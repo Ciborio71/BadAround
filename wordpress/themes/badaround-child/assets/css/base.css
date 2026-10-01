@@ -26,6 +26,35 @@ body { color: var(--ba-text); background: var(--ba-surface-alt); }
 img { max-width: 100%; height: auto; }
 a { color: var(--ba-teal-700); }
 
+/* Remove Astra's outer content constraint only on BadAround custom screens. */
+body.home .site-content > .ast-container,
+body.single-badaround_event .site-content > .ast-container,
+body.tax-badaround_location .site-content > .ast-container,
+body.page-template-page-segnala-evento .site-content > .ast-container {
+	display: block;
+	width: 100%;
+	max-width: none;
+	padding-inline: 0;
+}
+
+body.home #primary,
+body.single-badaround_event #primary,
+body.tax-badaround_location #primary,
+body.page-template-page-segnala-evento #primary {
+	float: none;
+	width: 100%;
+	max-width: none;
+	margin: 0;
+	padding: 0;
+}
+
+body.home .site-content,
+body.single-badaround_event .site-content,
+body.tax-badaround_location .site-content,
+body.page-template-page-segnala-evento .site-content {
+	padding: 0;
+}
+
 .ba-container {
 	width: min(100% - 32px, var(--ba-container));
 	margin-inline: auto;
