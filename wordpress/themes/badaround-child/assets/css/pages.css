@@ -1,0 +1,40 @@
+.ba-page { padding-bottom: 72px; }
+.ba-hero { padding-block: clamp(44px, 7vw, 92px); background: linear-gradient(120deg, #eefbfc 0%, #fff 48%, #eaf4fb 100%); }
+.ba-hero__grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(420px, 1.1fr); gap: 40px; align-items: center; }
+.ba-eyebrow { color: var(--ba-teal-700); font-weight: 850; }
+.ba-title { margin: 8px 0 14px; color: var(--ba-navy-950); font-size: clamp(2.1rem, 5vw, 4rem); line-height: 1.02; letter-spacing: -.04em; }
+.ba-lead { max-width: 62ch; color: var(--ba-muted); font-size: 1.1rem; }
+.ba-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+
+.ba-territory-head { padding: 34px 0 20px; }
+.ba-breadcrumb { margin-bottom: 12px; color: var(--ba-muted); font-size: .88rem; }
+.ba-territory-layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(350px, .75fr); gap: 20px; align-items: start; }
+.ba-results { display: grid; gap: 12px; max-height: 620px; overflow: auto; padding-right: 4px; }
+.ba-results .ba-event-card { display: grid; grid-template-columns: 150px 1fr; }
+.ba-results .ba-event-card__media { aspect-ratio: auto; min-height: 140px; }
+
+.ba-detail { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 28px; align-items: start; }
+.ba-detail__main, .ba-detail__aside { display: grid; gap: 20px; }
+.ba-panel { padding: clamp(18px, 3vw, 28px); }
+.ba-detail__gallery { overflow: hidden; border-radius: var(--ba-radius-lg); background: #dfe8ef; }
+.ba-detail__gallery img { display: block; width: 100%; max-height: 620px; object-fit: cover; }
+.ba-data { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.ba-data div { padding: 14px; border-radius: 12px; background: var(--ba-surface-alt); }
+.ba-data dt { color: var(--ba-muted); font-size: .78rem; text-transform: uppercase; }
+.ba-data dd { margin: 4px 0 0; font-weight: 750; }
+.ba-sponsor { padding: 20px; background: linear-gradient(120deg, #fff, #eff9fa); }
+
+.ba-report-shell { max-width: 920px; margin-inline: auto; }
+.ba-report-intro { text-align: center; margin-bottom: 28px; }
+.ba-report-mount { padding: clamp(18px, 4vw, 38px); }
+
+@media (max-width: 960px) {
+	.ba-hero__grid, .ba-territory-layout, .ba-detail { grid-template-columns: 1fr; }
+	.ba-hero__grid { gap: 24px; }
+	.ba-detail__aside { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 640px) {
+	.ba-results .ba-event-card { grid-template-columns: 110px 1fr; }
+	.ba-detail__aside, .ba-data { grid-template-columns: 1fr; }
+}
+

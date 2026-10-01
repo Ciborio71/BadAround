@@ -1,0 +1,16 @@
+.ba-report-mount .wpforms-container { margin: 0; }
+.ba-report-mount .wpforms-page-indicator { margin-bottom: 28px; }
+.ba-report-mount .wpforms-field-label { color: var(--ba-navy-950); font-weight: 800; }
+.ba-report-mount input[type="text"],
+.ba-report-mount input[type="email"],
+.ba-report-mount input[type="tel"],
+.ba-report-mount input[type="number"],
+.ba-report-mount select,
+.ba-report-mount textarea {
+	min-height: 48px; border: 1px solid var(--ba-border) !important; border-radius: 12px !important; background: #fff !important;
+}
+.ba-report-mount textarea { min-height: 130px; }
+.ba-report-mount input:focus, .ba-report-mount select:focus, .ba-report-mount textarea:focus { border-color: var(--ba-teal-600) !important; box-shadow: 0 0 0 3px rgba(7,152,168,.14) !important; }
+.ba-report-mount .wpforms-page-button, .ba-report-mount button[type="submit"] { min-height: 48px !important; padding: 10px 20px !important; border: 0 !important; border-radius: 12px !important; background: var(--ba-teal-600) !important; color: #fff !important; font-weight: 800 !important; }
+.ba-report-placeholder { padding: 34px; border: 2px dashed var(--ba-border); border-radius: var(--ba-radius); text-align: center; color: var(--ba-muted); background: var(--ba-surface-alt); }
+
