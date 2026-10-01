@@ -1,0 +1,34 @@
+name: Deploy child theme to staging
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: badaround-staging-theme
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy BadAround child theme
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Upload child theme over SFTP
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.STAGING_SFTP_HOST }}
+          port: ${{ secrets.STAGING_SFTP_PORT }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          source: "wordpress/themes/badaround-child/*"
+          target: "/staging.badaround.it/wp-content/themes/badaround-child/"
+          strip_components: 3
+          overwrite: true
+          rm: false
