@@ -1,0 +1,55 @@
+name: Deploy BadAround to staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      component:
+        description: Component to deploy
+        required: true
+        type: choice
+        default: theme
+        options:
+          - theme
+          - plugin
+          - both
+
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-theme:
+    name: Deploy child theme
+    if: ${{ inputs.component == 'theme' || inputs.component == 'both' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout selected revision
+        uses: actions/checkout@v4
+
+      - name: Deploy badaround-child via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTPS_SERVER }}
+          username: ${{ secrets.FTPS_USERNAME }}
+          password: ${{ secrets.FTPS_PASSWORD }}
+          protocol: ftps
+          local-dir: ./wordpress/themes/badaround-child/
+          server-dir: ${{ vars.STAGING_THEME_DIR }}
+
+  deploy-plugin:
+    name: Deploy badaround-core
+    if: ${{ inputs.component == 'plugin' || inputs.component == 'both' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout selected revision
+        uses: actions/checkout@v4
+
+      - name: Deploy badaround-core via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTPS_SERVER }}
+          username: ${{ secrets.FTPS_USERNAME }}
+          password: ${{ secrets.FTPS_PASSWORD }}
+          protocol: ftps
+          local-dir: ./wordpress/plugins/badaround-core/
+          server-dir: ${{ vars.STAGING_PLUGIN_DIR }}
