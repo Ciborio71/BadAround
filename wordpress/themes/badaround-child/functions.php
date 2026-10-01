@@ -15,5 +15,14 @@ function badaround_child_enqueue_styles() {
         array( 'astra-theme-css' ),
         wp_get_theme()->get( 'Version' )
     );
+
+    if ( is_page_template( 'page-segnala-evento.php' ) ) {
+        wp_enqueue_style(
+            'badaround-segnala-evento',
+            get_stylesheet_directory_uri() . '/assets/css/pages/segnala-evento.css',
+            array( 'badaround-child-style' ),
+            wp_get_theme()->get( 'Version' )
+        );
+    }
 }
 add_action( 'wp_enqueue_scripts', 'badaround_child_enqueue_styles', 20 );
