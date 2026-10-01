@@ -1,0 +1,45 @@
+/**
+ * BadAround - Segnala un evento
+ * Loaded only when the dedicated page template is active.
+ */
+
+.ba-report-page {
+    padding: clamp(2rem, 5vw, 4.5rem) 1.25rem;
+}
+
+.ba-report-page__inner {
+    width: min(100%, 920px);
+    margin-inline: auto;
+}
+
+.ba-report-page__header {
+    max-width: 720px;
+    margin-bottom: 2rem;
+}
+
+.ba-report-page__eyebrow {
+    margin: 0 0 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.ba-report-page__title {
+    margin: 0;
+}
+
+.ba-report-page__intro {
+    margin: 1rem 0 0;
+    max-width: 65ch;
+}
+
+.ba-report-page__form {
+    width: 100%;
+}
+
+.ba-report-page__notice {
+    padding: 1rem;
+    border: 1px solid currentColor;
+    border-radius: 0.5rem;
+}
