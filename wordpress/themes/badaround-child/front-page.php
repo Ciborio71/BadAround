@@ -8,8 +8,8 @@ $demo_events = array(
 ?>
 <main class="ba-page" id="main-content">
 	<section class="ba-hero">
-		<div class="ba-container ba-hero__grid">
-			<div>
+		<div class="ba-hero__grid">
+			<div class="ba-hero__content">
 				<div class="ba-eyebrow">La comunità che osserva, segnala e aiuta</div>
 				<h1 class="ba-title">Scopri cosa accade intorno a te</h1>
 				<p class="ba-lead">Furti, danneggiamenti, veicoli sospetti e richieste di testimoni nella tua zona.</p>
@@ -37,4 +37,3 @@ $demo_events = array(
 	<section class="ba-section"><div class="ba-container ba-card ba-panel"><div class="ba-eyebrow">Sentinelle</div><h2>Ricevi soltanto gli alert che riguardano la tua zona</h2><p class="ba-lead">Scegli territori e categorie. Potrai modificare le preferenze in qualsiasi momento.</p><a class="ba-button" href="#">Attiva gli alert</a></div></section>
 </main>
 <?php get_footer(); ?>
-

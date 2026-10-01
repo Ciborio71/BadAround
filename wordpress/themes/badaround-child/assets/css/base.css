@@ -17,7 +17,7 @@
 	--ba-radius: 16px;
 	--ba-radius-lg: 24px;
 	--ba-shadow: 0 12px 32px rgba(7, 26, 56, .09);
-	--ba-container: 1240px;
+	--ba-container: 1440px;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -28,6 +28,11 @@ a { color: var(--ba-teal-700); }
 
 .ba-container {
 	width: min(100% - 32px, var(--ba-container));
+	margin-inline: auto;
+}
+
+.ba-container--wide {
+	width: min(100% - 32px, 1680px);
 	margin-inline: auto;
 }
 
@@ -44,4 +49,3 @@ a { color: var(--ba-teal-700); }
 	.ba-grid--3 { grid-template-columns: 1fr; }
 	.ba-container { width: min(100% - 24px, var(--ba-container)); }
 }
-
