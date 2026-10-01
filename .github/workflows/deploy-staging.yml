@@ -20,15 +20,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Upload child theme over SFTP
-        uses: appleboy/scp-action@v1
+      - name: Upload child theme over FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
-          host: ${{ secrets.STAGING_SFTP_HOST }}
-          port: ${{ secrets.STAGING_SFTP_PORT }}
+          server: ${{ secrets.STAGING_SFTP_HOST }}
           username: ${{ secrets.STAGING_SFTP_USERNAME }}
           password: ${{ secrets.STAGING_SFTP_PASSWORD }}
-          source: "wordpress/themes/badaround-child/*"
-          target: "/staging.badaround.it/wp-content/themes/badaround-child/"
-          strip_components: 3
-          overwrite: true
-          rm: false
+          protocol: ftps
+          port: 21
+          local-dir: ./wordpress/themes/badaround-child/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          log-level: minimal
