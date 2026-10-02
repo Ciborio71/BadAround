@@ -1,19 +1,14 @@
-/* WPForms skin for BadAround report form */
-.ba-report-mount .wpforms-container { margin:0 !important; }
-.ba-report-mount .wpforms-page-indicator { margin-bottom:30px !important; }
-.ba-report-mount .wpforms-page-indicator.progress { height:10px; border-radius:999px; background:#e8eef3 !important; overflow:hidden; }
-.ba-report-mount .wpforms-page-indicator.progress .wpforms-page-indicator-page-progress-wrap { border-radius:999px; background:var(--ba-teal-600) !important; }
-.ba-report-mount .wpforms-page-indicator.circles,
-.ba-report-mount .wpforms-page-indicator.connector { display:flex; flex-wrap:wrap; gap:12px 18px; align-items:center; }
-.ba-report-mount .wpforms-page-indicator-page { color:#6c7e91 !important; font-weight:700; }
-.ba-report-mount .wpforms-page-indicator-page.active { color:var(--ba-navy-950) !important; }
-.ba-report-mount .wpforms-page-indicator-page-number { background:#edf2f6 !important; border-color:#d9e4ec !important; color:#53687c !important; }
-.ba-report-mount .wpforms-page-indicator-page.active .wpforms-page-indicator-page-number { background:var(--ba-teal-600) !important; border-color:var(--ba-teal-600) !important; color:#fff !important; }
-
-.ba-report-mount .wpforms-field { padding:10px 0 !important; }
-.ba-report-mount .wpforms-field-label { margin-bottom:8px !important; color:var(--ba-navy-950) !important; font-size:.92rem !important; font-weight:800 !important; }
+/* WPForms becomes the invisible engine of the BadAround report flow */
+.ba-report-mount .wpforms-container{margin:0!important}
+.ba-report-mount .wpforms-page-indicator{display:none!important}
+.ba-report-mount .badaround-form-intro,
+.ba-report-mount .badaround-required-note{display:none!important}
+.ba-report-mount .wpforms-field{padding:9px 0!important}
+.ba-report-mount .wpforms-field-label,
+.ba-report-mount legend.wpforms-field-label{margin-bottom:8px!important;color:var(--ba-navy-950)!important;font-size:.88rem!important;font-weight:820!important}
 .ba-report-mount .wpforms-field-description,
-.ba-report-mount .wpforms-field-sublabel { color:#6b7d90 !important; font-size:.78rem !important; line-height:1.45 !important; }
+.ba-report-mount .wpforms-field-sublabel{color:#718497!important;font-size:.73rem!important;line-height:1.45!important}
+.ba-report-mount fieldset{border:0!important;padding:0!important;margin:0!important}
 
 .ba-report-mount input[type="text"],
 .ba-report-mount input[type="email"],
@@ -23,807 +18,119 @@
 .ba-report-mount input[type="date"],
 .ba-report-mount input[type="time"],
 .ba-report-mount select,
-.ba-report-mount textarea {
-	width:100% !important;
-	min-height:50px !important;
-	padding:11px 13px !important;
-	border:1px solid var(--ba-border) !important;
-	border-radius:12px !important;
-	background:#fff !important;
-	color:var(--ba-text) !important;
-	box-shadow:none !important;
-}
-.ba-report-mount textarea { min-height:140px !important; resize:vertical; }
+.ba-report-mount textarea{width:100%!important;min-height:50px!important;padding:11px 13px!important;border:1px solid #d9e3ea!important;border-radius:12px!important;background:#fff!important;color:var(--ba-text)!important;box-shadow:none!important}
+.ba-report-mount textarea{min-height:125px!important;resize:vertical}
 .ba-report-mount input:focus,
 .ba-report-mount select:focus,
-.ba-report-mount textarea:focus { border-color:var(--ba-teal-600) !important; box-shadow:0 0 0 3px rgba(7,152,168,.14) !important; outline:0 !important; }
-.ba-report-mount input[type="checkbox"],
-.ba-report-mount input[type="radio"] { inline-size:20px !important; block-size:20px !important; accent-color:var(--ba-teal-600); }
+.ba-report-mount textarea:focus{border-color:var(--ba-teal-600)!important;outline:3px solid rgba(7,152,168,.12)!important;box-shadow:none!important}
 
-.ba-report-mount .wpforms-image-choices,
-.ba-report-mount .wpforms-icon-choices { display:grid !important; grid-template-columns:repeat(4,minmax(0,1fr)) !important; gap:14px !important; }
-.ba-report-mount .wpforms-image-choices-item,
-.ba-report-mount .wpforms-icon-choices-item { margin:0 !important; }
-.ba-report-mount .wpforms-image-choices-item label,
-.ba-report-mount .wpforms-icon-choices-item label {
-	height:100%;
-	padding:16px !important;
-	border:1px solid var(--ba-border) !important;
-	border-radius:14px !important;
-	background:#fff !important;
-	transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease;
-}
-.ba-report-mount .wpforms-image-choices-item label:hover,
-.ba-report-mount .wpforms-icon-choices-item label:hover { transform:translateY(-1px); border-color:#9ed9df !important; box-shadow:0 10px 24px rgba(7,26,56,.07); }
-.ba-report-mount .wpforms-image-choices-item.wpforms-selected label,
-.ba-report-mount .wpforms-icon-choices-item.wpforms-selected label { border-color:var(--ba-teal-600) !important; box-shadow:0 0 0 2px rgba(7,152,168,.12) !important; background:#f2fcfc !important; }
+/* Object-first category cards */
+.ba-report-mount .badaround-event-category{padding:0!important}
+.ba-report-mount .badaround-event-category>fieldset>legend{display:none!important}
+.ba-report-mount .badaround-event-category ul{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important;margin:0!important;padding:0!important;list-style:none!important}
+.ba-report-mount .badaround-event-category li{position:relative;margin:0!important;min-width:0}
+.ba-report-mount .badaround-event-category input[type="radio"]{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none}
+.ba-report-mount .badaround-event-category .wpforms-field-label-inline{position:relative;display:grid!important;grid-template-columns:48px 1fr;grid-template-areas:"icon title" "icon desc";column-gap:12px;align-items:center;min-height:94px;height:100%;padding:14px!important;border:1px solid #dce5ec!important;border-radius:16px!important;background:#fff!important;color:var(--ba-navy-950)!important;cursor:pointer;box-shadow:0 5px 14px rgba(7,26,56,.035);transition:.16s ease}
+.ba-report-mount .badaround-event-category .wpforms-field-label-inline:hover{transform:translateY(-1px);border-color:#98d7dc!important;box-shadow:0 10px 23px rgba(7,26,56,.07)}
+.ba-report-mount .badaround-event-category input:checked+.wpforms-field-label-inline{border-color:var(--ba-teal-600)!important;background:#f0fbfb!important;box-shadow:0 0 0 2px rgba(7,152,168,.09)}
+.ba-report-mount .badaround-event-category input:focus-visible+.wpforms-field-label-inline{outline:3px solid rgba(7,152,168,.22);outline-offset:2px}
+.ba-choice-icon{grid-area:icon;display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:#edf7f8;color:var(--ba-teal-700)}
+.ba-choice-icon svg{width:26px;height:26px}
+.ba-choice-copy{display:contents}
+.ba-choice-title{grid-area:title;align-self:end;font-size:.88rem;font-weight:850;line-height:1.15}
+.ba-choice-desc{grid-area:desc;align-self:start;margin-top:3px;color:#7b8d9d;font-size:.67rem;font-weight:600;line-height:1.25}
+.ba-report-mount .badaround-event-category input:checked+.wpforms-field-label-inline::after{content:"✓";position:absolute;right:10px;top:9px;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--ba-teal-600);color:#fff;font-size:.68rem;font-weight:900}
 
+/* Selected macro-category summary */
+.ba-selected-category{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:2px 0 17px;padding:12px 14px;border:1px solid #dce9ec;border-radius:14px;background:#f4fbfb}
+.ba-selected-category__main{display:flex;align-items:center;gap:10px}
+.ba-selected-category__icon{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:#dff5f6;color:var(--ba-teal-700)}
+.ba-selected-category__text strong,.ba-selected-category__text small{display:block}
+.ba-selected-category__text strong{color:var(--ba-navy-950);font-size:.82rem}
+.ba-selected-category__text small{margin-top:2px;color:#7c8d9d;font-size:.65rem}
+.ba-selected-category button{padding:0;border:0;background:transparent;color:var(--ba-teal-700);font-size:.7rem;font-weight:850;cursor:pointer}
+
+/* Drill-down: Waze-like quick choices */
+.ba-report-mount .ba-drilldown-field{margin-top:10px!important;padding-top:18px!important;border-top:1px solid #edf1f4}
+.ba-report-mount .ba-drilldown-field .wpforms-field-label{margin-bottom:10px!important;font-size:1rem!important}
+.ba-report-mount .ba-drilldown-field ul,
+.ba-report-mount .ba-relationship-field ul{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;margin:0!important;padding:0!important;list-style:none!important}
+.ba-report-mount .ba-drilldown-field li,
+.ba-report-mount .ba-relationship-field li{position:relative;margin:0!important}
+.ba-report-mount .ba-drilldown-field input[type="radio"],
+.ba-report-mount .ba-relationship-field input[type="radio"]{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important}
+.ba-report-mount .ba-drilldown-field .wpforms-field-label-inline,
+.ba-report-mount .ba-relationship-field .wpforms-field-label-inline{position:relative;display:flex!important;align-items:center;gap:11px;min-height:58px;height:100%;padding:11px 38px 11px 13px!important;border:1px solid #dce5ec!important;border-radius:13px!important;background:#fff!important;color:var(--ba-navy-950)!important;font-size:.79rem!important;font-weight:760!important;line-height:1.3!important;cursor:pointer;transition:.15s ease}
+.ba-report-mount .ba-drilldown-field .wpforms-field-label-inline:hover,
+.ba-report-mount .ba-relationship-field .wpforms-field-label-inline:hover{border-color:#9ad7dc!important;background:#fbfefe!important}
+.ba-report-mount .ba-drilldown-field input:checked+.wpforms-field-label-inline,
+.ba-report-mount .ba-relationship-field input:checked+.wpforms-field-label-inline{border-color:var(--ba-teal-600)!important;background:#f0fbfb!important;box-shadow:0 0 0 2px rgba(7,152,168,.07)}
+.ba-report-mount .ba-drilldown-field input:checked+.wpforms-field-label-inline::after,
+.ba-report-mount .ba-relationship-field input:checked+.wpforms-field-label-inline::after{content:"✓";position:absolute;right:11px;top:50%;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--ba-teal-600);color:#fff;font-size:.62rem;font-weight:900;transform:translateY(-50%)}
+.ba-drilldown-icon{flex:0 0 auto;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#f2f6f8;color:#526b7f;font-size:1rem}
+
+/* Step 2: location-first card */
+.ba-report-mount .ba-location-primary{margin-top:4px!important;padding:18px!important;border:1px solid #d7e7e9;border-radius:16px;background:linear-gradient(145deg,#f5fbfb,#fff)}
+.ba-report-mount .ba-location-primary .wpforms-field-label{font-size:1rem!important}
+.ba-location-helper{display:flex;align-items:flex-start;gap:9px;margin:10px 0 0;padding:10px 11px;border-radius:11px;background:#eef8f9;color:#597183;font-size:.7rem;line-height:1.45}
+.ba-location-helper strong{color:var(--ba-teal-700)}
+.ba-location-helper span{flex:0 0 auto}
+.ba-report-mount .ba-location-secondary{display:grid}
+.ba-report-mount .ba-danger-field{margin-top:8px!important;padding:14px!important;border:1px solid #f1dfbd;border-radius:14px;background:#fffaf1}
+
+/* Step 3+ becomes a set of light panels rather than a long form */
+.ba-report-mount .ba-form-section{margin:10px 0!important;padding:17px!important;border:1px solid #e1e8ed;border-radius:16px;background:#fbfdfe}
+.ba-report-mount .ba-form-section+.ba-form-section{margin-top:12px!important}
+.ba-report-mount .ba-form-section--media{background:#f7fbfc}
+.ba-report-mount .ba-form-section--identity{background:#fafbfd}
+.ba-report-mount .ba-form-section--sensitive{border-color:#f0dfbd;background:#fffaf2}
+
+/* Standard radio/checkbox choices on later steps */
+.ba-report-mount .wpforms-field-radio:not(.badaround-event-category):not(.ba-drilldown-field):not(.ba-relationship-field) ul,
+.ba-report-mount .wpforms-field-checkbox ul{display:grid!important;gap:7px!important;margin:0!important;padding:0!important;list-style:none!important}
+.ba-report-mount .wpforms-field-radio:not(.badaround-event-category):not(.ba-drilldown-field):not(.ba-relationship-field) li,
+.ba-report-mount .wpforms-field-checkbox li{margin:0!important}
+.ba-report-mount .wpforms-field-radio:not(.badaround-event-category):not(.ba-drilldown-field):not(.ba-relationship-field) label,
+.ba-report-mount .wpforms-field-checkbox label{font-size:.78rem!important;line-height:1.35!important}
+.ba-report-mount input[type="radio"],
+.ba-report-mount input[type="checkbox"]{accent-color:var(--ba-teal-600)}
+
+/* Page actions */
+.ba-report-mount .wpforms-field-pagebreak{padding-top:22px!important;margin-top:18px!important;border-top:1px solid #edf1f4}
+.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left{display:grid!important;grid-template-columns:auto 1fr auto!important;grid-template-areas:"prev . next" "save save save"!important;align-items:center!important;gap:10px 14px!important;width:100%!important;float:none!important;text-align:initial!important}
+.ba-report-mount .wpforms-field-pagebreak .wpforms-page-button-group{margin:0!important;float:none!important}
+.ba-report-mount .wpforms-field-pagebreak .wpforms-page-button-group:has(.wpforms-page-prev){grid-area:prev;justify-self:start}
+.ba-report-mount .wpforms-field-pagebreak .wpforms-page-button-group:has(.wpforms-page-next){grid-area:next;justify-self:end}
 .ba-report-mount .wpforms-page-button,
-.ba-report-mount button[type="submit"] {
-	min-height:50px !important;
-	padding:11px 22px !important;
-	border:1px solid transparent !important;
-	border-radius:12px !important;
-	background:var(--ba-coral-600) !important;
-	color:#fff !important;
-	font-weight:800 !important;
-	box-shadow:none !important;
-}
-.ba-report-mount .wpforms-page-button:hover,
-.ba-report-mount button[type="submit"]:hover { filter:brightness(.96); transform:translateY(-1px); }
-.ba-report-mount .wpforms-page-prev { background:#fff !important; color:var(--ba-navy-950) !important; border-color:#b8c7d4 !important; }
+.ba-report-mount button[type="submit"]{min-height:48px!important;padding:10px 18px!important;border:1px solid transparent!important;border-radius:12px!important;background:var(--ba-coral-600)!important;color:#fff!important;font-size:.8rem!important;font-weight:850!important;box-shadow:none!important;cursor:pointer}
+.ba-report-mount .wpforms-page-prev{background:#fff!important;color:var(--ba-navy-950)!important;border-color:#c8d5df!important}
+.ba-report-mount .wpforms-save-resume-button{grid-area:save;justify-self:end!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important;color:var(--ba-teal-700)!important;font-size:.7rem!important;font-weight:800!important;text-decoration:none!important}
 
-.ba-report-placeholder { padding:38px; border:2px dashed var(--ba-border); border-radius:var(--ba-radius); text-align:center; color:var(--ba-muted); background:var(--ba-surface-alt); }
-.ba-report-placeholder strong { display:block; color:var(--ba-navy-950); margin-bottom:6px; }
-
-@media (max-width:980px) {
-	.ba-report-mount .wpforms-image-choices,
-	.ba-report-mount .wpforms-icon-choices { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
-}
-@media (max-width:700px) {
-	.ba-report-mount .wpforms-image-choices,
-	.ba-report-mount .wpforms-icon-choices { grid-template-columns:1fr !important; }
-	.ba-report-mount .wpforms-page-button,
-	.ba-report-mount button[type="submit"] { width:100% !important; }
-}
-@media (prefers-reduced-motion:reduce) {
-	.ba-report-mount * { transition:none !important; }
-}
-
-
-/* Step 1 — Evento: visual choice cards matching the approved mockup */
-.ba-report-mount .badaround-form-intro {
-	max-width:760px;
-	margin:0 0 24px;
-}
-.ba-report-mount .badaround-form-intro h2 {
-	margin:0 0 8px;
-	color:var(--ba-navy-950);
-	font-size:clamp(1.7rem,2.6vw,2.35rem);
-	line-height:1.05;
-	letter-spacing:-.035em;
-}
-.ba-report-mount .badaround-form-intro p {
-	margin:0;
-	color:var(--ba-muted);
-	font-size:.95rem;
-	line-height:1.5;
-}
-.ba-report-mount .badaround-required-note { display:none; }
-
-.ba-report-mount .badaround-event-category fieldset { border:0 !important; padding:0 !important; margin:0 !important; }
-.ba-report-mount .badaround-event-category > fieldset > legend {
-	margin-bottom:14px !important;
-	font-size:.86rem !important;
-	color:#5b7085 !important;
-	font-weight:750 !important;
-}
-.ba-report-mount .badaround-event-category ul {
-	display:grid !important;
-	grid-template-columns:repeat(4,minmax(0,1fr)) !important;
-	gap:14px !important;
-	margin:0 !important;
-	padding:0 !important;
-	list-style:none !important;
-}
-.ba-report-mount .badaround-event-category li {
-	position:relative;
-	margin:0 !important;
-	min-width:0;
-}
-.ba-report-mount .badaround-event-category input[type="radio"] {
-	position:absolute !important;
-	inline-size:1px !important;
-	block-size:1px !important;
-	opacity:0 !important;
-	pointer-events:none;
-}
-.ba-report-mount .badaround-event-category .wpforms-field-label-inline {
-	position:relative;
-	display:flex !important;
-	flex-direction:column;
-	align-items:flex-start;
-	justify-content:flex-start;
-	gap:10px;
-	min-height:138px;
-	height:100%;
-	padding:17px 16px 16px !important;
-	border:1px solid #dce5ee !important;
-	border-radius:15px !important;
-	background:#fff !important;
-	color:var(--ba-navy-950) !important;
-	font-size:.9rem !important;
-	font-weight:800 !important;
-	line-height:1.25 !important;
-	cursor:pointer;
-	box-shadow:0 7px 18px rgba(7,26,56,.035);
-	transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background-color .18s ease;
-}
-.ba-report-mount .badaround-event-category .wpforms-field-label-inline::before {
-	content:"";
-	display:grid;
-	place-items:center;
-	width:42px;
-	height:42px;
-	border-radius:12px;
-	background:#edf7f8;
-	box-shadow:inset 0 0 0 1px rgba(7,152,168,.06);
-}
-.ba-report-mount .badaround-event-category li:nth-child(1) .wpforms-field-label-inline::before { background:#e7f1ff; }
-.ba-report-mount .badaround-event-category li:nth-child(2) .wpforms-field-label-inline::before { background:#eaf8f1; }
-.ba-report-mount .badaround-event-category li:nth-child(3) .wpforms-field-label-inline::before { background:#fff1ee; }
-.ba-report-mount .badaround-event-category li:nth-child(4) .wpforms-field-label-inline::before { background:#fff6dc; }
-.ba-report-mount .badaround-event-category li:nth-child(5) .wpforms-field-label-inline::before { background:#eff0fb; }
-.ba-report-mount .badaround-event-category li:nth-child(6) .wpforms-field-label-inline::before { background:#f5ecfb; }
-.ba-report-mount .badaround-event-category li:nth-child(7) .wpforms-field-label-inline::before { background:#eef3f6; }
-.ba-report-mount .badaround-event-category li:nth-child(8) .wpforms-field-label-inline::before { background:#f1f4f7; }
-
-.ba-report-mount .badaround-event-category .wpforms-field-label-inline:hover {
-	transform:translateY(-2px);
-	border-color:#9ed9df !important;
-	box-shadow:0 12px 26px rgba(7,26,56,.08);
-}
-.ba-report-mount .badaround-event-category input[type="radio"]:focus-visible + .wpforms-field-label-inline {
-	outline:3px solid rgba(7,152,168,.25);
-	outline-offset:2px;
-}
-.ba-report-mount .badaround-event-category input[type="radio"]:checked + .wpforms-field-label-inline {
-	border-color:var(--ba-teal-600) !important;
-	background:#f3fcfc !important;
-	box-shadow:0 0 0 2px rgba(7,152,168,.10),0 12px 28px rgba(7,26,56,.07);
-}
-.ba-report-mount .badaround-event-category input[type="radio"]:checked + .wpforms-field-label-inline::after {
-	content:"";
-	position:absolute;
-	top:13px;
-	right:13px;
-	width:18px;
-	height:18px;
-	border-radius:50%;
-	background:var(--ba-teal-600);
-	box-shadow:inset 0 0 0 5px #fff,0 0 0 1px var(--ba-teal-600);
-}
-
-/* Subcategory choices become compact selectable tiles instead of long radio lists. */
-.ba-report-mount .badaround-event-subcategory fieldset { border:0 !important; padding:0 !important; margin:22px 0 0 !important; }
-.ba-report-mount .badaround-event-subcategory ul {
-	display:grid !important;
-	grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-	gap:10px !important;
-	margin:0 !important;
-	padding:0 !important;
-	list-style:none !important;
-}
-.ba-report-mount .badaround-event-subcategory li { position:relative; margin:0 !important; }
-.ba-report-mount .badaround-event-subcategory input[type="radio"] {
-	position:absolute !important;
-	inline-size:1px !important;
-	block-size:1px !important;
-	opacity:0 !important;
-}
-.ba-report-mount .badaround-event-subcategory .wpforms-field-label-inline {
-	display:flex !important;
-	align-items:center;
-	min-height:48px;
-	padding:11px 13px !important;
-	border:1px solid var(--ba-border) !important;
-	border-radius:11px !important;
-	background:#fff !important;
-	color:var(--ba-text) !important;
-	font-size:.84rem !important;
-	font-weight:700 !important;
-	line-height:1.3 !important;
-	cursor:pointer;
-}
-.ba-report-mount .badaround-event-subcategory input[type="radio"]:checked + .wpforms-field-label-inline {
-	border-color:var(--ba-teal-600) !important;
-	background:#f2fcfc !important;
-	box-shadow:0 0 0 2px rgba(7,152,168,.09);
-}
-.ba-report-mount .badaround-event-subcategory input[type="radio"]:focus-visible + .wpforms-field-label-inline {
-	outline:3px solid rgba(7,152,168,.22);
-	outline-offset:2px;
-}
-
-/* WPForms page navigation */
-.ba-report-mount .wpforms-page-footer {
-	display:flex !important;
-	justify-content:flex-end;
-	align-items:center;
-	gap:10px;
-	margin-top:28px !important;
-	padding-top:20px !important;
-	border-top:1px solid #edf1f4;
-}
-.ba-report-mount .wpforms-page-footer .wpforms-page-prev { margin-right:auto !important; }
-.ba-report-mount .wpforms-save-resume-button {
-	color:var(--ba-teal-700) !important;
-	font-weight:750 !important;
-}
-
-/* Desktop stepper */
-.ba-report-mount .wpforms-page-indicator.connector {
-	position:relative;
-	display:grid !important;
-	grid-template-columns:repeat(5,1fr);
-	gap:0 !important;
-	margin:0 0 34px !important;
-	padding:0 0 18px;
-	border-bottom:1px solid #edf1f4;
-}
-.ba-report-mount .wpforms-page-indicator.connector::before {
-	content:"";
-	position:absolute;
-	left:8%;
-	right:8%;
-	top:17px;
-	height:2px;
-	background:#e1e9ef;
-}
-.ba-report-mount .wpforms-page-indicator.connector .wpforms-page-indicator-page {
-	position:relative;
-	z-index:1;
-	display:flex !important;
-	flex-direction:column;
-	align-items:center;
-	gap:7px;
-	min-width:0 !important;
-	text-align:center;
-}
-.ba-report-mount .wpforms-page-indicator.connector .wpforms-page-indicator-page-number {
-	display:grid !important;
-	place-items:center;
-	width:34px !important;
-	height:34px !important;
-	margin:0 !important;
-	border:2px solid #d7e1e8 !important;
-	border-radius:50% !important;
-	background:#fff !important;
-	color:#6c7e91 !important;
-	font-size:.78rem !important;
-	font-weight:850 !important;
-	box-shadow:none !important;
-}
-.ba-report-mount .wpforms-page-indicator.connector .wpforms-page-indicator-page-triangle { display:none !important; }
-.ba-report-mount .wpforms-page-indicator.connector .wpforms-page-indicator-page-title {
-	color:#718296 !important;
-	font-size:.75rem !important;
-	font-weight:750 !important;
-	white-space:normal;
-}
-.ba-report-mount .wpforms-page-indicator.connector .wpforms-page-indicator-page.active .wpforms-page-indicator-page-number {
-	border-color:var(--ba-teal-600) !important;
-	background:var(--ba-teal-600) !important;
-	color:#fff !important;
-}
-.ba-report-mount .wpforms-page-indicator.connector .wpforms-page-indicator-page.active .wpforms-page-indicator-page-title {
-	color:var(--ba-navy-950) !important;
-	font-weight:850 !important;
-}
-
-@media (max-width:980px) {
-	.ba-report-mount .badaround-event-category ul { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
-}
-@media (max-width:700px) {
-	.ba-report-mount .wpforms-page-indicator.connector {
-		display:block !important;
-		margin-bottom:24px !important;
-		padding:0 0 12px;
-		border-bottom:0;
-	}
-	.ba-report-mount .wpforms-page-indicator.connector::before { display:none; }
-	.ba-report-mount .wpforms-page-indicator.connector .wpforms-page-indicator-page { display:none !important; }
-	.ba-report-mount .wpforms-page-indicator.connector .wpforms-page-indicator-page.active { display:none !important; }
-	.ba-report-mount .wpforms-page-indicator.connector::after {
-		content:"";
-		display:block;
-		width:100%;
-		height:6px;
-		border-radius:999px;
-		background:linear-gradient(90deg,var(--ba-teal-600) 20%,#e5edf2 20%);
-	}
-	.ba-report-mount .badaround-form-intro { margin-bottom:18px; }
-	.ba-report-mount .badaround-form-intro h2 { font-size:1.65rem; }
-	.ba-report-mount .badaround-event-category ul { grid-template-columns:1fr !important; gap:10px !important; }
-	.ba-report-mount .badaround-event-category .wpforms-field-label-inline {
-		min-height:88px;
-		padding:14px !important;
-		flex-direction:row;
-		align-items:center;
-	}
-	.ba-report-mount .badaround-event-category .wpforms-field-label-inline::before {
-		flex:0 0 auto;
-		width:40px;
-		height:40px;
-	}
-	.ba-report-mount .badaround-event-subcategory ul { grid-template-columns:1fr !important; }
-	.ba-report-mount .wpforms-page-footer { position:sticky; bottom:0; z-index:5; margin-inline:-18px !important; margin-bottom:-18px !important; padding:12px 18px !important; background:rgba(255,255,255,.96); box-shadow:0 -10px 26px rgba(7,26,56,.06); }
-}
-
-
-/* Style validation refinements: equal cards + shared BadAround icon language */
-.ba-report-mount .badaround-event-category ul {
-	grid-auto-rows:1fr !important;
-	align-items:stretch !important;
-}
-.ba-report-mount .badaround-event-category li {
-	display:flex;
-	height:100%;
-}
-.ba-report-mount .badaround-event-category .wpforms-field-label-inline {
-	width:100%;
-	min-height:148px;
-	height:100%;
-	box-sizing:border-box;
-}
-.ba-report-mount .badaround-event-category .ba-choice-icon {
-	display:grid;
-	place-items:center;
-	flex:0 0 auto;
-	width:42px;
-	height:42px;
-	border-radius:12px;
-	background:#edf7f8;
-	color:currentColor;
-}
-.ba-report-mount .badaround-event-category .ba-choice-icon svg {
-	width:25px;
-	height:25px;
-}
-.ba-report-mount .badaround-event-category .wpforms-field-label-inline::before {
-	display:none !important;
-}
-.ba-report-mount .badaround-event-category li:nth-child(1) .ba-choice-icon { background:#e7f1ff; color:#1688e8; }
-.ba-report-mount .badaround-event-category li:nth-child(2) .ba-choice-icon { background:#eaf8f1; color:#45b862; }
-.ba-report-mount .badaround-event-category li:nth-child(3) .ba-choice-icon { background:#fff1ee; color:#f45151; }
-.ba-report-mount .badaround-event-category li:nth-child(4) .ba-choice-icon { background:#fff6dc; color:#f6a800; }
-.ba-report-mount .badaround-event-category li:nth-child(5) .ba-choice-icon { background:#eff0fb; color:#6a68c9; }
-.ba-report-mount .badaround-event-category li:nth-child(6) .ba-choice-icon { background:#f5ecfb; color:#9d45d4; }
-.ba-report-mount .badaround-event-category li:nth-child(7) .ba-choice-icon { background:#eef3f6; color:#5c6b7c; }
-.ba-report-mount .badaround-event-category li:nth-child(8) .ba-choice-icon { background:#f1f4f7; color:#5c6b7c; }
-
-.ba-report-mount .ba-relationship-field[hidden] {
-	display:none !important;
-}
-
-@media (max-width:700px) {
-	.ba-report-mount .badaround-event-category .wpforms-field-label-inline {
-		min-height:92px;
-	}
-}
-
-
-/* Vehicle/mobility subcategory — card treatment without icons */
-.ba-report-mount .badaround-vehicle-event ul {
-	display:grid !important;
-	grid-template-columns:repeat(3,minmax(0,1fr)) !important;
-	gap:12px !important;
-	align-items:stretch !important;
-}
-.ba-report-mount .badaround-vehicle-event li {
-	display:flex;
-	height:100%;
-	margin:0 !important;
-}
-.ba-report-mount .badaround-vehicle-event .wpforms-field-label-inline {
-	position:relative;
-	display:flex !important;
-	align-items:center;
-	justify-content:flex-start;
-	width:100%;
-	min-height:86px;
-	height:100%;
-	padding:16px 42px 16px 16px !important;
-	border:1px solid #dce5ee !important;
-	border-radius:14px !important;
-	background:#fff !important;
-	color:var(--ba-navy-950) !important;
-	font-size:.86rem !important;
-	font-weight:780 !important;
-	line-height:1.3 !important;
-	box-shadow:0 6px 16px rgba(7,26,56,.035);
-	cursor:pointer;
-	transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background-color .18s ease;
-}
-.ba-report-mount .badaround-vehicle-event .wpforms-field-label-inline:hover {
-	transform:translateY(-1px);
-	border-color:#9ed9df !important;
-	box-shadow:0 10px 22px rgba(7,26,56,.07);
-}
-.ba-report-mount .badaround-vehicle-event input[type="radio"]:focus-visible + .wpforms-field-label-inline {
-	outline:3px solid rgba(7,152,168,.22);
-	outline-offset:2px;
-}
-.ba-report-mount .badaround-vehicle-event input[type="radio"]:checked + .wpforms-field-label-inline {
-	border-color:var(--ba-teal-600) !important;
-	background:#f3fcfc !important;
-	box-shadow:0 0 0 2px rgba(7,152,168,.09),0 10px 22px rgba(7,26,56,.06);
-}
-.ba-report-mount .badaround-vehicle-event input[type="radio"]:checked + .wpforms-field-label-inline::after {
-	content:"";
-	position:absolute;
-	top:50%;
-	right:14px;
-	width:18px;
-	height:18px;
-	transform:translateY(-50%);
-	border-radius:50%;
-	background:var(--ba-teal-600);
-	box-shadow:inset 0 0 0 5px #fff,0 0 0 1px var(--ba-teal-600);
-}
-
-@media (max-width:980px) {
-	.ba-report-mount .badaround-vehicle-event ul {
-		grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-	}
-}
-@media (max-width:700px) {
-	.ba-report-mount .badaround-vehicle-event ul {
-		grid-template-columns:1fr !important;
-	}
-	.ba-report-mount .badaround-vehicle-event .wpforms-field-label-inline {
-		min-height:68px;
-	}
-}
-
-
-/* Relationship question — same iconless card language */
-.ba-report-mount .ba-relationship-field ul {
-	display:grid !important;
-	grid-template-columns:repeat(3,minmax(0,1fr)) !important;
-	gap:12px !important;
-	align-items:stretch !important;
-	margin:0 !important;
-	padding:0 !important;
-	list-style:none !important;
-}
-.ba-report-mount .ba-relationship-field li {
-	position:relative;
-	display:flex;
-	height:100%;
-	margin:0 !important;
-}
-.ba-report-mount .ba-relationship-field input[type="radio"] {
-	position:absolute !important;
-	inline-size:1px !important;
-	block-size:1px !important;
-	opacity:0 !important;
-	pointer-events:none;
-}
-.ba-report-mount .ba-relationship-field .wpforms-field-label-inline {
-	position:relative;
-	display:flex !important;
-	align-items:center;
-	justify-content:flex-start;
-	width:100%;
-	min-height:78px;
-	height:100%;
-	padding:15px 42px 15px 16px !important;
-	border:1px solid #dce5ee !important;
-	border-radius:14px !important;
-	background:#fff !important;
-	color:var(--ba-navy-950) !important;
-	font-size:.86rem !important;
-	font-weight:780 !important;
-	line-height:1.3 !important;
-	box-shadow:0 6px 16px rgba(7,26,56,.035);
-	cursor:pointer;
-	transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background-color .18s ease;
-}
-.ba-report-mount .ba-relationship-field .wpforms-field-label-inline:hover {
-	transform:translateY(-1px);
-	border-color:#9ed9df !important;
-	box-shadow:0 10px 22px rgba(7,26,56,.07);
-}
-.ba-report-mount .ba-relationship-field input[type="radio"]:focus-visible + .wpforms-field-label-inline {
-	outline:3px solid rgba(7,152,168,.22);
-	outline-offset:2px;
-}
-.ba-report-mount .ba-relationship-field input[type="radio"]:checked + .wpforms-field-label-inline {
-	border-color:var(--ba-teal-600) !important;
-	background:#f3fcfc !important;
-	box-shadow:0 0 0 2px rgba(7,152,168,.09),0 10px 22px rgba(7,26,56,.06);
-}
-.ba-report-mount .ba-relationship-field input[type="radio"]:checked + .wpforms-field-label-inline::after {
-	content:"";
-	position:absolute;
-	top:50%;
-	right:14px;
-	width:18px;
-	height:18px;
-	transform:translateY(-50%);
-	border-radius:50%;
-	background:var(--ba-teal-600);
-	box-shadow:inset 0 0 0 5px #fff,0 0 0 1px var(--ba-teal-600);
-}
-
-/* Navigation alignment — Continue right, Save & Resume directly below */
-.ba-report-mount .wpforms-page-footer {
-	display:grid !important;
-	grid-template-columns:1fr auto !important;
-	grid-template-rows:auto auto !important;
-	column-gap:12px !important;
-	row-gap:8px !important;
-	align-items:center !important;
-}
-.ba-report-mount .wpforms-page-footer .wpforms-page-prev {
-	grid-column:1 !important;
-	grid-row:1 / span 2 !important;
-	justify-self:start !important;
-	margin:0 !important;
-}
-.ba-report-mount .wpforms-page-footer .wpforms-page-next,
-.ba-report-mount .wpforms-page-footer button[type="submit"] {
-	grid-column:2 !important;
-	grid-row:1 !important;
-	justify-self:end !important;
-	margin:0 !important;
-}
-.ba-report-mount .wpforms-page-footer .wpforms-save-resume-button {
-	grid-column:2 !important;
-	grid-row:2 !important;
-	justify-self:end !important;
-	margin:0 !important;
-	padding:0 !important;
-	background:transparent !important;
-	border:0 !important;
-	box-shadow:none !important;
-	color:var(--ba-teal-700) !important;
-	font-size:.8rem !important;
-	font-weight:750 !important;
-	text-decoration:none !important;
-}
-.ba-report-mount .wpforms-page-footer .wpforms-save-resume-button:hover {
-	text-decoration:underline !important;
-}
-
-@media (max-width:980px) {
-	.ba-report-mount .ba-relationship-field ul {
-		grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-	}
-}
-@media (max-width:700px) {
-	.ba-report-mount .ba-relationship-field ul {
-		grid-template-columns:1fr !important;
-	}
-	.ba-report-mount .ba-relationship-field .wpforms-field-label-inline {
-		min-height:66px;
-	}
-	.ba-report-mount .wpforms-page-footer {
-		grid-template-columns:1fr !important;
-		grid-template-rows:auto auto auto !important;
-	}
-	.ba-report-mount .wpforms-page-footer .wpforms-page-prev {
-		grid-column:1 !important;
-		grid-row:1 !important;
-		justify-self:stretch !important;
-	}
-	.ba-report-mount .wpforms-page-footer .wpforms-page-next,
-	.ba-report-mount .wpforms-page-footer button[type="submit"] {
-		grid-column:1 !important;
-		grid-row:2 !important;
-		justify-self:stretch !important;
-		width:100% !important;
-	}
-	.ba-report-mount .wpforms-page-footer .wpforms-save-resume-button {
-		grid-column:1 !important;
-		grid-row:3 !important;
-		justify-self:center !important;
-	}
-}
-
-
-/* Force normalized page actions after JS relocates Save & Resume */
-.ba-report-mount .wpforms-page-footer {
-	display:grid !important;
-	grid-template-columns:minmax(0,1fr) auto !important;
-	grid-template-areas:
-		"prev next"
-		"prev save" !important;
-	align-items:center !important;
-	column-gap:14px !important;
-	row-gap:7px !important;
-	width:100% !important;
-}
-.ba-report-mount .wpforms-page-footer .wpforms-page-prev {
-	grid-area:prev !important;
-	justify-self:start !important;
-	align-self:center !important;
-}
-.ba-report-mount .wpforms-page-footer .ba-primary-next,
-.ba-report-mount .wpforms-page-footer .wpforms-page-next,
-.ba-report-mount .wpforms-page-footer button[type="submit"] {
-	grid-area:next !important;
-	justify-self:end !important;
-	margin-left:auto !important;
-}
-.ba-report-mount .wpforms-page-footer .ba-save-resume-slot,
-.ba-report-mount .wpforms-page-footer .wpforms-save-resume-button {
-	grid-area:save !important;
-	justify-self:end !important;
-	text-align:right !important;
-	margin:0 !important;
-}
-.ba-report-mount .wpforms-page-footer .ba-save-resume-slot .wpforms-save-resume-button {
-	display:inline-block !important;
-	margin:0 !important;
-	padding:0 !important;
-}
-
-@media (max-width:700px) {
-	.ba-report-mount .wpforms-page-footer {
-		grid-template-columns:1fr !important;
-		grid-template-areas:
-			"prev"
-			"next"
-			"save" !important;
-	}
-	.ba-report-mount .wpforms-page-footer .wpforms-page-prev,
-	.ba-report-mount .wpforms-page-footer .ba-primary-next,
-	.ba-report-mount .wpforms-page-footer .wpforms-page-next,
-	.ba-report-mount .wpforms-page-footer button[type="submit"] {
-		justify-self:stretch !important;
-		width:100% !important;
-	}
-	.ba-report-mount .wpforms-page-footer .ba-save-resume-slot,
-	.ba-report-mount .wpforms-page-footer .wpforms-save-resume-button {
-		justify-self:center !important;
-		text-align:center !important;
-	}
-}
-
-
-/* Definitive action stack: primary CTA right, Save & Resume below */
-.ba-report-mount .wpforms-page-footer {
-	display:flex !important;
-	align-items:flex-start !important;
-	width:100% !important;
-	gap:16px !important;
-}
-.ba-report-mount .wpforms-page-footer > .wpforms-page-prev {
-	margin-right:auto !important;
-	flex:0 0 auto !important;
-}
-.ba-report-mount .wpforms-page-footer .ba-page-actions {
-	display:flex !important;
-	flex-direction:column !important;
-	align-items:flex-end !important;
-	margin-left:auto !important;
-	flex:0 0 auto !important;
-	gap:8px !important;
-}
-.ba-report-mount .wpforms-page-footer .ba-page-actions .wpforms-page-next,
-.ba-report-mount .wpforms-page-footer .ba-page-actions button[type="submit"] {
-	margin:0 !important;
-	align-self:flex-end !important;
-}
-.ba-report-mount .wpforms-page-footer .ba-page-actions .ba-save-resume-slot,
-.ba-report-mount .wpforms-page-footer .ba-page-actions .wpforms-save-resume-button {
-	margin:0 !important;
-	padding:0 !important;
-	align-self:flex-end !important;
-	text-align:right !important;
-	background:transparent !important;
-	border:0 !important;
-	box-shadow:none !important;
-}
-.ba-report-mount .wpforms-page-footer .ba-page-actions .wpforms-save-resume-button {
-	display:inline-block !important;
-}
-
-@media (max-width:700px) {
-	.ba-report-mount .wpforms-page-footer {
-		flex-direction:column !important;
-		align-items:stretch !important;
-	}
-	.ba-report-mount .wpforms-page-footer > .wpforms-page-prev {
-		order:1;
-		width:100% !important;
-	}
-	.ba-report-mount .wpforms-page-footer .ba-page-actions {
-		order:2;
-		width:100% !important;
-		align-items:stretch !important;
-		margin-left:0 !important;
-	}
-	.ba-report-mount .wpforms-page-footer .ba-page-actions .wpforms-page-next,
-	.ba-report-mount .wpforms-page-footer .ba-page-actions button[type="submit"] {
-		width:100% !important;
-		align-self:stretch !important;
-	}
-	.ba-report-mount .wpforms-page-footer .ba-page-actions .ba-save-resume-slot,
-	.ba-report-mount .wpforms-page-footer .ba-page-actions .wpforms-save-resume-button {
-		align-self:center !important;
-		text-align:center !important;
-	}
-}
-
-
-/* Actual WPForms pagebreak markup: align actions using the real wrapper */
-.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left {
-	display:grid !important;
-	grid-template-columns:minmax(0,1fr) auto !important;
-	grid-template-areas:
-		"prev next"
-		". save" !important;
-	align-items:center !important;
-	column-gap:14px !important;
-	row-gap:8px !important;
-	width:100% !important;
-	float:none !important;
-	clear:both !important;
-	text-align:initial !important;
-}
-.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left > .wpforms-page-button-group {
-	margin:0 !important;
-	padding:0 !important;
-	float:none !important;
-	width:auto !important;
-}
-.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left > .wpforms-page-button-group:has(.wpforms-page-prev) {
-	grid-area:prev !important;
-	justify-self:start !important;
-}
-.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left > .wpforms-page-button-group:has(.wpforms-page-next) {
-	grid-area:next !important;
-	justify-self:end !important;
-}
-.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left > .wpforms-save-resume-button {
-	grid-area:save !important;
-	justify-self:end !important;
-	margin:0 !important;
-	padding:0 !important;
-	float:none !important;
-	text-align:right !important;
-}
-.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left .wpforms-page-next {
-	margin:0 !important;
-	float:none !important;
-}
-.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left .wpforms-page-prev {
-	margin:0 !important;
-	float:none !important;
-}
-
-@media (max-width:700px) {
-	.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left {
-		grid-template-columns:1fr !important;
-		grid-template-areas:
-			"prev"
-			"next"
-			"save" !important;
-	}
-	.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left > .wpforms-page-button-group:has(.wpforms-page-prev),
-	.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left > .wpforms-page-button-group:has(.wpforms-page-next) {
-		justify-self:stretch !important;
-		width:100% !important;
-	}
-	.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left .wpforms-page-prev,
-	.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left .wpforms-page-next {
-		width:100% !important;
-	}
-	.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left > .wpforms-save-resume-button {
-		justify-self:center !important;
-		text-align:center !important;
-	}
+/* Mobile app behavior */
+@media(max-width:760px){
+ .ba-report-mount .badaround-event-category ul{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+ .ba-report-mount .badaround-event-category .wpforms-field-label-inline{grid-template-columns:40px 1fr;min-height:88px;padding:11px!important;border-radius:14px!important}
+ .ba-choice-icon{width:40px;height:40px;border-radius:12px}
+ .ba-choice-icon svg{width:23px;height:23px}
+ .ba-choice-title{font-size:.78rem}
+ .ba-choice-desc{font-size:.59rem}
+ .ba-report-mount .ba-drilldown-field ul,
+ .ba-report-mount .ba-relationship-field ul{grid-template-columns:1fr!important}
+ .ba-report-mount .ba-drilldown-field .wpforms-field-label-inline,
+ .ba-report-mount .ba-relationship-field .wpforms-field-label-inline{min-height:54px}
+ .ba-report-mount .ba-location-primary,
+ .ba-report-mount .ba-form-section{padding:13px!important;border-radius:14px}
+ .ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left{grid-template-columns:1fr 1fr!important;grid-template-areas:"prev next" "save save"!important}
+ .ba-report-mount .wpforms-field-pagebreak .wpforms-page-button-group:has(.wpforms-page-prev),
+ .ba-report-mount .wpforms-field-pagebreak .wpforms-page-button-group:has(.wpforms-page-next){width:100%!important}
+ .ba-report-mount .wpforms-page-prev,
+ .ba-report-mount .wpforms-page-next,
+ .ba-report-mount button[type="submit"]{width:100%!important}
+ .ba-report-mount .wpforms-save-resume-button{justify-self:center!important}
+}
+@media(max-width:420px){
+ .ba-report-mount .badaround-event-category .wpforms-field-label-inline{grid-template-columns:1fr;grid-template-areas:"icon" "title" "desc";align-content:start;gap:6px;min-height:112px}
+}
+@media(prefers-reduced-motion:reduce){
+ .ba-report-mount *{transition:none!important}
 }
