@@ -6,6 +6,21 @@ get_header();
 $form_id = badaround_report_form_id();
 ?>
 <main class="ba-report-app" id="main-content">
+	<header class="ba-report-topbar">
+		<div class="ba-report-topbar__brand">
+			<span class="ba-report-topbar__mark" aria-hidden="true">◎</span>
+			<div>
+				<strong>Segnalazione civica</strong>
+				<small data-ba-report-step-label-top>Passo 1 di 3</small>
+			</div>
+		</div>
+
+		<div class="ba-report-topbar__actions">
+			<button class="ba-report-topbar__save" type="button" data-ba-report-save>Salva bozza</button>
+			<a class="ba-report-topbar__close" href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>" aria-label="Chiudi segnalazione">×</a>
+		</div>
+	</header>
+
 	<section class="ba-report-stage" aria-labelledby="ba-report-title">
 		<div class="ba-form-wrapper">
 			<header class="ba-report-header">
