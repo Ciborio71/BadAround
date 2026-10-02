@@ -13,6 +13,16 @@ function badaround_child_enqueue_assets() {
 	$uri = get_stylesheet_directory_uri();
 	$dir = get_stylesheet_directory();
 
+	$is_home      = is_front_page();
+	$is_event     = is_singular( 'badaround_event' );
+	$is_location  = is_tax( 'badaround_location' );
+	$is_reporting = is_page_template( 'page-segnala-evento.php' );
+	$is_badaround = $is_home || $is_event || $is_location || $is_reporting;
+
+	if ( ! $is_badaround ) {
+		return;
+	}
+
 	wp_enqueue_style(
 		'badaround-base',
 		$uri . '/assets/css/base.css',
@@ -27,7 +37,16 @@ function badaround_child_enqueue_assets() {
 		(string) filemtime( $dir . '/assets/css/components.css' )
 	);
 
-	if ( is_front_page() || is_singular( 'badaround_event' ) || is_tax( 'badaround_location' ) || is_page_template( 'page-segnala-evento.php' ) ) {
+	if ( $is_home ) {
+		wp_enqueue_style(
+			'badaround-home',
+			$uri . '/assets/css/home.css',
+			array( 'badaround-components' ),
+			(string) filemtime( $dir . '/assets/css/home.css' )
+		);
+	}
+
+	if ( $is_event || $is_location ) {
 		wp_enqueue_style(
 			'badaround-pages',
 			$uri . '/assets/css/pages.css',
@@ -36,22 +55,30 @@ function badaround_child_enqueue_assets() {
 		);
 	}
 
-	if ( is_page_template( 'page-segnala-evento.php' ) ) {
+	if ( $is_reporting ) {
+		wp_enqueue_style(
+			'badaround-report',
+			$uri . '/assets/css/report.css',
+			array( 'badaround-components' ),
+			(string) filemtime( $dir . '/assets/css/report.css' )
+		);
 		wp_enqueue_style(
 			'badaround-wpforms',
 			$uri . '/assets/css/wpforms.css',
-			array( 'badaround-pages' ),
+			array( 'badaround-report' ),
 			(string) filemtime( $dir . '/assets/css/wpforms.css' )
 		);
 	}
 
-	wp_enqueue_script(
-		'badaround-ui',
-		$uri . '/assets/js/ui.js',
-		array(),
-		(string) filemtime( $dir . '/assets/js/ui.js' ),
-		true
-	);
+	if ( $is_home || $is_location ) {
+		wp_enqueue_script(
+			'badaround-ui',
+			$uri . '/assets/js/ui.js',
+			array(),
+			(string) filemtime( $dir . '/assets/js/ui.js' ),
+			true
+		);
+	}
 }
 add_action( 'wp_enqueue_scripts', 'badaround_child_enqueue_assets', 20 );
 
@@ -59,6 +86,5 @@ add_action( 'wp_enqueue_scripts', 'badaround_child_enqueue_assets', 20 );
  * WPForms id can be provided without editing the page template.
  */
 function badaround_report_form_id() {
-	return (int) apply_filters( 'badaround_report_form_id', 0 );
+	return (int) apply_filters( 'badaround_report_form_id', 6 );
 }
-
