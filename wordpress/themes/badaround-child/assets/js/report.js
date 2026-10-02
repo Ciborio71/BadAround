@@ -72,35 +72,67 @@
 	}
 
 
-	/* WPForms Save & Resume is not always rendered inside the page footer.
-	 * Normalize the markup so the primary action can sit right-aligned
-	 * with Save & Resume directly underneath it. */
+	/* Normalize WPForms page actions into one right-aligned stack.
+	 * Save & Resume markup varies by WPForms version, so detect it by
+	 * class first and visible label as a fallback. */
 	const normalizePageActions = () => {
-		const pages = [...form.querySelectorAll('.wpforms-page')];
-		pages.forEach((page) => {
+		const saveCandidates = [...form.querySelectorAll('a,button')].filter((el) => {
+			const text = (el.textContent || '').trim().toLowerCase();
+			return el.classList.contains('wpforms-save-resume-button') ||
+				text.includes('salva e continua più tardi') ||
+				text.includes('salva e riprendi');
+		});
+
+		[...form.querySelectorAll('.wpforms-page')].forEach((page) => {
 			const footer = page.querySelector('.wpforms-page-footer');
 			if (!footer) return;
 
+			const prev = footer.querySelector('.wpforms-page-prev');
 			const next = footer.querySelector('.wpforms-page-next, button[type="submit"]');
-			let save = page.querySelector('.wpforms-save-resume-button');
+			if (!next) return;
 
-			if (!save) {
-				const candidate = form.querySelector('.wpforms-save-resume-button:not([data-ba-positioned])');
-				if (candidate) save = candidate;
+			let actions = footer.querySelector('.ba-page-actions');
+			if (!actions) {
+				actions = document.createElement('div');
+				actions.className = 'ba-page-actions';
+				footer.appendChild(actions);
 			}
 
+			if (next.parentElement !== actions) actions.appendChild(next);
+
+			const save = saveCandidates.find((el) => !el.closest('.ba-page-actions')) || saveCandidates[0];
 			if (save) {
-				const wrapper = save.closest('.wpforms-save-resume-block, .wpforms-save-resume-container') || save;
-				if (wrapper.parentElement !== footer) footer.appendChild(wrapper);
-				save.dataset.baPositioned = '1';
+				const saveWrapper = save.closest('.wpforms-save-resume-block, .wpforms-save-resume-container') || save;
+				if (saveWrapper.parentElement !== actions) actions.appendChild(saveWrapper);
+				saveWrapper.classList?.add('ba-save-resume-slot');
+			}
+
+			if (prev && prev.parentElement !== footer) footer.prepend(prev);
+		});
+
+		/* In some WPForms builds Save & Resume is a sibling of the page footer.
+		 * Re-run after WPForms has finished rendering conditional content. */
+		requestAnimationFrame(() => {
+			const firstFooter = form.querySelector('.wpforms-page:not([style*="display: none"]) .wpforms-page-footer, .wpforms-page-footer');
+			if (!firstFooter) return;
+			const actions = firstFooter.querySelector('.ba-page-actions');
+			if (!actions) return;
+			const looseSave = [...form.querySelectorAll('a,button')].find((el) => {
+				if (el.closest('.ba-page-actions')) return false;
+				const text = (el.textContent || '').trim().toLowerCase();
+				return text.includes('salva e continua più tardi') || text.includes('salva e riprendi');
+			});
+			if (looseSave) {
+				const wrapper = looseSave.closest('.wpforms-save-resume-block, .wpforms-save-resume-container') || looseSave;
+				actions.appendChild(wrapper);
 				wrapper.classList?.add('ba-save-resume-slot');
 			}
-
-			if (next) next.classList.add('ba-primary-next');
 		});
 	};
 
 	normalizePageActions();
+	setTimeout(normalizePageActions, 250);
+	setTimeout(normalizePageActions, 800);
 	new MutationObserver(normalizePageActions).observe(form, { childList:true, subtree:true });
 
 })();
