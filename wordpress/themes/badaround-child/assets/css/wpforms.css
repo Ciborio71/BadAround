@@ -194,3 +194,48 @@
 		max-height:62px!important;
 	}
 }
+
+
+/* Step 2 map-first hierarchy */
+.ba-report-mount .ba-location-first{
+	order:-20;
+	margin-top:0!important;
+	padding:0!important;
+	border:0!important;
+	background:transparent!important;
+}
+.ba-report-mount .ba-location-first .wpforms-field-label{
+	font-size:1.08rem!important;
+	margin-bottom:10px!important;
+}
+.ba-report-mount .ba-location-first .wpforms-geolocation-map,
+.ba-report-mount .ba-location-first [class*="wpforms-geolocation-map"]{
+	min-height:420px!important;
+	border:1px solid #d8e3ea!important;
+	border-radius:18px!important;
+	overflow:hidden!important;
+	box-shadow:0 10px 24px rgba(7,26,56,.06)!important;
+}
+.ba-report-mount .ba-location-first input{
+	margin-top:12px!important;
+}
+.ba-report-mount .wpforms-page-2{
+	display:flex;
+	flex-direction:column;
+}
+.ba-report-mount .wpforms-page-2 .ba-location-first{
+	order:-50;
+}
+.ba-report-mount .wpforms-page-2 .ba-location-secondary{
+	order:-30;
+}
+.ba-report-mount .wpforms-page-2 .ba-danger-field{
+	order:-10;
+}
+@media(max-width:760px){
+	.ba-report-mount .ba-location-first .wpforms-geolocation-map,
+	.ba-report-mount .ba-location-first [class*="wpforms-geolocation-map"]{
+		min-height:360px!important;
+		border-radius:15px!important;
+	}
+}
