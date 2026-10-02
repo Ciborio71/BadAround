@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BADAROUND_CHILD_VERSION', '0.2.0' );
+define( 'BADAROUND_CHILD_VERSION', '0.3.0' );
 
 /**
  * Load only the assets required by the current screen.
@@ -27,7 +27,7 @@ function badaround_child_enqueue_assets() {
 		(string) filemtime( $dir . '/assets/css/components.css' )
 	);
 
-	if ( is_front_page() || is_singular( 'badaround_event' ) || is_tax( 'badaround_location' ) || is_page_template( 'page-segnala-evento.php' ) ) {
+	if ( is_front_page() || is_singular( 'ba_evento' ) || is_post_type_archive( 'ba_evento' ) || is_tax( array( 'ba_territorio', 'ba_tipo_evento' ) ) || is_page_template( 'page-segnala-evento.php' ) ) {
 		wp_enqueue_style(
 			'badaround-pages',
 			$uri . '/assets/css/pages.css',
@@ -62,3 +62,41 @@ function badaround_report_form_id() {
 	return (int) apply_filters( 'badaround_report_form_id', 0 );
 }
 
+/**
+ * Return only fields explicitly approved for public event rendering.
+ * Private report data must never be queried by the child theme.
+ */
+function badaround_get_public_event_data( $post_id = 0 ) {
+	$post_id = $post_id ? absint( $post_id ) : get_the_ID();
+	if ( ! $post_id || 'ba_evento' !== get_post_type( $post_id ) ) {
+		return array();
+	}
+
+	$territories = get_the_terms( $post_id, 'ba_territorio' );
+	$types       = get_the_terms( $post_id, 'ba_tipo_evento' );
+
+	return array(
+		'event_status' => sanitize_key( get_post_meta( $post_id, '_ba_event_status', true ) ),
+		'occurred_at'  => sanitize_text_field( get_post_meta( $post_id, '_ba_occurred_at', true ) ),
+		'occurred_date' => sanitize_text_field( get_post_meta( $post_id, '_ba_occurred_date', true ) ),
+		'place_name'    => sanitize_text_field( get_post_meta( $post_id, '_ba_public_place_name', true ) ),
+		'address'       => sanitize_text_field( get_post_meta( $post_id, '_ba_public_address', true ) ),
+		'plate_masked'  => sanitize_text_field( get_post_meta( $post_id, '_ba_vehicle_plate_masked', true ) ),
+		'reward_amount' => get_post_meta( $post_id, '_ba_reward_amount', true ),
+		'territories'   => is_wp_error( $territories ) ? array() : $territories,
+		'types'         => is_wp_error( $types ) ? array() : $types,
+	);
+}
+
+function badaround_public_event_status_label( $status ) {
+	$labels = array(
+		'open'     => __( 'Evento attivo', 'badaround-child' ),
+		'updated'  => __( 'Aggiornato', 'badaround-child' ),
+		'resolved' => __( 'Risolto', 'badaround-child' ),
+		'closed'   => __( 'Chiuso', 'badaround-child' ),
+		'expired'  => __( 'Scaduto', 'badaround-child' ),
+		'archived' => __( 'Archiviato', 'badaround-child' ),
+	);
+
+	return $labels[ $status ] ?? __( 'Segnalazione', 'badaround-child' );
+}

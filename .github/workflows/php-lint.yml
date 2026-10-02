@@ -1,0 +1,35 @@
+name: PHP Syntax
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - "feature/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  php-lint:
+    name: Lint plugin and child theme
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          tools: php-parallel-lint
+
+      - name: Lint BadAround core plugin
+        run: parallel-lint --exclude vendor ./wordpress/plugins/badaround-core
+
+      - name: Lint BadAround child theme
+        run: parallel-lint --exclude vendor ./wordpress/themes/badaround-child
