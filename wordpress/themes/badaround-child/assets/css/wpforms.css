@@ -757,3 +757,73 @@
 		text-align:center !important;
 	}
 }
+
+
+/* Actual WPForms pagebreak markup: align actions using the real wrapper */
+.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left {
+	display:grid !important;
+	grid-template-columns:minmax(0,1fr) auto !important;
+	grid-template-areas:
+		"prev next"
+		". save" !important;
+	align-items:center !important;
+	column-gap:14px !important;
+	row-gap:8px !important;
+	width:100% !important;
+	float:none !important;
+	clear:both !important;
+	text-align:initial !important;
+}
+.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left > .wpforms-page-button-group {
+	margin:0 !important;
+	padding:0 !important;
+	float:none !important;
+	width:auto !important;
+}
+.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left > .wpforms-page-button-group:has(.wpforms-page-prev) {
+	grid-area:prev !important;
+	justify-self:start !important;
+}
+.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left > .wpforms-page-button-group:has(.wpforms-page-next) {
+	grid-area:next !important;
+	justify-self:end !important;
+}
+.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left > .wpforms-save-resume-button {
+	grid-area:save !important;
+	justify-self:end !important;
+	margin:0 !important;
+	padding:0 !important;
+	float:none !important;
+	text-align:right !important;
+}
+.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left .wpforms-page-next {
+	margin:0 !important;
+	float:none !important;
+}
+.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left .wpforms-page-prev {
+	margin:0 !important;
+	float:none !important;
+}
+
+@media (max-width:700px) {
+	.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left {
+		grid-template-columns:1fr !important;
+		grid-template-areas:
+			"prev"
+			"next"
+			"save" !important;
+	}
+	.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left > .wpforms-page-button-group:has(.wpforms-page-prev),
+	.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left > .wpforms-page-button-group:has(.wpforms-page-next) {
+		justify-self:stretch !important;
+		width:100% !important;
+	}
+	.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left .wpforms-page-prev,
+	.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left .wpforms-page-next {
+		width:100% !important;
+	}
+	.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left > .wpforms-save-resume-button {
+		justify-self:center !important;
+		text-align:center !important;
+	}
+}
