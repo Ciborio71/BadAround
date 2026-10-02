@@ -1,0 +1,104 @@
+/* BadAround account */
+.ba-account-page{background:#f5f8fb}
+.ba-account-auth{padding:72px 0 84px;background:linear-gradient(180deg,#fff,#f5f8fb)}
+.ba-account-auth__grid{display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:70px;align-items:center}
+.ba-account-auth__intro h1{max-width:760px;margin:8px 0 18px;color:var(--ba-navy-950);font-size:clamp(2.8rem,5vw,5rem);line-height:.95;letter-spacing:-.05em}
+.ba-account-auth__intro>p{max-width:620px;margin:0;color:#607589;font-size:1rem;line-height:1.7}
+.ba-account-auth__benefits{display:grid;gap:12px;margin-top:30px;max-width:620px}
+.ba-account-auth__benefits>div{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:center}
+.ba-account-auth__benefits>div>span{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:#e3f6f7;color:var(--ba-teal-700);font-weight:900}
+.ba-account-auth__benefits p,.ba-account-auth__benefits strong,.ba-account-auth__benefits small{display:block;margin:0}
+.ba-account-auth__benefits strong{color:var(--ba-navy-950);font-size:.85rem}
+.ba-account-auth__benefits small{margin-top:2px;color:#76899b;font-size:.72rem}
+.ba-account-login-card{padding:26px}
+.ba-account-login-card__head{display:flex;gap:12px;align-items:center;padding-bottom:18px;border-bottom:1px solid #edf2f5}
+.ba-account-login-card__mark{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:#e2f6f7;color:var(--ba-teal-700);font-size:1.35rem}
+.ba-account-login-card__head span,.ba-account-login-card__head h2{display:block}
+.ba-account-login-card__head>div>span{color:#8193a3;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.ba-account-login-card__head h2{margin:2px 0 0;color:var(--ba-navy-950);font-size:1.15rem}
+.ba-account-login-card form{display:grid;gap:14px;margin-top:20px}
+.ba-account-login-card form p{margin:0}
+.ba-account-login-card label{display:block;margin-bottom:6px;color:#53697c;font-size:.72rem;font-weight:800}
+.ba-account-login-card input[type="text"],.ba-account-login-card input[type="password"]{width:100%;height:46px;padding:10px 12px;border:1px solid var(--ba-border);border-radius:11px;background:#fff;box-shadow:none}
+.ba-account-login-card input[type="text"]:focus,.ba-account-login-card input[type="password"]:focus{border-color:var(--ba-teal-600);outline:3px solid rgba(7,152,168,.1)}
+.ba-account-login-card .login-remember label{display:flex;align-items:center;gap:8px;font-weight:650}
+.ba-account-login-card .login-submit input{width:100%;min-height:46px;border:0;border-radius:11px;background:var(--ba-teal-600);color:#fff;font-weight:800;cursor:pointer}
+.ba-account-login-card__links{display:flex;justify-content:space-between;gap:15px;margin-top:16px;padding-top:15px;border-top:1px solid #edf2f5}
+.ba-account-login-card__links a{font-size:.72rem;font-weight:800;text-decoration:none}
+.ba-account-login-card__privacy{margin:17px 0 0;color:#8b9aa8;font-size:.64rem;line-height:1.45}
+
+.ba-account-shell{padding:34px 0 72px}
+.ba-account-shell__grid{display:grid;grid-template-columns:255px minmax(0,1fr);gap:24px;align-items:start}
+.ba-account-sidebar{position:sticky;top:94px;overflow:hidden;border:1px solid var(--ba-border);border-radius:18px;background:#fff;box-shadow:0 8px 22px rgba(7,26,56,.05)}
+.ba-account-profile-card{display:grid;grid-template-columns:46px 1fr;gap:11px;align-items:center;padding:18px;border-bottom:1px solid #edf2f5}
+.ba-account-avatar{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:var(--ba-navy-950);color:#fff;font-size:1.1rem;font-weight:850}
+.ba-account-profile-card span,.ba-account-profile-card strong,.ba-account-profile-card small{display:block}
+.ba-account-profile-card span{color:#8a99a8;font-size:.61rem;text-transform:uppercase;font-weight:800}
+.ba-account-profile-card strong{overflow:hidden;margin-top:2px;color:var(--ba-navy-950);font-size:.82rem;text-overflow:ellipsis;white-space:nowrap}
+.ba-account-profile-card small{overflow:hidden;margin-top:2px;color:#8091a1;font-size:.62rem;text-overflow:ellipsis;white-space:nowrap}
+.ba-account-nav{display:grid;padding:9px}
+.ba-account-nav button{padding:11px 12px;border:0;border-radius:10px;background:transparent;color:#596f83;font-size:.76rem;font-weight:760;text-align:left;cursor:pointer}
+.ba-account-nav button:hover,.ba-account-nav button:focus-visible{background:#f4f8fa;color:var(--ba-navy-950)}
+.ba-account-nav button.is-active{background:#eaf8f9;color:var(--ba-teal-700)}
+.ba-account-logout{display:block;margin:2px 9px 10px;padding:11px 12px;border-top:1px solid #edf2f5;color:#a34848;font-size:.72rem;font-weight:750;text-decoration:none}
+.ba-account-content{min-width:0}
+.ba-account-panel{display:none}
+.ba-account-panel.is-active{display:block}
+.ba-account-panel__head{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:20px}
+.ba-account-panel__head h1{margin:5px 0 5px;color:var(--ba-navy-950);font-size:clamp(2rem,3vw,3rem);line-height:1;letter-spacing:-.04em}
+.ba-account-panel__head p{margin:0;color:#73879a;font-size:.82rem}
+.ba-account-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.ba-account-kpis>div{padding:17px}
+.ba-account-kpis span,.ba-account-kpis small{display:block;color:#8092a3}
+.ba-account-kpis span{font-size:.64rem;font-weight:800;text-transform:uppercase}
+.ba-account-kpis strong{display:block;margin:7px 0 2px;color:var(--ba-navy-950);font-size:1.55rem}
+.ba-account-kpis small{font-size:.62rem}
+.ba-account-overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+.ba-account-widget{padding:20px}
+.ba-account-widget__head{display:flex;align-items:start;justify-content:space-between;gap:15px;padding-bottom:14px;border-bottom:1px solid #edf2f5}
+.ba-account-widget__head h2{margin:4px 0 0;color:var(--ba-navy-950);font-size:1rem}
+.ba-account-widget__head button{padding:0;border:0;background:transparent;color:var(--ba-teal-700);font-size:.7rem;font-weight:800;cursor:pointer}
+.ba-account-empty-inline{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:center;padding:22px 0 15px}
+.ba-account-empty-inline>span{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#edf7f8;color:var(--ba-teal-700)}
+.ba-account-empty-inline strong{display:block;color:var(--ba-navy-950);font-size:.8rem}
+.ba-account-empty-inline p{margin:3px 0 0;color:#8192a2;font-size:.68rem}
+.ba-account-text-link{font-size:.72rem;font-weight:800;text-decoration:none}
+.ba-account-empty-state{display:grid;place-items:center;min-height:370px;padding:36px;text-align:center}
+.ba-account-empty-state>span{display:grid;place-items:center;width:58px;height:58px;margin-bottom:15px;border-radius:18px;background:#e7f6f7;color:var(--ba-teal-700);font-size:1.5rem}
+.ba-account-empty-state h2{max-width:500px;margin:0;color:var(--ba-navy-950);font-size:1.15rem}
+.ba-account-empty-state p{max-width:580px;margin:9px 0 20px;color:#718599;font-size:.8rem;line-height:1.55}
+.ba-account-settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ba-account-settings-card{padding:21px}
+.ba-account-settings-card h2{margin:0 0 17px;color:var(--ba-navy-950);font-size:1rem}
+.ba-account-settings-card>label:not(.ba-account-switch){display:grid;gap:6px;margin-bottom:12px}
+.ba-account-settings-card>label>span{color:#607589;font-size:.7rem;font-weight:800}
+.ba-account-settings-card input[type="text"],.ba-account-settings-card input[type="email"]{height:44px;border:1px solid var(--ba-border);border-radius:10px;background:#f7fafc;color:#63778a}
+.ba-account-settings-card>p{margin:12px 0 0;color:#8a99a8;font-size:.65rem}
+.ba-account-switch{display:grid;grid-template-columns:38px 1fr;gap:11px;align-items:start;margin:13px 0}
+.ba-account-switch>span{position:relative;width:38px;height:22px;border-radius:999px;background:#cfdbe3}
+.ba-account-switch>span::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff}
+.ba-account-switch input:checked+span{background:var(--ba-teal-600)}
+.ba-account-switch input:checked+span::after{left:19px}
+.ba-account-switch input{position:absolute;opacity:0}
+.ba-account-switch p,.ba-account-switch strong,.ba-account-switch small{display:block;margin:0}
+.ba-account-switch strong{color:var(--ba-navy-950);font-size:.76rem}
+.ba-account-switch small{margin-top:2px;color:#8193a3;font-size:.64rem}
+
+@media(max-width:960px){
+ .ba-account-auth__grid{grid-template-columns:1fr}
+ .ba-account-login-card{max-width:560px}
+ .ba-account-shell__grid{grid-template-columns:1fr}
+ .ba-account-sidebar{position:static}
+ .ba-account-nav{display:flex;overflow:auto;gap:5px;scrollbar-width:none}
+ .ba-account-nav button{flex:0 0 auto}
+ .ba-account-logout{border-top:0}
+ .ba-account-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:680px){
+ .ba-account-auth{padding:45px 0 60px}
+ .ba-account-auth__intro h1{font-size:clamp(2.5rem,13vw,4rem)}
+ .ba-account-panel__head{align-items:flex-start;flex-direction:column}
+ .ba-account-overview-grid,.ba-account-settings-grid{grid-template-columns:1fr}
+ .ba-account-profile-card{display:none}
+ .ba-account-sidebar{border-radius:14px}
+}
