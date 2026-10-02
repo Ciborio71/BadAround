@@ -9,19 +9,19 @@
 	const categoryMeta = {
 		'veicoli': ['Veicoli','Auto, moto e mezzi','car'],
 		'veicolo o mobilità': ['Veicoli','Auto, moto e mezzi','car'],
-		'case e attività': ['Abitazioni e attività','Case, condomini, negozi, uffici','home'],
-		'abitazioni e attività': ['Abitazioni e attività','Case, condomini, negozi, uffici','home'],
+		'case e attività': ['Abitazioni','Case, negozi, uffici','home'],
+		'abitazioni e attività': ['Abitazioni','Case, negozi, uffici','home'],
 		'furti, effrazioni e sicurezza': ['Abitazioni e attività','Case, negozi, uffici e sicurezza','home'],
 		'sicurezza o comportamento sospetto': ['Abitazioni e attività','Case, negozi, uffici e sicurezza','home'],
 		'pericoli': ['Pericoli','Strade, ostacoli e rischi','warning'],
 		'pericolo territoriale': ['Pericoli','Strade, ostacoli e rischi','warning'],
-		'spazi pubblici': ['Spazi pubblici','Rifiuti, degrado, buche…','public'],
-		'degrado urbano': ['Spazi pubblici','Rifiuti, degrado e arredo urbano','public'],
+		'spazi pubblici': ['Spazi pubblici','Rifiuti, buche, luci','public'],
+		'degrado urbano': ['Spazi pubblici','Rifiuti, buche, luci','public'],
 		'problema o disservizio di quartiere': ['Spazi pubblici','Disservizi e problemi di quartiere','public'],
-		'animali': ['Animali','Smarriti, ritrovati, avvistati…','animal'],
-		'animale': ['Animali','Smarriti, ritrovati, avvistati…','animal'],
-		'oggetti e documenti': ['Oggetti e documenti','Portafogli, chiavi, documenti…','object'],
-		'oggetto smarrito o ritrovato': ['Oggetti e documenti','Portafogli, chiavi, documenti…','object'],
+		'animali': ['Animali','Smarriti, avvistati','animal'],
+		'animale': ['Animali','Smarriti, avvistati','animal'],
+		'oggetti e documenti': ['Oggetti e doc.','Portafogli, chiavi','object'],
+		'oggetto smarrito o ritrovato': ['Oggetti e doc.','Portafogli, chiavi','object'],
 		'altro': ['Altro','Situazioni non comprese sopra','more']
 	};
 
@@ -46,7 +46,8 @@
 			const icon = document.createElement('span');
 			icon.className = 'ba-choice-icon';
 			icon.setAttribute('aria-hidden','true');
-			icon.innerHTML = icons[meta[2]] || icons.more;
+			const emojiIcons={car:'🚗',home:'🏠',warning:'⚠️',public:'🏙️',animal:'🐾',object:'🔍',more:'•••'};
+			icon.textContent = emojiIcons[meta[2]] || emojiIcons.more;
 			const title = document.createElement('span');
 			title.className = 'ba-choice-title';
 			title.textContent = meta[0];
@@ -264,6 +265,19 @@
 
 	/* Keep relationship hidden until a macro-category exists */
 	const relationship=field(11);
+	if(relationship){
+		const relationshipEmoji=(text)=>{
+			const t=text.toLowerCase();
+			if(t.includes('proprietario')||t.includes('coinvolt')||t.includes('direttamente')) return '👤 ';
+			if(t.includes('testimon')||t.includes('assistito')) return '👀 ';
+			return '💬 ';
+		};
+		relationship.querySelectorAll('.wpforms-field-label-inline').forEach(label=>{
+			if(label.dataset.baRelationshipEnhanced==='1') return;
+			label.textContent=relationshipEmoji(label.textContent.trim())+label.textContent.trim();
+			label.dataset.baRelationshipEnhanced='1';
+		});
+	}
 	const syncRelationship=()=>{
 		if(!relationship||!categoryRadios.length)return;
 		const selected=categoryRadios.some(r=>r.checked);
