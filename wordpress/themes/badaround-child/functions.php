@@ -171,3 +171,33 @@ add_action( 'wp_enqueue_scripts', 'badaround_child_enqueue_assets', 20 );
 function badaround_report_form_id() {
 	return (int) apply_filters( 'badaround_report_form_id', 6 );
 }
+
+
+/**
+ * BadAround reporting map defaults.
+ * Keep the first geolocation view in Italy and use a close street-level zoom.
+ */
+function badaround_wpforms_geolocation_default_location( $location ) {
+	if ( ! is_page_template( 'page-segnala-evento.php' ) ) {
+		return $location;
+	}
+
+	return array(
+		'lat' => 41.9028,
+		'lng' => 12.4964,
+	);
+}
+add_filter( 'wpforms_geolocation_map_default_location', 'badaround_wpforms_geolocation_default_location', 20 );
+
+function badaround_wpforms_geolocation_map_zoom( $zoom, $context ) {
+	if ( ! is_page_template( 'page-segnala-evento.php' ) ) {
+		return $zoom;
+	}
+
+	if ( 'field' === $context ) {
+		return 18;
+	}
+
+	return $zoom;
+}
+add_filter( 'wpforms_geolocation_map_zoom', 'badaround_wpforms_geolocation_map_zoom', 20, 2 );
