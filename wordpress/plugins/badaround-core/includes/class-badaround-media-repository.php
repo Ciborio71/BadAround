@@ -50,7 +50,9 @@ class BadAround_Media_Repository {
 	}
 
 	private function secure_base_dir() {
-		$dir = defined( 'BADAROUND_PRIVATE_MEDIA_PATH' ) ? BADAROUND_PRIVATE_MEDIA_PATH : '';
+		$dir = defined( 'BADAROUND_PRIVATE_MEDIA_PATH' )
+			? BADAROUND_PRIVATE_MEDIA_PATH
+			: dirname( untrailingslashit( ABSPATH ) ) . '/badaround-private-media';
 		$dir = apply_filters( 'badaround_private_media_path', $dir );
 		if ( ! is_string( $dir ) || '' === trim( $dir ) ) {
 			return '';

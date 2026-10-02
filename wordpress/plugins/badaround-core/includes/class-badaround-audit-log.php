@@ -8,7 +8,7 @@ class BadAround_Audit_Log {
 	public static function record( $object_type, $object_id, $action, $context = 'system', $reason = null, $request_id = null ) {
 		global $wpdb;
 
-		return $wpdb->insert(
+		$result = $wpdb->insert(
 			$wpdb->prefix . 'ba_audit_log',
 			array(
 				'actor_user_id' => get_current_user_id() ?: null,
@@ -23,6 +23,17 @@ class BadAround_Audit_Log {
 			),
 			array( '%d', '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s' )
 		);
+
+		if ( false === $result ) {
+			error_log(
+				sprintf(
+					'BadAround audit insert failed: %s',
+					sanitize_text_field( $wpdb->last_error )
+				)
+			);
+		}
+
+		return $result;
 	}
 
 	public static function technical_error( $object_type, $object_id, $action, $code, $request_id = null ) {
