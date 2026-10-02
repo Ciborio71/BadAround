@@ -68,6 +68,13 @@ function badaround_child_enqueue_assets() {
 			array( 'badaround-report' ),
 			(string) filemtime( $dir . '/assets/css/wpforms.css' )
 		);
+		wp_enqueue_script(
+			'badaround-report-ui',
+			$uri . '/assets/js/report.js',
+			array(),
+			(string) filemtime( $dir . '/assets/js/report.js' ),
+			true
+		);
 	}
 
 	if ( $is_home || $is_location ) {
