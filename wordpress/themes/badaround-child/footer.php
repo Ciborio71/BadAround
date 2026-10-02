@@ -25,6 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 					<a href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Mappa</a>
 					<a href="<?php echo esc_url( home_url( '/#segnalazioni' ) ); ?>">Segnalazioni</a>
 					<a href="<?php echo esc_url( home_url( '/#come-funziona' ) ); ?>">Come funziona</a>
+					<a href="<?php echo esc_url( home_url( '/area-personale/' ) ); ?>">Area personale</a>
 				</div>
 				<div>
 					<h2>Community</h2>
