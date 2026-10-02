@@ -14,8 +14,8 @@ function badaround_child_enqueue_assets() {
 	$dir = get_stylesheet_directory();
 
 	$is_home      = is_front_page();
-	$is_event     = is_singular( 'badaround_event' );
-	$is_location  = is_tax( 'badaround_location' );
+	$is_event     = is_singular( array( 'ba_evento', 'badaround_event' ) );
+	$is_location  = is_tax( array( 'ba_territorio', 'badaround_location' ) );
 	$is_reporting = is_page_template( 'page-segnala-evento.php' );
 	$is_badaround = $is_home || $is_event || $is_location || $is_reporting;
 
