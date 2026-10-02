@@ -101,7 +101,7 @@ $demo_events = array(
 				<a href="#">Vedi tutte le segnalazioni <span aria-hidden="true">→</span></a>
 			</div>
 
-			<div class="ba-home-events">
+			<div class="ba-home-events" id="segnalazioni">
 				<?php foreach ( $demo_events as $event ) : ?>
 					<article class="ba-home-event ba-card">
 						<div class="ba-home-event__thumb" aria-hidden="true"><span></span></div>
@@ -119,7 +119,7 @@ $demo_events = array(
 			</div>
 
 			<div class="ba-home-lower">
-				<section class="ba-home-sentinel">
+				<section class="ba-home-sentinel" id="sentinelle">
 					<div class="ba-home-sentinel__copy">
 						<p class="ba-eyebrow">Sentinelle</p>
 						<h2>Segui Torvaianica</h2>
@@ -132,7 +132,7 @@ $demo_events = array(
 					</div>
 				</section>
 
-				<section class="ba-home-how">
+				<section class="ba-home-how" id="come-funziona">
 					<h2>Come funziona</h2>
 					<ol>
 						<li><span>1</span><div><strong>Segnala</strong><p>Descrivi cosa hai visto in modo semplice e anonimo.</p></div></li>
