@@ -34,7 +34,9 @@ body.tax-ba_territorio .site-content > .ast-container,
 body.tax-badaround_location .site-content > .ast-container,
 body.page-template-page-segnala-evento .site-content > .ast-container,
 body.page-template-page-mappa .site-content > .ast-container,
-body.page-template-page-sentinelle .site-content > .ast-container {
+body.page-template-page-sentinelle .site-content > .ast-container,
+body.page-template-page-stati-sistema .site-content > .ast-container,
+body.page-template-page-segnalazione-inviata .site-content > .ast-container {
 	display: block;
 	width: 100%;
 	max-width: none;
@@ -48,7 +50,9 @@ body.tax-ba_territorio #primary,
 body.tax-badaround_location #primary,
 body.page-template-page-segnala-evento #primary,
 body.page-template-page-mappa #primary,
-body.page-template-page-sentinelle #primary {
+body.page-template-page-sentinelle #primary,
+body.page-template-page-stati-sistema #primary,
+body.page-template-page-segnalazione-inviata #primary {
 	float: none;
 	width: 100%;
 	max-width: none;
@@ -63,7 +67,9 @@ body.tax-ba_territorio .site-content,
 body.tax-badaround_location .site-content,
 body.page-template-page-segnala-evento .site-content,
 body.page-template-page-mappa .site-content,
-body.page-template-page-sentinelle .site-content {
+body.page-template-page-sentinelle .site-content,
+body.page-template-page-stati-sistema .site-content,
+body.page-template-page-segnalazione-inviata .site-content {
 	padding: 0;
 }
 
