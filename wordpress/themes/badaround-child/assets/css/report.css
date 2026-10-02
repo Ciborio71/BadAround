@@ -1,84 +1,51 @@
-/* Report page shell — aligned to approved BadAround wizard mockup */
-.ba-page { width:100%; max-width:100%; overflow:clip; }
-.ba-report-page {
-	min-height:calc(100svh - 80px);
-	padding:clamp(28px,4vw,52px) 0 72px;
-	background:
-		radial-gradient(circle at 80% 9%,rgba(7,152,168,.11),transparent 20rem),
-		linear-gradient(180deg,#f8fbfd 0%,#f4f8fb 100%);
-}
-.ba-report-page .ba-eyebrow { margin:0 0 3px; color:var(--ba-teal-700); font-size:.74rem; font-weight:850; letter-spacing:.06em; text-transform:uppercase; }
-.ba-report-section { padding:0; }
-.ba-report-shell {
-	position:relative;
-	width:min(100%,1180px);
-	margin-inline:auto;
-	overflow:hidden;
-	border:1px solid #dbe5ed;
-	border-radius:24px;
-	background:#fff;
-	box-shadow:0 24px 60px rgba(7,26,56,.09);
-}
-.ba-report-shell::after {
-	content:"";
-	position:absolute;
-	z-index:0;
-	top:-88px;
-	right:-70px;
-	width:300px;
-	height:300px;
-	border:1px solid rgba(7,152,168,.13);
-	border-radius:50%;
-	box-shadow:0 0 0 38px rgba(7,152,168,.035),0 0 0 78px rgba(7,152,168,.025);
-	pointer-events:none;
-}
-.ba-report-shell__head {
-	position:relative;
-	z-index:1;
-	display:flex;
-	justify-content:space-between;
-	align-items:center;
-	gap:28px;
-	min-height:116px;
-	padding:24px 32px;
-	border-bottom:1px solid #e3ebf1;
-	background:linear-gradient(90deg,rgba(255,255,255,.98),rgba(247,251,253,.92));
-}
-.ba-report-shell__title,.ba-report-shell__save { display:flex; align-items:center; gap:14px; }
-.ba-report-shell__icon {
-	flex:0 0 auto;
-	display:grid;
-	place-items:center;
-	width:48px;
-	height:48px;
-	border-radius:14px;
-	background:#ddf6f7;
-	color:var(--ba-teal-700);
-}
-.ba-report-shell__title h1 { margin:0; color:var(--ba-navy-950); font-size:clamp(1.35rem,2vw,1.75rem); line-height:1.1; letter-spacing:-.025em; }
-.ba-report-shell__title p:last-child { margin:5px 0 0; color:var(--ba-muted); font-size:.88rem; }
-.ba-report-shell__save { flex:0 0 auto; padding:10px 12px; border-radius:12px; background:rgba(255,255,255,.78); color:var(--ba-teal-700); }
-.ba-report-shell__save strong,.ba-report-shell__save small { display:block; }
-.ba-report-shell__save strong { color:var(--ba-navy-950); font-size:.85rem; }
-.ba-report-shell__save small { color:var(--ba-muted); font-size:.72rem; }
-.ba-report-shell__body { position:relative; z-index:1; padding:28px 34px 34px; }
-.ba-report-shell__foot { position:relative; z-index:1; padding:15px 32px; border-top:1px solid #e3ebf1; background:#f8fbfd; }
-.ba-report-shell__foot p { margin:0; color:#587087; font-size:.8rem; line-height:1.45; }
+/* BadAround report app — Waze-inspired interaction model */
+body.page-template-page-segnala-evento{background:#f4f7f9}
+body.page-template-page-segnala-evento .ba-site-header,
+body.page-template-page-segnala-evento .ba-site-footer{display:none}
+body.page-template-page-segnala-evento .site-content{padding:0!important}
+.ba-report-app{min-height:100svh;background:
+	radial-gradient(circle at 8% 8%,rgba(7,152,168,.08),transparent 24rem),
+	linear-gradient(180deg,#fbfdfe 0,#f4f7f9 100%)}
+.ba-report-topbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:72px;padding:12px max(18px,calc((100vw - 1180px)/2));border-bottom:1px solid #e1e8ee;background:rgba(255,255,255,.94);backdrop-filter:blur(18px)}
+.ba-report-topbar__brand{display:flex;align-items:center;gap:11px}
+.ba-report-topbar__mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#ddf5f6;color:var(--ba-teal-700);font-size:1.25rem;font-weight:900}
+.ba-report-topbar__brand strong,.ba-report-topbar__brand small{display:block}
+.ba-report-topbar__brand strong{color:var(--ba-navy-950);font-size:.84rem;letter-spacing:.01em;text-transform:uppercase}
+.ba-report-topbar__brand small{margin-top:2px;color:#8192a1;font-size:.66rem;font-weight:700}
+.ba-report-topbar__actions{display:flex;align-items:center;gap:9px}
+.ba-report-topbar__save{padding:8px 10px;border:0;background:transparent;color:var(--ba-teal-700);font-size:.74rem;font-weight:800;cursor:pointer}
+.ba-report-topbar__close{display:grid;place-items:center;width:38px;height:38px;border:1px solid #dbe4eb;border-radius:11px;background:#fff;color:var(--ba-navy-950);font-size:1.35rem;line-height:1;text-decoration:none}
+.ba-report-progress{position:sticky;top:72px;z-index:99;display:grid;grid-template-columns:repeat(3,1fr);gap:5px;height:5px;background:#fff}
+.ba-report-progress span{background:#e4ebf0;transition:background .18s ease}
+.ba-report-progress span.is-active,.ba-report-progress span.is-complete{background:var(--ba-teal-600)}
+.ba-report-stage{padding:clamp(30px,5vw,58px) 18px 70px}
+.ba-report-stage__inner{width:min(100%,940px);margin-inline:auto}
+.ba-report-intro{max-width:760px;margin:0 auto 24px;text-align:center}
+.ba-report-intro__eyebrow{margin:0 0 7px;color:var(--ba-teal-700);font-size:.7rem;font-weight:850;text-transform:uppercase;letter-spacing:.07em}
+.ba-report-intro h1{margin:0;color:var(--ba-navy-950);font-size:clamp(2rem,4vw,3.2rem);line-height:1;letter-spacing:-.045em}
+.ba-report-intro>p:last-child{max-width:630px;margin:12px auto 0;color:#697d90;font-size:.92rem;line-height:1.55}
+.ba-report-mount{padding:clamp(20px,3vw,30px);border:1px solid #dce5ec;border-radius:24px;background:#fff;box-shadow:0 18px 46px rgba(7,26,56,.07)}
+.ba-report-privacy{display:flex;align-items:flex-start;gap:10px;max-width:820px;margin:16px auto 0;padding:12px 14px;border:1px solid #e2e9ee;border-radius:13px;background:rgba(255,255,255,.72)}
+.ba-report-privacy>span{flex:0 0 auto}
+.ba-report-privacy p{margin:0;color:#697d90;font-size:.72rem;line-height:1.5}
+.ba-report-privacy strong{color:#51667a}
+.ba-report-placeholder{padding:38px;border:2px dashed var(--ba-border);border-radius:16px;text-align:center;color:var(--ba-muted);background:var(--ba-surface-alt)}
+.ba-report-placeholder strong{display:block;margin-bottom:6px;color:var(--ba-navy-950)}
 
-.ba-mobile-step-summary { display:none; }
-
-@media (max-width:760px) {
-	.ba-report-page { padding:18px 0 42px; }
-	.ba-report-page .ba-container--wide { width:min(100% - 20px,1680px); }
-	.ba-report-shell { border-radius:18px; }
-	.ba-report-shell::after { width:190px; height:190px; top:-82px; right:-80px; }
-	.ba-report-shell__head { min-height:92px; align-items:flex-start; padding:17px 18px; }
-	.ba-report-shell__icon { width:42px; height:42px; border-radius:12px; }
-	.ba-report-shell__title h1 { font-size:1.2rem; }
-	.ba-report-shell__title p:last-child { font-size:.78rem; }
-	.ba-report-shell__save { padding:7px 8px; }
-	.ba-report-shell__save small { display:none; }
-	.ba-report-shell__body { padding:18px; }
-	.ba-report-shell__foot { padding:13px 18px; }
-	.ba-mobile-step-summary { display:flex; justify-content:space-between; gap:12px; margin:0 0 10px; color:var(--ba-navy-950); font-size:.82rem; font-weight:800; }
+@media(max-width:760px){
+ .ba-report-topbar{min-height:62px;padding:10px 12px}
+ .ba-report-topbar__brand strong{font-size:.72rem}
+ .ba-report-topbar__mark{width:34px;height:34px;border-radius:10px}
+ .ba-report-topbar__save{display:none}
+ .ba-report-progress{top:62px}
+ .ba-report-stage{padding:24px 10px 40px}
+ .ba-report-stage__inner{width:100%}
+ .ba-report-intro{margin-bottom:16px;padding:0 8px;text-align:left}
+ .ba-report-intro h1{font-size:1.72rem;line-height:1.06}
+ .ba-report-intro>p:last-child{margin:8px 0 0;font-size:.81rem}
+ .ba-report-mount{padding:14px;border-radius:18px;box-shadow:0 10px 26px rgba(7,26,56,.055)}
+ .ba-report-privacy{margin-top:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .ba-report-progress span{transition:none}
 }
