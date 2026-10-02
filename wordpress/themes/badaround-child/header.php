@@ -28,7 +28,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 		</a>
 
 		<nav class="ba-primary-nav" id="ba-primary-nav" aria-label="<?php esc_attr_e( 'Navigazione principale', 'badaround-child' ); ?>">
-			<a href="<?php echo esc_url( home_url( '/#ba-map' ) ); ?>">Mappa</a>
+			<a href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Mappa</a>
 			<a href="<?php echo esc_url( home_url( '/#segnalazioni' ) ); ?>">Segnalazioni</a>
 			<a href="<?php echo esc_url( home_url( '/#come-funziona' ) ); ?>">Come funziona</a>
 			<a href="<?php echo esc_url( home_url( '/#sentinelle' ) ); ?>">Sentinelle</a>
@@ -48,7 +48,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 
 	<div class="ba-mobile-menu" id="ba-mobile-menu" hidden>
 		<nav aria-label="<?php esc_attr_e( 'Navigazione mobile', 'badaround-child' ); ?>">
-			<a href="<?php echo esc_url( home_url( '/#ba-map' ) ); ?>">Mappa</a>
+			<a href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Mappa</a>
 			<a href="<?php echo esc_url( home_url( '/#segnalazioni' ) ); ?>">Segnalazioni</a>
 			<a href="<?php echo esc_url( home_url( '/#come-funziona' ) ); ?>">Come funziona</a>
 			<a href="<?php echo esc_url( home_url( '/#sentinelle' ) ); ?>">Sentinelle</a>
