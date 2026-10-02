@@ -102,25 +102,59 @@
 
 	const categoryRadios=categoryField ? [...categoryField.querySelectorAll('input[type="radio"]')] : [];
 
-	/* WPForms conditional logic can reflow the page after a choice.
-	 * Preserve the user's viewport for in-step selections; only page
-	 * navigation is allowed to move the viewport. */
+	/* WPForms conditional logic may call scroll/focus and also changes the
+	 * document height when fields are revealed. Preserve the clicked card's
+	 * visual position instead of merely restoring the old scrollY. */
 	let allowPageNavigationScroll=false;
-	const preserveSelectionScroll=(event)=>{
+	let selectionAnchor=null;
+
+	const captureSelectionAnchor=(event)=>{
 		if(event.target.closest?.('.wpforms-page-next,.wpforms-page-prev')) return;
-		if(!event.target.matches?.('input[type="radio"],input[type="checkbox"]')) return;
-		const y=window.scrollY;
-		const restore=()=>{
-			if(!allowPageNavigationScroll && Math.abs(window.scrollY-y)>2){
-				window.scrollTo({top:y,left:0,behavior:'auto'});
-			}
+		const choice=event.target.closest?.(
+			'.wpforms-field-label-inline, input[type="radio"], input[type="checkbox"]'
+		);
+		if(!choice) return;
+
+		const container=choice.closest('.wpforms-field');
+		const anchor=choice.closest('li') || container || choice;
+		selectionAnchor={
+			node:anchor,
+			containerId:container?.id || '',
+			top:anchor.getBoundingClientRect().top
 		};
-		requestAnimationFrame(restore);
-		setTimeout(restore,0);
-		setTimeout(restore,60);
-		setTimeout(restore,180);
 	};
-	form.addEventListener('change',preserveSelectionScroll,true);
+
+	const restoreSelectionAnchor=()=>{
+		if(allowPageNavigationScroll || !selectionAnchor) return;
+
+		let anchor=selectionAnchor.node;
+		if(!anchor?.isConnected && selectionAnchor.containerId){
+			anchor=document.getElementById(selectionAnchor.containerId);
+		}
+		if(!anchor?.isConnected) return;
+
+		const currentTop=anchor.getBoundingClientRect().top;
+		const delta=currentTop-selectionAnchor.top;
+		if(Math.abs(delta)>1){
+			window.scrollBy({top:delta,left:0,behavior:'auto'});
+		}
+	};
+
+	const preserveSelectionScroll=()=>{
+		requestAnimationFrame(restoreSelectionAnchor);
+		setTimeout(restoreSelectionAnchor,0);
+		setTimeout(restoreSelectionAnchor,40);
+		setTimeout(restoreSelectionAnchor,120);
+		setTimeout(restoreSelectionAnchor,260);
+		setTimeout(()=>{ selectionAnchor=null; },340);
+	};
+
+	form.addEventListener('pointerdown',captureSelectionAnchor,true);
+	form.addEventListener('click',captureSelectionAnchor,true);
+	form.addEventListener('change',(event)=>{
+		if(!event.target.matches?.('input[type="radio"],input[type="checkbox"]')) return;
+		preserveSelectionScroll();
+	},true);
 	const syncSelectedCategory=()=>{
 		const selected=categoryRadios.find(r=>r.checked);
 		if(!selected){ selectedSummary.hidden=true; return; }
