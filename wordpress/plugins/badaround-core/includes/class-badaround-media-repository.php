@@ -103,7 +103,7 @@ class BadAround_Media_Repository {
 					}
 				}
 			} else {
-				$candidates = preg_split( '/[\\r\\n,]+/', (string) $value );
+				$candidates = preg_split( '/[\r\n,]+/', (string) $value );
 			}
 		}
 
