@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 			<div class="ba-footer-nav">
 				<div>
 					<h2>Esplora</h2>
-					<a href="<?php echo esc_url( home_url( '/#ba-map' ) ); ?>">Mappa</a>
+					<a href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Mappa</a>
 					<a href="<?php echo esc_url( home_url( '/#segnalazioni' ) ); ?>">Segnalazioni</a>
 					<a href="<?php echo esc_url( home_url( '/#come-funziona' ) ); ?>">Come funziona</a>
 				</div>
