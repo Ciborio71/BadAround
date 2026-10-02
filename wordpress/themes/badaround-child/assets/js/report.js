@@ -158,8 +158,10 @@
 		2:['Dove','Dove è successo?','Parti dalla mappa: cerca il punto oppure sposta il pin. Poi ti chiederemo quando è successo.'],
 		3:['Dettagli e invio','Completa la segnalazione','Aggiungi solo le informazioni utili. Foto e dettagli aiutano la community e la moderazione.']
 	};
-	const syncStep=()=>{
-		const step=macroStep(activeWpPageIndex());
+	let lastWpPageIndex=activeWpPageIndex();
+	const syncStep=(shouldScroll=false)=>{
+		const currentWpPageIndex=activeWpPageIndex();
+		const step=macroStep(currentWpPageIndex);
 		if(stepLabel)stepLabel.textContent='Passo '+step+' di 3';
 		if(eyebrow)eyebrow.textContent=stepCopy[step][0];
 		if(title)title.textContent=stepCopy[step][1];
@@ -172,15 +174,18 @@
 		if(next){
 			next.textContent=step===1?'Continua: Dove e quando →':step===2?'Continua: Dettagli e invio →':'Continua →';
 		}
-		window.scrollTo({top:0,behavior:'smooth'});
+		if(shouldScroll && currentWpPageIndex!==lastWpPageIndex){
+			document.querySelector('.ba-report-stage')?.scrollIntoView({behavior:'smooth',block:'start'});
+		}
+		lastWpPageIndex=currentWpPageIndex;
 	};
 
-	const observer=new MutationObserver(()=>requestAnimationFrame(syncStep));
+	const observer=new MutationObserver(()=>requestAnimationFrame(()=>syncStep(false)));
 	observer.observe(form,{attributes:true,subtree:true,attributeFilter:['style','class']});
 	form.addEventListener('click',(e)=>{
-		if(e.target.closest('.wpforms-page-next,.wpforms-page-prev')) setTimeout(syncStep,120);
+		if(e.target.closest('.wpforms-page-next,.wpforms-page-prev')) setTimeout(()=>syncStep(true),120);
 	});
-	syncStep();
+	syncStep(false);
 
 	/* Save topbar delegates to WPForms Save & Resume */
 	document.querySelector('[data-ba-report-save]')?.addEventListener('click',()=>{
