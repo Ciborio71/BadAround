@@ -121,7 +121,7 @@
 	/* Step 2: location and privacy emphasis */
 	const locationPrimary=field(31);
 	if(locationPrimary){
-		locationPrimary.classList.add('ba-location-primary');
+		locationPrimary.classList.add('ba-location-primary','ba-location-first');
 		const helper=document.createElement('div');
 		helper.className='ba-location-helper';
 		helper.innerHTML='<span aria-hidden="true">🔒</span><div><strong>Posizione protetta.</strong> Il civico e la posizione precisa restano riservati; al pubblico mostreremo solo l’area prevista dalle tue impostazioni.</div>';
@@ -155,7 +155,7 @@
 	const macroStep=(wpIndex)=>wpIndex===0?1:(wpIndex===1?2:3);
 	const stepCopy={
 		1:['Cosa','Cosa riguarda la segnalazione?',"Tocca il soggetto o l'ambiente coinvolto. Mostreremo solo le domande necessarie."],
-		2:['Dove e quando','Dove e quando è successo?','Indica la zona e il momento. La posizione pubblica resterà approssimativa.'],
+		2:['Dove','Dove è successo?','Parti dalla mappa: cerca il punto oppure sposta il pin. Poi ti chiederemo quando è successo.'],
 		3:['Dettagli e invio','Completa la segnalazione','Aggiungi solo le informazioni utili. Foto e dettagli aiutano la community e la moderazione.']
 	};
 	const syncStep=()=>{
