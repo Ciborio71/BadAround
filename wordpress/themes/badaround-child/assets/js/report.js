@@ -70,4 +70,37 @@
 		syncRelationshipVisibility();
 		initialRadios.forEach((radio) => radio.addEventListener('change', syncRelationshipVisibility));
 	}
+
+
+	/* WPForms Save & Resume is not always rendered inside the page footer.
+	 * Normalize the markup so the primary action can sit right-aligned
+	 * with Save & Resume directly underneath it. */
+	const normalizePageActions = () => {
+		const pages = [...form.querySelectorAll('.wpforms-page')];
+		pages.forEach((page) => {
+			const footer = page.querySelector('.wpforms-page-footer');
+			if (!footer) return;
+
+			const next = footer.querySelector('.wpforms-page-next, button[type="submit"]');
+			let save = page.querySelector('.wpforms-save-resume-button');
+
+			if (!save) {
+				const candidate = form.querySelector('.wpforms-save-resume-button:not([data-ba-positioned])');
+				if (candidate) save = candidate;
+			}
+
+			if (save) {
+				const wrapper = save.closest('.wpforms-save-resume-block, .wpforms-save-resume-container') || save;
+				if (wrapper.parentElement !== footer) footer.appendChild(wrapper);
+				save.dataset.baPositioned = '1';
+				wrapper.classList?.add('ba-save-resume-slot');
+			}
+
+			if (next) next.classList.add('ba-primary-next');
+		});
+	};
+
+	normalizePageActions();
+	new MutationObserver(normalizePageActions).observe(form, { childList:true, subtree:true });
+
 })();
