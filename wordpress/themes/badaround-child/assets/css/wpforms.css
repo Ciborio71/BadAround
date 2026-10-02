@@ -359,3 +359,55 @@
 	.ba-report-mount .badaround-event-subcategory ul { grid-template-columns:1fr !important; }
 	.ba-report-mount .wpforms-page-footer { position:sticky; bottom:0; z-index:5; margin-inline:-18px !important; margin-bottom:-18px !important; padding:12px 18px !important; background:rgba(255,255,255,.96); box-shadow:0 -10px 26px rgba(7,26,56,.06); }
 }
+
+
+/* Style validation refinements: equal cards + shared BadAround icon language */
+.ba-report-mount .badaround-event-category ul {
+	grid-auto-rows:1fr !important;
+	align-items:stretch !important;
+}
+.ba-report-mount .badaround-event-category li {
+	display:flex;
+	height:100%;
+}
+.ba-report-mount .badaround-event-category .wpforms-field-label-inline {
+	width:100%;
+	min-height:148px;
+	height:100%;
+	box-sizing:border-box;
+}
+.ba-report-mount .badaround-event-category .ba-choice-icon {
+	display:grid;
+	place-items:center;
+	flex:0 0 auto;
+	width:42px;
+	height:42px;
+	border-radius:12px;
+	background:#edf7f8;
+	color:currentColor;
+}
+.ba-report-mount .badaround-event-category .ba-choice-icon svg {
+	width:25px;
+	height:25px;
+}
+.ba-report-mount .badaround-event-category .wpforms-field-label-inline::before {
+	display:none !important;
+}
+.ba-report-mount .badaround-event-category li:nth-child(1) .ba-choice-icon { background:#e7f1ff; color:#1688e8; }
+.ba-report-mount .badaround-event-category li:nth-child(2) .ba-choice-icon { background:#eaf8f1; color:#45b862; }
+.ba-report-mount .badaround-event-category li:nth-child(3) .ba-choice-icon { background:#fff1ee; color:#f45151; }
+.ba-report-mount .badaround-event-category li:nth-child(4) .ba-choice-icon { background:#fff6dc; color:#f6a800; }
+.ba-report-mount .badaround-event-category li:nth-child(5) .ba-choice-icon { background:#eff0fb; color:#6a68c9; }
+.ba-report-mount .badaround-event-category li:nth-child(6) .ba-choice-icon { background:#f5ecfb; color:#9d45d4; }
+.ba-report-mount .badaround-event-category li:nth-child(7) .ba-choice-icon { background:#eef3f6; color:#5c6b7c; }
+.ba-report-mount .badaround-event-category li:nth-child(8) .ba-choice-icon { background:#f1f4f7; color:#5c6b7c; }
+
+.ba-report-mount .ba-relationship-field[hidden] {
+	display:none !important;
+}
+
+@media (max-width:700px) {
+	.ba-report-mount .badaround-event-category .wpforms-field-label-inline {
+		min-height:92px;
+	}
+}
