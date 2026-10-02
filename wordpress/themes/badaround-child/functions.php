@@ -18,7 +18,8 @@ function badaround_child_enqueue_assets() {
 	$is_location  = is_tax( array( 'ba_territorio', 'badaround_location' ) );
 	$is_reporting = is_page_template( 'page-segnala-evento.php' );
 	$is_map       = is_page_template( 'page-mappa.php' );
-	$is_badaround = $is_home || $is_event || $is_location || $is_reporting || $is_map;
+	$is_sentinel  = is_page_template( 'page-sentinelle.php' );
+	$is_badaround = $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_sentinel;
 
 	if ( ! $is_badaround ) {
 		return;
@@ -83,6 +84,22 @@ function badaround_child_enqueue_assets() {
 			$uri . '/assets/js/map.js',
 			array(),
 			(string) filemtime( $dir . '/assets/js/map.js' ),
+			true
+		);
+	}
+
+	if ( $is_sentinel ) {
+		wp_enqueue_style(
+			'badaround-sentinels',
+			$uri . '/assets/css/sentinels.css',
+			array( 'badaround-components' ),
+			(string) filemtime( $dir . '/assets/css/sentinels.css' )
+		);
+		wp_enqueue_script(
+			'badaround-sentinels',
+			$uri . '/assets/js/sentinels.js',
+			array(),
+			(string) filemtime( $dir . '/assets/js/sentinels.js' ),
 			true
 		);
 	}
