@@ -4,37 +4,21 @@ get_header();
 $form_id = badaround_report_form_id();
 ?>
 <main class="ba-page ba-report-page" id="main-content">
-	<section class="ba-report-hero" aria-labelledby="ba-report-title">
-		<div class="ba-container--wide">
-			<div class="ba-report-hero__inner">
-				<div>
-					<p class="ba-eyebrow">Segnala un evento</p>
-					<h1 id="ba-report-title">Aiutaci a capire cosa è successo.</h1>
-					<p class="ba-lead">Compila solo le informazioni necessarie. Ti guideremo passo passo e proteggeremo i dati sensibili prima della pubblicazione.</p>
-				</div>
-				<div class="ba-report-trust" aria-label="Informazioni sul trattamento della segnalazione">
-					<span><strong>Moderata</strong><small>Prima della pubblicazione</small></span>
-					<span><strong>Posizione protetta</strong><small>Il civico non viene mostrato</small></span>
-					<span><strong>Dati riservati</strong><small>Contatti non pubblici</small></span>
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<section class="ba-report-section">
+	<section class="ba-report-section" aria-labelledby="ba-report-title">
 		<div class="ba-container--wide">
 			<div class="ba-report-shell">
 				<header class="ba-report-shell__head">
 					<div class="ba-report-shell__title">
 						<span class="ba-report-shell__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" focusable="false"><path d="M4 20h4l11-11-4-4L4 16v4Zm9-13 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
 						<div>
-							<strong>Segnala un evento</strong>
-							<span>Modulo guidato BadAround</span>
+							<p class="ba-eyebrow">Segnala un evento</p>
+							<h1 id="ba-report-title">Segnala un evento</h1>
+							<p>Ti guideremo passo passo. Mostreremo solo le domande necessarie.</p>
 						</div>
 					</div>
-					<div class="ba-report-shell__save" aria-label="Salvataggio del modulo">
+					<div class="ba-report-shell__save" aria-label="Salvataggio e ripresa del modulo">
 						<span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" focusable="false"><path d="M7 18h10a4 4 0 0 0 .6-8 6 6 0 0 0-11.4-1.6A4.5 4.5 0 0 0 7 18Z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span>
-						<div><strong>Bozza salvata</strong><small>Puoi riprendere più tardi</small></div>
+						<div><strong>Salva e riprendi</strong><small>Puoi continuare più tardi</small></div>
 					</div>
 				</header>
 
@@ -56,7 +40,7 @@ $form_id = badaround_report_form_id();
 				</div>
 
 				<footer class="ba-report-shell__foot">
-					<p><strong>Privacy:</strong> luogo preciso, civico e dati di contatto non vengono pubblicati automaticamente.</p>
+					<p><strong>Privacy:</strong> la posizione pubblica viene mostrata in modo approssimativo. Civico e dati di contatto non vengono pubblicati automaticamente.</p>
 				</footer>
 			</div>
 		</div>
