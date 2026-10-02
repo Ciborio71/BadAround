@@ -134,3 +134,63 @@
 @media(prefers-reduced-motion:reduce){
  .ba-report-mount *{transition:none!important}
 }
+
+
+/* Selection focus — selected choice stays prominent, alternatives recede */
+.ba-report-mount .badaround-event-category ul:has(input[type="radio"]:checked) li:not(:has(input[type="radio"]:checked)) .wpforms-field-label-inline,
+.ba-report-mount .ba-drilldown-field ul:has(input[type="radio"]:checked) li:not(:has(input[type="radio"]:checked)) .wpforms-field-label-inline,
+.ba-report-mount .ba-relationship-field ul:has(input[type="radio"]:checked) li:not(:has(input[type="radio"]:checked)) .wpforms-field-label-inline {
+	opacity:.46;
+	filter:saturate(.55);
+	background:#fbfcfd!important;
+	border-color:#e6edf2!important;
+	box-shadow:none!important;
+}
+.ba-report-mount .badaround-event-category ul:has(input[type="radio"]:checked) li:not(:has(input[type="radio"]:checked)) .wpforms-field-label-inline:hover,
+.ba-report-mount .ba-drilldown-field ul:has(input[type="radio"]:checked) li:not(:has(input[type="radio"]:checked)) .wpforms-field-label-inline:hover,
+.ba-report-mount .ba-relationship-field ul:has(input[type="radio"]:checked) li:not(:has(input[type="radio"]:checked)) .wpforms-field-label-inline:hover {
+	opacity:.82;
+	filter:none;
+	border-color:#b9dfe3!important;
+}
+
+/* Uniform card geometry */
+.ba-report-mount .badaround-event-category .wpforms-field-label-inline {
+	height:104px!important;
+	min-height:104px!important;
+	max-height:104px!important;
+	overflow:hidden;
+}
+.ba-report-mount .ba-drilldown-field .wpforms-field-label-inline,
+.ba-report-mount .ba-relationship-field .wpforms-field-label-inline {
+	height:68px!important;
+	min-height:68px!important;
+	max-height:68px!important;
+	overflow:hidden;
+}
+
+/* Keep rows visually aligned even with longer labels */
+.ba-report-mount .ba-drilldown-field .wpforms-field-label-inline,
+.ba-report-mount .ba-relationship-field .wpforms-field-label-inline {
+	display:flex!important;
+	align-items:center!important;
+}
+.ba-report-mount .ba-drilldown-field .wpforms-field-label-inline {
+	line-clamp:2;
+	-webkit-line-clamp:2;
+}
+
+/* Mobile: same-height cards, slightly more compact */
+@media(max-width:760px){
+	.ba-report-mount .badaround-event-category .wpforms-field-label-inline{
+		height:96px!important;
+		min-height:96px!important;
+		max-height:96px!important;
+	}
+	.ba-report-mount .ba-drilldown-field .wpforms-field-label-inline,
+	.ba-report-mount .ba-relationship-field .wpforms-field-label-inline{
+		height:62px!important;
+		min-height:62px!important;
+		max-height:62px!important;
+	}
+}
