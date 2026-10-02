@@ -485,3 +485,149 @@
 		min-height:68px;
 	}
 }
+
+
+/* Relationship question — same iconless card language */
+.ba-report-mount .ba-relationship-field ul {
+	display:grid !important;
+	grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+	gap:12px !important;
+	align-items:stretch !important;
+	margin:0 !important;
+	padding:0 !important;
+	list-style:none !important;
+}
+.ba-report-mount .ba-relationship-field li {
+	position:relative;
+	display:flex;
+	height:100%;
+	margin:0 !important;
+}
+.ba-report-mount .ba-relationship-field input[type="radio"] {
+	position:absolute !important;
+	inline-size:1px !important;
+	block-size:1px !important;
+	opacity:0 !important;
+	pointer-events:none;
+}
+.ba-report-mount .ba-relationship-field .wpforms-field-label-inline {
+	position:relative;
+	display:flex !important;
+	align-items:center;
+	justify-content:flex-start;
+	width:100%;
+	min-height:78px;
+	height:100%;
+	padding:15px 42px 15px 16px !important;
+	border:1px solid #dce5ee !important;
+	border-radius:14px !important;
+	background:#fff !important;
+	color:var(--ba-navy-950) !important;
+	font-size:.86rem !important;
+	font-weight:780 !important;
+	line-height:1.3 !important;
+	box-shadow:0 6px 16px rgba(7,26,56,.035);
+	cursor:pointer;
+	transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background-color .18s ease;
+}
+.ba-report-mount .ba-relationship-field .wpforms-field-label-inline:hover {
+	transform:translateY(-1px);
+	border-color:#9ed9df !important;
+	box-shadow:0 10px 22px rgba(7,26,56,.07);
+}
+.ba-report-mount .ba-relationship-field input[type="radio"]:focus-visible + .wpforms-field-label-inline {
+	outline:3px solid rgba(7,152,168,.22);
+	outline-offset:2px;
+}
+.ba-report-mount .ba-relationship-field input[type="radio"]:checked + .wpforms-field-label-inline {
+	border-color:var(--ba-teal-600) !important;
+	background:#f3fcfc !important;
+	box-shadow:0 0 0 2px rgba(7,152,168,.09),0 10px 22px rgba(7,26,56,.06);
+}
+.ba-report-mount .ba-relationship-field input[type="radio"]:checked + .wpforms-field-label-inline::after {
+	content:"";
+	position:absolute;
+	top:50%;
+	right:14px;
+	width:18px;
+	height:18px;
+	transform:translateY(-50%);
+	border-radius:50%;
+	background:var(--ba-teal-600);
+	box-shadow:inset 0 0 0 5px #fff,0 0 0 1px var(--ba-teal-600);
+}
+
+/* Navigation alignment — Continue right, Save & Resume directly below */
+.ba-report-mount .wpforms-page-footer {
+	display:grid !important;
+	grid-template-columns:1fr auto !important;
+	grid-template-rows:auto auto !important;
+	column-gap:12px !important;
+	row-gap:8px !important;
+	align-items:center !important;
+}
+.ba-report-mount .wpforms-page-footer .wpforms-page-prev {
+	grid-column:1 !important;
+	grid-row:1 / span 2 !important;
+	justify-self:start !important;
+	margin:0 !important;
+}
+.ba-report-mount .wpforms-page-footer .wpforms-page-next,
+.ba-report-mount .wpforms-page-footer button[type="submit"] {
+	grid-column:2 !important;
+	grid-row:1 !important;
+	justify-self:end !important;
+	margin:0 !important;
+}
+.ba-report-mount .wpforms-page-footer .wpforms-save-resume-button {
+	grid-column:2 !important;
+	grid-row:2 !important;
+	justify-self:end !important;
+	margin:0 !important;
+	padding:0 !important;
+	background:transparent !important;
+	border:0 !important;
+	box-shadow:none !important;
+	color:var(--ba-teal-700) !important;
+	font-size:.8rem !important;
+	font-weight:750 !important;
+	text-decoration:none !important;
+}
+.ba-report-mount .wpforms-page-footer .wpforms-save-resume-button:hover {
+	text-decoration:underline !important;
+}
+
+@media (max-width:980px) {
+	.ba-report-mount .ba-relationship-field ul {
+		grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+	}
+}
+@media (max-width:700px) {
+	.ba-report-mount .ba-relationship-field ul {
+		grid-template-columns:1fr !important;
+	}
+	.ba-report-mount .ba-relationship-field .wpforms-field-label-inline {
+		min-height:66px;
+	}
+	.ba-report-mount .wpforms-page-footer {
+		grid-template-columns:1fr !important;
+		grid-template-rows:auto auto auto !important;
+	}
+	.ba-report-mount .wpforms-page-footer .wpforms-page-prev {
+		grid-column:1 !important;
+		grid-row:1 !important;
+		justify-self:stretch !important;
+	}
+	.ba-report-mount .wpforms-page-footer .wpforms-page-next,
+	.ba-report-mount .wpforms-page-footer button[type="submit"] {
+		grid-column:1 !important;
+		grid-row:2 !important;
+		justify-self:stretch !important;
+		width:100% !important;
+	}
+	.ba-report-mount .wpforms-page-footer .wpforms-save-resume-button {
+		grid-column:1 !important;
+		grid-row:3 !important;
+		justify-self:center !important;
+	}
+}
