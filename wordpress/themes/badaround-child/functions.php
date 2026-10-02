@@ -37,6 +37,21 @@ function badaround_child_enqueue_assets() {
 		(string) filemtime( $dir . '/assets/css/components.css' )
 	);
 
+	wp_enqueue_style(
+		'badaround-shell',
+		$uri . '/assets/css/shell.css',
+		array( 'badaround-components' ),
+		(string) filemtime( $dir . '/assets/css/shell.css' )
+	);
+
+	wp_enqueue_script(
+		'badaround-navigation',
+		$uri . '/assets/js/navigation.js',
+		array(),
+		(string) filemtime( $dir . '/assets/js/navigation.js' ),
+		true
+	);
+
 	if ( $is_home ) {
 		wp_enqueue_style(
 			'badaround-home',
