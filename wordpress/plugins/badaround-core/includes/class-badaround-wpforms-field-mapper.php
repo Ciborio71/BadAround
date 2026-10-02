@@ -119,7 +119,7 @@ class BadAround_WPForms_Field_Mapper {
 			),
 			'vehicle'           => array(
 				'description_choice' => $this->first_choice_id( 37, $choice_ids ),
-				'type_choice'        ==> $this->first_choice_id( 38, $choice_ids ),
+				'type_choice'        => $this->first_choice_id( 38, $choice_ids ),
 				'make'               => sanitize_text_field( $this->field_value( $fields, 39 ) ),
 				'model'              => sanitize_text_field( $this->field_value( $fields, 40 ) ),
 			'color'              => sanitize_text_field( $this->field_value( $fields, 41 ) ),
