@@ -83,10 +83,10 @@ class BadAround_Media_Repository {
 			$raw_values = is_array( $field['value_raw'] ) ? $field['value_raw'] : array( $field['value_raw'] );
 			foreach ( $raw_values as $raw_value ) {
 				if ( is_array( $raw_value ) ) {
-					if ( ! empty( $raw_value['file'] ) && is_string( $raw_value['file'] ) ) {
-						$candidates[] = $raw_value['file'];
-					} elseif ( ! empty( $raw_value['value'] ) && is_string( $raw_value['value'] ) ) {
+					if ( ! empty( $raw_value['value'] ) && is_string( $raw_value['value'] ) ) {
 						$candidates[] = $raw_value['value'];
+					} elseif ( ! empty( $raw_value['file'] ) && is_string( $raw_value['file'] ) ) {
+						$candidates[] = $raw_value['file'];
 					}
 				} elseif ( is_scalar( $raw_value ) ) {
 					$candidates[] = (string) $raw_value;
