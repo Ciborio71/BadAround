@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 				</div>
 				<div>
 					<h2>Community</h2>
-					<a href="<?php echo esc_url( home_url( '/#sentinelle' ) ); ?>">Sentinelle</a>
+					<a href="<?php echo esc_url( home_url( '/sentinelle/' ) ); ?>">Sentinelle</a>
 					<a href="<?php echo esc_url( home_url( '/segnala-un-evento/' ) ); ?>">Segnala un evento</a>
 					<a href="#">Regole della community</a>
 				</div>
