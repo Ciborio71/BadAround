@@ -141,12 +141,18 @@
 	};
 
 	const preserveSelectionScroll=()=>{
-		requestAnimationFrame(restoreSelectionAnchor);
-		setTimeout(restoreSelectionAnchor,0);
-		setTimeout(restoreSelectionAnchor,40);
-		setTimeout(restoreSelectionAnchor,120);
-		setTimeout(restoreSelectionAnchor,260);
-		setTimeout(()=>{ selectionAnchor=null; },340);
+		const started=performance.now();
+		const lockFor=700;
+		const keepAnchorStable=(now)=>{
+			if(allowPageNavigationScroll || !selectionAnchor) return;
+			restoreSelectionAnchor();
+			if(now-started<lockFor){
+				requestAnimationFrame(keepAnchorStable);
+			}else{
+				selectionAnchor=null;
+			}
+		};
+		requestAnimationFrame(keepAnchorStable);
 	};
 
 	form.addEventListener('pointerdown',captureSelectionAnchor,true);
