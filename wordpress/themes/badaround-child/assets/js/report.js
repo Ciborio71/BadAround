@@ -101,6 +101,26 @@
 	if(categoryField) categoryField.after(selectedSummary);
 
 	const categoryRadios=categoryField ? [...categoryField.querySelectorAll('input[type="radio"]')] : [];
+
+	/* WPForms conditional logic can reflow the page after a choice.
+	 * Preserve the user's viewport for in-step selections; only page
+	 * navigation is allowed to move the viewport. */
+	let allowPageNavigationScroll=false;
+	const preserveSelectionScroll=(event)=>{
+		if(event.target.closest?.('.wpforms-page-next,.wpforms-page-prev')) return;
+		if(!event.target.matches?.('input[type="radio"],input[type="checkbox"]')) return;
+		const y=window.scrollY;
+		const restore=()=>{
+			if(!allowPageNavigationScroll && Math.abs(window.scrollY-y)>2){
+				window.scrollTo({top:y,left:0,behavior:'auto'});
+			}
+		};
+		requestAnimationFrame(restore);
+		setTimeout(restore,0);
+		setTimeout(restore,60);
+		setTimeout(restore,180);
+	};
+	form.addEventListener('change',preserveSelectionScroll,true);
 	const syncSelectedCategory=()=>{
 		const selected=categoryRadios.find(r=>r.checked);
 		if(!selected){ selectedSummary.hidden=true; return; }
@@ -183,7 +203,13 @@
 	const observer=new MutationObserver(()=>requestAnimationFrame(()=>syncStep(false)));
 	observer.observe(form,{attributes:true,subtree:true,attributeFilter:['style','class']});
 	form.addEventListener('click',(e)=>{
-		if(e.target.closest('.wpforms-page-next,.wpforms-page-prev')) setTimeout(()=>syncStep(true),120);
+		if(e.target.closest('.wpforms-page-next,.wpforms-page-prev')){
+			allowPageNavigationScroll=true;
+			setTimeout(()=>{
+				syncStep(true);
+				allowPageNavigationScroll=false;
+			},120);
+		}
 	});
 	syncStep(false);
 
