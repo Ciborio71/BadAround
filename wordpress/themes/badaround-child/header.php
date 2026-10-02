@@ -31,7 +31,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 			<a href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Mappa</a>
 			<a href="<?php echo esc_url( home_url( '/#segnalazioni' ) ); ?>">Segnalazioni</a>
 			<a href="<?php echo esc_url( home_url( '/#come-funziona' ) ); ?>">Come funziona</a>
-			<a href="<?php echo esc_url( home_url( '/#sentinelle' ) ); ?>">Sentinelle</a>
+			<a href="<?php echo esc_url( home_url( '/sentinelle/' ) ); ?>">Sentinelle</a>
 		</nav>
 
 		<div class="ba-header-actions">
@@ -51,7 +51,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 			<a href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Mappa</a>
 			<a href="<?php echo esc_url( home_url( '/#segnalazioni' ) ); ?>">Segnalazioni</a>
 			<a href="<?php echo esc_url( home_url( '/#come-funziona' ) ); ?>">Come funziona</a>
-			<a href="<?php echo esc_url( home_url( '/#sentinelle' ) ); ?>">Sentinelle</a>
+			<a href="<?php echo esc_url( home_url( '/sentinelle/' ) ); ?>">Sentinelle</a>
 			<a href="<?php echo esc_url( wp_login_url() ); ?>">Accedi</a>
 			<a class="ba-button ba-button--urgent" href="<?php echo esc_url( $report_url ); ?>">Segnala un evento</a>
 		</nav>
