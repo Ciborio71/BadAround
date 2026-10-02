@@ -76,19 +76,39 @@ class BadAround_Media_Repository {
 		if ( ! is_array( $field ) ) {
 			return array();
 		}
+
 		$candidates = array();
-		foreach ( array( 'value_raw', 'value' ) as $key ) {
-			if ( empty( $field[ $key ] ) ) {
-				continue;
-			}
-			$value = $field[ $key ];
-			if ( is_array( $value ) ) {
-				$candidates = array_merge( $candidates, $value );
-			} else {
-				$candidates = array_merge( $candidates, preg_split( '/[\r\n,]+/', (string) $value ) );
+
+		if ( ! empty( $field['value_raw'] ) ) {
+			$raw_values = is_array( $field['value_raw'] ) ? $field['value_raw'] : array( $field['value_raw'] );
+			foreach ( $raw_values as $raw_value ) {
+				if ( is_array( $raw_value ) ) {
+					if ( ! empty( $raw_value['file'] ) && is_string( $raw_value['file'] ) ) {
+						$candidates[] = $raw_value['file'];
+					} elseif ( ! empty( $raw_value['value'] ) && is_string( $raw_value['value'] ) ) {
+						$candidates[] = $raw_value['value'];
+					}
+				} elseif ( is_scalar( $raw_value ) ) {
+					$candidates[] = (string) $raw_value;
+				}
 			}
 		}
-		return array_values( array_filter( array_map( 'trim', $candidates ) ) );
+
+		if ( ! $candidates && ! empty( $field['value'] ) ) {
+			$value = $field['value'];
+			if ( is_array( $value ) ) {
+				foreach ( $value as $item ) {
+					if ( is_scalar( $item ) ) {
+						$candidates[] = (string) $item;
+					}
+				}
+			} else {
+				$candidates = preg_split( '/[\\r\\n,]+/', (string) $value );
+			}
+		}
+
+		$candidates = array_map( 'trim', $candidates );
+		return array_values( array_unique( array_filter( $candidates ) ) );
 	}
 
 	private function local_path_from_reference( $reference ) {
