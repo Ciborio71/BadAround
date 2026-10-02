@@ -239,3 +239,31 @@
 		border-radius:15px!important;
 	}
 }
+
+
+/* Sequential drill-down choices — one clear decision per row */
+.ba-report-mount .ba-drilldown-field ul,
+.ba-report-mount .ba-relationship-field ul{
+	grid-template-columns:1fr!important;
+	gap:8px!important;
+}
+.ba-report-mount .ba-drilldown-field .wpforms-field-label-inline,
+.ba-report-mount .ba-relationship-field .wpforms-field-label-inline{
+	width:100%!important;
+	height:62px!important;
+	min-height:62px!important;
+	max-height:62px!important;
+	padding-inline:14px 42px!important;
+}
+.ba-report-mount .ba-drilldown-field,
+.ba-report-mount .ba-relationship-field{
+	max-width:760px;
+	margin-inline:auto!important;
+}
+
+/* Prevent browser scroll anchoring from jumping while WPForms reveals fields */
+.ba-report-mount,
+.ba-report-mount .wpforms-container,
+.ba-report-mount .wpforms-page{
+	overflow-anchor:none;
+}
