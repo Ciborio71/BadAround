@@ -691,3 +691,69 @@
 		text-align:center !important;
 	}
 }
+
+
+/* Definitive action stack: primary CTA right, Save & Resume below */
+.ba-report-mount .wpforms-page-footer {
+	display:flex !important;
+	align-items:flex-start !important;
+	width:100% !important;
+	gap:16px !important;
+}
+.ba-report-mount .wpforms-page-footer > .wpforms-page-prev {
+	margin-right:auto !important;
+	flex:0 0 auto !important;
+}
+.ba-report-mount .wpforms-page-footer .ba-page-actions {
+	display:flex !important;
+	flex-direction:column !important;
+	align-items:flex-end !important;
+	margin-left:auto !important;
+	flex:0 0 auto !important;
+	gap:8px !important;
+}
+.ba-report-mount .wpforms-page-footer .ba-page-actions .wpforms-page-next,
+.ba-report-mount .wpforms-page-footer .ba-page-actions button[type="submit"] {
+	margin:0 !important;
+	align-self:flex-end !important;
+}
+.ba-report-mount .wpforms-page-footer .ba-page-actions .ba-save-resume-slot,
+.ba-report-mount .wpforms-page-footer .ba-page-actions .wpforms-save-resume-button {
+	margin:0 !important;
+	padding:0 !important;
+	align-self:flex-end !important;
+	text-align:right !important;
+	background:transparent !important;
+	border:0 !important;
+	box-shadow:none !important;
+}
+.ba-report-mount .wpforms-page-footer .ba-page-actions .wpforms-save-resume-button {
+	display:inline-block !important;
+}
+
+@media (max-width:700px) {
+	.ba-report-mount .wpforms-page-footer {
+		flex-direction:column !important;
+		align-items:stretch !important;
+	}
+	.ba-report-mount .wpforms-page-footer > .wpforms-page-prev {
+		order:1;
+		width:100% !important;
+	}
+	.ba-report-mount .wpforms-page-footer .ba-page-actions {
+		order:2;
+		width:100% !important;
+		align-items:stretch !important;
+		margin-left:0 !important;
+	}
+	.ba-report-mount .wpforms-page-footer .ba-page-actions .wpforms-page-next,
+	.ba-report-mount .wpforms-page-footer .ba-page-actions button[type="submit"] {
+		width:100% !important;
+		align-self:stretch !important;
+	}
+	.ba-report-mount .wpforms-page-footer .ba-page-actions .ba-save-resume-slot,
+	.ba-report-mount .wpforms-page-footer .ba-page-actions .wpforms-save-resume-button {
+		align-self:center !important;
+		text-align:center !important;
+	}
+}
