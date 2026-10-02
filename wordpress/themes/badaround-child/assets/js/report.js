@@ -214,7 +214,7 @@
 	};
 	const macroStep=(wpIndex)=>wpIndex===0?1:(wpIndex===1?2:3);
 	const stepCopy={
-		1:['Cosa','Cosa riguarda la segnalazione?',"Tocca il soggetto o l'ambiente coinvolto. Mostreremo solo le domande necessarie."],
+		1:['Cosa','Cosa riguarda la segnalazione?','Tocca la categoria: mostreremo solo le domande necessarie.'],
 		2:['Dove','Dove è successo?','Parti dalla mappa: cerca il punto oppure sposta il pin. Poi ti chiederemo quando è successo.'],
 		3:['Dettagli e invio','Completa la segnalazione','Aggiungi solo le informazioni utili. Foto e dettagli aiutano la community e la moderazione.']
 	};
@@ -222,7 +222,7 @@
 	const syncStep=(shouldScroll=false)=>{
 		const currentWpPageIndex=activeWpPageIndex();
 		const step=macroStep(currentWpPageIndex);
-		if(stepLabel)stepLabel.textContent='Passo '+step+' di 3';
+		if(stepLabel)stepLabel.textContent='SEGNALAZIONE CIVICA • PASSO '+step;
 		if(eyebrow)eyebrow.textContent=stepCopy[step][0];
 		if(title)title.textContent=stepCopy[step][1];
 		if(copy)copy.textContent=stepCopy[step][2];
