@@ -146,6 +146,15 @@ function badaround_child_enqueue_assets() {
 			(string) filemtime( $dir . '/assets/js/sentinels.js' ),
 			true
 		);
+		wp_add_inline_script(
+			'badaround-sentinels',
+			'window.BadAroundSentinels=' . wp_json_encode(
+				array(
+					'endpoint' => esc_url_raw( rest_url( 'badaround/v1/sentinels' ) ),
+				)
+			) . ';',
+			'before'
+		);
 	}
 
 	if ( $is_states ) {
