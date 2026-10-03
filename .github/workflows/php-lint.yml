@@ -32,3 +32,6 @@ jobs:
 
       - name: Lint BadAround child theme
         run: find ./wordpress/themes/badaround-child -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Test D1 Sentinel lifecycle
+        run: php ./tests/sentinels-d1.php
