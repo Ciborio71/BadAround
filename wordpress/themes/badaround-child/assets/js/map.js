@@ -68,19 +68,22 @@
 
 	const pinSvg = (categorySlug, selected = false, resolved = false) => {
 		const palette = resolved ? neutral : (categories[categorySlug] || neutral);
-		const width = selected ? 64 : 48;
-		const height = selected ? 78 : 60;
+		const compact = window.matchMedia('(max-width: 760px)').matches;
+		const displayWidth = selected ? (compact ? 48 : 54) : (compact ? 42 : 48);
+		const displayHeight = selected ? (compact ? 60 : 67) : (compact ? 52 : 60);
+		const canvasWidth = selected ? 64 : 48;
+		const canvasHeight = selected ? 78 : 60;
 		const halo = selected
 			? '<circle cx="32" cy="30" r="29" fill="' + palette.color + '" fill-opacity=".16" stroke="' + palette.color + '" stroke-opacity=".42" stroke-width="2"/>'
 			: '';
 		const tx = selected ? 8 : 0;
 		const ty = selected ? 4 : 0;
 		const pin = '<path d="M24 58C20.5 53 8 40.8 8 25.8 8 16 15.2 8 24 8s16 8 16 17.8C40 40.8 27.5 53 24 58Z" fill="' + palette.color + '" stroke="' + palette.dark + '" stroke-width="1.5"/><circle cx="24" cy="25" r="12.2" fill="' + palette.color + '"/><g transform="translate(12 13)">' + iconMarkup(resolved ? 'check' : palette.icon) + '</g>';
-		const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + ' ' + height + '">' + halo + '<g transform="translate(' + tx + ' ' + ty + ')">' + pin + '</g></svg>';
+		const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + canvasWidth + '" height="' + canvasHeight + '" viewBox="0 0 ' + canvasWidth + ' ' + canvasHeight + '">' + halo + '<g transform="translate(' + tx + ' ' + ty + ')">' + pin + '</g></svg>';
 		return {
 			url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-			scaledSize: new google.maps.Size(width, height),
-			anchor: new google.maps.Point(width / 2, height),
+			scaledSize: new google.maps.Size(displayWidth, displayHeight),
+			anchor: new google.maps.Point(displayWidth / 2, displayHeight),
 		};
 	};
 

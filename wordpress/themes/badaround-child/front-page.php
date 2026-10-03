@@ -57,6 +57,8 @@ $demo_events = array(
 				<div data-ba-map-preview-content></div>
 			</aside>
 
+			<?php get_template_part( 'template-parts/components/map-legend' ); ?>
+
 			<div class="ba-map-privacy-note">
 				<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.8 7.8 7 10 4.2-2.2 7-5.4 7-10V6l-7-3Z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
 				<span>Le posizioni degli eventi sono pubbliche e possono essere approssimate.</span>
