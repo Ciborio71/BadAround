@@ -15,6 +15,9 @@ class BadAround_Core {
         $territory_admin = new BadAround_Territory_Admin();
         $territory_admin->register_hooks();
 
+        $discovery = new BadAround_Discovery_Query();
+        $discovery->register_hooks();
+
         $wpforms_event_intake = new BadAround_WPForms_Event_Intake();
         $wpforms_event_intake->register_hooks();
 
