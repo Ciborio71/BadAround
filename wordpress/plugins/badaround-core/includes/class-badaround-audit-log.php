@@ -36,6 +36,34 @@ class BadAround_Audit_Log {
 		return $result;
 	}
 
+	public static function transition( $object_type, $object_id, $action, $old_value, $new_value, $context = 'moderation', $reason = null, $request_id = null ) {
+		global $wpdb;
+
+		$result = $wpdb->insert(
+			$wpdb->prefix . 'ba_audit_log',
+			array(
+				'actor_user_id' => get_current_user_id() ?: null,
+				'object_type'   => sanitize_key( $object_type ),
+				'object_id'     => absint( $object_id ),
+				'action'        => sanitize_key( $action ),
+				'old_value'     => wp_json_encode( array( 'moderation_status' => sanitize_key( $old_value ) ) ),
+				'new_value'     => wp_json_encode( array( 'moderation_status' => sanitize_key( $new_value ) ) ),
+				'reason'        => $reason ? sanitize_textarea_field( $reason ) : null,
+				'context'       => sanitize_key( $context ),
+				'request_id'    => $request_id ? sanitize_text_field( $request_id ) : wp_generate_uuid4(),
+				'ip_hash'       => self::request_ip_hash(),
+				'created_at'    => current_time( 'mysql', true ),
+			),
+			array( '%d', '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
+		);
+
+		if ( false === $result ) {
+			error_log( sprintf( 'BadAround audit transition insert failed: %s', sanitize_text_field( $wpdb->last_error ) ) );
+		}
+
+		return $result;
+	}
+
 	public static function technical_error( $object_type, $object_id, $action, $code, $request_id = null ) {
 		$code = sanitize_key( $code );
 		self::record( $object_type, $object_id, $action, 'wpforms', $code, $request_id );
