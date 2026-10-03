@@ -12,6 +12,7 @@ class BadAround_Moderation_Admin {
 		add_action( 'save_post_' . BadAround_Event_Post_Type::POST_TYPE, array( $this, 'save_public_fields' ), 10, 2 );
 		add_action( 'admin_post_ba_moderate_event', array( $this, 'handle_moderation_action' ) );
 		add_action( 'admin_post_ba_private_media', array( $this, 'serve_private_media' ) );
+		add_action( 'rest_api_init', array( $this, 'register_staging_test_routes' ) );
 		add_action( 'pre_get_posts', array( $this, 'filter_moderation_queue' ) );
 		add_filter( 'manage_' . BadAround_Event_Post_Type::POST_TYPE . '_posts_columns', array( $this, 'add_list_columns' ) );
 		add_action( 'manage_' . BadAround_Event_Post_Type::POST_TYPE . '_posts_custom_column', array( $this, 'render_list_column' ), 10, 2 );
@@ -314,6 +315,42 @@ class BadAround_Moderation_Admin {
 		header( 'Content-Disposition: inline; filename="' . rawurlencode( $row->original_filename ) . '"' );
 		readfile( $file['path'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
 		exit;
+	}
+
+	public function register_staging_test_routes() {
+		if ( 'staging' !== wp_get_environment_type() ) {
+			return;
+		}
+		register_rest_route(
+			'badaround/v1',
+			'/b2-test/moderate',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => function () {
+					return current_user_can( 'ba_moderate_events' );
+				},
+				'callback'            => function ( WP_REST_Request $request ) {
+					$event_id = absint( $request->get_param( 'event_id' ) );
+					$target   = sanitize_key( (string) $request->get_param( 'target' ) );
+					$reason   = sanitize_textarea_field( (string) $request->get_param( 'reason' ) );
+					$result   = ( new BadAround_Moderation_Service() )->transition( $event_id, $target, $reason );
+					if ( is_wp_error( $result ) ) {
+						return $result;
+					}
+					return array(
+						'ok'                => true,
+						'event_id'          => $event_id,
+						'moderation_status' => get_post_meta( $event_id, '_ba_moderation_status', true ),
+						'post_status'       => get_post_status( $event_id ),
+					);
+				},
+				'args'                => array(
+					'event_id' => array( 'required' => true, 'type' => 'integer' ),
+					'target'   => array( 'required' => true, 'type' => 'string' ),
+					'reason'   => array( 'required' => false, 'type' => 'string' ),
+				),
+			)
+		);
 	}
 
 	public function prevent_b2_publish( $data, $postarr ) {
