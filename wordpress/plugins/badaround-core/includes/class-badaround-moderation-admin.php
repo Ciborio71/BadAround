@@ -88,7 +88,11 @@ class BadAround_Moderation_Admin {
 		$fields = array(
 			'_ba_occurred_date'     => __( 'Data evento', 'badaround-core' ),
 			'_ba_occurred_time'     => __( 'Ora evento', 'badaround-core' ),
-			'_ba_public_place_name' => __( 'Posizione pubblicabile', 'badaround-core' ),
+			'_ba_public_place_name' => __( 'Luogo pubblico', 'badaround-core' ),
+			'_ba_public_address'    => __( 'Indirizzo pubblicabile', 'badaround-core' ),
+			'_ba_public_lat'        => __( 'Latitudine pubblica/generalizzata', 'badaround-core' ),
+			'_ba_public_lng'        => __( 'Longitudine pubblica/generalizzata', 'badaround-core' ),
+			'_ba_public_radius_m'   => __( 'Raggio pubblico (m)', 'badaround-core' ),
 			'_ba_vehicle_make'      => __( 'Marca veicolo', 'badaround-core' ),
 			'_ba_vehicle_model'     => __( 'Modello veicolo', 'badaround-core' ),
 			'_ba_vehicle_color'     => __( 'Colore veicolo', 'badaround-core' ),
@@ -97,7 +101,12 @@ class BadAround_Moderation_Admin {
 		echo '<p><strong>' . esc_html__( 'Titolo pubblico', 'badaround-core' ) . '</strong><br><input class="widefat" name="ba_public_title" value="' . esc_attr( $post->post_title ) . '"></p>';
 		echo '<p><strong>' . esc_html__( 'Descrizione pubblicabile', 'badaround-core' ) . '</strong><br><textarea class="widefat" rows="5" name="ba_public_content">' . esc_textarea( $post->post_content ) . '</textarea></p>';
 		echo '<p><strong>' . esc_html__( 'Categoria / sottocategoria', 'badaround-core' ) . '</strong><br>' . wp_kses_post( $this->term_path( $post->ID, BadAround_Event_Post_Type::EVENT_TYPE_TAX ) ) . '</p>';
-		echo '<p><strong>' . esc_html__( 'Territorio', 'badaround-core' ) . '</strong><br>' . esc_html( $territory ? $territory->name : '—' ) . '</p>';
+		echo '<p><label><strong>' . esc_html__( 'Territorio', 'badaround-core' ) . '</strong><br><select class="widefat" name="ba_territory_id">';
+		echo '<option value="">' . esc_html__( '— Seleziona —', 'badaround-core' ) . '</option>';
+		foreach ( $this->territory_options() as $term_id => $label ) {
+			echo '<option value="' . absint( $term_id ) . '" ' . selected( $territory ? $territory->term_id : 0, $term_id, false ) . '>' . esc_html( $label ) . '</option>';
+		}
+		echo '</select></label></p>';
 		foreach ( $fields as $key => $label ) {
 			echo '<p><label><strong>' . esc_html( $label ) . '</strong><br><input class="widefat" name="ba_public_meta[' . esc_attr( $key ) . ']" value="' . esc_attr( get_post_meta( $post->ID, $key, true ) ) . '"></label></p>';
 		}
@@ -114,6 +123,11 @@ class BadAround_Moderation_Admin {
 			echo '<p>' . esc_html__( 'Nessun report riservato collegato.', 'badaround-core' ) . '</p>';
 			return;
 		}
+		$payload = json_decode( (string) $report->content_original, true );
+		$original_text = '';
+		if ( is_array( $payload ) && ! empty( $payload['private_fields'][55] ) ) {
+			$original_text = is_array( $payload['private_fields'][55] ) ? implode( "\n", array_map( 'strval', $payload['private_fields'][55] ) ) : (string) $payload['private_fields'][55];
+		}
 		$rows = array(
 			__( 'Report ID', 'badaround-core' )       => $report->id,
 			__( 'Segnalante', 'badaround-core' )      => trim( $report->author_name . ' ' . $report->author_surname ),
@@ -122,6 +136,7 @@ class BadAround_Moderation_Admin {
 			__( 'Indirizzo esatto', 'badaround-core' )=> $report->exact_address,
 			__( 'Coordinate precise', 'badaround-core' ) => ( null !== $report->exact_lat && null !== $report->exact_lng ) ? $report->exact_lat . ', ' . $report->exact_lng : '—',
 			__( 'Targa completa', 'badaround-core' )  => $report->full_plate ?: '—',
+			__( 'Testo originale', 'badaround-core' ) => $original_text ?: '—',
 		);
 		echo '<div style="border-left:4px solid #d63638;padding-left:12px"><p><strong>' . esc_html__( 'RISERVATO — non copiare nei dati pubblici', 'badaround-core' ) . '</strong></p><table class="widefat striped"><tbody>';
 		foreach ( $rows as $label => $value ) {
@@ -221,6 +236,10 @@ class BadAround_Moderation_Admin {
 			'_ba_occurred_date',
 			'_ba_occurred_time',
 			'_ba_public_place_name',
+			'_ba_public_address',
+			'_ba_public_lat',
+			'_ba_public_lng',
+			'_ba_public_radius_m',
 			'_ba_vehicle_make',
 			'_ba_vehicle_model',
 			'_ba_vehicle_color',
@@ -230,6 +249,13 @@ class BadAround_Moderation_Admin {
 		foreach ( $allowed as $key ) {
 			if ( array_key_exists( $key, $input ) ) {
 				update_post_meta( $post_id, $key, sanitize_text_field( $input[ $key ] ) );
+			}
+		}
+
+		if ( isset( $_POST['ba_territory_id'] ) ) {
+			$territory_id = absint( $_POST['ba_territory_id'] );
+			if ( $territory_id && term_exists( $territory_id, BadAround_Event_Post_Type::TERRITORY_TAX ) ) {
+				wp_set_object_terms( $post_id, array( $territory_id ), BadAround_Event_Post_Type::TERRITORY_TAX, false );
 			}
 		}
 	}
@@ -293,10 +319,35 @@ class BadAround_Moderation_Admin {
 		global $wpdb;
 		return $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT id, author_name, author_surname, author_email, author_phone, exact_address, exact_lat, exact_lng, full_plate FROM {$wpdb->prefix}ba_reports WHERE event_id = %d AND deleted_at IS NULL ORDER BY id ASC LIMIT 1",
+				"SELECT id, author_name, author_surname, author_email, author_phone, exact_address, exact_lat, exact_lng, full_plate, content_original FROM {$wpdb->prefix}ba_reports WHERE event_id = %d AND deleted_at IS NULL ORDER BY id ASC LIMIT 1",
 				absint( $event_id )
 			)
 		);
+	}
+
+	private function territory_options() {
+		$terms = get_terms( array( 'taxonomy' => BadAround_Event_Post_Type::TERRITORY_TAX, 'hide_empty' => false ) );
+		if ( is_wp_error( $terms ) ) {
+			return array();
+		}
+		$by_id = array();
+		foreach ( $terms as $term ) {
+			$by_id[ $term->term_id ] = $term;
+		}
+		$options = array();
+		foreach ( $terms as $term ) {
+			$parts = array( $term->name );
+			$parent = (int) $term->parent;
+			$guard = 0;
+			while ( $parent && isset( $by_id[ $parent ] ) && $guard < 8 ) {
+				array_unshift( $parts, $by_id[ $parent ]->name );
+				$parent = (int) $by_id[ $parent ]->parent;
+				$guard++;
+			}
+			$options[ $term->term_id ] = implode( ' → ', $parts );
+		}
+		natcasesort( $options );
+		return $options;
 	}
 
 	private function term_path( $post_id, $taxonomy ) {
