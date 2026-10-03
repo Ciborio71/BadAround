@@ -84,7 +84,7 @@ function badaround_child_enqueue_assets() {
 		);
 	}
 
-	if ( $is_map ) {
+	if ( $is_map || $is_home ) {
 		wp_enqueue_style(
 			'badaround-map',
 			$uri . '/assets/css/map.css',
@@ -119,13 +119,39 @@ function badaround_child_enqueue_assets() {
 		);
 		wp_script_add_data( 'badaround-map', 'strategy', 'defer' );
 
+		$category_by_term = array();
+		if ( taxonomy_exists( 'ba_tipo_evento' ) ) {
+			$terms = get_terms(
+				array(
+					'taxonomy'   => 'ba_tipo_evento',
+					'hide_empty' => false,
+				)
+			);
+			if ( ! is_wp_error( $terms ) ) {
+				foreach ( $terms as $term ) {
+					$current = $term;
+					while ( $current instanceof WP_Term && $current->parent ) {
+						$parent = get_term( $current->parent, 'ba_tipo_evento' );
+						if ( ! $parent instanceof WP_Term ) {
+							break;
+						}
+						$current = $parent;
+					}
+					if ( $current instanceof WP_Term ) {
+						$category_by_term[ (string) $term->term_id ] = $current->slug;
+					}
+				}
+			}
+		}
+
 		wp_add_inline_script(
 			'badaround-map',
 			'window.BadAroundMap=' . wp_json_encode(
 				array(
-					'endpoint' => esc_url_raw( rest_url( 'badaround/v1/discovery' ) ),
-					'limit'    => 100,
-					'hasMaps'  => (bool) $google_maps_key,
+					'endpoint'       => esc_url_raw( rest_url( 'badaround/v1/discovery' ) ),
+					'limit'          => 100,
+					'hasMaps'        => (bool) $google_maps_key,
+					'categoryByTerm' => $category_by_term,
 				)
 			) . ';',
 			'before'
