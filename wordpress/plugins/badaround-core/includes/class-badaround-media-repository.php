@@ -117,7 +117,11 @@ class BadAround_Media_Repository {
 			array( '%s', '%d', '%s' ),
 			array( '%d' )
 		);
-		return false === $updated ? new WP_Error( 'ba_public_media_approval_failed', __( 'Impossibile approvare il media per la pubblicazione.', 'badaround-core' ) ) : true;
+		if ( false === $updated ) {
+			return new WP_Error( 'ba_public_media_approval_failed', __( 'Impossibile approvare il media per la pubblicazione.', 'badaround-core' ) );
+		}
+		BadAround_Audit_Log::record( 'event', $event_id, 'public_media_approved', 'publication' );
+		return true;
 	}
 
 	public function materialize_approved_public_media_for_event( $event_id ) {
