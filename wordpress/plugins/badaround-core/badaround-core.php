@@ -2,7 +2,7 @@
 /**
  * Plugin Name: BadAround Core
  * Description: Core application logic for the BadAround platform.
- * Version: 0.5.2
+ * Version: 0.5.3
  * Author: BadAround
  * Text Domain: badaround-core
  */
@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'BADAROUND_CORE_VERSION', '0.5.2' );
+define( 'BADAROUND_CORE_VERSION', '0.5.3' );
 define( 'BADAROUND_CORE_FILE', __FILE__ );
 define( 'BADAROUND_CORE_PATH', plugin_dir_path( __FILE__ ) );
 
