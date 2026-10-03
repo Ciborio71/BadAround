@@ -25,6 +25,8 @@ require_once BADAROUND_CORE_PATH . 'includes/class-badaround-wpforms-field-mappe
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-event-type-resolver.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-territory-resolver.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-media-repository.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-moderation-service.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-moderation-admin.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-wpforms-event-intake.php';
 
 register_activation_hook( BADAROUND_CORE_FILE, array( 'BadAround_Installer', 'activate' ) );
