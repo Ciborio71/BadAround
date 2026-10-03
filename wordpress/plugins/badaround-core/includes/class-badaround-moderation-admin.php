@@ -369,7 +369,10 @@ class BadAround_Moderation_Admin {
 						return new WP_Error( 'ba_test_invalid_event', 'Invalid event.', array( 'status' => 404 ) );
 					}
 
-					do_action( 'add_meta_boxes_' . BadAround_Event_Post_Type::POST_TYPE, $post );
+					if ( ! function_exists( 'add_meta_box' ) ) {
+						require_once ABSPATH . 'wp-admin/includes/template.php';
+					}
+					$this->register_meta_boxes( $post );
 					$box_ids = array();
 					if ( ! empty( $wp_meta_boxes[ BadAround_Event_Post_Type::POST_TYPE ] ) ) {
 						foreach ( $wp_meta_boxes[ BadAround_Event_Post_Type::POST_TYPE ] as $context_boxes ) {
