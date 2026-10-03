@@ -420,6 +420,52 @@ class BadAround_Moderation_Admin {
 						}
 						return array( 'ok' => true, 'post_status' => get_post_status( $event_id ) );
 					}
+					if ( 'probe_public' === $action ) {
+						global $wpdb;
+						$url = get_permalink( $event_id );
+						$response = wp_remote_get( $url, array( 'redirection' => 0, 'timeout' => 15 ) );
+						if ( is_wp_error( $response ) ) {
+							return array( 'ok' => false, 'transport_error' => $response->get_error_code() );
+						}
+						$body = (string) wp_remote_retrieve_body( $response );
+						$code = (int) wp_remote_retrieve_response_code( $response );
+						$report = $wpdb->get_row(
+							$wpdb->prepare(
+								"SELECT author_name, author_surname, author_email, author_phone, exact_address, exact_lat, exact_lng, full_plate FROM {$wpdb->prefix}ba_reports WHERE event_id = %d AND deleted_at IS NULL ORDER BY id ASC LIMIT 1",
+								$event_id
+							)
+						);
+						$haystack = strtolower( wp_strip_all_tags( $body ) );
+						$private_hits = false;
+						if ( $report ) {
+							$identity = trim( (string) $report->author_name . ' ' . (string) $report->author_surname );
+							foreach ( array( $identity, $report->author_email, $report->author_phone, $report->exact_address, $report->full_plate ) as $value ) {
+								$value = trim( strtolower( (string) $value ) );
+								if ( strlen( $value ) >= 5 && false !== strpos( $haystack, $value ) ) {
+									$private_hits = true;
+								}
+							}
+							if ( null !== $report->exact_lat && false !== strpos( $haystack, strtolower( (string) $report->exact_lat ) ) ) {
+								$private_hits = true;
+							}
+							if ( null !== $report->exact_lng && false !== strpos( $haystack, strtolower( (string) $report->exact_lng ) ) ) {
+								$private_hits = true;
+							}
+						}
+						$thumb_id = get_post_thumbnail_id( $event_id );
+						$thumb_url = $thumb_id ? wp_get_attachment_url( $thumb_id ) : '';
+						$report_probe = wp_remote_get( rest_url( 'wp/v2/ba_reports/6' ), array( 'redirection' => 0, 'timeout' => 15 ) );
+						return array(
+							'ok'                    => true,
+							'http_status'           => $code,
+							'template_marker'       => false !== strpos( $body, 'Informazioni disponibili' ) && false !== strpos( $body, 'Hai informazioni?' ),
+							'private_data_exposed'  => $private_hits,
+							'private_labels_exposed'=> false !== strpos( $body, 'Coordinate precise' ) || false !== strpos( $body, 'Targa completa' ) || false !== strpos( $body, 'Segnalante' ),
+							'public_media_rendered' => $thumb_url ? false !== strpos( $body, basename( $thumb_url ) ) : false,
+							'report_rest_status'    => is_wp_error( $report_probe ) ? 0 : (int) wp_remote_retrieve_response_code( $report_probe ),
+						);
+					}
+
 					if ( 'approve' === $action ) {
 						$result = ( new BadAround_Moderation_Service() )->transition( $event_id, BadAround_Moderation_Service::STATUS_APPROVED, 'B3 end-to-end test approval' );
 					} elseif ( 'approve_media' === $action ) {
