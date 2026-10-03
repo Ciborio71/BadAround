@@ -91,7 +91,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 					</div>
 					<label class="ba-sentinel-field">
 						<span>Zona</span>
-						<input type="text" name="area" placeholder="Es. Torvaianica" data-ba-sentinel-area>
+						<input type="text" name="area" placeholder="Comune, località o quartiere" data-ba-sentinel-area>
 					</label>
 				</div>
 
@@ -165,7 +165,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 			<div class="ba-sentinel-dashboard__grid">
 				<article class="ba-card ba-sentinel-zone-card">
 					<div class="ba-sentinel-zone-card__top">
-						<div><span class="ba-sentinel-zone-card__dot"></span><strong>Torvaianica</strong></div>
+						<div><span class="ba-sentinel-zone-card__dot"></span><strong>La tua zona</strong></div>
 						<span class="ba-badge ba-badge--resolved">Attiva</span>
 					</div>
 					<p>3 km · Furti, Sicurezza, Veicoli</p>
@@ -175,7 +175,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 
 				<article class="ba-card ba-sentinel-zone-card ba-sentinel-zone-card--muted">
 					<div class="ba-sentinel-zone-card__top">
-						<div><span class="ba-sentinel-zone-card__dot"></span><strong>Roma centro</strong></div>
+						<div><span class="ba-sentinel-zone-card__dot"></span><strong>Seconda zona</strong></div>
 						<span class="ba-badge ba-badge--info">Demo</span>
 					</div>
 					<p>5 km · Tutte le categorie</p>
