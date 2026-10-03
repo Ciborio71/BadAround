@@ -7,6 +7,9 @@ define( 'ABSPATH', __DIR__ . '/' );
 define( 'DAY_IN_SECONDS', 86400 );
 define( 'MINUTE_IN_SECONDS', 60 );
 define( 'HOUR_IN_SECONDS', 3600 );
+define( 'BADAROUND_TURBOSMTP_CONSUMER_KEY', 'test-consumer-key' );
+define( 'BADAROUND_TURBOSMTP_CONSUMER_SECRET', 'test-consumer-secret' );
+define( 'BADAROUND_TURBOSMTP_FROM_EMAIL', 'noreply@example.invalid' );
 
 function wp_salt( $scheme = 'auth' ) {
 	return 'badaround-test-secret-' . $scheme;
@@ -18,6 +21,36 @@ function sanitize_text_field( $value ) {
 
 function absint( $value ) {
 	return abs( (int) $value );
+}
+
+function sanitize_email( $value ) {
+	return filter_var( (string) $value, FILTER_SANITIZE_EMAIL );
+}
+
+function is_email( $value ) {
+	return false !== filter_var( (string) $value, FILTER_VALIDATE_EMAIL );
+}
+
+function wp_json_encode( $value ) {
+	return json_encode( $value );
+}
+
+$GLOBALS['ba_test_http_request'] = null;
+
+function wp_remote_post( $url, $args ) {
+	$GLOBALS['ba_test_http_request'] = array(
+		'url'  => $url,
+		'args' => $args,
+	);
+	return array(
+		'response' => array(
+			'code' => 200,
+		),
+	);
+}
+
+function wp_remote_retrieve_response_code( $response ) {
+	return isset( $response['response']['code'] ) ? (int) $response['response']['code'] : 0;
 }
 
 function is_wp_error( $value ) {
@@ -91,6 +124,32 @@ $token_method->setAccessible( true );
 $repo_property = $service_reflection->getProperty( 'repository' );
 $repo_property->setAccessible( true );
 $repo = $repo_property->getValue( $service );
+
+$mail_method = $service_reflection->getMethod( 'send_transactional_email' );
+$mail_method->setAccessible( true );
+$mail_result = $mail_method->invoke( $service, 'qa@example.invalid', 'Test subject', 'Test content' );
+ba_assert( true === $mail_result, 'turboSMTP transport accepts a successful API response' );
+ba_assert(
+	BadAround_Sentinel_Service::TURBOSMTP_API_ENDPOINT === $GLOBALS['ba_test_http_request']['url'],
+	'turboSMTP transport uses the canonical v2 mail endpoint'
+);
+ba_assert(
+	'test-consumer-key' === $GLOBALS['ba_test_http_request']['args']['headers']['Consumerkey'],
+	'turboSMTP consumer key is sent as an HTTP header'
+);
+ba_assert(
+	'test-consumer-secret' === $GLOBALS['ba_test_http_request']['args']['headers']['Consumersecret'],
+	'turboSMTP consumer secret is sent as an HTTP header'
+);
+$mail_payload = json_decode( $GLOBALS['ba_test_http_request']['args']['body'], true );
+ba_assert( 'noreply@example.invalid' === $mail_payload['from'], 'configured sender is used' );
+ba_assert( 'qa@example.invalid' === $mail_payload['to'], 'verification recipient is used' );
+ba_assert( 'Test subject' === $mail_payload['subject'], 'verification subject is preserved' );
+ba_assert( 'Test content' === $mail_payload['content'], 'verification content is preserved' );
+ba_assert(
+	false === strpos( $GLOBALS['ba_test_http_request']['args']['body'], 'test-consumer-secret' ),
+	'turboSMTP secret is never included in the JSON body'
+);
 
 $public_id = '7f6ce5fc-1959-4fb7-a735-59d8bd4fb067';
 $email_hash = hash( 'sha256', 'test@example.invalid' );
