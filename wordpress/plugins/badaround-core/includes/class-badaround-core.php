@@ -17,5 +17,8 @@ class BadAround_Core {
 
         $wpforms_event_intake = new BadAround_WPForms_Event_Intake();
         $wpforms_event_intake->register_hooks();
+
+        $moderation_admin = new BadAround_Moderation_Admin();
+        $moderation_admin->register_hooks();
     }
 }
