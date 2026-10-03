@@ -132,12 +132,12 @@
 		return wrap;
 	};
 
-	const renderList = (items) => {
+	const renderList = (items, total = items.length) => {
 		const list = document.querySelector('[data-ba-map-list]');
 		const count = document.querySelector('[data-ba-map-count]');
 		const mobileCount = document.querySelector('[data-ba-map-mobile-count]');
-		if (count) count.textContent = `${items.length} ${items.length === 1 ? 'risultato' : 'risultati'}`;
-		if (mobileCount) mobileCount.textContent = `${items.length} ${items.length === 1 ? 'risultato' : 'risultati'}`;
+		if (count) count.textContent = `${total} ${total === 1 ? 'risultato' : 'risultati'}`;
+		if (mobileCount) mobileCount.textContent = `${total} ${total === 1 ? 'risultato' : 'risultati'}`;
 		if (!list) return;
 
 		list.replaceChildren();
@@ -493,8 +493,9 @@
 			if (!response.ok) throw new Error(`Discovery HTTP ${response.status}`);
 			const payload = await response.json();
 			const items = Array.isArray(payload.items) ? payload.items : [];
+			const total = Number.isFinite(Number(payload.total)) ? Number(payload.total) : items.length;
 
-			renderList(items);
+			renderList(items, total);
 			mapNodes.forEach((node) => initMap(node, items));
 		} catch (error) {
 			console.error('BadAround map:', error);
