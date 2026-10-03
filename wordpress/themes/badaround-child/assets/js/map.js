@@ -16,6 +16,37 @@
 	};
 	const neutral = { color: '#8292A8', dark: '#627187', icon: 'check' };
 	const clusterColor = '#263B63';
+	let googleMapsPromise;
+
+	const loadGoogleMaps = () => {
+		if (!config.hasMaps || !config.mapsUrl) return Promise.resolve(false);
+		if (window.google?.maps) return Promise.resolve(true);
+		if (googleMapsPromise) return googleMapsPromise;
+
+		googleMapsPromise = new Promise((resolve, reject) => {
+			const callbackName = '__badaroundGoogleMapsReady';
+			const finish = () => {
+				delete window[callbackName];
+				resolve(Boolean(window.google?.maps));
+			};
+			const fail = () => {
+				delete window[callbackName];
+				reject(new Error('Google Maps non disponibile'));
+			};
+
+			window[callbackName] = finish;
+			const script = document.createElement('script');
+			const url = new URL(config.mapsUrl, window.location.origin);
+			url.searchParams.set('callback', callbackName);
+			script.src = url.toString();
+			script.async = true;
+			script.dataset.baGoogleMaps = '1';
+			script.onerror = fail;
+			document.head.appendChild(script);
+		});
+
+		return googleMapsPromise;
+	};
 
 	const baseMapStyles = [
 		{
@@ -493,36 +524,45 @@
 		}
 	};
 
-	const load = async () => {
+	const loadDiscovery = async () => {
 		if (!config.endpoint) {
+			throw new Error('Servizio Discovery non disponibile');
+		}
+
+		const url = new URL(config.endpoint, window.location.origin);
+		url.searchParams.set('per_page', String(config.limit || 100));
+		const response = await fetch(url.toString(), {
+			credentials: 'same-origin',
+			headers: { Accept: 'application/json' },
+		});
+		if (!response.ok) throw new Error(`Discovery HTTP ${response.status}`);
+		return response.json();
+	};
+
+	const load = async () => {
+		const [discoveryResult, mapsResult] = await Promise.allSettled([
+			loadDiscovery(),
+			loadGoogleMaps(),
+		]);
+
+		if (discoveryResult.status === 'rejected') {
+			console.error('BadAround map:', discoveryResult.reason);
 			document.querySelectorAll('[data-ba-map-status]').forEach((el) => {
-				el.textContent = 'Servizio Discovery non disponibile.';
+				el.textContent = 'Errore nel caricamento della mappa. Puoi continuare con la ricerca manuale.';
 				el.hidden = false;
 			});
 			return;
 		}
 
-		try {
-			const url = new URL(config.endpoint, window.location.origin);
-			url.searchParams.set('per_page', String(config.limit || 100));
-			const response = await fetch(url.toString(), {
-				credentials: 'same-origin',
-				headers: { Accept: 'application/json' },
-			});
-			if (!response.ok) throw new Error(`Discovery HTTP ${response.status}`);
-			const payload = await response.json();
-			const items = Array.isArray(payload.items) ? payload.items : [];
-			const total = Number.isFinite(Number(payload.total)) ? Number(payload.total) : items.length;
+		const payload = discoveryResult.value;
+		const items = Array.isArray(payload.items) ? payload.items : [];
+		const total = Number.isFinite(Number(payload.total)) ? Number(payload.total) : items.length;
+		renderList(items, total);
 
-			renderList(items, total);
-			mapNodes.forEach((node) => initMap(node, items));
-		} catch (error) {
-			console.error('BadAround map:', error);
-			document.querySelectorAll('[data-ba-map-status]').forEach((el) => {
-				el.textContent = 'Errore nel caricamento della mappa. Puoi continuare con la ricerca manuale.';
-				el.hidden = false;
-			});
+		if (mapsResult.status === 'rejected') {
+			console.error('BadAround map:', mapsResult.reason);
 		}
+		mapNodes.forEach((node) => initMap(node, items));
 	};
 
 	bindResultsPanel();

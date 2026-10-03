@@ -56,6 +56,7 @@ function badaround_child_enqueue_assets() {
 		(string) filemtime( $dir . '/assets/js/navigation.js' ),
 		true
 	);
+	wp_script_add_data( 'badaround-navigation', 'strategy', 'defer' );
 
 	if ( $is_home ) {
 		wp_enqueue_style(
@@ -97,23 +98,10 @@ function badaround_child_enqueue_assets() {
 			? trim( (string) $wpforms_settings['geolocation-google-places-api-key'] )
 			: '';
 
-		$map_dependencies = array();
-		if ( $google_maps_key ) {
-			wp_enqueue_script(
-				'badaround-google-maps',
-				'https://maps.googleapis.com/maps/api/js?key=' . rawurlencode( $google_maps_key ),
-				array(),
-				null,
-				true
-			);
-			wp_script_add_data( 'badaround-google-maps', 'strategy', 'defer' );
-			$map_dependencies[] = 'badaround-google-maps';
-		}
-
 		wp_enqueue_script(
 			'badaround-map',
 			$uri . '/assets/js/map.js',
-			$map_dependencies,
+			array(),
 			(string) filemtime( $dir . '/assets/js/map.js' ),
 			true
 		);
@@ -151,6 +139,16 @@ function badaround_child_enqueue_assets() {
 					'endpoint'       => esc_url_raw( rest_url( 'badaround/v1/discovery' ) ),
 					'limit'          => 100,
 					'hasMaps'        => (bool) $google_maps_key,
+					'mapsUrl'        => $google_maps_key
+						? add_query_arg(
+							array(
+								'key'     => $google_maps_key,
+								'loading' => 'async',
+								'v'       => 'weekly',
+							),
+							'https://maps.googleapis.com/maps/api/js'
+						)
+						: '',
 					'categoryByTerm' => $category_by_term,
 				)
 			) . ';',
@@ -238,9 +236,31 @@ function badaround_child_enqueue_assets() {
 			(string) filemtime( $dir . '/assets/js/ui.js' ),
 			true
 		);
+		wp_script_add_data( 'badaround-ui', 'strategy', 'defer' );
 	}
 }
 add_action( 'wp_enqueue_scripts', 'badaround_child_enqueue_assets', 20 );
+
+/**
+ * Warm up only the third-party origins used by the public maps.
+ */
+function badaround_child_map_resource_hints( $urls, $relation_type ) {
+	if ( 'preconnect' !== $relation_type || ( ! is_front_page() && ! is_page_template( 'page-mappa.php' ) ) ) {
+		return $urls;
+	}
+
+	$urls[] = array(
+		'href'        => 'https://maps.googleapis.com',
+		'crossorigin' => 'anonymous',
+	);
+	$urls[] = array(
+		'href'        => 'https://maps.gstatic.com',
+		'crossorigin' => 'anonymous',
+	);
+
+	return $urls;
+}
+add_filter( 'wp_resource_hints', 'badaround_child_map_resource_hints', 10, 2 );
 
 /**
  * WPForms id can be provided without editing the page template.
