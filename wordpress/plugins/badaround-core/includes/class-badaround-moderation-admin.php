@@ -11,6 +11,8 @@ class BadAround_Moderation_Admin {
 		add_action( 'add_meta_boxes_' . BadAround_Event_Post_Type::POST_TYPE, array( $this, 'register_meta_boxes' ) );
 		add_action( 'save_post_' . BadAround_Event_Post_Type::POST_TYPE, array( $this, 'save_public_fields' ), 10, 2 );
 		add_action( 'admin_post_ba_moderate_event', array( $this, 'handle_moderation_action' ) );
+		add_action( 'admin_post_ba_publish_event', array( $this, 'handle_publish_action' ) );
+		add_action( 'admin_post_ba_approve_public_media', array( $this, 'handle_public_media_action' ) );
 		add_action( 'admin_post_ba_private_media', array( $this, 'serve_private_media' ) );
 		add_action( 'pre_get_posts', array( $this, 'filter_moderation_queue' ) );
 		add_filter( 'manage_' . BadAround_Event_Post_Type::POST_TYPE . '_posts_columns', array( $this, 'add_list_columns' ) );
@@ -169,14 +171,26 @@ class BadAround_Moderation_Admin {
 			echo '<p>' . esc_html__( 'Nessun media collegato.', 'badaround-core' ) . '</p>';
 			return;
 		}
+		$moderation_status = sanitize_key( (string) get_post_meta( $post->ID, '_ba_moderation_status', true ) );
 		foreach ( $rows as $row ) {
 			$url = wp_nonce_url(
 				admin_url( 'admin-post.php?action=ba_private_media&media_id=' . absint( $row->id ) ),
 				'ba_private_media_' . absint( $row->id )
 			);
 			echo '<p><strong>' . esc_html( $row->original_filename ) . '</strong><br>';
-			echo esc_html( $row->mime_type . ' · ' . size_format( (int) $row->file_size ) . ' · ' . $row->sensitivity ) . '<br>';
-			echo '<a class="button" target="_blank" rel="noopener" href="' . esc_url( $url ) . '">' . esc_html__( 'Visualizza originale privato', 'badaround-core' ) . '</a></p>';
+			echo esc_html( $row->mime_type . ' · ' . size_format( (int) $row->file_size ) . ' · ' . $row->sensitivity . ' · ' . $row->review_status ) . '<br>';
+			echo '<a class="button" target="_blank" rel="noopener" href="' . esc_url( $url ) . '">' . esc_html__( 'Visualizza originale privato', 'badaround-core' ) . '</a>';
+			if ( BadAround_Moderation_Service::STATUS_APPROVED === $moderation_status && 'received' === $row->review_status && current_user_can( 'ba_moderate_events' ) ) {
+				$approve_url = wp_nonce_url(
+					admin_url( 'admin-post.php?action=ba_approve_public_media&event_id=' . absint( $post->ID ) . '&media_id=' . absint( $row->id ) ),
+					'ba_approve_public_media_' . absint( $row->id )
+				);
+				echo ' <a class="button button-secondary" href="' . esc_url( $approve_url ) . '">' . esc_html__( 'Approva copia per pubblicazione', 'badaround-core' ) . '</a>';
+			}
+			if ( ! empty( $row->public_attachment_id ) ) {
+				echo '<br><small>' . esc_html__( 'Copia pubblica collegata:', 'badaround-core' ) . ' #' . absint( $row->public_attachment_id ) . '</small>';
+			}
+			echo '</p>';
 		}
 	}
 
@@ -207,12 +221,29 @@ class BadAround_Moderation_Admin {
 		$status = get_post_meta( $post->ID, '_ba_moderation_status', true );
 		$status = $status ?: BadAround_Moderation_Service::STATUS_NEW;
 		echo '<p><strong>' . esc_html__( 'Stato:', 'badaround-core' ) . '</strong> ' . esc_html( BadAround_Moderation_Service::label( $status ) ) . '</p>';
-		echo '<p class="description">' . esc_html__( 'B2 non pubblica mai automaticamente l’evento.', 'badaround-core' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'La pubblicazione è consentita solo tramite la transizione controllata B3.', 'badaround-core' ) . '</p>';
 		if ( ! current_user_can( 'ba_moderate_events' ) ) {
 			return;
 		}
-		if ( in_array( $status, array( BadAround_Moderation_Service::STATUS_APPROVED, BadAround_Moderation_Service::STATUS_REJECTED ), true ) ) {
-			echo '<p><em>' . esc_html__( 'Moderazione conclusa. La pubblicazione resta demandata a B3.', 'badaround-core' ) . '</em></p>';
+		if ( BadAround_Publication_Service::STATUS_PUBLISHED === $status ) {
+			$permalink = get_permalink( $post->ID );
+			echo '<p><strong>' . esc_html__( 'Evento pubblicato.', 'badaround-core' ) . '</strong></p>';
+			if ( $permalink ) {
+				echo '<p><a class="button button-secondary" target="_blank" rel="noopener" href="' . esc_url( $permalink ) . '">' . esc_html__( 'Apri evento pubblico', 'badaround-core' ) . '</a></p>';
+			}
+			return;
+		}
+		if ( BadAround_Moderation_Service::STATUS_APPROVED === $status ) {
+			$publish_url = wp_nonce_url(
+				admin_url( 'admin-post.php?action=ba_publish_event&event_id=' . absint( $post->ID ) ),
+				'ba_publish_event_' . absint( $post->ID )
+			);
+			echo '<p><em>' . esc_html__( 'Moderazione conclusa. Verifica la proiezione pubblica e gli eventuali media prima di pubblicare.', 'badaround-core' ) . '</em></p>';
+			echo '<p><a class="button button-primary" style="width:100%;text-align:center" href="' . esc_url( $publish_url ) . '">' . esc_html__( 'Pubblica evento', 'badaround-core' ) . '</a></p>';
+			return;
+		}
+		if ( BadAround_Moderation_Service::STATUS_REJECTED === $status ) {
+			echo '<p><em>' . esc_html__( 'Evento rifiutato: non pubblicabile.', 'badaround-core' ) . '</em></p>';
 			return;
 		}
 		$base = admin_url( 'admin-post.php?action=ba_moderate_event&event_id=' . absint( $post->ID ) );
@@ -292,6 +323,37 @@ class BadAround_Moderation_Admin {
 		$args = is_wp_error( $result )
 			? array( 'ba_moderation_error' => $result->get_error_code() )
 			: array( 'ba_moderation_updated' => 1 );
+		wp_safe_redirect( add_query_arg( $args, get_edit_post_link( $event_id, 'url' ) ) );
+		exit;
+	}
+
+	public function handle_publish_action() {
+		$event_id = isset( $_REQUEST['event_id'] ) ? absint( $_REQUEST['event_id'] ) : 0;
+		check_admin_referer( 'ba_publish_event_' . $event_id );
+		$result = ( new BadAround_Publication_Service() )->publish( $event_id );
+		$args = is_wp_error( $result )
+			? array( 'ba_publication_error' => $result->get_error_code() )
+			: array( 'ba_publication_updated' => 1 );
+		wp_safe_redirect( add_query_arg( $args, get_edit_post_link( $event_id, 'url' ) ) );
+		exit;
+	}
+
+	public function handle_public_media_action() {
+		$event_id = isset( $_REQUEST['event_id'] ) ? absint( $_REQUEST['event_id'] ) : 0;
+		$media_id = isset( $_REQUEST['media_id'] ) ? absint( $_REQUEST['media_id'] ) : 0;
+		check_admin_referer( 'ba_approve_public_media_' . $media_id );
+		if ( ! current_user_can( 'ba_moderate_events' ) || ! current_user_can( 'ba_view_private_media' ) || ! current_user_can( 'edit_post', $event_id ) ) {
+			wp_die( esc_html__( 'Accesso non autorizzato.', 'badaround-core' ), '', array( 'response' => 403 ) );
+		}
+		$status = sanitize_key( (string) get_post_meta( $event_id, '_ba_moderation_status', true ) );
+		if ( BadAround_Moderation_Service::STATUS_APPROVED !== $status ) {
+			$result = new WP_Error( 'ba_public_media_event_not_approved', __( 'Il media può essere approvato per il pubblico solo dopo l’approvazione dell’evento.', 'badaround-core' ) );
+		} else {
+			$result = ( new BadAround_Media_Repository() )->approve_for_publication( $media_id, $event_id );
+		}
+		$args = is_wp_error( $result )
+			? array( 'ba_public_media_error' => $result->get_error_code() )
+			: array( 'ba_public_media_updated' => 1 );
 		wp_safe_redirect( add_query_arg( $args, get_edit_post_link( $event_id, 'url' ) ) );
 		exit;
 	}
