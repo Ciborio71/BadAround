@@ -276,8 +276,36 @@ add_action( 'wp_head', 'badaround_territory_meta_description', 2 );
 function badaround_territory_robots( $robots ) {
 	if ( is_tax( 'ba_territorio' ) ) {
 		$term = get_queried_object();
-		if ( $term && isset( $term->count ) && 0 === (int) $term->count ) {
-			$robots['noindex'] = true;
+		if ( $term && ! empty( $term->term_id ) ) {
+			$published = new WP_Query(
+				array(
+					'post_type'              => 'ba_evento',
+					'post_status'            => 'publish',
+					'posts_per_page'         => 1,
+					'fields'                 => 'ids',
+					'no_found_rows'          => true,
+					'ignore_sticky_posts'    => true,
+					'meta_query'             => array(
+						array(
+							'key'     => '_ba_moderation_status',
+							'value'   => 'published',
+							'compare' => '=',
+						),
+					),
+					'tax_query'              => array(
+						array(
+							'taxonomy'         => 'ba_territorio',
+							'field'            => 'term_id',
+							'terms'            => array( (int) $term->term_id ),
+							'include_children' => true,
+						),
+					),
+				)
+			);
+
+			if ( ! $published->have_posts() ) {
+				$robots['noindex'] = true;
+			}
 		}
 	}
 	return $robots;
