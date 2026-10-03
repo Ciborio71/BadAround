@@ -167,6 +167,7 @@ class BadAround_Sentinel_Service {
 				empty( $sentinel['verify_token_hash'] ) ||
 				! hash_equals( (string) $sentinel['verify_token_hash'], hash( 'sha256', $token ) )
 			) {
+				BadAround_Audit_Log::record( 'sentinel', $sentinel['id'], 'sentinel_verification_invalid', 'sentinel' );
 				return new WP_Error( 'invalid', 'Invalid verification token.' );
 			}
 			return 'already-active';
@@ -187,6 +188,7 @@ class BadAround_Sentinel_Service {
 			! hash_equals( (string) $sentinel['verify_token_hash'], hash( 'sha256', $token ) ) ||
 			! hash_equals( $expected, $token )
 		) {
+			BadAround_Audit_Log::record( 'sentinel', $sentinel['id'], 'sentinel_verification_invalid', 'sentinel' );
 			return new WP_Error( 'invalid', 'Invalid verification token.' );
 		}
 
@@ -238,7 +240,12 @@ class BadAround_Sentinel_Service {
 		$message .= "Conferma la Sentinella aprendo questo link:\n{$url}\n\n";
 		$message .= "Il link scade tra 24 ore. Se non hai richiesto questa Sentinella, ignora questa email.";
 
-		$sent = $this->send_transactional_email( $recipient, $subject, $message );
+		$html_message  = '<p>Hai chiesto di seguire <strong>' . esc_html( $territory ) . '</strong> su BadAround.</p>';
+		$html_message .= '<p><a href="' . esc_url( $url ) . '" style="display:inline-block;padding:12px 18px;background:#111;color:#fff;text-decoration:none;border-radius:6px;">Conferma la Sentinella</a></p>';
+		$html_message .= '<p>Se il pulsante non funziona, copia e incolla questo indirizzo nel browser:<br><a href="' . esc_url( $url ) . '">' . esc_html( $url ) . '</a></p>';
+		$html_message .= '<p>Il link scade tra 24 ore. Se non hai richiesto questa Sentinella, ignora questa email.</p>';
+
+		$sent = $this->send_transactional_email( $recipient, $subject, $message, $html_message );
 		BadAround_Audit_Log::record(
 			'sentinel',
 			$sentinel['id'],
@@ -253,7 +260,7 @@ class BadAround_Sentinel_Service {
 	 * Credentials intentionally live in environment/wp-config constants only.
 	 * Nothing is persisted in WordPress options or exposed to the public API.
 	 */
-	private function send_transactional_email( $recipient, $subject, $message ) {
+	private function send_transactional_email( $recipient, $subject, $message, $html_message = '' ) {
 		$consumer_key = defined( 'BADAROUND_TURBOSMTP_CONSUMER_KEY' ) ? trim( (string) BADAROUND_TURBOSMTP_CONSUMER_KEY ) : '';
 		$consumer_secret = defined( 'BADAROUND_TURBOSMTP_CONSUMER_SECRET' ) ? trim( (string) BADAROUND_TURBOSMTP_CONSUMER_SECRET ) : '';
 		$from_email = defined( 'BADAROUND_TURBOSMTP_FROM_EMAIL' ) ? sanitize_email( BADAROUND_TURBOSMTP_FROM_EMAIL ) : '';
@@ -285,8 +292,9 @@ class BadAround_Sentinel_Service {
 					array(
 						'from'    => $from_email,
 						'to'      => $recipient,
-						'subject' => (string) $subject,
-						'content' => (string) $message,
+						'subject'      => (string) $subject,
+						'content'      => (string) $message,
+						'html_content' => (string) $html_message,
 					)
 				),
 			)
