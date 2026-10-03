@@ -174,14 +174,6 @@ class BadAround_Publication_Service {
 			return $valid;
 		}
 
-		$media_result = ( new BadAround_Media_Repository() )->materialize_approved_public_media_for_event( $event_id );
-		if ( is_wp_error( $media_result ) ) {
-			return $media_result;
-		}
-		if ( ! empty( $media_result ) && ! has_post_thumbnail( $event_id ) ) {
-			set_post_thumbnail( $event_id, (int) reset( $media_result ) );
-		}
-
 		$allow = static function ( $allowed, $candidate_id ) use ( $event_id ) {
 			return absint( $candidate_id ) === $event_id ? true : $allowed;
 		};
@@ -203,6 +195,15 @@ class BadAround_Publication_Service {
 			return is_wp_error( $updated )
 				? $updated
 				: new WP_Error( 'ba_publication_wp_status_failed', __( 'WordPress non ha confermato la pubblicazione.', 'badaround-core' ) );
+		}
+
+		$media_result = ( new BadAround_Media_Repository() )->materialize_approved_public_media_for_event( $event_id );
+		if ( is_wp_error( $media_result ) ) {
+			wp_update_post( array( 'ID' => $event_id, 'post_status' => 'pending' ) );
+			return $media_result;
+		}
+		if ( ! empty( $media_result ) && ! has_post_thumbnail( $event_id ) ) {
+			set_post_thumbnail( $event_id, (int) reset( $media_result ) );
 		}
 
 		update_post_meta( $event_id, '_ba_moderation_status', self::STATUS_PUBLISHED );
