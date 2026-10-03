@@ -101,6 +101,7 @@ class BadAround_Moderation_Service {
 			self::STATUS_APPROVED          => __( 'Approvato', 'badaround-core' ),
 			self::STATUS_REJECTED          => __( 'Rifiutato', 'badaround-core' ),
 			self::STATUS_ESCALATED         => __( 'Escalation', 'badaround-core' ),
+			BadAround_Publication_Service::STATUS_PUBLISHED => __( 'Pubblicato', 'badaround-core' ),
 		);
 		$status = sanitize_key( $status );
 		return isset( $labels[ $status ] ) ? $labels[ $status ] : $status;
