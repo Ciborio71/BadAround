@@ -121,3 +121,21 @@
  .ba-sentinel-form__footer{align-items:stretch;flex-direction:column;padding:18px}
  .ba-sentinel-form__footer .ba-button{width:100%}
 }
+
+
+/* D1 — creation and verification states */
+.ba-sentinel-status-section{padding:22px 0 0}
+.ba-sentinel-status{padding:18px 20px;border-left:4px solid var(--ba-teal-600)}
+.ba-sentinel-status strong{display:block;color:var(--ba-navy-950);font-size:.95rem}
+.ba-sentinel-status p{margin:5px 0 0;color:#657a8d;font-size:.8rem}
+.ba-sentinel-status--success{background:#f1fbfb}
+.ba-sentinel-status--warning{border-left-color:#d99a21;background:#fffaf0}
+.ba-sentinel-status--error{border-left-color:var(--ba-coral-600);background:#fff6f6}
+.ba-sentinel-field select{width:100%;height:46px;padding:0 12px;border:1px solid var(--ba-border);border-radius:11px;background:#fff;color:#31485d;box-shadow:none}
+.ba-sentinel-field select:focus{border-color:var(--ba-teal-600);outline:3px solid rgba(7,152,168,.12)}
+.ba-sentinel-fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ba-sentinel-form__message{margin:0 24px 24px;padding:13px 14px;border-radius:11px;background:#f7fafc;color:#52687b;font-size:.78rem;line-height:1.5}
+.ba-sentinel-form__message.is-success{background:#edf9f5;color:#285f4d}
+.ba-sentinel-form__message.is-error{background:#fff1f1;color:#8d3e3e}
+.ba-sentinel-form button[disabled]{opacity:.6;cursor:wait}
+@media(max-width:760px){.ba-sentinel-fields-grid{grid-template-columns:1fr}}

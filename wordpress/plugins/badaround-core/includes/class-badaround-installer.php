@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Owns the versioned database schema for private and relational data. */
 class BadAround_Installer {
-	const SCHEMA_VERSION = '1.1.0';
+	const SCHEMA_VERSION = '1.2.0';
 	const OPTION_NAME    = 'ba_db_schema_version';
 
 	public function register_hooks() {
@@ -124,6 +124,7 @@ class BadAround_Installer {
 		$reports         = $wpdb->prefix . 'ba_reports';
 		$media           = $wpdb->prefix . 'ba_report_media';
 		$audit           = $wpdb->prefix . 'ba_audit_log';
+		$sentinels       = $wpdb->prefix . 'ba_sentinels';
 
 		$sql = "CREATE TABLE {$reports} (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -189,6 +190,36 @@ class BadAround_Installer {
 			KEY event_status (event_id,review_status),
 			KEY public_attachment (public_attachment_id),
 			KEY checksum (checksum)
+		) {$charset_collate};
+
+		CREATE TABLE {$sentinels} (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			public_id char(36) NOT NULL,
+			user_id bigint(20) unsigned DEFAULT NULL,
+			email varchar(191) NOT NULL,
+			email_hash char(64) NOT NULL,
+			status varchar(32) NOT NULL DEFAULT 'pending',
+			territory_term_id bigint(20) unsigned NOT NULL,
+			category_term_id bigint(20) unsigned DEFAULT NULL,
+			event_type_term_id bigint(20) unsigned DEFAULT NULL,
+			criteria_json longtext NOT NULL,
+			criteria_hash char(64) NOT NULL,
+			verify_token_hash char(64) DEFAULT NULL,
+			verification_expires_at datetime DEFAULT NULL,
+			confirmed_at datetime DEFAULT NULL,
+			disabled_at datetime DEFAULT NULL,
+			deleted_at datetime DEFAULT NULL,
+			last_notification_at datetime DEFAULT NULL,
+			created_at datetime NOT NULL,
+			updated_at datetime NOT NULL,
+			PRIMARY KEY  (id),
+			UNIQUE KEY public_id (public_id),
+			UNIQUE KEY email_criteria (email_hash,criteria_hash),
+			KEY status_territory (status,territory_term_id),
+			KEY status_category (status,category_term_id),
+			KEY status_event_type (status,event_type_term_id),
+			KEY user_status (user_id,status),
+			KEY verification_expiry (status,verification_expires_at)
 		) {$charset_collate};
 
 		CREATE TABLE {$audit} (

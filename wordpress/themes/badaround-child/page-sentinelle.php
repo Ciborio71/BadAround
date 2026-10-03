@@ -7,6 +7,57 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 get_header();
 
 $report_url = home_url( '/segnala-un-evento/' );
+$status = isset( $_GET['ba_sentinel_status'] ) ? sanitize_key( wp_unslash( $_GET['ba_sentinel_status'] ) ) : '';
+
+$territories = get_terms(
+	array(
+		'taxonomy'   => 'ba_territorio',
+		'hide_empty' => false,
+		'orderby'    => 'name',
+		'order'      => 'ASC',
+	)
+);
+if ( is_wp_error( $territories ) ) {
+	$territories = array();
+}
+
+$event_terms = get_terms(
+	array(
+		'taxonomy'   => 'ba_tipo_evento',
+		'hide_empty' => false,
+		'orderby'    => 'name',
+		'order'      => 'ASC',
+	)
+);
+if ( is_wp_error( $event_terms ) ) {
+	$event_terms = array();
+}
+
+$categories = array();
+$event_types = array();
+foreach ( $event_terms as $term ) {
+	if ( 0 === (int) $term->parent ) {
+		$categories[] = $term;
+	} else {
+		$event_types[] = $term;
+	}
+}
+
+$requested_territory = isset( $_GET['territory'] ) ? sanitize_title( wp_unslash( $_GET['territory'] ) ) : '';
+$requested_category  = isset( $_GET['category'] ) ? sanitize_title( wp_unslash( $_GET['category'] ) ) : '';
+$requested_event_type = isset( $_GET['event_type'] ) ? sanitize_title( wp_unslash( $_GET['event_type'] ) ) : '';
+
+function badaround_sentinel_territory_label( WP_Term $term ) {
+	$names = array();
+	foreach ( array_reverse( get_ancestors( $term->term_id, 'ba_territorio', 'taxonomy' ) ) as $ancestor_id ) {
+		$ancestor = get_term( $ancestor_id, 'ba_territorio' );
+		if ( $ancestor instanceof WP_Term ) {
+			$names[] = $ancestor->name;
+		}
+	}
+	$names[] = $term->name;
+	return implode( ' → ', $names );
+}
 ?>
 <main class="ba-sentinel-page" id="main-content">
 	<section class="ba-sentinel-hero">
@@ -15,9 +66,9 @@ $report_url = home_url( '/segnala-un-evento/' );
 				<div class="ba-sentinel-hero__copy">
 					<span class="ba-eyebrow">Sentinelle BadAround</span>
 					<h1>Segui le zone che ti interessano.</h1>
-					<p>Ricevi avvisi utili quando vengono pubblicate nuove segnalazioni rilevanti vicino casa, al lavoro o nei luoghi che vuoi tenere sotto controllo.</p>
+					<p>Ricevi un'email quando BadAround pubblica nuove segnalazioni coerenti con il territorio e l'interesse che hai scelto.</p>
 					<div class="ba-sentinel-hero__actions">
-						<a class="ba-button" href="#attiva-sentinella">Attiva una Sentinella</a>
+						<a class="ba-button" href="#attiva-sentinella">Crea una Sentinella</a>
 						<a class="ba-button ba-button--outline" href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Esplora la mappa</a>
 					</div>
 				</div>
@@ -35,23 +86,51 @@ $report_url = home_url( '/segnala-un-evento/' );
 		</div>
 	</section>
 
+	<?php if ( $status ) : ?>
+		<section class="ba-sentinel-status-section">
+			<div class="ba-container">
+				<?php if ( 'confirmed' === $status ) : ?>
+					<div class="ba-card ba-sentinel-status ba-sentinel-status--success" role="status">
+						<strong>Sentinella attivata.</strong>
+						<p>La verifica email è completata. La Sentinella è ora attiva.</p>
+					</div>
+				<?php elseif ( 'already-active' === $status ) : ?>
+					<div class="ba-card ba-sentinel-status" role="status">
+						<strong>Sentinella già attiva.</strong>
+						<p>Questo link era già stato utilizzato correttamente.</p>
+					</div>
+				<?php elseif ( 'expired' === $status ) : ?>
+					<div class="ba-card ba-sentinel-status ba-sentinel-status--warning" role="alert">
+						<strong>Link di verifica scaduto.</strong>
+						<p>Ricrea la stessa Sentinella per ricevere un nuovo link di conferma.</p>
+					</div>
+				<?php else : ?>
+					<div class="ba-card ba-sentinel-status ba-sentinel-status--error" role="alert">
+						<strong>Link non valido.</strong>
+						<p>Il collegamento di verifica non è valido o non può più essere utilizzato.</p>
+					</div>
+				<?php endif; ?>
+			</div>
+		</section>
+	<?php endif; ?>
+
 	<section class="ba-sentinel-benefits">
 		<div class="ba-container">
 			<div class="ba-sentinel-benefits__grid">
 				<article class="ba-card ba-sentinel-benefit">
 					<span class="ba-sentinel-benefit__icon" aria-hidden="true">◎</span>
-					<h2>Scegli una zona</h2>
-					<p>Comune, località, quartiere o area che vuoi seguire.</p>
+					<h2>Scegli un territorio</h2>
+					<p>Comune, località, frazione o quartiere già presenti nel modello territoriale BadAround.</p>
 				</article>
 				<article class="ba-card ba-sentinel-benefit">
 					<span class="ba-sentinel-benefit__icon" aria-hidden="true">≋</span>
-					<h2>Filtra ciò che conta</h2>
-					<p>Puoi limitare gli avvisi alle categorie davvero rilevanti per te.</p>
+					<h2>Definisci l'interesse</h2>
+					<p>Categoria e, se vuoi, una tipologia più specifica del Discovery Contract.</p>
 				</article>
 				<article class="ba-card ba-sentinel-benefit">
-					<span class="ba-sentinel-benefit__icon" aria-hidden="true">◌</span>
-					<h2>Scegli la frequenza</h2>
-					<p>Immediata, riepilogo giornaliero oppure solo aggiornamenti importanti.</p>
+					<span class="ba-sentinel-benefit__icon" aria-hidden="true">✓</span>
+					<h2>Verifica l'email</h2>
+					<p>La Sentinella resta inattiva finché non confermi il link inviato all'indirizzo indicato.</p>
 				</article>
 			</div>
 		</div>
@@ -61,37 +140,44 @@ $report_url = home_url( '/segnala-un-evento/' );
 		<div class="ba-container ba-sentinel-builder__grid">
 			<div class="ba-sentinel-builder__intro">
 				<span class="ba-eyebrow">Crea una Sentinella</span>
-				<h2>Configura gli avvisi in pochi passaggi</h2>
-				<p>Questa è la prima interfaccia del configuratore. Il salvataggio definitivo verrà collegato allo strato account/notifiche.</p>
+				<h2>Definisci cosa vuoi seguire</h2>
+				<p>I criteri utilizzano gli stessi identificatori canonici di territorio, categoria e tipologia già usati da Ricerca, Mappa e Filtri.</p>
 
 				<div class="ba-sentinel-preview ba-card">
 					<div class="ba-sentinel-preview__head">
 						<div class="ba-sentinel-preview__icon">◎</div>
 						<div>
 							<span>Anteprima</span>
-							<strong data-ba-sentinel-preview-area>La tua zona</strong>
+							<strong data-ba-sentinel-preview-area>Seleziona un territorio</strong>
 						</div>
 					</div>
 					<div class="ba-sentinel-preview__meta">
-						<span><strong data-ba-sentinel-preview-categories>Tutte le categorie</strong><small>Eventi seguiti</small></span>
-						<span><strong data-ba-sentinel-preview-radius>3 km</strong><small>Raggio</small></span>
-						<span><strong data-ba-sentinel-preview-frequency>Immediata</strong><small>Frequenza</small></span>
+						<span><strong data-ba-sentinel-preview-category>Tutte le categorie</strong><small>Categoria</small></span>
+						<span><strong data-ba-sentinel-preview-event-type>Tutte le tipologie</strong><small>Tipologia</small></span>
+						<span><strong>Immediata</strong><small>Modalità MVP</small></span>
 					</div>
 				</div>
 			</div>
 
-			<form class="ba-card ba-sentinel-form" data-ba-sentinel-form>
+			<form class="ba-card ba-sentinel-form" data-ba-sentinel-form novalidate>
 				<div class="ba-sentinel-form__step">
 					<div class="ba-sentinel-form__step-head">
 						<span>1</span>
 						<div>
-							<h3>Quale zona vuoi seguire?</h3>
-							<p>Cerca un Comune, una località, una frazione o un quartiere.</p>
+							<h3>Quale territorio vuoi seguire?</h3>
+							<p>La Sentinella usa la gerarchia territoriale canonica di BadAround.</p>
 						</div>
 					</div>
 					<label class="ba-sentinel-field">
-						<span>Zona</span>
-						<input type="text" name="area" placeholder="Es. Torvaianica" data-ba-sentinel-area>
+						<span>Territorio</span>
+						<select name="territory_term_id" required data-ba-sentinel-territory>
+							<option value="">Seleziona un territorio</option>
+							<?php foreach ( $territories as $term ) : ?>
+								<option value="<?php echo esc_attr( $term->term_id ); ?>" data-slug="<?php echo esc_attr( $term->slug ); ?>" <?php selected( $requested_territory, $term->slug ); ?>>
+									<?php echo esc_html( badaround_sentinel_territory_label( $term ) ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
 					</label>
 				</div>
 
@@ -99,15 +185,33 @@ $report_url = home_url( '/segnala-un-evento/' );
 					<div class="ba-sentinel-form__step-head">
 						<span>2</span>
 						<div>
-							<h3>Quanto deve essere ampia l'area?</h3>
-							<p>Il raggio potrà essere raffinato in base alla struttura geografica della zona.</p>
+							<h3>Quali eventi ti interessano?</h3>
+							<p>Puoi seguire tutti gli eventi della zona oppure restringere a una categoria e a una tipologia.</p>
 						</div>
 					</div>
-					<div class="ba-sentinel-choice-grid" data-ba-sentinel-radius>
-						<label><input type="radio" name="radius" value="1 km"><span>1 km</span></label>
-						<label><input type="radio" name="radius" value="3 km" checked><span>3 km</span></label>
-						<label><input type="radio" name="radius" value="5 km"><span>5 km</span></label>
-						<label><input type="radio" name="radius" value="10 km"><span>10 km</span></label>
+					<div class="ba-sentinel-fields-grid">
+						<label class="ba-sentinel-field">
+							<span>Categoria</span>
+							<select name="category_term_id" data-ba-sentinel-category>
+								<option value="">Tutte le categorie</option>
+								<?php foreach ( $categories as $term ) : ?>
+									<option value="<?php echo esc_attr( $term->term_id ); ?>" data-slug="<?php echo esc_attr( $term->slug ); ?>" <?php selected( $requested_category, $term->slug ); ?>>
+										<?php echo esc_html( $term->name ); ?>
+									</option>
+								<?php endforeach; ?>
+							</select>
+						</label>
+						<label class="ba-sentinel-field">
+							<span>Tipologia</span>
+							<select name="event_type_term_id" data-ba-sentinel-event-type>
+								<option value="">Tutte le tipologie</option>
+								<?php foreach ( $event_types as $term ) : ?>
+									<option value="<?php echo esc_attr( $term->term_id ); ?>" data-parent="<?php echo esc_attr( $term->parent ); ?>" data-slug="<?php echo esc_attr( $term->slug ); ?>" <?php selected( $requested_event_type, $term->slug ); ?>>
+										<?php echo esc_html( $term->name ); ?>
+									</option>
+								<?php endforeach; ?>
+							</select>
+						</label>
 					</div>
 				</div>
 
@@ -115,83 +219,22 @@ $report_url = home_url( '/segnala-un-evento/' );
 					<div class="ba-sentinel-form__step-head">
 						<span>3</span>
 						<div>
-							<h3>Quali eventi vuoi seguire?</h3>
-							<p>Puoi selezionare una o più categorie.</p>
+							<h3>Dove dobbiamo inviare la verifica?</h3>
+							<p>Non serve un account. La Sentinella sarà attiva solo dopo la conferma dell'indirizzo email.</p>
 						</div>
 					</div>
-					<div class="ba-sentinel-category-grid" data-ba-sentinel-categories>
-						<label><input type="checkbox" value="Furti"><span>Furti</span></label>
-						<label><input type="checkbox" value="Sicurezza"><span>Sicurezza</span></label>
-						<label><input type="checkbox" value="Veicoli"><span>Veicoli</span></label>
-						<label><input type="checkbox" value="Degrado"><span>Degrado</span></label>
-						<label><input type="checkbox" value="Pericoli"><span>Pericoli</span></label>
-						<label><input type="checkbox" value="Animali"><span>Animali</span></label>
-					</div>
-				</div>
-
-				<div class="ba-sentinel-form__step">
-					<div class="ba-sentinel-form__step-head">
-						<span>4</span>
-						<div>
-							<h3>Quando vuoi essere avvisato?</h3>
-							<p>Scegli la frequenza più adatta.</p>
-						</div>
-					</div>
-					<div class="ba-sentinel-frequency" data-ba-sentinel-frequency>
-						<label><input type="radio" name="frequency" value="Immediata" checked><span><strong>Immediata</strong><small>Quando viene pubblicato un evento rilevante</small></span></label>
-						<label><input type="radio" name="frequency" value="Giornaliera"><span><strong>Riepilogo giornaliero</strong><small>Un solo aggiornamento con le novità della zona</small></span></label>
-						<label><input type="radio" name="frequency" value="Importanti"><span><strong>Solo eventi importanti</strong><small>Riduce al minimo le notifiche</small></span></label>
-					</div>
+					<label class="ba-sentinel-field">
+						<span>Email</span>
+						<input type="email" name="email" autocomplete="email" inputmode="email" placeholder="nome@esempio.it" required data-ba-sentinel-email>
+					</label>
 				</div>
 
 				<div class="ba-sentinel-form__footer">
-					<p>Potrai modificare o disattivare questa Sentinella in qualsiasi momento.</p>
-					<button class="ba-button" type="button" data-ba-sentinel-submit>Continua</button>
+					<p>Per D1 non vengono ancora inviate notifiche relative agli eventi: questa fase attiva soltanto la Sentinella verificata.</p>
+					<button class="ba-button" type="submit" data-ba-sentinel-submit>Crea Sentinella</button>
 				</div>
+				<div class="ba-sentinel-form__message" data-ba-sentinel-message role="status" aria-live="polite" hidden></div>
 			</form>
-		</div>
-	</section>
-
-	<section class="ba-sentinel-dashboard">
-		<div class="ba-container">
-			<div class="ba-sentinel-section-head">
-				<div>
-					<span class="ba-eyebrow">Le tue Sentinelle</span>
-					<h2>Un'unica vista per le zone che segui</h2>
-				</div>
-				<span class="ba-sentinel-section-head__note">Anteprima area account</span>
-			</div>
-
-			<div class="ba-sentinel-dashboard__grid">
-				<article class="ba-card ba-sentinel-zone-card">
-					<div class="ba-sentinel-zone-card__top">
-						<div><span class="ba-sentinel-zone-card__dot"></span><strong>Torvaianica</strong></div>
-						<span class="ba-badge ba-badge--resolved">Attiva</span>
-					</div>
-					<p>3 km · Furti, Sicurezza, Veicoli</p>
-					<div class="ba-sentinel-zone-card__stats"><span><strong>3</strong><small>nuove oggi</small></span><span><strong>18</strong><small>attive</small></span></div>
-					<div class="ba-sentinel-zone-card__actions"><button type="button">Modifica</button><button type="button">Pausa</button></div>
-				</article>
-
-				<article class="ba-card ba-sentinel-zone-card ba-sentinel-zone-card--muted">
-					<div class="ba-sentinel-zone-card__top">
-						<div><span class="ba-sentinel-zone-card__dot"></span><strong>Roma centro</strong></div>
-						<span class="ba-badge ba-badge--info">Demo</span>
-					</div>
-					<p>5 km · Tutte le categorie</p>
-					<div class="ba-sentinel-zone-card__stats"><span><strong>—</strong><small>nuove oggi</small></span><span><strong>—</strong><small>attive</small></span></div>
-					<div class="ba-sentinel-zone-card__actions"><button type="button">Modifica</button><button type="button">Pausa</button></div>
-				</article>
-
-				<article class="ba-sentinel-add-card">
-					<div>
-						<span aria-hidden="true">+</span>
-						<h3>Aggiungi una nuova zona</h3>
-						<p>Puoi creare più Sentinelle per luoghi diversi.</p>
-						<a href="#attiva-sentinella">Crea Sentinella</a>
-					</div>
-				</article>
-			</div>
 		</div>
 	</section>
 
