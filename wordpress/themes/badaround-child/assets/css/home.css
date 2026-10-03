@@ -129,3 +129,61 @@
 @media (prefers-reduced-motion:reduce) {
 	.ba-home-categories a,.ba-report-mount * { transition:none !important; scroll-behavior:auto !important; }
 }
+
+
+/* C4 — real Home map */
+.ba-home-map{
+	background:#eaf0f4;
+}
+.ba-home-map::before{display:none}
+.ba-home-google-map{
+	position:absolute;
+	inset:0;
+	width:100%;
+	height:100%;
+}
+.ba-home-map .ba-map-privacy-note{
+	left:16px;
+	right:auto;
+	bottom:16px;
+	z-index:8;
+}
+.ba-home-map__status{
+	top:16px;
+	left:50%;
+	z-index:9;
+}
+.ba-home-map__preview{
+	z-index:11;
+}
+.ba-home-geo-status{
+	min-height:1.2em;
+	margin:8px 0 0;
+	color:#5b7084;
+	font-size:.78rem;
+	line-height:1.4;
+}
+.ba-home-position:disabled{
+	opacity:.62;
+	cursor:not-allowed;
+}
+.ba-home-position:focus-visible{
+	outline:3px solid #111827;
+	outline-offset:3px;
+}
+
+@media(max-width:760px){
+	.ba-home-map .ba-map-privacy-note{
+		left:12px;
+		right:12px;
+		bottom:12px;
+		max-width:none;
+	}
+	.ba-home-map__preview.is-open + .ba-map-privacy-note{
+		display:none;
+	}
+	.ba-home-map__status{
+		top:12px;
+		max-width:calc(100% - 24px);
+	}
+}
