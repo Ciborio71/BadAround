@@ -16,7 +16,7 @@ class BadAround_Moderation_Admin {
 		add_filter( 'manage_' . BadAround_Event_Post_Type::POST_TYPE . '_posts_columns', array( $this, 'add_list_columns' ) );
 		add_action( 'manage_' . BadAround_Event_Post_Type::POST_TYPE . '_posts_custom_column', array( $this, 'render_list_column' ), 10, 2 );
 		add_filter( 'wp_insert_post_data', array( $this, 'prevent_b2_publish' ), 20, 2 );
-		add_action( 'admin_head-post.php', array( $this, 'hide_native_publish_controls' ) );
+		add_action( 'admin_footer-post.php', array( $this, 'customize_native_publish_controls' ) );
 	}
 
 	public function register_queue_menu() {
@@ -203,6 +203,10 @@ class BadAround_Moderation_Admin {
 		if ( ! current_user_can( 'ba_moderate_events' ) ) {
 			return;
 		}
+		if ( in_array( $status, array( BadAround_Moderation_Service::STATUS_APPROVED, BadAround_Moderation_Service::STATUS_REJECTED ), true ) ) {
+			echo '<p><em>' . esc_html__( 'Moderazione conclusa. La pubblicazione resta demandata a B3.', 'badaround-core' ) . '</em></p>';
+			return;
+		}
 		$base = admin_url( 'admin-post.php?action=ba_moderate_event&event_id=' . absint( $post->ID ) );
 		foreach ( array(
 			BadAround_Moderation_Service::STATUS_IN_REVIEW => __( 'Mantieni da moderare', 'badaround-core' ),
@@ -297,7 +301,7 @@ class BadAround_Moderation_Admin {
 	}
 
 	public function prevent_b2_publish( $data, $postarr ) {
-		if ( BadAround_Event_Post_Type::POST_TYPE !== $data['post_type'] || 'publish' !== $data['post_status'] ) {
+		if ( empty( $data['post_type'] ) || BadAround_Event_Post_Type::POST_TYPE !== $data['post_type'] || empty( $data['post_status'] ) || 'publish' !== $data['post_status'] ) {
 			return $data;
 		}
 		if ( apply_filters( 'badaround_allow_event_publish', false, isset( $postarr['ID'] ) ? absint( $postarr['ID'] ) : 0 ) ) {
@@ -307,12 +311,12 @@ class BadAround_Moderation_Admin {
 		return $data;
 	}
 
-	public function hide_native_publish_controls() {
+	public function customize_native_publish_controls() {
 		$screen = get_current_screen();
 		if ( ! $screen || BadAround_Event_Post_Type::POST_TYPE !== $screen->post_type ) {
 			return;
 		}
-		echo '<style>#publishing-action,#minor-publishing-actions{display:none!important}</style>';
+		echo '<script>(function(){var b=document.getElementById("publish");if(b){b.value="' . esc_js( __( 'Salva modifiche', 'badaround-core' ) ) . '";}var s=document.getElementById("post-status-select");if(s){s.style.display="none";}}());</script>';
 	}
 
 	private function report_for_event( $event_id ) {
