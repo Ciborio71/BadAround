@@ -26,6 +26,13 @@ $events = new WP_Query(
 		'ignore_sticky_posts' => true,
 		'orderby'             => 'date',
 		'order'               => 'DESC',
+		'meta_query'          => array(
+			array(
+				'key'     => '_ba_moderation_status',
+				'value'   => 'published',
+				'compare' => '=',
+			),
+		),
 		'tax_query'           => array(
 			array(
 				'taxonomy'         => $taxonomy,
