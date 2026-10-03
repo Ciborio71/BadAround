@@ -29,10 +29,15 @@ a { color: var(--ba-teal-700); }
 /* Remove Astra's outer content constraint only on BadAround custom screens. */
 body.home .site-content > .ast-container,
 body.single-ba_evento .site-content > .ast-container,
-body.post-type-archive-ba_evento .site-content > .ast-container,
+body.single-badaround_event .site-content > .ast-container,
 body.tax-ba_territorio .site-content > .ast-container,
-body.tax-ba_tipo_evento .site-content > .ast-container,
-body.page-template-page-segnala-evento .site-content > .ast-container {
+body.tax-badaround_location .site-content > .ast-container,
+body.page-template-page-segnala-evento .site-content > .ast-container,
+body.page-template-page-mappa .site-content > .ast-container,
+body.page-template-page-sentinelle .site-content > .ast-container,
+body.page-template-page-stati-sistema .site-content > .ast-container,
+body.page-template-page-segnalazione-inviata .site-content > .ast-container,
+body.page-template-page-area-personale .site-content > .ast-container {
 	display: block;
 	width: 100%;
 	max-width: none;
@@ -41,10 +46,15 @@ body.page-template-page-segnala-evento .site-content > .ast-container {
 
 body.home #primary,
 body.single-ba_evento #primary,
-body.post-type-archive-ba_evento #primary,
+body.single-badaround_event #primary,
 body.tax-ba_territorio #primary,
-body.tax-ba_tipo_evento #primary,
-body.page-template-page-segnala-evento #primary {
+body.tax-badaround_location #primary,
+body.page-template-page-segnala-evento #primary,
+body.page-template-page-mappa #primary,
+body.page-template-page-sentinelle #primary,
+body.page-template-page-stati-sistema #primary,
+body.page-template-page-segnalazione-inviata #primary,
+body.page-template-page-area-personale #primary {
 	float: none;
 	width: 100%;
 	max-width: none;
@@ -54,10 +64,15 @@ body.page-template-page-segnala-evento #primary {
 
 body.home .site-content,
 body.single-ba_evento .site-content,
-body.post-type-archive-ba_evento .site-content,
+body.single-badaround_event .site-content,
 body.tax-ba_territorio .site-content,
-body.tax-ba_tipo_evento .site-content,
-body.page-template-page-segnala-evento .site-content {
+body.tax-badaround_location .site-content,
+body.page-template-page-segnala-evento .site-content,
+body.page-template-page-mappa .site-content,
+body.page-template-page-sentinelle .site-content,
+body.page-template-page-stati-sistema .site-content,
+body.page-template-page-segnalazione-inviata .site-content,
+body.page-template-page-area-personale .site-content {
 	padding: 0;
 }
 

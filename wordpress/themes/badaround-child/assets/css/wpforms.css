@@ -1,16 +1,653 @@
-.ba-report-mount .wpforms-container { margin: 0; }
-.ba-report-mount .wpforms-page-indicator { margin-bottom: 28px; }
-.ba-report-mount .wpforms-field-label { color: var(--ba-navy-950); font-weight: 800; }
+/* BadAround WPForms skin — Desktop Focus Monocolonna */
+.ba-report-mount .wpforms-container{margin:0!important}
+.ba-report-mount .wpforms-page-indicator,
+.ba-report-mount .badaround-form-intro,
+.ba-report-mount .badaround-required-note{display:none!important}
+.ba-report-mount fieldset{margin:0!important;padding:0!important;border:0!important}
+.ba-report-mount .wpforms-field{padding:8px 0!important}
+.ba-report-mount .wpforms-field-label,
+.ba-report-mount legend.wpforms-field-label{
+	margin-bottom:9px!important;
+	color:var(--ba-text-title)!important;
+	font-size:13.5px!important;
+	font-weight:700!important;
+	line-height:1.3!important;
+}
+.ba-report-mount .wpforms-required-label{color:var(--ba-danger)!important}
+.ba-report-mount .wpforms-field-description,
+.ba-report-mount .wpforms-field-sublabel{
+	color:var(--ba-text-subtle)!important;
+	font-size:11px!important;
+	line-height:1.45!important;
+}
+
+/* Standard controls */
 .ba-report-mount input[type="text"],
 .ba-report-mount input[type="email"],
 .ba-report-mount input[type="tel"],
 .ba-report-mount input[type="number"],
+.ba-report-mount input[type="url"],
+.ba-report-mount input[type="date"],
+.ba-report-mount input[type="time"],
 .ba-report-mount select,
-.ba-report-mount textarea {
-	min-height: 48px; border: 1px solid var(--ba-border) !important; border-radius: 12px !important; background: #fff !important;
+.ba-report-mount textarea{
+	width:100%!important;
+	min-height:44px!important;
+	padding:10px 12px!important;
+	border:1px solid var(--ba-border-default)!important;
+	border-radius:10px!important;
+	background:#fff!important;
+	color:var(--ba-text-body)!important;
+	font-size:13px!important;
+	box-shadow:none!important;
 }
-.ba-report-mount textarea { min-height: 130px; }
-.ba-report-mount input:focus, .ba-report-mount select:focus, .ba-report-mount textarea:focus { border-color: var(--ba-teal-600) !important; box-shadow: 0 0 0 3px rgba(7,152,168,.14) !important; }
-.ba-report-mount .wpforms-page-button, .ba-report-mount button[type="submit"] { min-height: 48px !important; padding: 10px 20px !important; border: 0 !important; border-radius: 12px !important; background: var(--ba-teal-600) !important; color: #fff !important; font-weight: 800 !important; }
-.ba-report-placeholder { padding: 34px; border: 2px dashed var(--ba-border); border-radius: var(--ba-radius); text-align: center; color: var(--ba-muted); background: var(--ba-surface-alt); }
+.ba-report-mount textarea{min-height:120px!important;resize:vertical}
+.ba-report-mount input:focus,
+.ba-report-mount select:focus,
+.ba-report-mount textarea:focus{
+	border-color:var(--ba-primary)!important;
+	outline:3px solid rgba(37,99,235,.10)!important;
+	box-shadow:none!important;
+}
 
+/* 1. Macro-categorie: 3 x 2, tutte identiche */
+.ba-report-mount .badaround-event-category{padding:0 0 12px!important}
+.ba-report-mount .badaround-event-category>fieldset>legend{display:none!important}
+.ba-report-mount .badaround-event-category ul{
+	display:grid!important;
+	grid-template-columns:repeat(3,minmax(0,1fr))!important;
+	gap:10px 12px!important;
+	margin:0!important;
+	padding:0!important;
+	list-style:none!important;
+}
+.ba-report-mount .badaround-event-category li{position:relative;margin:0!important;min-width:0}
+.ba-report-mount .badaround-event-category input[type="radio"]{
+	position:absolute!important;
+	width:1px!important;
+	height:1px!important;
+	opacity:0!important;
+	pointer-events:none!important;
+}
+.ba-report-mount .badaround-event-category .wpforms-field-label-inline{
+	position:relative;
+	display:grid!important;
+	grid-template-columns:22px minmax(0,1fr);
+	grid-template-rows:auto auto;
+	grid-template-areas:"icon title" "icon desc";
+	column-gap:8px;
+	align-content:center;
+	width:100%;
+	height:68px!important;
+	min-height:68px!important;
+	max-height:68px!important;
+	padding:9px 12px!important;
+	overflow:hidden;
+	border:1.5px solid var(--ba-border-default)!important;
+	border-radius:12px!important;
+	background:#fff!important;
+	color:var(--ba-text-title)!important;
+	box-shadow:none!important;
+	cursor:pointer;
+	transition:border-color .15s ease,background-color .15s ease,color .15s ease;
+}
+.ba-report-mount .badaround-event-category .wpforms-field-label-inline:hover{
+	border-color:var(--ba-border-hover)!important;
+	background:#F8FAFC!important;
+	transform:none!important;
+	box-shadow:none!important;
+}
+.ba-report-mount .badaround-event-category input:checked+.wpforms-field-label-inline{
+	border:2px solid var(--ba-primary)!important;
+	background:var(--ba-primary-active-bg)!important;
+	box-shadow:none!important;
+}
+.ba-report-mount .badaround-event-category input:focus-visible+.wpforms-field-label-inline{
+	outline:3px solid rgba(37,99,235,.16);
+	outline-offset:2px;
+}
+.ba-choice-icon{
+	grid-area:icon;
+	display:grid;
+	place-items:center;
+	align-self:center;
+	width:22px;
+	height:22px;
+	border:0;
+	border-radius:0;
+	background:transparent!important;
+	color:var(--ba-primary);
+}
+.ba-choice-icon svg{width:20px;height:20px}
+.ba-choice-title{
+	grid-area:title;
+	align-self:end;
+	overflow:hidden;
+	color:var(--ba-text-title);
+	font-size:13px;
+	font-weight:700;
+	line-height:1.1;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+}
+.ba-choice-desc{
+	grid-area:desc;
+	align-self:start;
+	overflow:hidden;
+	margin-top:2px;
+	color:var(--ba-text-subtle);
+	font-size:10px;
+	font-weight:500;
+	line-height:1.15;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+}
+.ba-report-mount .badaround-event-category input:checked+.wpforms-field-label-inline .ba-choice-title{color:var(--ba-primary-hover)}
+.ba-report-mount .badaround-event-category input:checked+.wpforms-field-label-inline .ba-choice-desc{color:#3B82F6}
+.ba-report-mount .badaround-event-category input:checked+.wpforms-field-label-inline::after{
+	content:"✓";
+	position:absolute;
+	right:8px;
+	top:8px;
+	display:grid;
+	place-items:center;
+	width:12px;
+	height:12px;
+	border-radius:50%;
+	background:var(--ba-primary);
+	color:#fff;
+	font-size:7px;
+	font-weight:800;
+}
+
+/* Non selezionate: meno invasive ma sempre leggibili */
+.ba-report-mount .badaround-event-category ul:has(input:checked) li:not(:has(input:checked)) .wpforms-field-label-inline{
+	opacity:.72;
+	background:#fff!important;
+	border-color:var(--ba-border-default)!important;
+	filter:none;
+}
+
+/* Il riepilogo intermedio non serve nel layout del mockup */
+.ba-selected-category{display:none!important}
+
+/* 2. Evento specifico: righe compatte in sequenza */
+.ba-report-mount .ba-drilldown-field{
+	max-width:none;
+	margin:14px 0 0!important;
+	padding:18px 0 0!important;
+	border-top:1px solid var(--ba-border-default);
+}
+.ba-report-mount .ba-drilldown-field ul{
+	display:grid!important;
+	grid-template-columns:1fr!important;
+	gap:6px!important;
+	margin:0!important;
+	padding:0!important;
+	list-style:none!important;
+}
+.ba-report-mount .ba-drilldown-field li{position:relative;margin:0!important}
+.ba-report-mount .ba-drilldown-field input[type="radio"]{
+	position:absolute!important;
+	width:1px!important;
+	height:1px!important;
+	opacity:0!important;
+}
+.ba-report-mount .ba-drilldown-field .wpforms-field-label-inline{
+	position:relative;
+	display:flex!important;
+	align-items:center!important;
+	gap:9px;
+	width:100%!important;
+	height:42px!important;
+	min-height:42px!important;
+	max-height:42px!important;
+	padding:7px 34px 7px 12px!important;
+	overflow:hidden;
+	border:1.2px solid var(--ba-border-default)!important;
+	border-radius:10px!important;
+	background:#fff!important;
+	color:var(--ba-text-body)!important;
+	font-size:12.5px!important;
+	font-weight:500!important;
+	line-height:1.2!important;
+	box-shadow:none!important;
+	cursor:pointer;
+	transition:border-color .15s ease,background-color .15s ease,color .15s ease;
+}
+.ba-report-mount .ba-drilldown-field .wpforms-field-label-inline:hover{
+	border-color:var(--ba-border-hover)!important;
+	background:var(--ba-bg-subtle)!important;
+}
+.ba-report-mount .ba-drilldown-field input:checked+.wpforms-field-label-inline{
+	border:1.5px solid var(--ba-primary)!important;
+	background:var(--ba-primary-active-bg)!important;
+	color:#1E40AF!important;
+	font-weight:700!important;
+	box-shadow:none!important;
+}
+.ba-report-mount .ba-drilldown-field input:checked+.wpforms-field-label-inline::after{
+	content:"✓";
+	position:absolute;
+	right:12px;
+	top:50%;
+	display:grid;
+	place-items:center;
+	width:13px;
+	height:13px;
+	border-radius:50%;
+	background:var(--ba-primary);
+	color:#fff;
+	font-size:8px;
+	font-weight:800;
+	transform:translateY(-50%);
+}
+.ba-drilldown-icon{
+	flex:0 0 auto;
+	display:grid;
+	place-items:center;
+	width:18px;
+	height:18px;
+	border:0;
+	border-radius:0;
+	background:transparent;
+	font-size:15px;
+	line-height:1;
+}
+.ba-report-mount .ba-drilldown-field ul:has(input:checked) li:not(:has(input:checked)) .wpforms-field-label-inline{
+	opacity:.72;
+	filter:none;
+	background:#fff!important;
+	border-color:var(--ba-border-default)!important;
+}
+
+/* 3. Rapporto con l'evento: pillole su 3 colonne */
+.ba-report-mount .ba-relationship-field{
+	max-width:none;
+	margin:18px 0 0!important;
+	padding:0!important;
+	border:0!important;
+}
+.ba-report-mount .ba-relationship-field ul{
+	display:grid!important;
+	grid-template-columns:repeat(3,minmax(0,1fr))!important;
+	gap:8px!important;
+	margin:0!important;
+	padding:0!important;
+	list-style:none!important;
+}
+.ba-report-mount .ba-relationship-field li{position:relative;margin:0!important}
+.ba-report-mount .ba-relationship-field input[type="radio"]{
+	position:absolute!important;
+	width:1px!important;
+	height:1px!important;
+	opacity:0!important;
+}
+.ba-report-mount .ba-relationship-field .wpforms-field-label-inline{
+	position:relative;
+	display:flex!important;
+	align-items:center!important;
+	justify-content:center;
+	width:100%!important;
+	height:38px!important;
+	min-height:38px!important;
+	max-height:38px!important;
+	padding:6px 8px!important;
+	overflow:hidden;
+	border:1.2px solid var(--ba-border-default)!important;
+	border-radius:8px!important;
+	background:#fff!important;
+	color:#475569!important;
+	font-size:11px!important;
+	font-weight:500!important;
+	line-height:1.15!important;
+	text-align:center;
+	box-shadow:none!important;
+	cursor:pointer;
+}
+.ba-report-mount .ba-relationship-field input:checked+.wpforms-field-label-inline{
+	border:1.5px solid var(--ba-primary)!important;
+	background:var(--ba-primary-active-bg)!important;
+	color:var(--ba-primary-hover)!important;
+	font-weight:700!important;
+	box-shadow:none!important;
+}
+.ba-report-mount .ba-relationship-field input:checked+.wpforms-field-label-inline::after{display:none!important}
+.ba-report-mount .ba-relationship-field ul:has(input:checked) li:not(:has(input:checked)) .wpforms-field-label-inline{
+	opacity:.76;
+	filter:none;
+	background:#fff!important;
+}
+
+/* 4. Navigazione: CTA full width */
+.ba-report-mount .wpforms-field-pagebreak{
+	margin:20px 0 0!important;
+	padding:0!important;
+	border:0!important;
+}
+.ba-report-mount .wpforms-field-pagebreak .wpforms-pagebreak-left{
+	display:flex!important;
+	flex-direction:column!important;
+	align-items:stretch!important;
+	width:100%!important;
+	gap:8px!important;
+	float:none!important;
+	text-align:initial!important;
+}
+.ba-report-mount .wpforms-field-pagebreak .wpforms-page-button-group{
+	display:flex!important;
+	width:100%!important;
+	margin:0!important;
+	padding:0!important;
+	float:none!important;
+}
+.ba-report-mount .wpforms-field-pagebreak .wpforms-page-button-group:has(.wpforms-page-prev){
+	order:2;
+}
+.ba-report-mount .wpforms-field-pagebreak .wpforms-page-button-group:has(.wpforms-page-next){
+	order:1;
+}
+.ba-report-mount .wpforms-page-button,
+.ba-report-mount button[type="submit"]{
+	width:100%!important;
+	min-height:46px!important;
+	margin:0!important;
+	padding:10px 14px!important;
+	border:1px solid transparent!important;
+	border-radius:10px!important;
+	background:var(--ba-primary)!important;
+	color:#fff!important;
+	font-size:14px!important;
+	font-weight:700!important;
+	box-shadow:none!important;
+	cursor:pointer;
+}
+.ba-report-mount .wpforms-page-button:hover,
+.ba-report-mount button[type="submit"]:hover{
+	background:var(--ba-primary-hover)!important;
+	filter:none!important;
+	transform:none!important;
+}
+.ba-report-mount .wpforms-page-prev{
+	margin-top:2px!important;
+	background:#fff!important;
+	color:var(--ba-text-body)!important;
+	border-color:var(--ba-border-default)!important;
+}
+.ba-report-mount .wpforms-save-resume-button{
+	order:3;
+	align-self:center!important;
+	margin:0!important;
+	padding:2px 0!important;
+	border:0!important;
+	background:transparent!important;
+	color:var(--ba-text-subtle)!important;
+	font-size:11.5px!important;
+	font-weight:500!important;
+	text-align:center!important;
+	text-decoration:none!important;
+}
+.ba-report-mount .wpforms-save-resume-button:hover{color:var(--ba-primary)!important}
+
+/* Step 2: mappa per prima, ampia e ravvicinata */
+.ba-report-mount .wpforms-page-2{display:flex;flex-direction:column}
+.ba-report-mount .wpforms-page-2 .ba-location-first{order:-50}
+.ba-report-mount .wpforms-page-2 .ba-location-secondary{order:-30}
+.ba-report-mount .wpforms-page-2 .ba-danger-field{order:-10}
+.ba-report-mount .ba-location-first{
+	margin:0!important;
+	padding:0!important;
+	border:0!important;
+	background:transparent!important;
+}
+.ba-report-mount .ba-location-first .wpforms-geolocation-map,
+.ba-report-mount .ba-location-first [class*="wpforms-geolocation-map"]{
+	min-height:400px!important;
+	overflow:hidden!important;
+	border:1px solid var(--ba-border-default)!important;
+	border-radius:12px!important;
+	box-shadow:none!important;
+}
+.ba-report-mount .ba-location-first input{margin-top:10px!important}
+.ba-location-helper{
+	display:flex;
+	align-items:flex-start;
+	gap:8px;
+	margin:9px 0 0;
+	padding:9px 10px;
+	border:1px solid var(--ba-primary-border);
+	border-radius:8px;
+	background:var(--ba-primary-active-bg);
+	color:var(--ba-text-subtle);
+	font-size:10.5px;
+	line-height:1.4;
+}
+.ba-location-helper strong{color:var(--ba-primary-hover)}
+.ba-report-mount .ba-danger-field{
+	margin-top:8px!important;
+	padding:12px!important;
+	border:1px solid #FDE68A;
+	border-radius:10px;
+	background:#FFFBEB;
+}
+
+/* Step 3+ */
+.ba-report-mount .ba-form-section{
+	margin:8px 0!important;
+	padding:13px!important;
+	border:1px solid var(--ba-border-default);
+	border-radius:10px;
+	background:#fff;
+}
+.ba-report-mount .ba-form-section--media{background:var(--ba-bg-subtle)}
+.ba-report-mount .ba-form-section--identity{background:#fff}
+.ba-report-mount .ba-form-section--sensitive{border-color:#FDE68A;background:#FFFBEB}
+.ba-report-mount input[type="radio"],
+.ba-report-mount input[type="checkbox"]{accent-color:var(--ba-primary)}
+
+/* Evita scroll anchoring del browser durante la conditional logic */
+.ba-report-mount,
+.ba-report-mount .wpforms-container,
+.ba-report-mount .wpforms-page{overflow-anchor:none}
+
+@media(max-width:720px){
+	.ba-report-mount .badaround-event-category ul{
+		grid-template-columns:repeat(2,minmax(0,1fr))!important;
+		gap:8px!important;
+	}
+	.ba-report-mount .badaround-event-category .wpforms-field-label-inline{
+		height:72px!important;
+		min-height:72px!important;
+		max-height:72px!important;
+		padding:9px 10px!important;
+	}
+	.ba-choice-title{font-size:12px}
+	.ba-choice-desc{font-size:9.5px}
+	.ba-report-mount .ba-relationship-field ul{grid-template-columns:1fr!important}
+	.ba-report-mount .ba-relationship-field .wpforms-field-label-inline{
+		height:40px!important;
+		min-height:40px!important;
+		max-height:40px!important;
+	}
+	.ba-report-mount .ba-location-first .wpforms-geolocation-map,
+	.ba-report-mount .ba-location-first [class*="wpforms-geolocation-map"]{min-height:340px!important}
+}
+@media(max-width:420px){
+	.ba-report-mount .badaround-event-category ul{grid-template-columns:1fr 1fr!important}
+	.ba-report-mount .badaround-event-category .wpforms-field-label-inline{
+		grid-template-columns:20px minmax(0,1fr);
+		height:76px!important;
+		min-height:76px!important;
+		max-height:76px!important;
+	}
+}
+@media(prefers-reduced-motion:reduce){
+	.ba-report-mount *{transition:none!important}
+}
+
+
+/* Mockup fidelity pass — exact visual language from supplied reference */
+.ba-report-mount .badaround-event-category ul{
+	grid-template-columns:repeat(3,minmax(0,1fr))!important;
+	gap:10px 12px!important;
+}
+.ba-report-mount .badaround-event-category .wpforms-field-label-inline{
+	grid-template-columns:24px minmax(0,1fr)!important;
+	grid-template-areas:"icon title" "icon desc"!important;
+	height:68px!important;
+	min-height:68px!important;
+	max-height:68px!important;
+	padding:9px 12px!important;
+	border-radius:12px!important;
+	border-width:1.5px!important;
+}
+.ba-report-mount .badaround-event-category input:checked+.wpforms-field-label-inline{
+	border-width:2px!important;
+	background:#EFF6FF!important;
+	border-color:#2563EB!important;
+}
+.ba-choice-icon{
+	width:24px!important;
+	height:24px!important;
+	display:grid!important;
+	place-items:center!important;
+	background:transparent!important;
+	color:inherit!important;
+	font-size:20px!important;
+	line-height:1!important;
+}
+.ba-choice-icon svg{display:none!important}
+.ba-choice-title{
+	font-size:13px!important;
+	font-weight:700!important;
+	color:#0F172A!important;
+}
+.ba-choice-desc{
+	font-size:10px!important;
+	font-weight:500!important;
+	color:#64748B!important;
+}
+.ba-report-mount .badaround-event-category input:checked+.wpforms-field-label-inline .ba-choice-title{
+	color:#1D4ED8!important;
+	font-weight:800!important;
+}
+.ba-report-mount .badaround-event-category input:checked+.wpforms-field-label-inline .ba-choice-desc{
+	color:#3B82F6!important;
+	font-weight:600!important;
+}
+.ba-report-mount .badaround-event-category input:checked+.wpforms-field-label-inline::after{
+	right:8px!important;
+	top:9px!important;
+	width:10px!important;
+	height:10px!important;
+	font-size:6.5px!important;
+	background:#2563EB!important;
+}
+
+/* Event rows: 42px, left icon, radio circle/check at right */
+.ba-report-mount .ba-drilldown-field ul{gap:6px!important}
+.ba-report-mount .ba-drilldown-field .wpforms-field-label-inline{
+	height:42px!important;
+	min-height:42px!important;
+	max-height:42px!important;
+	padding:7px 38px 7px 12px!important;
+	border:1.2px solid #E2E8F0!important;
+	border-radius:10px!important;
+	background:#fff!important;
+	color:#334155!important;
+	font-size:12.5px!important;
+	font-weight:500!important;
+}
+.ba-report-mount .ba-drilldown-field .wpforms-field-label-inline::after{
+	content:""!important;
+	position:absolute!important;
+	right:12px!important;
+	top:50%!important;
+	width:13px!important;
+	height:13px!important;
+	border:1.5px solid #CBD5E1!important;
+	border-radius:50%!important;
+	background:#fff!important;
+	transform:translateY(-50%)!important;
+	box-sizing:border-box!important;
+}
+.ba-report-mount .ba-drilldown-field input:checked+.wpforms-field-label-inline{
+	background:#EFF6FF!important;
+	border:1.5px solid #2563EB!important;
+	color:#1E40AF!important;
+	font-weight:700!important;
+}
+.ba-report-mount .ba-drilldown-field input:checked+.wpforms-field-label-inline::after{
+	content:"✓"!important;
+	display:grid!important;
+	place-items:center!important;
+	width:13px!important;
+	height:13px!important;
+	border:0!important;
+	background:#2563EB!important;
+	color:#fff!important;
+	font-size:8px!important;
+	font-weight:800!important;
+	line-height:1!important;
+}
+.ba-drilldown-icon{
+	width:18px!important;
+	height:18px!important;
+	font-size:15px!important;
+	background:transparent!important;
+}
+
+/* Relationship pills: exact white/blue treatment */
+.ba-report-mount .ba-relationship-field ul{
+	grid-template-columns:repeat(3,minmax(0,1fr))!important;
+	gap:9px!important;
+}
+.ba-report-mount .ba-relationship-field .wpforms-field-label-inline{
+	height:38px!important;
+	min-height:38px!important;
+	max-height:38px!important;
+	border:1.2px solid #E2E8F0!important;
+	border-radius:8px!important;
+	background:#fff!important;
+	color:#475569!important;
+	font-size:11.5px!important;
+	font-weight:500!important;
+}
+.ba-report-mount .ba-relationship-field input:checked+.wpforms-field-label-inline{
+	background:#EFF6FF!important;
+	border:1.5px solid #2563EB!important;
+	color:#1D4ED8!important;
+	font-weight:700!important;
+}
+
+/* CTA, save link and privacy strip */
+.ba-report-mount .wpforms-page-button,
+.ba-report-mount button[type="submit"]{
+	min-height:46px!important;
+	border-radius:10px!important;
+	background:#2563EB!important;
+	font-size:14px!important;
+	font-weight:700!important;
+}
+.ba-report-mount .wpforms-page-button:hover,
+.ba-report-mount button[type="submit"]:hover{background:#1D4ED8!important}
+.ba-report-mount .wpforms-save-resume-button{
+	color:#64748B!important;
+	font-size:11.5px!important;
+	font-weight:500!important;
+}
+.ba-report-privacy{
+	border-radius:8px!important;
+	background:#F8FAFC!important;
+	border-color:#E2E8F0!important;
+}
+
+/* Preserve the wider desktop shell requested, while keeping the mockup's exact component geometry. */
+@media(min-width:721px){
+	.ba-report-mount .badaround-event-category,
+	.ba-report-mount .ba-drilldown-field,
+	.ba-report-mount .ba-relationship-field,
+	.ba-report-mount .wpforms-field-pagebreak{
+		width:100%;
+	}
+}

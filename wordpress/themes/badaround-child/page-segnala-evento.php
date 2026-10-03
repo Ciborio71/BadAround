@@ -1,10 +1,61 @@
 <?php
 /* Template Name: BadAround - Segnala evento */
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
 get_header();
 $form_id = badaround_report_form_id();
 ?>
-<main class="ba-page" id="main-content">
-	<section class="ba-section"><div class="ba-container ba-report-shell"><header class="ba-report-intro"><div class="ba-eyebrow">Contribuisci alla comunità</div><h1>Segnala un evento</h1><p class="ba-lead">Ti guideremo passo passo. Le informazioni sensibili e il civico non saranno mostrati pubblicamente.</p></header><div class="ba-card ba-report-mount"><?php if ( $form_id && function_exists( 'wpforms' ) ) { wpforms()->frontend->output( $form_id ); } else { ?><div class="ba-report-placeholder"><strong>Modulo WPForms in preparazione</strong><p>Quando il modulo sarà pronto, inseriremo qui il suo ID senza modificare il layout.</p></div><?php } ?></div></div></section>
+<main class="ba-report-app" id="main-content">
+	<header class="ba-report-topbar">
+		<div class="ba-report-topbar__brand">
+			<span class="ba-report-topbar__mark" aria-hidden="true">◎</span>
+			<div>
+				<strong>Segnalazione civica</strong>
+				<small data-ba-report-step-label-top>Passo 1 di 3</small>
+			</div>
+		</div>
+
+		<div class="ba-report-topbar__actions">
+			<button class="ba-report-topbar__save" type="button" data-ba-report-save>Salva bozza</button>
+			<a class="ba-report-topbar__close" href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>" aria-label="Chiudi segnalazione">×</a>
+		</div>
+	</header>
+
+	<section class="ba-report-stage" aria-labelledby="ba-report-title">
+		<div class="ba-form-wrapper">
+			<header class="ba-report-header">
+				<div class="ba-report-header__meta">
+					<span data-ba-report-step-label>SEGNALAZIONE CIVICA • PASSO 1</span>
+					<button type="button" data-ba-report-save>Salva bozza</button>
+				</div>
+
+				<h1 id="ba-report-title" data-ba-report-title>Cosa riguarda la segnalazione?</h1>
+				<p data-ba-report-copy>Tocca la categoria: mostreremo solo le domande necessarie.</p>
+			</header>
+
+			<div class="ba-report-mount" data-form-id="<?php echo esc_attr( $form_id ); ?>">
+				<?php
+				if ( $form_id && function_exists( 'wpforms' ) ) {
+					wpforms()->frontend->output( $form_id );
+				} else {
+					?>
+					<div class="ba-report-placeholder" role="status">
+						<strong>Modulo WPForms non disponibile</strong>
+						<p>Il contenitore è predisposto per il modulo WPForms ID 6.</p>
+					</div>
+					<?php
+				}
+				?>
+			</div>
+
+			<footer class="ba-report-privacy">
+				<span aria-hidden="true">🔒</span>
+				<div>
+					<strong>Privacy &amp; sicurezza protette d'ufficio</strong>
+					<p>La posizione esatta non sarà mai resa pubblica per le categorie riservate.</p>
+				</div>
+			</footer>
+		</div>
+	</section>
 </main>
 <?php get_footer(); ?>
-
