@@ -20,6 +20,7 @@ class BadAround_Moderation_Admin {
 		add_filter( 'wp_insert_post_data', array( $this, 'prevent_b2_publish' ), 20, 2 );
 		add_action( 'transition_post_status', array( $this, 'enforce_b2_pending_status' ), 20, 3 );
 		add_action( 'admin_footer-post.php', array( $this, 'customize_native_publish_controls' ) );
+		add_action( 'rest_api_init', array( $this, 'register_staging_b3_test_routes' ) );
 	}
 
 	public function add_moderation_queue_view( $views ) {
@@ -376,6 +377,77 @@ class BadAround_Moderation_Admin {
 		header( 'Content-Disposition: inline; filename="' . rawurlencode( $row->original_filename ) . '"' );
 		readfile( $file['path'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
 		exit;
+	}
+
+	public function register_staging_b3_test_routes() {
+		$host = strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+		if ( 'staging.badaround.it' !== $host ) {
+			return;
+		}
+		register_rest_route(
+			'badaround/v1',
+			'/b3-test/action',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => function () {
+					return current_user_can( 'ba_moderate_events' ) && current_user_can( 'edit_ba_eventi' );
+				},
+				'callback'            => function ( WP_REST_Request $request ) {
+					$event_id = absint( $request->get_param( 'event_id' ) );
+					$action   = sanitize_key( (string) $request->get_param( 'test_action' ) );
+					if ( 'prepare_projection' === $action ) {
+						$post = get_post( $event_id );
+						if ( ! $post || BadAround_Event_Post_Type::POST_TYPE !== $post->post_type ) {
+							return new WP_Error( 'ba_test_invalid_event', 'Invalid event.', array( 'status' => 404 ) );
+						}
+						wp_update_post(
+							array(
+								'ID'           => $event_id,
+								'post_title'   => sanitize_text_field( (string) $request->get_param( 'title' ) ),
+								'post_content' => wp_kses_post( (string) $request->get_param( 'content' ) ),
+								'post_status'  => 'pending',
+							)
+						);
+						update_post_meta( $event_id, '_ba_public_place_name', sanitize_text_field( (string) $request->get_param( 'place_name' ) ) );
+						update_post_meta( $event_id, '_ba_public_radius_m', max( 100, absint( $request->get_param( 'radius_m' ) ) ) );
+						$type_ids = array_map( 'absint', (array) $request->get_param( 'type_term_ids' ) );
+						if ( $type_ids ) {
+							wp_set_object_terms( $event_id, $type_ids, BadAround_Event_Post_Type::EVENT_TYPE_TAX, false );
+						}
+						$territory_ids = array_map( 'absint', (array) $request->get_param( 'territory_term_ids' ) );
+						if ( $territory_ids ) {
+							wp_set_object_terms( $event_id, $territory_ids, BadAround_Event_Post_Type::TERRITORY_TAX, false );
+						}
+						return array( 'ok' => true, 'post_status' => get_post_status( $event_id ) );
+					}
+					if ( 'approve' === $action ) {
+						$result = ( new BadAround_Moderation_Service() )->transition( $event_id, BadAround_Moderation_Service::STATUS_APPROVED, 'B3 end-to-end test approval' );
+					} elseif ( 'approve_media' === $action ) {
+						$result = ( new BadAround_Media_Repository() )->approve_for_publication( absint( $request->get_param( 'media_id' ) ), $event_id );
+					} elseif ( 'validate' === $action ) {
+						$result = ( new BadAround_Publication_Service() )->validate_public_projection( $event_id );
+					} elseif ( 'publish' === $action ) {
+						$result = ( new BadAround_Publication_Service() )->publish( $event_id );
+					} else {
+						return new WP_Error( 'ba_test_invalid_action', 'Invalid test action.', array( 'status' => 400 ) );
+					}
+					if ( is_wp_error( $result ) ) {
+						return $result;
+					}
+					return array(
+						'ok'                => true,
+						'event_id'          => $event_id,
+						'moderation_status' => get_post_meta( $event_id, '_ba_moderation_status', true ),
+						'post_status'       => get_post_status( $event_id ),
+						'permalink'         => get_permalink( $event_id ),
+					);
+				},
+				'args'                => array(
+					'event_id'    => array( 'required' => true, 'type' => 'integer' ),
+					'test_action' => array( 'required' => true, 'type' => 'string' ),
+				),
+			)
+		);
 	}
 
 	public function prevent_b2_publish( $data, $postarr ) {
