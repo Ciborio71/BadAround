@@ -201,3 +201,43 @@ function badaround_wpforms_geolocation_map_zoom( $zoom, $context ) {
 	return $zoom;
 }
 add_filter( 'wpforms_geolocation_map_zoom', 'badaround_wpforms_geolocation_map_zoom', 20, 2 );
+
+
+/**
+ * B4 — minimal SEO for the canonical public event detail.
+ * Only published ba_evento items receive public-event metadata.
+ */
+function badaround_event_document_title( $parts ) {
+	if ( is_singular( 'ba_evento' ) && 'publish' === get_post_status( get_queried_object_id() ) ) {
+		$parts['site'] = 'BadAround';
+	}
+	return $parts;
+}
+add_filter( 'document_title_parts', 'badaround_event_document_title', 20 );
+
+function badaround_event_robots( $robots ) {
+	if ( is_singular( 'ba_evento' ) && 'publish' !== get_post_status( get_queried_object_id() ) ) {
+		$robots['noindex']  = true;
+		$robots['nofollow'] = true;
+	}
+	return $robots;
+}
+add_filter( 'wp_robots', 'badaround_event_robots', 20 );
+
+function badaround_event_meta_description() {
+	if ( ! is_singular( 'ba_evento' ) || 'publish' !== get_post_status( get_queried_object_id() ) ) {
+		return;
+	}
+	if ( defined( 'WPSEO_VERSION' ) || defined( 'RANK_MATH_VERSION' ) ) {
+		return;
+	}
+	$post_id     = get_queried_object_id();
+	$description = has_excerpt( $post_id ) ? get_the_excerpt( $post_id ) : wp_strip_all_tags( get_post_field( 'post_content', $post_id ) );
+	$description = trim( preg_replace( '/\s+/', ' ', $description ) );
+	if ( ! $description ) {
+		return;
+	}
+	$description = wp_html_excerpt( $description, 155, '…' );
+	echo '<meta name="description" content="' . esc_attr( $description ) . '">' . "\n";
+}
+add_action( 'wp_head', 'badaround_event_meta_description', 2 );
