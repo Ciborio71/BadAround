@@ -1,4 +1,5 @@
 name: Deploy core plugin to staging
+# B2 autonomous staging test
 
 on:
   push:
