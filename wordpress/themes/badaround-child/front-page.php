@@ -3,7 +3,7 @@ get_header();
 
 $demo_events = array(
 	array(
-		'title'        => 'Auto rubata a Torvaianica',
+		'title'        => 'Auto rubata nella zona',
 		'status'       => 'urgent',
 		'status_label' => 'Urgente',
 		'meta'         => 'Oggi · zona Lungomare · 1,8 km',
@@ -14,7 +14,7 @@ $demo_events = array(
 		'title'        => 'Danneggiamento in parcheggio',
 		'status'       => 'witness',
 		'status_label' => 'Cerca testimoni',
-		'meta'         => 'Ieri · Pomezia · 6,4 km',
+		'meta'         => 'Ieri · zona centrale · 6,4 km',
 		'type'         => 'Danneggiamento',
 		'image'        => '',
 	),
@@ -22,7 +22,7 @@ $demo_events = array(
 		'title'        => 'Veicolo ritrovato',
 		'status'       => 'resolved',
 		'status_label' => 'Risolto',
-		'meta'         => '2 giorni fa · Ardea · 8,1 km',
+		'meta'         => '2 giorni fa · area vicina · 8,1 km',
 		'type'         => 'Veicolo ritrovato',
 		'image'        => '',
 	),
@@ -38,7 +38,7 @@ $demo_events = array(
 			<form class="ba-home-search" role="search" action="<?php echo esc_url( home_url( '/cerca/' ) ); ?>" method="get">
 				<label class="ba-sr-only" for="ba-home-location">Cerca territorio o evento</label>
 				<span class="ba-home-search__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" focusable="false"><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="10" r="2.2" fill="currentColor"/></svg></span>
-				<input id="ba-home-location" name="q" type="search" placeholder="Cerca Torvaianica, Pomezia, veicolo rubato…">
+				<input id="ba-home-location" name="q" type="search" placeholder="Cerca comune, quartiere o evento…">
 				<button class="ba-button" type="submit">Cerca</button>
 			</form>
 
@@ -68,7 +68,7 @@ $demo_events = array(
 		<div class="ba-container--wide ba-home-localbar__inner">
 			<div class="ba-home-localbar__place">
 				<span class="ba-home-localbar__marker" aria-hidden="true">●</span>
-				<div><span>Nelle vicinanze di</span><strong>Torvaianica</strong></div>
+				<div><span>Esplora</span><strong>La tua area</strong></div>
 			</div>
 			<div class="ba-home-stat"><strong>18</strong><span>segnalazioni</span></div>
 			<div class="ba-home-stat"><strong>6</strong><span>richieste di aiuto</span></div>
@@ -113,7 +113,7 @@ $demo_events = array(
 				<section class="ba-home-sentinel" id="sentinelle">
 					<div class="ba-home-sentinel__copy">
 						<p class="ba-eyebrow">Sentinelle</p>
-						<h2>Segui Torvaianica</h2>
+						<h2>Segui una zona</h2>
 						<p>Ricevi solo gli alert per le aree e le categorie che ti interessano. Aiutaci a rendere la tua comunità più sicura e informata.</p>
 						<a class="ba-button" href="#">Attiva gli alert <span aria-hidden="true">→</span></a>
 					</div>
@@ -138,7 +138,7 @@ $demo_events = array(
 				<div class="ba-home-ad__label">Contenuto sponsorizzato</div>
 				<div class="ba-home-ad__copy">
 					<span class="ba-home-ad__kicker">Attività della zona</span>
-					<div><strong>Proteggi il tuo veicolo a Torvaianica</strong><p>Antifurti satellitari, block shaft e soluzioni di sicurezza personalizzate.</p></div>
+					<div><strong>Proteggi il tuo veicolo nella tua zona</strong><p>Antifurti satellitari, block shaft e soluzioni di sicurezza personalizzate.</p></div>
 				</div>
 				<a class="ba-button ba-button--dark" href="#">Scopri di più <span aria-hidden="true">→</span></a>
 			</aside>
