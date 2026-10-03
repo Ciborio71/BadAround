@@ -3,37 +3,46 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 the_post();
 
-$post_id = get_the_ID();
-$title   = get_the_title();
+$post_id    = get_the_ID();
+$title      = get_the_title();
 $report_url = home_url( '/segnala-un-evento/' );
 
-$public_location = get_post_meta( $post_id, 'ba_public_location_label', true );
-if ( ! $public_location ) { $public_location = get_post_meta( $post_id, 'ba_public_area', true ); }
-if ( ! $public_location ) { $public_location = 'Posizione pubblica approssimativa'; }
-
-$status = get_post_meta( $post_id, 'ba_public_status', true );
-if ( ! $status ) { $status = 'Evento attivo'; }
-
-$category = '';
-foreach ( array( 'ba_categoria', 'badaround_category', 'category' ) as $taxonomy ) {
-	$terms = get_the_terms( $post_id, $taxonomy );
-	if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
-		$category = $terms[0]->name;
-		break;
+$deepest_term = static function ( $terms, $taxonomy ) {
+	if ( is_wp_error( $terms ) || empty( $terms ) ) {
+		return null;
 	}
-}
-if ( ! $category ) { $category = 'Segnalazione'; }
+	usort(
+		$terms,
+		static function ( $a, $b ) use ( $taxonomy ) {
+			$a_depth = count( get_ancestors( $a->term_id, $taxonomy, 'taxonomy' ) );
+			$b_depth = count( get_ancestors( $b->term_id, $taxonomy, 'taxonomy' ) );
+			return $b_depth <=> $a_depth;
+		}
+	);
+	return $terms[0];
+};
 
-$territory = '';
-foreach ( array( 'ba_territorio', 'badaround_location' ) as $taxonomy ) {
-	$terms = get_the_terms( $post_id, $taxonomy );
-	if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
-		$territory = $terms[0]->name;
-		break;
-	}
-}
+$territory_term  = $deepest_term( get_the_terms( $post_id, 'ba_territorio' ), 'ba_territorio' );
+$territory       = $territory_term ? $territory_term->name : '';
+$public_location = sanitize_text_field( (string) get_post_meta( $post_id, '_ba_public_place_name', true ) );
+if ( ! $public_location ) { $public_location = $territory ?: 'Posizione pubblica approssimativa'; }
 
-$event_date = get_post_meta( $post_id, 'ba_public_event_date', true );
+$event_status = sanitize_key( (string) get_post_meta( $post_id, '_ba_event_status', true ) );
+$status_labels = array(
+	'open'     => 'Evento attivo',
+	'updated'  => 'Aggiornato',
+	'resolved' => 'Risolto',
+	'closed'   => 'Chiuso',
+	'expired'  => 'Scaduto',
+	'archived' => 'Archiviato',
+);
+$status = isset( $status_labels[ $event_status ] ) ? $status_labels[ $event_status ] : 'Segnalazione';
+
+$type_term = $deepest_term( get_the_terms( $post_id, 'ba_tipo_evento' ), 'ba_tipo_evento' );
+$category  = $type_term ? $type_term->name : 'Segnalazione';
+
+$event_date = sanitize_text_field( (string) get_post_meta( $post_id, '_ba_occurred_at', true ) );
+if ( ! $event_date ) { $event_date = sanitize_text_field( (string) get_post_meta( $post_id, '_ba_occurred_date', true ) ); }
 if ( ! $event_date ) { $event_date = get_the_date(); }
 
 $has_thumb = has_post_thumbnail();
