@@ -123,7 +123,8 @@ $demo_events = array(
 							<span>Sentinella BadAround</span>
 						</div>
 						<h2>Vuoi aiutare a tenere d’occhio una zona?</h2>
-						<p>Diventa una Sentinella BadAround e resta aggiornato su ciò che succede nell’area che ti interessa.</p>
+						<p>Diventa una <strong>Sentinella BadAround</strong>: ricevi aggiornamenti sulla zona che ti interessa e contribuisci alla community con segnalazioni e avvistamenti utili!</p>
+						<p class="ba-home-sentinel__privacy">La tua identità non viene resa pubblica.</p>
 						<a class="ba-button" href="#">Attiva gli alert <span aria-hidden="true">→</span></a>
 					</div>
 					<div class="ba-home-phone" aria-hidden="true">
