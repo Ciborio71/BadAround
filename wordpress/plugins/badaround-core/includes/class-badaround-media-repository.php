@@ -77,6 +77,156 @@ class BadAround_Media_Repository {
 		return array( 'row' => $row, 'path' => $path );
 	}
 
+	public function approve_for_publication( $media_id, $event_id ) {
+		global $wpdb;
+		$media_id = absint( $media_id );
+		$event_id = absint( $event_id );
+		if ( ! $media_id || ! $event_id ) {
+			return new WP_Error( 'ba_public_media_invalid', __( 'Media non valido.', 'badaround-core' ) );
+		}
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT id, event_id, media_type, review_status, sensitivity, public_attachment_id, redaction_required, redaction_status FROM {$wpdb->prefix}ba_report_media WHERE id = %d AND event_id = %d AND deleted_at IS NULL LIMIT 1",
+				$media_id,
+				$event_id
+			)
+		);
+		if ( ! $row ) {
+			return new WP_Error( 'ba_public_media_not_found', __( 'Media non trovato.', 'badaround-core' ) );
+		}
+		if ( 'private' !== $row->sensitivity ) {
+			return new WP_Error( 'ba_public_media_not_private', __( 'Il media originale deve rimanere privato.', 'badaround-core' ) );
+		}
+		if ( 'image' !== $row->media_type ) {
+			return new WP_Error( 'ba_public_media_unsupported', __( 'Per B3 è supportata la pubblicazione delle immagini.', 'badaround-core' ) );
+		}
+		if ( ! empty( $row->redaction_required ) && 'completed' !== $row->redaction_status ) {
+			return new WP_Error( 'ba_public_media_redaction_required', __( 'Il media richiede una redazione prima della pubblicazione.', 'badaround-core' ) );
+		}
+		if ( in_array( $row->review_status, array( 'approved_public', 'published' ), true ) ) {
+			return true;
+		}
+		$updated = $wpdb->update(
+			$wpdb->prefix . 'ba_report_media',
+			array(
+				'review_status' => 'approved_public',
+				'moderated_by'  => get_current_user_id() ?: null,
+				'moderated_at'  => current_time( 'mysql', true ),
+			),
+			array( 'id' => $media_id ),
+			array( '%s', '%d', '%s' ),
+			array( '%d' )
+		);
+		return false === $updated ? new WP_Error( 'ba_public_media_approval_failed', __( 'Impossibile approvare il media per la pubblicazione.', 'badaround-core' ) ) : true;
+	}
+
+	public function materialize_approved_public_media_for_event( $event_id ) {
+		global $wpdb;
+		$event_id = absint( $event_id );
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, public_attachment_id FROM {$wpdb->prefix}ba_report_media WHERE event_id = %d AND deleted_at IS NULL AND review_status IN ('approved_public','published') ORDER BY id ASC",
+				$event_id
+			)
+		);
+		$attachments = array();
+		foreach ( $rows as $row ) {
+			if ( ! empty( $row->public_attachment_id ) && get_post( (int) $row->public_attachment_id ) ) {
+				$attachments[] = (int) $row->public_attachment_id;
+				continue;
+			}
+			$attachment_id = $this->materialize_public_copy( (int) $row->id, $event_id );
+			if ( is_wp_error( $attachment_id ) ) {
+				return $attachment_id;
+			}
+			$attachments[] = (int) $attachment_id;
+		}
+		return $attachments;
+	}
+
+	private function materialize_public_copy( $media_id, $event_id ) {
+		global $wpdb;
+		$file = $this->private_file_for_media_id( $media_id );
+		if ( is_wp_error( $file ) ) {
+			return $file;
+		}
+		$row = $file['row'];
+		if ( (int) $row->event_id !== absint( $event_id ) || 'private' !== $row->sensitivity || 'image' !== $row->media_type ) {
+			return new WP_Error( 'ba_public_media_invalid_source', __( 'Sorgente media non valida.', 'badaround-core' ) );
+		}
+		if ( ! in_array( $row->review_status, array( 'approved_public', 'published' ), true ) ) {
+			return new WP_Error( 'ba_public_media_not_approved', __( 'Il media non è stato approvato per la pubblicazione.', 'badaround-core' ) );
+		}
+
+		if ( ! function_exists( 'wp_get_image_editor' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/image.php';
+		}
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/media.php';
+
+		$uploads = wp_upload_dir();
+		if ( ! empty( $uploads['error'] ) ) {
+			return new WP_Error( 'ba_public_media_upload_dir', sanitize_text_field( $uploads['error'] ) );
+		}
+		$subdir = trailingslashit( $uploads['basedir'] ) . 'badaround-public/' . gmdate( 'Y/m' );
+		if ( ! wp_mkdir_p( $subdir ) ) {
+			return new WP_Error( 'ba_public_media_mkdir_failed', __( 'Impossibile creare la cartella media pubblica.', 'badaround-core' ) );
+		}
+
+		$ext = strtolower( pathinfo( $row->original_filename, PATHINFO_EXTENSION ) );
+		$ext = in_array( $ext, array( 'jpg', 'jpeg', 'png', 'webp' ), true ) ? $ext : 'jpg';
+		$filename = wp_unique_filename( $subdir, 'event-' . absint( $event_id ) . '-' . wp_generate_uuid4() . '.' . $ext );
+		$target = trailingslashit( $subdir ) . $filename;
+		$editor = wp_get_image_editor( $file['path'] );
+		if ( is_wp_error( $editor ) ) {
+			return $editor;
+		}
+		$saved = $editor->save( $target );
+		if ( is_wp_error( $saved ) || empty( $saved['path'] ) || ! is_file( $saved['path'] ) ) {
+			return is_wp_error( $saved ) ? $saved : new WP_Error( 'ba_public_media_save_failed', __( 'Impossibile creare la copia media pubblica.', 'badaround-core' ) );
+		}
+
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_mime_type' => sanitize_mime_type( $saved['mime-type'] ?? $row->mime_type ),
+				'post_title'     => sanitize_text_field( get_the_title( $event_id ) ),
+				'post_status'    => 'inherit',
+			),
+			$saved['path'],
+			$event_id,
+			true
+		);
+		if ( is_wp_error( $attachment_id ) ) {
+			@unlink( $saved['path'] ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			return $attachment_id;
+		}
+		$metadata = wp_generate_attachment_metadata( $attachment_id, $saved['path'] );
+		if ( is_array( $metadata ) ) {
+			wp_update_attachment_metadata( $attachment_id, $metadata );
+		}
+
+		$updated = $wpdb->update(
+			$wpdb->prefix . 'ba_report_media',
+			array(
+				'public_attachment_id' => $attachment_id,
+				'review_status'        => 'published',
+				'exif_removed'         => 1,
+				'moderated_by'         => get_current_user_id() ?: null,
+				'moderated_at'         => current_time( 'mysql', true ),
+			),
+			array( 'id' => absint( $media_id ) ),
+			array( '%d', '%s', '%d', '%d', '%s' ),
+			array( '%d' )
+		);
+		if ( false === $updated ) {
+			wp_delete_attachment( $attachment_id, true );
+			return new WP_Error( 'ba_public_media_link_failed', __( 'Impossibile collegare la copia media pubblica.', 'badaround-core' ) );
+		}
+
+		BadAround_Audit_Log::record( 'event', $event_id, 'public_media_materialized', 'publication' );
+		return $attachment_id;
+	}
+
 	private function secure_base_dir() {
 		$dir = defined( 'BADAROUND_PRIVATE_MEDIA_PATH' )
 			? BADAROUND_PRIVATE_MEDIA_PATH
