@@ -17,6 +17,24 @@
 	const neutral = { color: '#8292A8', dark: '#627187', icon: 'check' };
 	const clusterColor = '#263B63';
 
+	const baseMapStyles = [
+		{
+			featureType: 'poi',
+			elementType: 'all',
+			stylers: [{ visibility: 'off' }],
+		},
+		{
+			featureType: 'transit',
+			elementType: 'all',
+			stylers: [{ visibility: 'off' }],
+		},
+		{
+			featureType: 'road',
+			elementType: 'labels.icon',
+			stylers: [{ visibility: 'off' }],
+		},
+	];
+
 	const esc = (value) => String(value ?? '')
 		.replaceAll('&', '&amp;')
 		.replaceAll('<', '&lt;')
@@ -248,6 +266,7 @@
 			streetViewControl: false,
 			fullscreenControl: context !== 'home',
 			gestureHandling: context === 'home' ? 'cooperative' : 'greedy',
+			styles: baseMapStyles,
 		});
 
 		const bounds = new google.maps.LatLngBounds();
