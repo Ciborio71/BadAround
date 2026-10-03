@@ -48,7 +48,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 		</aside>
 
 		<div class="ba-map-canvas" data-ba-map-canvas aria-label="Mappa interattiva delle segnalazioni pubbliche">
-			<div id="ba-google-map" class="ba-google-map" role="application" aria-label="Google Maps con eventi BadAround"></div>
+			<div id="ba-google-map" class="ba-google-map" data-ba-map data-ba-map-context="full" role="application" aria-label="Google Maps con eventi BadAround"></div>
 
 			<div class="ba-map-status" data-ba-map-status hidden></div>
 
