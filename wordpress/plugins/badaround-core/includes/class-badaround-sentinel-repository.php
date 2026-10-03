@@ -106,12 +106,11 @@ class BadAround_Sentinel_Repository {
 			array(
 				'status'                  => self::STATUS_ACTIVE,
 				'confirmed_at'            => current_time( 'mysql', true ),
-				'verify_token_hash'       => null,
 				'verification_expires_at' => null,
 				'updated_at'              => current_time( 'mysql', true ),
 			),
 			array( 'id' => absint( $id ) ),
-			array( '%s', '%s', '%s', '%s', '%s' ),
+			array( '%s', '%s', '%s', '%s' ),
 			array( '%d' )
 		);
 
