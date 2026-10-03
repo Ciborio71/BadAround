@@ -318,7 +318,8 @@ class BadAround_Moderation_Admin {
 	}
 
 	public function register_staging_test_routes() {
-		if ( 'staging' !== wp_get_environment_type() ) {
+		$host = strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+		if ( 'staging.badaround.it' !== $host ) {
 			return;
 		}
 		register_rest_route(
