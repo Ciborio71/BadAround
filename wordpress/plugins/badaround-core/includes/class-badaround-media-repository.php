@@ -204,6 +204,7 @@ class BadAround_Media_Repository {
 			@unlink( $saved['path'] ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			return $attachment_id;
 		}
+		update_attached_file( $attachment_id, $saved['path'] );
 		$metadata = wp_generate_attachment_metadata( $attachment_id, $saved['path'] );
 		if ( is_array( $metadata ) ) {
 			wp_update_attachment_metadata( $attachment_id, $metadata );
