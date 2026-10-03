@@ -230,6 +230,8 @@ class BadAround_Moderation_Admin {
 			return;
 		}
 
+		$before_hash = hash( 'sha256', wp_json_encode( array( $post->post_title, $post->post_content, get_post_meta( $post_id ), wp_get_post_terms( $post_id, BadAround_Event_Post_Type::TERRITORY_TAX, array( 'fields' => 'ids' ) ) ) ) );
+
 		remove_action( 'save_post_' . BadAround_Event_Post_Type::POST_TYPE, array( $this, 'save_public_fields' ), 10 );
 		$title   = isset( $_POST['ba_public_title'] ) ? sanitize_text_field( wp_unslash( $_POST['ba_public_title'] ) ) : $post->post_title;
 		$content = isset( $_POST['ba_public_content'] ) ? wp_kses_post( wp_unslash( $_POST['ba_public_content'] ) ) : $post->post_content;
@@ -262,13 +264,19 @@ class BadAround_Moderation_Admin {
 				wp_set_object_terms( $post_id, array( $territory_id ), BadAround_Event_Post_Type::TERRITORY_TAX, false );
 			}
 		}
+
+		$after = get_post( $post_id );
+		$after_hash = hash( 'sha256', wp_json_encode( array( $after ? $after->post_title : '', $after ? $after->post_content : '', get_post_meta( $post_id ), wp_get_post_terms( $post_id, BadAround_Event_Post_Type::TERRITORY_TAX, array( 'fields' => 'ids' ) ) ) ) );
+		if ( $before_hash !== $after_hash ) {
+			BadAround_Audit_Log::record( 'event', $post_id, 'moderation_public_data_updated', 'moderation' );
+		}
 	}
 
 	public function handle_moderation_action() {
 		$event_id = isset( $_REQUEST['event_id'] ) ? absint( $_REQUEST['event_id'] ) : 0;
 		check_admin_referer( 'ba_moderate_event_' . $event_id );
 		if ( ! current_user_can( 'ba_moderate_events' ) ) {
-			wp_die( esc_html__( 'Accesso non autorizzato.', 'badaround-core' ), 403 );
+			wp_die( esc_html__( 'Accesso non autorizzato.', 'badaround-core' ), '', array( 'response' => 403 ) );
 		}
 		$target = isset( $_REQUEST['target'] ) ? sanitize_key( wp_unslash( $_REQUEST['target'] ) ) : '';
 		$reason = isset( $_REQUEST['reason'] ) ? sanitize_textarea_field( wp_unslash( $_REQUEST['reason'] ) ) : '';
@@ -288,7 +296,7 @@ class BadAround_Moderation_Admin {
 		}
 		$file = ( new BadAround_Media_Repository() )->private_file_for_media_id( $media_id );
 		if ( is_wp_error( $file ) ) {
-			wp_die( esc_html( $file->get_error_message() ), 404 );
+			wp_die( esc_html( $file->get_error_message() ), '', array( 'response' => 404 ) );
 		}
 		$row = $file['row'];
 		nocache_headers();
