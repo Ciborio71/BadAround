@@ -301,7 +301,7 @@ class BadAround_Moderation_Admin {
 		$media_id = isset( $_GET['media_id'] ) ? absint( $_GET['media_id'] ) : 0;
 		check_admin_referer( 'ba_private_media_' . $media_id );
 		if ( ! current_user_can( 'ba_view_private_media' ) ) {
-			wp_die( esc_html__( 'Accesso non autorizzato.', 'badaround-core' ), 403 );
+			wp_die( esc_html__( 'Accesso non autorizzato.', 'badaround-core' ), '', array( 'response' => 403 ) );
 		}
 		$file = ( new BadAround_Media_Repository() )->private_file_for_media_id( $media_id );
 		if ( is_wp_error( $file ) ) {
@@ -349,6 +349,106 @@ class BadAround_Moderation_Admin {
 					'event_id' => array( 'required' => true, 'type' => 'integer' ),
 					'target'   => array( 'required' => true, 'type' => 'string' ),
 					'reason'   => array( 'required' => false, 'type' => 'string' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			'badaround/v1',
+			'/b2-test/diagnostics',
+			array(
+				'methods'             => 'GET',
+				'permission_callback' => function () {
+					return current_user_can( 'ba_moderate_events' ) && current_user_can( 'ba_view_private_reports' ) && current_user_can( 'ba_view_private_media' ) && current_user_can( 'ba_view_audit_log' );
+				},
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb, $wp_meta_boxes;
+					$event_id = absint( $request->get_param( 'event_id' ) );
+					$post = get_post( $event_id );
+					if ( ! $post || BadAround_Event_Post_Type::POST_TYPE !== $post->post_type ) {
+						return new WP_Error( 'ba_test_invalid_event', 'Invalid event.', array( 'status' => 404 ) );
+					}
+
+					do_action( 'add_meta_boxes_' . BadAround_Event_Post_Type::POST_TYPE, $post );
+					$box_ids = array();
+					if ( ! empty( $wp_meta_boxes[ BadAround_Event_Post_Type::POST_TYPE ] ) ) {
+						foreach ( $wp_meta_boxes[ BadAround_Event_Post_Type::POST_TYPE ] as $context_boxes ) {
+							foreach ( $context_boxes as $priority_boxes ) {
+								$box_ids = array_merge( $box_ids, array_keys( $priority_boxes ) );
+							}
+						}
+					}
+					$box_ids = array_values( array_unique( $box_ids ) );
+
+					$report = $wpdb->get_row(
+						$wpdb->prepare(
+							"SELECT id, author_email, author_phone, exact_address, exact_lat, exact_lng, full_plate, content_original FROM {$wpdb->prefix}ba_reports WHERE event_id = %d AND deleted_at IS NULL ORDER BY id ASC LIMIT 1",
+							$event_id
+						)
+					);
+
+					$media_rows = $wpdb->get_results(
+						$wpdb->prepare(
+							"SELECT id, sensitivity, public_attachment_id FROM {$wpdb->prefix}ba_report_media WHERE event_id = %d AND deleted_at IS NULL ORDER BY id ASC",
+							$event_id
+						)
+					);
+					$media_checks = array();
+					$media_repo = new BadAround_Media_Repository();
+					foreach ( $media_rows as $media_row ) {
+						$file = $media_repo->private_file_for_media_id( $media_row->id );
+						$outside_webroot = false;
+						$file_exists = false;
+						if ( ! is_wp_error( $file ) ) {
+							$path = wp_normalize_path( $file['path'] );
+							$webroot = wp_normalize_path( trailingslashit( ABSPATH ) );
+							$outside_webroot = 0 !== strpos( $path, $webroot );
+							$file_exists = is_file( $path ) && is_readable( $path );
+						}
+						$media_checks[] = array(
+							'id'                   => (int) $media_row->id,
+							'sensitivity'          => (string) $media_row->sensitivity,
+							'no_public_attachment' => empty( $media_row->public_attachment_id ),
+							'file_exists'          => $file_exists,
+							'outside_webroot'      => $outside_webroot,
+						);
+					}
+
+					$sensitive_meta_count = (int) $wpdb->get_var(
+						$wpdb->prepare(
+							"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND (meta_key LIKE '%%email%%' OR meta_key LIKE '%%phone%%' OR meta_key LIKE '%%exact%%' OR meta_key LIKE '%%full_plate%%' OR meta_key LIKE '%%content_original%%')",
+							$event_id
+						)
+					);
+
+					$audit_count = (int) $wpdb->get_var(
+						$wpdb->prepare(
+							"SELECT COUNT(*) FROM {$wpdb->prefix}ba_audit_log WHERE object_type = 'event' AND object_id = %d",
+							$event_id
+						)
+					);
+
+					return array(
+						'event_id'          => $event_id,
+						'post_status'       => get_post_status( $event_id ),
+						'moderation_status' => get_post_meta( $event_id, '_ba_moderation_status', true ),
+						'meta_boxes'        => $box_ids,
+						'private_report'    => array(
+							'present'             => (bool) $report,
+							'has_email'           => $report && ! empty( $report->author_email ),
+							'has_phone'           => $report && ! empty( $report->author_phone ),
+							'has_exact_address'   => $report && ! empty( $report->exact_address ),
+							'has_exact_coords'    => $report && null !== $report->exact_lat && null !== $report->exact_lng,
+							'has_full_plate'      => $report && ! empty( $report->full_plate ),
+							'has_original_payload'=> $report && ! empty( $report->content_original ),
+						),
+						'sensitive_meta_count' => $sensitive_meta_count,
+						'media'                => $media_checks,
+						'audit_count'          => $audit_count,
+					);
+				},
+				'args'                => array(
+					'event_id' => array( 'required' => true, 'type' => 'integer' ),
 				),
 			)
 		);
