@@ -36,6 +36,16 @@ class BadAround_Sentinel_Service {
 				'permission_callback' => '__return_true',
 			)
 		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			self::REST_ROUTE . '/verify/(?P<public_id>[a-f0-9-]{36})/(?P<token>[a-f0-9]{64})',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'rest_verify' ),
+				'permission_callback' => '__return_true',
+			)
+		);
 	}
 
 	public function rest_create( WP_REST_Request $request ) {
@@ -125,6 +135,25 @@ class BadAround_Sentinel_Service {
 				'message' => 'Se i dati sono validi, riceverai un messaggio per confermare la Sentinella.',
 			)
 		);
+	}
+
+	public function rest_verify( WP_REST_Request $request ) {
+		$public_id = sanitize_text_field( (string) $request->get_param( 'public_id' ) );
+		$token     = sanitize_text_field( (string) $request->get_param( 'token' ) );
+
+		$result = $this->verify_token( $public_id . '.' . $token );
+		$status = is_wp_error( $result ) ? $result->get_error_code() : $result;
+		$allowed = array( 'confirmed', 'already-active', 'expired', 'invalid' );
+		if ( ! in_array( $status, $allowed, true ) ) {
+			$status = 'invalid';
+		}
+
+		$response = new WP_REST_Response( null, 302 );
+		$response->header(
+			'Location',
+			add_query_arg( 'ba_sentinel_status', rawurlencode( $status ), home_url( '/sentinelle/' ) )
+		);
+		return $response;
 	}
 
 	public function maybe_verify_from_link() {
@@ -227,10 +256,10 @@ class BadAround_Sentinel_Service {
 			$recipient = $override;
 		}
 
-		$url = add_query_arg(
-			'ba_sentinel_verify',
-			rawurlencode( $sentinel['public_id'] . '.' . $token ),
-			home_url( '/sentinelle/' )
+		$url = rest_url(
+			self::REST_NAMESPACE . self::REST_ROUTE . '/verify/' .
+			rawurlencode( $sentinel['public_id'] ) . '/' .
+			rawurlencode( $token )
 		);
 
 		$criteria = json_decode( $sentinel['criteria_json'], true );
