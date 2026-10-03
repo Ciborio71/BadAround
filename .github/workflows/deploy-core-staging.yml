@@ -1,6 +1,9 @@
 name: Deploy core plugin to staging
 
 on:
+  push:
+    branches:
+      - feature/moderation-b2
   workflow_dispatch:
 
 permissions:
