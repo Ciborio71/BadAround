@@ -162,7 +162,7 @@ class BadAround_Media_Repository {
 			return new WP_Error( 'ba_public_media_not_approved', __( 'Il media non è stato approvato per la pubblicazione.', 'badaround-core' ) );
 		}
 
-		if ( ! function_exists( 'wp_get_image_editor' ) ) {
+		if ( ! function_exists( 'wp_generate_attachment_metadata' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/image.php';
 		}
 		require_once ABSPATH . 'wp-admin/includes/file.php';
