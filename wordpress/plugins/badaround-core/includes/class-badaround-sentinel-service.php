@@ -103,6 +103,15 @@ class BadAround_Sentinel_Service {
 		);
 
 		if ( is_wp_error( $sentinel ) ) {
+			$concurrent = $this->repository->find_duplicate( $email_hash, $criteria_hash );
+			if ( $concurrent ) {
+				return rest_ensure_response(
+					array(
+						'ok'      => true,
+						'message' => 'Se i dati sono validi, riceverai un messaggio per confermare la Sentinella.',
+					)
+				);
+			}
 			return new WP_Error( 'ba_sentinel_create_failed', 'Non è stato possibile creare la Sentinella.', array( 'status' => 500 ) );
 		}
 
@@ -153,6 +162,12 @@ class BadAround_Sentinel_Service {
 		}
 
 		if ( BadAround_Sentinel_Repository::STATUS_ACTIVE === $sentinel['status'] ) {
+			if (
+				empty( $sentinel['verify_token_hash'] ) ||
+				! hash_equals( (string) $sentinel['verify_token_hash'], hash( 'sha256', $token ) )
+			) {
+				return new WP_Error( 'invalid', 'Invalid verification token.' );
+			}
 			return 'already-active';
 		}
 
