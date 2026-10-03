@@ -68,7 +68,7 @@ $demo_events = array(
 		<div class="ba-container--wide ba-home-localbar__inner">
 			<div class="ba-home-localbar__place">
 				<span class="ba-home-localbar__marker" aria-hidden="true">●</span>
-				<div><span>Esplora</span><strong>La tua area</strong></div>
+				<div><span>Esplora</span><strong>l’area attorno a te</strong></div>
 			</div>
 			<div class="ba-home-stat"><strong>18</strong><span>segnalazioni</span></div>
 			<div class="ba-home-stat"><strong>6</strong><span>richieste di aiuto</span></div>
@@ -112,9 +112,18 @@ $demo_events = array(
 			<div class="ba-home-lower">
 				<section class="ba-home-sentinel" id="sentinelle">
 					<div class="ba-home-sentinel__copy">
-						<p class="ba-eyebrow">Sentinelle</p>
-						<h2>Segui una zona</h2>
-						<p>Ricevi solo gli alert per le aree e le categorie che ti interessano. Aiutaci a rendere la tua comunità più sicura e informata.</p>
+						<div class="ba-home-sentinel__badge">
+							<span class="ba-home-sentinel__badge-icon" aria-hidden="true">
+								<svg viewBox="0 0 28 28" focusable="false">
+									<path d="M14 25s7-6.2 7-13a7 7 0 1 0-14 0c0 6.8 7 13 7 13Z" fill="none" stroke="currentColor" stroke-width="1.8"/>
+									<path d="M9.6 12s1.7-2.7 4.4-2.7 4.4 2.7 4.4 2.7-1.7 2.7-4.4 2.7S9.6 12 9.6 12Z" fill="none" stroke="currentColor" stroke-width="1.55"/>
+									<circle cx="14" cy="12" r="1.45" fill="currentColor"/>
+								</svg>
+							</span>
+							<span>Sentinella BadAround</span>
+						</div>
+						<h2>Vuoi aiutare a tenere d’occhio una zona?</h2>
+						<p>Diventa una Sentinella BadAround e resta aggiornato su ciò che succede nell’area che ti interessa.</p>
 						<a class="ba-button" href="#">Attiva gli alert <span aria-hidden="true">→</span></a>
 					</div>
 					<div class="ba-home-phone" aria-hidden="true">
