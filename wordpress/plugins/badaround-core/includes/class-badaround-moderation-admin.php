@@ -16,6 +16,7 @@ class BadAround_Moderation_Admin {
 		add_filter( 'manage_' . BadAround_Event_Post_Type::POST_TYPE . '_posts_columns', array( $this, 'add_list_columns' ) );
 		add_action( 'manage_' . BadAround_Event_Post_Type::POST_TYPE . '_posts_custom_column', array( $this, 'render_list_column' ), 10, 2 );
 		add_filter( 'wp_insert_post_data', array( $this, 'prevent_b2_publish' ), 20, 2 );
+		add_action( 'transition_post_status', array( $this, 'enforce_b2_pending_status' ), 20, 3 );
 		add_action( 'admin_footer-post.php', array( $this, 'customize_native_publish_controls' ) );
 	}
 
@@ -327,6 +328,21 @@ class BadAround_Moderation_Admin {
 		}
 		$data['post_status'] = 'pending';
 		return $data;
+	}
+
+	public function enforce_b2_pending_status( $new_status, $old_status, $post ) {
+		if ( ! $post || BadAround_Event_Post_Type::POST_TYPE !== $post->post_type || 'publish' !== $new_status ) {
+			return;
+		}
+		if ( apply_filters( 'badaround_allow_event_publish', false, $post->ID ) ) {
+			return;
+		}
+
+		remove_action( 'transition_post_status', array( $this, 'enforce_b2_pending_status' ), 20 );
+		wp_update_post( array( 'ID' => $post->ID, 'post_status' => 'pending' ) );
+		add_action( 'transition_post_status', array( $this, 'enforce_b2_pending_status' ), 20, 3 );
+
+		BadAround_Audit_Log::record( 'event', $post->ID, 'b2_publish_blocked', 'moderation', 'automatic publication blocked before B3' );
 	}
 
 	public function customize_native_publish_controls() {
