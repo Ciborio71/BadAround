@@ -1,6 +1,9 @@
 name: Deploy core plugin to staging
 
 on:
+  push:
+    branches:
+      - feature/publication-b3
   workflow_dispatch:
 
 permissions:
