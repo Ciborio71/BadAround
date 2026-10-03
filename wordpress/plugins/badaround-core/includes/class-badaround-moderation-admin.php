@@ -316,10 +316,13 @@ class BadAround_Moderation_Admin {
 	}
 
 	public function prevent_b2_publish( $data, $postarr ) {
-		if ( empty( $data['post_type'] ) || BadAround_Event_Post_Type::POST_TYPE !== $data['post_type'] || empty( $data['post_status'] ) || 'publish' !== $data['post_status'] ) {
+		$post_id   = isset( $postarr['ID'] ) ? absint( $postarr['ID'] ) : 0;
+		$post_type = ! empty( $data['post_type'] ) ? $data['post_type'] : ( $post_id ? get_post_type( $post_id ) : '' );
+
+		if ( BadAround_Event_Post_Type::POST_TYPE !== $post_type || empty( $data['post_status'] ) || 'publish' !== $data['post_status'] ) {
 			return $data;
 		}
-		if ( apply_filters( 'badaround_allow_event_publish', false, isset( $postarr['ID'] ) ? absint( $postarr['ID'] ) : 0 ) ) {
+		if ( apply_filters( 'badaround_allow_event_publish', false, $post_id ) ) {
 			return $data;
 		}
 		$data['post_status'] = 'pending';
