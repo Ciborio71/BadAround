@@ -42,33 +42,24 @@ $demo_events = array(
 				<button class="ba-button" type="submit">Cerca</button>
 			</form>
 
-			<button class="ba-button ba-button--outline ba-home-position" type="button">Usa la mia posizione</button>
-			<p class="ba-home-privacy">La posizione pubblica è sempre approssimata.</p>
+			<button class="ba-button ba-button--outline ba-home-position" type="button" data-ba-geolocate aria-describedby="ba-home-geo-status">Usa la mia posizione</button>
+			<p class="ba-home-privacy">La posizione pubblica degli eventi è sempre approssimata. La tua posizione non viene salvata.</p>
+			<p id="ba-home-geo-status" class="ba-home-geo-status" data-ba-geolocation-status role="status" aria-live="polite"></p>
 		</div>
 
-		<div class="ba-home-map" id="ba-map" role="img" aria-label="Anteprima della mappa delle segnalazioni nell'area di Torvaianica">
-			<div class="ba-home-map__toolbar" aria-hidden="true">
-				<span class="is-active">Eventi</span>
-				<span>Mappa di calore</span>
-				<span>Tutte le categorie</span>
-				<span>Ultimi 7 giorni</span>
-				<span>Entro 10 km</span>
-			</div>
-			<div class="ba-map-cluster ba-map-cluster--red" style="left:35%;top:34%">12</div>
-			<div class="ba-map-cluster ba-map-cluster--amber" style="left:57%;top:20%">7</div>
-			<div class="ba-map-cluster ba-map-cluster--teal" style="left:66%;top:62%">3</div>
-			<div class="ba-map-pin ba-map-pin--home" style="left:49%;top:58%" aria-hidden="true"></div>
-			<div class="ba-map-pin ba-map-pin--car" style="left:53%;top:31%" aria-hidden="true"></div>
-			<div class="ba-map-pin ba-map-pin--alert" style="left:77%;top:42%" aria-hidden="true"></div>
-			<div class="ba-home-map__labels" aria-hidden="true">
-				<span style="left:25%;top:48%">Torvaianica</span>
-				<span style="left:63%;top:13%">Pomezia</span>
-				<span style="left:74%;top:56%">Ardea</span>
-			</div>
-			<div class="ba-home-map__legend" aria-hidden="true">
-				<span><i class="is-red"></i> Evento recente</span>
-				<span><i class="is-amber"></i> Più segnalazioni</span>
-				<span><i class="is-green"></i> Evento risolto</span>
+		<div class="ba-home-map" id="ba-map" aria-label="Mappa interattiva delle segnalazioni pubbliche">
+			<div id="ba-home-google-map" class="ba-google-map ba-home-google-map" data-ba-map data-ba-map-context="home" role="application" aria-label="Google Maps con eventi pubblicati BadAround"></div>
+
+			<div class="ba-map-status ba-home-map__status" data-ba-map-status hidden></div>
+
+			<aside class="ba-map-preview ba-home-map__preview" data-ba-map-preview hidden aria-live="polite" aria-label="Anteprima evento selezionato">
+				<button class="ba-map-preview__close" type="button" data-ba-map-preview-close aria-label="Chiudi anteprima">×</button>
+				<div data-ba-map-preview-content></div>
+			</aside>
+
+			<div class="ba-map-privacy-note">
+				<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.8 7.8 7 10 4.2-2.2 7-5.4 7-10V6l-7-3Z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+				<span>Le posizioni degli eventi sono pubbliche e possono essere approssimate.</span>
 			</div>
 		</div>
 	</section>
