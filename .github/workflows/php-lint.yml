@@ -26,10 +26,9 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.2"
-          tools: php-parallel-lint
-
+    
       - name: Lint BadAround core plugin
-        run: parallel-lint --exclude vendor ./wordpress/plugins/badaround-core
+        run: find ./wordpress/plugins/badaround-core -type f -name '*.php' -print0 | xargs -0 -n1 php -l
 
       - name: Lint BadAround child theme
-        run: parallel-lint --exclude vendor ./wordpress/themes/badaround-child
+        run: find ./wordpress/themes/badaround-child -type f -name '*.php' -print0 | xargs -0 -n1 php -l
