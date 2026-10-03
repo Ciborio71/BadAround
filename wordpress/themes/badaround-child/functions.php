@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BADAROUND_CHILD_VERSION', '0.2.0' );
+define( 'BADAROUND_CHILD_VERSION', '0.3.0' );
 
 /**
  * Load only the assets required by the current screen.
@@ -81,12 +81,44 @@ function badaround_child_enqueue_assets() {
 			array( 'badaround-components' ),
 			(string) filemtime( $dir . '/assets/css/map.css' )
 		);
+
+		$wpforms_settings = get_option( 'wpforms_settings', array() );
+		$google_maps_key  = is_array( $wpforms_settings ) && ! empty( $wpforms_settings['geolocation-google-places-api-key'] )
+			? trim( (string) $wpforms_settings['geolocation-google-places-api-key'] )
+			: '';
+
+		$map_dependencies = array();
+		if ( $google_maps_key ) {
+			wp_enqueue_script(
+				'badaround-google-maps',
+				'https://maps.googleapis.com/maps/api/js?key=' . rawurlencode( $google_maps_key ),
+				array(),
+				null,
+				true
+			);
+			wp_script_add_data( 'badaround-google-maps', 'strategy', 'defer' );
+			$map_dependencies[] = 'badaround-google-maps';
+		}
+
 		wp_enqueue_script(
 			'badaround-map',
 			$uri . '/assets/js/map.js',
-			array(),
+			$map_dependencies,
 			(string) filemtime( $dir . '/assets/js/map.js' ),
 			true
+		);
+		wp_script_add_data( 'badaround-map', 'strategy', 'defer' );
+
+		wp_add_inline_script(
+			'badaround-map',
+			'window.BadAroundMap=' . wp_json_encode(
+				array(
+					'endpoint' => esc_url_raw( rest_url( 'badaround/v1/discovery' ) ),
+					'limit'    => 100,
+					'hasMaps'  => (bool) $google_maps_key,
+				)
+			) . ';',
+			'before'
 		);
 	}
 
