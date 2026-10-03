@@ -49,6 +49,34 @@ class BadAround_Media_Repository {
 		return $stored;
 	}
 
+	public function private_file_for_media_id( $media_id ) {
+		global $wpdb;
+
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT id, report_id, event_id, original_storage_key, original_filename, mime_type, file_size, checksum, media_type, review_status, sensitivity, public_attachment_id FROM {$wpdb->prefix}ba_report_media WHERE id = %d AND deleted_at IS NULL LIMIT 1",
+				absint( $media_id )
+			)
+		);
+
+		if ( ! $row ) {
+			return new WP_Error( 'ba_media_not_found', __( 'Media non trovato.', 'badaround-core' ) );
+		}
+
+		$base = $this->secure_base_dir();
+		if ( ! $base ) {
+			return new WP_Error( 'ba_secure_media_unavailable', __( 'Archivio media privato non disponibile.', 'badaround-core' ) );
+		}
+
+		$path = wp_normalize_path( trailingslashit( $base ) . 'report-' . absint( $row->report_id ) . '/' . basename( $row->original_storage_key ) );
+		$root = wp_normalize_path( trailingslashit( $base ) );
+		if ( 0 !== strpos( $path, $root ) || ! is_file( $path ) || ! is_readable( $path ) ) {
+			return new WP_Error( 'ba_media_file_unavailable', __( 'File media privato non disponibile.', 'badaround-core' ) );
+		}
+
+		return array( 'row' => $row, 'path' => $path );
+	}
+
 	private function secure_base_dir() {
 		$dir = defined( 'BADAROUND_PRIVATE_MEDIA_PATH' )
 			? BADAROUND_PRIVATE_MEDIA_PATH
