@@ -139,6 +139,10 @@ body.page-template-page-mappa .ba-site-footer{display:none}
 .ba-map-legend__pin.is-resolved{border-radius:50%;background:#8292A8;color:#fff;transform:none;font-size:.62rem;font-weight:900}
 .ba-map-legend__pin.is-resolved::after{display:none}
 .ba-map-legend__cluster{display:grid;place-items:center;width:22px;height:22px;border:2px solid #fff;border-radius:50%;background:#263B63;color:#fff;font-size:.55rem;font-weight:850;box-shadow:0 2px 6px rgba(7,26,56,.18)}
+.ba-home-map .ba-map-legend--home{left:16px;right:auto;top:16px;width:min(240px,calc(100% - 32px))}
+@media(max-width:860px){
+ .ba-home-map .ba-map-legend--home{left:10px;right:auto;top:10px;width:min(225px,calc(100% - 20px))}
+}
 @media(max-width:860px){
  .ba-map-legend{top:10px;right:10px;width:min(230px,calc(100% - 20px))}
  .ba-map-legend summary{padding:9px 11px;font-size:.72rem}
