@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BADAROUND_CHILD_VERSION', '0.3.0' );
+define( 'BADAROUND_CHILD_VERSION', '0.4.0' );
 
 /**
  * Load only the assets required by the current screen.
@@ -18,10 +18,11 @@ function badaround_child_enqueue_assets() {
 	$is_location  = is_tax( array( 'ba_territorio', 'badaround_location' ) );
 	$is_reporting = is_page_template( 'page-segnala-evento.php' );
 	$is_map       = is_page_template( 'page-mappa.php' );
+	$is_search    = is_page_template( 'page-cerca.php' );
 	$is_sentinel  = is_page_template( 'page-sentinelle.php' );
 	$is_states    = is_page_template( array( 'page-stati-sistema.php', 'page-segnalazione-inviata.php' ) );
 	$is_account   = is_page_template( 'page-area-personale.php' );
-	$is_badaround = $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_sentinel || $is_states || $is_account;
+	$is_badaround = $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_search || $is_sentinel || $is_states || $is_account;
 
 	if ( ! $is_badaround ) {
 		return;
@@ -71,6 +72,15 @@ function badaround_child_enqueue_assets() {
 			$uri . '/assets/css/pages.css',
 			array( 'badaround-components' ),
 			(string) filemtime( $dir . '/assets/css/pages.css' )
+		);
+	}
+
+	if ( $is_search ) {
+		wp_enqueue_style(
+			'badaround-search',
+			$uri . '/assets/css/search.css',
+			array( 'badaround-components' ),
+			(string) filemtime( $dir . '/assets/css/search.css' )
 		);
 	}
 
@@ -371,3 +381,16 @@ function badaround_territory_canonical() {
 	echo '<link rel="canonical" href="' . esc_url( $url ) . '">' . "\n";
 }
 add_action( 'wp_head', 'badaround_territory_canonical', 3 );
+
+
+/**
+ * C2 — search result pages are utility pages, not SEO landing pages.
+ */
+function badaround_search_robots( $robots ) {
+	if ( is_page_template( 'page-cerca.php' ) ) {
+		$robots['noindex'] = true;
+		$robots['follow']  = true;
+	}
+	return $robots;
+}
+add_filter( 'wp_robots', 'badaround_search_robots', 20 );
