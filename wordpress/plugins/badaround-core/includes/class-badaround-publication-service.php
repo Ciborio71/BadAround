@@ -92,7 +92,8 @@ class BadAround_Publication_Service {
 			(string) get_post_meta( $event_id, '_ba_vehicle_plate_masked', true ),
 		) ) ) );
 
-		foreach ( array( $report->author_email, $report->author_phone, $report->exact_address ) as $private_value ) {
+		$private_identity = trim( strtolower( trim( (string) $report->author_name . ' ' . (string) $report->author_surname ) ) );
+		foreach ( array( $private_identity, $report->author_email, $report->author_phone, $report->exact_address ) as $private_value ) {
 			$private_value = trim( strtolower( (string) $private_value ) );
 			if ( strlen( $private_value ) >= 5 && false !== strpos( $public_text, $private_value ) ) {
 				return new WP_Error( 'ba_publication_private_data_detected', __( 'La proiezione pubblica contiene dati del report riservato.', 'badaround-core' ) );
