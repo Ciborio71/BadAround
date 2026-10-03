@@ -1,9 +1,6 @@
 name: Deploy child theme to staging
 
 on:
-  push:
-    branches:
-      - feature/ui-foundation
   workflow_dispatch:
 
 permissions:
