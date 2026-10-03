@@ -2,9 +2,6 @@ name: Deploy child theme to staging
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - feature/sentinels-d1
 
 permissions:
   contents: read
