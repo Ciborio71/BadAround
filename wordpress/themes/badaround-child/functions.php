@@ -311,3 +311,31 @@ function badaround_territory_robots( $robots ) {
 	return $robots;
 }
 add_filter( 'wp_robots', 'badaround_territory_robots', 20 );
+
+
+/**
+ * B5 — canonical URL for territory archives.
+ */
+function badaround_territory_canonical() {
+	if ( ! is_tax( 'ba_territorio' ) ) {
+		return;
+	}
+
+	$term = get_queried_object();
+	if ( ! $term || empty( $term->term_id ) ) {
+		return;
+	}
+
+	$url = get_term_link( $term );
+	if ( is_wp_error( $url ) ) {
+		return;
+	}
+
+	$paged = max( 1, (int) get_query_var( 'paged' ) );
+	if ( $paged > 1 ) {
+		$url = trailingslashit( $url ) . 'page/' . $paged . '/';
+	}
+
+	echo '<link rel="canonical" href="' . esc_url( $url ) . '">' . "\n";
+}
+add_action( 'wp_head', 'badaround_territory_canonical', 3 );
