@@ -8,10 +8,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Canonical public discovery query for maps, search, filters and future sentinels.
  */
 class BadAround_Discovery_Query {
-	const REST_NAMESPACE = 'badaround/v1';
-	const REST_ROUTE     = '/discovery';
-	const DEFAULT_LIMIT  = 100;
-	const MAX_LIMIT      = 100;
+	const REST_NAMESPACE   = 'badaround/v1';
+	const REST_ROUTE       = '/discovery';
+	const DEFAULT_LIMIT    = 100;
+	const MAX_LIMIT        = 100;
+	const SEARCH_ID_LIMIT  = 500;
 
 	public function register_hooks() {
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
@@ -32,6 +33,9 @@ class BadAround_Discovery_Query {
 					'event_type' => array(
 						'sanitize_callback' => 'sanitize_title',
 					),
+					'search' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 					'page' => array(
 						'default'           => 1,
 						'sanitize_callback' => 'absint',
@@ -46,16 +50,17 @@ class BadAround_Discovery_Query {
 	}
 
 	public function rest_discover( WP_REST_Request $request ) {
-		$result = $this->discover(
-			array(
-				'territory'  => $request->get_param( 'territory' ),
-				'event_type' => $request->get_param( 'event_type' ),
-				'page'       => $request->get_param( 'page' ),
-				'per_page'   => $request->get_param( 'per_page' ),
+		return rest_ensure_response(
+			$this->discover(
+				array(
+					'territory'  => $request->get_param( 'territory' ),
+					'event_type' => $request->get_param( 'event_type' ),
+					'search'     => $request->get_param( 'search' ),
+					'page'       => $request->get_param( 'page' ),
+					'per_page'   => $request->get_param( 'per_page' ),
+				)
 			)
 		);
-
-		return rest_ensure_response( $result );
 	}
 
 	public function discover( $filters = array() ) {
@@ -64,6 +69,7 @@ class BadAround_Discovery_Query {
 			array(
 				'territory'  => '',
 				'event_type' => '',
+				'search'     => '',
 				'page'       => 1,
 				'per_page'   => self::DEFAULT_LIMIT,
 			)
@@ -71,6 +77,8 @@ class BadAround_Discovery_Query {
 
 		$page     = max( 1, absint( $filters['page'] ) );
 		$per_page = min( self::MAX_LIMIT, max( 1, absint( $filters['per_page'] ) ) );
+		$search   = trim( sanitize_text_field( (string) $filters['search'] ) );
+		$territory_matches = array();
 
 		$args = array(
 			'post_type'           => BadAround_Event_Post_Type::POST_TYPE,
@@ -80,14 +88,19 @@ class BadAround_Discovery_Query {
 			'ignore_sticky_posts' => true,
 			'orderby'             => 'date',
 			'order'               => 'DESC',
-			'meta_query'          => array(
-				array(
-					'key'     => '_ba_moderation_status',
-					'value'   => BadAround_Publication_Service::STATUS_PUBLISHED,
-					'compare' => '=',
-				),
-			),
+			'meta_query'          => $this->public_gate_meta_query(),
 		);
+
+		if ( '' !== $search ) {
+			$resolved = $this->resolve_search( $search );
+			$territory_matches = $resolved['territory_matches'];
+
+			if ( empty( $resolved['post_ids'] ) ) {
+				return $this->empty_result( $filters, $page, $territory_matches );
+			}
+
+			$args['post__in'] = $resolved['post_ids'];
+		}
 
 		$tax_query = array();
 
@@ -127,14 +140,161 @@ class BadAround_Discovery_Query {
 		}
 
 		return array(
-			'items'   => $items,
-			'total'   => (int) $query->found_posts,
-			'page'    => $page,
-			'pages'   => (int) $query->max_num_pages,
-			'filters' => array(
+			'items'               => $items,
+			'total'               => (int) $query->found_posts,
+			'page'                => $page,
+			'pages'               => (int) $query->max_num_pages,
+			'filters'             => array(
 				'territory'  => sanitize_title( (string) $filters['territory'] ),
 				'event_type' => sanitize_title( (string) $filters['event_type'] ),
+				'search'     => $search,
 			),
+			'territory_matches'   => $territory_matches,
+		);
+	}
+
+	private function resolve_search( $search ) {
+		$post_ids = array();
+
+		$text_query = new WP_Query(
+			array(
+				'post_type'           => BadAround_Event_Post_Type::POST_TYPE,
+				'post_status'         => 'publish',
+				'fields'              => 'ids',
+				'posts_per_page'      => self::SEARCH_ID_LIMIT,
+				'no_found_rows'       => true,
+				'ignore_sticky_posts' => true,
+				's'                   => $search,
+				'meta_query'          => $this->public_gate_meta_query(),
+			)
+		);
+
+		$post_ids = array_map( 'absint', $text_query->posts );
+
+		$territories = $this->find_matching_territories( $search );
+		$territory_matches = array();
+
+		if ( $territories ) {
+			$term_ids = array();
+
+			foreach ( $territories as $term ) {
+				$term_ids[] = (int) $term->term_id;
+				$territory_matches[] = $this->territory_projection( $term );
+			}
+
+			$territory_query = new WP_Query(
+				array(
+					'post_type'           => BadAround_Event_Post_Type::POST_TYPE,
+					'post_status'         => 'publish',
+					'fields'              => 'ids',
+					'posts_per_page'      => self::SEARCH_ID_LIMIT,
+					'no_found_rows'       => true,
+					'ignore_sticky_posts' => true,
+					'meta_query'          => $this->public_gate_meta_query(),
+					'tax_query'           => array(
+						array(
+							'taxonomy'         => BadAround_Event_Post_Type::TERRITORY_TAX,
+							'field'            => 'term_id',
+							'terms'            => $term_ids,
+							'include_children' => true,
+						),
+					),
+				)
+			);
+
+			$post_ids = array_merge( $post_ids, array_map( 'absint', $territory_query->posts ) );
+		}
+
+		return array(
+			'post_ids'             => array_values( array_unique( array_filter( $post_ids ) ) ),
+			'territory_matches'    => $territory_matches,
+		);
+	}
+
+	private function find_matching_territories( $search ) {
+		$taxonomy = BadAround_Event_Post_Type::TERRITORY_TAX;
+		$needle   = $this->normalize_label( $search );
+		$matches  = array();
+
+		$slug_match = get_term_by( 'slug', sanitize_title( $search ), $taxonomy );
+		if ( $slug_match instanceof WP_Term ) {
+			$matches[ $slug_match->term_id ] = $slug_match;
+		}
+
+		$candidates = get_terms(
+			array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => false,
+				'name__like' => $search,
+				'number'     => 20,
+			)
+		);
+
+		if ( ! is_wp_error( $candidates ) ) {
+			foreach ( $candidates as $term ) {
+				if ( $needle === $this->normalize_label( $term->name ) ) {
+					$matches[ $term->term_id ] = $term;
+				}
+			}
+		}
+
+		return array_values( $matches );
+	}
+
+	private function territory_projection( WP_Term $term ) {
+		$taxonomy = BadAround_Event_Post_Type::TERRITORY_TAX;
+		$ancestor_ids = array_reverse( get_ancestors( $term->term_id, $taxonomy, 'taxonomy' ) );
+		$path = array();
+
+		foreach ( $ancestor_ids as $ancestor_id ) {
+			$ancestor = get_term( $ancestor_id, $taxonomy );
+			if ( $ancestor instanceof WP_Term ) {
+				$path[] = $ancestor->name;
+			}
+		}
+		$path[] = $term->name;
+
+		$url = get_term_link( $term );
+		if ( is_wp_error( $url ) ) {
+			$url = '';
+		}
+
+		return array(
+			'id'   => (int) $term->term_id,
+			'name' => $term->name,
+			'slug' => $term->slug,
+			'path' => $path,
+			'url'  => esc_url_raw( $url ),
+		);
+	}
+
+	private function normalize_label( $value ) {
+		$value = remove_accents( wp_strip_all_tags( (string) $value ) );
+		return function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( $value ), 'UTF-8' ) : strtolower( trim( $value ) );
+	}
+
+	private function public_gate_meta_query() {
+		return array(
+			array(
+				'key'     => '_ba_moderation_status',
+				'value'   => BadAround_Publication_Service::STATUS_PUBLISHED,
+				'compare' => '=',
+			),
+		);
+	}
+
+	private function empty_result( $filters, $page, $territory_matches = array() ) {
+		return array(
+			'items'             => array(),
+			'total'             => 0,
+			'page'              => $page,
+			'pages'             => 0,
+			'filters'           => array(
+				'territory'  => sanitize_title( (string) $filters['territory'] ),
+				'event_type' => sanitize_title( (string) $filters['event_type'] ),
+				'search'     => trim( sanitize_text_field( (string) $filters['search'] ) ),
+			),
+			'territory_matches' => $territory_matches,
 		);
 	}
 
@@ -149,7 +309,6 @@ class BadAround_Discovery_Query {
 		}
 
 		$geo = $this->public_geo( $event_id );
-
 		$event_type = $this->deepest_term( get_the_terms( $event_id, BadAround_Event_Post_Type::EVENT_TYPE_TAX ), BadAround_Event_Post_Type::EVENT_TYPE_TAX );
 		$territory  = $this->deepest_term( get_the_terms( $event_id, BadAround_Event_Post_Type::TERRITORY_TAX ), BadAround_Event_Post_Type::TERRITORY_TAX );
 
