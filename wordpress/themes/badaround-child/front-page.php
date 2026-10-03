@@ -35,10 +35,10 @@ $demo_events = array(
 			<h1 id="ba-home-title">Cosa succede<br>intorno a te?</h1>
 			<p class="ba-home-hero__lead">Segnalazioni locali, richieste di testimoni e aggiornamenti utili dalla tua comunità.</p>
 
-			<form class="ba-home-search" role="search" action="<?php echo esc_url( home_url( '/' ) ); ?>" method="get">
-				<label class="ba-sr-only" for="ba-home-location">Cerca comune, quartiere o indirizzo</label>
+			<form class="ba-home-search" role="search" action="<?php echo esc_url( home_url( '/cerca/' ) ); ?>" method="get">
+				<label class="ba-sr-only" for="ba-home-location">Cerca territorio o evento</label>
 				<span class="ba-home-search__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" focusable="false"><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="10" r="2.2" fill="currentColor"/></svg></span>
-				<input id="ba-home-location" name="s" type="search" placeholder="Cerca comune, quartiere o indirizzo">
+				<input id="ba-home-location" name="q" type="search" placeholder="Cerca Torvaianica, Pomezia, veicolo rubato…">
 				<button class="ba-button" type="submit">Cerca</button>
 			</form>
 
