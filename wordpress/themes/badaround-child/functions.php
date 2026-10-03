@@ -241,3 +241,45 @@ function badaround_event_meta_description() {
 	echo '<meta name="description" content="' . esc_attr( $description ) . '">' . "\n";
 }
 add_action( 'wp_head', 'badaround_event_meta_description', 2 );
+
+
+/**
+ * B5 — minimal SEO for canonical territory archives.
+ */
+function badaround_territory_document_title( $parts ) {
+	if ( is_tax( 'ba_territorio' ) ) {
+		$term = get_queried_object();
+		if ( $term && ! empty( $term->name ) ) {
+			$parts['title'] = $term->name . ' — Eventi';
+			$parts['site']  = 'BadAround';
+		}
+	}
+	return $parts;
+}
+add_filter( 'document_title_parts', 'badaround_territory_document_title', 20 );
+
+function badaround_territory_meta_description() {
+	if ( ! is_tax( 'ba_territorio' ) || defined( 'WPSEO_VERSION' ) || defined( 'RANK_MATH_VERSION' ) ) {
+		return;
+	}
+	$term = get_queried_object();
+	if ( ! $term || empty( $term->name ) ) {
+		return;
+	}
+	$description = ! empty( $term->description )
+		? wp_strip_all_tags( $term->description )
+		: sprintf( 'Eventi pubblicati e moderati relativi a %s su BadAround.', $term->name );
+	echo '<meta name="description" content="' . esc_attr( wp_html_excerpt( trim( $description ), 155, '…' ) ) . '">' . "\n";
+}
+add_action( 'wp_head', 'badaround_territory_meta_description', 2 );
+
+function badaround_territory_robots( $robots ) {
+	if ( is_tax( 'ba_territorio' ) ) {
+		$term = get_queried_object();
+		if ( $term && isset( $term->count ) && 0 === (int) $term->count ) {
+			$robots['noindex'] = true;
+		}
+	}
+	return $robots;
+}
+add_filter( 'wp_robots', 'badaround_territory_robots', 20 );
