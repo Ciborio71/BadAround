@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BADAROUND_CHILD_VERSION', '0.4.0' );
+define( 'BADAROUND_CHILD_VERSION', '0.5.0' );
 
 /**
  * Load only the assets required by the current screen.
