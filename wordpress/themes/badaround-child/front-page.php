@@ -3,7 +3,7 @@ get_header();
 
 $demo_events = array(
 	array(
-		'title'        => 'Auto rubata a Torvaianica',
+		'title'        => 'Auto rubata nella zona',
 		'status'       => 'urgent',
 		'status_label' => 'Urgente',
 		'meta'         => 'Oggi · zona Lungomare · 1,8 km',
@@ -14,7 +14,7 @@ $demo_events = array(
 		'title'        => 'Danneggiamento in parcheggio',
 		'status'       => 'witness',
 		'status_label' => 'Cerca testimoni',
-		'meta'         => 'Ieri · Pomezia · 6,4 km',
+		'meta'         => 'Ieri · zona centrale · 6,4 km',
 		'type'         => 'Danneggiamento',
 		'image'        => '',
 	),
@@ -22,7 +22,7 @@ $demo_events = array(
 		'title'        => 'Veicolo ritrovato',
 		'status'       => 'resolved',
 		'status_label' => 'Risolto',
-		'meta'         => '2 giorni fa · Ardea · 8,1 km',
+		'meta'         => '2 giorni fa · area vicina · 8,1 km',
 		'type'         => 'Veicolo ritrovato',
 		'image'        => '',
 	),
@@ -46,7 +46,7 @@ $demo_events = array(
 			<p class="ba-home-privacy">La posizione pubblica è sempre approssimata.</p>
 		</div>
 
-		<div class="ba-home-map" id="ba-map" role="img" aria-label="Anteprima della mappa delle segnalazioni nell'area di Torvaianica">
+		<div class="ba-home-map" id="ba-map" role="img" aria-label="Anteprima della mappa delle segnalazioni nella tua area">
 			<div class="ba-home-map__toolbar" aria-hidden="true">
 				<span class="is-active">Eventi</span>
 				<span>Mappa di calore</span>
@@ -60,11 +60,6 @@ $demo_events = array(
 			<div class="ba-map-pin ba-map-pin--home" style="left:49%;top:58%" aria-hidden="true"></div>
 			<div class="ba-map-pin ba-map-pin--car" style="left:53%;top:31%" aria-hidden="true"></div>
 			<div class="ba-map-pin ba-map-pin--alert" style="left:77%;top:42%" aria-hidden="true"></div>
-			<div class="ba-home-map__labels" aria-hidden="true">
-				<span style="left:25%;top:48%">Torvaianica</span>
-				<span style="left:63%;top:13%">Pomezia</span>
-				<span style="left:74%;top:56%">Ardea</span>
-			</div>
 			<div class="ba-home-map__legend" aria-hidden="true">
 				<span><i class="is-red"></i> Evento recente</span>
 				<span><i class="is-amber"></i> Più segnalazioni</span>
@@ -77,7 +72,7 @@ $demo_events = array(
 		<div class="ba-container--wide ba-home-localbar__inner">
 			<div class="ba-home-localbar__place">
 				<span class="ba-home-localbar__marker" aria-hidden="true">●</span>
-				<div><span>Nelle vicinanze di</span><strong>Torvaianica</strong></div>
+				<div><span>Esplora</span><strong>La tua area</strong></div>
 			</div>
 			<div class="ba-home-stat"><strong>18</strong><span>segnalazioni</span></div>
 			<div class="ba-home-stat"><strong>6</strong><span>richieste di aiuto</span></div>
@@ -122,7 +117,7 @@ $demo_events = array(
 				<section class="ba-home-sentinel" id="sentinelle">
 					<div class="ba-home-sentinel__copy">
 						<p class="ba-eyebrow">Sentinelle</p>
-						<h2>Segui Torvaianica</h2>
+						<h2>Segui una zona</h2>
 						<p>Ricevi solo gli alert per le aree e le categorie che ti interessano. Aiutaci a rendere la tua comunità più sicura e informata.</p>
 						<a class="ba-button" href="#">Attiva gli alert <span aria-hidden="true">→</span></a>
 					</div>
@@ -147,7 +142,7 @@ $demo_events = array(
 				<div class="ba-home-ad__label">Contenuto sponsorizzato</div>
 				<div class="ba-home-ad__copy">
 					<span class="ba-home-ad__kicker">Attività della zona</span>
-					<div><strong>Proteggi il tuo veicolo a Torvaianica</strong><p>Antifurti satellitari, block shaft e soluzioni di sicurezza personalizzate.</p></div>
+					<div><strong>Proteggi il tuo veicolo nella tua zona</strong><p>Antifurti satellitari, block shaft e soluzioni di sicurezza personalizzate.</p></div>
 				</div>
 				<a class="ba-button ba-button--dark" href="#">Scopri di più <span aria-hidden="true">→</span></a>
 			</aside>
