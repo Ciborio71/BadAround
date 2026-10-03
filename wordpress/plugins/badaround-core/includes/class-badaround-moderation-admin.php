@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Minimal, capability-gated B2 moderation UI for ba_evento. */
 class BadAround_Moderation_Admin {
 	public function register_hooks() {
-		add_action( 'admin_menu', array( $this, 'register_queue_menu' ) );
+		add_filter( 'views_edit-' . BadAround_Event_Post_Type::POST_TYPE, array( $this, 'add_moderation_queue_view' ) );
 		add_action( 'add_meta_boxes_' . BadAround_Event_Post_Type::POST_TYPE, array( $this, 'register_meta_boxes' ) );
 		add_action( 'save_post_' . BadAround_Event_Post_Type::POST_TYPE, array( $this, 'save_public_fields' ), 10, 2 );
 		add_action( 'admin_post_ba_moderate_event', array( $this, 'handle_moderation_action' ) );
@@ -19,14 +19,21 @@ class BadAround_Moderation_Admin {
 		add_action( 'admin_footer-post.php', array( $this, 'customize_native_publish_controls' ) );
 	}
 
-	public function register_queue_menu() {
-		add_submenu_page(
-			'edit.php?post_type=' . BadAround_Event_Post_Type::POST_TYPE,
-			__( 'Da moderare', 'badaround-core' ),
-			__( 'Da moderare', 'badaround-core' ),
-			'ba_moderate_events',
-			'edit.php?post_type=' . BadAround_Event_Post_Type::POST_TYPE . '&ba_moderation_queue=1'
+	public function add_moderation_queue_view( $views ) {
+		if ( ! current_user_can( 'ba_moderate_events' ) ) {
+			return $views;
+		}
+		$count = $this->moderation_queue_count();
+		$url = add_query_arg(
+			array(
+				'post_type'           => BadAround_Event_Post_Type::POST_TYPE,
+				'ba_moderation_queue' => 1,
+			),
+			admin_url( 'edit.php' )
 		);
+		$current = ! empty( $_GET['ba_moderation_queue'] ) ? ' class="current" aria-current="page"' : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$views['ba_moderation_queue'] = '<a href="' . esc_url( $url ) . '"' . $current . '>' . esc_html__( 'Da moderare', 'badaround-core' ) . ' <span class="count">(' . absint( $count ) . ')</span></a>';
+		return $views;
 	}
 
 	public function filter_moderation_queue( $query ) {
@@ -325,6 +332,30 @@ class BadAround_Moderation_Admin {
 			return;
 		}
 		echo '<script>(function(){var b=document.getElementById("publish");if(b){b.value="' . esc_js( __( 'Salva modifiche', 'badaround-core' ) ) . '";}var s=document.getElementById("post-status-select");if(s){s.style.display="none";}}());</script>';
+	}
+
+	private function moderation_queue_count() {
+		$query = new WP_Query(
+			array(
+				'post_type'      => BadAround_Event_Post_Type::POST_TYPE,
+				'post_status'    => 'pending',
+				'fields'         => 'ids',
+				'posts_per_page' => 1,
+				'no_found_rows'  => false,
+				'meta_query'     => array(
+					array(
+						'key'     => '_ba_moderation_status',
+						'value'   => array(
+							BadAround_Moderation_Service::STATUS_NEW,
+							BadAround_Moderation_Service::STATUS_IN_REVIEW,
+							BadAround_Moderation_Service::STATUS_NEEDS_INFORMATION,
+						),
+						'compare' => 'IN',
+					),
+				),
+			)
+		);
+		return (int) $query->found_posts;
 	}
 
 	private function report_for_event( $event_id ) {
