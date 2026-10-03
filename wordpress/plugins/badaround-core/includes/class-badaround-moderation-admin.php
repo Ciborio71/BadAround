@@ -20,7 +20,6 @@ class BadAround_Moderation_Admin {
 		add_filter( 'wp_insert_post_data', array( $this, 'prevent_b2_publish' ), 20, 2 );
 		add_action( 'transition_post_status', array( $this, 'enforce_b2_pending_status' ), 20, 3 );
 		add_action( 'admin_footer-post.php', array( $this, 'customize_native_publish_controls' ) );
-		add_action( 'rest_api_init', array( $this, 'register_staging_b3_test_routes' ) );
 	}
 
 	public function add_moderation_queue_view( $views ) {
@@ -377,123 +376,6 @@ class BadAround_Moderation_Admin {
 		header( 'Content-Disposition: inline; filename="' . rawurlencode( $row->original_filename ) . '"' );
 		readfile( $file['path'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
 		exit;
-	}
-
-	public function register_staging_b3_test_routes() {
-		$host = strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
-		if ( 'staging.badaround.it' !== $host ) {
-			return;
-		}
-		register_rest_route(
-			'badaround/v1',
-			'/b3-test/action',
-			array(
-				'methods'             => 'POST',
-				'permission_callback' => function () {
-					return current_user_can( 'ba_moderate_events' ) && current_user_can( 'edit_ba_eventi' );
-				},
-				'callback'            => function ( WP_REST_Request $request ) {
-					$event_id = absint( $request->get_param( 'event_id' ) );
-					$action   = sanitize_key( (string) $request->get_param( 'test_action' ) );
-					if ( 'prepare_projection' === $action ) {
-						$post = get_post( $event_id );
-						if ( ! $post || BadAround_Event_Post_Type::POST_TYPE !== $post->post_type ) {
-							return new WP_Error( 'ba_test_invalid_event', 'Invalid event.', array( 'status' => 404 ) );
-						}
-						wp_update_post(
-							array(
-								'ID'           => $event_id,
-								'post_title'   => sanitize_text_field( (string) $request->get_param( 'title' ) ),
-								'post_content' => wp_kses_post( (string) $request->get_param( 'content' ) ),
-								'post_status'  => 'pending',
-							)
-						);
-						update_post_meta( $event_id, '_ba_public_place_name', sanitize_text_field( (string) $request->get_param( 'place_name' ) ) );
-						update_post_meta( $event_id, '_ba_public_radius_m', max( 100, absint( $request->get_param( 'radius_m' ) ) ) );
-						$type_ids = array_map( 'absint', (array) $request->get_param( 'type_term_ids' ) );
-						if ( $type_ids ) {
-							wp_set_object_terms( $event_id, $type_ids, BadAround_Event_Post_Type::EVENT_TYPE_TAX, false );
-						}
-						$territory_ids = array_map( 'absint', (array) $request->get_param( 'territory_term_ids' ) );
-						if ( $territory_ids ) {
-							wp_set_object_terms( $event_id, $territory_ids, BadAround_Event_Post_Type::TERRITORY_TAX, false );
-						}
-						return array( 'ok' => true, 'post_status' => get_post_status( $event_id ) );
-					}
-					if ( 'probe_public' === $action ) {
-						global $wpdb;
-						$url = get_permalink( $event_id );
-						$response = wp_remote_get( $url, array( 'redirection' => 0, 'timeout' => 15 ) );
-						if ( is_wp_error( $response ) ) {
-							return array( 'ok' => false, 'transport_error' => $response->get_error_code() );
-						}
-						$body = (string) wp_remote_retrieve_body( $response );
-						$code = (int) wp_remote_retrieve_response_code( $response );
-						$report = $wpdb->get_row(
-							$wpdb->prepare(
-								"SELECT author_name, author_surname, author_email, author_phone, exact_address, exact_lat, exact_lng, full_plate FROM {$wpdb->prefix}ba_reports WHERE event_id = %d AND deleted_at IS NULL ORDER BY id ASC LIMIT 1",
-								$event_id
-							)
-						);
-						$haystack = strtolower( wp_strip_all_tags( $body ) );
-						$private_hits = false;
-						if ( $report ) {
-							$identity = trim( (string) $report->author_name . ' ' . (string) $report->author_surname );
-							foreach ( array( $identity, $report->author_email, $report->author_phone, $report->exact_address, $report->full_plate ) as $value ) {
-								$value = trim( strtolower( (string) $value ) );
-								if ( strlen( $value ) >= 5 && false !== strpos( $haystack, $value ) ) {
-									$private_hits = true;
-								}
-							}
-							if ( null !== $report->exact_lat && false !== strpos( $haystack, strtolower( (string) $report->exact_lat ) ) ) {
-								$private_hits = true;
-							}
-							if ( null !== $report->exact_lng && false !== strpos( $haystack, strtolower( (string) $report->exact_lng ) ) ) {
-								$private_hits = true;
-							}
-						}
-						$thumb_id = get_post_thumbnail_id( $event_id );
-						$thumb_url = $thumb_id ? wp_get_attachment_url( $thumb_id ) : '';
-						$report_probe = wp_remote_get( rest_url( 'wp/v2/ba_reports/6' ), array( 'redirection' => 0, 'timeout' => 15 ) );
-						return array(
-							'ok'                    => true,
-							'http_status'           => $code,
-							'template_marker'       => false !== strpos( $body, 'Informazioni disponibili' ) && false !== strpos( $body, 'Hai informazioni?' ),
-							'private_data_exposed'  => $private_hits,
-							'private_labels_exposed'=> false !== strpos( $body, 'Coordinate precise' ) || false !== strpos( $body, 'Targa completa' ) || false !== strpos( $body, 'Segnalante' ),
-							'public_media_rendered' => $thumb_url ? false !== strpos( $body, basename( $thumb_url ) ) : false,
-							'report_rest_status'    => is_wp_error( $report_probe ) ? 0 : (int) wp_remote_retrieve_response_code( $report_probe ),
-						);
-					}
-
-					if ( 'approve' === $action ) {
-						$result = ( new BadAround_Moderation_Service() )->transition( $event_id, BadAround_Moderation_Service::STATUS_APPROVED, 'B3 end-to-end test approval' );
-					} elseif ( 'approve_media' === $action ) {
-						$result = ( new BadAround_Media_Repository() )->approve_for_publication( absint( $request->get_param( 'media_id' ) ), $event_id );
-					} elseif ( 'validate' === $action ) {
-						$result = ( new BadAround_Publication_Service() )->validate_public_projection( $event_id );
-					} elseif ( 'publish' === $action ) {
-						$result = ( new BadAround_Publication_Service() )->publish( $event_id );
-					} else {
-						return new WP_Error( 'ba_test_invalid_action', 'Invalid test action.', array( 'status' => 400 ) );
-					}
-					if ( is_wp_error( $result ) ) {
-						return $result;
-					}
-					return array(
-						'ok'                => true,
-						'event_id'          => $event_id,
-						'moderation_status' => get_post_meta( $event_id, '_ba_moderation_status', true ),
-						'post_status'       => get_post_status( $event_id ),
-						'permalink'         => get_permalink( $event_id ),
-					);
-				},
-				'args'                => array(
-					'event_id'    => array( 'required' => true, 'type' => 'integer' ),
-					'test_action' => array( 'required' => true, 'type' => 'string' ),
-				),
-			)
-		);
 	}
 
 	public function prevent_b2_publish( $data, $postarr ) {
