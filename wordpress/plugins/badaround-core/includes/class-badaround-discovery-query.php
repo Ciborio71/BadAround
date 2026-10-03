@@ -30,8 +30,14 @@ class BadAround_Discovery_Query {
 					'territory' => array(
 						'sanitize_callback' => 'sanitize_title',
 					),
+					'category' => array(
+						'sanitize_callback' => 'sanitize_title',
+					),
 					'event_type' => array(
 						'sanitize_callback' => 'sanitize_title',
+					),
+					'period' => array(
+						'sanitize_callback' => 'absint',
 					),
 					'search' => array(
 						'sanitize_callback' => 'sanitize_text_field',
@@ -54,7 +60,9 @@ class BadAround_Discovery_Query {
 			$this->discover(
 				array(
 					'territory'  => $request->get_param( 'territory' ),
+					'category'   => $request->get_param( 'category' ),
 					'event_type' => $request->get_param( 'event_type' ),
+					'period'     => $request->get_param( 'period' ),
 					'search'     => $request->get_param( 'search' ),
 					'page'       => $request->get_param( 'page' ),
 					'per_page'   => $request->get_param( 'per_page' ),
@@ -68,7 +76,9 @@ class BadAround_Discovery_Query {
 			$filters,
 			array(
 				'territory'  => '',
+				'category'   => '',
 				'event_type' => '',
+				'period'     => 0,
 				'search'     => '',
 				'page'       => 1,
 				'per_page'   => self::DEFAULT_LIMIT,
@@ -78,6 +88,7 @@ class BadAround_Discovery_Query {
 		$page     = max( 1, absint( $filters['page'] ) );
 		$per_page = min( self::MAX_LIMIT, max( 1, absint( $filters['per_page'] ) ) );
 		$search   = trim( sanitize_text_field( (string) $filters['search'] ) );
+		$period   = in_array( absint( $filters['period'] ), array( 7, 30, 90 ), true ) ? absint( $filters['period'] ) : 0;
 		$territory_matches = array();
 
 		$args = array(
@@ -102,6 +113,21 @@ class BadAround_Discovery_Query {
 			$args['post__in'] = $resolved['post_ids'];
 		}
 
+		if ( $period ) {
+			$period_ids = $this->resolve_period_post_ids( $period );
+			if ( empty( $period_ids ) ) {
+				return $this->empty_result( $filters, $page, $territory_matches );
+			}
+
+			$args['post__in'] = isset( $args['post__in'] )
+				? array_values( array_intersect( $args['post__in'], $period_ids ) )
+				: $period_ids;
+
+			if ( empty( $args['post__in'] ) ) {
+				return $this->empty_result( $filters, $page, $territory_matches );
+			}
+		}
+
 		$tax_query = array();
 
 		if ( ! empty( $filters['territory'] ) ) {
@@ -113,12 +139,21 @@ class BadAround_Discovery_Query {
 			);
 		}
 
+		if ( ! empty( $filters['category'] ) ) {
+			$tax_query[] = array(
+				'taxonomy'         => BadAround_Event_Post_Type::EVENT_TYPE_TAX,
+				'field'            => 'slug',
+				'terms'            => array( sanitize_title( $filters['category'] ) ),
+				'include_children' => true,
+			);
+		}
+
 		if ( ! empty( $filters['event_type'] ) ) {
 			$tax_query[] = array(
 				'taxonomy'         => BadAround_Event_Post_Type::EVENT_TYPE_TAX,
 				'field'            => 'slug',
 				'terms'            => array( sanitize_title( $filters['event_type'] ) ),
-				'include_children' => true,
+				'include_children' => false,
 			);
 		}
 
@@ -146,11 +181,54 @@ class BadAround_Discovery_Query {
 			'pages'               => (int) $query->max_num_pages,
 			'filters'             => array(
 				'territory'  => sanitize_title( (string) $filters['territory'] ),
+				'category'   => sanitize_title( (string) $filters['category'] ),
 				'event_type' => sanitize_title( (string) $filters['event_type'] ),
+				'period'     => $period,
 				'search'     => $search,
 			),
 			'territory_matches'   => $territory_matches,
 		);
+	}
+
+	private function resolve_period_post_ids( $days ) {
+		$days = absint( $days );
+		if ( ! in_array( $days, array( 7, 30, 90 ), true ) ) {
+			return array();
+		}
+
+		$query = new WP_Query(
+			array(
+				'post_type'           => BadAround_Event_Post_Type::POST_TYPE,
+				'post_status'         => 'publish',
+				'fields'              => 'ids',
+				'posts_per_page'      => self::SEARCH_ID_LIMIT,
+				'no_found_rows'       => true,
+				'ignore_sticky_posts' => true,
+				'meta_query'          => $this->public_gate_meta_query(),
+			)
+		);
+
+		$today     = new DateTimeImmutable( 'today', wp_timezone() );
+		$threshold = $today->sub( new DateInterval( 'P' . max( 0, $days - 1 ) . 'D' ) );
+		$ids       = array();
+
+		foreach ( $query->posts as $post_id ) {
+			$value = trim( (string) get_post_meta( $post_id, '_ba_occurred_date', true ) );
+			if ( '' === $value ) {
+				continue;
+			}
+
+			$date = DateTimeImmutable::createFromFormat( '!d/m/Y', $value, wp_timezone() );
+			if ( ! $date ) {
+				$date = DateTimeImmutable::createFromFormat( '!Y-m-d', $value, wp_timezone() );
+			}
+
+			if ( $date && $date >= $threshold && $date <= $today ) {
+				$ids[] = absint( $post_id );
+			}
+		}
+
+		return array_values( array_unique( $ids ) );
 	}
 
 	private function resolve_search( $search ) {
@@ -291,7 +369,9 @@ class BadAround_Discovery_Query {
 			'pages'             => 0,
 			'filters'           => array(
 				'territory'  => sanitize_title( (string) $filters['territory'] ),
+				'category'   => sanitize_title( (string) $filters['category'] ),
 				'event_type' => sanitize_title( (string) $filters['event_type'] ),
+				'period'     => in_array( absint( $filters['period'] ), array( 7, 30, 90 ), true ) ? absint( $filters['period'] ) : 0,
 				'search'     => trim( sanitize_text_field( (string) $filters['search'] ) ),
 			),
 			'territory_matches' => $territory_matches,
