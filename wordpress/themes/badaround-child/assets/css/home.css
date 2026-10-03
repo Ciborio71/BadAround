@@ -66,6 +66,9 @@
 .ba-home-sentinel,.ba-home-how { min-height:210px; border-radius:16px; overflow:hidden; }
 .ba-home-sentinel { position:relative; display:grid; grid-template-columns:1fr 290px; padding:28px 32px; background:linear-gradient(115deg,#e9fbfc 0%,#d8f6f8 58%,#c7eef2 100%); }
 .ba-home-sentinel__copy { position:relative; z-index:2; max-width:590px; }
+.ba-home-sentinel__badge { display:inline-flex; align-items:center; gap:8px; width:fit-content; margin:0 0 12px; padding:6px 10px 6px 7px; border:1px solid rgba(16,137,143,.20); border-radius:999px; background:rgba(255,255,255,.68); color:var(--ba-teal-700); font-size:.78rem; font-weight:800; letter-spacing:.02em; box-shadow:0 5px 14px rgba(7,26,56,.05); }
+.ba-home-sentinel__badge-icon { display:grid; place-items:center; width:26px; height:26px; border-radius:50%; background:#fff; color:var(--ba-teal-700); box-shadow:0 2px 8px rgba(7,26,56,.08); }
+.ba-home-sentinel__badge-icon svg { width:18px; height:18px; display:block; }
 .ba-home-sentinel__copy p:not(.ba-eyebrow) { color:#4f647c; line-height:1.4; }
 .ba-home-phone { align-self:end; justify-self:end; position:absolute; right:24px; bottom:-46px; width:220px; height:250px; border:10px solid #111b25; border-radius:34px; background:linear-gradient(160deg,#2d6474,#afc9c4); box-shadow:0 20px 45px rgba(7,26,56,.25); transform:rotate(-2deg); }
 .ba-home-phone__notch { width:80px; height:18px; margin:5px auto 25px; border-radius:0 0 14px 14px; background:#111b25; }
