@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Owns the versioned database schema for private and relational data. */
 class BadAround_Installer {
-	const SCHEMA_VERSION = '1.0.0';
+	const SCHEMA_VERSION = '1.1.0';
 	const OPTION_NAME    = 'ba_db_schema_version';
 
 	public function register_hooks() {
@@ -18,6 +18,7 @@ class BadAround_Installer {
 		self::install_capabilities();
 		$content_model = new BadAround_Event_Post_Type();
 		$content_model->register_content_model();
+		self::install_event_taxonomy();
 		flush_rewrite_rules();
 	}
 
@@ -57,6 +58,60 @@ class BadAround_Installer {
 		if ( self::SCHEMA_VERSION !== get_option( self::OPTION_NAME ) ) {
 			self::install_schema();
 			self::install_capabilities();
+			self::install_event_taxonomy();
+		}
+	}
+
+	private static function install_event_taxonomy() {
+		$taxonomy = BadAround_Event_Post_Type::EVENT_TYPE_TAX;
+
+		if ( ! taxonomy_exists( $taxonomy ) ) {
+			return;
+		}
+
+		$legacy_vehicles = get_term_by( 'slug', 'veicolo-o-mobilita', $taxonomy );
+		$vehicles        = get_term_by( 'slug', 'veicoli', $taxonomy );
+
+		if ( ! $vehicles && $legacy_vehicles instanceof WP_Term ) {
+			wp_update_term(
+				$legacy_vehicles->term_id,
+				$taxonomy,
+				array(
+					'name' => 'Veicoli',
+					'slug' => 'veicoli',
+				)
+			);
+			$vehicles = get_term( $legacy_vehicles->term_id, $taxonomy );
+		}
+
+		$parents = array(
+			'veicoli'              => 'Veicoli',
+			'case-e-attivita'      => 'Case e attività',
+			'pericoli'             => 'Pericoli',
+			'spazi-pubblici'       => 'Spazi pubblici',
+			'animali'              => 'Animali',
+			'oggetti-e-documenti'  => 'Oggetti e documenti',
+		);
+
+		foreach ( $parents as $slug => $name ) {
+			if ( ! term_exists( $slug, $taxonomy ) ) {
+				wp_insert_term( $name, $taxonomy, array( 'slug' => $slug ) );
+			}
+		}
+
+		$public_spaces = get_term_by( 'slug', 'spazi-pubblici', $taxonomy );
+		$urban_decay   = get_term_by( 'slug', 'degrado-urbano', $taxonomy );
+
+		if (
+			$public_spaces instanceof WP_Term &&
+			$urban_decay instanceof WP_Term &&
+			0 === (int) $urban_decay->parent
+		) {
+			wp_update_term(
+				$urban_decay->term_id,
+				$taxonomy,
+				array( 'parent' => (int) $public_spaces->term_id )
+			);
 		}
 	}
 
