@@ -76,14 +76,8 @@ function badaround_sentinel_territory_label( WP_Term $term ) {
 					</div>
 				</div>
 
-				<div class="ba-sentinel-radar" aria-hidden="true">
-					<div class="ba-sentinel-radar__ring ba-sentinel-radar__ring--1"></div>
-					<div class="ba-sentinel-radar__ring ba-sentinel-radar__ring--2"></div>
-					<div class="ba-sentinel-radar__ring ba-sentinel-radar__ring--3"></div>
-					<span class="ba-sentinel-radar__dot ba-sentinel-radar__dot--1"></span>
-					<span class="ba-sentinel-radar__dot ba-sentinel-radar__dot--2"></span>
-					<span class="ba-sentinel-radar__dot ba-sentinel-radar__dot--3"></span>
-					<span class="ba-sentinel-radar__center"></span>
+				<div class="ba-sentinel-hero__visual">
+					<img src="<?php echo esc_url( content_url( '/uploads/2026/10/BadAround-—-Hero-Sentinelle.png' ) ); ?>" alt="Sentinella BadAround: monitoraggio delle segnalazioni nella propria zona" width="1672" height="941" fetchpriority="high" decoding="async">
 				</div>
 			</div>
 		</div>
