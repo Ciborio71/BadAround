@@ -107,19 +107,35 @@ class BadAround_Sentinel_Matching_Service {
 			? '[STAGING BadAround] Nuovo evento nella tua Sentinella'
 			: 'Nuovo evento nella tua Sentinella BadAround';
 
+		$criteria = json_decode( $sentinel['criteria_json'], true );
 		$territory = ! empty( $projection['territory']['name'] ) ? $projection['territory']['name'] : '';
 		$type      = ! empty( $projection['event_type']['name'] ) ? $projection['event_type']['name'] : '';
-		$message   = $projection['title'] . "\n";
+		$watch_area = ! empty( $criteria['territory']['name'] ) ? $criteria['territory']['name'] : $territory;
+		$watch_type = ! empty( $criteria['event_type']['name'] )
+			? $criteria['event_type']['name']
+			: ( ! empty( $criteria['category']['name'] ) ? $criteria['category']['name'] : 'tutti gli eventi' );
+
+		$unsubscribe_url = ( new BadAround_Sentinel_Service() )->unsubscribe_url_for_sentinel( $sentinel );
+		if ( is_wp_error( $unsubscribe_url ) ) {
+			$this->handle_send_failure( $match, $unsubscribe_url );
+			return;
+		}
+
+		$message  = "Ricevi questo avviso perché la tua Sentinella segue {$watch_area} per {$watch_type}.\n\n";
+		$message .= $projection['title'] . "\n";
 		if ( $territory ) { $message .= 'Zona: ' . $territory . "\n"; }
 		if ( $type ) { $message .= 'Tipo: ' . $type . "\n"; }
 		if ( ! empty( $projection['excerpt'] ) ) { $message .= "\n" . $projection['excerpt'] . "\n"; }
 		$message .= "\nDettaglio pubblico: " . $projection['permalink'];
+		$message .= "\n\nDisattiva questa Sentinella: " . $unsubscribe_url;
 
-		$html  = '<h2>' . esc_html( $projection['title'] ) . '</h2>';
+		$html  = '<p>Ricevi questo avviso perché la tua Sentinella segue <strong>' . esc_html( $watch_area ) . '</strong> per <strong>' . esc_html( $watch_type ) . '</strong>.</p>';
+		$html .= '<h2>' . esc_html( $projection['title'] ) . '</h2>';
 		if ( $territory ) { $html .= '<p><strong>Zona:</strong> ' . esc_html( $territory ) . '</p>'; }
 		if ( $type ) { $html .= '<p><strong>Tipo:</strong> ' . esc_html( $type ) . '</p>'; }
 		if ( ! empty( $projection['excerpt'] ) ) { $html .= '<p>' . esc_html( $projection['excerpt'] ) . '</p>'; }
 		$html .= '<p><a href="' . esc_url( $projection['permalink'] ) . '">Apri il dettaglio su BadAround</a></p>';
+		$html .= '<hr><p><small>Non vuoi più ricevere notifiche da questa Sentinella? <a href="' . esc_url( $unsubscribe_url ) . '">Disattiva questa Sentinella</a>.</small></p>';
 
 		$result = ( new BadAround_Transactional_Mailer() )->send( $recipient, $subject, $message, $html );
 		if ( is_wp_error( $result ) ) {
