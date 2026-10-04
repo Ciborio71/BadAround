@@ -1,5 +1,5 @@
 name: Deploy RC1 to staging
-# RC1 PERF-01 deploy marker
+# RC1 D2 deploy marker
 
 on:
   push:
@@ -33,6 +33,8 @@ jobs:
         run: find ./wordpress/themes/badaround-child -type f -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Test D1 Sentinel lifecycle
         run: php ./tests/sentinels-d1.php
+      - name: Test D2 Sentinel matching
+        run: php ./tests/sentinels-d2.php
 
   deploy:
     name: Deploy RC1 core and theme
