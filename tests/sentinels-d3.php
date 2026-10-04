@@ -3,6 +3,9 @@
  * D3 Sentinel unsubscribe lifecycle tests without WordPress.
  */
 define( 'ABSPATH', __DIR__ . '/' );
+define( 'DAY_IN_SECONDS', 86400 );
+define( 'MINUTE_IN_SECONDS', 60 );
+define( 'HOUR_IN_SECONDS', 3600 );
 
 function wp_salt( $scheme = 'auth' ) { return 'badaround-d3-test-' . $scheme; }
 function sanitize_text_field( $value ) { return preg_replace( '/[^A-Za-z0-9._-]/', '', (string) $value ); }
