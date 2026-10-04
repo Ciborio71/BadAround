@@ -117,14 +117,6 @@ $demo_events = array(
 					<span class="ba-home-category__pin is-object" aria-hidden="true"></span>
 					<span class="ba-home-category__copy"><strong>Oggetti e documenti</strong><small>Oggetti smarriti o ritrovati</small></span>
 				</a>
-				<div class="ba-home-category-card is-info" aria-label="Risolto — Evento concluso">
-					<span class="ba-home-category__resolved" aria-hidden="true">✓</span>
-					<span class="ba-home-category__copy"><strong>Risolto</strong><small>Evento concluso</small></span>
-				</div>
-				<div class="ba-home-category-card is-info" aria-label="Più eventi — Pinpoint raggruppati nella stessa area">
-					<span class="ba-home-category__cluster" aria-hidden="true">3</span>
-					<span class="ba-home-category__copy"><strong>Più eventi</strong><small>Pinpoint raggruppati nella stessa area</small></span>
-				</div>
 			</nav>
 
 			<div class="ba-home-sectionhead">
