@@ -23,8 +23,9 @@ function badaround_child_enqueue_assets() {
 	$is_sentinel  = is_page_template( 'page-sentinelle.php' );
 	$is_states    = is_page_template( array( 'page-stati-sistema.php', 'page-segnalazione-inviata.php' ) );
 	$is_account   = is_page_template( 'page-area-personale.php' );
-	$is_not_found = is_404();
-	$is_badaround = $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_search || $is_reports || $is_sentinel || $is_states || $is_account || $is_not_found;
+	$is_not_found    = is_404();
+	$is_how_it_works = is_page( 'come-funziona' );
+	$is_badaround     = $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_search || $is_reports || $is_sentinel || $is_states || $is_account || $is_not_found || $is_how_it_works;
 
 	if ( ! $is_badaround ) {
 		return;
