@@ -16,12 +16,12 @@ if ( class_exists( 'BadAround_Discovery_Query' ) ) {
 }
 
 $home_categories = array(
-	array( 'label' => 'Veicoli',              'slug' => 'veicoli',              'class' => 'is-blue' ),
-	array( 'label' => 'Case e attività',      'slug' => 'case-e-attivita',      'class' => 'is-coral' ),
-	array( 'label' => 'Pericoli',             'slug' => 'pericoli',             'class' => 'is-amber' ),
-	array( 'label' => 'Spazi pubblici',       'slug' => 'spazi-pubblici',       'class' => 'is-purple' ),
-	array( 'label' => 'Animali',              'slug' => 'animali',              'class' => 'is-green' ),
-	array( 'label' => 'Oggetti e documenti',  'slug' => 'oggetti-e-documenti',  'class' => 'is-slate' ),
+	array( 'label' => 'Veicoli',             'subtitle' => 'Auto, moto e altri mezzi',             'slug' => 'veicoli',             'class' => 'is-vehicles' ),
+	array( 'label' => 'Case e attività',     'subtitle' => 'Abitazioni, negozi e uffici',          'slug' => 'case-e-attivita',     'class' => 'is-property' ),
+	array( 'label' => 'Pericoli',            'subtitle' => 'Rischi e situazioni pericolose',       'slug' => 'pericoli',            'class' => 'is-hazard' ),
+	array( 'label' => 'Spazi pubblici',      'subtitle' => 'Strade, aree pubbliche e decoro',      'slug' => 'spazi-pubblici',      'class' => 'is-public' ),
+	array( 'label' => 'Animali',             'subtitle' => 'Smarrimenti e segnalazioni',           'slug' => 'animali',             'class' => 'is-animal' ),
+	array( 'label' => 'Oggetti e documenti', 'subtitle' => 'Oggetti smarriti o ritrovati',         'slug' => 'oggetti-e-documenti', 'class' => 'is-object' ),
 );
 ?>
 <main class="ba-home" id="main-content">
@@ -90,9 +90,9 @@ $home_categories = array(
 		<div class="ba-container--wide">
 			<nav class="ba-home-categories" aria-label="Categorie principali">
 				<?php foreach ( $home_categories as $category ) : ?>
-					<a href="<?php echo esc_url( add_query_arg( 'categoria', $category['slug'], home_url( '/segnalazioni/' ) ) ); ?>">
-						<span class="ba-home-category__icon <?php echo esc_attr( $category['class'] ); ?>" aria-hidden="true">●</span>
-						<?php echo esc_html( $category['label'] ); ?>
+					<a class="ba-home-category-card" href="<?php echo esc_url( add_query_arg( 'categoria', $category['slug'], home_url( '/segnalazioni/' ) ) ); ?>">
+						<span class="ba-home-category__pin <?php echo esc_attr( $category['class'] ); ?>" aria-hidden="true"></span>
+						<span class="ba-home-category__copy"><strong><?php echo esc_html( $category['label'] ); ?></strong><small><?php echo esc_html( $category['subtitle'] ); ?></small></span>
 					</a>
 				<?php endforeach; ?>
 			</nav>
