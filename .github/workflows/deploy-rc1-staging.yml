@@ -36,6 +36,9 @@ jobs:
       - name: Test D2 Sentinel matching
         run: php ./tests/sentinels-d2.php
 
+      - name: Test D3 Sentinel completion
+        run: php ./tests/sentinels-d3.php
+
   deploy:
     name: Deploy RC1 core and theme
     needs: validate
