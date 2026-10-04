@@ -159,7 +159,7 @@ $home_categories = array(
 					</div>
 					<div class="ba-home-phone" aria-hidden="true">
 						<div class="ba-home-phone__notch"></div>
-						<div class="ba-home-phone__alert"><strong>BadAround</strong><span>Nuova segnalazione<br>a 2 km da te</span></div>
+						<div class="ba-home-phone__alert"><strong>BadAround</strong><span>Nuova segnalazione<br>nella zona che segui</span></div>
 					</div>
 				</section>
 
@@ -170,7 +170,8 @@ $home_categories = array(
 						<li><span>2</span><div><strong>Verifichiamo</strong><p>Controlliamo la segnalazione e rimuoviamo contenuti inappropriati.</p></div></li>
 						<li><span>3</span><div><strong>La comunità aiuta</strong><p>Le informazioni utili sono visibili a tutti.</p></div></li>
 					</ol>
-					<p class="ba-home-disclaimer">Le segnalazioni sono pubblicate dagli utenti e non costituiscono dati ufficiali.</p>\n\t\t\t\t\t<a class="ba-button ba-button--outline" href="<?php echo esc_url( home_url( '/come-funziona/' ) ); ?>">Scopri come funziona</a>
+					<p class="ba-home-disclaimer">Le segnalazioni sono pubblicate dagli utenti e non costituiscono dati ufficiali.</p>
+					<a class="ba-button ba-button--outline" href="<?php echo esc_url( home_url( '/come-funziona/' ) ); ?>">Scopri come funziona</a>
 				</section>
 			</div>
 
