@@ -145,7 +145,7 @@ function badaround_sentinel_territory_label( WP_Term $term ) {
 				<article class="ba-card ba-sentinel-benefit">
 					<span class="ba-sentinel-benefit__icon" aria-hidden="true">✓</span>
 					<h2>Verifica l'email</h2>
-					<p>La Sentinella resta inattiva finché non confermi il link inviato all'indirizzo indicato.</p>
+					<p>La Sentinella resta inattiva finché non confermi il link inviato all'indirizzo indicato. La tua identità non viene resa pubblica.</p>
 				</article>
 			</div>
 		</div>
