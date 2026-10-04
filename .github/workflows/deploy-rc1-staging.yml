@@ -1,5 +1,5 @@
 name: Deploy RC1 to staging
-# RC1 D2 deploy marker match-fix
+# RC1 D2 final deploy
 
 on:
   push:
