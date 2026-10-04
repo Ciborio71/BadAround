@@ -166,7 +166,7 @@ $home_categories = array(
 				<section class="ba-home-how" id="come-funziona">
 					<h2>Come funziona</h2>
 					<ol>
-						<li><span>1</span><div><strong>Segnala</strong><p>Descrivi cosa hai visto in modo semplice e anonimo.</p></div></li>
+						<li><span>1</span><div><strong>Segnala</strong><p>Descrivi cosa hai visto in modo semplice.</p></div></li>
 						<li><span>2</span><div><strong>Verifichiamo</strong><p>Controlliamo la segnalazione e rimuoviamo contenuti inappropriati.</p></div></li>
 						<li><span>3</span><div><strong>La comunità aiuta</strong><p>Le informazioni utili sono visibili a tutti.</p></div></li>
 					</ol>
