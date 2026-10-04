@@ -43,6 +43,19 @@ class BadAround_Sentinel_Repository {
 		);
 	}
 
+	public function find_eligible_active() {
+		global $wpdb;
+		return $wpdb->get_results(
+			"SELECT * FROM {$this->table()}
+			 WHERE status = '" . self::STATUS_ACTIVE . "'
+			   AND confirmed_at IS NOT NULL
+			   AND disabled_at IS NULL
+			   AND deleted_at IS NULL
+			 ORDER BY id ASC",
+			ARRAY_A
+		);
+	}
+
 	public function create( $data ) {
 		global $wpdb;
 
