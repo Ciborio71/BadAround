@@ -30,7 +30,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 		<nav class="ba-primary-nav" id="ba-primary-nav" aria-label="<?php esc_attr_e( 'Navigazione principale', 'badaround-child' ); ?>">
 			<a href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Mappa</a>
 			<a href="<?php echo esc_url( home_url( '/cerca/' ) ); ?>">Cerca</a>
-			<a href="<?php echo esc_url( home_url( '/#segnalazioni' ) ); ?>">Segnalazioni</a>
+			<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Segnalazioni</a>
 			<a href="<?php echo esc_url( home_url( '/#come-funziona' ) ); ?>">Come funziona</a>
 			<a href="<?php echo esc_url( home_url( '/sentinelle/' ) ); ?>">Sentinelle</a>
 		</nav>
@@ -51,7 +51,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 		<nav aria-label="<?php esc_attr_e( 'Navigazione mobile', 'badaround-child' ); ?>">
 			<a href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Mappa</a>
 			<a href="<?php echo esc_url( home_url( '/cerca/' ) ); ?>">Cerca</a>
-			<a href="<?php echo esc_url( home_url( '/#segnalazioni' ) ); ?>">Segnalazioni</a>
+			<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Segnalazioni</a>
 			<a href="<?php echo esc_url( home_url( '/#come-funziona' ) ); ?>">Come funziona</a>
 			<a href="<?php echo esc_url( home_url( '/sentinelle/' ) ); ?>">Sentinelle</a>
 			<a href="<?php echo esc_url( home_url( '/area-personale/' ) ); ?>"><?php echo is_user_logged_in() ? 'Account' : 'Accedi'; ?></a>
