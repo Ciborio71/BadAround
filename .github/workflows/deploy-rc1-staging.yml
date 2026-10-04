@@ -1,5 +1,5 @@
 name: Deploy RC1 to staging
-# RC1 D3 curl-template-sync
+# RC1 D3 one-shot-template-sync
 
 on:
   push:
@@ -66,7 +66,7 @@ jobs:
           FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
           FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
         run: |
-          curl --fail --show-error --silent \
+          curl --fail --show-error --silent --insecure \
             --ssl-reqd --ftp-pasv --disable-epsv \
             --retry 3 --retry-delay 2 --retry-all-errors \
             --user "$FTP_USER:$FTP_PASS" \
