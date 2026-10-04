@@ -125,6 +125,31 @@ class BadAround_Sentinel_Repository {
 		return $this->find_by_id( $id );
 	}
 
+	public function unsubscribe( $id ) {
+		global $wpdb;
+
+		$updated = $wpdb->update(
+			$this->table(),
+			array(
+				'status'      => self::STATUS_UNSUBSCRIBED,
+				'disabled_at' => current_time( 'mysql', true ),
+				'updated_at'  => current_time( 'mysql', true ),
+			),
+			array(
+				'id'     => absint( $id ),
+				'status' => self::STATUS_ACTIVE,
+			),
+			array( '%s', '%s', '%s' ),
+			array( '%d', '%s' )
+		);
+
+		if ( false === $updated ) {
+			return new WP_Error( 'ba_sentinel_unsubscribe_failed', 'Unable to unsubscribe sentinel.' );
+		}
+
+		return $this->find_by_id( $id );
+	}
+
 	public function activate( $id ) {
 		global $wpdb;
 
