@@ -234,3 +234,14 @@ a.ba-home-category-card:hover,a.ba-home-category-card:focus-visible { transform:
 .ba-home-events .ba-event-card--home .ba-event-card__media{position:relative;background:#eef3f6}
 .ba-home-events .ba-event-card--home .ba-event-card__media::after{content:"";position:absolute;inset:0;box-shadow:inset -1px 0 rgba(7,26,56,.06);pointer-events:none}
 @media(prefers-reduced-motion:reduce){.ba-home-events .ba-event-card--home{transition:none}}
+
+/* UX-02b — icon-led badges and strict card rhythm */
+.ba-home-events .ba-event-card--home .ba-event-card__body{display:grid;grid-template-rows:32px minmax(42px,auto) 20px minmax(40px,auto) 22px;align-content:start}
+.ba-home-events .ba-event-card--home .ba-badge{display:inline-flex;align-items:center;justify-self:start;gap:6px;max-width:100%;min-height:28px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ba-event-card__category-icon{display:grid;place-items:center;flex:0 0 auto;width:18px;height:18px}
+.ba-event-card__category-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.ba-home-events .ba-event-card--home .ba-event-card__title{display:-webkit-box;margin:0;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;align-self:center}
+.ba-home-events .ba-event-card--home .ba-event-card__meta{align-self:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ba-home-events .ba-event-card--home .ba-event-card__excerpt{align-self:start;margin:0;-webkit-line-clamp:2}
+.ba-home-events .ba-event-card--home .ba-event-card__link{align-self:end;margin-top:0}
+@media(max-width:640px){.ba-home-events .ba-event-card--home .ba-event-card__body{grid-template-rows:32px minmax(42px,auto) 20px minmax(40px,auto) 22px}}
