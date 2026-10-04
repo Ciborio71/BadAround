@@ -31,12 +31,11 @@ $report_url = home_url( '/segnala-un-evento/' );
 			<a href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Mappa</a>
 			<a href="<?php echo esc_url( home_url( '/cerca/' ) ); ?>">Cerca</a>
 			<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Segnalazioni</a>
-			<a href="<?php echo esc_url( home_url( '/#come-funziona' ) ); ?>">Come funziona</a>
+			<a href="<?php echo esc_url( home_url( '/come-funziona/' ) ); ?>">Come funziona</a>
 			<a href="<?php echo esc_url( home_url( '/sentinelle/' ) ); ?>">Sentinelle</a>
 		</nav>
 
 		<div class="ba-header-actions">
-			<a class="ba-header-login" href="<?php echo esc_url( home_url( '/area-personale/' ) ); ?>"><?php echo is_user_logged_in() ? 'Account' : 'Accedi'; ?></a>
 			<a class="ba-button ba-button--urgent ba-header-report" href="<?php echo esc_url( $report_url ); ?>">
 				<span class="ba-header-report__plus" aria-hidden="true">+</span>
 				Segnala un evento
@@ -54,7 +53,6 @@ $report_url = home_url( '/segnala-un-evento/' );
 			<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Segnalazioni</a>
 			<a href="<?php echo esc_url( home_url( '/#come-funziona' ) ); ?>">Come funziona</a>
 			<a href="<?php echo esc_url( home_url( '/sentinelle/' ) ); ?>">Sentinelle</a>
-			<a href="<?php echo esc_url( home_url( '/area-personale/' ) ); ?>"><?php echo is_user_logged_in() ? 'Account' : 'Accedi'; ?></a>
 			<a class="ba-button ba-button--urgent" href="<?php echo esc_url( $report_url ); ?>">Segnala un evento</a>
 		</nav>
 	</div>
