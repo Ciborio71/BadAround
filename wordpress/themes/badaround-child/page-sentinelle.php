@@ -66,7 +66,7 @@ function badaround_sentinel_territory_label( WP_Term $term ) {
 				<div class="ba-sentinel-hero__copy">
 					<span class="ba-eyebrow">Sentinelle BadAround</span>
 					<h1>Segui le zone che ti interessano.</h1>
-					<p>Ricevi un'email quando BadAround pubblica nuove segnalazioni coerenti con il territorio e l'interesse che hai scelto.</p>
+					<p>Ricevi un'email quando BadAround pubblica nuove segnalazioni coerenti con il territorio e l'interesse che hai scelto. Non serve creare un account.</p>
 					<div class="ba-sentinel-hero__actions">
 						<a class="ba-button" href="#attiva-sentinella">Crea una Sentinella</a>
 						<a class="ba-button ba-button--outline" href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Esplora la mappa</a>
@@ -89,7 +89,22 @@ function badaround_sentinel_territory_label( WP_Term $term ) {
 	<?php if ( $status ) : ?>
 		<section class="ba-sentinel-status-section">
 			<div class="ba-container">
-				<?php if ( 'confirmed' === $status ) : ?>
+				<?php if ( 'unsubscribed' === $status ) : ?>
+					<div class="ba-card ba-sentinel-status ba-sentinel-status--success" role="status">
+						<strong>Sentinella disattivata.</strong>
+						<p>Non riceverai più notifiche relative ai criteri di questa Sentinella.</p>
+					</div>
+				<?php elseif ( 'already-unsubscribed' === $status ) : ?>
+					<div class="ba-card ba-sentinel-status" role="status">
+						<strong>Sentinella già disattivata.</strong>
+						<p>Non sono necessarie altre operazioni.</p>
+					</div>
+				<?php elseif ( 'unsubscribe-invalid' === $status ) : ?>
+					<div class="ba-card ba-sentinel-status ba-sentinel-status--error" role="alert">
+						<strong>Link non valido.</strong>
+						<p>Il collegamento di disattivazione non è valido o non può essere utilizzato.</p>
+					</div>
+				<?php elseif ( 'confirmed' === $status ) : ?>
 					<div class="ba-card ba-sentinel-status ba-sentinel-status--success" role="status">
 						<strong>Sentinella attivata.</strong>
 						<p>La verifica email è completata. La Sentinella è ora attiva.</p>
@@ -230,7 +245,7 @@ function badaround_sentinel_territory_label( WP_Term $term ) {
 				</div>
 
 				<div class="ba-sentinel-form__footer">
-					<p>Per D1 non vengono ancora inviate notifiche relative agli eventi: questa fase attiva soltanto la Sentinella verificata.</p>
+					<p>Dopo la verifica, BadAround può inviarti una notifica quando viene pubblicato un evento compatibile. Puoi disattivare in qualsiasi momento quella Sentinella dal link presente nelle comunicazioni.</p>
 					<button class="ba-button" type="submit" data-ba-sentinel-submit>Crea Sentinella</button>
 				</div>
 				<div class="ba-sentinel-form__message" data-ba-sentinel-message role="status" aria-live="polite" hidden></div>
