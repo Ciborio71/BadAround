@@ -1,5 +1,5 @@
 name: Deploy RC1 to staging
-# RC1 D3 clean final deploy
+# RC1 D3 force-theme-sync
 
 on:
   push:
@@ -69,5 +69,6 @@ jobs:
           port: 21
           local-dir: ./wordpress/themes/badaround-child/
           server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          state-name: .ftp-deploy-sync-state-rc1-theme.json
           dangerous-clean-slate: false
           log-level: minimal
