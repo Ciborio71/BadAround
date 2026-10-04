@@ -1,5 +1,5 @@
 name: Deploy RC1 to staging
-# RC1 D3 force-theme-sync
+# RC1 D3 targeted-template-sync
 
 on:
   push:
@@ -59,7 +59,11 @@ jobs:
           server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/
           dangerous-clean-slate: false
           log-level: minimal
-      - name: Upload child theme over FTPS
+      - name: Prepare D3 Sentinelle template
+        run: |
+          mkdir -p ./d3-theme-upload
+          cp ./wordpress/themes/badaround-child/page-sentinelle.php ./d3-theme-upload/page-sentinelle.php
+      - name: Upload D3 Sentinelle template over FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.STAGING_SFTP_HOST }}
@@ -67,8 +71,8 @@ jobs:
           password: ${{ secrets.STAGING_SFTP_PASSWORD }}
           protocol: ftps
           port: 21
-          local-dir: ./wordpress/themes/badaround-child/
+          local-dir: ./d3-theme-upload/
           server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
-          state-name: .ftp-deploy-sync-state-rc1-theme.json
+          state-name: .ftp-deploy-sync-state-d3-sentinelle.json
           dangerous-clean-slate: false
           log-level: minimal
