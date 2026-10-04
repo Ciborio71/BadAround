@@ -204,7 +204,23 @@
 
 		items.forEach((item) => {
 			const card = document.createElement('article');
-			card.className = 'ba-card ba-event-card';
+			const category = categoryFor(item);
+			card.className = 'ba-card ba-event-card ba-map-event-card' + (category ? ' ba-event-card--category-' + category : '');
+			card.dataset.baEventId = String(item.id || '');
+			if (item.thumbnail || config.placeholder) {
+				const media = document.createElement('a');
+				media.className = 'ba-event-card__media';
+				media.href = item.permalink;
+				media.tabIndex = -1;
+				media.setAttribute('aria-hidden', 'true');
+				const img = document.createElement('img');
+				img.src = item.thumbnail || config.placeholder;
+				img.alt = '';
+				img.loading = 'lazy';
+				img.decoding = 'async';
+				media.appendChild(img);
+				card.appendChild(media);
+			}
 			const body = document.createElement('div');
 			body.className = 'ba-event-card__body';
 
@@ -301,6 +317,30 @@
 		});
 
 		const bounds = new google.maps.LatLngBounds();
+
+		if (context === 'detail') {
+			const lat = Number(node.dataset.baEventLat);
+			const lng = Number(node.dataset.baEventLng);
+			if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+				setStatus('Posizione pubblica non disponibile.');
+				return;
+			}
+			const item = items.find((candidate) => String(candidate.id) === String(node.dataset.baEventId));
+			const category = item ? categoryFor(item) : '';
+			const resolved = item ? isResolved(item) : false;
+			const position = { lat, lng };
+			const detailMap = new google.maps.Map(node, {
+				center: position, zoom: 14, mapTypeControl: false, streetViewControl: false,
+				fullscreenControl: false, gestureHandling: 'cooperative', styles: baseMapStyles,
+			});
+			new google.maps.Marker({ map: detailMap, position, title: item?.title || 'Segnalazione BadAround', icon: pinSvg(category, true, resolved), zIndex: 100 });
+			const radius = Number(node.dataset.baEventRadius);
+			if (Number.isFinite(radius) && radius >= 100) {
+				const palette = categories[category] || neutral;
+				new google.maps.Circle({ map: detailMap, center: position, radius, clickable: false, strokeColor: palette.color, strokeOpacity:.5, strokeWeight:1.5, fillColor:palette.color, fillOpacity:.1 });
+			}
+			return;
+		}
 		const infoWindow = new google.maps.InfoWindow();
 		const eventMarkers = [];
 		const circles = [];
@@ -377,7 +417,15 @@
 			const entry = { item, marker, position, category, resolved };
 			eventMarkers.push(entry);
 
-			marker.addListener('click', () => setSelected(entry));
+			marker.addListener('click', () => {
+				setSelected(entry);
+				const listCard = document.querySelector('[data-ba-event-id="' + String(item.id) + '"]');
+				if (listCard && context === 'full') {
+					document.querySelectorAll('.ba-map-event-card.is-selected').forEach((el) => el.classList.remove('is-selected'));
+					listCard.classList.add('is-selected');
+					listCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+				}
+			});
 
 			const radius = Number(geo.radius_m);
 			if (Number.isFinite(radius) && radius >= 100) {
