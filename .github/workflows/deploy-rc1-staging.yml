@@ -1,5 +1,5 @@
 name: Deploy RC1 to staging
-# RC1 D3 one-shot-template-sync
+# RC1 D3 absolute-template-sync
 
 on:
   push:
@@ -71,4 +71,4 @@ jobs:
             --retry 3 --retry-delay 2 --retry-all-errors \
             --user "$FTP_USER:$FTP_PASS" \
             --upload-file ./wordpress/themes/badaround-child/page-sentinelle.php \
-            "ftp://$FTP_HOST/staging.badaround.it/wp-content/themes/badaround-child/page-sentinelle.php"
+            "ftp://$FTP_HOST//staging.badaround.it/wp-content/themes/badaround-child/page-sentinelle.php"
