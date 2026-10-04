@@ -16,8 +16,39 @@ class BadAround_Sentinel_Matching_Service {
 
 	public function register_hooks() {
 		add_action( 'badaround_event_published', array( $this, 'queue_event_matching' ), 10, 1 );
+		add_action( 'rest_api_init', array( $this, 'register_d3_qa_route' ) );
 		add_action( self::MATCH_CRON_HOOK, array( $this, 'process_event_matching' ), 10, 1 );
 		add_action( self::SEND_CRON_HOOK, array( $this, 'send_match_notification' ), 10, 1 );
+	}
+
+	public function register_d3_qa_route() {
+		if ( ! $this->is_staging() ) {
+			return;
+		}
+		register_rest_route(
+			'badaround/v1',
+			'/qa/d3/match',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'rest_d3_qa_match' ),
+				'permission_callback' => function () {
+					return current_user_can( 'ba_moderate_events' );
+				},
+			)
+		);
+	}
+
+	public function rest_d3_qa_match( WP_REST_Request $request ) {
+		$event_id = absint( $request->get_param( 'event_id' ) );
+		if ( ! BadAround_Discovery_Contract::is_public_event( $event_id ) ) {
+			return new WP_Error( 'ba_d3_qa_event_not_public', 'Event is not public.', array( 'status' => 400 ) );
+		}
+		return rest_ensure_response(
+			array(
+				'ok'       => (bool) $this->queue_event_matching( $event_id ),
+				'event_id' => $event_id,
+			)
+		);
 	}
 
 	public function queue_event_matching( $event_id ) {
