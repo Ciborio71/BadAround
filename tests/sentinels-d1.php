@@ -105,6 +105,7 @@ class BadAround_Sentinel_Repository {
 	}
 }
 
+require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-transactional-mailer.php';
 require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-sentinel-service.php';
 
 function ba_assert( $condition, $message ) {
@@ -125,12 +126,11 @@ $repo_property = $service_reflection->getProperty( 'repository' );
 $repo_property->setAccessible( true );
 $repo = $repo_property->getValue( $service );
 
-$mail_method = $service_reflection->getMethod( 'send_transactional_email' );
-$mail_method->setAccessible( true );
-$mail_result = $mail_method->invoke( $service, 'qa@example.invalid', 'Test subject', 'Test content' );
+$mailer = new BadAround_Transactional_Mailer();
+$mail_result = $mailer->send( 'qa@example.invalid', 'Test subject', 'Test content', '<p><a href="https://example.invalid/verify">Verify</a></p>' );
 ba_assert( true === $mail_result, 'turboSMTP transport accepts a successful API response' );
 ba_assert(
-	BadAround_Sentinel_Service::TURBOSMTP_API_ENDPOINT === $GLOBALS['ba_test_http_request']['url'],
+	BadAround_Transactional_Mailer::TURBOSMTP_API_ENDPOINT === $GLOBALS['ba_test_http_request']['url'],
 	'turboSMTP transport uses the canonical v2 mail endpoint'
 );
 ba_assert(
@@ -146,6 +146,10 @@ ba_assert( 'noreply@example.invalid' === $mail_payload['from'], 'configured send
 ba_assert( 'qa@example.invalid' === $mail_payload['to'], 'verification recipient is used' );
 ba_assert( 'Test subject' === $mail_payload['subject'], 'verification subject is preserved' );
 ba_assert( 'Test content' === $mail_payload['content'], 'verification content is preserved' );
+ba_assert(
+	false !== strpos( $mail_payload['html_content'], 'https://example.invalid/verify' ),
+	'HTML verification link is preserved'
+);
 ba_assert(
 	false === strpos( $GLOBALS['ba_test_http_request']['args']['body'], 'test-consumer-secret' ),
 	'turboSMTP secret is never included in the JSON body'
