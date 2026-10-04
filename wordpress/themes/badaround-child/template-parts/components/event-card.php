@@ -14,10 +14,16 @@ $defaults = array(
 	'excerpt'      => '',
 	'link_label'   => __( 'Vedi dettaglio', 'badaround-child' ),
 	'class'        => '',
+	'category'     => '',
 );
 $card = wp_parse_args( $args ?? array(), $defaults );
+if ( ! $card['image'] && function_exists( 'badaround_child_placeholder_url' ) ) {
+	$card['image'] = badaround_child_placeholder_url();
+	$card['image_alt'] = __( 'BadAround — immagine segnalazione non disponibile', 'badaround-child' );
+}
+$category_class = $card['category'] ? ' ba-event-card--category-' . sanitize_html_class( $card['category'] ) : '';
 ?>
-<article class="ba-card ba-event-card<?php echo $card['image'] ? '' : ' ba-event-card--no-media'; ?><?php echo $card['class'] ? ' ' . esc_attr( $card['class'] ) : ''; ?>">
+<article class="ba-card ba-event-card<?php echo $card['image'] ? '' : ' ba-event-card--no-media'; ?><?php echo $card['class'] ? ' ' . esc_attr( $card['class'] ) : ''; ?><?php echo esc_attr( $category_class ); ?>">
 	<?php if ( $card['image'] ) : ?>
 		<a class="ba-event-card__media" href="<?php echo esc_url( $card['url'] ); ?>" tabindex="-1" aria-hidden="true">
 			<img src="<?php echo esc_url( $card['image'] ); ?>" alt="<?php echo esc_attr( $card['image_alt'] ); ?>" loading="lazy" decoding="async">
