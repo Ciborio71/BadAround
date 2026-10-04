@@ -34,7 +34,7 @@ $category_class = $card['category'] ? ' ba-event-card--category-' . sanitize_htm
 	<div class="ba-event-card__body">
 		<?php if ( $card['status_label'] ) : ?>
 			<span class="ba-badge ba-badge--<?php echo esc_attr( $card['status'] ); ?>">
-				<?php if ( $card['category_icon'] ) : ?><span class="ba-event-card__category-icon" aria-hidden="true"><?php echo wp_kses( $card['category_icon'], array( 'svg' => array( 'viewBox' => true, 'focusable' => true ), 'path' => array( 'd' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true, 'stroke-linecap' => true, 'stroke-linejoin' => true ), 'circle' => array( 'cx' => true, 'cy' => true, 'r' => true, 'fill' => true ) ) ); ?></span><?php endif; ?>
+				<?php if ( $card['category_icon'] ) : ?><span class="ba-event-card__category-icon" aria-hidden="true"><?php echo wp_kses( $card['category_icon'], array( 'svg' => array( 'viewbox' => true, 'viewBox' => true, 'focusable' => true ), 'path' => array( 'd' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true, 'stroke-linecap' => true, 'stroke-linejoin' => true ), 'circle' => array( 'cx' => true, 'cy' => true, 'r' => true, 'fill' => true ) ) ); ?></span><?php endif; ?>
 				<?php echo esc_html( $card['status_label'] ); ?>
 			</span>
 		<?php endif; ?>
