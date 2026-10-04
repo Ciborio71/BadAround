@@ -16,12 +16,12 @@ if ( class_exists( 'BadAround_Discovery_Query' ) ) {
 }
 
 $home_categories = array(
-	array( 'label' => 'Veicoli',             'subtitle' => 'Auto, moto e altri mezzi',             'slug' => 'veicoli',             'class' => 'is-vehicles' ),
-	array( 'label' => 'Case e attività',     'subtitle' => 'Abitazioni, negozi e uffici',          'slug' => 'case-e-attivita',     'class' => 'is-property' ),
-	array( 'label' => 'Pericoli',            'subtitle' => 'Rischi e situazioni pericolose',       'slug' => 'pericoli',            'class' => 'is-hazard' ),
-	array( 'label' => 'Spazi pubblici',      'subtitle' => 'Strade, aree pubbliche e decoro',      'slug' => 'spazi-pubblici',      'class' => 'is-public' ),
-	array( 'label' => 'Animali',             'subtitle' => 'Smarrimenti e segnalazioni',           'slug' => 'animali',             'class' => 'is-animal' ),
-	array( 'label' => 'Oggetti e documenti', 'subtitle' => 'Oggetti smarriti o ritrovati',         'slug' => 'oggetti-e-documenti', 'class' => 'is-object' ),
+	array( 'label' => 'Veicoli',             'subtitle' => 'Auto, moto e altri mezzi',             'slug' => 'veicoli',             'class' => 'is-vehicles', 'icon' => 'car' ),
+	array( 'label' => 'Case e attività',     'subtitle' => 'Abitazioni, negozi e uffici',          'slug' => 'case-e-attivita',     'class' => 'is-property', 'icon' => 'home' ),
+	array( 'label' => 'Pericoli',            'subtitle' => 'Rischi e situazioni pericolose',       'slug' => 'pericoli',            'class' => 'is-hazard', 'icon' => 'warning' ),
+	array( 'label' => 'Spazi pubblici',      'subtitle' => 'Strade, aree pubbliche e decoro',      'slug' => 'spazi-pubblici',      'class' => 'is-public', 'icon' => 'public' ),
+	array( 'label' => 'Animali',             'subtitle' => 'Smarrimenti e segnalazioni',           'slug' => 'animali',             'class' => 'is-animal', 'icon' => 'paw' ),
+	array( 'label' => 'Oggetti e documenti', 'subtitle' => 'Oggetti smarriti o ritrovati',         'slug' => 'oggetti-e-documenti', 'class' => 'is-object', 'icon' => 'object' ),
 );
 ?>
 <main class="ba-home" id="main-content">
@@ -91,14 +91,21 @@ $home_categories = array(
 			<nav class="ba-home-categories" aria-label="Categorie principali">
 				<?php foreach ( $home_categories as $category ) : ?>
 					<a class="ba-home-category-card" href="<?php echo esc_url( add_query_arg( 'categoria', $category['slug'], home_url( '/segnalazioni/' ) ) ); ?>">
-						<span class="ba-home-category__pin <?php echo esc_attr( $category['class'] ); ?>" aria-hidden="true"></span>
+						<span class="ba-home-category__pin <?php echo esc_attr( $category['class'] ); ?>" aria-hidden="true">
+							<?php if ( 'car' === $category['icon'] ) : ?><svg viewBox="0 0 24 24"><path d="M5 14h14l-1.5-5h-11L5 14Zm1 0v3m12-3v3M8 17h8M8 9l1-3h6l1 3"/></svg>
+							<?php elseif ( 'home' === $category['icon'] ) : ?><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v9h-6v-6h-4v6H4v-9Z"/></svg>
+							<?php elseif ( 'warning' === $category['icon'] ) : ?><svg viewBox="0 0 24 24"><path d="M12 4 3.5 20h17L12 4Z"/><path d="M12 9v5m0 3h.01"/></svg>
+							<?php elseif ( 'public' === $category['icon'] ) : ?><svg viewBox="0 0 24 24"><path d="M4 18h16M6 18V9h12v9M8 9V6h8v3M9 13h2m2 0h2"/></svg>
+							<?php elseif ( 'paw' === $category['icon'] ) : ?><svg viewBox="0 0 24 24"><path d="M8 11c-1.3 0-2.3-1.3-2.3-2.8S6.5 5.5 7.8 5.5s2.2 1.2 2.2 2.7S9.3 11 8 11Zm8 0c-1.3 0-2-1.3-2-2.8s.9-2.7 2.2-2.7 2.1 1.2 2.1 2.7S17.3 11 16 11Zm-4 9c-3.2 0-5.4-1.7-5.4-3.8 0-1.8 1.4-3 3-3.9.8-.5 1.2-1.5 2.4-1.5s1.6 1 2.4 1.5c1.6.9 3 2.1 3 3.9 0 2.1-2.2 3.8-5.4 3.8Z"/></svg>
+							<?php else : ?><svg viewBox="0 0 24 24"><path d="M5 7h14v12H5V7Zm3-3h8v3H8V4Zm1 7h6m-6 4h4"/></svg><?php endif; ?>
+						</span>
 						<span class="ba-home-category__copy"><strong><?php echo esc_html( $category['label'] ); ?></strong><small><?php echo esc_html( $category['subtitle'] ); ?></small></span>
 					</a>
 				<?php endforeach; ?>
 			</nav>
 
 			<div class="ba-home-sectionhead">
-				<h2>Segnalazioni recenti</h2>
+				<h2>Segnalazioni vicino a te</h2>
 				<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Vedi tutte le segnalazioni <span aria-hidden="true">→</span></a>
 			</div>
 
@@ -126,6 +133,7 @@ $home_categories = array(
 								'image_alt'    => $item['title'],
 								'excerpt'      => $item['excerpt'] ?? '',
 								'link_label'   => 'Visualizza segnalazione',
+								'class'        => 'ba-event-card--home',
 							)
 						);
 						?>
