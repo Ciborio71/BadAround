@@ -4,7 +4,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BADAROUND_CHILD_VERSION', '0.5.0' );
+define( 'BADAROUND_CHILD_VERSION', '0.6.0' );
+
+/**
+ * Public media standard.
+ * Originals remain governed by the private/moderated media pipeline; these sizes are presentation derivatives only.
+ */
+function badaround_child_public_image_sizes() {
+	add_image_size( 'ba-thumb', 360, 240, true );
+	add_image_size( 'ba-map-card', 640, 426, true );
+	add_image_size( 'ba-detail', 1440, 1080, false );
+}
+add_action( 'after_setup_theme', 'badaround_child_public_image_sizes' );
+
+function badaround_child_placeholder_url() {
+	return content_url( '/uploads/2026/10/BadAround-—-placeholder-segnalazione.png' );
+}
+
+function badaround_child_event_image_url( $post_id, $context = 'thumb' ) {
+	$sizes = array( 'thumb' => 'ba-thumb', 'map' => 'ba-map-card', 'detail' => 'ba-detail' );
+	$size = $sizes[ $context ] ?? 'ba-thumb';
+	if ( has_post_thumbnail( $post_id ) ) {
+		$url = get_the_post_thumbnail_url( $post_id, $size );
+		if ( $url ) return $url;
+	}
+	return badaround_child_placeholder_url();
+}
 
 /**
  * Load only the assets required by the current screen.
@@ -97,7 +122,7 @@ function badaround_child_enqueue_assets() {
 		);
 	}
 
-	if ( $is_map || $is_home ) {
+	if ( $is_map || $is_home || $is_event ) {
 		wp_enqueue_style(
 			'badaround-map',
 			$uri . '/assets/css/map.css',
@@ -162,6 +187,7 @@ function badaround_child_enqueue_assets() {
 						)
 						: '',
 					'categoryByTerm' => $category_by_term,
+					'placeholder'    => badaround_child_placeholder_url(),
 				)
 			) . ';',
 			'before'
@@ -257,7 +283,7 @@ add_action( 'wp_enqueue_scripts', 'badaround_child_enqueue_assets', 20 );
  * Warm up only the third-party origins used by the public maps.
  */
 function badaround_child_map_resource_hints( $urls, $relation_type ) {
-	if ( 'preconnect' !== $relation_type || ( ! is_front_page() && ! is_page_template( 'page-mappa.php' ) ) ) {
+	if ( 'preconnect' !== $relation_type || ( ! is_front_page() && ! is_page_template( 'page-mappa.php' ) && ! is_singular( 'ba_evento' ) ) ) {
 		return $urls;
 	}
 
