@@ -13,6 +13,7 @@ class BadAround_Event_Post_Type {
 	public function register_hooks() {
 		add_action( 'init', array( $this, 'register_content_model' ) );
 		add_filter( 'display_post_states', array( $this, 'label_pending_events' ), 10, 2 );
+		add_action( 'template_redirect', array( $this, 'redirect_public_archive' ) );
 	}
 
 	public function register_content_model() {
@@ -181,6 +182,15 @@ class BadAround_Event_Post_Type {
 
 	public function can_edit_event_meta( $allowed, $meta_key, $post_id ) {
 		return current_user_can( 'edit_post', $post_id );
+	}
+
+	public function redirect_public_archive() {
+		if ( ! is_post_type_archive( self::POST_TYPE ) ) {
+			return;
+		}
+
+		wp_safe_redirect( home_url( '/segnalazioni/' ), 301, 'BadAround' );
+		exit;
 	}
 
 	public function label_pending_events( $post_states, $post ) {
