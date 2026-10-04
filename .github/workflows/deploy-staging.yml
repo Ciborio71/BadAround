@@ -2,6 +2,11 @@ name: Deploy child theme to staging
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feature/r1-3-global-navigation-404
+    paths:
+      - .github/workflows/deploy-staging.yml
 
 permissions:
   contents: read
@@ -11,8 +16,25 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate:
+    name: Validate BadAround child theme
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Lint child theme PHP
+        run: find ./wordpress/themes/badaround-child -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+
   deploy:
     name: Deploy BadAround child theme
+    needs: validate
     runs-on: ubuntu-latest
     environment: staging
 
