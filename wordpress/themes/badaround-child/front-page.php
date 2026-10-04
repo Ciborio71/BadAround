@@ -113,6 +113,18 @@ $home_categories = array(
 				<?php if ( ! empty( $recent_events['items'] ) ) : ?>
 					<?php foreach ( $recent_events['items'] as $item ) : ?>
 						<?php
+						$category_slug = '';
+						if ( ! empty( $item['event_type']['id'] ) ) {
+							$event_term = get_term( (int) $item['event_type']['id'], 'ba_tipo_evento' );
+							if ( $event_term instanceof WP_Term ) {
+								while ( $event_term->parent ) {
+									$parent = get_term( $event_term->parent, 'ba_tipo_evento' );
+									if ( ! $parent instanceof WP_Term ) break;
+									$event_term = $parent;
+								}
+								$category_slug = $event_term->slug;
+							}
+						}
 						$meta = array_filter(
 							array(
 								$item['occurred_date'] ?? '',
@@ -129,11 +141,12 @@ $home_categories = array(
 								'status'       => 'info',
 								'status_label' => $item['event_type']['name'] ?? 'Segnalazione',
 								'meta'         => implode( ' · ', $meta ),
-								'image'        => $item['thumbnail'] ?? '',
+								'image'        => ! empty( $item['id'] ) && function_exists( 'badaround_child_event_image_url' ) ? badaround_child_event_image_url( (int) $item['id'], 'thumb' ) : ( $item['thumbnail'] ?? '' ),
 								'image_alt'    => $item['title'],
 								'excerpt'      => $item['excerpt'] ?? '',
 								'link_label'   => 'Visualizza segnalazione',
 								'class'        => 'ba-event-card--home',
+								'category'     => $category_slug,
 							)
 						);
 						?>
