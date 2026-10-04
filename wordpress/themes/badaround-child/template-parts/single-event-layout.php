@@ -113,7 +113,7 @@ if ( $status ) {
 			<nav class="ba-breadcrumb" aria-label="Breadcrumb">
 				<a href="<?php echo esc_url( home_url( '/' ) ); ?>">Home</a>
 				<span aria-hidden="true">›</span>
-				<a href="<?php echo esc_url( home_url( '/#segnalazioni' ) ); ?>">Segnalazioni</a>
+				<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Segnalazioni</a>
 				<span aria-hidden="true">›</span>
 				<span aria-current="page"><?php echo esc_html( wp_trim_words( $title, 6, '…' ) ); ?></span>
 			</nav>
