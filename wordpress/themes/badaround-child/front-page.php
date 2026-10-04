@@ -1,31 +1,27 @@
 <?php
 get_header();
 
-$demo_events = array(
-	array(
-		'title'        => 'Auto rubata nella zona',
-		'status'       => 'urgent',
-		'status_label' => 'Urgente',
-		'meta'         => 'Oggi · zona Lungomare · 1,8 km',
-		'type'         => 'Furto veicolo',
-		'image'        => '',
-	),
-	array(
-		'title'        => 'Danneggiamento in parcheggio',
-		'status'       => 'witness',
-		'status_label' => 'Cerca testimoni',
-		'meta'         => 'Ieri · zona centrale · 6,4 km',
-		'type'         => 'Danneggiamento',
-		'image'        => '',
-	),
-	array(
-		'title'        => 'Veicolo ritrovato',
-		'status'       => 'resolved',
-		'status_label' => 'Risolto',
-		'meta'         => '2 giorni fa · area vicina · 8,1 km',
-		'type'         => 'Veicolo ritrovato',
-		'image'        => '',
-	),
+$recent_events = array(
+	'items' => array(),
+	'total' => 0,
+);
+
+if ( class_exists( 'BadAround_Discovery_Query' ) ) {
+	$recent_events = ( new BadAround_Discovery_Query() )->discover(
+		array(
+			'page'     => 1,
+			'per_page' => 3,
+		)
+	);
+}
+
+$home_categories = array(
+	array( 'label' => 'Veicoli',              'slug' => 'veicoli',              'class' => 'is-blue' ),
+	array( 'label' => 'Case e attività',      'slug' => 'case-e-attivita',      'class' => 'is-coral' ),
+	array( 'label' => 'Pericoli',             'slug' => 'pericoli',             'class' => 'is-amber' ),
+	array( 'label' => 'Spazi pubblici',       'slug' => 'spazi-pubblici',       'class' => 'is-purple' ),
+	array( 'label' => 'Animali',              'slug' => 'animali',              'class' => 'is-green' ),
+	array( 'label' => 'Oggetti e documenti',  'slug' => 'oggetti-e-documenti',  'class' => 'is-slate' ),
 );
 ?>
 <main class="ba-home" id="main-content">
@@ -78,49 +74,69 @@ $demo_events = array(
 		</div>
 	</section>
 
-	<section class="ba-home-localbar" aria-label="Riepilogo della zona">
+	<section class="ba-home-localbar" aria-label="Esplora BadAround">
 		<div class="ba-container--wide ba-home-localbar__inner">
 			<div class="ba-home-localbar__place">
 				<span class="ba-home-localbar__marker" aria-hidden="true">●</span>
 				<div><span>Esplora</span><strong>l’area attorno a te</strong></div>
 			</div>
-			<div class="ba-home-stat"><strong>18</strong><span>segnalazioni</span></div>
-			<div class="ba-home-stat"><strong>6</strong><span>richieste di aiuto</span></div>
-			<div class="ba-home-stat"><strong>4</strong><span>eventi risolti</span></div>
+			<a class="ba-home-localbar__link" href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Apri la mappa</a>
+			<a class="ba-home-localbar__link" href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Tutte le segnalazioni</a>
+			<a class="ba-home-localbar__link" href="<?php echo esc_url( home_url( '/segnala-un-evento/' ) ); ?>">Segnala un evento</a>
 		</div>
 	</section>
 
 	<section class="ba-home-main ba-section--tight">
 		<div class="ba-container--wide">
 			<nav class="ba-home-categories" aria-label="Categorie principali">
-				<a href="#"><span class="ba-home-category__icon is-blue" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 13h16l-1.5-5h-13L4 13Zm1 0v5m14-5v5M7 18h10M7 8l1.2-3h7.6L17 8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span>Furti</a>
-				<a href="#"><span class="ba-home-category__icon is-coral" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m14.5 5.5 4 4M6 18l4.4-4.4m-2-7.2 9.2 9.2M5 5l14 14" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span>Danni</a>
-				<a href="#"><span class="ba-home-category__icon is-amber" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12s3.5-5 9-5 9 5 9 5-3.5 5-9 5-9-5-9-5Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg></span>Testimoni</a>
-				<a href="#"><span class="ba-home-category__icon is-purple" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2M9 7a3 3 0 1 0 6 0 3 3 0 0 0-6 0Z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span>Sicurezza</a>
-				<a href="#"><span class="ba-home-category__icon is-slate" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 16h14l-1-6H6l-1 6Zm2 0v2m10-2v2M8 10l1-3h6l1 3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span>Veicoli abbandonati</a>
-				<a href="#"><span class="ba-home-category__icon is-green" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 3 20h18L12 3Z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 9v5m0 3h.01" stroke="currentColor" stroke-width="1.8"/></svg></span>Degrado</a>
+				<?php foreach ( $home_categories as $category ) : ?>
+					<a href="<?php echo esc_url( add_query_arg( 'categoria', $category['slug'], home_url( '/segnalazioni/' ) ) ); ?>">
+						<span class="ba-home-category__icon <?php echo esc_attr( $category['class'] ); ?>" aria-hidden="true">●</span>
+						<?php echo esc_html( $category['label'] ); ?>
+					</a>
+				<?php endforeach; ?>
 			</nav>
 
 			<div class="ba-home-sectionhead">
-				<h2>Segnalazioni vicino a te</h2>
+				<h2>Segnalazioni recenti</h2>
 				<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Vedi tutte le segnalazioni <span aria-hidden="true">→</span></a>
 			</div>
 
 			<div class="ba-home-events" id="segnalazioni">
-				<?php foreach ( $demo_events as $event ) : ?>
-					<article class="ba-home-event ba-card">
-						<div class="ba-home-event__thumb" aria-hidden="true"><span></span></div>
-						<div class="ba-home-event__body">
-							<span class="ba-badge ba-badge--<?php echo esc_attr( $event['status'] ); ?>"><?php echo esc_html( $event['status_label'] ); ?></span>
-							<h3><?php echo esc_html( $event['title'] ); ?></h3>
-							<p><?php echo esc_html( $event['meta'] ); ?></p>
-							<div class="ba-home-event__foot">
-								<span><?php echo esc_html( $event['type'] ); ?></span>
-								<a href="#">Vedi segnalazione <span aria-hidden="true">→</span></a>
-							</div>
-						</div>
-					</article>
-				<?php endforeach; ?>
+				<?php if ( ! empty( $recent_events['items'] ) ) : ?>
+					<?php foreach ( $recent_events['items'] as $item ) : ?>
+						<?php
+						$meta = array_filter(
+							array(
+								$item['occurred_date'] ?? '',
+								$item['occurred_time'] ?? '',
+								$item['public_place_name'] ?? ( $item['territory']['name'] ?? '' ),
+							)
+						);
+						get_template_part(
+							'template-parts/components/event-card',
+							null,
+							array(
+								'title'        => $item['title'],
+								'url'          => $item['permalink'],
+								'status'       => 'info',
+								'status_label' => $item['event_type']['name'] ?? 'Segnalazione',
+								'meta'         => implode( ' · ', $meta ),
+								'image'        => $item['thumbnail'] ?? '',
+								'image_alt'    => $item['title'],
+								'excerpt'      => $item['excerpt'] ?? '',
+								'link_label'   => 'Visualizza segnalazione',
+							)
+						);
+						?>
+					<?php endforeach; ?>
+				<?php else : ?>
+					<div class="ba-card ba-home-events-empty">
+						<h3>Nessuna segnalazione pubblicata</h3>
+						<p>Quando saranno disponibili nuovi eventi moderati e pubblicati, compariranno qui.</p>
+						<a class="ba-button ba-button--urgent" href="<?php echo esc_url( home_url( '/segnala-un-evento/' ) ); ?>">Segnala un evento</a>
+					</div>
+				<?php endif; ?>
 			</div>
 
 			<div class="ba-home-lower">
@@ -139,7 +155,7 @@ $demo_events = array(
 						<h2>Vuoi aiutare a tenere d’occhio una zona?</h2>
 						<p>Diventa una <strong>Sentinella BadAround</strong>: ricevi aggiornamenti sulla zona che ti interessa e contribuisci alla community con segnalazioni e avvistamenti utili!</p>
 						<p class="ba-home-sentinel__privacy">La tua identità non viene resa pubblica.</p>
-						<a class="ba-button" href="#">Attiva gli alert <span aria-hidden="true">→</span></a>
+						<a class="ba-button" href="<?php echo esc_url( home_url( '/sentinelle/' ) ); ?>">Attiva una Sentinella <span aria-hidden="true">→</span></a>
 					</div>
 					<div class="ba-home-phone" aria-hidden="true">
 						<div class="ba-home-phone__notch"></div>
@@ -154,18 +170,10 @@ $demo_events = array(
 						<li><span>2</span><div><strong>Verifichiamo</strong><p>Controlliamo la segnalazione e rimuoviamo contenuti inappropriati.</p></div></li>
 						<li><span>3</span><div><strong>La comunità aiuta</strong><p>Le informazioni utili sono visibili a tutti.</p></div></li>
 					</ol>
-					<p class="ba-home-disclaimer">Le segnalazioni sono pubblicate dagli utenti e non costituiscono dati ufficiali.</p>
+					<p class="ba-home-disclaimer">Le segnalazioni sono pubblicate dagli utenti e non costituiscono dati ufficiali.</p>\n\t\t\t\t\t<a class="ba-button ba-button--outline" href="<?php echo esc_url( home_url( '/come-funziona/' ) ); ?>">Scopri come funziona</a>
 				</section>
 			</div>
 
-			<aside class="ba-home-ad" aria-label="Contenuto sponsorizzato">
-				<div class="ba-home-ad__label">Contenuto sponsorizzato</div>
-				<div class="ba-home-ad__copy">
-					<span class="ba-home-ad__kicker">Attività della zona</span>
-					<div><strong>Proteggi il tuo veicolo nella tua zona</strong><p>Antifurti satellitari, block shaft e soluzioni di sicurezza personalizzate.</p></div>
-				</div>
-				<a class="ba-button ba-button--dark" href="#">Scopri di più <span aria-hidden="true">→</span></a>
-			</aside>
 		</div>
 	</section>
 </main>
