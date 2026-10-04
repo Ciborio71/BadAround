@@ -23,7 +23,8 @@ function badaround_child_enqueue_assets() {
 	$is_sentinel  = is_page_template( 'page-sentinelle.php' );
 	$is_states    = is_page_template( array( 'page-stati-sistema.php', 'page-segnalazione-inviata.php' ) );
 	$is_account   = is_page_template( 'page-area-personale.php' );
-	$is_badaround = $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_search || $is_reports || $is_sentinel || $is_states || $is_account;
+	$is_not_found = is_404();
+	$is_badaround = $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_search || $is_reports || $is_sentinel || $is_states || $is_account || $is_not_found;
 
 	if ( ! $is_badaround ) {
 		return;
@@ -182,7 +183,7 @@ function badaround_child_enqueue_assets() {
 		);
 	}
 
-	if ( $is_states ) {
+	if ( $is_states || $is_not_found ) {
 		wp_enqueue_style(
 			'badaround-states',
 			$uri . '/assets/css/states.css',
