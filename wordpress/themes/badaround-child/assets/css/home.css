@@ -245,3 +245,11 @@ a.ba-home-category-card:hover,a.ba-home-category-card:focus-visible { transform:
 .ba-home-events .ba-event-card--home .ba-event-card__excerpt{align-self:start;margin:0;-webkit-line-clamp:2}
 .ba-home-events .ba-event-card--home .ba-event-card__link{align-self:end;margin-top:0}
 @media(max-width:640px){.ba-home-events .ba-event-card--home .ba-event-card__body{grid-template-rows:32px minmax(42px,auto) 20px minmax(40px,auto) 22px}}
+
+/* UX-02c — category medallion overlapping image/content edge */
+.ba-home-events .ba-event-card--home .ba-event-card__media{overflow:visible}
+.ba-home-events .ba-event-card--home .ba-event-card__media img{border-radius:inherit;overflow:hidden}
+.ba-event-card__media-category{position:absolute;z-index:5;top:14px;right:-19px;display:grid;place-items:center;width:42px;height:42px;border:4px solid #fff;border-radius:50%;background:var(--ba-card-accent,#8292A8);color:#fff;box-shadow:0 5px 14px rgba(7,26,56,.18);pointer-events:none}
+.ba-event-card__media-category svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ba-event-card--category-animali .ba-event-card__media-category svg{fill:currentColor}
+.ba-home-events .ba-event-card--home .ba-event-card__body{padding-left:28px}
