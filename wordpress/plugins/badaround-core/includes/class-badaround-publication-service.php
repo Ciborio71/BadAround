@@ -221,6 +221,12 @@ class BadAround_Publication_Service {
 			'publication'
 		);
 
+		/*
+		 * D2 starts only after B3 is fully committed. Listeners must remain
+		 * asynchronous and must never make publication depend on delivery.
+		 */
+		do_action( 'badaround_event_published', $event_id );
+
 		return true;
 	}
 }
