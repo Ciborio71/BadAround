@@ -12,6 +12,7 @@ $defaults = array(
 	'image'        => '',
 	'image_alt'    => '',
 	'excerpt'      => '',
+	'link_label'   => __( 'Vedi dettaglio', 'badaround-child' ),
 );
 $card = wp_parse_args( $args ?? array(), $defaults );
 ?>
@@ -39,6 +40,6 @@ $card = wp_parse_args( $args ?? array(), $defaults );
 			<p class="ba-event-card__excerpt"><?php echo esc_html( $card['excerpt'] ); ?></p>
 		<?php endif; ?>
 
-		<a class="ba-event-card__link" href="<?php echo esc_url( $card['url'] ); ?>">Vedi dettaglio <span aria-hidden="true">→</span></a>
+		<a class="ba-event-card__link" href="<?php echo esc_url( $card['url'] ); ?>"><?php echo esc_html( $card['link_label'] ); ?> <span aria-hidden="true">→</span></a>
 	</div>
 </article>
