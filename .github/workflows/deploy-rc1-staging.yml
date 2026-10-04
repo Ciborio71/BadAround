@@ -1,5 +1,5 @@
 name: Deploy RC1 to staging
-# RC1 D3 QA deploy
+# RC1 D3 clean final deploy
 
 on:
   push:
