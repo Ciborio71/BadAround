@@ -43,7 +43,6 @@ $category_icon = $category_icons[ $card['category'] ] ?? '';
 	<div class="ba-event-card__body">
 		<?php if ( $card['status_label'] ) : ?>
 			<span class="ba-badge ba-badge--<?php echo esc_attr( $card['status'] ); ?>">
-				<?php if ( $category_icon ) : ?><span class="ba-event-card__category-icon" aria-hidden="true"><?php echo $category_icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed internal SVG map. ?></span><?php endif; ?>
 				<?php echo esc_html( $card['status_label'] ); ?>
 			</span>
 		<?php endif; ?>
