@@ -11,6 +11,11 @@ class BadAround_Installer {
 
 	public function register_hooks() {
 		add_action( 'admin_init', array( $this, 'maybe_upgrade' ) );
+		/*
+		 * Schema upgrades must not depend on an administrator opening wp-admin.
+		 * Priority 30 runs after the content model/taxonomies registered on init.
+		 */
+		add_action( 'init', array( $this, 'maybe_upgrade' ), 30 );
 	}
 
 	public static function activate() {
