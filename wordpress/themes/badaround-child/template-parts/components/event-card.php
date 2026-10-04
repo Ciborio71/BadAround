@@ -15,6 +15,7 @@ $defaults = array(
 	'link_label'   => __( 'Vedi dettaglio', 'badaround-child' ),
 	'class'        => '',
 	'category'     => '',
+	'category_icon'=> '',
 );
 $card = wp_parse_args( $args ?? array(), $defaults );
 if ( ! $card['image'] && function_exists( 'badaround_child_placeholder_url' ) ) {
@@ -32,7 +33,10 @@ $category_class = $card['category'] ? ' ba-event-card--category-' . sanitize_htm
 
 	<div class="ba-event-card__body">
 		<?php if ( $card['status_label'] ) : ?>
-			<span class="ba-badge ba-badge--<?php echo esc_attr( $card['status'] ); ?>"><?php echo esc_html( $card['status_label'] ); ?></span>
+			<span class="ba-badge ba-badge--<?php echo esc_attr( $card['status'] ); ?>">
+				<?php if ( $card['category_icon'] ) : ?><span class="ba-event-card__category-icon" aria-hidden="true"><?php echo wp_kses( $card['category_icon'], array( 'svg' => array( 'viewBox' => true, 'focusable' => true ), 'path' => array( 'd' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true, 'stroke-linecap' => true, 'stroke-linejoin' => true ), 'circle' => array( 'cx' => true, 'cy' => true, 'r' => true, 'fill' => true ) ) ); ?></span><?php endif; ?>
+				<?php echo esc_html( $card['status_label'] ); ?>
+			</span>
 		<?php endif; ?>
 
 		<h3 class="ba-event-card__title">
