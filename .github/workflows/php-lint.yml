@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - "feature/**"
+      - "release/mvp-rc1"
   workflow_dispatch:
 
 permissions:
@@ -35,3 +36,6 @@ jobs:
 
       - name: Test D1 Sentinel lifecycle
         run: php ./tests/sentinels-d1.php
+
+      - name: Test D2 Sentinel matching
+        run: php ./tests/sentinels-d2.php
