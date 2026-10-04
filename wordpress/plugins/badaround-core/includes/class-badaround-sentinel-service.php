@@ -12,7 +12,6 @@ class BadAround_Sentinel_Service {
 	const RATE_IP_TTL    = 15 * MINUTE_IN_SECONDS;
 	const RATE_EMAIL_LIMIT = 3;
 	const RATE_EMAIL_TTL   = HOUR_IN_SECONDS;
-	const TURBOSMTP_API_ENDPOINT = 'https://api.turbo-smtp.com/api/v2/mail/send';
 
 	private $repository;
 
@@ -274,7 +273,7 @@ class BadAround_Sentinel_Service {
 		$html_message .= '<p>Se il pulsante non funziona, copia e incolla questo indirizzo nel browser:<br><a href="' . esc_url( $url ) . '">' . esc_html( $url ) . '</a></p>';
 		$html_message .= '<p>Il link scade tra 24 ore. Se non hai richiesto questa Sentinella, ignora questa email.</p>';
 
-		$sent = $this->send_transactional_email( $recipient, $subject, $message, $html_message );
+		$sent = ( new BadAround_Transactional_Mailer() )->send( $recipient, $subject, $message, $html_message );
 		BadAround_Audit_Log::record(
 			'sentinel',
 			$sentinel['id'],
@@ -289,58 +288,6 @@ class BadAround_Sentinel_Service {
 	 * Credentials intentionally live in environment/wp-config constants only.
 	 * Nothing is persisted in WordPress options or exposed to the public API.
 	 */
-	private function send_transactional_email( $recipient, $subject, $message, $html_message = '' ) {
-		$consumer_key = defined( 'BADAROUND_TURBOSMTP_CONSUMER_KEY' ) ? trim( (string) BADAROUND_TURBOSMTP_CONSUMER_KEY ) : '';
-		$consumer_secret = defined( 'BADAROUND_TURBOSMTP_CONSUMER_SECRET' ) ? trim( (string) BADAROUND_TURBOSMTP_CONSUMER_SECRET ) : '';
-		$from_email = defined( 'BADAROUND_TURBOSMTP_FROM_EMAIL' ) ? sanitize_email( BADAROUND_TURBOSMTP_FROM_EMAIL ) : '';
-		$recipient = sanitize_email( $recipient );
-
-		if (
-			'' === $consumer_key ||
-			'' === $consumer_secret ||
-			! $from_email ||
-			! is_email( $from_email ) ||
-			! $recipient ||
-			! is_email( $recipient )
-		) {
-			return new WP_Error( 'ba_turbosmtp_not_configured', 'Transactional email transport is not configured.' );
-		}
-
-		$response = wp_remote_post(
-			self::TURBOSMTP_API_ENDPOINT,
-			array(
-				'timeout'     => 15,
-				'redirection' => 0,
-				'headers'     => array(
-					'Accept'         => 'application/json',
-					'Consumerkey'    => $consumer_key,
-					'Consumersecret' => $consumer_secret,
-					'Content-Type'   => 'application/json',
-				),
-				'body'        => wp_json_encode(
-					array(
-						'from'    => $from_email,
-						'to'      => $recipient,
-						'subject'      => (string) $subject,
-						'content'      => (string) $message,
-						'html_content' => (string) $html_message,
-					)
-				),
-			)
-		);
-
-		if ( is_wp_error( $response ) ) {
-			return new WP_Error( 'ba_turbosmtp_request_failed', 'Transactional email request failed.' );
-		}
-
-		$status = (int) wp_remote_retrieve_response_code( $response );
-		if ( $status < 200 || $status >= 300 ) {
-			return new WP_Error( 'ba_turbosmtp_rejected', 'Transactional email provider rejected the request.' );
-		}
-
-		return true;
-	}
-
 	private function queue_verification_email( $sentinel_id ) {
 		$args = array( absint( $sentinel_id ) );
 		if ( ! wp_next_scheduled( 'badaround_sentinel_send_verification', $args ) ) {
