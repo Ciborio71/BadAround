@@ -75,10 +75,6 @@ function badaround_sentinel_territory_label( WP_Term $term ) {
 						<a class="ba-button ba-button--outline" href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Esplora la mappa</a>
 					</div>
 				</div>
-
-				<div class="ba-sentinel-hero__visual">
-					<img src="<?php echo esc_url( content_url( '/uploads/2026/10/BadAround-—-Hero-Sentinelle-visual.png' ) ); ?>" alt="Persona che osserva la propria zona con smartphone e segnalazioni BadAround" width="1536" height="1024" fetchpriority="high" decoding="async">
-				</div>
 			</div>
 		</div>
 	</section>
