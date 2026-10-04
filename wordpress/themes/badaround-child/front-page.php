@@ -92,18 +92,44 @@ $demo_events = array(
 
 	<section class="ba-home-main ba-section--tight">
 		<div class="ba-container--wide">
-			<nav class="ba-home-categories" aria-label="Categorie principali">
-				<a href="#"><span class="ba-home-category__icon is-blue" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 13h16l-1.5-5h-13L4 13Zm1 0v5m14-5v5M7 18h10M7 8l1.2-3h7.6L17 8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span>Furti</a>
-				<a href="#"><span class="ba-home-category__icon is-coral" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m14.5 5.5 4 4M6 18l4.4-4.4m-2-7.2 9.2 9.2M5 5l14 14" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span>Danni</a>
-				<a href="#"><span class="ba-home-category__icon is-amber" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12s3.5-5 9-5 9 5 9 5-3.5 5-9 5-9-5-9-5Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg></span>Testimoni</a>
-				<a href="#"><span class="ba-home-category__icon is-purple" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2M9 7a3 3 0 1 0 6 0 3 3 0 0 0-6 0Z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span>Sicurezza</a>
-				<a href="#"><span class="ba-home-category__icon is-slate" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 16h14l-1-6H6l-1 6Zm2 0v2m10-2v2M8 10l1-3h6l1 3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span>Veicoli abbandonati</a>
-				<a href="#"><span class="ba-home-category__icon is-green" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 3 20h18L12 3Z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 9v5m0 3h.01" stroke="currentColor" stroke-width="1.8"/></svg></span>Degrado</a>
+			<nav class="ba-home-categories" aria-label="Legenda e categorie BadAround">
+				<a href="<?php echo esc_url( add_query_arg( 'categoria', 'veicoli', home_url( '/cerca/' ) ) ); ?>" class="ba-home-category-card">
+					<span class="ba-home-category__pin is-vehicles" aria-hidden="true"></span>
+					<span class="ba-home-category__copy"><strong>Veicoli</strong><small>Auto, moto e altri mezzi</small></span>
+				</a>
+				<a href="<?php echo esc_url( add_query_arg( 'categoria', 'case-e-attivita', home_url( '/cerca/' ) ) ); ?>" class="ba-home-category-card">
+					<span class="ba-home-category__pin is-property" aria-hidden="true"></span>
+					<span class="ba-home-category__copy"><strong>Case e attività</strong><small>Abitazioni, negozi e uffici</small></span>
+				</a>
+				<a href="<?php echo esc_url( add_query_arg( 'categoria', 'pericoli', home_url( '/cerca/' ) ) ); ?>" class="ba-home-category-card">
+					<span class="ba-home-category__pin is-hazard" aria-hidden="true"></span>
+					<span class="ba-home-category__copy"><strong>Pericoli</strong><small>Rischi e situazioni pericolose</small></span>
+				</a>
+				<a href="<?php echo esc_url( add_query_arg( 'categoria', 'spazi-pubblici', home_url( '/cerca/' ) ) ); ?>" class="ba-home-category-card">
+					<span class="ba-home-category__pin is-public" aria-hidden="true"></span>
+					<span class="ba-home-category__copy"><strong>Spazi pubblici</strong><small>Strade, aree pubbliche e decoro</small></span>
+				</a>
+				<a href="<?php echo esc_url( add_query_arg( 'categoria', 'animali', home_url( '/cerca/' ) ) ); ?>" class="ba-home-category-card">
+					<span class="ba-home-category__pin is-animal" aria-hidden="true"></span>
+					<span class="ba-home-category__copy"><strong>Animali</strong><small>Smarrimenti e segnalazioni</small></span>
+				</a>
+				<a href="<?php echo esc_url( add_query_arg( 'categoria', 'oggetti-e-documenti', home_url( '/cerca/' ) ) ); ?>" class="ba-home-category-card">
+					<span class="ba-home-category__pin is-object" aria-hidden="true"></span>
+					<span class="ba-home-category__copy"><strong>Oggetti e documenti</strong><small>Oggetti smarriti o ritrovati</small></span>
+				</a>
+				<div class="ba-home-category-card is-info" aria-label="Risolto — Evento concluso">
+					<span class="ba-home-category__resolved" aria-hidden="true">✓</span>
+					<span class="ba-home-category__copy"><strong>Risolto</strong><small>Evento concluso</small></span>
+				</div>
+				<div class="ba-home-category-card is-info" aria-label="Più eventi — Pinpoint raggruppati nella stessa area">
+					<span class="ba-home-category__cluster" aria-hidden="true">3</span>
+					<span class="ba-home-category__copy"><strong>Più eventi</strong><small>Pinpoint raggruppati nella stessa area</small></span>
+				</div>
 			</nav>
 
 			<div class="ba-home-sectionhead">
 				<h2>Segnalazioni vicino a te</h2>
-				<a href="#">Vedi tutte le segnalazioni <span aria-hidden="true">→</span></a>
+				<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Vedi tutte le segnalazioni <span aria-hidden="true">→</span></a>
 			</div>
 
 			<div class="ba-home-events" id="segnalazioni">
@@ -139,7 +165,7 @@ $demo_events = array(
 						<h2>Vuoi aiutare a tenere d’occhio una zona?</h2>
 						<p>Diventa una <strong>Sentinella BadAround</strong>: ricevi aggiornamenti sulla zona che ti interessa e contribuisci alla community con segnalazioni e avvistamenti utili!</p>
 						<p class="ba-home-sentinel__privacy">La tua identità non viene resa pubblica.</p>
-						<a class="ba-button" href="#">Attiva gli alert <span aria-hidden="true">→</span></a>
+						<a class="ba-button" href="<?php echo esc_url( home_url( '/sentinelle/#attiva-sentinella' ) ); ?>">Attiva una Sentinella <span aria-hidden="true">→</span></a>
 					</div>
 					<div class="ba-home-phone" aria-hidden="true">
 						<div class="ba-home-phone__notch"></div>
