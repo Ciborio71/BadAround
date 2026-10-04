@@ -1,6 +1,9 @@
 name: Deploy child theme to staging
 
 on:
+  push:
+    branches:
+      - feature/r1-1-segnalazioni-archive
   workflow_dispatch:
 
 permissions:
