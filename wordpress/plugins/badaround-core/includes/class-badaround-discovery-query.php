@@ -163,6 +163,14 @@ class BadAround_Discovery_Query {
 		);
 	}
 
+	public function public_projection_for_event( $event_id ) {
+		$post = get_post( absint( $event_id ) );
+		if ( ! $post instanceof WP_Post ) {
+			return null;
+		}
+		return $this->public_projection( $post );
+	}
+
 	private function resolve_period_post_ids( $days ) {
 		$days = absint( $days );
 		if ( ! in_array( $days, array( 7, 30, 90 ), true ) ) {
