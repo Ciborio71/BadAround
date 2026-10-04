@@ -58,45 +58,81 @@ class BadAround_Discovery_Contract {
 			return false;
 		}
 
-		$territory = get_term( absint( $territory_id ), BadAround_Event_Post_Type::TERRITORY_TAX );
+		$territory_id = absint( $territory_id );
+		$category_id  = absint( $category_id );
+		$event_type_id = absint( $event_type_id );
+
+		$territory = get_term( $territory_id, BadAround_Event_Post_Type::TERRITORY_TAX );
 		if ( ! $territory instanceof WP_Term ) {
 			return false;
 		}
 
-		$filters = array( 'territory' => $territory->slug, 'category' => '', 'event_type' => '' );
+		$event_territories = get_the_terms( $event_id, BadAround_Event_Post_Type::TERRITORY_TAX );
+		if ( is_wp_error( $event_territories ) || ! $event_territories ) {
+			return false;
+		}
+
+		$territory_match = false;
+		foreach ( $event_territories as $event_territory ) {
+			if (
+				(int) $event_territory->term_id === $territory_id ||
+				term_is_ancestor_of( $territory_id, $event_territory->term_id, BadAround_Event_Post_Type::TERRITORY_TAX )
+			) {
+				$territory_match = true;
+				break;
+			}
+		}
+		if ( ! $territory_match ) {
+			return false;
+		}
+
+		$event_types = get_the_terms( $event_id, BadAround_Event_Post_Type::EVENT_TYPE_TAX );
+		if ( is_wp_error( $event_types ) || ! $event_types ) {
+			return false;
+		}
 
 		if ( $category_id ) {
-			$category = get_term( absint( $category_id ), BadAround_Event_Post_Type::EVENT_TYPE_TAX );
+			$category = get_term( $category_id, BadAround_Event_Post_Type::EVENT_TYPE_TAX );
 			if ( ! $category instanceof WP_Term || 0 !== (int) $category->parent ) {
 				return false;
 			}
-			$filters['category'] = $category->slug;
+
+			$category_match = false;
+			foreach ( $event_types as $assigned_type ) {
+				if (
+					(int) $assigned_type->term_id === $category_id ||
+					term_is_ancestor_of( $category_id, $assigned_type->term_id, BadAround_Event_Post_Type::EVENT_TYPE_TAX )
+				) {
+					$category_match = true;
+					break;
+				}
+			}
+			if ( ! $category_match ) {
+				return false;
+			}
 		}
 
 		if ( $event_type_id ) {
-			$event_type = get_term( absint( $event_type_id ), BadAround_Event_Post_Type::EVENT_TYPE_TAX );
+			$event_type = get_term( $event_type_id, BadAround_Event_Post_Type::EVENT_TYPE_TAX );
 			if ( ! $event_type instanceof WP_Term || 0 === (int) $event_type->parent ) {
 				return false;
 			}
-			if ( $category_id && ! term_is_ancestor_of( absint( $category_id ), $event_type->term_id, BadAround_Event_Post_Type::EVENT_TYPE_TAX ) ) {
+			if ( $category_id && ! term_is_ancestor_of( $category_id, $event_type_id, BadAround_Event_Post_Type::EVENT_TYPE_TAX ) ) {
 				return false;
 			}
-			$filters['event_type'] = $event_type->slug;
+
+			$event_type_match = false;
+			foreach ( $event_types as $assigned_type ) {
+				if ( (int) $assigned_type->term_id === $event_type_id ) {
+					$event_type_match = true;
+					break;
+				}
+			}
+			if ( ! $event_type_match ) {
+				return false;
+			}
 		}
 
-		$args = array(
-			'post_type'      => BadAround_Event_Post_Type::POST_TYPE,
-			'post_status'    => 'publish',
-			'p'              => absint( $event_id ),
-			'fields'         => 'ids',
-			'posts_per_page' => 1,
-			'no_found_rows'   => true,
-			'meta_query'     => self::public_gate_meta_query(),
-		);
-		$tax_query = self::tax_query_from_slugs( $filters['territory'], $filters['category'], $filters['event_type'] );
-		if ( $tax_query ) { $args['tax_query'] = $tax_query; }
-
-		$query = new WP_Query( $args );
-		return ! empty( $query->posts );
+		return true;
 	}
 }
