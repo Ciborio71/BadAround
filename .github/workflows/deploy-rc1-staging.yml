@@ -1,5 +1,5 @@
 name: Deploy RC1 to staging
-# RC1 D3 targeted-template-sync
+# RC1 D3 curl-template-sync
 
 on:
   push:
@@ -59,20 +59,16 @@ jobs:
           server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/
           dangerous-clean-slate: false
           log-level: minimal
-      - name: Prepare D3 Sentinelle template
+      - name: Upload D3 Sentinelle template over FTPS (PASV IPv4)
+        shell: bash
+        env:
+          FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
         run: |
-          mkdir -p ./d3-theme-upload
-          cp ./wordpress/themes/badaround-child/page-sentinelle.php ./d3-theme-upload/page-sentinelle.php
-      - name: Upload D3 Sentinelle template over FTPS
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
-        with:
-          server: ${{ secrets.STAGING_SFTP_HOST }}
-          username: ${{ secrets.STAGING_SFTP_USERNAME }}
-          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
-          protocol: ftps
-          port: 21
-          local-dir: ./d3-theme-upload/
-          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
-          state-name: .ftp-deploy-sync-state-d3-sentinelle.json
-          dangerous-clean-slate: false
-          log-level: minimal
+          curl --fail --show-error --silent \
+            --ssl-reqd --ftp-pasv --disable-epsv \
+            --retry 3 --retry-delay 2 --retry-all-errors \
+            --user "$FTP_USER:$FTP_PASS" \
+            --upload-file ./wordpress/themes/badaround-child/page-sentinelle.php \
+            "ftp://$FTP_HOST/staging.badaround.it/wp-content/themes/badaround-child/page-sentinelle.php"
