@@ -103,7 +103,7 @@ $demo_events = array(
 
 			<div class="ba-home-sectionhead">
 				<h2>Segnalazioni vicino a te</h2>
-				<a href="#">Vedi tutte le segnalazioni <span aria-hidden="true">→</span></a>
+				<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Vedi tutte le segnalazioni <span aria-hidden="true">→</span></a>
 			</div>
 
 			<div class="ba-home-events" id="segnalazioni">
