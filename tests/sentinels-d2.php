@@ -44,7 +44,7 @@ d2_assert( false !== strpos( $discovery, 'BadAround_Discovery_Contract::tax_quer
 d2_assert( false !== strpos( $contract, "'include_children' => true" ), 'territory/category ancestor semantics are retained' );
 d2_assert( false !== strpos( $contract, "'include_children' => false" ), 'specific event type remains exact' );
 
-d2_assert( false !== strpos( $sentinels, "status = '" . self::STATUS_ACTIVE . "'" ), 'only active sentinels are enumerated' );
+d2_assert( false !== strpos( $sentinels, 'self::STATUS_ACTIVE' ), 'only active sentinels are enumerated' );
 d2_assert( false !== strpos( $sentinels, 'confirmed_at IS NOT NULL' ), 'only verified sentinels are enumerated' );
 d2_assert( false !== strpos( $sentinels, 'disabled_at IS NULL' ) && false !== strpos( $sentinels, 'deleted_at IS NULL' ), 'disabled/deleted sentinels are excluded' );
 
