@@ -30,19 +30,6 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 					<h2>Community</h2>
 					<a href="<?php echo esc_url( home_url( '/sentinelle/' ) ); ?>">Sentinelle</a>
 					<a href="<?php echo esc_url( home_url( '/segnala-un-evento/' ) ); ?>">Segnala un evento</a>
-					<a href="#">Regole della community</a>
-				</div>
-				<div>
-					<h2>Supporto</h2>
-					<a href="#">Centro assistenza</a>
-					<a href="#">Contatti</a>
-					<a href="#">Segnala un problema</a>
-				</div>
-				<div>
-					<h2>Legale</h2>
-					<a href="#">Privacy</a>
-					<a href="#">Termini di utilizzo</a>
-					<a href="#">Cookie</a>
 				</div>
 			</div>
 		</div>
