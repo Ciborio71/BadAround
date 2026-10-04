@@ -59,3 +59,9 @@
  .ba-filter-actions .ba-button{width:100%}
  .ba-filter-reset{text-align:center}
 }
+
+/* R1.1 — Segnalazioni MVP */
+.ba-reports-empty-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:18px}
+.ba-reports-page .ba-event-card__link{display:inline-flex;align-items:center;gap:5px;color:var(--ba-teal-700);font-size:.8rem;font-weight:800;text-decoration:none}
+.ba-reports-page .ba-event-card__link:hover,.ba-reports-page .ba-event-card__link:focus-visible{text-decoration:underline}
+@media(max-width:640px){.ba-reports-empty-actions{align-items:stretch;flex-direction:column}.ba-reports-empty-actions .ba-button{width:100%}}
