@@ -1,0 +1,47 @@
+/* Come funziona — civic onboarding landing */
+body.page-template-page-come-funziona .site-content>.ast-container{display:block;width:100%;max-width:none;padding-inline:0}
+body.page-template-page-come-funziona #primary{float:none;width:100%;max-width:none;margin:0;padding:0}
+body.page-template-page-come-funziona .site-content{padding:0}
+.ba-how{overflow:hidden;background:#fff;color:var(--ba-text)}
+.ba-how h1,.ba-how h2,.ba-how h3,.ba-how p{margin-top:0}
+.ba-how h1{max-width:760px;margin-bottom:24px;color:var(--ba-navy-950);font-size:clamp(2.7rem,5vw,5.4rem);line-height:.98;letter-spacing:-.055em}
+.ba-how h1 span{color:#147ee6}
+.ba-how h2{margin-bottom:14px;color:var(--ba-navy-950);font-size:clamp(2rem,3vw,3.15rem);line-height:1.05;letter-spacing:-.04em}
+.ba-how h3{color:var(--ba-navy-950);font-size:1.04rem;line-height:1.25}
+.ba-how-eyebrow{margin-bottom:14px;color:#0f78db;font-size:.78rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+.ba-how-lead,.ba-how-intro{max-width:700px;color:#52667d;font-size:1.08rem;line-height:1.65}
+.ba-how-actions{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.ba-how-primary{background:#147ee6}.ba-how-primary:hover{background:#0868c7}
+.ba-how-hero{position:relative;padding:clamp(62px,7vw,108px) 0 72px;background:linear-gradient(115deg,#fff 0 54%,#edf7ff 54% 100%)}
+.ba-how-hero__grid{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(420px,.98fr);gap:clamp(34px,5vw,80px);align-items:center}
+.ba-how-free{display:inline-block;margin:0 0 26px;padding:8px 12px;border-radius:10px;background:#e7f7ee;color:#176f3c;font-size:.94rem}
+.ba-how-hero__visual{position:relative;min-height:520px}
+.ba-how-phone{position:absolute;left:50%;top:50%;z-index:3;width:270px;height:500px;padding:12px;border:8px solid #0b1c31;border-radius:42px;background:#0b1c31;box-shadow:0 34px 70px rgba(7,26,56,.24);transform:translate(-50%,-50%) rotate(-5deg)}
+.ba-how-phone__speaker{position:absolute;z-index:5;top:7px;left:50%;width:84px;height:19px;border-radius:0 0 14px 14px;background:#0b1c31;transform:translateX(-50%)}
+.ba-how-phone__map{position:relative;width:100%;height:100%;overflow:hidden;border-radius:28px;background:linear-gradient(28deg,#dcebd9 0 20%,#edf3f7 20% 48%,#dbe8f1 48% 54%,#f3f5ef 54% 100%)}
+.ba-how-road{position:absolute;height:14px;width:130%;background:#fff;border:1px solid #d7e0e7;transform-origin:center}
+.ba-how-road--a{left:-20%;top:30%;transform:rotate(28deg)}.ba-how-road--b{left:-10%;top:58%;transform:rotate(-18deg)}.ba-how-road--c{left:-18%;top:73%;transform:rotate(46deg)}
+.ba-how-pin{position:absolute;z-index:2;display:grid;place-items:center;width:38px;height:38px;border:4px solid #fff;border-radius:50% 50% 50% 10%;color:#fff;font-size:.72rem;font-weight:900;box-shadow:0 5px 12px rgba(7,26,56,.2);transform:rotate(-45deg)}
+.ba-how-pin>*{transform:rotate(45deg)}.ba-how-pin--1{left:25%;top:24%;background:#f45151}.ba-how-pin--2{right:22%;top:38%;background:#1688e8}.ba-how-pin--3{left:31%;top:57%;background:#f6a800}.ba-how-pin--4{right:30%;top:70%;background:#2dae67}
+.ba-how-preview{position:absolute;z-index:4;left:16px;right:16px;bottom:24px;display:grid;gap:3px;padding:14px;border-radius:14px;background:#fff;box-shadow:0 10px 24px rgba(7,26,56,.16);font-size:.78rem}.ba-how-preview span{color:#6c7c8e;font-size:.7rem}
+.ba-how-orbit{position:absolute;border-radius:50%;background:#d9efff}.ba-how-orbit--one{width:420px;height:420px;left:50%;top:50%;transform:translate(-50%,-50%)}.ba-how-orbit--two{width:540px;height:270px;left:50%;bottom:0;background:#e9f6ff;transform:translateX(-50%)}
+.ba-how-callout{position:absolute;z-index:5;color:#0d4f93;font-size:1.05rem;font-weight:800;line-height:1.35;font-style:italic}.ba-how-callout--top{right:0;top:12%}.ba-how-callout--side{right:-3%;bottom:14%;max-width:190px}
+.ba-how-section{padding:clamp(64px,7vw,96px) 0}.ba-how-section--soft{background:#edf7ff}.ba-how-section--white{background:#fff}
+.ba-how-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin-top:40px}
+.ba-how-step{position:relative;min-height:310px;padding:42px 22px 24px;border:1px solid #dce9f3;border-radius:18px;background:#fff;text-align:center;box-shadow:0 8px 24px rgba(7,26,56,.045)}
+.ba-how-step__number{position:absolute;top:-17px;left:50%;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#147ee6;color:#fff;font-weight:900;transform:translateX(-50%)}
+.ba-how-step__icon{display:grid;place-items:center;width:58px;height:58px;margin:0 auto 18px;border-radius:18px;background:#e8f4ff;color:#147ee6;font-size:1.55rem;font-weight:900}.ba-how-step:nth-child(2) .ba-how-step__icon{background:#e4f7ec;color:#239d5a}.ba-how-step:nth-child(3) .ba-how-step__icon{background:#ffe8e8;color:#e63d3d}.ba-how-step:nth-child(5) .ba-how-step__icon{background:#fff1ce;color:#c88900}
+.ba-how-step p,.ba-how-category p{margin-bottom:0;color:#64768a;font-size:.9rem;line-height:1.55}
+.ba-how-categories{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:34px}
+.ba-how-category{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;padding:20px;border:1px solid #e1e8ef;border-radius:16px;background:#fff;box-shadow:0 5px 18px rgba(7,26,56,.035)}.ba-how-category h3{margin-bottom:6px}
+.ba-how-category__icon{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;font-size:1.25rem;font-weight:900}
+.ba-how-category--vehicles .ba-how-category__icon{background:#dceeff;color:#1688e8}.ba-how-category--places .ba-how-category__icon{background:#f5e2e7;color:#9c3152}.ba-how-category--hazards .ba-how-category__icon{background:#ffeadc;color:#e36b21}.ba-how-category--public .ba-how-category__icon{background:#dff5f2;color:#087f8c}.ba-how-category--animals .ba-how-category__icon{background:#eee2fa;color:#7e3db6}.ba-how-category--objects .ba-how-category__icon{background:#fff0c9;color:#a87500}
+.ba-how-split{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(40px,7vw,100px);align-items:center}
+.ba-how-sentinel{background:linear-gradient(120deg,#f5fbff,#e8f7f7)}.ba-how-note{width:fit-content;padding:8px 12px;border-radius:10px;background:#fff;color:#3f6171;font-size:.9rem;font-weight:700}
+.ba-how-sentinel__visual{position:relative;display:grid;place-items:center;min-height:300px}.ba-how-sentinel__pin{display:grid;place-items:center;width:190px;height:190px;border-radius:50% 50% 50% 12%;background:linear-gradient(145deg,#1688e8,#087f8c);color:#fff;font-size:5rem;box-shadow:0 25px 60px rgba(8,127,140,.2);transform:rotate(-45deg)}.ba-how-sentinel__eye{position:absolute;color:#fff;font-size:3rem}
+.ba-how-privacy{background:#edf7ff}.ba-how-checks{display:grid;gap:13px;margin:0;padding:0;list-style:none}.ba-how-checks li{display:flex;gap:11px;align-items:flex-start;color:#344b64;font-weight:650}.ba-how-checks span{display:grid;flex:0 0 24px;place-items:center;width:24px;height:24px;border-radius:50%;background:#2dae67;color:#fff;font-size:.75rem}
+.ba-how-emergency{padding:44px 0;background:#fff2ee}.ba-how-emergency__grid{display:grid;grid-template-columns:1.25fr .75fr;gap:50px;align-items:center}.ba-how-emergency h2{font-size:clamp(1.65rem,2.4vw,2.5rem)}.ba-how-emergency p{margin-bottom:0;color:#596a7c}.ba-how-emergency__card{display:flex;gap:18px;align-items:center;padding:20px 24px;border-radius:18px;background:#ffe0dc;color:#c62b2b}.ba-how-emergency__card>span{display:grid;place-items:center;width:64px;height:64px;border-radius:50%;background:#e72f2f;color:#fff;font-size:1.8rem}.ba-how-emergency__card small,.ba-how-emergency__card strong{display:block}.ba-how-emergency__card strong{margin-top:4px;font-size:1.25rem}
+.ba-how-final{padding:52px 0;background:linear-gradient(110deg,#0789db,#0756c8);color:#fff}.ba-how-final__grid{display:grid;grid-template-columns:1.3fr .7fr;gap:40px;align-items:center}.ba-how-final .ba-how-eyebrow,.ba-how-final h2,.ba-how-final p{color:#fff}.ba-how-final h2{margin-bottom:8px}.ba-how-final p{margin-bottom:0}.ba-how-final__primary{background:#fff;color:#0756c8}.ba-how-final__primary:hover{background:#eaf4ff;color:#0756c8}.ba-how-final__secondary{border-color:#fff;background:transparent;color:#fff}.ba-how-final__secondary:hover{background:#fff;color:#0756c8}
+@media(max-width:1100px){.ba-how-hero__grid{grid-template-columns:1fr 440px}.ba-how-steps{grid-template-columns:repeat(3,1fr)}.ba-how-callout{display:none}}
+@media(max-width:860px){.ba-how-hero{padding-top:48px;background:linear-gradient(180deg,#fff 0 52%,#edf7ff 52%)}.ba-how-hero__grid,.ba-how-split,.ba-how-emergency__grid,.ba-how-final__grid{grid-template-columns:1fr}.ba-how-hero__visual{min-height:470px}.ba-how-categories{grid-template-columns:repeat(2,1fr)}.ba-how-final__grid{gap:26px}}
+@media(max-width:620px){.ba-how h1{font-size:clamp(2.35rem,12vw,3.5rem)}.ba-how-hero__copy{text-align:left}.ba-how-actions{display:grid;grid-template-columns:1fr}.ba-how-actions .ba-button{width:100%}.ba-how-hero__visual{min-height:400px}.ba-how-phone{width:215px;height:390px;border-radius:34px}.ba-how-orbit--one{width:320px;height:320px}.ba-how-orbit--two{width:390px;height:200px}.ba-how-steps,.ba-how-categories{grid-template-columns:1fr}.ba-how-step{min-height:0}.ba-how-section{padding:56px 0}.ba-how-category{padding:17px}.ba-how-sentinel__visual{min-height:240px}.ba-how-sentinel__pin{width:150px;height:150px}.ba-how-emergency__card{padding:16px}.ba-how-emergency__card>span{width:52px;height:52px}.ba-how-final{padding:44px 0}}
