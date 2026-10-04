@@ -187,3 +187,23 @@
 .ba-sentinel-hero__visual img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;object-position:center}
 @media(max-width:900px){.ba-sentinel-hero__visual{max-width:720px;margin:8px auto 0;transform:none}}
 @media(max-width:600px){.ba-sentinel-hero__visual{border-radius:20px}.ba-sentinel-hero__visual img{aspect-ratio:4/3;object-position:center;object-fit:cover}}
+
+/* Sentinelle hero — immersive photographic background */
+.ba-sentinel-hero{position:relative;isolation:isolate;overflow:hidden;background:#f7fbff url("https://staging.badaround.it/wp-content/uploads/2026/10/BadAround-—-Hero-Sentinelle-visual.png") right center/auto 100% no-repeat}
+.ba-sentinel-hero::before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,#f7fbff 0%,rgba(247,251,255,.98) 31%,rgba(247,251,255,.84) 46%,rgba(247,251,255,.32) 65%,rgba(247,251,255,.06) 100%)}
+.ba-sentinel-hero::after{content:"";position:absolute;z-index:-1;left:0;right:0;bottom:0;height:22%;background:linear-gradient(0deg,#f7fbff 0%,rgba(247,251,255,0) 100%);pointer-events:none}
+.ba-sentinel-hero__grid{grid-template-columns:minmax(0,610px) 1fr;min-height:570px;align-items:center}
+.ba-sentinel-hero__copy{position:relative;z-index:2;padding:18px 0;max-width:610px}
+.ba-sentinel-hero__visual{display:none}
+@media(max-width:900px){
+ .ba-sentinel-hero{background-position:68% center;background-size:cover}
+ .ba-sentinel-hero::before{background:linear-gradient(90deg,#f7fbff 0%,rgba(247,251,255,.97) 48%,rgba(247,251,255,.72) 72%,rgba(247,251,255,.45) 100%)}
+ .ba-sentinel-hero__grid{grid-template-columns:minmax(0,1fr);min-height:540px}
+ .ba-sentinel-hero__copy{max-width:600px}
+}
+@media(max-width:600px){
+ .ba-sentinel-hero{background-position:70% center}
+ .ba-sentinel-hero::before{background:linear-gradient(180deg,rgba(247,251,255,.96) 0%,rgba(247,251,255,.91) 68%,rgba(247,251,255,.68) 100%)}
+ .ba-sentinel-hero__grid{min-height:auto}
+ .ba-sentinel-hero__copy{padding:10px 0 34px}
+}
