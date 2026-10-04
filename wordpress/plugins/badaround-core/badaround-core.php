@@ -26,7 +26,9 @@ require_once BADAROUND_CORE_PATH . 'includes/class-badaround-event-type-resolver
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-territory-resolver.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-media-repository.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-publication-service.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-discovery-contract.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-discovery-query.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-transactional-mailer.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-sentinel-repository.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-sentinel-service.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-moderation-service.php';
