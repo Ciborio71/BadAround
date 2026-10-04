@@ -11,10 +11,9 @@ $sentinel_url = home_url( '/sentinelle/' );
 
 $steps = array(
 	array( 'n'=>'1', 'icon'=>'✎', 'title'=>'Racconta cosa è successo', 'text'=>'Scegli la categoria e aggiungi le informazioni utili. Puoi indicare il luogo e, quando serve, allegare immagini.' ),
-	array( 'n'=>'2', 'icon'=>'✓', 'title'=>'La segnalazione viene verificata', 'text'=>'Prima della pubblicazione BadAround applica un controllo di moderazione per rendere le informazioni più utili alla community.' ),
-	array( 'n'=>'3', 'icon'=>'●', 'title'=>'L’evento appare sulla mappa', 'text'=>'Quando viene approvato e pubblicato, l’evento diventa consultabile attraverso la mappa e le altre viste pubbliche.' ),
-	array( 'n'=>'4', 'icon'=>'◎', 'title'=>'La community può scoprirlo', 'text'=>'Le persone possono trovare le segnalazioni pubblicate tramite mappa, ricerca e filtri e conoscere meglio ciò che accade intorno a loro.' ),
-	array( 'n'=>'5', 'icon'=>'◉', 'title'=>'Le Sentinelle possono essere avvisate', 'text'=>'Chi ha attivato una Sentinella compatibile può ricevere gli aggiornamenti previsti senza dover controllare continuamente la mappa.' ),
+	array( 'n'=>'2', 'icon'=>'●', 'title'=>'L’evento appare sulla mappa', 'text'=>'La segnalazione diventa consultabile attraverso la mappa e le altre viste pubbliche di BadAround.' ),
+	array( 'n'=>'3', 'icon'=>'◎', 'title'=>'La community può scoprirlo', 'text'=>'Le persone possono trovare le segnalazioni tramite mappa, ricerca e filtri e conoscere meglio ciò che accade intorno a loro.' ),
+	array( 'n'=>'4', 'icon'=>'◉', 'title'=>'Le Sentinelle possono essere avvisate', 'text'=>'Chi ha attivato una Sentinella compatibile può ricevere gli aggiornamenti previsti senza dover controllare continuamente la mappa.' ),
 );
 
 $categories = array(
@@ -86,6 +85,17 @@ $categories = array(
 						<div><h3><?php echo esc_html( $category['title'] ); ?></h3><p><?php echo esc_html( $category['text'] ); ?></p></div>
 					</article>
 				<?php endforeach; ?>
+			</div>
+		</div>
+	</section>
+
+	<section class="ba-how-section ba-how-social">
+		<div class="ba-container ba-how-split">
+			<div class="ba-how-social__visual" aria-hidden="true"><span>↗</span><strong>BadAround</strong><small>La segnalazione raggiunge più persone</small></div>
+			<div>
+				<p class="ba-how-eyebrow">PIÙ VISIBILITÀ ALLA SEGNALAZIONE</p>
+				<h2>Dalla piattaforma alla community.</h2>
+				<p class="ba-how-intro">BadAround nasce per dare alle segnalazioni utili la massima rapidità e visibilità. I contenuti pubblicati possono essere rilanciati anche attraverso i canali social BadAround e la relativa community, ampliandone la diffusione oltre la piattaforma.</p>
 			</div>
 		</div>
 	</section>
