@@ -37,6 +37,7 @@ $category_icon = $category_icons[ $card['category'] ] ?? '';
 	<?php if ( $card['image'] ) : ?>
 		<a class="ba-event-card__media" href="<?php echo esc_url( $card['url'] ); ?>" tabindex="-1" aria-hidden="true">
 			<img src="<?php echo esc_url( $card['image'] ); ?>" alt="<?php echo esc_attr( $card['image_alt'] ); ?>" loading="lazy" decoding="async">
+			<?php if ( $category_icon ) : ?><span class="ba-event-card__media-category"><?php echo $category_icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed internal SVG map. ?></span><?php endif; ?>
 		</a>
 	<?php endif; ?>
 
