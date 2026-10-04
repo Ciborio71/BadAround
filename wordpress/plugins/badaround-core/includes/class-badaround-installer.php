@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Owns the versioned database schema for private and relational data. */
 class BadAround_Installer {
-	const SCHEMA_VERSION = '1.2.0';
+	const SCHEMA_VERSION = '1.3.0';
 	const OPTION_NAME    = 'ba_db_schema_version';
 
 	public function register_hooks() {
@@ -125,6 +125,7 @@ class BadAround_Installer {
 		$media           = $wpdb->prefix . 'ba_report_media';
 		$audit           = $wpdb->prefix . 'ba_audit_log';
 		$sentinels       = $wpdb->prefix . 'ba_sentinels';
+		$sentinel_matches = $wpdb->prefix . 'ba_sentinel_event_matches';
 
 		$sql = "CREATE TABLE {$reports} (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -220,6 +221,27 @@ class BadAround_Installer {
 			KEY status_event_type (status,event_type_term_id),
 			KEY user_status (user_id,status),
 			KEY verification_expiry (status,verification_expires_at)
+		) {$charset_collate};
+
+		CREATE TABLE {$sentinel_matches} (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			sentinel_id bigint(20) unsigned NOT NULL,
+			event_id bigint(20) unsigned NOT NULL,
+			match_status varchar(32) NOT NULL DEFAULT 'matched',
+			notification_status varchar(32) NOT NULL DEFAULT 'queued',
+			notification_attempts int(10) unsigned NOT NULL DEFAULT 0,
+			matched_at datetime NOT NULL,
+			last_attempt_at datetime DEFAULT NULL,
+			next_retry_at datetime DEFAULT NULL,
+			sent_at datetime DEFAULT NULL,
+			last_error_code varchar(64) DEFAULT NULL,
+			created_at datetime NOT NULL,
+			updated_at datetime NOT NULL,
+			PRIMARY KEY  (id),
+			UNIQUE KEY sentinel_event (sentinel_id,event_id),
+			KEY event_id (event_id),
+			KEY sentinel_status (sentinel_id,notification_status),
+			KEY notification_retry (notification_status,next_retry_at)
 		) {$charset_collate};
 
 		CREATE TABLE {$audit} (
