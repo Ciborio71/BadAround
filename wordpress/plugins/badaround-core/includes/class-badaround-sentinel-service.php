@@ -45,6 +45,95 @@ class BadAround_Sentinel_Service {
 				'permission_callback' => '__return_true',
 			)
 		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			self::REST_ROUTE . '/unsubscribe/(?P<public_id>[a-f0-9-]{36})/(?P<token>[a-f0-9]{64})',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'rest_unsubscribe' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+
+	public function rest_unsubscribe( WP_REST_Request $request ) {
+		$public_id = sanitize_text_field( (string) $request->get_param( 'public_id' ) );
+		$token     = sanitize_text_field( (string) $request->get_param( 'token' ) );
+
+		$result = $this->unsubscribe_token( $public_id . '.' . $token );
+		$status = is_wp_error( $result ) ? 'unsubscribe-invalid' : $result;
+		$allowed = array( 'unsubscribed', 'already-unsubscribed', 'unsubscribe-invalid' );
+		if ( ! in_array( $status, $allowed, true ) ) {
+			$status = 'unsubscribe-invalid';
+		}
+
+		$response = new WP_REST_Response( null, 302 );
+		$response->header(
+			'Location',
+			add_query_arg( 'ba_sentinel_status', rawurlencode( $status ), home_url( '/sentinelle/' ) )
+		);
+		return $response;
+	}
+
+	public function unsubscribe_url_for_sentinel( $sentinel ) {
+		if ( ! is_array( $sentinel ) || empty( $sentinel['public_id'] ) || empty( $sentinel['email_hash'] ) || empty( $sentinel['confirmed_at'] ) ) {
+			return new WP_Error( 'ba_sentinel_unsubscribe_unavailable', 'Sentinel unsubscribe link is unavailable.' );
+		}
+
+		$token = $this->unsubscribe_token_value(
+			$sentinel['public_id'],
+			$sentinel['email_hash'],
+			$sentinel['confirmed_at']
+		);
+
+		return rest_url(
+			self::REST_NAMESPACE . self::REST_ROUTE . '/unsubscribe/' .
+			rawurlencode( $sentinel['public_id'] ) . '/' .
+			rawurlencode( $token )
+		);
+	}
+
+	public function unsubscribe_token( $compound_token ) {
+		$parts = explode( '.', (string) $compound_token, 2 );
+		if ( 2 !== count( $parts ) ) {
+			return new WP_Error( 'invalid', 'Invalid unsubscribe token.' );
+		}
+
+		$public_id = sanitize_text_field( $parts[0] );
+		$token     = sanitize_text_field( $parts[1] );
+		$sentinel  = $this->repository->find_by_public_id( $public_id );
+
+		if ( ! $sentinel || empty( $sentinel['confirmed_at'] ) ) {
+			return new WP_Error( 'invalid', 'Invalid unsubscribe token.' );
+		}
+
+		$expected = $this->unsubscribe_token_value(
+			$sentinel['public_id'],
+			$sentinel['email_hash'],
+			$sentinel['confirmed_at']
+		);
+
+		if ( ! hash_equals( $expected, $token ) ) {
+			BadAround_Audit_Log::record( 'sentinel', $sentinel['id'], 'sentinel_unsubscribe_invalid', 'sentinel' );
+			return new WP_Error( 'invalid', 'Invalid unsubscribe token.' );
+		}
+
+		if ( BadAround_Sentinel_Repository::STATUS_UNSUBSCRIBED === $sentinel['status'] || ! empty( $sentinel['disabled_at'] ) ) {
+			return 'already-unsubscribed';
+		}
+
+		if ( BadAround_Sentinel_Repository::STATUS_ACTIVE !== $sentinel['status'] ) {
+			return new WP_Error( 'invalid', 'Invalid unsubscribe token.' );
+		}
+
+		$updated = $this->repository->unsubscribe( $sentinel['id'] );
+		if ( is_wp_error( $updated ) || ! is_array( $updated ) || BadAround_Sentinel_Repository::STATUS_UNSUBSCRIBED !== $updated['status'] ) {
+			return new WP_Error( 'invalid', 'Unable to unsubscribe sentinel.' );
+		}
+
+		BadAround_Audit_Log::record( 'sentinel', $sentinel['id'], 'sentinel_unsubscribed', 'sentinel' );
+		return 'unsubscribed';
 	}
 
 	public function rest_create( WP_REST_Request $request ) {
@@ -371,6 +460,14 @@ class BadAround_Sentinel_Service {
 		}
 		set_transient( $key, $count + 1, $ttl );
 		return true;
+	}
+
+	private function unsubscribe_token_value( $public_id, $email_hash, $confirmed_at ) {
+		return hash_hmac(
+			'sha256',
+			'unsubscribe|' . (string) $public_id . '|' . (string) $email_hash . '|' . (string) $confirmed_at,
+			wp_salt( 'auth' )
+		);
 	}
 
 	private function verification_token( $public_id, $email_hash, $expires_at ) {
