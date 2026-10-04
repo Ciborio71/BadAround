@@ -99,7 +99,7 @@ class BadAround_Discovery_Query {
 			'ignore_sticky_posts' => true,
 			'orderby'             => 'date',
 			'order'               => 'DESC',
-			'meta_query'          => $this->public_gate_meta_query(),
+			'meta_query'          => BadAround_Discovery_Contract::public_gate_meta_query(),
 		);
 
 		if ( '' !== $search ) {
@@ -128,39 +128,12 @@ class BadAround_Discovery_Query {
 			}
 		}
 
-		$tax_query = array();
-
-		if ( ! empty( $filters['territory'] ) ) {
-			$tax_query[] = array(
-				'taxonomy'         => BadAround_Event_Post_Type::TERRITORY_TAX,
-				'field'            => 'slug',
-				'terms'            => array( sanitize_title( $filters['territory'] ) ),
-				'include_children' => true,
-			);
-		}
-
-		if ( ! empty( $filters['category'] ) ) {
-			$tax_query[] = array(
-				'taxonomy'         => BadAround_Event_Post_Type::EVENT_TYPE_TAX,
-				'field'            => 'slug',
-				'terms'            => array( sanitize_title( $filters['category'] ) ),
-				'include_children' => true,
-			);
-		}
-
-		if ( ! empty( $filters['event_type'] ) ) {
-			$tax_query[] = array(
-				'taxonomy'         => BadAround_Event_Post_Type::EVENT_TYPE_TAX,
-				'field'            => 'slug',
-				'terms'            => array( sanitize_title( $filters['event_type'] ) ),
-				'include_children' => false,
-			);
-		}
-
+		$tax_query = BadAround_Discovery_Contract::tax_query_from_slugs(
+			(string) $filters['territory'],
+			(string) $filters['category'],
+			(string) $filters['event_type']
+		);
 		if ( $tax_query ) {
-			if ( count( $tax_query ) > 1 ) {
-				$tax_query['relation'] = 'AND';
-			}
 			$args['tax_query'] = $tax_query;
 		}
 
@@ -204,7 +177,7 @@ class BadAround_Discovery_Query {
 				'posts_per_page'      => self::SEARCH_ID_LIMIT,
 				'no_found_rows'       => true,
 				'ignore_sticky_posts' => true,
-				'meta_query'          => $this->public_gate_meta_query(),
+				'meta_query'          => BadAround_Discovery_Contract::public_gate_meta_query(),
 			)
 		);
 
@@ -243,7 +216,7 @@ class BadAround_Discovery_Query {
 				'no_found_rows'       => true,
 				'ignore_sticky_posts' => true,
 				's'                   => $search,
-				'meta_query'          => $this->public_gate_meta_query(),
+				'meta_query'          => BadAround_Discovery_Contract::public_gate_meta_query(),
 			)
 		);
 
@@ -268,7 +241,7 @@ class BadAround_Discovery_Query {
 					'posts_per_page'      => self::SEARCH_ID_LIMIT,
 					'no_found_rows'       => true,
 					'ignore_sticky_posts' => true,
-					'meta_query'          => $this->public_gate_meta_query(),
+					'meta_query'          => BadAround_Discovery_Contract::public_gate_meta_query(),
 					'tax_query'           => array(
 						array(
 							'taxonomy'         => BadAround_Event_Post_Type::TERRITORY_TAX,
@@ -351,16 +324,6 @@ class BadAround_Discovery_Query {
 		return function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( $value ), 'UTF-8' ) : strtolower( trim( $value ) );
 	}
 
-	private function public_gate_meta_query() {
-		return array(
-			array(
-				'key'     => '_ba_moderation_status',
-				'value'   => BadAround_Publication_Service::STATUS_PUBLISHED,
-				'compare' => '=',
-			),
-		);
-	}
-
 	private function empty_result( $filters, $page, $territory_matches = array() ) {
 		return array(
 			'items'             => array(),
@@ -381,10 +344,7 @@ class BadAround_Discovery_Query {
 	private function public_projection( WP_Post $post ) {
 		$event_id = (int) $post->ID;
 
-		if (
-			'publish' !== $post->post_status ||
-			BadAround_Publication_Service::STATUS_PUBLISHED !== sanitize_key( (string) get_post_meta( $event_id, '_ba_moderation_status', true ) )
-		) {
+		if ( ! BadAround_Discovery_Contract::is_public_event( $event_id ) ) {
 			return null;
 		}
 
