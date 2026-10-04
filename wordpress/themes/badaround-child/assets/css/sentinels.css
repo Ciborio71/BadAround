@@ -180,3 +180,10 @@
 .ba-sentinel-final-cta__box>*{position:relative;z-index:1}
 @media(prefers-reduced-motion:reduce){.ba-sentinel-radar__ring{animation:none}.ba-sentinel-benefit{transition:none}}
 @media(max-width:760px){.ba-sentinel-hero{padding:52px 0 64px}.ba-sentinel-benefits{margin-top:-16px}.ba-sentinel-trust{display:grid;gap:8px}.ba-sentinel-builder{padding:48px 0 58px}.ba-sentinel-form__step{padding:21px}.ba-sentinel-final-cta{padding:42px 0 60px}.ba-sentinel-final-cta__box{padding:28px 24px}}
+
+/* Approved hero visual */
+.ba-sentinel-hero__visual{position:relative;overflow:hidden;border:1px solid rgba(7,152,168,.14);border-radius:30px;background:#eaf7f8;box-shadow:0 24px 60px rgba(7,26,56,.13);transform:rotate(.7deg)}
+.ba-sentinel-hero__visual::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.55);pointer-events:none}
+.ba-sentinel-hero__visual img{display:block;width:100%;height:auto;aspect-ratio:1672/941;object-fit:cover}
+@media(max-width:900px){.ba-sentinel-hero__visual{max-width:720px;margin:8px auto 0;transform:none}}
+@media(max-width:600px){.ba-sentinel-hero__visual{border-radius:20px}.ba-sentinel-hero__visual img{aspect-ratio:4/3;object-position:center;object-fit:cover}}
