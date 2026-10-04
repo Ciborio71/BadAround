@@ -88,6 +88,20 @@ class BadAround_Sentinel_Repository {
 		return $this->find_by_id( (int) $wpdb->insert_id );
 	}
 
+	public function mark_notified( $id ) {
+		global $wpdb;
+		return false !== $wpdb->update(
+			$this->table(),
+			array(
+				'last_notification_at' => current_time( 'mysql', true ),
+				'updated_at'           => current_time( 'mysql', true ),
+			),
+			array( 'id' => absint( $id ) ),
+			array( '%s', '%s' ),
+			array( '%d' )
+		);
+	}
+
 	public function refresh_verification( $id, $token_hash, $expires_at ) {
 		global $wpdb;
 
