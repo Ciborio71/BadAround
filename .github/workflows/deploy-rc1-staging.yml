@@ -1,5 +1,5 @@
 name: Deploy RC1 to staging
-# RC1 D2 deploy marker schema-fix
+# RC1 D2 deploy marker qa-route
 
 on:
   push:
