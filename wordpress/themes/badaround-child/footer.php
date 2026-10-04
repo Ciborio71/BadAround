@@ -23,9 +23,8 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 				<div>
 					<h2>Esplora</h2>
 					<a href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Mappa</a>
-					<a href="<?php echo esc_url( home_url( '/#segnalazioni' ) ); ?>">Segnalazioni</a>
-					<a href="<?php echo esc_url( home_url( '/#come-funziona' ) ); ?>">Come funziona</a>
-					<a href="<?php echo esc_url( home_url( '/area-personale/' ) ); ?>">Area personale</a>
+					<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Segnalazioni</a>
+					<a href="<?php echo esc_url( home_url( '/come-funziona/' ) ); ?>">Come funziona</a>
 				</div>
 				<div>
 					<h2>Community</h2>
