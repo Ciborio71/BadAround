@@ -70,6 +70,10 @@ $event_when = trim( $event_date . ( $event_time ? ' · ' . $event_time : '' ) );
 $content_text = trim( wp_strip_all_tags( get_post_field( 'post_content', $post_id ) ) );
 $has_content  = '' !== $content_text;
 $has_thumb    = has_post_thumbnail( $post_id );
+$detail_image = function_exists( 'badaround_child_event_image_url' ) ? badaround_child_event_image_url( $post_id, 'detail' ) : ( $has_thumb ? get_the_post_thumbnail_url( $post_id, 'large' ) : '' );
+$public_lat   = get_post_meta( $post_id, '_ba_public_lat', true );
+$public_lng   = get_post_meta( $post_id, '_ba_public_lng', true );
+$public_radius = get_post_meta( $post_id, '_ba_public_radius_m', true );
 
 $public_specific = array();
 $vehicle_make    = sanitize_text_field( (string) get_post_meta( $post_id, '_ba_vehicle_make', true ) );
@@ -156,17 +160,9 @@ if ( $status ) {
 	<section class="ba-event-body">
 		<div class="ba-container ba-event-layout">
 			<div class="ba-event-main">
-				<?php if ( $has_thumb ) : ?>
+				<?php if ( $detail_image ) : ?>
 					<figure class="ba-event-media">
-						<?php
-						the_post_thumbnail(
-							'large',
-							array(
-								'loading' => 'eager',
-								'alt'     => $title,
-							)
-						);
-						?>
+						<img src="<?php echo esc_url( $detail_image ); ?>" alt="<?php echo esc_attr( $has_thumb ? $title : 'BadAround — immagine segnalazione non disponibile' ); ?>" loading="eager" decoding="async">
 					</figure>
 				<?php endif; ?>
 
@@ -198,6 +194,10 @@ if ( $status ) {
 									</li>
 								<?php endforeach; ?>
 							</ol>
+						<?php endif; ?>
+
+						<?php if ( is_numeric( $public_lat ) && is_numeric( $public_lng ) ) : ?>
+							<div class="ba-event-location-map" id="ba-event-google-map" data-ba-map data-ba-map-context="detail" data-ba-event-lat="<?php echo esc_attr( $public_lat ); ?>" data-ba-event-lng="<?php echo esc_attr( $public_lng ); ?>" data-ba-event-radius="<?php echo esc_attr( $public_radius ); ?>" data-ba-event-id="<?php echo esc_attr( $post_id ); ?>" aria-label="Mappa della posizione pubblica approssimata"></div>
 						<?php endif; ?>
 
 						<?php if ( $public_location ) : ?>
