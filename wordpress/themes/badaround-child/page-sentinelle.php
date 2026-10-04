@@ -64,11 +64,14 @@ function badaround_sentinel_territory_label( WP_Term $term ) {
 		<div class="ba-container">
 			<div class="ba-sentinel-hero__grid">
 				<div class="ba-sentinel-hero__copy">
-					<span class="ba-eyebrow">Sentinelle BadAround</span>
-					<h1>Segui le zone che ti interessano.</h1>
-					<p>Ricevi un'email quando BadAround pubblica nuove segnalazioni coerenti con il territorio e l'interesse che hai scelto. Non serve creare un account.</p>
+					<span class="ba-eyebrow">Sentinelle BadAround · gratuite</span>
+					<h1>Quello che succede vicino a te,<br><em>senza doverlo cercare.</em></h1>
+					<p>Attiva una Sentinella sulla zona che ti interessa. Quando BadAround pubblica una segnalazione compatibile, ricevi un avviso via email.</p>
+					<div class="ba-sentinel-trust" aria-label="Vantaggi della Sentinella">
+						<span>✓ Nessun account</span><span>✓ Identità non pubblica</span><span>✓ Disattivabile quando vuoi</span>
+					</div>
 					<div class="ba-sentinel-hero__actions">
-						<a class="ba-button" href="#attiva-sentinella">Crea una Sentinella</a>
+						<a class="ba-button" href="#attiva-sentinella">Attiva gratis la tua Sentinella</a>
 						<a class="ba-button ba-button--outline" href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Esplora la mappa</a>
 					</div>
 				</div>
@@ -133,19 +136,19 @@ function badaround_sentinel_territory_label( WP_Term $term ) {
 		<div class="ba-container">
 			<div class="ba-sentinel-benefits__grid">
 				<article class="ba-card ba-sentinel-benefit">
-					<span class="ba-sentinel-benefit__icon" aria-hidden="true">◎</span>
-					<h2>Scegli un territorio</h2>
-					<p>Comune, località, frazione o quartiere già presenti nel modello territoriale BadAround.</p>
+					<span class="ba-sentinel-benefit__icon" aria-hidden="true">⌖</span>
+					<h2>La tua zona, sotto osservazione</h2>
+					<p>Scegli il territorio che conta per te: dal comune fino alla località o al quartiere.</p>
 				</article>
 				<article class="ba-card ba-sentinel-benefit">
-					<span class="ba-sentinel-benefit__icon" aria-hidden="true">≋</span>
-					<h2>Definisci l'interesse</h2>
-					<p>Categoria e, se vuoi, una tipologia più specifica del Discovery Contract.</p>
+					<span class="ba-sentinel-benefit__icon" aria-hidden="true">◉</span>
+					<h2>Solo ciò che ti interessa</h2>
+					<p>Segui tutto oppure concentrati su veicoli, animali, pericoli e le altre categorie BadAround.</p>
 				</article>
 				<article class="ba-card ba-sentinel-benefit">
-					<span class="ba-sentinel-benefit__icon" aria-hidden="true">✓</span>
-					<h2>Verifica l'email</h2>
-					<p>La Sentinella resta inattiva finché non confermi il link inviato all'indirizzo indicato. La tua identità non viene resa pubblica.</p>
+					<span class="ba-sentinel-benefit__icon" aria-hidden="true">✉</span>
+					<h2>Ti avvisiamo noi</h2>
+					<p>Conferma l'email una sola volta. Quando c'è una nuova segnalazione compatibile, BadAround può avvisarti.</p>
 				</article>
 			</div>
 		</div>
@@ -155,21 +158,22 @@ function badaround_sentinel_territory_label( WP_Term $term ) {
 		<div class="ba-container ba-sentinel-builder__grid">
 			<div class="ba-sentinel-builder__intro">
 				<span class="ba-eyebrow">Crea una Sentinella</span>
-				<h2>Definisci cosa vuoi seguire</h2>
-				<p>I criteri utilizzano gli stessi identificatori canonici di territorio, categoria e tipologia già usati da Ricerca, Mappa e Filtri.</p>
+				<h2>La tua Sentinella in meno di un minuto.</h2>
+				<p>Scegli una zona, indica cosa vuoi tenere d'occhio e inserisci la tua email. Nessun profilo pubblico da creare.</p>
+				<div class="ba-sentinel-builder__promise"><strong>È gratis.</strong> Tre scelte e hai finito.</div>
 
 				<div class="ba-sentinel-preview ba-card">
 					<div class="ba-sentinel-preview__head">
 						<div class="ba-sentinel-preview__icon">◎</div>
 						<div>
-							<span>Anteprima</span>
+							<span>La tua Sentinella</span>
 							<strong data-ba-sentinel-preview-area>Seleziona un territorio</strong>
 						</div>
 					</div>
 					<div class="ba-sentinel-preview__meta">
 						<span><strong data-ba-sentinel-preview-category>Tutte le categorie</strong><small>Categoria</small></span>
 						<span><strong data-ba-sentinel-preview-event-type>Tutte le tipologie</strong><small>Tipologia</small></span>
-						<span><strong>Immediata</strong><small>Modalità MVP</small></span>
+						<span><strong>Via email</strong><small>Notifica</small></span>
 					</div>
 				</div>
 			</div>
@@ -180,7 +184,7 @@ function badaround_sentinel_territory_label( WP_Term $term ) {
 						<span>1</span>
 						<div>
 							<h3>Quale territorio vuoi seguire?</h3>
-							<p>La Sentinella usa la gerarchia territoriale canonica di BadAround.</p>
+							<p>Dove vuoi che BadAround tenga gli occhi aperti per te?</p>
 						</div>
 					</div>
 					<label class="ba-sentinel-field">
@@ -201,7 +205,7 @@ function badaround_sentinel_territory_label( WP_Term $term ) {
 						<span>2</span>
 						<div>
 							<h3>Quali eventi ti interessano?</h3>
-							<p>Puoi seguire tutti gli eventi della zona oppure restringere a una categoria e a una tipologia.</p>
+							<p>Scegli tutto oppure filtra le segnalazioni che per te contano di più.</p>
 						</div>
 					</div>
 					<div class="ba-sentinel-fields-grid">
@@ -234,8 +238,8 @@ function badaround_sentinel_territory_label( WP_Term $term ) {
 					<div class="ba-sentinel-form__step-head">
 						<span>3</span>
 						<div>
-							<h3>Dove dobbiamo inviare la verifica?</h3>
-							<p>Non serve un account. La Sentinella sarà attiva solo dopo la conferma dell'indirizzo email.</p>
+							<h3>Dove vuoi ricevere gli avvisi?</h3>
+							<p>Nessun account: ti inviamo solo il link per confermare e attivare la Sentinella.</p>
 						</div>
 					</div>
 					<label class="ba-sentinel-field">
@@ -246,7 +250,7 @@ function badaround_sentinel_territory_label( WP_Term $term ) {
 
 				<div class="ba-sentinel-form__footer">
 					<p>Dopo la verifica, BadAround può inviarti una notifica quando viene pubblicato un evento compatibile. Puoi disattivare in qualsiasi momento quella Sentinella dal link presente nelle comunicazioni.</p>
-					<button class="ba-button" type="submit" data-ba-sentinel-submit>Crea Sentinella</button>
+					<button class="ba-button" type="submit" data-ba-sentinel-submit>Attiva gratis la Sentinella</button>
 				</div>
 				<div class="ba-sentinel-form__message" data-ba-sentinel-message role="status" aria-live="polite" hidden></div>
 			</form>
