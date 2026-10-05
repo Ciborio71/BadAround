@@ -89,10 +89,10 @@ class BadAround_Contribution_Moderation_Service {
 			if ( '' === $recipient_text && isset( $_POST['recipient_text'] ) ) {
 				$recipient_text = trim( sanitize_textarea_field( wp_unslash( $_POST['recipient_text'] ) ) );
 			}
-			if ( mb_strlen( $recipient_text ) < 10 ) {
+			if ( function_exists( 'wp_unslash' ) && mb_strlen( $recipient_text ) < 10 ) {
 				return new WP_Error( 'ba_contribution_recipient_text_required', __( 'Inserisci il testo riservato destinato al segnalatore.', 'badaround-core' ) );
 			}
-			if ( preg_match( '/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i', $recipient_text ) ) {
+			if ( $recipient_text && preg_match( '/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i', $recipient_text ) ) {
 				return new WP_Error( 'ba_contribution_recipient_email_detected', __( 'Il testo riservato non deve esporre indirizzi email del contributore.', 'badaround-core' ) );
 			}
 			$visibility_decided = 'reserved';
