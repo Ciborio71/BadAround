@@ -240,41 +240,62 @@
 	box-shadow:inset 0 0 0 4px #fff;
 }
 
-/* Relationship */
+/* Relationship — same visual language as event choices */
 .ba-report-mount .ba-relationship-field{
-	margin:22px 0 0!important;
-	padding:20px 0 0!important;
+	margin:24px 0 0!important;
+	padding:22px 0 0!important;
 	border-top:1px solid #e4ebf1!important;
 }
 .ba-report-mount .ba-relationship-field ul{
 	display:grid!important;
-	grid-template-columns:repeat(3,minmax(0,1fr))!important;
-	gap:9px!important;
+	grid-template-columns:repeat(2,minmax(0,1fr))!important;
+	gap:10px!important;
 	margin:0!important;
 	padding:0!important;
 	list-style:none!important;
 }
-.ba-report-mount .ba-relationship-field li{position:relative;margin:0!important}
-.ba-report-mount .ba-relationship-field input[type="radio"]{position:absolute!important;opacity:0!important;width:1px!important;height:1px!important}
+.ba-report-mount .ba-relationship-field li{position:relative;margin:0!important;min-width:0}
+.ba-report-mount .ba-relationship-field input[type="radio"]{
+	position:absolute!important;
+	width:1px!important;
+	height:1px!important;
+	opacity:0!important;
+}
 .ba-report-mount .ba-relationship-field .wpforms-field-label-inline{
-	display:flex!important;
+	position:relative;
+	display:grid!important;
+	grid-template-columns:38px 1fr 22px;
 	align-items:center!important;
-	justify-content:center!important;
-	min-height:48px!important;
-	padding:9px 12px!important;
+	gap:11px;
+	width:100%!important;
+	min-height:72px!important;
+	padding:12px 13px!important;
 	border:1px solid #dce5ed!important;
-	border-radius:12px!important;
+	border-radius:13px!important;
 	background:#fff!important;
-	color:#526a80!important;
-	font-size:.77rem!important;
-	font-weight:750!important;
-	text-align:center!important;
+	color:#304b63!important;
+	font-size:.84rem!important;
+	font-weight:720!important;
+	line-height:1.25!important;
+	text-align:left!important;
+	box-shadow:none!important;
 	cursor:pointer;
+	transition:border-color .15s ease,background-color .15s ease,box-shadow .15s ease!important;
+}
+.ba-report-mount .ba-relationship-field .wpforms-field-label-inline:hover{
+	border-color:#9ccfd4!important;
+	background:#fbfefe!important;
 }
 .ba-report-mount .ba-relationship-field input:checked+.wpforms-field-label-inline{
 	border-color:var(--ba-report-teal)!important;
 	background:#effafa!important;
-	color:#12646d!important;
+	color:#135f67!important;
+	box-shadow:0 0 0 3px rgba(7,152,168,.07)!important;
+}
+.ba-report-mount .ba-relationship-field input:checked+.wpforms-field-label-inline .ba-drilldown-radio{
+	border-color:var(--ba-report-teal);
+	background:var(--ba-report-teal);
+	box-shadow:inset 0 0 0 4px #fff;
 }
 
 /* Standard radio / checkbox lists */
