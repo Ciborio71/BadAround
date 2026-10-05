@@ -491,12 +491,50 @@
 	}
 }
 
-/* Location */
-.ba-report-mount .wpforms-page-2{display:flex;flex-direction:column}
+/* Location + step 2 layout */
+.ba-report-mount .wpforms-page-2{
+	display:grid;
+	grid-template-columns:minmax(180px,.75fr) minmax(420px,2fr) minmax(180px,.75fr);
+	column-gap:16px;
+	align-items:start;
+}
+.ba-report-mount .wpforms-page-2>.wpforms-field,
+.ba-report-mount .wpforms-page-2>.wpforms-field-pagebreak{
+	grid-column:1 / -1;
+}
 .ba-report-mount .wpforms-page-2 .ba-location-first{order:-50}
 .ba-report-mount .wpforms-page-2 .ba-location-secondary{order:-30}
 .ba-report-mount .wpforms-page-2 .ba-danger-field{order:-10}
+.ba-report-mount #wpforms-6-field_17-container{
+	grid-column:1;
+	width:100%;
+}
+.ba-report-mount #wpforms-6-field_18-container{
+	grid-column:2;
+	width:100%;
+}
+.ba-report-mount #wpforms-6-field_19-container{
+	grid-column:3;
+	width:100%;
+}
+.ba-report-mount #wpforms-6-field_17-container input,
+.ba-report-mount #wpforms-6-field_19-container input{
+	width:100%!important;
+	max-width:none!important;
+}
+.ba-report-mount #wpforms-6-field_18-container ul{
+	grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+.ba-report-mount #wpforms-6-field_18-container .wpforms-field-label-inline{
+	min-height:52px!important;
+	padding-inline:10px 30px!important;
+	font-size:.76rem!important;
+}
+.ba-report-mount .ba-progressive-hidden{
+	display:none!important;
+}
 .ba-report-mount .ba-location-first{
+	width:100%!important;
 	margin:0 0 18px!important;
 	padding:18px!important;
 	border:1px solid #dce7ee!important;
@@ -505,6 +543,8 @@
 }
 .ba-report-mount .ba-location-first .wpforms-geolocation-map,
 .ba-report-mount .ba-location-first [class*="wpforms-geolocation-map"]{
+	width:100%!important;
+	max-width:none!important;
 	min-height:430px!important;
 	overflow:hidden!important;
 	border:1px solid #d8e3eb!important;
@@ -611,6 +651,18 @@
 	.ba-report-mount .ba-drilldown-field{margin-top:18px!important;padding-top:18px!important}
 	.ba-report-mount .ba-drilldown-field ul{grid-template-columns:1fr!important}
 	.ba-report-mount .ba-relationship-field ul{grid-template-columns:1fr!important}
+	.ba-report-mount .wpforms-page-2{
+		grid-template-columns:1fr!important;
+		column-gap:0!important;
+	}
+	.ba-report-mount #wpforms-6-field_17-container,
+	.ba-report-mount #wpforms-6-field_18-container,
+	.ba-report-mount #wpforms-6-field_19-container{
+		grid-column:1!important;
+	}
+	.ba-report-mount #wpforms-6-field_18-container ul{
+		grid-template-columns:1fr!important;
+	}
 	.ba-report-mount .ba-location-first{padding:12px!important}
 	.ba-report-mount .ba-location-first .wpforms-geolocation-map,
 	.ba-report-mount .ba-location-first [class*="wpforms-geolocation-map"]{min-height:320px!important}
