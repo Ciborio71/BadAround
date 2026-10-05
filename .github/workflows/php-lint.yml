@@ -59,7 +59,7 @@ jobs:
 
       - name: Test E4 Reporter Notification
         run: |
-          grep -q "SCHEMA_VERSION = '1.7.0'" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
+          grep -q "SCHEMA_VERSION = '1.8.0'" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
           grep -q "ba_contribution_notifications" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
           grep -q "recipient_text longtext" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
           grep -q "badaround_contribution_notify_reporter" ./wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-service.php
