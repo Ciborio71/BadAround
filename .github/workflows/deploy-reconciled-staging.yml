@@ -1,5 +1,5 @@
 name: Deploy reconciled to staging
-# manual trigger marker: e5-admin-link-fix
+# manual trigger marker: e2-moderation-controls-1.8
 
 on:
   push:
@@ -42,14 +42,10 @@ jobs:
       - name: E2
         run: php ./tests/contributions-e2.php
       - name: E3
-        run: |
-          cp ./tests/contributions-e3.php ./tests/contributions-e3-ci.php
-          sed -i "/schema version advanced for E3/c\\e3_assert( true, 'schema version advanced for E3' );" ./tests/contributions-e3-ci.php
-          php ./tests/contributions-e3-ci.php
-          rm ./tests/contributions-e3-ci.php
+        run: php ./tests/contributions-e3.php
       - name: E4
         run: |
-          grep -q "SCHEMA_VERSION = '1.7.0'" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
+          grep -q "SCHEMA_VERSION = '1.8.0'" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
           grep -q "badaround_contribution_notify_reporter" ./wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-service.php
           grep -q "Testo riservato destinato al segnalatore" ./wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-admin.php
       - name: E5
