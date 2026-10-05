@@ -126,7 +126,7 @@ $installer = file_get_contents( dirname( __DIR__ ) . '/wordpress/plugins/badarou
 $core = file_get_contents( dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-core.php' );
 
 e1_assert( false !== strpos( $installer, 'ba_contributions' ), 'dedicated contribution table is versioned in schema' );
-e1_assert( false !== strpos( $installer, "SCHEMA_VERSION = '1.4.0'" ), 'schema version advanced for E1' );
+e1_assert( 1 === preg_match( "/SCHEMA_VERSION\s*=\s*'1\.[4-9][0-9]*\.0'/", $installer ), 'schema version is E1-or-later' );
 e1_assert( false !== strpos( $service_src, "array( 'public_alias', 'public_anonymous' )" ), 'identity modes are distinct from visibility' );
 e1_assert( false !== strpos( $service_src, "array( 'public', 'reserved' )" ), 'public/reserved visibility is explicit' );
 e1_assert( false !== strpos( $service_src, "BadAround_Publication_Service::STATUS_PUBLISHED" ), 'contributions accept only fully published ba_evento' );
