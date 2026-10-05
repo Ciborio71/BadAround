@@ -50,6 +50,11 @@ class BadAround_Contribution_Moderation_Service {
 			if ( 'reserved' === sanitize_key( $row['visibility_requested'] ) ) {
 				return new WP_Error( 'ba_contribution_reserved_cannot_publish', __( 'Un contributo richiesto come riservato non può essere pubblicato.', 'badaround-core' ) );
 			}
+			$media_repository = new BadAround_Contribution_Media_Repository();
+			if ( $media_repository->has_pending_review( $contribution_id ) ) {
+				return new WP_Error( 'ba_contribution_media_review_required', __( 'Prima di pubblicare devi approvare o rifiutare tutti i media del contributo.', 'badaround-core' ) );
+			}
+
 			$public_text = isset( $args['public_text'] ) ? trim( sanitize_textarea_field( $args['public_text'] ) ) : '';
 			if ( mb_strlen( $public_text ) < 10 ) {
 				return new WP_Error( 'ba_contribution_public_text_required', __( 'Inserisci un testo pubblico moderato.', 'badaround-core' ) );
@@ -61,6 +66,15 @@ class BadAround_Contribution_Moderation_Service {
 			$projection_id = $this->create_public_projection( $row, $public_text );
 			if ( is_wp_error( $projection_id ) ) {
 				return $projection_id;
+			}
+
+			$media_result = $media_repository->materialize_approved( $contribution_id, $projection_id );
+			if ( is_wp_error( $media_result ) ) {
+				wp_delete_post( $projection_id, true );
+				return $media_result;
+			}
+			if ( ! empty( $media_result ) ) {
+				update_post_meta( $projection_id, '_ba_public_media_ids', array_map( 'absint', $media_result ) );
 			}
 			$visibility_decided = 'public';
 		}
