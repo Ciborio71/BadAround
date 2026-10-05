@@ -150,7 +150,8 @@ $installer = file_get_contents( dirname( __DIR__ ) . '/wordpress/plugins/badarou
 e2_assert( false !== strpos( $post_type_src, "'publicly_queryable' => false" ), 'contribution projection is not directly publicly queryable' );
 e2_assert( false !== strpos( $post_type_src, "'show_in_rest' => false" ), 'contribution projection is not exposed through public REST' );
 e2_assert( false !== strpos( $service_src, 'validate_public_text' ), 'public projection passes privacy validation' );
-e2_assert( false !== strpos( $service_src, 'content_original' ) === false || true, 'source inspection complete' );
+$projection_segment = strstr( $service_src, 'private function create_public_projection' );
+e2_assert( false !== $projection_segment && false === strpos( $projection_segment, "['content_original']" ), 'public projection does not copy original private content automatically' );
 e2_assert( false !== strpos( $admin_src, 'Non copiare automaticamente dati riservati' ), 'moderation UI warns against copying private data' );
 e2_assert( false !== strpos( $admin_src, 'Testo pubblico moderato' ), 'publication requires explicit moderator-authored public text' );
 e2_assert( false !== strpos( $installer, 'ba_moderate_contributions' ) && false !== strpos( $installer, 'ba_view_private_contributions' ), 'E2 capabilities are versioned' );
