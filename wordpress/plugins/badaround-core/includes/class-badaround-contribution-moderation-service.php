@@ -139,7 +139,10 @@ class BadAround_Contribution_Moderation_Service {
 		if ( $projection_id ) {
 			BadAround_Audit_Log::record( 'contribution', $contribution_id, 'contribution_public_projection_created', 'contribution' );
 		}
-		if ( in_array( $target_status, array( BadAround_Contribution_Repository::STATUS_PUBLISHED, BadAround_Contribution_Repository::STATUS_RESERVED ), true ) ) {
+		if (
+			function_exists( 'wp_schedule_single_event' ) &&
+			in_array( $target_status, array( BadAround_Contribution_Repository::STATUS_PUBLISHED, BadAround_Contribution_Repository::STATUS_RESERVED ), true )
+		) {
 			$queued = $this->queue_reporter_notification( $contribution_id );
 			if ( is_wp_error( $queued ) ) {
 				BadAround_Audit_Log::record( 'contribution', $contribution_id, 'contribution_reporter_notification_queue_failed', 'contribution', $queued->get_error_code() );
