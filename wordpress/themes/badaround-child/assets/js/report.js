@@ -263,19 +263,27 @@
 			|| animalEvent.includes('smarrito il mio animale')
 			|| objectStatus.includes('smarrito l’oggetto');
 	};
+	const rewardStatus = field(65);
+	if (rewardStatus) {
+		rewardStatus.querySelectorAll('input[type="radio"]').forEach((radio) => {
+			radio.addEventListener('change',(event) => {
+				if (event.isTrusted) rewardStatus.dataset.baUserTouched = '1';
+			});
+		});
+	}
+
 	const syncRewardSection = () => {
 		const visible = rewardIsRelevant();
-		const rewardStatus = field(65);
 		const noReward = rewardStatus?.querySelector('input[type="radio"][value="No"]');
 
 		if (!visible && noReward && !noReward.checked) {
 			noReward.checked = true;
-			noReward.dataset.baAutoContextValue = '1';
+			if (rewardStatus) rewardStatus.dataset.baAutoNo = '1';
 			noReward.dispatchEvent(new Event('input',{bubbles:true}));
 			noReward.dispatchEvent(new Event('change',{bubbles:true}));
-		} else if (visible && noReward?.dataset.baAutoContextValue === '1') {
+		} else if (visible && noReward?.checked && rewardStatus?.dataset.baUserTouched !== '1') {
 			noReward.checked = false;
-			delete noReward.dataset.baAutoContextValue;
+			delete rewardStatus.dataset.baAutoNo;
 			noReward.dispatchEvent(new Event('input',{bubbles:true}));
 			noReward.dispatchEvent(new Event('change',{bubbles:true}));
 		}
