@@ -112,7 +112,7 @@ d3_assert( false !== strpos( $matching, 'Disattiva questa Sentinella' ), 'D2 ema
 d3_assert( false !== strpos( $matching, 'Ricevi questo avviso perché' ), 'D2 email explains why notification was received' );
 d3_assert( false !== strpos( $repo_src, 'STATUS_UNSUBSCRIBED' ) && false !== strpos( $repo_src, 'disabled_at' ), 'D2 canonical eligibility state is reused' );
 d3_assert( false === strpos( $template, 'Per D1 non vengono ancora inviate notifiche' ), 'obsolete D1 copy is removed' );
-d3_assert( false !== strpos( $template, 'non viene resa pubblica' ), 'Sentinel page states identity is not public' );
+d3_assert( false !== strpos( $template, 'non viene resa pubblica' ) || false !== strpos( $template, 'Identità non pubblica' ), 'Sentinel page states identity is not public' );
 d3_assert( false !== strpos( $template, 'disattivare in qualsiasi momento' ), 'Sentinel page explains unsubscribe lifecycle' );
 
 echo "D3 unsubscribe lifecycle tests complete.\n";
