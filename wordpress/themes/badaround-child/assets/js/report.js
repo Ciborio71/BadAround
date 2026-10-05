@@ -315,24 +315,86 @@
 	setTimeout(constrainEventDatePicker,250);
 	setTimeout(constrainEventDatePicker,1000);
 
+	const exactTimeField = field(19);
+	const exactTimeInput = exactTimeField?.querySelector('input');
+	const timeFromField = field(20);
+	const timeToField = field(22);
+	const timeFromNowInput = timeFromField?.querySelector('input');
+	const timeToNowInput = timeToField?.querySelector('input');
+
+	const isEventDateToday = () => {
+		const parsed = parseItalianDate(eventDateInput?.value);
+		if (!parsed) return false;
+		return parsed.getTime() === todayLocal().getTime();
+	};
+
+	const currentMinutes = () => {
+		const now = new Date();
+		return (now.getHours() * 60) + now.getMinutes();
+	};
+
+	const validateNotFutureTime = (container,input,{focus=false}={}) => {
+		if (!container || !input || getComputedStyle(container).display === 'none') {
+			container?.classList.remove('ba-future-time-invalid');
+			container?.querySelector('.ba-future-time-error')?.remove();
+			input?.removeAttribute('aria-invalid');
+			return true;
+		}
+		const valueMinutes = minutesFromTime(input.value);
+		const invalid = isEventDateToday() && valueMinutes !== null && valueMinutes > currentMinutes();
+
+		container.classList.toggle('ba-future-time-invalid',invalid);
+		input.setAttribute('aria-invalid',invalid ? 'true' : 'false');
+		let error = container.querySelector('.ba-future-time-error');
+		if (invalid && !error) {
+			error = document.createElement('div');
+			error.className = 'ba-future-time-error';
+			error.setAttribute('role','alert');
+			error.textContent = 'Per la data odierna non puoi indicare un orario successivo all’ora attuale.';
+			container.append(error);
+		} else if (!invalid && error) {
+			error.remove();
+		}
+		if (invalid && focus) {
+			input.focus({preventScroll:true});
+			container.scrollIntoView({behavior:'smooth',block:'center'});
+		}
+		return !invalid;
+	};
+
+	const validateEventTimesAgainstNow = ({focus=false}={}) => {
+		const checks = [
+			[exactTimeField,exactTimeInput],
+			[timeFromField,timeFromNowInput],
+			[timeToField,timeToNowInput]
+		];
+		for (const [container,input] of checks) {
+			if (!validateNotFutureTime(container,input,{focus})) return false;
+		}
+		return true;
+	};
+
+	['input','change','blur'].forEach((eventName) => {
+		exactTimeInput?.addEventListener(eventName,() => validateEventTimesAgainstNow());
+		timeFromNowInput?.addEventListener(eventName,() => validateEventTimesAgainstNow());
+		timeToNowInput?.addEventListener(eventName,() => validateEventTimesAgainstNow());
+		eventDateInput?.addEventListener(eventName,() => validateEventTimesAgainstNow());
+	});
+
 	/* Step 4 hygiene:
 	 * - no accidental preselection on a fresh first visit;
 	 * - preserve answers when navigating back/forward or resuming a saved draft;
 	 * - hide damage question for a stolen vehicle, where damage cannot be verified. */
-	const step4NeutralFields = [56,59,60,64].map(field).filter(Boolean);
+	const neutralRadioFields = [42,56,59,60,64,65].map(field).filter(Boolean);
 	const damageField = field(56);
 	const stolenVehicleRadio = field(3)?.querySelector('input[type="radio"][value="Veicolo rubato"]');
 	const resumeSession = /resume/i.test(window.location.search) || !!root.querySelector('[name*="resume"],[data-resume]');
-	const step4InitiallyVisible = (() => {
-		const page4 = root.querySelector('.wpforms-page-4');
-		return !!page4 && getComputedStyle(page4).display !== 'none';
-	})();
-	let step4FreshResetDone = resumeSession || step4InitiallyVisible;
+	let neutralDefaultsSanitized = resumeSession;
 
-	const clearAccidentalStep4Selections = () => {
-		if (step4FreshResetDone || resumeSession) return;
-		step4FreshResetDone = true;
-		step4NeutralFields.forEach((container) => {
+	const sanitizeNeutralRadioDefaults = () => {
+		if (neutralDefaultsSanitized || resumeSession) return;
+		neutralDefaultsSanitized = true;
+		neutralRadioFields.forEach((container) => {
 			container.querySelectorAll('input[type="radio"]:checked').forEach((input) => {
 				input.checked = false;
 				input.dispatchEvent(new Event('input',{bubbles:true}));
@@ -340,6 +402,7 @@
 			});
 		});
 	};
+	sanitizeNeutralRadioDefaults();
 
 	const syncDamageQuestion = () => {
 		if (!damageField) return;
@@ -550,7 +613,6 @@
 		root.classList.toggle('is-final-step', step === 5);
 		for (let i = 1; i <= 5; i++) root.classList.toggle('is-step-' + i, i === step);
 		if (step === 4) {
-			clearAccidentalStep4Selections();
 			syncDamageQuestion();
 		}
 
@@ -576,6 +638,7 @@
 		syncExactDateFlow();
 		validateEventDate();
 		constrainEventDatePicker();
+		validateEventTimesAgainstNow();
 		validateTimeRange();
 		syncDamageQuestion();
 		syncRelationship();
@@ -587,7 +650,7 @@
 		const navigationButton = event.target.closest('.wpforms-page-next,.wpforms-page-prev');
 		if (!navigationButton) return;
 		if (navigationButton.classList.contains('wpforms-page-next') && activePageIndex() === 1) {
-			if (!validateEventDate({focus:true}) || !validateTimeRange({focus:true})) {
+			if (!validateEventDate({focus:true}) || !validateEventTimesAgainstNow({focus:true}) || !validateTimeRange({focus:true})) {
 				event.preventDefault();
 				event.stopImmediatePropagation();
 				return;
