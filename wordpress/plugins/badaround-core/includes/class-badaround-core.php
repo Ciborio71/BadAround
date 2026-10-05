@@ -24,6 +24,15 @@ class BadAround_Core {
 		$sentinel_matching = new BadAround_Sentinel_Matching_Service();
 		$sentinel_matching->register_hooks();
 
+		$contributions = new BadAround_Contribution_Service();
+		$contributions->register_hooks();
+
+		$contribution_projection = new BadAround_Contribution_Post_Type();
+		$contribution_projection->register_hooks();
+
+		$contribution_moderation = new BadAround_Contribution_Moderation_Admin();
+		$contribution_moderation->register_hooks();
+
 		$wpforms_event_intake = new BadAround_WPForms_Event_Intake();
 		$wpforms_event_intake->register_hooks();
 
