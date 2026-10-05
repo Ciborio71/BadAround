@@ -57,6 +57,7 @@ class BadAround_Contribution_Repository {
 	const STATUS_PENDING_VERIFICATION = 'pending_verification';
 	const STATUS_TO_REVIEW = 'to_review';
 	const STATUS_IN_REVIEW = 'in_review';
+	const STATUS_ON_HOLD = 'on_hold';
 	const STATUS_PUBLISHED = 'published';
 	const STATUS_RESERVED = 'reserved';
 	const STATUS_REJECTED = 'rejected';
@@ -81,6 +82,11 @@ class BadAround_Contribution_Repository {
 		);
 	}
 	public function find_by_id( $id ) { return (int) $id === (int) $this->row['id'] ? $this->row : null; }
+	public function save_moderated_draft( $id, $draft ) {
+		$this->row['moderated_draft'] = $draft;
+		return $this->row;
+	}
+	public function archive( $id, $reason = '' ) { return true; }
 	public function moderate( $id, $expected, $target, array $data ) {
 		if ( (int) $id !== (int) $this->row['id'] || $expected !== $this->row['status'] ) {
 			return new WP_Error( 'ba_contribution_moderation_update_failed' );
@@ -140,6 +146,16 @@ e2_assert( ! is_wp_error( $result ) && BadAround_Contribution_Repository::STATUS
 e2_assert( empty( $repository->row['public_projection_id'] ), 'reserved contribution creates no public projection' );
 
 $repository->row['status'] = BadAround_Contribution_Repository::STATUS_IN_REVIEW;
+$result = $service->transition( 91, BadAround_Contribution_Repository::STATUS_ON_HOLD );
+e2_assert( ! is_wp_error( $result ) && BadAround_Contribution_Repository::STATUS_ON_HOLD === $repository->row['status'], 'in_review can move to on_hold' );
+
+$result = $service->transition( 91, BadAround_Contribution_Repository::STATUS_IN_REVIEW );
+e2_assert( ! is_wp_error( $result ) && BadAround_Contribution_Repository::STATUS_IN_REVIEW === $repository->row['status'], 'on_hold can resume to in_review' );
+
+$result = $service->save_draft( 91, 'Bozza moderata persistente.' );
+e2_assert( ! is_wp_error( $result ) && 'Bozza moderata persistente.' === $repository->row['moderated_draft'], 'moderated draft can be saved separately from original content' );
+
+$repository->row['status'] = BadAround_Contribution_Repository::STATUS_IN_REVIEW;
 $result = $service->transition( 91, BadAround_Contribution_Repository::STATUS_REJECTED );
 e2_assert( is_wp_error( $result ) && 'ba_contribution_reason_required' === $result->get_error_code(), 'rejection requires internal reason' );
 
@@ -158,6 +174,10 @@ $projection_segment = strstr( $service_src, 'private function create_public_proj
 e2_assert( false !== $projection_segment && false === strpos( $projection_segment, "['content_original']" ), 'public projection does not copy original private content automatically' );
 e2_assert( false !== strpos( $admin_src, 'Non copiare automaticamente dati riservati' ), 'moderation UI warns against copying private data' );
 e2_assert( false !== strpos( $admin_src, 'Testo pubblico moderato' ), 'publication requires explicit moderator-authored public text' );
+e2_assert( false !== strpos( $admin_src, 'Bozza moderata' ), 'moderation UI exposes a separate editable draft' );
+e2_assert( false !== strpos( $admin_src, 'Metti in stand-by' ) && false !== strpos( $admin_src, 'Riprendi revisione' ), 'moderation UI exposes hold and resume actions' );
+e2_assert( false !== strpos( $admin_src, 'Archivia contributo' ), 'moderation UI exposes soft archive action' );
+e2_assert( false !== strpos( $installer, 'moderated_draft longtext' ), 'moderated draft has dedicated schema field' );
 e2_assert( false !== strpos( $installer, 'ba_moderate_contributions' ) && false !== strpos( $installer, 'ba_view_private_contributions' ), 'E2 capabilities are versioned' );
 e2_assert( 1 === preg_match( "/SCHEMA_VERSION\s*=\s*'1\.[5-9][0-9]*\.0'/", $installer ), 'schema/capability version is E2-or-later' );
 
