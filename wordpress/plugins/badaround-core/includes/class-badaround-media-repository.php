@@ -124,6 +124,36 @@ class BadAround_Media_Repository {
 		return true;
 	}
 
+	public function approve_received_images_for_event( $event_id ) {
+		global $wpdb;
+
+		$event_id = absint( $event_id );
+		if ( ! $event_id ) {
+			return new WP_Error( 'ba_public_media_invalid', __( 'Evento non valido.', 'badaround-core' ) );
+		}
+
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id FROM {$wpdb->prefix}ba_report_media
+				 WHERE event_id = %d
+				   AND deleted_at IS NULL
+				   AND media_type = 'image'
+				   AND review_status = 'received'
+				 ORDER BY id ASC",
+				$event_id
+			)
+		);
+
+		foreach ( $rows as $row ) {
+			$result = $this->approve_for_publication( (int) $row->id, $event_id );
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+		}
+
+		return true;
+	}
+
 	public function materialize_approved_public_media_for_event( $event_id ) {
 		global $wpdb;
 		$event_id = absint( $event_id );
