@@ -17,6 +17,8 @@ class BadAround_Contribution_Moderation_Admin {
 		add_action( 'admin_post_ba_moderate_contribution', array( $this, 'handle_action' ) );
 		add_action( 'admin_post_ba_contribution_media_review', array( $this, 'handle_media_action' ) );
 		add_action( 'admin_post_ba_contribution_private_media', array( $this, 'serve_private_media' ) );
+		add_action( 'admin_post_ba_contribution_save_draft', array( $this, 'handle_save_draft' ) );
+		add_action( 'admin_post_ba_contribution_archive', array( $this, 'handle_archive' ) );
 	}
 
 	public function register_menu() {
@@ -122,11 +124,18 @@ class BadAround_Contribution_Moderation_Admin {
 		if ( BadAround_Contribution_Repository::STATUS_TO_REVIEW === $row['status'] ) {
 			$this->render_action_form( $row, BadAround_Contribution_Repository::STATUS_IN_REVIEW, __( 'Prendi in carico', 'badaround-core' ), false );
 		} elseif ( BadAround_Contribution_Repository::STATUS_IN_REVIEW === $row['status'] ) {
+			$this->render_draft_form( $row );
 			if ( 'reserved' !== $row['visibility_requested'] ) {
 				$this->render_publish_form( $row );
 			}
 			$this->render_reserved_form( $row );
+			$this->render_action_form( $row, BadAround_Contribution_Repository::STATUS_ON_HOLD, __( 'Metti in stand-by', 'badaround-core' ), false );
 			$this->render_action_form( $row, BadAround_Contribution_Repository::STATUS_REJECTED, __( 'Rifiuta', 'badaround-core' ), true );
+			$this->render_archive_form( $row );
+		} elseif ( BadAround_Contribution_Repository::STATUS_ON_HOLD === $row['status'] ) {
+			$this->render_draft_form( $row );
+			$this->render_action_form( $row, BadAround_Contribution_Repository::STATUS_IN_REVIEW, __( 'Riprendi revisione', 'badaround-core' ), false );
+			$this->render_archive_form( $row );
 		} else {
 			echo '<p>' . esc_html__( 'Moderazione conclusa.', 'badaround-core' ) . '</p>';
 			if ( ! empty( $row['public_projection_id'] ) ) {
@@ -175,6 +184,28 @@ class BadAround_Contribution_Moderation_Admin {
 		}
 	}
 
+	private function render_draft_form( array $row ) {
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin:16px 0;padding:12px;border:1px solid #ccd0d4;background:#fff">';
+		wp_nonce_field( 'ba_contribution_save_draft_' . absint( $row['id'] ) );
+		echo '<input type="hidden" name="action" value="ba_contribution_save_draft">';
+		echo '<input type="hidden" name="contribution_id" value="' . absint( $row['id'] ) . '">';
+		echo '<p><label><strong>' . esc_html__( 'Bozza moderata', 'badaround-core' ) . '</strong><br>';
+		echo '<textarea class="widefat" rows="6" name="moderated_draft">' . esc_textarea( (string) ( $row['moderated_draft'] ?? '' ) ) . '</textarea></label></p>';
+		echo '<p class="description">' . esc_html__( 'Questa è una bozza editoriale separata dal contenuto originale. Puoi salvarla e riprenderla in seguito.', 'badaround-core' ) . '</p>';
+		submit_button( __( 'Salva bozza moderata', 'badaround-core' ), 'secondary', 'submit', false );
+		echo '</form>';
+	}
+
+	private function render_archive_form( array $row ) {
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin:16px 0;padding:12px;border:1px solid #dcdcde;background:#fff">';
+		wp_nonce_field( 'ba_contribution_archive_' . absint( $row['id'] ) );
+		echo '<input type="hidden" name="action" value="ba_contribution_archive">';
+		echo '<input type="hidden" name="contribution_id" value="' . absint( $row['id'] ) . '">';
+		echo '<p><textarea class="widefat" name="reason" rows="3" placeholder="' . esc_attr__( 'Motivazione archiviazione (facoltativa)', 'badaround-core' ) . '"></textarea></p>';
+		submit_button( __( 'Archivia contributo', 'badaround-core' ), 'delete', 'submit', false, array( 'onclick' => "return confirm('Archiviare questo contributo? Non verrà cancellato fisicamente.')" ) );
+		echo '</form>';
+	}
+
 	private function render_publish_form( array $row ) {
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin:16px 0;padding:12px;border:1px solid #ccd0d4;background:#fff">';
 		wp_nonce_field( 'ba_moderate_contribution_' . absint( $row['id'] ) );
@@ -182,7 +213,7 @@ class BadAround_Contribution_Moderation_Admin {
 		echo '<input type="hidden" name="contribution_id" value="' . absint( $row['id'] ) . '">';
 		echo '<input type="hidden" name="target_status" value="' . esc_attr( BadAround_Contribution_Repository::STATUS_PUBLISHED ) . '">';
 		echo '<p><label><strong>' . esc_html__( 'Testo pubblico moderato', 'badaround-core' ) . '</strong><br>';
-		echo '<textarea class="widefat" rows="6" name="public_text" required></textarea></label></p>';
+		echo '<textarea class="widefat" rows="6" name="public_text" required>' . esc_textarea( (string) ( $row['moderated_draft'] ?? '' ) ) . '</textarea></label></p>';
 		echo '<p class="description">' . esc_html__( 'Scrivi esplicitamente la versione pubblicabile. Il contenuto originale non viene copiato automaticamente.', 'badaround-core' ) . '</p>';
 		submit_button( __( 'Pubblica contributo', 'badaround-core' ), 'primary', 'submit', false );
 		echo '</form>';
@@ -212,6 +243,51 @@ class BadAround_Contribution_Moderation_Admin {
 		}
 		submit_button( $label, 'secondary', 'submit', false );
 		echo '</form>';
+	}
+
+	public function handle_save_draft() {
+		if ( ! current_user_can( 'ba_moderate_contributions' ) ) {
+			wp_die( esc_html__( 'Accesso non autorizzato.', 'badaround-core' ) );
+		}
+		$id = isset( $_POST['contribution_id'] ) ? absint( $_POST['contribution_id'] ) : 0;
+		check_admin_referer( 'ba_contribution_save_draft_' . $id );
+		$result = $this->service->save_draft(
+			$id,
+			isset( $_POST['moderated_draft'] ) ? wp_unslash( $_POST['moderated_draft'] ) : ''
+		);
+		$url = add_query_arg(
+			array(
+				'post_type' => BadAround_Event_Post_Type::POST_TYPE,
+				'page' => 'ba-contributions',
+				'contribution_id' => $id,
+				'ba_draft_result' => is_wp_error( $result ) ? $result->get_error_code() : 'ok',
+			),
+			admin_url( 'edit.php' )
+		);
+		wp_safe_redirect( $url );
+		exit;
+	}
+
+	public function handle_archive() {
+		if ( ! current_user_can( 'ba_moderate_contributions' ) ) {
+			wp_die( esc_html__( 'Accesso non autorizzato.', 'badaround-core' ) );
+		}
+		$id = isset( $_POST['contribution_id'] ) ? absint( $_POST['contribution_id'] ) : 0;
+		check_admin_referer( 'ba_contribution_archive_' . $id );
+		$result = $this->service->archive(
+			$id,
+			isset( $_POST['reason'] ) ? wp_unslash( $_POST['reason'] ) : ''
+		);
+		$url = add_query_arg(
+			array(
+				'post_type' => BadAround_Event_Post_Type::POST_TYPE,
+				'page' => 'ba-contributions',
+				'ba_archive_result' => is_wp_error( $result ) ? $result->get_error_code() : 'ok',
+			),
+			admin_url( 'edit.php' )
+		);
+		wp_safe_redirect( $url );
+		exit;
 	}
 
 	public function handle_media_action() {
