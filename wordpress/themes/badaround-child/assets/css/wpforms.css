@@ -330,6 +330,9 @@
 	margin:0!important;
 	float:none!important;
 }
+.ba-report-mount .wpforms-field-pagebreak .wpforms-page-button-group:has(.wpforms-page-next){
+	margin-left:auto!important;
+}
 .ba-report-mount .wpforms-page-next,
 .ba-report-mount button[type="submit"]{
 	min-width:190px!important;
@@ -361,21 +364,14 @@
 	font-weight:780!important;
 }
 .ba-report-mount .wpforms-save-resume-button{
-	margin-left:auto!important;
-	padding:8px 10px!important;
-	border:0!important;
-	background:transparent!important;
-	color:#6f8092!important;
-	font-size:.75rem!important;
-	font-weight:700!important;
-	text-decoration:none!important;
+	display:none!important;
 }
 
 .ba-report-mount .wpforms-submit-container{
 	position:sticky;
 	z-index:30;
 	bottom:0;
-	display:flex!important;
+	display:none!important;
 	justify-content:flex-end!important;
 	align-items:center!important;
 	margin:30px -58px -36px!important;
@@ -384,6 +380,7 @@
 	background:rgba(255,255,255,.96)!important;
 	backdrop-filter:blur(14px);
 }
+.ba-report-mount #wpforms-6.is-final-step .wpforms-submit-container{display:flex!important}
 .ba-report-mount .wpforms-submit-container button[type="submit"]{margin-left:auto!important}
 
 /* Location */
@@ -518,7 +515,7 @@
 	.ba-report-mount .wpforms-page-next,
 	.ba-report-mount button[type="submit"]{order:1;width:100%!important;min-width:0!important;margin-left:0!important}
 	.ba-report-mount .wpforms-page-prev{order:2;flex:1}
-	.ba-report-mount .wpforms-save-resume-button{order:3;margin-left:0!important;flex:1;text-align:right!important}
+
 }
 @media(prefers-reduced-motion:reduce){
 	.ba-report-mount *{transition:none!important}
