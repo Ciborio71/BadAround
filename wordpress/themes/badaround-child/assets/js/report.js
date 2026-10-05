@@ -65,6 +65,17 @@
 			label.dataset.baDesc = meta.desc;
 			label.dataset.baColor = meta.color;
 		});
+		const order = ['Veicoli','Case e attività','Pericoli','Spazi pubblici','Animali','Oggetti e documenti'];
+		const list = categoryField.querySelector('ul');
+		if (list) {
+			const items = [...list.children];
+			items.sort((a,b) => {
+				const aTitle = a.querySelector('.wpforms-field-label-inline')?.dataset.baTitle || '';
+				const bTitle = b.querySelector('.wpforms-field-label-inline')?.dataset.baTitle || '';
+				return order.indexOf(aTitle) - order.indexOf(bTitle);
+			});
+			items.forEach((item) => list.appendChild(item));
+		}
 	}
 
 	[3,4,5,6,7,8].forEach((id) => field(id)?.classList.add('ba-drilldown-field'));
@@ -253,6 +264,7 @@
 		});
 
 		syncContext(step);
+		root.classList.toggle('is-final-step', step === 5);
 
 		const visiblePage = root.querySelector('.wpforms-page:not([style*="display: none"])');
 		const next = visiblePage?.querySelector('.wpforms-page-next');
