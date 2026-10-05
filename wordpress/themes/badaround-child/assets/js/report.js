@@ -167,12 +167,12 @@
 		if (t.includes('elettronic')) return '▥';
 		if (t.includes('document')) return '▣';
 		if (t.includes('chiav')) return '⌘';
-		if (t.includes('testimon')) return '◉';
-		if (t.includes('coinvolt')) return '◎';
-		if (t.includes('sì') || t.startsWith('si ')) return '✓';
-		if (t.includes('no')) return '–';
-		if (t.includes('altro') || t.includes('non lo so') || t.includes('non sono')) return '…';
-		return choiceGlyph(text);
+		if (t.includes('testimon')) return '';
+		if (t.includes('coinvolt')) return '';
+		if (t.includes('sì') || t.startsWith('si ')) return '';
+		if (t.includes('no')) return '';
+		if (t.includes('altro') || t.includes('non lo so') || t.includes('non sono')) return '';
+		return '';
 	};
 
 	root.querySelectorAll('.wpforms-page-3 .wpforms-field-radio, .wpforms-page-3 .wpforms-field-checkbox, .wpforms-page-4 .wpforms-field-radio, .wpforms-page-4 .wpforms-field-checkbox, .wpforms-page-5 .wpforms-field-radio, .wpforms-page-5 .wpforms-field-checkbox').forEach((container) => {
@@ -183,10 +183,12 @@
 			const displayText = stripLeadingEmoji(label.textContent.trim());
 			label.textContent = '';
 
+			const iconValue = detailChoiceIcon(displayText);
 			const icon = document.createElement('span');
 			icon.className = 'ba-detail-choice-icon';
 			icon.setAttribute('aria-hidden','true');
-			icon.textContent = detailChoiceIcon(displayText);
+			icon.textContent = iconValue;
+			if (!iconValue) icon.hidden = true;
 
 			const text = document.createElement('span');
 			text.className = 'ba-detail-choice-text';
