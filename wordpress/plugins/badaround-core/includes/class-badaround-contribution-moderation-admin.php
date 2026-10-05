@@ -4,15 +4,19 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 class BadAround_Contribution_Moderation_Admin {
 	private $repository;
 	private $service;
+	private $media_repository;
 
 	public function __construct() {
 		$this->repository = new BadAround_Contribution_Repository();
 		$this->service = new BadAround_Contribution_Moderation_Service();
+		$this->media_repository = new BadAround_Contribution_Media_Repository();
 	}
 
 	public function register_hooks() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_post_ba_moderate_contribution', array( $this, 'handle_action' ) );
+		add_action( 'admin_post_ba_contribution_media_review', array( $this, 'handle_media_action' ) );
+		add_action( 'admin_post_ba_contribution_private_media', array( $this, 'serve_private_media' ) );
 	}
 
 	public function register_menu() {
@@ -107,6 +111,7 @@ class BadAround_Contribution_Moderation_Admin {
 			echo '<tr><th style="width:210px">' . esc_html( $label ) . '</th><td>' . nl2br( esc_html( (string) $value ) ) . '</td></tr>';
 		}
 		echo '</tbody></table>';
+		$this->render_media( $row );
 		echo '</div>';
 
 		echo '<aside>';
@@ -128,6 +133,45 @@ class BadAround_Contribution_Moderation_Admin {
 			}
 		}
 		echo '</aside></div>';
+	}
+
+	private function render_media( array $row ) {
+		if ( ! current_user_can( 'ba_view_private_contributions' ) ) {
+			return;
+		}
+		$media = $this->media_repository->list_for_contribution( $row['id'] );
+		echo '<h3 style="margin-top:24px">' . esc_html__( 'Media del contributo — ORIGINALI PRIVATI', 'badaround-core' ) . '</h3>';
+		if ( ! $media ) {
+			echo '<p>' . esc_html__( 'Nessun media allegato.', 'badaround-core' ) . '</p>';
+			return;
+		}
+		foreach ( $media as $item ) {
+			$view_url = wp_nonce_url(
+				admin_url( 'admin-post.php?action=ba_contribution_private_media&media_id=' . absint( $item['id'] ) ),
+				'ba_contribution_private_media_' . absint( $item['id'] )
+			);
+			echo '<div style="padding:12px;margin:10px 0;border:1px solid #ccd0d4;background:#fff">';
+			echo '<p><strong>' . esc_html( $item['original_filename'] ) . '</strong><br>';
+			echo esc_html( $item['mime_type'] . ' · ' . size_format( (int) $item['file_size'] ) . ' · ' . $item['review_status'] ) . '</p>';
+			echo '<p><a class="button" target="_blank" rel="noopener" href="' . esc_url( $view_url ) . '">' . esc_html__( 'Visualizza originale privato', 'badaround-core' ) . '</a></p>';
+
+			if ( BadAround_Contribution_Repository::STATUS_IN_REVIEW === $row['status'] && 'received' === $item['review_status'] ) {
+				foreach ( array( 'approve' => __( 'Approva derivato pubblico', 'badaround-core' ), 'reject' => __( 'Rifiuta media', 'badaround-core' ) ) as $decision => $label ) {
+					$url = wp_nonce_url(
+						admin_url(
+							'admin-post.php?action=ba_contribution_media_review&contribution_id=' . absint( $row['id'] ) .
+							'&media_id=' . absint( $item['id'] ) . '&decision=' . rawurlencode( $decision )
+						),
+						'ba_contribution_media_review_' . absint( $item['id'] )
+					);
+					echo '<a class="button button-secondary" style="margin-right:6px" href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a>';
+				}
+			}
+			if ( ! empty( $item['public_attachment_id'] ) ) {
+				echo '<p><small>' . esc_html__( 'Derivato pubblico:', 'badaround-core' ) . ' #' . absint( $item['public_attachment_id'] ) . '</small></p>';
+			}
+			echo '</div>';
+		}
 	}
 
 	private function render_publish_form( array $row ) {
@@ -154,6 +198,62 @@ class BadAround_Contribution_Moderation_Admin {
 		}
 		submit_button( $label, 'secondary', 'submit', false );
 		echo '</form>';
+	}
+
+	public function handle_media_action() {
+		if ( ! current_user_can( 'ba_moderate_contributions' ) || ! current_user_can( 'ba_view_private_contributions' ) ) {
+			wp_die( esc_html__( 'Accesso non autorizzato.', 'badaround-core' ), '', array( 'response' => 403 ) );
+		}
+		$contribution_id = isset( $_GET['contribution_id'] ) ? absint( $_GET['contribution_id'] ) : 0;
+		$media_id = isset( $_GET['media_id'] ) ? absint( $_GET['media_id'] ) : 0;
+		$decision = isset( $_GET['decision'] ) ? sanitize_key( wp_unslash( $_GET['decision'] ) ) : '';
+		check_admin_referer( 'ba_contribution_media_review_' . $media_id );
+
+		$row = $this->repository->find_by_id( $contribution_id );
+		if ( ! $row || BadAround_Contribution_Repository::STATUS_IN_REVIEW !== $row['status'] ) {
+			wp_die( esc_html__( 'Il contributo non è in revisione.', 'badaround-core' ), '', array( 'response' => 409 ) );
+		}
+
+		if ( 'approve' === $decision ) {
+			$result = $this->media_repository->approve( $media_id, $contribution_id );
+		} elseif ( 'reject' === $decision ) {
+			$result = $this->media_repository->reject( $media_id, $contribution_id );
+		} else {
+			$result = new WP_Error( 'ba_contribution_media_invalid_decision', __( 'Decisione non valida.', 'badaround-core' ) );
+		}
+
+		$url = add_query_arg(
+			array(
+				'post_type' => BadAround_Event_Post_Type::POST_TYPE,
+				'page' => 'ba-contributions',
+				'contribution_id' => $contribution_id,
+				'ba_media_result' => is_wp_error( $result ) ? $result->get_error_code() : 'ok',
+			),
+			admin_url( 'edit.php' )
+		);
+		wp_safe_redirect( $url );
+		exit;
+	}
+
+	public function serve_private_media() {
+		$media_id = isset( $_GET['media_id'] ) ? absint( $_GET['media_id'] ) : 0;
+		check_admin_referer( 'ba_contribution_private_media_' . $media_id );
+		if ( ! current_user_can( 'ba_view_private_contributions' ) ) {
+			wp_die( esc_html__( 'Accesso non autorizzato.', 'badaround-core' ), '', array( 'response' => 403 ) );
+		}
+		$file = $this->media_repository->private_file( $media_id );
+		if ( is_wp_error( $file ) ) {
+			wp_die( esc_html( $file->get_error_message() ), '', array( 'response' => 404 ) );
+		}
+		$row = $file['row'];
+		nocache_headers();
+		header( 'X-Content-Type-Options: nosniff' );
+		header( 'Content-Security-Policy: default-src \'none\'; img-src \'self\' data:' );
+		header( 'Content-Type: ' . sanitize_mime_type( $row['mime_type'] ) );
+		header( 'Content-Length: ' . (string) filesize( $file['path'] ) );
+		header( 'Content-Disposition: inline; filename="' . rawurlencode( $row['original_filename'] ) . '"' );
+		readfile( $file['path'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
+		exit;
 	}
 
 	public function handle_action() {
