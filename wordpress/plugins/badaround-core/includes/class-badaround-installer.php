@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Owns the versioned database schema for private and relational data. */
 class BadAround_Installer {
-	const SCHEMA_VERSION = '1.5.0';
+	const SCHEMA_VERSION = '1.6.0';
 	const OPTION_NAME    = 'ba_db_schema_version';
 
 	public function register_hooks() {
@@ -134,6 +134,7 @@ class BadAround_Installer {
 		$sentinels       = $wpdb->prefix . 'ba_sentinels';
 		$sentinel_matches = $wpdb->prefix . 'ba_sentinel_event_matches';
 		$contributions    = $wpdb->prefix . 'ba_contributions';
+		$contribution_media = $wpdb->prefix . 'ba_contribution_media';
 
 		$sql = "CREATE TABLE {$reports} (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -297,6 +298,33 @@ class BadAround_Installer {
 			KEY payload_duplicate (event_id,email_hash,payload_hash),
 			KEY verification_expiry (status,verification_expires_at),
 			KEY created_at (created_at)
+		) {$charset_collate};
+
+		CREATE TABLE {$contribution_media} (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			contribution_id bigint(20) unsigned NOT NULL,
+			event_id bigint(20) unsigned NOT NULL,
+			original_storage_key varchar(255) NOT NULL,
+			original_filename varchar(255) NOT NULL,
+			mime_type varchar(127) NOT NULL,
+			file_size bigint(20) unsigned NOT NULL DEFAULT 0,
+			checksum char(64) NOT NULL,
+			media_type varchar(32) NOT NULL DEFAULT 'image',
+			review_status varchar(32) NOT NULL DEFAULT 'received',
+			sensitivity varchar(32) NOT NULL DEFAULT 'private',
+			public_attachment_id bigint(20) unsigned DEFAULT NULL,
+			redaction_required tinyint(1) NOT NULL DEFAULT 0,
+			redaction_status varchar(32) DEFAULT NULL,
+			exif_removed tinyint(1) NOT NULL DEFAULT 0,
+			moderated_by bigint(20) unsigned DEFAULT NULL,
+			moderated_at datetime DEFAULT NULL,
+			created_at datetime NOT NULL,
+			deleted_at datetime DEFAULT NULL,
+			PRIMARY KEY  (id),
+			KEY contribution_status (contribution_id,review_status),
+			KEY event_status (event_id,review_status),
+			KEY public_attachment (public_attachment_id),
+			KEY checksum (checksum)
 		) {$charset_collate};
 
 		CREATE TABLE {$audit} (
