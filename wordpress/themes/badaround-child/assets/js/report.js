@@ -1,289 +1,299 @@
 (() => {
 	'use strict';
 
-	const form = document.querySelector('#wpforms-6');
-	if (!form) return;
+	const root = document.querySelector('#wpforms-6');
+	if (!root) return;
 
-	const field = (id) => form.querySelector('#wpforms-6-field_' + id + '-container') || form.querySelector('[id$="-field_' + id + '-container"]');
+	const form = root.querySelector('form') || root;
+	const field = (id) => root.querySelector('#wpforms-6-field_' + id + '-container') || root.querySelector('[id$="-field_' + id + '-container"]');
 
 	const categoryMeta = {
-		'veicoli': ['Veicoli','Auto, moto e mezzi','car'],
-		'veicolo o mobilità': ['Veicoli','Auto, moto e mezzi','car'],
-		'case e attività': ['Abitazioni','Case, negozi, uffici','home'],
-		'abitazioni e attività': ['Abitazioni','Case, negozi, uffici','home'],
-		'furti, effrazioni e sicurezza': ['Abitazioni e attività','Case, negozi, uffici e sicurezza','home'],
-		'sicurezza o comportamento sospetto': ['Abitazioni e attività','Case, negozi, uffici e sicurezza','home'],
-		'pericoli': ['Pericoli','Strade, ostacoli e rischi','warning'],
-		'pericolo territoriale': ['Pericoli','Strade, ostacoli e rischi','warning'],
-		'spazi pubblici': ['Spazi pubblici','Rifiuti, buche, luci','public'],
-		'degrado urbano': ['Spazi pubblici','Rifiuti, buche, luci','public'],
-		'problema o disservizio di quartiere': ['Spazi pubblici','Disservizi e problemi di quartiere','public'],
-		'animali': ['Animali','Smarriti, avvistati','animal'],
-		'animale': ['Animali','Smarriti, avvistati','animal'],
-		'oggetti e documenti': ['Oggetti e doc.','Portafogli, chiavi','object'],
-		'oggetto smarrito o ritrovato': ['Oggetti e doc.','Portafogli, chiavi','object'],
-		'altro': ['Altro','Situazioni non comprese sopra','more']
+		'veicoli': { title:'Veicoli', desc:'Auto, moto e altri mezzi', icon:'vehicle', color:'#1688e8' },
+		'case e attività': { title:'Case e attività', desc:'Abitazioni, negozi e uffici', icon:'property', color:'#9c3152' },
+		'pericoli': { title:'Pericoli', desc:'Rischi e situazioni pericolose', icon:'hazard', color:'#e36b21' },
+		'spazi pubblici': { title:'Spazi pubblici', desc:'Strade, aree pubbliche e decoro', icon:'public', color:'#087f8c' },
+		'animali': { title:'Animali', desc:'Smarrimenti e segnalazioni', icon:'animal', color:'#7e3db6' },
+		'oggetti e documenti': { title:'Oggetti e documenti', desc:'Oggetti smarriti o ritrovati', icon:'object', color:'#a26f14' }
 	};
 
 	const icons = {
-		car:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h16l-1.5-5h-13L4 13Zm1 0v5m14-5v5M7 18h10M7 8l1.2-3h7.6L17 8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
-		home:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-7 9 7M6 9v11h12V9M9 20v-6h6v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
-		warning:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 3 20h18L12 3Z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 9v5m0 3h.01" stroke="currentColor" stroke-width="1.8"/></svg>',
-		public:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9l8-5 8 5v11M2 20h20M8 13h8M9 17h6" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>',
+		vehicle:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 14h15l-1.8-5.2a2 2 0 0 0-1.9-1.3H8.2a2 2 0 0 0-1.9 1.3L4.5 14Z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 14v4m14-4v4M7.5 18h9M7.2 12h.01M16.8 12h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+		property:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-7 9 7M6 9.5V20h12V9.5M9 20v-6h6v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+		hazard:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 3.5 20h17L12 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 9v5m0 3h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+		public:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9l8-5 8 5v11M2 20h20M8 13h8M9 17h6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>',
 		animal:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12c-2 0-3.5 1.4-3.5 3.2C4.5 18 7.6 20 12 20s7.5-2 7.5-4.8C19.5 13.4 18 12 16 12m-8 0c.7-2.1 2.1-3.3 4-3.3s3.3 1.2 4 3.3M6.5 8.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm11 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM12 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
-		object:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v12H7zM9 7V5h6v2M9 11h6" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
-		more:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/></svg>'
+		object:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h8l2 3v9H6v-9l2-3Zm1 0V5h6v2M9 12h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>'
 	};
 
+	const stripLeadingEmoji = (value) => value.replace(/^[^\p{L}\p{N}]+/u,'').trim();
+
 	const categoryField = field(2);
+	const categoryRadios = categoryField ? [...categoryField.querySelectorAll('input[type="radio"]')] : [];
+
 	if (categoryField) {
 		categoryField.classList.add('badaround-event-category');
 		categoryField.querySelectorAll('.wpforms-field-label-inline').forEach((label) => {
 			if (label.dataset.baEnhanced === '1') return;
-			const raw = label.textContent.trim();
-			const meta = categoryMeta[raw.toLowerCase()] || [raw,'', 'more'];
+			const raw = stripLeadingEmoji(label.textContent.trim());
+			const meta = categoryMeta[raw.toLowerCase()];
+			if (!meta) return;
+
 			label.textContent = '';
+			label.style.setProperty('--ba-category', meta.color);
+
 			const icon = document.createElement('span');
 			icon.className = 'ba-choice-icon';
 			icon.setAttribute('aria-hidden','true');
-			const emojiIcons={car:'🚗',home:'🏠',warning:'⚠️',public:'🏙️',animal:'🐾',object:'🔍',more:'•••'};
-			icon.textContent = emojiIcons[meta[2]] || emojiIcons.more;
+			icon.innerHTML = icons[meta.icon] || '';
+
 			const title = document.createElement('span');
 			title.className = 'ba-choice-title';
-			title.textContent = meta[0];
+			title.textContent = meta.title;
+
 			const desc = document.createElement('span');
 			desc.className = 'ba-choice-desc';
-			desc.textContent = meta[1];
-			label.append(icon,title,desc);
+			desc.textContent = meta.desc;
+
+			const check = document.createElement('span');
+			check.className = 'ba-choice-check';
+			check.setAttribute('aria-hidden','true');
+			check.textContent = '✓';
+
+			label.append(icon,title,desc,check);
 			label.dataset.baEnhanced = '1';
-			label.dataset.baTitle = meta[0];
-			label.dataset.baDesc = meta[1];
+			label.dataset.baTitle = meta.title;
+			label.dataset.baDesc = meta.desc;
+			label.dataset.baColor = meta.color;
 		});
 	}
 
-	[3,4,5,6,7,8,9,10,11].forEach((id) => {
-		const el = field(id);
-		if (el) el.classList.add(id === 11 ? 'ba-relationship-field' : 'ba-drilldown-field');
-	});
+	[3,4,5,6,7,8].forEach((id) => field(id)?.classList.add('ba-drilldown-field'));
+	field(11)?.classList.add('ba-relationship-field');
 
-	const choiceEmoji = (text) => {
-		const t=text.toLowerCase();
-		if(t.includes('furto')||t.includes('rubat')) return '🚨';
-		if(t.includes('danno')||t.includes('vandal')) return '💥';
-		if(t.includes('incidente')||t.includes('fuga')) return '🏃';
-		if(t.includes('abbandon')) return '🚧';
-		if(t.includes('sospett')) return '👀';
-		if(t.includes('albero')||t.includes('ramo')) return '🌳';
-		if(t.includes('rifiut')||t.includes('discarica')) return '🗑️';
-		if(t.includes('illumin')) return '💡';
-		if(t.includes('buche')||t.includes('strada')) return '🛣️';
-		if(t.includes('smarrit')) return '🔎';
-		if(t.includes('ritrovat')) return '✓';
-		if(t.includes('ferito')) return '🩹';
-		if(t.includes('document')) return '🪪';
-		if(t.includes('chiavi')) return '🔑';
-		if(t.includes('telefono')||t.includes('computer')) return '📱';
-		if(t.includes('altro')) return '＋';
+	const choiceGlyph = (text) => {
+		const t = stripLeadingEmoji(text).toLowerCase();
+		if (t.includes('rubat') || t.includes('furto')) return '↗';
+		if (t.includes('danno') || t.includes('vandal')) return '✦';
+		if (t.includes('fuga')) return '→';
+		if (t.includes('sospett') || t.includes('avvist')) return '◉';
+		if (t.includes('albero') || t.includes('ramo')) return '⌁';
+		if (t.includes('rifiut')) return '▤';
+		if (t.includes('illumin')) return '✧';
+		if (t.includes('strada') || t.includes('buca')) return '═';
+		if (t.includes('smarrit')) return '⌕';
+		if (t.includes('ritrovat') || t.includes('trovato')) return '✓';
+		if (t.includes('ferito')) return '+';
+		if (t.includes('document')) return '▣';
+		if (t.includes('chiavi')) return '⌘';
+		if (t.includes('elettron')) return '▥';
+		if (t.includes('altro')) return '…';
 		return '•';
 	};
 
-	form.querySelectorAll('.ba-drilldown-field .wpforms-field-label-inline').forEach((label)=>{
-		if(label.querySelector('.ba-drilldown-icon'))return;
-		const icon=document.createElement('span');
-		icon.className='ba-drilldown-icon';
+	root.querySelectorAll('.ba-drilldown-field .wpforms-field-label-inline').forEach((label) => {
+		if (label.dataset.baDrilldownEnhanced === '1') return;
+		const displayText = stripLeadingEmoji(label.textContent.trim());
+		label.textContent = '';
+
+		const icon = document.createElement('span');
+		icon.className = 'ba-drilldown-icon';
 		icon.setAttribute('aria-hidden','true');
-		icon.textContent=choiceEmoji(label.textContent.trim());
-		label.prepend(icon);
+		icon.textContent = choiceGlyph(displayText);
+
+		const text = document.createElement('span');
+		text.className = 'ba-drilldown-text';
+		text.textContent = displayText;
+
+		const radio = document.createElement('span');
+		radio.className = 'ba-drilldown-radio';
+		radio.setAttribute('aria-hidden','true');
+
+		label.append(icon,text,radio);
+		label.dataset.baDrilldownEnhanced = '1';
 	});
 
-	const selectedSummary=document.createElement('div');
-	selectedSummary.className='ba-selected-category';
-	selectedSummary.hidden=true;
-	if(categoryField) categoryField.after(selectedSummary);
+	/* Visual grouping only: no fields are moved and no WPForms logic is altered. */
+	const classFields = (ids, classes) => ids.forEach((id) => field(id)?.classList.add(...classes));
+	classFields([37,38,39,40,41,42,43,44],['ba-form-section']);
+	classFields([45,46,47,48],['ba-form-section']);
+	classFields([49,50,51],['ba-form-section']);
+	classFields([87,88,89,91],['ba-form-section','ba-form-section--sensitive']);
+	classFields([55,56,57,59,60,61,62],['ba-form-section']);
+	classFields([63,64],['ba-form-section','ba-form-section--media']);
+	classFields([65,66,68,69,70],['ba-form-section']);
+	classFields([73,74,75,76,77,78,80,81,82,83,84,85,86],['ba-form-section','ba-form-section--identity']);
 
-	const categoryRadios=categoryField ? [...categoryField.querySelectorAll('input[type="radio"]')] : [];
+	/* Step 2 location emphasis. */
+	const locationPrimary = field(31);
+	if (locationPrimary) {
+		locationPrimary.classList.add('ba-location-primary','ba-location-first');
+		if (!locationPrimary.querySelector('.ba-location-helper')) {
+			const helper = document.createElement('div');
+			helper.className = 'ba-location-helper';
+			helper.innerHTML = '<span aria-hidden="true">🔒</span><div><strong>Posizione protetta.</strong> Il civico e la posizione precisa restano riservati; al pubblico viene mostrato solo il livello previsto dalla segnalazione.</div>';
+			locationPrimary.append(helper);
+		}
+	}
+	[29,32,33].forEach((id) => field(id)?.classList.add('ba-location-secondary'));
+	field(34)?.classList.add('ba-danger-field');
 
-	/* WPForms conditional logic may call scroll/focus and also changes the
-	 * document height when fields are revealed. Preserve the clicked card's
-	 * visual position instead of merely restoring the old scrollY. */
-	let allowPageNavigationScroll=false;
-	let selectionAnchor=null;
+	/* Keep the reporter relationship question hidden until a macro-category exists. */
+	const relationship = field(11);
+	const syncRelationship = () => {
+		if (!relationship || !categoryRadios.length) return;
+		const selected = categoryRadios.some((radio) => radio.checked);
+		relationship.hidden = !selected;
+		relationship.setAttribute('aria-hidden', selected ? 'false' : 'true');
+	};
+	categoryRadios.forEach((radio) => radio.addEventListener('change',syncRelationship));
+	syncRelationship();
 
-	const captureSelectionAnchor=(event)=>{
-		if(event.target.closest?.('.wpforms-page-next,.wpforms-page-prev')) return;
-		const choice=event.target.closest?.(
-			'.wpforms-field-label-inline, input[type="radio"], input[type="checkbox"]'
-		);
-		if(!choice) return;
+	/* Category context chip for later steps. */
+	const context = document.querySelector('[data-ba-report-context]');
+	const selectedCategoryMeta = () => {
+		const selected = categoryRadios.find((radio) => radio.checked);
+		if (!selected) return null;
+		const label = selected.nextElementSibling;
+		if (!label) return null;
+		return {
+			title: label.dataset.baTitle || stripLeadingEmoji(label.textContent.trim()),
+			color: label.dataset.baColor || '#0798a8'
+		};
+	};
+	const syncContext = (step) => {
+		if (!context) return;
+		const meta = selectedCategoryMeta();
+		if (!meta || step === 1) {
+			context.hidden = true;
+			context.textContent = '';
+			return;
+		}
+		context.hidden = false;
+		context.style.setProperty('--ba-report-context-color',meta.color);
+		context.innerHTML = '<span class="ba-report-context__dot" aria-hidden="true"></span><span>' + meta.title + '</span>';
+	};
+	categoryRadios.forEach((radio) => radio.addEventListener('change',() => syncContext(activePageIndex()+1)));
 
-		const container=choice.closest('.wpforms-field');
-		const anchor=choice.closest('li') || container || choice;
-		selectionAnchor={
+	/* Preserve click position while conditional fields open/close. */
+	let allowPageNavigationScroll = false;
+	let selectionAnchor = null;
+	const captureSelectionAnchor = (event) => {
+		if (event.target.closest?.('.wpforms-page-next,.wpforms-page-prev')) return;
+		const choice = event.target.closest?.('.wpforms-field-label-inline,input[type="radio"],input[type="checkbox"]');
+		if (!choice) return;
+		const container = choice.closest('.wpforms-field');
+		const anchor = choice.closest('li') || container || choice;
+		selectionAnchor = {
 			node:anchor,
 			containerId:container?.id || '',
 			top:anchor.getBoundingClientRect().top
 		};
 	};
-
-	const restoreSelectionAnchor=()=>{
-		if(allowPageNavigationScroll || !selectionAnchor) return;
-
-		let anchor=selectionAnchor.node;
-		if(!anchor?.isConnected && selectionAnchor.containerId){
-			anchor=document.getElementById(selectionAnchor.containerId);
-		}
-		if(!anchor?.isConnected) return;
-
-		const currentTop=anchor.getBoundingClientRect().top;
-		const delta=currentTop-selectionAnchor.top;
-		if(Math.abs(delta)>1){
-			window.scrollBy({top:delta,left:0,behavior:'auto'});
-		}
+	const restoreSelectionAnchor = () => {
+		if (allowPageNavigationScroll || !selectionAnchor) return;
+		let anchor = selectionAnchor.node;
+		if (!anchor?.isConnected && selectionAnchor.containerId) anchor = document.getElementById(selectionAnchor.containerId);
+		if (!anchor?.isConnected) return;
+		const delta = anchor.getBoundingClientRect().top - selectionAnchor.top;
+		if (Math.abs(delta) > 1) window.scrollBy({top:delta,left:0,behavior:'auto'});
 	};
-
-	const preserveSelectionScroll=()=>{
-		const started=performance.now();
-		const lockFor=700;
-		const keepAnchorStable=(now)=>{
-			if(allowPageNavigationScroll || !selectionAnchor) return;
+	const preserveSelectionScroll = () => {
+		const started = performance.now();
+		const keep = (now) => {
+			if (allowPageNavigationScroll || !selectionAnchor) return;
 			restoreSelectionAnchor();
-			if(now-started<lockFor){
-				requestAnimationFrame(keepAnchorStable);
-			}else{
-				selectionAnchor=null;
-			}
+			if (now - started < 650) requestAnimationFrame(keep);
+			else selectionAnchor = null;
 		};
-		requestAnimationFrame(keepAnchorStable);
+		requestAnimationFrame(keep);
 	};
-
-	form.addEventListener('pointerdown',captureSelectionAnchor,true);
-	form.addEventListener('click',captureSelectionAnchor,true);
-	form.addEventListener('change',(event)=>{
-		if(!event.target.matches?.('input[type="radio"],input[type="checkbox"]')) return;
+	root.addEventListener('pointerdown',captureSelectionAnchor,true);
+	root.addEventListener('click',captureSelectionAnchor,true);
+	root.addEventListener('change',(event) => {
+		if (!event.target.matches?.('input[type="radio"],input[type="checkbox"]')) return;
 		preserveSelectionScroll();
 	},true);
-	const syncSelectedCategory=()=>{
-		const selected=categoryRadios.find(r=>r.checked);
-		if(!selected){ selectedSummary.hidden=true; return; }
-		const label=selected.nextElementSibling;
-		if(!label){ selectedSummary.hidden=true; return; }
-		const title=label.dataset.baTitle || label.textContent.trim();
-		const desc=label.dataset.baDesc || '';
-		const icon=label.querySelector('.ba-choice-icon')?.innerHTML || icons.more;
-		selectedSummary.innerHTML='<div class="ba-selected-category__main"><span class="ba-selected-category__icon" aria-hidden="true">'+icon+'</span><span class="ba-selected-category__text"><strong>'+title+'</strong><small>'+desc+'</small></span></div><button type="button">Cambia</button>';
-		selectedSummary.hidden=false;
-		selectedSummary.querySelector('button')?.addEventListener('click',()=>{
-			categoryField?.scrollIntoView({behavior:'smooth',block:'center'});
+
+	/* Five real WPForms pages = five visible BadAround steps. */
+	const stepItems = [...document.querySelectorAll('[data-ba-report-step]')];
+	const eyebrow = document.querySelector('[data-ba-report-eyebrow]');
+	const title = document.querySelector('[data-ba-report-title]');
+	const copy = document.querySelector('[data-ba-report-copy]');
+
+	const stepCopy = {
+		1:['SEGNALA UN EVENTO','Cosa è successo?','Scegli la categoria più vicina al tuo caso. Mostreremo solo le domande necessarie.'],
+		2:['PASSAGGIO 2 DI 5','Dove e quando è successo?','Indica il luogo e il momento dell’evento. La posizione pubblica seguirà sempre le regole di privacy BadAround.'],
+		3:['PASSAGGIO 3 DI 5','Aggiungi i dettagli','Vedrai soltanto le domande pertinenti alla categoria e al tipo di evento che hai scelto.'],
+		4:['PASSAGGIO 4 DI 5','Racconta e documenta','Descrivi i fatti in modo chiaro e aggiungi eventuali foto o informazioni utili alla verifica.'],
+		5:['PASSAGGIO 5 DI 5','Controlla e invia','Verifica i dati, scegli come apparire pubblicamente e completa le conferme prima dell’invio.']
+	};
+
+	const activePageIndex = () => {
+		const pages = [...root.querySelectorAll('.wpforms-page')];
+		const visible = pages.findIndex((page) => getComputedStyle(page).display !== 'none');
+		return visible >= 0 ? visible : 0;
+	};
+
+	let lastPage = activePageIndex();
+	const syncStep = (shouldScroll = false) => {
+		const pageIndex = activePageIndex();
+		const step = Math.min(5,pageIndex + 1);
+		const content = stepCopy[step];
+
+		if (eyebrow) eyebrow.textContent = content[0];
+		if (title) title.textContent = content[1];
+		if (copy) copy.textContent = content[2];
+
+		stepItems.forEach((item) => {
+			const itemStep = Number(item.dataset.baReportStep || 0);
+			item.classList.toggle('is-active',itemStep === step);
+			item.classList.toggle('is-complete',itemStep < step);
+			if (itemStep === step) item.setAttribute('aria-current','step');
+			else item.removeAttribute('aria-current');
 		});
-	};
-	categoryRadios.forEach(r=>r.addEventListener('change',syncSelectedCategory));
-	syncSelectedCategory();
 
-	/* Step 2: location and privacy emphasis */
-	const locationPrimary=field(31);
-	if(locationPrimary){
-		locationPrimary.classList.add('ba-location-primary','ba-location-first');
-		const helper=document.createElement('div');
-		helper.className='ba-location-helper';
-		helper.innerHTML='<span aria-hidden="true">🔒</span><div><strong>Posizione protetta.</strong> Il civico e la posizione precisa restano riservati; al pubblico mostreremo solo l’area prevista dalle tue impostazioni.</div>';
-		locationPrimary.append(helper);
-	}
-	[29,32,33].forEach(id=>field(id)?.classList.add('ba-location-secondary'));
-	field(34)?.classList.add('ba-danger-field');
+		syncContext(step);
 
-	/* Step 3+ visual grouping without changing WPForms logic */
-	const classFields=(ids,classes)=>ids.forEach(id=>field(id)?.classList.add(...classes));
-	classFields([37,38,39,40,41,42,43,44],['ba-form-section']);
-	classFields([45,46,47,48],['ba-form-section']);
-	classFields([49,50,51],['ba-form-section']);
-	classFields([87,88,89,90,91],['ba-form-section','ba-form-section--sensitive']);
-	classFields([55,56,57,58,59,60,61,62],['ba-form-section']);
-	classFields([63,64],['ba-form-section','ba-form-section--media']);
-	classFields([65,66,68,69,70],['ba-form-section']);
-	classFields([73,74,75,76,77,78,80,81,82,83,84,85,86],['ba-form-section','ba-form-section--identity']);
-
-	const stepLabel=document.querySelector('[data-ba-report-step-label]');
-	const title=document.querySelector('[data-ba-report-title]');
-	const eyebrow=document.querySelector('[data-ba-report-eyebrow]');
-	const copy=document.querySelector('[data-ba-report-copy]');
-	const progress=[...document.querySelectorAll('[data-ba-report-progress]')];
-
-	const activeWpPageIndex=()=>{
-		const pages=[...form.querySelectorAll('.wpforms-page')];
-		const visible=pages.findIndex(p=>getComputedStyle(p).display!=='none');
-		return visible>=0?visible:0;
-	};
-	const macroStep=(wpIndex)=>wpIndex===0?1:(wpIndex===1?2:3);
-	const stepCopy={
-		1:['Cosa','Cosa riguarda la segnalazione?','Tocca la categoria: mostreremo solo le domande necessarie.'],
-		2:['Dove','Dove è successo?','Parti dalla mappa: cerca il punto oppure sposta il pin. Poi ti chiederemo quando è successo.'],
-		3:['Dettagli e invio','Completa la segnalazione','Aggiungi solo le informazioni utili. Foto e dettagli aiutano la community e la moderazione.']
-	};
-	let lastWpPageIndex=activeWpPageIndex();
-	const syncStep=(shouldScroll=false)=>{
-		const currentWpPageIndex=activeWpPageIndex();
-		const step=macroStep(currentWpPageIndex);
-		if(stepLabel)stepLabel.textContent='SEGNALAZIONE CIVICA • PASSO '+step;
-		if(eyebrow)eyebrow.textContent=stepCopy[step][0];
-		if(title)title.textContent=stepCopy[step][1];
-		if(copy)copy.textContent=stepCopy[step][2];
-		progress.forEach((bar,index)=>{
-			bar.classList.toggle('is-active',index===step-1);
-			bar.classList.toggle('is-complete',index<step-1);
-		});
-		const next=form.querySelector('.wpforms-page:not([style*="display: none"]) .wpforms-page-next');
-		if(next){
-			next.textContent=step===1?'Continua: Dove e quando →':step===2?'Continua: Dettagli e invio →':'Continua →';
+		const visiblePage = root.querySelector('.wpforms-page:not([style*="display: none"])');
+		const next = visiblePage?.querySelector('.wpforms-page-next');
+		if (next) {
+			const labels = {
+				1:'Continua: luogo e momento →',
+				2:'Continua: dettagli →',
+				3:'Continua: contenuti →',
+				4:'Continua: verifica →'
+			};
+			next.textContent = labels[step] || 'Continua →';
 		}
-		if(shouldScroll && currentWpPageIndex!==lastWpPageIndex){
-			document.querySelector('.ba-report-stage')?.scrollIntoView({behavior:'smooth',block:'start'});
+
+		if (shouldScroll && pageIndex !== lastPage) {
+			document.querySelector('.ba-report-workspace')?.scrollIntoView({behavior:'smooth',block:'start'});
 		}
-		lastWpPageIndex=currentWpPageIndex;
+		lastPage = pageIndex;
 	};
 
-	const observer=new MutationObserver(()=>requestAnimationFrame(()=>syncStep(false)));
-	observer.observe(form,{attributes:true,subtree:true,attributeFilter:['style','class']});
-	form.addEventListener('click',(e)=>{
-		if(e.target.closest('.wpforms-page-next,.wpforms-page-prev')){
-			allowPageNavigationScroll=true;
-			setTimeout(()=>{
-				syncStep(true);
-				allowPageNavigationScroll=false;
-			},120);
-		}
+	const observer = new MutationObserver(() => requestAnimationFrame(() => syncStep(false)));
+	observer.observe(root,{attributes:true,subtree:true,attributeFilter:['style','class']});
+
+	root.addEventListener('click',(event) => {
+		if (!event.target.closest('.wpforms-page-next,.wpforms-page-prev')) return;
+		allowPageNavigationScroll = true;
+		setTimeout(() => {
+			syncStep(true);
+			allowPageNavigationScroll = false;
+		},120);
 	});
+
+	/* Top save action delegates to WPForms Save & Resume. */
+	document.querySelectorAll('[data-ba-report-save]').forEach((button) => {
+		button.addEventListener('click',() => {
+			const save = [...root.querySelectorAll('a,button')].find((element) => {
+				const text = (element.textContent || '').toLowerCase();
+				return element.classList.contains('wpforms-save-resume-button') || text.includes('salva e continua') || text.includes('salva e riprendi');
+			});
+			if (save) save.click();
+		});
+	});
+
 	syncStep(false);
-
-	/* Save topbar delegates to WPForms Save & Resume */
-	document.querySelector('[data-ba-report-save]')?.addEventListener('click',()=>{
-		const save=[...form.querySelectorAll('a,button')].find(el=>{
-			const text=(el.textContent||'').toLowerCase();
-			return el.classList.contains('wpforms-save-resume-button')||text.includes('salva e continua')||text.includes('salva e riprendi');
-		});
-		if(save) save.click();
-	});
-
-	/* Keep relationship hidden until a macro-category exists */
-	const relationship=field(11);
-	if(relationship){
-		const relationshipEmoji=(text)=>{
-			const t=text.toLowerCase();
-			if(t.includes('proprietario')||t.includes('coinvolt')||t.includes('direttamente')) return '👤 ';
-			if(t.includes('testimon')||t.includes('assistito')) return '👀 ';
-			return '💬 ';
-		};
-		relationship.querySelectorAll('.wpforms-field-label-inline').forEach(label=>{
-			if(label.dataset.baRelationshipEnhanced==='1') return;
-			label.textContent=relationshipEmoji(label.textContent.trim())+label.textContent.trim();
-			label.dataset.baRelationshipEnhanced='1';
-		});
-	}
-	const syncRelationship=()=>{
-		if(!relationship||!categoryRadios.length)return;
-		const selected=categoryRadios.some(r=>r.checked);
-		relationship.hidden=!selected;
-		relationship.setAttribute('aria-hidden',selected?'false':'true');
-	};
-	categoryRadios.forEach(r=>r.addEventListener('change',syncRelationship));
-	syncRelationship();
 })();
