@@ -992,3 +992,23 @@ body.ba-save-resume-mode #ba-mobile-menu .ba-button--urgent{
 	.ba-report-mount .wpforms-save-resume-confirmation{padding:22px}
 	.ba-save-resume-heading h2{font-size:1.45rem}
 }
+
+
+/* Progressive disclosure — steps 2–5 */
+.ba-report-mount .wpforms-field.ba-progressive-gated{
+	display:none!important;
+}
+.ba-report-mount .wpforms-field.ba-progressive-revealed{
+	animation:ba-report-field-reveal .28s ease-out both;
+}
+@keyframes ba-report-field-reveal{
+	from{opacity:0;transform:translateY(8px)}
+	to{opacity:1;transform:translateY(0)}
+}
+.ba-report-mount .wpforms-page-next.ba-progressive-awaiting{
+	opacity:.52;
+	cursor:not-allowed;
+}
+@media (prefers-reduced-motion:reduce){
+	.ba-report-mount .wpforms-field.ba-progressive-revealed{animation:none}
+}
