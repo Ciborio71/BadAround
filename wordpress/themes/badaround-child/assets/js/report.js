@@ -250,6 +250,60 @@
 	});
 	syncExactDateFlow();
 
+	/* Step 2 time-range validation: ending time cannot precede starting time. */
+	const timeFrom = field(20);
+	const timeTo = field(22);
+	const timeFromInput = timeFrom?.querySelector('input');
+	const timeToInput = timeTo?.querySelector('input');
+
+	const minutesFromTime = (value) => {
+		const match = String(value || '').trim().match(/^(\d{1,2}):(\d{2})$/);
+		if (!match) return null;
+		const hours = Number(match[1]);
+		const minutes = Number(match[2]);
+		if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+		return (hours * 60) + minutes;
+	};
+
+	const validateTimeRange = ({focus = false} = {}) => {
+		if (!timeFrom || !timeTo || !timeFromInput || !timeToInput) return true;
+		if (getComputedStyle(timeFrom).display === 'none' || getComputedStyle(timeTo).display === 'none') {
+			timeTo.classList.remove('ba-time-range-invalid');
+			timeTo.querySelector('.ba-time-range-error')?.remove();
+			timeToInput.removeAttribute('aria-invalid');
+			return true;
+		}
+
+		const fromMinutes = minutesFromTime(timeFromInput.value);
+		const toMinutes = minutesFromTime(timeToInput.value);
+		const invalid = fromMinutes !== null && toMinutes !== null && toMinutes < fromMinutes;
+
+		timeTo.classList.toggle('ba-time-range-invalid', invalid);
+		timeToInput.setAttribute('aria-invalid', invalid ? 'true' : 'false');
+
+		let error = timeTo.querySelector('.ba-time-range-error');
+		if (invalid && !error) {
+			error = document.createElement('div');
+			error.className = 'ba-time-range-error';
+			error.setAttribute('role','alert');
+			error.textContent = 'L’orario finale non può essere precedente all’orario di inizio.';
+			timeTo.append(error);
+		} else if (!invalid && error) {
+			error.remove();
+		}
+
+		if (invalid && focus) {
+			timeToInput.focus({preventScroll:true});
+			timeTo.scrollIntoView({behavior:'smooth',block:'center'});
+		}
+		return !invalid;
+	};
+
+	['input','change','blur'].forEach((eventName) => {
+		timeFromInput?.addEventListener(eventName,() => validateTimeRange());
+		timeToInput?.addEventListener(eventName,() => validateTimeRange());
+	});
+
 	/* Progressive disclosure: show reporter relationship only after a
 	 * specific event has been selected in the currently visible branch. */
 	const relationship = field(11);
@@ -400,13 +454,20 @@
 
 	const observer = new MutationObserver(() => requestAnimationFrame(() => {
 		syncExactDateFlow();
+		validateTimeRange();
 		syncRelationship();
 		syncStep(false);
 	}));
 	observer.observe(root,{attributes:true,subtree:true,attributeFilter:['style','class']});
 
 	root.addEventListener('click',(event) => {
-		if (!event.target.closest('.wpforms-page-next,.wpforms-page-prev')) return;
+		const navigationButton = event.target.closest('.wpforms-page-next,.wpforms-page-prev');
+		if (!navigationButton) return;
+		if (navigationButton.classList.contains('wpforms-page-next') && activePageIndex() === 1 && !validateTimeRange({focus:true})) {
+			event.preventDefault();
+			event.stopImmediatePropagation();
+			return;
+		}
 		allowPageNavigationScroll = true;
 		setTimeout(() => {
 			syncStep(true);
