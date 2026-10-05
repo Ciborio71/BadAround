@@ -32,6 +32,11 @@ class BadAround_Publication_Service {
 			update_post_meta( $event_id, '_ba_public_place_name', $place_name );
 		}
 
+		$location_result = $this->ensure_public_location( $event_id, $territory );
+		if ( is_wp_error( $location_result ) ) {
+			return $location_result;
+		}
+
 		$title = trim( wp_strip_all_tags( (string) $post->post_title ) );
 		if ( '' === $title || preg_match( '/^Segnalazione da moderare\s*#/i', $title ) ) {
 			$subject = $subtype ? sanitize_text_field( $subtype->name ) : __( 'Segnalazione', 'badaround-core' );
@@ -89,7 +94,6 @@ class BadAround_Publication_Service {
 				'ID'           => $event_id,
 				'post_title'   => sanitize_text_field( $title ),
 				'post_content' => wp_kses_post( $content ),
-				'post_status'  => 'pending',
 			),
 			true
 		);
@@ -247,6 +251,81 @@ class BadAround_Publication_Service {
 		return true;
 	}
 
+	private function ensure_public_location( $event_id, $territory = null ) {
+		global $wpdb;
+
+		$public_lat = get_post_meta( $event_id, '_ba_public_lat', true );
+		$public_lng = get_post_meta( $event_id, '_ba_public_lng', true );
+		$radius     = absint( get_post_meta( $event_id, '_ba_public_radius_m', true ) );
+		if ( is_numeric( $public_lat ) && is_numeric( $public_lng ) && $radius >= 100 ) {
+			return true;
+		}
+
+		$report = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT exact_lat, exact_lng FROM {$wpdb->prefix}ba_reports
+				 WHERE event_id = %d AND deleted_at IS NULL
+				 ORDER BY id ASC LIMIT 1",
+				absint( $event_id )
+			)
+		);
+
+		if ( ! $report || ! is_numeric( $report->exact_lat ) || ! is_numeric( $report->exact_lng ) ) {
+			return new WP_Error( 'ba_publication_location_missing', __( 'Non sono disponibili coordinate sufficienti per creare una posizione pubblica approssimata.', 'badaround-core' ) );
+		}
+
+		$precision = sanitize_key( (string) get_post_meta( $event_id, '_ba_public_location_precision', true ) );
+		$radii = array(
+			'f32-c4' => 150,
+			'f32-c5' => 300,
+			'f32-c6' => 1000,
+			'f32-c7' => 3000,
+		);
+		$radius = isset( $radii[ $precision ] ) ? $radii[ $precision ] : 750;
+
+		if ( 'f32-c7' === $precision && $territory instanceof WP_Term ) {
+			$center_lat = get_term_meta( $territory->term_id, '_ba_center_lat', true );
+			$center_lng = get_term_meta( $territory->term_id, '_ba_center_lng', true );
+			if ( is_numeric( $center_lat ) && is_numeric( $center_lng ) ) {
+				update_post_meta( $event_id, '_ba_public_lat', round( (float) $center_lat, 6 ) );
+				update_post_meta( $event_id, '_ba_public_lng', round( (float) $center_lng, 6 ) );
+				update_post_meta( $event_id, '_ba_public_radius_m', $radius );
+				return true;
+			}
+		}
+
+		$lat = (float) $report->exact_lat;
+		$lng = (float) $report->exact_lng;
+
+		/* Deterministic privacy offset: stable for the event, but impossible to
+		 * reverse without the private source coordinates. */
+		$seed = hash_hmac( 'sha256', 'ba-public-location|' . absint( $event_id ), wp_salt( 'auth' ) );
+		$angle_fraction = hexdec( substr( $seed, 0, 8 ) ) / 4294967295;
+		$angle = 2 * M_PI * $angle_fraction;
+		$distance = max( 100, (int) round( $radius * 0.65 ) );
+		$earth = 6378137;
+
+		$lat_offset = ( $distance * cos( $angle ) / $earth ) * ( 180 / M_PI );
+		$cos_lat = cos( deg2rad( $lat ) );
+		$lng_offset = abs( $cos_lat ) > 0.000001
+			? ( $distance * sin( $angle ) / ( $earth * $cos_lat ) ) * ( 180 / M_PI )
+			: 0;
+
+		$public_lat = round( $lat + $lat_offset, 6 );
+		$public_lng = round( $lng + $lng_offset, 6 );
+
+		if ( abs( $public_lat - $lat ) < 0.00001 && abs( $public_lng - $lng ) < 0.00001 ) {
+			$public_lat = round( $lat + 0.0015, 6 );
+		}
+
+		update_post_meta( $event_id, '_ba_public_lat', $public_lat );
+		update_post_meta( $event_id, '_ba_public_lng', $public_lng );
+		update_post_meta( $event_id, '_ba_public_radius_m', $radius );
+
+		BadAround_Audit_Log::record( 'event', $event_id, 'public_location_generalized', 'publication' );
+		return true;
+	}
+
 	private function deepest_term( $event_id, $taxonomy ) {
 		$terms = wp_get_post_terms( absint( $event_id ), $taxonomy );
 		if ( is_wp_error( $terms ) || ! $terms ) {
@@ -272,6 +351,22 @@ class BadAround_Publication_Service {
 
 		$current = sanitize_key( (string) get_post_meta( $event_id, '_ba_moderation_status', true ) );
 		if ( self::STATUS_PUBLISHED === $current && 'publish' === get_post_status( $event_id ) ) {
+			$prepared = $this->prepare_public_projection( $event_id );
+			if ( is_wp_error( $prepared ) ) {
+				return $prepared;
+			}
+			$media = new BadAround_Media_Repository();
+			$approved = $media->approve_received_images_for_event( $event_id );
+			if ( is_wp_error( $approved ) ) {
+				return $approved;
+			}
+			$attachments = $media->materialize_approved_public_media_for_event( $event_id );
+			if ( is_wp_error( $attachments ) ) {
+				return $attachments;
+			}
+			if ( ! empty( $attachments ) && ! has_post_thumbnail( $event_id ) ) {
+				set_post_thumbnail( $event_id, (int) reset( $attachments ) );
+			}
 			return true;
 		}
 		if ( BadAround_Moderation_Service::STATUS_APPROVED !== $current ) {
@@ -281,6 +376,12 @@ class BadAround_Publication_Service {
 		$valid = $this->validate_public_projection( $event_id );
 		if ( is_wp_error( $valid ) ) {
 			return $valid;
+		}
+
+		$media_repository = new BadAround_Media_Repository();
+		$media_approval = $media_repository->approve_received_images_for_event( $event_id );
+		if ( is_wp_error( $media_approval ) ) {
+			return $media_approval;
 		}
 
 		$allow = static function ( $allowed, $candidate_id ) use ( $event_id ) {
@@ -306,7 +407,7 @@ class BadAround_Publication_Service {
 				: new WP_Error( 'ba_publication_wp_status_failed', __( 'WordPress non ha confermato la pubblicazione.', 'badaround-core' ) );
 		}
 
-		$media_result = ( new BadAround_Media_Repository() )->materialize_approved_public_media_for_event( $event_id );
+		$media_result = $media_repository->materialize_approved_public_media_for_event( $event_id );
 		if ( is_wp_error( $media_result ) ) {
 			wp_update_post( array( 'ID' => $event_id, 'post_status' => 'pending' ) );
 			return $media_result;
