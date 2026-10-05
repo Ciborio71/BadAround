@@ -917,3 +917,78 @@
 @media(prefers-reduced-motion:reduce){
 	.ba-report-mount *{transition:none!important}
 }
+
+
+/* Save & Resume — distinct application state */
+body.ba-save-resume-mode .ba-header-report,
+body.ba-save-resume-mode #ba-mobile-menu .ba-button--urgent{
+	display:none!important;
+}
+.ba-report-workspace.is-save-resume-mode .ba-report-steps,
+.ba-report-workspace.is-save-resume-mode .ba-report-stage__intro{
+	display:none!important;
+}
+.ba-report-workspace.is-save-resume-mode .ba-report-stage{
+	max-width:860px;
+	margin:32px auto 0;
+}
+.ba-report-mount .wpforms-save-resume-confirmation{
+	max-width:760px;
+	margin:0 auto;
+	padding:34px;
+	border:1px solid #dfe7ea;
+	border-radius:18px;
+	background:#fff;
+	box-shadow:0 18px 50px rgba(20,48,58,.08);
+}
+.ba-report-mount .wpforms-save-resume-confirmation .message{
+	margin:0 0 26px;
+	padding:0;
+	background:transparent;
+	border:0;
+}
+.ba-save-resume-heading__eyebrow{
+	display:block;
+	margin-bottom:8px;
+	color:#0b7b79;
+	font-size:.76rem;
+	font-weight:800;
+	letter-spacing:.08em;
+}
+.ba-save-resume-heading h2{
+	margin:0 0 10px;
+	color:#17343d;
+	font-size:1.75rem;
+	line-height:1.2;
+}
+.ba-save-resume-heading p{
+	margin:0 0 16px;
+	color:#557078;
+	line-height:1.6;
+}
+.ba-report-mount .wpforms-save-resume-actions{
+	display:grid;
+	gap:20px;
+}
+.ba-report-mount .wpforms-save-resume-shortcode-container{
+	display:flex;
+	align-items:center;
+	gap:8px;
+}
+.ba-report-mount .wpforms-save-resume-shortcode{
+	min-height:48px;
+}
+.ba-report-mount .wpforms-save-resume-email-notification{
+	padding:20px;
+	border:1px solid #e4ecee;
+	border-radius:14px;
+	background:#f8fbfb;
+}
+.ba-report-mount .wpforms-save-resume-email-notification .wpforms-submit{
+	min-height:48px;
+	border-radius:10px;
+}
+@media (max-width:640px){
+	.ba-report-mount .wpforms-save-resume-confirmation{padding:22px}
+	.ba-save-resume-heading h2{font-size:1.45rem}
+}
