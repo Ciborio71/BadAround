@@ -225,6 +225,7 @@ if ( $status ) {
 						</dl>
 					</section>
 				<?php endif; ?>
+				<?php if ( class_exists( 'BadAround_Contribution_Service' ) ) { BadAround_Contribution_Service::render_event_contribution_block( $post_id ); } ?>
 			</div>
 
 			<aside class="ba-event-aside" aria-label="Riepilogo evento">
