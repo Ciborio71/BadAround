@@ -81,7 +81,15 @@ class BadAround_Contribution_Moderation_Service {
 			$visibility_decided = 'public';
 		}
 
+		$recipient_text = '';
 		if ( BadAround_Contribution_Repository::STATUS_RESERVED === $target_status ) {
+			$recipient_text = isset( $args['recipient_text'] ) ? trim( sanitize_textarea_field( $args['recipient_text'] ) ) : '';
+			if ( mb_strlen( $recipient_text ) < 10 ) {
+				return new WP_Error( 'ba_contribution_recipient_text_required', __( 'Inserisci il testo riservato destinato al segnalatore.', 'badaround-core' ) );
+			}
+			if ( preg_match( '/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i', $recipient_text ) ) {
+				return new WP_Error( 'ba_contribution_recipient_email_detected', __( 'Il testo riservato non deve esporre indirizzi email del contributore.', 'badaround-core' ) );
+			}
 			$visibility_decided = 'reserved';
 		}
 		if ( BadAround_Contribution_Repository::STATUS_REJECTED === $target_status ) {
@@ -97,6 +105,7 @@ class BadAround_Contribution_Moderation_Service {
 				'public_projection_id' => $projection_id,
 				'moderated_by' => get_current_user_id() ?: null,
 				'reason' => $reason,
+				'recipient_text' => $recipient_text,
 			)
 		);
 		if ( is_wp_error( $updated ) ) {
@@ -124,6 +133,12 @@ class BadAround_Contribution_Moderation_Service {
 
 		if ( $projection_id ) {
 			BadAround_Audit_Log::record( 'contribution', $contribution_id, 'contribution_public_projection_created', 'contribution' );
+		}
+		if ( in_array( $target_status, array( BadAround_Contribution_Repository::STATUS_PUBLISHED, BadAround_Contribution_Repository::STATUS_RESERVED ), true ) ) {
+			$queued = $this->queue_reporter_notification( $contribution_id );
+			if ( is_wp_error( $queued ) ) {
+				BadAround_Audit_Log::record( 'contribution', $contribution_id, 'contribution_reporter_notification_queue_failed', 'contribution', $queued->get_error_code() );
+			}
 		}
 		return $updated;
 	}
