@@ -433,6 +433,7 @@
 
 		syncContext(step);
 		root.classList.toggle('is-final-step', step === 5);
+		for (let i = 1; i <= 5; i++) root.classList.toggle('is-step-' + i, i === step);
 
 		const visiblePage = root.querySelector('.wpforms-page:not([style*="display: none"])');
 		const next = visiblePage?.querySelector('.wpforms-page-next');
