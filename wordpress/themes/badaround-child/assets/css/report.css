@@ -132,7 +132,14 @@ body.page-template-page-segnala-evento .ba-site-header{position:sticky}
 	font-size:.8rem;
 	font-weight:900;
 }
-.ba-report-step__label{position:relative;z-index:1;white-space:nowrap}
+.ba-report-step__label{
+	position:relative;
+	z-index:2;
+	display:inline-block;
+	padding:2px 8px 2px 0;
+	background:rgba(255,255,255,.96);
+	white-space:nowrap;
+}
 .ba-report-steps li.is-active{color:var(--ba-report-navy)}
 .ba-report-steps li.is-active .ba-report-step__number{
 	border-color:var(--ba-report-teal);
