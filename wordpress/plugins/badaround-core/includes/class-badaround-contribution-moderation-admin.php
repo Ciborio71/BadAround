@@ -63,14 +63,15 @@ class BadAround_Contribution_Moderation_Admin {
 				),
 				admin_url( 'edit.php' )
 			);
+			$event_edit_url = get_edit_post_link( absint( $row['event_id'] ) );
 			echo '<tr>';
 			echo '<td>#' . absint( $row['id'] ) . '</td>';
-			echo '<td><a href="' . esc_url( get_edit_post_link( absint( $row['event_id'] ) ) ) . '">' . esc_html( get_the_title( absint( $row['event_id'] ) ) ) . '</a></td>';
+			echo '<td><a href="' . esc_url( $url ) . '"><strong>' . esc_html( get_the_title( absint( $row['event_id'] ) ) ) . '</strong></a><div class="row-actions"><span><a href="' . esc_url( $event_edit_url ) . '">' . esc_html__( 'Modifica evento', 'badaround-core' ) . '</a></span></div></td>';
 			echo '<td>' . esc_html( $row['contribution_type'] ) . '</td>';
 			echo '<td>' . esc_html( $row['visibility_requested'] ) . '</td>';
 			echo '<td><strong>' . esc_html( $row['status'] ) . '</strong></td>';
 			echo '<td>' . esc_html( $row['created_at'] ) . '</td>';
-			echo '<td><a class="button" href="' . esc_url( $url ) . '">' . esc_html__( 'Apri', 'badaround-core' ) . '</a></td>';
+			echo '<td><a class="button" href="' . esc_url( $url ) . '">' . esc_html__( 'Modera contributo', 'badaround-core' ) . '</a></td>';
 			echo '</tr>';
 		}
 		echo '</tbody></table>';
