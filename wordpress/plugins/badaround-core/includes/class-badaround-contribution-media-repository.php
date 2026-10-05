@@ -76,6 +76,17 @@ class BadAround_Contribution_Media_Repository {
 		);
 	}
 
+	public function has_pending_review( $contribution_id ) {
+		global $wpdb;
+		$count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}ba_contribution_media WHERE contribution_id = %d AND deleted_at IS NULL AND review_status = 'received'",
+				absint( $contribution_id )
+			)
+		);
+		return $count > 0;
+	}
+
 	public function private_file( $media_id ) {
 		global $wpdb;
 		$row = $wpdb->get_row(
