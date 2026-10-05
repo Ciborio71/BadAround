@@ -6,6 +6,8 @@ class BadAround_Contribution_Moderation_Service {
 
 	public function __construct() {
 		$this->repository = new BadAround_Contribution_Repository();
+		add_action( 'badaround_contribution_notify_reporter', array( $this, 'send_reporter_notification' ), 10, 1 );
+		add_action( 'template_redirect', array( $this, 'maybe_render_reserved_access' ), 0 );
 	}
 
 	public function transition( $contribution_id, $target_status, array $args = array() ) {
