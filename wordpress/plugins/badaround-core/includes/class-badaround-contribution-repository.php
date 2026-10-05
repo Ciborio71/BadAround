@@ -5,6 +5,7 @@ class BadAround_Contribution_Repository {
 	const STATUS_PENDING_VERIFICATION = 'pending_verification';
 	const STATUS_TO_REVIEW             = 'to_review';
 	const STATUS_IN_REVIEW             = 'in_review';
+	const STATUS_ON_HOLD               = 'on_hold';
 	const STATUS_PUBLISHED             = 'published';
 	const STATUS_RESERVED              = 'reserved';
 	const STATUS_REJECTED              = 'rejected';
@@ -147,6 +148,39 @@ class BadAround_Contribution_Repository {
 		return false !== $updated;
 	}
 
+	public function save_moderated_draft( $id, $draft ) {
+		global $wpdb;
+		$updated = $wpdb->update(
+			$this->table(),
+			array(
+				'moderated_draft' => '' !== trim( (string) $draft ) ? sanitize_textarea_field( $draft ) : null,
+				'updated_at' => current_time( 'mysql', true ),
+			),
+			array( 'id' => absint( $id ) )
+		);
+		if ( false === $updated ) {
+			return new WP_Error( 'ba_contribution_draft_save_failed', __( 'Impossibile salvare la bozza moderata.', 'badaround-core' ) );
+		}
+		return $this->find_by_id( $id );
+	}
+
+	public function archive( $id, $reason = '' ) {
+		global $wpdb;
+		$updated = $wpdb->update(
+			$this->table(),
+			array(
+				'deleted_at' => current_time( 'mysql', true ),
+				'moderation_reason' => '' !== trim( (string) $reason ) ? sanitize_textarea_field( $reason ) : null,
+				'updated_at' => current_time( 'mysql', true ),
+			),
+			array( 'id' => absint( $id ) )
+		);
+		if ( false === $updated ) {
+			return new WP_Error( 'ba_contribution_archive_failed', __( 'Impossibile archiviare il contributo.', 'badaround-core' ) );
+		}
+		return true;
+	}
+
 	public function moderate( $id, $expected_status, $target_status, array $data ) {
 		global $wpdb;
 		$update = array(
@@ -180,9 +214,10 @@ class BadAround_Contribution_Repository {
 		$limit = max( 1, min( 200, absint( $limit ) ) );
 		return $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT * FROM {$table} WHERE deleted_at IS NULL AND status IN (%s,%s,%s,%s,%s) ORDER BY created_at DESC LIMIT %d",
+				"SELECT * FROM {$table} WHERE deleted_at IS NULL AND status IN (%s,%s,%s,%s,%s,%s) ORDER BY created_at DESC LIMIT %d",
 				self::STATUS_TO_REVIEW,
 				self::STATUS_IN_REVIEW,
+				self::STATUS_ON_HOLD,
 				self::STATUS_PUBLISHED,
 				self::STATUS_RESERVED,
 				self::STATUS_REJECTED,
