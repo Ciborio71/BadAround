@@ -325,6 +325,105 @@
 }
 .ba-report-mount .wpforms-field-label-inline{color:#344d64!important;font-size:.82rem!important;line-height:1.4!important}
 
+/* Step 3 — detail choices inherit the card system */
+.ba-report-mount .wpforms-page-3 .ba-detail-choice-field{
+	margin:18px 0!important;
+	padding:16px 0!important;
+}
+.ba-report-mount .wpforms-page-3 .ba-detail-choice-field ul{
+	display:grid!important;
+	grid-template-columns:repeat(auto-fit,minmax(220px,1fr))!important;
+	gap:10px!important;
+	margin:0!important;
+	padding:0!important;
+	list-style:none!important;
+}
+.ba-report-mount .wpforms-page-3 .ba-detail-choice-field li{
+	position:relative!important;
+	display:block!important;
+	min-width:0!important;
+	margin:0!important;
+	padding:0!important;
+	border:0!important;
+	background:transparent!important;
+}
+.ba-report-mount .wpforms-page-3 .ba-detail-choice-field input[type="radio"],
+.ba-report-mount .wpforms-page-3 .ba-detail-choice-field input[type="checkbox"]{
+	position:absolute!important;
+	width:1px!important;
+	height:1px!important;
+	opacity:0!important;
+	pointer-events:none!important;
+}
+.ba-report-mount .wpforms-page-3 .ba-detail-choice-field .wpforms-field-label-inline{
+	position:relative;
+	display:grid!important;
+	grid-template-columns:40px 1fr 20px;
+	align-items:center!important;
+	gap:11px;
+	width:100%!important;
+	min-height:70px!important;
+	padding:12px 13px!important;
+	border:1px solid #dce5ed!important;
+	border-radius:13px!important;
+	background:#fff!important;
+	color:#304b63!important;
+	font-size:.84rem!important;
+	font-weight:720!important;
+	line-height:1.25!important;
+	text-align:left!important;
+	box-shadow:none!important;
+	cursor:pointer;
+	transition:border-color .15s ease,background-color .15s ease,box-shadow .15s ease,transform .15s ease!important;
+}
+.ba-report-mount .wpforms-page-3 .ba-detail-choice-field .wpforms-field-label-inline:hover{
+	transform:translateY(-1px);
+	border-color:#9ccfd4!important;
+	background:#fbfefe!important;
+}
+.ba-detail-choice-icon{
+	display:grid;
+	place-items:center;
+	width:40px;
+	height:40px;
+	border-radius:11px;
+	background:#eef7f8;
+	color:var(--ba-report-teal-dark);
+	font-size:1.08rem;
+	line-height:1;
+}
+.ba-detail-choice-text{min-width:0}
+.ba-detail-choice-indicator{
+	display:grid;
+	place-items:center;
+	width:17px;
+	height:17px;
+	border:1.5px solid #c8d5df;
+	border-radius:50%;
+	background:#fff;
+}
+.ba-detail-choice-indicator.is-checkbox{border-radius:5px}
+.ba-report-mount .wpforms-page-3 .ba-detail-choice-field input:checked+.wpforms-field-label-inline{
+	border-color:var(--ba-report-teal)!important;
+	background:#effafa!important;
+	color:#135f67!important;
+	box-shadow:0 0 0 3px rgba(7,152,168,.07)!important;
+}
+.ba-report-mount .wpforms-page-3 .ba-detail-choice-field input:checked+.wpforms-field-label-inline .ba-detail-choice-indicator{
+	border-color:var(--ba-report-teal);
+	background:var(--ba-report-teal);
+	box-shadow:inset 0 0 0 4px #fff;
+}
+.ba-report-mount .wpforms-page-3 .ba-detail-choice-field input[type="checkbox"]:checked+.wpforms-field-label-inline .ba-detail-choice-indicator{
+	box-shadow:none;
+}
+.ba-report-mount .wpforms-page-3 .ba-detail-choice-field input[type="checkbox"]:checked+.wpforms-field-label-inline .ba-detail-choice-indicator::before{
+	content:"✓";
+	color:#fff;
+	font-size:.68rem;
+	font-weight:900;
+}
+
 /* Page navigation */
 .ba-report-mount .wpforms-field-pagebreak:has(.wpforms-page-button-group){
 	position:sticky;
@@ -662,6 +761,7 @@
 	.ba-report-mount .ba-drilldown-field{margin-top:18px!important;padding-top:18px!important}
 	.ba-report-mount .ba-drilldown-field ul{grid-template-columns:1fr!important}
 	.ba-report-mount .ba-relationship-field ul{grid-template-columns:1fr!important}
+	.ba-report-mount .wpforms-page-3 .ba-detail-choice-field ul{grid-template-columns:1fr!important}
 	.ba-report-mount .wpforms-page-2{
 		grid-template-columns:1fr!important;
 		column-gap:0!important;
