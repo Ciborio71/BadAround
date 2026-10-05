@@ -250,6 +250,52 @@
 	});
 	syncExactDateFlow();
 
+	/* Step 4 hygiene:
+	 * - no accidental preselection on a fresh first visit;
+	 * - preserve answers when navigating back/forward or resuming a saved draft;
+	 * - hide damage question for a stolen vehicle, where damage cannot be verified. */
+	const step4NeutralFields = [56,59,60,64].map(field).filter(Boolean);
+	const damageField = field(56);
+	const stolenVehicleRadio = field(3)?.querySelector('input[type="radio"][value="Veicolo rubato"]');
+	const resumeSession = /resume/i.test(window.location.search) || !!root.querySelector('[name*="resume"],[data-resume]');
+	let step4FreshResetDone = resumeSession || activePageIndex() >= 3;
+
+	const clearAccidentalStep4Selections = () => {
+		if (step4FreshResetDone || resumeSession) return;
+		step4FreshResetDone = true;
+		step4NeutralFields.forEach((container) => {
+			container.querySelectorAll('input[type="radio"]:checked').forEach((input) => {
+				input.checked = false;
+				input.dispatchEvent(new Event('input',{bubbles:true}));
+				input.dispatchEvent(new Event('change',{bubbles:true}));
+			});
+		});
+	};
+
+	const syncDamageQuestion = () => {
+		if (!damageField) return;
+		const hiddenForStolenVehicle = !!stolenVehicleRadio?.checked;
+		damageField.classList.toggle('ba-context-hidden',hiddenForStolenVehicle);
+		damageField.setAttribute('aria-hidden',hiddenForStolenVehicle ? 'true' : 'false');
+		damageField.querySelectorAll('input').forEach((input) => {
+			if (hiddenForStolenVehicle) {
+				input.dataset.baWasRequired = input.required ? '1' : '0';
+				input.required = false;
+				if (input.checked) {
+					input.checked = false;
+					input.dispatchEvent(new Event('change',{bubbles:true}));
+				}
+			} else if (input.dataset.baWasRequired === '1') {
+				input.required = true;
+				delete input.dataset.baWasRequired;
+			}
+		});
+	};
+	field(3)?.querySelectorAll('input[type="radio"]').forEach((radio) => {
+		radio.addEventListener('change',() => requestAnimationFrame(syncDamageQuestion));
+	});
+	syncDamageQuestion();
+
 	/* Step 2 time-range validation: ending time cannot precede starting time. */
 	const timeFrom = field(20);
 	const timeTo = field(22);
@@ -434,6 +480,10 @@
 		syncContext(step);
 		root.classList.toggle('is-final-step', step === 5);
 		for (let i = 1; i <= 5; i++) root.classList.toggle('is-step-' + i, i === step);
+		if (step === 4) {
+			clearAccidentalStep4Selections();
+			syncDamageQuestion();
+		}
 
 		const visiblePage = root.querySelector('.wpforms-page:not([style*="display: none"])');
 		const next = visiblePage?.querySelector('.wpforms-page-next');
@@ -456,6 +506,7 @@
 	const observer = new MutationObserver(() => requestAnimationFrame(() => {
 		syncExactDateFlow();
 		validateTimeRange();
+		syncDamageQuestion();
 		syncRelationship();
 		syncStep(false);
 	}));
