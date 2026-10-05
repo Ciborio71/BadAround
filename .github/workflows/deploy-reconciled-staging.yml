@@ -1,0 +1,173 @@
+name: Deploy reconciled to staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: "Exact approved release/mvp-reconciled commit SHA"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate authorized reconciled release
+    if: github.ref == 'refs/heads/release/mvp-reconciled'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout authorized release
+        uses: actions/checkout@v4
+        with:
+          ref: release/mvp-reconciled
+          fetch-depth: 1
+
+      - name: Verify approved SHA
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
+          echo "Authorized SHA: $ACTUAL_SHA"
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+
+      - name: Lint core plugin
+        run: find ./wordpress/plugins/badaround-core -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Lint child theme
+        run: find ./wordpress/themes/badaround-child -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Golden-state invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "Version: 0.17.0" ./wordpress/plugins/badaround-core/badaround-core.php
+          grep -q "BADAROUND_CORE_VERSION', '0.17.0'" ./wordpress/plugins/badaround-core/badaround-core.php
+          grep -q "SCHEMA_VERSION = '1.8.0'" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
+          grep -q "BadAround_Contribution_Service" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
+          grep -q "BadAround_Contribution_Moderation_Admin" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
+          grep -q "BadAround_Sentinel_Service" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
+          grep -q "BadAround_Sentinel_Matching_Service" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
+
+      - name: Recovery invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Eq "'per_page'[[:space:]]*=>[[:space:]]*6" ./wordpress/themes/badaround-child/front-page.php
+          grep -q "grid-template-columns:repeat(3,minmax(0,1fr))" ./wordpress/themes/badaround-child/assets/css/home.css
+          grep -q 'data-ba-map-context="home"' ./wordpress/themes/badaround-child/front-page.php
+          grep -q 'data-ba-map-context="detail"' ./wordpress/themes/badaround-child/template-parts/single-event-layout.php
+          grep -q "BadAround_Contribution_Service::render_event_contribution_block" ./wordpress/themes/badaround-child/template-parts/single-event-layout.php
+          grep -q "prepare_public_projection" ./wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+          grep -q "ensure_public_location" ./wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+          grep -q "approve_received_images_for_event" ./wordpress/plugins/badaround-core/includes/class-badaround-media-repository.php
+          grep -q "Approva e pubblica" ./wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php
+          grep -q "public_projection_prepare_failed" ./wordpress/plugins/badaround-core/includes/class-badaround-wpforms-event-intake.php
+          grep -q "progressiveFieldCandidates" ./wordpress/themes/badaround-child/assets/js/report.js
+          grep -q "baUserTouched" ./wordpress/themes/badaround-child/assets/js/report.js
+          grep -q "wpforms-6-field_17-container" ./wordpress/themes/badaround-child/assets/css/wpforms.css
+
+      - name: D1
+        run: php ./tests/sentinels-d1.php
+      - name: D2
+        run: php ./tests/sentinels-d2.php
+      - name: D3
+        run: php ./tests/sentinels-d3.php
+      - name: E1
+        run: php ./tests/contributions-e1.php
+      - name: E2
+        run: php ./tests/contributions-e2.php
+      - name: E3
+        run: php ./tests/contributions-e3.php
+      - name: E4
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "ba_contribution_notifications" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
+          grep -q "badaround_contribution_notify_reporter" ./wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-service.php
+          grep -q "BadAround_Transactional_Mailer" ./wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-service.php
+          grep -q "Testo riservato destinato al segnalatore" ./wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-admin.php
+      - name: E5
+        run: php ./tests/contributions-e5.php
+
+      - name: Build release manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ./release-manifest
+          SHA="$(git rev-parse HEAD)"
+          CORE_TREE="$(find ./wordpress/plugins/badaround-core -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')"
+          THEME_TREE="$(find ./wordpress/themes/badaround-child -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')"
+          {
+            echo "sha=$SHA"
+            echo "core_version=0.17.0"
+            echo "schema_version=1.8.0"
+            echo "core_tree_sha256=$CORE_TREE"
+            echo "theme_tree_sha256=$THEME_TREE"
+            echo "generated_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > ./release-manifest/staging-release.txt
+
+      - name: Upload release manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: badaround-staging-release-manifest
+          path: ./release-manifest/staging-release.txt
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy authorized core and theme
+    needs: validate
+    if: github.ref == 'refs/heads/release/mvp-reconciled'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout authorized release
+        uses: actions/checkout@v4
+        with:
+          ref: release/mvp-reconciled
+          fetch-depth: 1
+
+      - name: Re-verify approved SHA
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Upload core plugin over FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./wordpress/plugins/badaround-core/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/
+          dangerous-clean-slate: false
+          log-level: minimal
+
+      - name: Upload child theme over FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./wordpress/themes/badaround-child/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          log-level: minimal
