@@ -759,7 +759,7 @@
 			/* Native WPForms conditional fields stay outside our progression
 			 * until WPForms makes them eligible. */
 			if (isNativeConditionalHidden(container)) {
-				setProgressiveGate(container,false);
+				container.classList.remove('ba-progressive-gated','ba-progressive-revealed');
 				continue;
 			}
 
