@@ -265,7 +265,22 @@
 	};
 	const syncRewardSection = () => {
 		const visible = rewardIsRelevant();
-		rewardFields.forEach((container) => setContextVisibility(container,visible,{clear:!visible}));
+		const rewardStatus = field(65);
+		const noReward = rewardStatus?.querySelector('input[type="radio"][value="No"]');
+
+		if (!visible && noReward && !noReward.checked) {
+			noReward.checked = true;
+			noReward.dataset.baAutoContextValue = '1';
+			noReward.dispatchEvent(new Event('input',{bubbles:true}));
+			noReward.dispatchEvent(new Event('change',{bubbles:true}));
+		} else if (visible && noReward?.dataset.baAutoContextValue === '1') {
+			noReward.checked = false;
+			delete noReward.dataset.baAutoContextValue;
+			noReward.dispatchEvent(new Event('input',{bubbles:true}));
+			noReward.dispatchEvent(new Event('change',{bubbles:true}));
+		}
+
+		rewardFields.forEach((container) => setContextVisibility(container,visible,{clear:false}));
 	};
 	[3,6,51].forEach((id) => field(id)?.querySelectorAll('input[type="radio"]').forEach((radio) => {
 		radio.addEventListener('change',() => requestAnimationFrame(syncRewardSection));
@@ -282,20 +297,13 @@
 	});
 	syncPhotoUpload();
 
-	const uploadHasFiles = () => {
-		if (!photoUpload) return false;
-		const hiddenValue = photoUpload.querySelector('input.dropzone-input')?.value?.trim();
-		return !!hiddenValue || !!photoUpload.querySelector('.dz-preview:not(.dz-error), .wpforms-uploader-file');
-	};
-	const syncContentRightsConfirmation = () => {
-		const visible = uploadHasFiles();
-		setContextVisibility(contentRightsConfirmation,visible,{clear:!visible});
-	};
-	if (photoUpload) {
-		photoUpload.addEventListener('change',syncContentRightsConfirmation,true);
-		new MutationObserver(() => requestAnimationFrame(syncContentRightsConfirmation))
-			.observe(photoUpload,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+	const contentRightsLabel = contentRightsConfirmation?.querySelector('.wpforms-field-label-inline');
+	if (contentRightsLabel) {
+		contentRightsLabel.textContent = 'Se ho allegato fotografie o altri contenuti, dichiaro di avere il diritto di caricarli e condividerli con BadAround.';
 	}
+	const syncContentRightsConfirmation = () => {
+		setContextVisibility(contentRightsConfirmation,true,{clear:false});
+	};
 	syncContentRightsConfirmation();
 
 	const publicContactField = field(78);
@@ -503,21 +511,36 @@
 	const syncDamageQuestion = () => {
 		if (!damageField) return;
 		const hiddenForStolenVehicle = !!stolenVehicleRadio?.checked;
+		const notApplicable = damageField.querySelector('input[type="radio"][value="Non applicabile"]');
+
 		damageField.classList.toggle('ba-context-hidden',hiddenForStolenVehicle);
 		damageField.setAttribute('aria-hidden',hiddenForStolenVehicle ? 'true' : 'false');
-		damageField.querySelectorAll('input').forEach((input) => {
-			if (hiddenForStolenVehicle) {
-				input.dataset.baWasRequired = input.required ? '1' : '0';
+
+		if (hiddenForStolenVehicle) {
+			damageField.querySelectorAll('input').forEach((input) => {
+				if (input.required) input.dataset.baWasRequired = '1';
 				input.required = false;
-				if (input.checked) {
-					input.checked = false;
-					input.dispatchEvent(new Event('change',{bubbles:true}));
-				}
-			} else if (input.dataset.baWasRequired === '1') {
-				input.required = true;
-				delete input.dataset.baWasRequired;
+			});
+			if (notApplicable && !notApplicable.checked) {
+				notApplicable.checked = true;
+				notApplicable.dataset.baAutoContextValue = '1';
+				notApplicable.dispatchEvent(new Event('input',{bubbles:true}));
+				notApplicable.dispatchEvent(new Event('change',{bubbles:true}));
 			}
-		});
+		} else {
+			if (notApplicable?.dataset.baAutoContextValue === '1') {
+				notApplicable.checked = false;
+				delete notApplicable.dataset.baAutoContextValue;
+				notApplicable.dispatchEvent(new Event('input',{bubbles:true}));
+				notApplicable.dispatchEvent(new Event('change',{bubbles:true}));
+			}
+			damageField.querySelectorAll('input').forEach((input) => {
+				if (input.dataset.baWasRequired === '1') {
+					input.required = true;
+					delete input.dataset.baWasRequired;
+				}
+			});
+		}
 	};
 	field(3)?.querySelectorAll('input[type="radio"]').forEach((radio) => {
 		radio.addEventListener('change',() => requestAnimationFrame(syncDamageQuestion));
@@ -761,6 +784,35 @@
 			allowPageNavigationScroll = false;
 		},120);
 	});
+
+	/* Save & Resume is a distinct mode, not another report step. */
+	const saveResumeConfirmation = root.querySelector('.wpforms-save-resume-confirmation');
+	const workspace = document.querySelector('.ba-report-workspace');
+
+	const enhanceSaveResumeConfirmation = () => {
+		if (!saveResumeConfirmation) return;
+		const message = saveResumeConfirmation.querySelector('.message');
+		if (message && !message.querySelector('.ba-save-resume-heading')) {
+			const heading = document.createElement('div');
+			heading.className = 'ba-save-resume-heading';
+			heading.innerHTML = '<span class="ba-save-resume-heading__eyebrow">SALVA LA SEGNALAZIONE</span><h2>Riprendi la compilazione più tardi</h2><p>Conserva il link personale oppure invialo al tuo indirizzo email. Potrai tornare esattamente alla compilazione salvata.</p>';
+			message.prepend(heading);
+		}
+	};
+
+	const syncSaveResumeMode = () => {
+		if (!saveResumeConfirmation) return;
+		const active = getComputedStyle(saveResumeConfirmation).display !== 'none';
+		document.body.classList.toggle('ba-save-resume-mode',active);
+		workspace?.classList.toggle('is-save-resume-mode',active);
+		if (active) enhanceSaveResumeConfirmation();
+	};
+
+	if (saveResumeConfirmation) {
+		new MutationObserver(() => requestAnimationFrame(syncSaveResumeMode))
+			.observe(saveResumeConfirmation,{attributes:true,attributeFilter:['style','class']});
+		syncSaveResumeMode();
+	}
 
 	/* Top save action delegates to WPForms Save & Resume. */
 	document.querySelectorAll('[data-ba-report-save]').forEach((button) => {
