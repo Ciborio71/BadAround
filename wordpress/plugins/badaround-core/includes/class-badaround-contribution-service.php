@@ -66,7 +66,7 @@ class BadAround_Contribution_Service {
 		}
 
 		$identity_mode = sanitize_key( (string) $request->get_param( 'public_identity_mode' ) );
-		if ( ! in_array( $identity_mode, array( 'public_alias', 'public_anonymous', 'reserved' ), true ) ) {
+		if ( ! in_array( $identity_mode, array( 'public_alias', 'public_anonymous' ), true ) ) {
 			$identity_mode = 'public_anonymous';
 		}
 		$display_name = trim( sanitize_text_field( (string) $request->get_param( 'public_display_name' ) ) );
@@ -77,7 +77,10 @@ class BadAround_Contribution_Service {
 			$display_name = '';
 		}
 
-		$visibility = 'reserved' === $identity_mode ? 'reserved' : 'public';
+		$visibility = sanitize_key( (string) $request->get_param( 'visibility_requested' ) );
+		if ( ! in_array( $visibility, array( 'public', 'reserved' ), true ) ) {
+			$visibility = 'public';
+		}
 		$consent_privacy = rest_sanitize_boolean( $request->get_param( 'consent_privacy' ) );
 		if ( ! $consent_privacy ) {
 			return new WP_Error( 'ba_contribution_privacy_required', 'È necessario accettare l’informativa privacy.', array( 'status' => 400 ) );
@@ -115,6 +118,20 @@ class BadAround_Contribution_Service {
 		$token = $this->verification_token( $public_id, $email_hash, $expires_at );
 		$lat = $request->get_param( 'exact_lat' );
 		$lng = $request->get_param( 'exact_lng' );
+		if ( '' !== (string) $lat && ( ! is_numeric( $lat ) || (float) $lat < -90 || (float) $lat > 90 ) ) {
+			return new WP_Error( 'ba_contribution_invalid_latitude', 'Posizione non valida.', array( 'status' => 400 ) );
+		}
+		if ( '' !== (string) $lng && ( ! is_numeric( $lng ) || (float) $lng < -180 || (float) $lng > 180 ) ) {
+			return new WP_Error( 'ba_contribution_invalid_longitude', 'Posizione non valida.', array( 'status' => 400 ) );
+		}
+		$observed_at = trim( sanitize_text_field( (string) $request->get_param( 'observed_at' ) ) );
+		if ( $observed_at ) {
+			$parsed_observed_at = strtotime( $observed_at );
+			if ( false === $parsed_observed_at ) {
+				return new WP_Error( 'ba_contribution_invalid_observed_at', 'Data o ora non valida.', array( 'status' => 400 ) );
+			}
+			$observed_at = gmdate( 'Y-m-d H:i:s', $parsed_observed_at );
+		}
 
 		$contribution = $this->repository->create( array(
 			'public_id' => $public_id,
@@ -127,7 +144,7 @@ class BadAround_Contribution_Service {
 			'public_display_name' => $display_name ?: null,
 			'visibility_requested' => $visibility,
 			'content_original' => $content,
-			'observed_at' => $normalized_payload['observed_at'] ?: null,
+			'observed_at' => $observed_at ?: null,
 			'observed_at_precision' => sanitize_key( (string) $request->get_param( 'observed_at_precision' ) ),
 			'exact_location_text' => $normalized_payload['exact_location_text'] ?: null,
 			'exact_lat' => is_numeric( $lat ) ? (float) $lat : null,
