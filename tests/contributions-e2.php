@@ -42,6 +42,10 @@ class WP_Error {
 
 class BadAround_Publication_Service { const STATUS_PUBLISHED = 'published'; }
 class BadAround_Contribution_Post_Type { const POST_TYPE = 'ba_contributo'; }
+class BadAround_Contribution_Media_Repository {
+	public function has_pending_review( $id ) { return false; }
+	public function materialize_approved( $id, $projection_id ) { return array(); }
+}
 
 class BadAround_Audit_Log {
 	public static $actions = array();
@@ -155,6 +159,6 @@ e2_assert( false !== $projection_segment && false === strpos( $projection_segmen
 e2_assert( false !== strpos( $admin_src, 'Non copiare automaticamente dati riservati' ), 'moderation UI warns against copying private data' );
 e2_assert( false !== strpos( $admin_src, 'Testo pubblico moderato' ), 'publication requires explicit moderator-authored public text' );
 e2_assert( false !== strpos( $installer, 'ba_moderate_contributions' ) && false !== strpos( $installer, 'ba_view_private_contributions' ), 'E2 capabilities are versioned' );
-e2_assert( false !== strpos( $installer, "SCHEMA_VERSION = '1.5.0'" ), 'schema/capability version advanced for E2' );
+e2_assert( 1 === preg_match( "/SCHEMA_VERSION\s*=\s*'1\.[5-9][0-9]*\.0'/", $installer ), 'schema/capability version is E2-or-later' );
 
 echo "E2 contribution moderation tests complete.\n";
