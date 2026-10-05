@@ -124,7 +124,7 @@ class BadAround_Contribution_Moderation_Admin {
 			if ( 'reserved' !== $row['visibility_requested'] ) {
 				$this->render_publish_form( $row );
 			}
-			$this->render_action_form( $row, BadAround_Contribution_Repository::STATUS_RESERVED, __( 'Classifica come riservato', 'badaround-core' ), false );
+			$this->render_reserved_form( $row );
 			$this->render_action_form( $row, BadAround_Contribution_Repository::STATUS_REJECTED, __( 'Rifiuta', 'badaround-core' ), true );
 		} else {
 			echo '<p>' . esc_html__( 'Moderazione conclusa.', 'badaround-core' ) . '</p>';
