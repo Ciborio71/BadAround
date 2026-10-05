@@ -431,6 +431,13 @@
 	border-color:#9ccfd4!important;
 	background:#fbfefe!important;
 }
+.ba-report-mount .ba-detail-choice-field .wpforms-field-label-inline:has(.ba-detail-choice-icon[hidden]){
+	grid-template-columns:1fr 20px;
+}
+.ba-report-mount .ba-detail-choice-field .ba-detail-choice-icon[hidden]{
+	display:none!important;
+}
+
 .ba-detail-choice-icon{
 	display:grid;
 	place-items:center;
