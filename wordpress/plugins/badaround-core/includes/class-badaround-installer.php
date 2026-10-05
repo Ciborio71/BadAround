@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Owns the versioned database schema for private and relational data. */
 class BadAround_Installer {
-	const SCHEMA_VERSION = '1.4.0';
+	const SCHEMA_VERSION = '1.5.0';
 	const OPTION_NAME    = 'ba_db_schema_version';
 
 	public function register_hooks() {
@@ -52,6 +52,8 @@ class BadAround_Installer {
 			'ba_view_private_reports',
 			'ba_view_private_media',
 			'ba_view_audit_log',
+			'ba_moderate_contributions',
+			'ba_view_private_contributions',
 		);
 
 		foreach ( $capabilities as $capability ) {
