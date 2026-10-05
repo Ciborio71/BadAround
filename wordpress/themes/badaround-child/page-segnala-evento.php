@@ -53,11 +53,11 @@ $form_id = badaround_report_form_id();
 			<header class="ba-report-stage__intro">
 				<div>
 					<span class="ba-report-stage__eyebrow" data-ba-report-eyebrow>SEGNALA UN EVENTO</span>
-					<h2 data-ba-report-title>Cosa Vuoi Segnalare?</h2>
+					<h2 data-ba-report-title>Cosa vuoi segnalare?</h2>
 					<div class="ba-report-stage__copy" data-ba-report-copy>
 						<p>Un <strong>furto</strong>, un <strong>danno</strong>, un <strong>comportamento sospetto</strong>, uno <strong>smarrimento</strong>, un <strong>pericolo</strong> oppure stai <strong>cercando testimoni</strong>?</p>
 						
-						<p>Ti guideremo noi e ti mostreremo solo le domande necessarie per segnalare l'evento alla Community di BadAround!</p>
+						<p>Ti guideremo noi e ti mostreremo solo le domande necessarie per segnalare l'evento alla community di BadAround.</p>
 					</div>
 				</div>
 				<div class="ba-report-stage__actions">
