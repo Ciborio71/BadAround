@@ -228,10 +228,15 @@ class BadAround_Moderation_Admin {
 		}
 		if ( BadAround_Publication_Service::STATUS_PUBLISHED === $status ) {
 			$permalink = get_permalink( $post->ID );
+			$repair_url = wp_nonce_url(
+				admin_url( 'admin-post.php?action=ba_publish_event&event_id=' . absint( $post->ID ) ),
+				'ba_publish_event_' . absint( $post->ID )
+			);
 			echo '<p><strong>' . esc_html__( 'Evento pubblicato.', 'badaround-core' ) . '</strong></p>';
 			if ( $permalink ) {
 				echo '<p><a class="button button-secondary" target="_blank" rel="noopener" href="' . esc_url( $permalink ) . '">' . esc_html__( 'Apri evento pubblico', 'badaround-core' ) . '</a></p>';
 			}
+			echo '<p><a class="button" style="width:100%;text-align:center" href="' . esc_url( $repair_url ) . '">' . esc_html__( 'Aggiorna proiezione pubblica', 'badaround-core' ) . '</a></p>';
 			return;
 		}
 		if ( BadAround_Moderation_Service::STATUS_APPROVED === $status ) {
