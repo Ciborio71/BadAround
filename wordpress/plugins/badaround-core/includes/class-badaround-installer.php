@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Owns the versioned database schema for private and relational data. */
 class BadAround_Installer {
-	const SCHEMA_VERSION = '1.6.0';
+	const SCHEMA_VERSION = '1.7.0';
 	const OPTION_NAME    = 'ba_db_schema_version';
 
 	public function register_hooks() {
@@ -135,6 +135,7 @@ class BadAround_Installer {
 		$sentinel_matches = $wpdb->prefix . 'ba_sentinel_event_matches';
 		$contributions    = $wpdb->prefix . 'ba_contributions';
 		$contribution_media = $wpdb->prefix . 'ba_contribution_media';
+		$contribution_notifications = $wpdb->prefix . 'ba_contribution_notifications';
 
 		$sql = "CREATE TABLE {$reports} (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -288,6 +289,7 @@ class BadAround_Installer {
 			moderated_by bigint(20) unsigned DEFAULT NULL,
 			moderated_at datetime DEFAULT NULL,
 			moderation_reason text DEFAULT NULL,
+			recipient_text longtext DEFAULT NULL,
 			created_at datetime NOT NULL,
 			updated_at datetime NOT NULL,
 			deleted_at datetime DEFAULT NULL,
@@ -325,6 +327,30 @@ class BadAround_Installer {
 			KEY event_status (event_id,review_status),
 			KEY public_attachment (public_attachment_id),
 			KEY checksum (checksum)
+		) {$charset_collate};
+
+		CREATE TABLE {$contribution_notifications} (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			contribution_id bigint(20) unsigned NOT NULL,
+			event_id bigint(20) unsigned NOT NULL,
+			notification_kind varchar(32) NOT NULL,
+			recipient_hash char(64) NOT NULL,
+			status varchar(32) NOT NULL DEFAULT 'queued',
+			notification_attempts int(10) unsigned NOT NULL DEFAULT 0,
+			last_attempt_at datetime DEFAULT NULL,
+			next_retry_at datetime DEFAULT NULL,
+			sent_at datetime DEFAULT NULL,
+			last_error_code varchar(64) DEFAULT NULL,
+			access_public_id char(36) DEFAULT NULL,
+			access_token_hash char(64) DEFAULT NULL,
+			access_expires_at datetime DEFAULT NULL,
+			created_at datetime NOT NULL,
+			updated_at datetime NOT NULL,
+			PRIMARY KEY  (id),
+			UNIQUE KEY contribution_id (contribution_id),
+			UNIQUE KEY access_public_id (access_public_id),
+			KEY status_retry (status,next_retry_at),
+			KEY event_id (event_id)
 		) {$charset_collate};
 
 		CREATE TABLE {$audit} (
