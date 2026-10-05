@@ -131,4 +131,47 @@ class BadAround_Contribution_Repository {
 		);
 		return false !== $updated;
 	}
+	public function moderate( $id, $expected_status, $target_status, array $data ) {
+		global $wpdb;
+		$update = array(
+			'status' => sanitize_key( $target_status ),
+			'visibility_decided' => ! empty( $data['visibility_decided'] ) ? sanitize_key( $data['visibility_decided'] ) : null,
+			'public_projection_id' => ! empty( $data['public_projection_id'] ) ? absint( $data['public_projection_id'] ) : null,
+			'moderated_by' => ! empty( $data['moderated_by'] ) ? absint( $data['moderated_by'] ) : null,
+			'moderated_at' => current_time( 'mysql', true ),
+			'moderation_reason' => ! empty( $data['reason'] ) ? sanitize_textarea_field( $data['reason'] ) : null,
+			'updated_at' => current_time( 'mysql', true ),
+		);
+
+		$updated = $wpdb->update(
+			$this->table(),
+			$update,
+			array(
+				'id' => absint( $id ),
+				'status' => sanitize_key( $expected_status ),
+			)
+		);
+		if ( false === $updated || 0 === $updated ) {
+			return new WP_Error( 'ba_contribution_moderation_update_failed', __( 'Impossibile aggiornare lo stato del contributo.', 'badaround-core' ) );
+		}
+		return $this->find_by_id( $id );
+	}
+
+	public function list_for_moderation( $limit = 100 ) {
+		global $wpdb;
+		$table = $this->table();
+		$limit = max( 1, min( 200, absint( $limit ) ) );
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$table} WHERE deleted_at IS NULL AND status IN (%s,%s,%s,%s,%s) ORDER BY created_at DESC LIMIT %d",
+				self::STATUS_TO_REVIEW,
+				self::STATUS_IN_REVIEW,
+				self::STATUS_PUBLISHED,
+				self::STATUS_RESERVED,
+				self::STATUS_REJECTED,
+				$limit
+			),
+			ARRAY_A
+		);
+	}
 }
