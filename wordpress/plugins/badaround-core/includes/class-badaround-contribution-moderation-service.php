@@ -84,6 +84,9 @@ class BadAround_Contribution_Moderation_Service {
 		$recipient_text = '';
 		if ( BadAround_Contribution_Repository::STATUS_RESERVED === $target_status ) {
 			$recipient_text = isset( $args['recipient_text'] ) ? trim( sanitize_textarea_field( $args['recipient_text'] ) ) : '';
+			if ( '' === $recipient_text && isset( $_POST['recipient_text'] ) ) {
+				$recipient_text = trim( sanitize_textarea_field( wp_unslash( $_POST['recipient_text'] ) ) );
+			}
 			if ( mb_strlen( $recipient_text ) < 10 ) {
 				return new WP_Error( 'ba_contribution_recipient_text_required', __( 'Inserisci il testo riservato destinato al segnalatore.', 'badaround-core' ) );
 			}
