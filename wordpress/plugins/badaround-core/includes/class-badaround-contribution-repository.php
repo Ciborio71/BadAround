@@ -131,6 +131,22 @@ class BadAround_Contribution_Repository {
 		);
 		return false !== $updated;
 	}
+	public function abandon_pending( $id ) {
+		global $wpdb;
+		$updated = $wpdb->update(
+			$this->table(),
+			array(
+				'deleted_at' => current_time( 'mysql', true ),
+				'updated_at' => current_time( 'mysql', true ),
+			),
+			array(
+				'id' => absint( $id ),
+				'status' => self::STATUS_PENDING_VERIFICATION,
+			)
+		);
+		return false !== $updated;
+	}
+
 	public function moderate( $id, $expected_status, $target_status, array $data ) {
 		global $wpdb;
 		$update = array(
