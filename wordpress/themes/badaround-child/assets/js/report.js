@@ -258,7 +258,11 @@
 	const damageField = field(56);
 	const stolenVehicleRadio = field(3)?.querySelector('input[type="radio"][value="Veicolo rubato"]');
 	const resumeSession = /resume/i.test(window.location.search) || !!root.querySelector('[name*="resume"],[data-resume]');
-	let step4FreshResetDone = resumeSession || activePageIndex() >= 3;
+	const step4InitiallyVisible = (() => {
+		const page4 = root.querySelector('.wpforms-page-4');
+		return !!page4 && getComputedStyle(page4).display !== 'none';
+	})();
+	let step4FreshResetDone = resumeSession || step4InitiallyVisible;
 
 	const clearAccidentalStep4Selections = () => {
 		if (step4FreshResetDone || resumeSession) return;
