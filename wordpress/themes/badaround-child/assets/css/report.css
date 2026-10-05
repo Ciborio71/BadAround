@@ -241,6 +241,7 @@ body.page-template-page-segnala-evento .ba-site-header{position:sticky}
 }
 .ba-report-context__dot{width:8px;height:8px;border-radius:50%;background:var(--ba-report-context-color,var(--ba-report-teal))}
 .ba-report-mount{position:relative;z-index:2}
+.ba-report-stage:has(#wpforms-6.is-step-3) .ba-report-stage__intro{margin-bottom:42px}
 .ba-report-trust{
 	display:flex;
 	align-items:center;
