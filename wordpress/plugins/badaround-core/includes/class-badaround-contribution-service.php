@@ -162,6 +162,18 @@ class BadAround_Contribution_Service {
 		) );
 		if ( is_wp_error( $contribution ) ) { return $contribution; }
 
+		$files = method_exists( $request, 'get_file_params' ) ? $request->get_file_params() : array();
+		if ( ! empty( $files ) ) {
+			$media_repository = new BadAround_Contribution_Media_Repository();
+			$media = $media_repository->ingest_rest_files( $contribution['id'], $event_id, $files );
+			if ( is_wp_error( $media ) ) {
+				$media_repository->cleanup_contribution( $contribution['id'] );
+				$this->repository->abandon_pending( $contribution['id'] );
+				BadAround_Audit_Log::record( 'contribution', $contribution['id'], 'contribution_media_ingest_failed', 'contribution', $media->get_error_code() );
+				return $media;
+			}
+		}
+
 		BadAround_Audit_Log::record( 'contribution', $contribution['id'], 'contribution_created', 'contribution' );
 		$this->queue_verification_email( $contribution['id'] );
 
