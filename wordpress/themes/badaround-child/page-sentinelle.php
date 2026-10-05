@@ -75,6 +75,26 @@ function badaround_sentinel_territory_label( WP_Term $term ) {
 						<a class="ba-button ba-button--outline" href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Esplora la mappa</a>
 					</div>
 				</div>
+				<div class="ba-sentinel-hero-art" aria-label="Una Sentinella BadAround monitora una zona e avvisa quando viene pubblicata una nuova segnalazione">
+					<div class="ba-sentinel-hero-art__halo ba-sentinel-hero-art__halo--outer"></div>
+					<div class="ba-sentinel-hero-art__halo ba-sentinel-hero-art__halo--inner"></div>
+					<div class="ba-sentinel-hero-art__map">
+						<span class="ba-sentinel-art-road ba-sentinel-art-road--a"></span>
+						<span class="ba-sentinel-art-road ba-sentinel-art-road--b"></span>
+						<span class="ba-sentinel-art-road ba-sentinel-art-road--c"></span>
+						<span class="ba-sentinel-art-zone"><i></i><strong>La tua zona</strong></span>
+						<span class="ba-sentinel-art-pin ba-sentinel-art-pin--vehicles">●</span>
+						<span class="ba-sentinel-art-pin ba-sentinel-art-pin--hazards">!</span>
+						<span class="ba-sentinel-art-pin ba-sentinel-art-pin--animals">●</span>
+						<span class="ba-sentinel-art-pin ba-sentinel-art-pin--places">⌂</span>
+					</div>
+					<div class="ba-sentinel-art-status"><span></span> Sentinella attiva</div>
+					<div class="ba-sentinel-art-notification">
+						<span class="ba-sentinel-art-notification__icon">!</span>
+						<div><small>NUOVA SEGNALAZIONE</small><strong>Nuovo evento nella tua zona</strong><span>Pericolo · pochi minuti fa</span></div>
+					</div>
+					<div class="ba-sentinel-art-caption">BadAround tiene d'occhio la zona<br><strong>e ti avvisa quando serve.</strong></div>
+				</div>
 			</div>
 		</div>
 	</section>
