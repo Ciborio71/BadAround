@@ -1,4 +1,5 @@
 name: Deploy reconciled to staging
+# manual trigger marker: e5-admin-link-fix
 
 on:
   push:
