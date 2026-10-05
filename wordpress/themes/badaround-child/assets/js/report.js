@@ -250,6 +250,71 @@
 	});
 	syncExactDateFlow();
 
+	const parseItalianDate = (value) => {
+		const match = String(value || '').trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+		if (!match) return null;
+		const day = Number(match[1]);
+		const month = Number(match[2]);
+		const year = Number(match[3]);
+		const date = new Date(year,month - 1,day);
+		if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null;
+		date.setHours(0,0,0,0);
+		return date;
+	};
+
+	const todayLocal = () => {
+		const today = new Date();
+		today.setHours(0,0,0,0);
+		return today;
+	};
+
+	const validateEventDate = ({focus = false} = {}) => {
+		if (!eventDate || !eventDateInput) return true;
+		const parsed = parseItalianDate(eventDateInput.value);
+		const invalid = !!parsed && parsed.getTime() > todayLocal().getTime();
+
+		eventDate.classList.toggle('ba-event-date-invalid',invalid);
+		eventDateInput.setAttribute('aria-invalid',invalid ? 'true' : 'false');
+
+		let error = eventDate.querySelector('.ba-event-date-error');
+		if (invalid && !error) {
+			error = document.createElement('div');
+			error.className = 'ba-event-date-error';
+			error.setAttribute('role','alert');
+			error.textContent = 'La data dell’evento non può essere successiva alla data odierna.';
+			eventDate.append(error);
+		} else if (!invalid && error) {
+			error.remove();
+		}
+
+		if (invalid && focus) {
+			eventDateInput.focus({preventScroll:true});
+			eventDate.scrollIntoView({behavior:'smooth',block:'center'});
+		}
+		return !invalid;
+	};
+
+	const constrainEventDatePicker = () => {
+		if (!eventDateInput) return;
+		if (eventDateInput._flatpickr) {
+			eventDateInput._flatpickr.set('maxDate','today');
+			return;
+		}
+		if (eventDateInput.type === 'date') {
+			const today = new Date();
+			const yyyy = today.getFullYear();
+			const mm = String(today.getMonth() + 1).padStart(2,'0');
+			const dd = String(today.getDate()).padStart(2,'0');
+			eventDateInput.max = yyyy + '-' + mm + '-' + dd;
+		}
+	};
+	['input','change','blur'].forEach((eventName) => {
+		eventDateInput?.addEventListener(eventName,() => validateEventDate());
+	});
+	constrainEventDatePicker();
+	setTimeout(constrainEventDatePicker,250);
+	setTimeout(constrainEventDatePicker,1000);
+
 	/* Step 4 hygiene:
 	 * - no accidental preselection on a fresh first visit;
 	 * - preserve answers when navigating back/forward or resuming a saved draft;
@@ -509,6 +574,8 @@
 
 	const observer = new MutationObserver(() => requestAnimationFrame(() => {
 		syncExactDateFlow();
+		validateEventDate();
+		constrainEventDatePicker();
 		validateTimeRange();
 		syncDamageQuestion();
 		syncRelationship();
@@ -519,10 +586,12 @@
 	root.addEventListener('click',(event) => {
 		const navigationButton = event.target.closest('.wpforms-page-next,.wpforms-page-prev');
 		if (!navigationButton) return;
-		if (navigationButton.classList.contains('wpforms-page-next') && activePageIndex() === 1 && !validateTimeRange({focus:true})) {
-			event.preventDefault();
-			event.stopImmediatePropagation();
-			return;
+		if (navigationButton.classList.contains('wpforms-page-next') && activePageIndex() === 1) {
+			if (!validateEventDate({focus:true}) || !validateTimeRange({focus:true})) {
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				return;
+			}
 		}
 		allowPageNavigationScroll = true;
 		setTimeout(() => {
