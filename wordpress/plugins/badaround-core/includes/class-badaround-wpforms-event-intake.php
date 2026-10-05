@@ -97,6 +97,11 @@ class BadAround_WPForms_Event_Intake {
 				BadAround_Audit_Log::technical_error( 'event', $post_id, 'territory_mapping_failed', 'canonical_territory_unresolved', $request_id );
 			}
 
+			$projection = ( new BadAround_Publication_Service() )->prepare_public_projection( $post_id );
+			if ( is_wp_error( $projection ) ) {
+				BadAround_Audit_Log::technical_error( 'event', $post_id, 'public_projection_prepare_failed', $projection->get_error_code(), $request_id );
+			}
+
 			$repository->link_event( $report_id, $post_id );
 
 			if ( isset( $fields[63] ) && is_array( $fields[63] ) ) {
