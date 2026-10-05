@@ -145,6 +145,62 @@
 		label.dataset.baRelationshipEnhanced = '1';
 	});
 
+	const detailChoiceIcon = (text) => {
+		const t = stripLeadingEmoji(text).toLowerCase();
+		if (t.includes('automobile')) return '🚗';
+		if (t.includes('motocicletta')) return '🏍';
+		if (t.includes('scooter') || t.includes('ciclomotore')) return '🛵';
+		if (t.includes('furgone')) return '🚐';
+		if (t.includes('camion') || t.includes('mezzo pesante')) return '🚚';
+		if (t.includes('camper')) return '🚐';
+		if (t.includes('autobus')) return '🚌';
+		if (t.includes('bicicletta')) return '🚲';
+		if (t.includes('monopattino')) return '🛴';
+		if (t.includes('agricolo') || t.includes('da lavoro')) return '⚙';
+		if (t.includes('cane')) return '🐕';
+		if (t.includes('gatto')) return '🐈';
+		if (t.includes('uccello')) return '◒';
+		if (t.includes('coniglio')) return '◉';
+		if (t.includes('porta') || t.includes('finestra') || t.includes('serratura')) return '⌂';
+		if (t.includes('denaro')) return '€';
+		if (t.includes('gioiell')) return '◇';
+		if (t.includes('elettronic')) return '▥';
+		if (t.includes('document')) return '▣';
+		if (t.includes('chiav')) return '⌘';
+		if (t.includes('testimon')) return '◉';
+		if (t.includes('coinvolt')) return '◎';
+		if (t.includes('sì') || t.startsWith('si ')) return '✓';
+		if (t.includes('no')) return '–';
+		if (t.includes('altro') || t.includes('non lo so') || t.includes('non sono')) return '…';
+		return choiceGlyph(text);
+	};
+
+	root.querySelectorAll('.wpforms-page-3 .wpforms-field-radio, .wpforms-page-3 .wpforms-field-checkbox').forEach((container) => {
+		container.classList.add('ba-detail-choice-field');
+		container.querySelectorAll('.wpforms-field-label-inline').forEach((label) => {
+			if (label.dataset.baDetailEnhanced === '1') return;
+			const input = label.previousElementSibling;
+			const displayText = stripLeadingEmoji(label.textContent.trim());
+			label.textContent = '';
+
+			const icon = document.createElement('span');
+			icon.className = 'ba-detail-choice-icon';
+			icon.setAttribute('aria-hidden','true');
+			icon.textContent = detailChoiceIcon(displayText);
+
+			const text = document.createElement('span');
+			text.className = 'ba-detail-choice-text';
+			text.textContent = displayText;
+
+			const indicator = document.createElement('span');
+			indicator.className = 'ba-detail-choice-indicator' + (input?.type === 'checkbox' ? ' is-checkbox' : '');
+			indicator.setAttribute('aria-hidden','true');
+
+			label.append(icon,text,indicator);
+			label.dataset.baDetailEnhanced = '1';
+		});
+	});
+
 	/* Visual grouping only: no fields are moved and no WPForms logic is altered. */
 	const classFields = (ids, classes) => ids.forEach((id) => field(id)?.classList.add(...classes));
 	classFields([37,38,39,40,41,42,43,44],['ba-form-section']);
