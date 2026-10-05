@@ -187,6 +187,19 @@ class BadAround_Contribution_Moderation_Admin {
 		echo '</form>';
 	}
 
+	private function render_reserved_form( array $row ) {
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin:16px 0;padding:12px;border:1px solid #ccd0d4;background:#fff">';
+		wp_nonce_field( 'ba_moderate_contribution_' . absint( $row['id'] ) );
+		echo '<input type="hidden" name="action" value="ba_moderate_contribution">';
+		echo '<input type="hidden" name="contribution_id" value="' . absint( $row['id'] ) . '">';
+		echo '<input type="hidden" name="target_status" value="' . esc_attr( BadAround_Contribution_Repository::STATUS_RESERVED ) . '">';
+		echo '<p><label><strong>' . esc_html__( 'Testo riservato destinato al segnalatore', 'badaround-core' ) . '</strong><br>';
+		echo '<textarea class="widefat" rows="6" name="recipient_text" required></textarea></label></p>';
+		echo '<p class="description">' . esc_html__( 'Scrivi solo le informazioni che il segnalatore può ricevere. Non inserire email o contatti del contributore.', 'badaround-core' ) . '</p>';
+		submit_button( __( 'Classifica come riservato e notifica', 'badaround-core' ), 'secondary', 'submit', false );
+		echo '</form>';
+	}
+
 	private function render_action_form( array $row, $target, $label, $reason_required ) {
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin:12px 0">';
 		wp_nonce_field( 'ba_moderate_contribution_' . absint( $row['id'] ) );
