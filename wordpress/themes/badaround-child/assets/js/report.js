@@ -170,6 +170,37 @@
 	[29,32,33].forEach((id) => field(id)?.classList.add('ba-location-secondary'));
 	field(34)?.classList.add('ba-danger-field');
 
+	/* Step 2 exact-date progressive flow:
+	 * date first, then time knowledge, then WPForms reveals the exact time. */
+	const eventTiming = field(16);
+	const eventDate = field(17);
+	const timeKnowledge = field(18);
+	const exactTime = field(19);
+	const eventDateInput = eventDate?.querySelector('input');
+	const exactDateRadio = eventTiming?.querySelector('input[type="radio"][value="In una data precisa"]');
+
+	const syncExactDateFlow = () => {
+		if (!timeKnowledge) return;
+		const exactDateSelected = !!exactDateRadio?.checked;
+		const hasDate = !!eventDateInput?.value.trim();
+		const revealTimeKnowledge = exactDateSelected && hasDate;
+		timeKnowledge.classList.toggle('ba-progressive-hidden', !revealTimeKnowledge);
+		timeKnowledge.setAttribute('aria-hidden', revealTimeKnowledge ? 'false' : 'true');
+
+		if (!revealTimeKnowledge && exactTime) {
+			exactTime.classList.add('ba-progressive-hidden');
+		} else if (exactTime && getComputedStyle(exactTime).display !== 'none') {
+			exactTime.classList.remove('ba-progressive-hidden');
+		}
+	};
+	eventTiming?.querySelectorAll('input[type="radio"]').forEach((radio) => {
+		radio.addEventListener('change',() => requestAnimationFrame(syncExactDateFlow));
+	});
+	['input','change','blur'].forEach((eventName) => {
+		eventDateInput?.addEventListener(eventName,() => requestAnimationFrame(syncExactDateFlow));
+	});
+	syncExactDateFlow();
+
 	/* Progressive disclosure: show reporter relationship only after a
 	 * specific event has been selected in the currently visible branch. */
 	const relationship = field(11);
@@ -319,6 +350,7 @@
 	};
 
 	const observer = new MutationObserver(() => requestAnimationFrame(() => {
+		syncExactDateFlow();
 		syncRelationship();
 		syncStep(false);
 	}));
