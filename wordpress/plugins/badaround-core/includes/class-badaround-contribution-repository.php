@@ -62,21 +62,24 @@ class BadAround_Contribution_Repository {
 
 	public function find_by_id( $id ) {
 		global $wpdb;
-		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$this->table()} WHERE id = %d AND deleted_at IS NULL LIMIT 1", absint( $id ) ), ARRAY_A );
+		$table = $this->table();
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d AND deleted_at IS NULL LIMIT 1", absint( $id ) ), ARRAY_A );
 		return $row ?: null;
 	}
 
 	public function find_by_public_id( $public_id ) {
 		global $wpdb;
-		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$this->table()} WHERE public_id = %s AND deleted_at IS NULL LIMIT 1", sanitize_text_field( $public_id ) ), ARRAY_A );
+		$table = $this->table();
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE public_id = %s AND deleted_at IS NULL LIMIT 1", sanitize_text_field( $public_id ) ), ARRAY_A );
 		return $row ?: null;
 	}
 
 	public function find_recent_duplicate( $event_id, $email_hash, $payload_hash, $since_gmt ) {
 		global $wpdb;
+		$table = $this->table();
 		$row = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM {$this->table()} WHERE event_id = %d AND email_hash = %s AND payload_hash = %s AND created_at >= %s AND deleted_at IS NULL ORDER BY id DESC LIMIT 1",
+				"SELECT * FROM {$table} WHERE event_id = %d AND email_hash = %s AND payload_hash = %s AND created_at >= %s AND deleted_at IS NULL ORDER BY id DESC LIMIT 1",
 				absint( $event_id ),
 				sanitize_text_field( $email_hash ),
 				sanitize_text_field( $payload_hash ),
