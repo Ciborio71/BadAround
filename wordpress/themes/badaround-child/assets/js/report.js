@@ -148,15 +148,24 @@
 	[29,32,33].forEach((id) => field(id)?.classList.add('ba-location-secondary'));
 	field(34)?.classList.add('ba-danger-field');
 
-	/* Keep the reporter relationship question hidden until a macro-category exists. */
+	/* Progressive disclosure: show reporter relationship only after a
+	 * specific event has been selected in the currently visible branch. */
 	const relationship = field(11);
+	const drilldownFields = [3,4,5,6,7,8].map(field).filter(Boolean);
+	const hasVisibleEventSelection = () => drilldownFields.some((container) => {
+		if (container.hidden || getComputedStyle(container).display === 'none') return false;
+		return !!container.querySelector('input[type="radio"]:checked');
+	});
 	const syncRelationship = () => {
-		if (!relationship || !categoryRadios.length) return;
-		const selected = categoryRadios.some((radio) => radio.checked);
+		if (!relationship) return;
+		const selected = hasVisibleEventSelection();
 		relationship.hidden = !selected;
 		relationship.setAttribute('aria-hidden', selected ? 'false' : 'true');
 	};
-	categoryRadios.forEach((radio) => radio.addEventListener('change',syncRelationship));
+	categoryRadios.forEach((radio) => radio.addEventListener('change',() => requestAnimationFrame(syncRelationship)));
+	drilldownFields.forEach((container) => {
+		container.querySelectorAll('input[type="radio"]').forEach((radio) => radio.addEventListener('change',syncRelationship));
+	});
 	syncRelationship();
 
 	/* Category context chip for later steps. */
@@ -287,7 +296,10 @@
 		lastPage = pageIndex;
 	};
 
-	const observer = new MutationObserver(() => requestAnimationFrame(() => syncStep(false)));
+	const observer = new MutationObserver(() => requestAnimationFrame(() => {
+		syncRelationship();
+		syncStep(false);
+	}));
 	observer.observe(root,{attributes:true,subtree:true,attributeFilter:['style','class']});
 
 	root.addEventListener('click',(event) => {
