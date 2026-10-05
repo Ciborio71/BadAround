@@ -175,7 +175,7 @@
 		return choiceGlyph(text);
 	};
 
-	root.querySelectorAll('.wpforms-page-3 .wpforms-field-radio, .wpforms-page-3 .wpforms-field-checkbox').forEach((container) => {
+	root.querySelectorAll('.wpforms-page-3 .wpforms-field-radio, .wpforms-page-3 .wpforms-field-checkbox, .wpforms-page-4 .wpforms-field-radio, .wpforms-page-4 .wpforms-field-checkbox, .wpforms-page-5 .wpforms-field-radio, .wpforms-page-5 .wpforms-field-checkbox').forEach((container) => {
 		container.classList.add('ba-detail-choice-field');
 		container.querySelectorAll('.wpforms-field-label-inline').forEach((label) => {
 			if (label.dataset.baDetailEnhanced === '1') return;
