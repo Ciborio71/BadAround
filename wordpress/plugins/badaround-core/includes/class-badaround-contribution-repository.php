@@ -156,6 +156,7 @@ class BadAround_Contribution_Repository {
 			'moderated_by' => ! empty( $data['moderated_by'] ) ? absint( $data['moderated_by'] ) : null,
 			'moderated_at' => current_time( 'mysql', true ),
 			'moderation_reason' => ! empty( $data['reason'] ) ? sanitize_textarea_field( $data['reason'] ) : null,
+			'recipient_text' => ! empty( $data['recipient_text'] ) ? sanitize_textarea_field( $data['recipient_text'] ) : null,
 			'updated_at' => current_time( 'mysql', true ),
 		);
 
