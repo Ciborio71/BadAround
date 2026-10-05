@@ -1,0 +1,36 @@
+name: Home Hero color fix staging deploy
+
+on:
+  push:
+    branches:
+      - feature/home-hero-editorial
+
+permissions:
+  contents: read
+
+concurrency:
+  group: badaround-staging-theme
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy Home Hero color fix
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Upload child theme over FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./wordpress/themes/badaround-child/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          log-level: minimal
