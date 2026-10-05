@@ -232,7 +232,7 @@
 	const copy = document.querySelector('[data-ba-report-copy]');
 
 	const stepCopy = {
-		1:['SEGNALA UN EVENTO','Cosa è successo?','Scegli la categoria più vicina al tuo caso. Mostreremo solo le domande necessarie.'],
+		1:['SEGNALA UN EVENTO','Cosa è successo?','<p><strong>Un furto, un danno, un comportamento sospetto, un pericolo o stai cercando testimoni?</strong><br>Segnala ciò che è successo e aiuta chi vive o frequenta la stessa zona.</p><p><strong>Scegli la categoria più vicina al tuo caso.</strong></p><p><strong>Non preoccuparti se non è perfetta: ti guideremo noi e ti mostreremo solo le domande necessarie.</strong></p>'],
 		2:['PASSAGGIO 2 DI 5','Dove e quando è successo?','Indica il luogo e il momento dell’evento. La posizione pubblica seguirà sempre le regole di privacy BadAround.'],
 		3:['PASSAGGIO 3 DI 5','Aggiungi i dettagli','Vedrai soltanto le domande pertinenti alla categoria e al tipo di evento che hai scelto.'],
 		4:['PASSAGGIO 4 DI 5','Racconta e documenta','Descrivi i fatti in modo chiaro e aggiungi eventuali foto o informazioni utili alla verifica.'],
@@ -253,7 +253,10 @@
 
 		if (eyebrow) eyebrow.textContent = content[0];
 		if (title) title.textContent = content[1];
-		if (copy) copy.textContent = content[2];
+		if (copy) {
+			if (step === 1) copy.innerHTML = content[2];
+			else copy.textContent = content[2];
+		}
 
 		stepItems.forEach((item) => {
 			const itemStep = Number(item.dataset.baReportStep || 0);
