@@ -27,9 +27,11 @@ $home_categories = array(
 <main class="ba-home" id="main-content">
 	<section class="ba-home-hero" aria-labelledby="ba-home-title">
 		<div class="ba-home-hero__content">
-			<p class="ba-eyebrow">La comunità che osserva, segnala e aiuta</p>
-			<h1 id="ba-home-title">Cosa succede<br>intorno a te?</h1>
+			<h1 id="ba-home-title" class="ba-home-hero__wordmark"><span class="ba-home-hero__wordmark-bad">Bad</span><span class="ba-home-hero__wordmark-around">Around</span></h1>
+			<h2 class="ba-home-hero__subtitle">La community delle Sentinelle di quartiere</h2>
+			<p class="ba-home-hero__appeal">Aiutaci ad aiutarti!</p>
 			<p class="ba-home-hero__lead"><strong>Furti, danni, comportamenti sospetti, pericoli, animali smarriti e richieste di testimoni.</strong><br>Segui le segnalazioni della tua zona e contribuisci a far circolare informazioni utili nella comunità.</p>
+			<p class="ba-home-hero__payoff">Osserva. Segnala. Condividi. Fai rete.</p>
 
 			<form class="ba-home-search" role="search" action="<?php echo esc_url( home_url( '/cerca/' ) ); ?>" method="get">
 				<label class="ba-sr-only" for="ba-home-location">Cerca territorio o evento</label>
