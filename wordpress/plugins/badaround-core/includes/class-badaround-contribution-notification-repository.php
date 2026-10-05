@@ -49,21 +49,32 @@ class BadAround_Contribution_Notification_Repository {
 		return $row ?: null;
 	}
 
+	public function find_by_id( $id ) {
+		global $wpdb;
+		$table = $this->table();
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d LIMIT 1", absint( $id ) ), ARRAY_A );
+		return $row ?: null;
+	}
+
 	public function claim( $id ) {
 		global $wpdb;
+		$row = $this->find_by_id( $id );
+		if ( ! $row || self::STATUS_QUEUED !== $row['status'] ) {
+			return false;
+		}
 		$updated = $wpdb->update(
 			$this->table(),
 			array(
 				'status' => self::STATUS_SENDING,
 				'last_attempt_at' => current_time( 'mysql', true ),
-				'notification_attempts' => new stdClass(),
+				'notification_attempts' => absint( $row['notification_attempts'] ) + 1,
 				'updated_at' => current_time( 'mysql', true ),
 			),
-			array( 'id' => absint( $id ), 'status' => self::STATUS_QUEUED )
+			array(
+				'id' => absint( $id ),
+				'status' => self::STATUS_QUEUED,
+			)
 		);
-		if ( false === $updated ) { return false; }
-		// Increment atomically after the state claim.
-		$wpdb->query( $wpdb->prepare( "UPDATE {$this->table()} SET notification_attempts = notification_attempts + 1 WHERE id = %d", absint( $id ) ) );
 		return 1 === (int) $updated;
 	}
 
