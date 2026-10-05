@@ -10,6 +10,7 @@ on:
       - "feature/**"
       - "release/mvp-rc1"
       - "release/mvp-reconciled"
+      - "recovery/**"
   workflow_dispatch:
 
 permissions:
@@ -34,6 +35,21 @@ jobs:
 
       - name: Lint BadAround child theme
         run: find ./wordpress/themes/badaround-child -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Test recovery golden-state invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "Version: 0.17.0" ./wordpress/plugins/badaround-core/badaround-core.php
+          grep -q "SCHEMA_VERSION = '1.8.0'" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
+          grep -Eq "'per_page'[[:space:]]*=>[[:space:]]*6" ./wordpress/themes/badaround-child/front-page.php
+          grep -q "grid-template-columns:repeat(3,minmax(0,1fr))" ./wordpress/themes/badaround-child/assets/css/home.css
+          grep -q 'data-ba-map-context="home"' ./wordpress/themes/badaround-child/front-page.php
+          grep -q 'data-ba-map-context="detail"' ./wordpress/themes/badaround-child/template-parts/single-event-layout.php
+          grep -q "BadAround_Contribution_Service::render_event_contribution_block" ./wordpress/themes/badaround-child/template-parts/single-event-layout.php
+          grep -q "prepare_public_projection" ./wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+          grep -q "approve_received_images_for_event" ./wordpress/plugins/badaround-core/includes/class-badaround-media-repository.php
+          grep -q "progressiveFieldCandidates" ./wordpress/themes/badaround-child/assets/js/report.js
 
       - name: Test D1 Sentinel lifecycle
         run: php ./tests/sentinels-d1.php
