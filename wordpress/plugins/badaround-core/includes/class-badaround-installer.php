@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Owns the versioned database schema for private and relational data. */
 class BadAround_Installer {
-	const SCHEMA_VERSION = '1.7.0';
+	const SCHEMA_VERSION = '1.8.0';
 	const OPTION_NAME    = 'ba_db_schema_version';
 
 	public function register_hooks() {
@@ -289,6 +289,7 @@ class BadAround_Installer {
 			moderated_by bigint(20) unsigned DEFAULT NULL,
 			moderated_at datetime DEFAULT NULL,
 			moderation_reason text DEFAULT NULL,
+			moderated_draft longtext DEFAULT NULL,
 			recipient_text longtext DEFAULT NULL,
 			created_at datetime NOT NULL,
 			updated_at datetime NOT NULL,
