@@ -29,9 +29,13 @@ class BadAround_Contribution_Moderation_Service {
 		$allowed = array(
 			BadAround_Contribution_Repository::STATUS_TO_REVIEW => array( BadAround_Contribution_Repository::STATUS_IN_REVIEW ),
 			BadAround_Contribution_Repository::STATUS_IN_REVIEW => array(
+				BadAround_Contribution_Repository::STATUS_ON_HOLD,
 				BadAround_Contribution_Repository::STATUS_PUBLISHED,
 				BadAround_Contribution_Repository::STATUS_RESERVED,
 				BadAround_Contribution_Repository::STATUS_REJECTED,
+			),
+			BadAround_Contribution_Repository::STATUS_ON_HOLD => array(
+				BadAround_Contribution_Repository::STATUS_IN_REVIEW,
 			),
 		);
 
@@ -60,6 +64,9 @@ class BadAround_Contribution_Moderation_Service {
 			}
 
 			$public_text = isset( $args['public_text'] ) ? trim( sanitize_textarea_field( $args['public_text'] ) ) : '';
+			if ( '' === $public_text && ! empty( $row['moderated_draft'] ) ) {
+				$public_text = trim( sanitize_textarea_field( $row['moderated_draft'] ) );
+			}
 			if ( mb_strlen( $public_text ) < 10 ) {
 				return new WP_Error( 'ba_contribution_public_text_required', __( 'Inserisci un testo pubblico moderato.', 'badaround-core' ) );
 			}
@@ -121,7 +128,8 @@ class BadAround_Contribution_Moderation_Service {
 		}
 
 		$actions = array(
-			BadAround_Contribution_Repository::STATUS_IN_REVIEW => 'contribution_review_started',
+			BadAround_Contribution_Repository::STATUS_IN_REVIEW => BadAround_Contribution_Repository::STATUS_ON_HOLD === $current ? 'contribution_review_resumed' : 'contribution_review_started',
+			BadAround_Contribution_Repository::STATUS_ON_HOLD => 'contribution_put_on_hold',
 			BadAround_Contribution_Repository::STATUS_PUBLISHED => 'contribution_published',
 			BadAround_Contribution_Repository::STATUS_RESERVED => 'contribution_reserved',
 			BadAround_Contribution_Repository::STATUS_REJECTED => 'contribution_rejected',
@@ -149,6 +157,42 @@ class BadAround_Contribution_Moderation_Service {
 			}
 		}
 		return $updated;
+	}
+
+
+	public function save_draft( $contribution_id, $draft ) {
+		$contribution_id = absint( $contribution_id );
+		if ( ! $contribution_id || ! current_user_can( 'ba_moderate_contributions' ) ) {
+			return new WP_Error( 'ba_contribution_moderation_forbidden', __( 'Non sei autorizzato a moderare i contributi.', 'badaround-core' ) );
+		}
+		$row = $this->repository->find_by_id( $contribution_id );
+		if ( ! $row || ! in_array( $row['status'], array( BadAround_Contribution_Repository::STATUS_IN_REVIEW, BadAround_Contribution_Repository::STATUS_ON_HOLD ), true ) ) {
+			return new WP_Error( 'ba_contribution_draft_not_allowed', __( 'La bozza moderata può essere salvata solo durante la revisione o lo stand-by.', 'badaround-core' ) );
+		}
+		$result = $this->repository->save_moderated_draft( $contribution_id, $draft );
+		if ( ! is_wp_error( $result ) ) {
+			BadAround_Audit_Log::record( 'contribution', $contribution_id, 'contribution_moderated_draft_saved', 'contribution' );
+		}
+		return $result;
+	}
+
+	public function archive( $contribution_id, $reason = '' ) {
+		$contribution_id = absint( $contribution_id );
+		if ( ! $contribution_id || ! current_user_can( 'ba_moderate_contributions' ) ) {
+			return new WP_Error( 'ba_contribution_moderation_forbidden', __( 'Non sei autorizzato a moderare i contributi.', 'badaround-core' ) );
+		}
+		$row = $this->repository->find_by_id( $contribution_id );
+		if ( ! $row ) {
+			return new WP_Error( 'ba_contribution_not_found', __( 'Contributo non trovato.', 'badaround-core' ) );
+		}
+		if ( in_array( $row['status'], array( BadAround_Contribution_Repository::STATUS_PUBLISHED, BadAround_Contribution_Repository::STATUS_RESERVED ), true ) ) {
+			return new WP_Error( 'ba_contribution_archive_finalized', __( 'Un contributo già pubblicato o riservato non può essere archiviato da questa azione.', 'badaround-core' ) );
+		}
+		$result = $this->repository->archive( $contribution_id, $reason );
+		if ( ! is_wp_error( $result ) ) {
+			BadAround_Audit_Log::record( 'contribution', $contribution_id, 'contribution_archived', 'contribution', sanitize_textarea_field( $reason ) );
+		}
+		return $result;
 	}
 
 	private function validate_public_text( array $row, $public_text ) {
