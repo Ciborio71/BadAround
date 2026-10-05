@@ -750,6 +750,18 @@
 }
 
 
+.ba-future-time-error{
+	margin-top:7px;
+	color:#b42323;
+	font-size:.75rem;
+	font-weight:700;
+	line-height:1.4;
+}
+.ba-report-mount .ba-future-time-invalid input{
+	border-color:#e77a7a!important;
+	box-shadow:0 0 0 3px rgba(231,122,122,.10)!important;
+}
+
 .ba-event-date-error{
 	margin-top:7px;
 	color:#b42323;
