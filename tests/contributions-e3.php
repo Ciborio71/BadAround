@@ -31,6 +31,7 @@ class BadAround_Contribution_Repository {
 	const STATUS_PENDING_VERIFICATION = 'pending_verification';
 	const STATUS_TO_REVIEW = 'to_review';
 	const STATUS_IN_REVIEW = 'in_review';
+	const STATUS_ON_HOLD = 'on_hold';
 	const STATUS_PUBLISHED = 'published';
 	const STATUS_RESERVED = 'reserved';
 	const STATUS_REJECTED = 'rejected';
@@ -83,7 +84,7 @@ $admin_src = file_get_contents( dirname( __DIR__ ) . '/wordpress/plugins/badarou
 $installer = file_get_contents( dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-installer.php' );
 
 e3_assert( false !== strpos( $installer, 'ba_contribution_media' ), 'dedicated contribution media table is versioned' );
-e3_assert( 1 === preg_match( "/SCHEMA_VERSION\s*=\s*'1\.6\.0'/", $installer ), 'schema version advanced for E3' );
+e3_assert( 1 === preg_match( "/SCHEMA_VERSION\s*=\s*'1\.[6-9][0-9]*\.0'/", $installer ), 'schema version is E3-or-later' );
 e3_assert( false !== strpos( $media_src, 'BADAROUND_PRIVATE_MEDIA_PATH' ), 'E3 reuses private media root outside public WordPress paths' );
 e3_assert( false !== strpos( $media_src, 'WP_CONTENT_DIR' ) && false !== strpos( $media_src, 'return \'\';' ), 'private media root rejects public WordPress paths' );
 e3_assert( false !== strpos( $media_src, 'MAX_FILES = 5' ), 'E3 limits image count' );
