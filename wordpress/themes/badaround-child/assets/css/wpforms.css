@@ -1012,3 +1012,26 @@ body.ba-save-resume-mode #ba-mobile-menu .ba-button--urgent{
 @media (prefers-reduced-motion:reduce){
 	.ba-report-mount .wpforms-field.ba-progressive-revealed{animation:none}
 }
+
+
+/* Step 2 — align adjacent date/time cards */
+.ba-report-mount #wpforms-6-field_17-container,
+.ba-report-mount #wpforms-6-field_18-container{
+	min-height:124px;
+}
+.ba-report-mount #wpforms-6-field_17-container{
+	display:flex;
+	flex-direction:column;
+}
+.ba-report-mount #wpforms-6-field_17-container .wpforms-datepicker-wrap{
+	display:flex;
+	flex:1;
+	align-items:flex-start;
+}
+.ba-report-mount #wpforms-6-field_17-container .wpforms-field-description{
+	margin-top:auto!important;
+}
+@media(max-width:767px){
+	.ba-report-mount #wpforms-6-field_17-container,
+	.ba-report-mount #wpforms-6-field_18-container{min-height:0}
+}
