@@ -9,6 +9,7 @@ on:
     branches:
       - "feature/**"
       - "release/mvp-rc1"
+      - "release/mvp-reconciled"
   workflow_dispatch:
 
 permissions:
@@ -42,3 +43,9 @@ jobs:
 
       - name: Test D3 Sentinel completion
         run: php ./tests/sentinels-d3.php
+
+      - name: Test E1 Contribution Core
+        run: php ./tests/contributions-e1.php
+
+      - name: Test E2 Contribution Moderation
+        run: php ./tests/contributions-e2.php

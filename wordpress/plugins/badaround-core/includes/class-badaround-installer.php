@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Owns the versioned database schema for private and relational data. */
 class BadAround_Installer {
-	const SCHEMA_VERSION = '1.3.0';
+	const SCHEMA_VERSION = '1.5.0';
 	const OPTION_NAME    = 'ba_db_schema_version';
 
 	public function register_hooks() {
@@ -52,6 +52,8 @@ class BadAround_Installer {
 			'ba_view_private_reports',
 			'ba_view_private_media',
 			'ba_view_audit_log',
+			'ba_moderate_contributions',
+			'ba_view_private_contributions',
 		);
 
 		foreach ( $capabilities as $capability ) {
@@ -131,6 +133,7 @@ class BadAround_Installer {
 		$audit           = $wpdb->prefix . 'ba_audit_log';
 		$sentinels       = $wpdb->prefix . 'ba_sentinels';
 		$sentinel_matches = $wpdb->prefix . 'ba_sentinel_event_matches';
+		$contributions    = $wpdb->prefix . 'ba_contributions';
 
 		$sql = "CREATE TABLE {$reports} (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -247,6 +250,53 @@ class BadAround_Installer {
 			KEY event_id (event_id),
 			KEY sentinel_status (sentinel_id,notification_status),
 			KEY notification_retry (notification_status,next_retry_at)
+		) {$charset_collate};
+
+		CREATE TABLE {$contributions} (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			public_id char(36) NOT NULL,
+			event_id bigint(20) unsigned NOT NULL,
+			user_id bigint(20) unsigned DEFAULT NULL,
+			email varchar(191) NOT NULL,
+			email_hash char(64) NOT NULL,
+			email_verified_at datetime DEFAULT NULL,
+			status varchar(32) NOT NULL DEFAULT 'pending_verification',
+			contribution_type varchar(32) NOT NULL,
+			public_identity_mode varchar(32) NOT NULL DEFAULT 'public_anonymous',
+			public_display_name varchar(191) DEFAULT NULL,
+			visibility_requested varchar(32) NOT NULL DEFAULT 'public',
+			visibility_decided varchar(32) DEFAULT NULL,
+			content_original longtext NOT NULL,
+			observed_at datetime DEFAULT NULL,
+			observed_at_precision varchar(32) DEFAULT NULL,
+			exact_location_text text DEFAULT NULL,
+			exact_lat decimal(10,7) DEFAULT NULL,
+			exact_lng decimal(10,7) DEFAULT NULL,
+			direction varchar(191) DEFAULT NULL,
+			additional_details longtext DEFAULT NULL,
+			contact_allowed tinyint(1) NOT NULL DEFAULT 0,
+			consent_privacy tinyint(1) NOT NULL DEFAULT 0,
+			consent_version varchar(64) DEFAULT NULL,
+			consented_at datetime DEFAULT NULL,
+			verify_token_hash char(64) DEFAULT NULL,
+			verification_expires_at datetime DEFAULT NULL,
+			payload_hash char(64) NOT NULL,
+			ip_hash char(64) DEFAULT NULL,
+			source varchar(32) NOT NULL DEFAULT 'event_detail',
+			public_projection_id bigint(20) unsigned DEFAULT NULL,
+			moderated_by bigint(20) unsigned DEFAULT NULL,
+			moderated_at datetime DEFAULT NULL,
+			moderation_reason text DEFAULT NULL,
+			created_at datetime NOT NULL,
+			updated_at datetime NOT NULL,
+			deleted_at datetime DEFAULT NULL,
+			PRIMARY KEY  (id),
+			UNIQUE KEY public_id (public_id),
+			KEY event_status (event_id,status),
+			KEY email_event (email_hash,event_id),
+			KEY payload_duplicate (event_id,email_hash,payload_hash),
+			KEY verification_expiry (status,verification_expires_at),
+			KEY created_at (created_at)
 		) {$charset_collate};
 
 		CREATE TABLE {$audit} (
