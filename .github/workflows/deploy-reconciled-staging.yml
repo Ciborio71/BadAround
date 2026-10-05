@@ -56,7 +56,7 @@ jobs:
           grep -q "BADAROUND_CORE_VERSION', '0.17.0'" ./wordpress/plugins/badaround-core/badaround-core.php
           grep -q "SCHEMA_VERSION = '1.8.0'" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
           grep -q "BadAround_Contribution_Service" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
-          grep -q "BadAround_Contribution_Moderation_Service" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
+          grep -q "BadAround_Contribution_Moderation_Admin" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
           grep -q "BadAround_Sentinel_Service" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
           grep -q "BadAround_Sentinel_Matching_Service" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
 
