@@ -7,6 +7,10 @@
 	const form = root.querySelector('form') || root;
 	const field = (id) => root.querySelector('#wpforms-6-field_' + id + '-container') || root.querySelector('[id$="-field_' + id + '-container"]');
 
+	/* Legacy residue: field 9 is not part of the approved reporting flow.
+	 * Remove every rendered instance to avoid duplicate IDs and accidental submission. */
+	root.querySelectorAll('[data-field-id="9"]').forEach((container) => container.remove());
+
 	const categoryMeta = {
 		'veicoli': { title:'Veicoli', desc:'Auto, moto e altri mezzi', icon:'vehicle', color:'#1688e8' },
 		'case e attività': { title:'Case e attività', desc:'Abitazioni, negozi e uffici', icon:'property', color:'#9c3152' },
@@ -213,6 +217,96 @@
 	classFields([63,64],['ba-form-section','ba-form-section--media']);
 	classFields([65,66,68,69,70],['ba-form-section']);
 	classFields([73,74,75,76,77,78,80,81,82,83,84,85,86],['ba-form-section','ba-form-section--identity']);
+
+	/* Step 4–5 semantic cleanup and progressive disclosure. */
+	const page4 = root.querySelector('.wpforms-page-4');
+	const photoUpload = field(63);
+	const mediaAvailability = field(64);
+	const rewardFields = [65,66,68,69,70].map(field).filter(Boolean);
+	const contentRightsConfirmation = field(82);
+
+	if (page4 && photoUpload && mediaAvailability && mediaAvailability.parentElement === page4) {
+		page4.insertBefore(mediaAvailability,photoUpload);
+	}
+
+	const mediaDescription = mediaAvailability?.querySelector('.wpforms-field-description');
+	if (mediaDescription) {
+		mediaDescription.textContent = 'Se disponi di fotografie potrai caricarle qui. Per eventuali video, BadAround ti indicherà successivamente come trasmetterli.';
+	}
+
+	const setContextVisibility = (container,visible,{clear=false}={}) => {
+		if (!container) return;
+		container.classList.toggle('ba-context-hidden',!visible);
+		container.setAttribute('aria-hidden',visible ? 'false' : 'true');
+		container.querySelectorAll('input,select,textarea').forEach((control) => {
+			if (!visible) {
+				if (control.required) control.dataset.baWasRequired = '1';
+				control.required = false;
+				if (clear) {
+					if (control.matches('input[type="radio"],input[type="checkbox"]')) control.checked = false;
+					else if (control.tagName === 'SELECT') control.selectedIndex = 0;
+					else if (!control.matches('input[type="file"]')) control.value = '';
+				}
+			} else if (control.dataset.baWasRequired === '1') {
+				control.required = true;
+				delete control.dataset.baWasRequired;
+			}
+		});
+	};
+
+	const selectedText = (container) => container?.querySelector('input[type="radio"]:checked')?.value || '';
+	const rewardIsRelevant = () => {
+		const vehicleEvent = selectedText(field(3)).toLowerCase();
+		const animalEvent = selectedText(field(6)).toLowerCase();
+		const objectStatus = selectedText(field(51)).toLowerCase();
+		return vehicleEvent.includes('veicolo rubato')
+			|| animalEvent.includes('smarrito il mio animale')
+			|| objectStatus.includes('smarrito l’oggetto');
+	};
+	const syncRewardSection = () => {
+		const visible = rewardIsRelevant();
+		rewardFields.forEach((container) => setContextVisibility(container,visible,{clear:!visible}));
+	};
+	[3,6,51].forEach((id) => field(id)?.querySelectorAll('input[type="radio"]').forEach((radio) => {
+		radio.addEventListener('change',() => requestAnimationFrame(syncRewardSection));
+	}));
+	syncRewardSection();
+
+	const hasDirectMedia = () => {
+		const value = selectedText(mediaAvailability).toLowerCase();
+		return value.startsWith('sì, dispongo di immagini o video');
+	};
+	const syncPhotoUpload = () => setContextVisibility(photoUpload,hasDirectMedia());
+	mediaAvailability?.querySelectorAll('input[type="radio"]').forEach((radio) => {
+		radio.addEventListener('change',() => requestAnimationFrame(syncPhotoUpload));
+	});
+	syncPhotoUpload();
+
+	const uploadHasFiles = () => {
+		if (!photoUpload) return false;
+		const hiddenValue = photoUpload.querySelector('input.dropzone-input')?.value?.trim();
+		return !!hiddenValue || !!photoUpload.querySelector('.dz-preview:not(.dz-error), .wpforms-uploader-file');
+	};
+	const syncContentRightsConfirmation = () => {
+		const visible = uploadHasFiles();
+		setContextVisibility(contentRightsConfirmation,visible,{clear:!visible});
+	};
+	if (photoUpload) {
+		photoUpload.addEventListener('change',syncContentRightsConfirmation,true);
+		new MutationObserver(() => requestAnimationFrame(syncContentRightsConfirmation))
+			.observe(photoUpload,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+	}
+	syncContentRightsConfirmation();
+
+	const publicContactField = field(78);
+	const publicContactLegend = publicContactField?.querySelector('legend.wpforms-field-label');
+	if (publicContactLegend?.firstChild) {
+		publicContactLegend.firstChild.textContent = 'Vuoi ricevere messaggi dalla community relativi alla segnalazione? ';
+	}
+	const publicContactDescription = publicContactField?.querySelector('.wpforms-field-description');
+	if (publicContactDescription) {
+		publicContactDescription.textContent = 'Email e telefono non saranno mostrati pubblicamente. Questa scelta riguarda i messaggi della community; BadAround potrà comunque inviarti comunicazioni operative sulla segnalazione.';
+	}
 
 	/* Step 2 location emphasis. */
 	const locationPrimary = field(31);
@@ -577,7 +671,7 @@
 	const copy = document.querySelector('[data-ba-report-copy]');
 
 	const stepCopy = {
-		1:['SEGNALA UN EVENTO','Cosa Vuoi Segnalare?','<p>Un <strong>furto</strong>, un <strong>danno</strong>, un <strong>comportamento sospetto</strong>, uno <strong>smarrimento</strong>, un <strong>pericolo</strong> oppure stai <strong>cercando testimoni</strong>?</p><p>Ti guideremo noi e ti mostreremo solo le domande necessarie per segnalare l\'evento alla Community di BadAround!</p>'],
+		1:['SEGNALA UN EVENTO','Cosa vuoi segnalare?','<p>Un <strong>furto</strong>, un <strong>danno</strong>, un <strong>comportamento sospetto</strong>, uno <strong>smarrimento</strong>, un <strong>pericolo</strong> oppure stai <strong>cercando testimoni</strong>?</p><p>Ti guideremo noi e ti mostreremo solo le domande necessarie per segnalare l\'evento alla community di BadAround.</p>'],
 		2:['PASSAGGIO 2 DI 5','Dove e quando è successo?','Indica il luogo e il momento dell’evento. La posizione pubblica seguirà sempre le regole di privacy BadAround.'],
 		3:['PASSAGGIO 3 DI 5','Aggiungi i dettagli','Vedrai soltanto le domande pertinenti alla categoria e al tipo di evento che hai scelto.'],
 		4:['PASSAGGIO 4 DI 5','Racconta e documenta','Descrivi i fatti in modo chiaro e aggiungi eventuali foto o informazioni utili alla verifica.'],
@@ -643,6 +737,9 @@
 		validateEventTimesAgainstNow();
 		validateTimeRange();
 		syncDamageQuestion();
+		syncRewardSection();
+		syncPhotoUpload();
+		syncContentRightsConfirmation();
 		syncRelationship();
 		syncStep(false);
 	}));
