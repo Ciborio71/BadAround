@@ -10,6 +10,98 @@ if ( ! defined( 'ABSPATH' ) ) {
 class BadAround_Publication_Service {
 	const STATUS_PUBLISHED = 'published';
 
+	/**
+	 * Builds a conservative public projection from already classified,
+	 * structured data. Private free text, exact coordinates and full plates
+	 * are intentionally excluded.
+	 */
+	public function prepare_public_projection( $event_id ) {
+		$event_id = absint( $event_id );
+		$post     = get_post( $event_id );
+
+		if ( ! $post || BadAround_Event_Post_Type::POST_TYPE !== $post->post_type ) {
+			return new WP_Error( 'ba_publication_invalid_event', __( 'Evento non valido.', 'badaround-core' ) );
+		}
+
+		$territory = $this->deepest_term( $event_id, BadAround_Event_Post_Type::TERRITORY_TAX );
+		$subtype   = $this->deepest_term( $event_id, BadAround_Event_Post_Type::EVENT_TYPE_TAX );
+
+		$place_name = trim( (string) get_post_meta( $event_id, '_ba_public_place_name', true ) );
+		if ( '' === $place_name && $territory ) {
+			$place_name = sanitize_text_field( $territory->name );
+			update_post_meta( $event_id, '_ba_public_place_name', $place_name );
+		}
+
+		$title = trim( wp_strip_all_tags( (string) $post->post_title ) );
+		if ( '' === $title || preg_match( '/^Segnalazione da moderare\s*#/i', $title ) ) {
+			$subject = $subtype ? sanitize_text_field( $subtype->name ) : __( 'Segnalazione', 'badaround-core' );
+			$title   = $place_name
+				? sprintf( __( '%1$s a %2$s', 'badaround-core' ), $subject, $place_name )
+				: $subject;
+		}
+
+		$content = trim( wp_strip_all_tags( (string) $post->post_content ) );
+		if ( '' === $content ) {
+			$parts   = array();
+			$subject = $subtype ? sanitize_text_field( $subtype->name ) : __( 'evento segnalato', 'badaround-core' );
+
+			if ( $place_name ) {
+				$parts[] = sprintf(
+					__( 'Segnalazione relativa a %1$s nella zona di %2$s.', 'badaround-core' ),
+					$subject,
+					$place_name
+				);
+			} else {
+				$parts[] = sprintf( __( 'Segnalazione relativa a %s.', 'badaround-core' ), $subject );
+			}
+
+			$occurred_date = trim( (string) get_post_meta( $event_id, '_ba_occurred_date', true ) );
+			$occurred_time = trim( (string) get_post_meta( $event_id, '_ba_occurred_time', true ) );
+			if ( $occurred_date && $occurred_time ) {
+				$parts[] = sprintf( __( 'Evento indicato per il %1$s alle %2$s.', 'badaround-core' ), $occurred_date, $occurred_time );
+			} elseif ( $occurred_date ) {
+				$parts[] = sprintf( __( 'Evento indicato per il %s.', 'badaround-core' ), $occurred_date );
+			}
+
+			$vehicle_bits = array_filter(
+				array(
+					trim( (string) get_post_meta( $event_id, '_ba_vehicle_make', true ) ),
+					trim( (string) get_post_meta( $event_id, '_ba_vehicle_model', true ) ),
+				)
+			);
+			$vehicle_color = trim( (string) get_post_meta( $event_id, '_ba_vehicle_color', true ) );
+			if ( $vehicle_bits || $vehicle_color ) {
+				$vehicle = trim( implode( ' ', $vehicle_bits ) );
+				if ( $vehicle && $vehicle_color ) {
+					$parts[] = sprintf( __( 'Veicolo: %1$s, colore %2$s.', 'badaround-core' ), $vehicle, $vehicle_color );
+				} elseif ( $vehicle ) {
+					$parts[] = sprintf( __( 'Veicolo: %s.', 'badaround-core' ), $vehicle );
+				} else {
+					$parts[] = sprintf( __( 'Colore del veicolo: %s.', 'badaround-core' ), $vehicle_color );
+				}
+			}
+
+			$content = implode( ' ', $parts );
+		}
+
+		$updated = wp_update_post(
+			array(
+				'ID'           => $event_id,
+				'post_title'   => sanitize_text_field( $title ),
+				'post_content' => wp_kses_post( $content ),
+				'post_status'  => 'pending',
+			),
+			true
+		);
+
+		if ( is_wp_error( $updated ) ) {
+			return $updated;
+		}
+
+		BadAround_Audit_Log::record( 'event', $event_id, 'public_projection_prepared', 'publication' );
+		return true;
+	}
+
 	public function validate_public_projection( $event_id ) {
 		global $wpdb;
 
@@ -153,6 +245,22 @@ class BadAround_Publication_Service {
 		}
 
 		return true;
+	}
+
+	private function deepest_term( $event_id, $taxonomy ) {
+		$terms = wp_get_post_terms( absint( $event_id ), $taxonomy );
+		if ( is_wp_error( $terms ) || ! $terms ) {
+			return null;
+		}
+
+		usort(
+			$terms,
+			static function ( $a, $b ) {
+				return count( get_ancestors( $b->term_id, $b->taxonomy, 'taxonomy' ) ) <=> count( get_ancestors( $a->term_id, $a->taxonomy, 'taxonomy' ) );
+			}
+		);
+
+		return reset( $terms ) ?: null;
 	}
 
 	public function publish( $event_id ) {
