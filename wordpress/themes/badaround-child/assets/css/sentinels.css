@@ -207,3 +207,17 @@
  .ba-sentinel-hero__grid{min-height:auto}
  .ba-sentinel-hero__copy{padding:10px 0 34px}
 }
+
+/* Hero visual refinement: smaller image, lighter fade */
+@media(min-width:901px){
+ .ba-sentinel-hero{background-size:auto 84%;background-position:right center}
+ .ba-sentinel-hero::before{background:linear-gradient(90deg,#f7fbff 0%,rgba(247,251,255,.96) 30%,rgba(247,251,255,.66) 45%,rgba(247,251,255,.14) 61%,rgba(247,251,255,0) 76%)}
+ .ba-sentinel-hero::after{height:12%;background:linear-gradient(0deg,rgba(247,251,255,.82) 0%,rgba(247,251,255,0) 100%)}
+}
+@media(min-width:601px) and (max-width:900px){
+ .ba-sentinel-hero{background-size:auto 88%;background-position:78% center}
+ .ba-sentinel-hero::before{background:linear-gradient(90deg,#f7fbff 0%,rgba(247,251,255,.94) 42%,rgba(247,251,255,.48) 67%,rgba(247,251,255,.08) 88%)}
+}
+@media(max-width:600px){
+ .ba-sentinel-hero::before{background:linear-gradient(180deg,rgba(247,251,255,.91) 0%,rgba(247,251,255,.82) 62%,rgba(247,251,255,.50) 100%)}
+}
