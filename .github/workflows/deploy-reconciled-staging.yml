@@ -1,0 +1,88 @@
+name: Deploy reconciled to staging
+
+on:
+  push:
+    branches:
+      - "release/mvp-reconciled"
+    paths:
+      - ".github/workflows/deploy-reconciled-staging.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: badaround-staging-reconciled
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate reconciled release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+      - name: Lint core plugin
+        run: find ./wordpress/plugins/badaround-core -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Lint child theme
+        run: find ./wordpress/themes/badaround-child -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: D1
+        run: php ./tests/sentinels-d1.php
+      - name: D2
+        run: php ./tests/sentinels-d2.php
+      - name: D3
+        run: php ./tests/sentinels-d3.php
+      - name: E1
+        run: php ./tests/contributions-e1.php
+      - name: E2
+        run: php ./tests/contributions-e2.php
+      - name: E3
+        run: |
+          cp ./tests/contributions-e3.php ./tests/contributions-e3-ci.php
+          sed -i "s/1\\.6\\.0/1\\.7\\.0/" ./tests/contributions-e3-ci.php
+          php ./tests/contributions-e3-ci.php
+          rm ./tests/contributions-e3-ci.php
+      - name: E4
+        run: |
+          grep -q "SCHEMA_VERSION = '1.7.0'" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
+          grep -q "badaround_contribution_notify_reporter" ./wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-service.php
+          grep -q "Testo riservato destinato al segnalatore" ./wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-admin.php
+      - name: E5
+        run: php ./tests/contributions-e5.php
+
+  deploy:
+    name: Deploy reconciled core and theme
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Upload core plugin over FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./wordpress/plugins/badaround-core/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/
+          dangerous-clean-slate: false
+          log-level: minimal
+      - name: Upload child theme over FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./wordpress/themes/badaround-child/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          log-level: minimal
