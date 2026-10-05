@@ -214,6 +214,10 @@ body.page-template-page-segnala-evento .ba-site-header{position:sticky}
 	font-size:clamp(.95rem,1.4vw,1.08rem);
 	line-height:1.55;
 }
+.ba-report-stage__copy{max-width:880px}
+.ba-report-stage__copy p{margin:10px 0 0}
+.ba-report-stage__copy p:first-child{margin-top:13px}
+.ba-report-stage__copy strong{color:#324b61;font-weight:800}
 .ba-report-context{
 	display:inline-flex;
 	align-items:center;
