@@ -46,3 +46,6 @@ jobs:
 
       - name: Test E1 Contribution Core
         run: php ./tests/contributions-e1.php
+
+      - name: Test E2 Contribution Moderation
+        run: php ./tests/contributions-e2.php
