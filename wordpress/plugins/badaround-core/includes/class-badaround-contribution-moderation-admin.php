@@ -123,6 +123,7 @@ class BadAround_Contribution_Moderation_Admin {
 
 		if ( BadAround_Contribution_Repository::STATUS_TO_REVIEW === $row['status'] ) {
 			$this->render_action_form( $row, BadAround_Contribution_Repository::STATUS_IN_REVIEW, __( 'Prendi in carico', 'badaround-core' ), false );
+			$this->render_archive_form( $row );
 		} elseif ( BadAround_Contribution_Repository::STATUS_IN_REVIEW === $row['status'] ) {
 			$this->render_draft_form( $row );
 			if ( 'reserved' !== $row['visibility_requested'] ) {
