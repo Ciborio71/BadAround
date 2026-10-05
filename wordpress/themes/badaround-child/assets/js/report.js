@@ -792,19 +792,44 @@
 	const enhanceSaveResumeConfirmation = () => {
 		if (!saveResumeConfirmation) return;
 		const message = saveResumeConfirmation.querySelector('.message');
-		if (message && !message.querySelector('.ba-save-resume-heading')) {
-			const heading = document.createElement('div');
+		if (!message) return;
+
+		let heading = message.querySelector('.ba-save-resume-heading');
+		if (!heading) {
+			heading = document.createElement('div');
 			heading.className = 'ba-save-resume-heading';
-			heading.innerHTML = '<span class="ba-save-resume-heading__eyebrow">SALVA LA SEGNALAZIONE</span><h2>Riprendi la compilazione più tardi</h2><p>Conserva il link personale oppure invialo al tuo indirizzo email. Potrai tornare esattamente alla compilazione salvata.</p>';
 			message.prepend(heading);
 		}
+
+		const rawText = [...message.childNodes]
+			.filter((node) => node !== heading)
+			.map((node) => node.textContent || '')
+			.join(' ')
+			.toLowerCase();
+		const emailSent = rawText.includes('abbiamo spedito') || rawText.includes('link') && rawText.includes('email') && rawText.includes('invi');
+
+		heading.innerHTML = emailSent
+			? '<span class="ba-save-resume-heading__eyebrow">SALVATAGGIO COMPLETATO</span><h2>Bozza salvata</h2><p>Il link per riprendere la compilazione è stato inviato. Conservalo: ti permetterà di tornare alla segnalazione senza ricominciare da capo.</p>'
+			: '<span class="ba-save-resume-heading__eyebrow">SALVA LA SEGNALAZIONE</span><h2>Riprendi la compilazione più tardi</h2><p>Conserva il link personale oppure invialo al tuo indirizzo email. Potrai tornare esattamente alla compilazione salvata.</p>';
 	};
+
+	const reportPageTitle = document.querySelector('#ba-report-page-title');
+	const reportPageSubtitle = reportPageTitle?.parentElement?.querySelector('p');
+	if (reportPageTitle) reportPageTitle.dataset.baOriginalText = reportPageTitle.textContent;
+	if (reportPageSubtitle) reportPageSubtitle.dataset.baOriginalText = reportPageSubtitle.textContent;
 
 	const syncSaveResumeMode = () => {
 		if (!saveResumeConfirmation) return;
 		const active = getComputedStyle(saveResumeConfirmation).display !== 'none';
 		document.body.classList.toggle('ba-save-resume-mode',active);
 		workspace?.classList.toggle('is-save-resume-mode',active);
+
+		if (reportPageTitle) {
+			reportPageTitle.textContent = active ? 'Salva la segnalazione' : (reportPageTitle.dataset.baOriginalText || 'Segnala un evento');
+		}
+		if (reportPageSubtitle) {
+			reportPageSubtitle.textContent = active ? 'Conserva i progressi e riprendi quando vuoi.' : (reportPageSubtitle.dataset.baOriginalText || '');
+		}
 		if (active) enhanceSaveResumeConfirmation();
 	};
 
