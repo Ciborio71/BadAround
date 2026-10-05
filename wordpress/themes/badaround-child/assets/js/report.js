@@ -687,6 +687,134 @@
 		preserveSelectionScroll();
 	},true);
 
+	/* Progressive disclosure for steps 2–5.
+	 * WPForms conditional logic remains authoritative: this layer only gates
+	 * fields that WPForms itself currently considers eligible. Required fields
+	 * advance the sequence; optional fields never trap the user. */
+	const progressivePages = [2,3,4,5]
+		.map((number) => root.querySelector('.wpforms-page-' + number))
+		.filter(Boolean);
+
+	const isNativeConditionalHidden = (container) => {
+		if (!container) return true;
+		if (container.hidden) return true;
+		return container.style.display === 'none';
+	};
+
+	const progressiveFieldCandidates = (page) => [...page.children].filter((container) => {
+		if (!container.classList?.contains('wpforms-field')) return false;
+		if (container.classList.contains('wpforms-field-html')) return false;
+		if (container.classList.contains('wpforms-field-pagebreak')) return false;
+		return !!container.dataset.fieldId;
+	});
+
+	const fieldRequiredControls = (container) => [...container.querySelectorAll('input[required],select[required],textarea[required]')];
+
+	const controlHasValue = (control) => {
+		if (control.disabled) return true;
+		if (control.matches('input[type="radio"],input[type="checkbox"]')) {
+			const name = control.name;
+			return !!containerFor(control)?.querySelector('input[name="' + CSS.escape(name) + '"]:checked');
+		}
+		return String(control.value || '').trim() !== '';
+	};
+
+	const containerFor = (control) => control.closest('.wpforms-field');
+
+	const progressiveFieldComplete = (container) => {
+		const required = fieldRequiredControls(container);
+		if (!required.length) return true;
+
+		const grouped = new Set();
+		for (const control of required) {
+			if (control.matches('input[type="radio"],input[type="checkbox"]')) {
+				if (grouped.has(control.name)) continue;
+				grouped.add(control.name);
+				if (!container.querySelector('input[name="' + CSS.escape(control.name) + '"]:checked')) return false;
+				continue;
+			}
+			if (String(control.value || '').trim() === '') return false;
+		}
+		return true;
+	};
+
+	const setProgressiveGate = (container,gated) => {
+		if (!container) return;
+		const wasGated = container.classList.contains('ba-progressive-gated');
+		container.classList.toggle('ba-progressive-gated',gated);
+		container.setAttribute('aria-hidden',gated ? 'true' : 'false');
+		if (wasGated && !gated) {
+			container.classList.add('ba-progressive-revealed');
+			setTimeout(() => container.classList.remove('ba-progressive-revealed'),320);
+		}
+	};
+
+	const syncProgressivePage = (page) => {
+		if (!page || page.style.display === 'none') return;
+
+		const candidates = progressiveFieldCandidates(page);
+		let canRevealNext = true;
+
+		for (const container of candidates) {
+			/* Native WPForms conditional fields stay outside our progression
+			 * until WPForms makes them eligible. */
+			if (isNativeConditionalHidden(container)) {
+				setProgressiveGate(container,false);
+				continue;
+			}
+
+			const fieldId = Number(container.dataset.fieldId || 0);
+
+			/* Step 5 final review/consents are intentionally released together
+			 * once contact preference (78) has been completed. */
+			if (page.classList.contains('wpforms-page-5') && fieldId >= 80) {
+				const contact = field(78);
+				const ready = !contact || progressiveFieldComplete(contact);
+				setProgressiveGate(container,!ready);
+				continue;
+			}
+
+			setProgressiveGate(container,!canRevealNext);
+			if (canRevealNext && !progressiveFieldComplete(container)) {
+				canRevealNext = false;
+			}
+		}
+
+		const next = page.querySelector('.wpforms-page-next');
+		if (next) {
+			const incompleteRequired = candidates.some((container) => {
+				if (isNativeConditionalHidden(container)) return false;
+				if (container.classList.contains('ba-progressive-gated')) return fieldRequiredControls(container).length > 0;
+				return !progressiveFieldComplete(container);
+			});
+			next.classList.toggle('ba-progressive-awaiting',incompleteRequired);
+			next.setAttribute('aria-disabled',incompleteRequired ? 'true' : 'false');
+		}
+	};
+
+	const syncProgressiveDisclosure = () => {
+		progressivePages.forEach(syncProgressivePage);
+	};
+
+	root.addEventListener('input',() => requestAnimationFrame(syncProgressiveDisclosure),true);
+	root.addEventListener('change',() => requestAnimationFrame(syncProgressiveDisclosure),true);
+	root.addEventListener('blur',() => requestAnimationFrame(syncProgressiveDisclosure),true);
+
+	/* Google Places address: Enter confirms the autocomplete choice only.
+	 * It must never bubble to WPForms as a page navigation / submit action. */
+	const locationAutocompleteInput = field(31)?.querySelector('input');
+	if (locationAutocompleteInput) {
+		['keydown','keypress'].forEach((eventName) => {
+			locationAutocompleteInput.addEventListener(eventName,(event) => {
+				if (event.key !== 'Enter') return;
+				event.preventDefault();
+				event.stopPropagation();
+			});
+		});
+	}
+
+	syncProgressiveDisclosure();
+
 	/* Five real WPForms pages = five visible BadAround steps. */
 	const stepItems = [...document.querySelectorAll('[data-ba-report-step]')];
 	const eyebrow = document.querySelector('[data-ba-report-eyebrow]');
@@ -764,6 +892,7 @@
 		syncPhotoUpload();
 		syncContentRightsConfirmation();
 		syncRelationship();
+		syncProgressiveDisclosure();
 		syncStep(false);
 	}));
 	observer.observe(root,{attributes:true,subtree:true,attributeFilter:['style','class']});
@@ -771,6 +900,21 @@
 	root.addEventListener('click',(event) => {
 		const navigationButton = event.target.closest('.wpforms-page-next,.wpforms-page-prev');
 		if (!navigationButton) return;
+		if (navigationButton.classList.contains('wpforms-page-next') && navigationButton.classList.contains('ba-progressive-awaiting')) {
+			event.preventDefault();
+			event.stopImmediatePropagation();
+			const page = navigationButton.closest('.wpforms-page');
+			const firstPending = progressiveFieldCandidates(page).find((container) => {
+				if (isNativeConditionalHidden(container)) return false;
+				return container.classList.contains('ba-progressive-gated') || !progressiveFieldComplete(container);
+			});
+			if (firstPending) {
+				setProgressiveGate(firstPending,false);
+				firstPending.scrollIntoView({behavior:'smooth',block:'center'});
+				firstPending.querySelector('input,select,textarea')?.focus({preventScroll:true});
+			}
+			return;
+		}
 		if (navigationButton.classList.contains('wpforms-page-next') && activePageIndex() === 1) {
 			if (!validateEventDate({focus:true}) || !validateEventTimesAgainstNow({focus:true}) || !validateTimeRange({focus:true})) {
 				event.preventDefault();
