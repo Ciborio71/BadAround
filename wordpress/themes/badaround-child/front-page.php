@@ -30,7 +30,7 @@ $home_categories = array(
 			<h1 id="ba-home-title" class="ba-home-hero__wordmark"><span class="ba-home-hero__wordmark-bad">Bad</span><span class="ba-home-hero__wordmark-around">Around</span></h1>
 			<h2 class="ba-home-hero__subtitle">La community delle Sentinelle di quartiere</h2>
 			<p class="ba-home-hero__appeal">Aiutaci ad aiutarti!</p>
-			<p class="ba-home-hero__lead"><strong>Furti, danni, comportamenti sospetti, pericoli, animali smarriti e richieste di testimoni.</strong><br>Segui le segnalazioni della tua zona e contribuisci a far circolare informazioni utili nella comunità.</p>
+			<p class="ba-home-hero__lead"><strong>Furti, danni, comportamenti sospetti, pericoli, animali smarriti e richieste di testimoni.</strong>Segui le segnalazioni della tua zona e contribuisci a far circolare informazioni utili nella comunità.</p>
 			<p class="ba-home-hero__payoff">Osserva. Segnala. Condividi. Fai rete.</p>
 
 			<form class="ba-home-search" role="search" action="<?php echo esc_url( home_url( '/cerca/' ) ); ?>" method="get">
