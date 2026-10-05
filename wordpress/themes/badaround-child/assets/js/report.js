@@ -123,6 +123,28 @@
 		label.dataset.baDrilldownEnhanced = '1';
 	});
 
+	root.querySelectorAll('.ba-relationship-field .wpforms-field-label-inline').forEach((label) => {
+		if (label.dataset.baRelationshipEnhanced === '1') return;
+		const displayText = stripLeadingEmoji(label.textContent.trim());
+		label.textContent = '';
+
+		const icon = document.createElement('span');
+		icon.className = 'ba-drilldown-icon';
+		icon.setAttribute('aria-hidden','true');
+		icon.textContent = displayText.toLowerCase().includes('testimon') ? '◉' : '•';
+
+		const text = document.createElement('span');
+		text.className = 'ba-drilldown-text';
+		text.textContent = displayText;
+
+		const radio = document.createElement('span');
+		radio.className = 'ba-drilldown-radio';
+		radio.setAttribute('aria-hidden','true');
+
+		label.append(icon,text,radio);
+		label.dataset.baRelationshipEnhanced = '1';
+	});
+
 	/* Visual grouping only: no fields are moved and no WPForms logic is altered. */
 	const classFields = (ids, classes) => ids.forEach((id) => field(id)?.classList.add(...classes));
 	classFields([37,38,39,40,41,42,43,44],['ba-form-section']);
