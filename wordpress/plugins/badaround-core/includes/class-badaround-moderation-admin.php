@@ -14,6 +14,7 @@ class BadAround_Moderation_Admin {
 		add_action( 'admin_post_ba_publish_event', array( $this, 'handle_publish_action' ) );
 		add_action( 'admin_post_ba_approve_public_media', array( $this, 'handle_public_media_action' ) );
 		add_action( 'admin_post_ba_private_media', array( $this, 'serve_private_media' ) );
+		add_action( 'admin_notices', array( $this, 'render_admin_notices' ) );
 		add_action( 'pre_get_posts', array( $this, 'filter_moderation_queue' ) );
 		add_filter( 'manage_' . BadAround_Event_Post_Type::POST_TYPE . '_posts_columns', array( $this, 'add_list_columns' ) );
 		add_action( 'manage_' . BadAround_Event_Post_Type::POST_TYPE . '_posts_custom_column', array( $this, 'render_list_column' ), 10, 2 );
@@ -227,10 +228,15 @@ class BadAround_Moderation_Admin {
 		}
 		if ( BadAround_Publication_Service::STATUS_PUBLISHED === $status ) {
 			$permalink = get_permalink( $post->ID );
+			$repair_url = wp_nonce_url(
+				admin_url( 'admin-post.php?action=ba_publish_event&event_id=' . absint( $post->ID ) ),
+				'ba_publish_event_' . absint( $post->ID )
+			);
 			echo '<p><strong>' . esc_html__( 'Evento pubblicato.', 'badaround-core' ) . '</strong></p>';
 			if ( $permalink ) {
 				echo '<p><a class="button button-secondary" target="_blank" rel="noopener" href="' . esc_url( $permalink ) . '">' . esc_html__( 'Apri evento pubblico', 'badaround-core' ) . '</a></p>';
 			}
+			echo '<p><a class="button" style="width:100%;text-align:center" href="' . esc_url( $repair_url ) . '">' . esc_html__( 'Aggiorna proiezione pubblica', 'badaround-core' ) . '</a></p>';
 			return;
 		}
 		if ( BadAround_Moderation_Service::STATUS_APPROVED === $status ) {
@@ -238,8 +244,8 @@ class BadAround_Moderation_Admin {
 				admin_url( 'admin-post.php?action=ba_publish_event&event_id=' . absint( $post->ID ) ),
 				'ba_publish_event_' . absint( $post->ID )
 			);
-			echo '<p><em>' . esc_html__( 'Moderazione conclusa. Verifica la proiezione pubblica e gli eventuali media prima di pubblicare.', 'badaround-core' ) . '</em></p>';
-			echo '<p><a class="button button-primary" style="width:100%;text-align:center" href="' . esc_url( $publish_url ) . '">' . esc_html__( 'Pubblica evento', 'badaround-core' ) . '</a></p>';
+			echo '<p><em>' . esc_html__( 'Moderazione approvata. La proiezione pubblica viene completata automaticamente prima della pubblicazione.', 'badaround-core' ) . '</em></p>';
+			echo '<p><a class="button button-primary" style="width:100%;text-align:center" href="' . esc_url( $publish_url ) . '">' . esc_html__( 'Completa e pubblica', 'badaround-core' ) . '</a></p>';
 			return;
 		}
 		if ( BadAround_Moderation_Service::STATUS_REJECTED === $status ) {
@@ -249,7 +255,7 @@ class BadAround_Moderation_Admin {
 		$base = admin_url( 'admin-post.php?action=ba_moderate_event&event_id=' . absint( $post->ID ) );
 		foreach ( array(
 			BadAround_Moderation_Service::STATUS_IN_REVIEW => __( 'Mantieni da moderare', 'badaround-core' ),
-			BadAround_Moderation_Service::STATUS_APPROVED  => __( 'Approva', 'badaround-core' ),
+			BadAround_Moderation_Service::STATUS_APPROVED  => __( 'Approva e pubblica', 'badaround-core' ),
 		) as $target => $label ) {
 			$url = wp_nonce_url( $base . '&target=' . $target, 'ba_moderate_event_' . $post->ID );
 			echo '<p><a class="button button-secondary" style="width:100%;text-align:center" href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a></p>';
@@ -320,9 +326,21 @@ class BadAround_Moderation_Admin {
 		$target = isset( $_REQUEST['target'] ) ? sanitize_key( wp_unslash( $_REQUEST['target'] ) ) : '';
 		$reason = isset( $_REQUEST['reason'] ) ? sanitize_textarea_field( wp_unslash( $_REQUEST['reason'] ) ) : '';
 		$result = ( new BadAround_Moderation_Service() )->transition( $event_id, $target, $reason );
-		$args = is_wp_error( $result )
-			? array( 'ba_moderation_error' => $result->get_error_code() )
-			: array( 'ba_moderation_updated' => 1 );
+
+		if ( ! is_wp_error( $result ) && BadAround_Moderation_Service::STATUS_APPROVED === $target ) {
+			$publication = new BadAround_Publication_Service();
+			$prepared    = $publication->prepare_public_projection( $event_id );
+			$result      = is_wp_error( $prepared ) ? $prepared : $publication->publish( $event_id );
+
+			$args = is_wp_error( $result )
+				? array( 'ba_publication_error' => $result->get_error_code() )
+				: array( 'ba_publication_updated' => 1 );
+		} else {
+			$args = is_wp_error( $result )
+				? array( 'ba_moderation_error' => $result->get_error_code() )
+				: array( 'ba_moderation_updated' => 1 );
+		}
+
 		wp_safe_redirect( add_query_arg( $args, get_edit_post_link( $event_id, 'url' ) ) );
 		exit;
 	}
@@ -330,7 +348,9 @@ class BadAround_Moderation_Admin {
 	public function handle_publish_action() {
 		$event_id = isset( $_REQUEST['event_id'] ) ? absint( $_REQUEST['event_id'] ) : 0;
 		check_admin_referer( 'ba_publish_event_' . $event_id );
-		$result = ( new BadAround_Publication_Service() )->publish( $event_id );
+		$publication = new BadAround_Publication_Service();
+		$prepared    = $publication->prepare_public_projection( $event_id );
+		$result      = is_wp_error( $prepared ) ? $prepared : $publication->publish( $event_id );
 		$args = is_wp_error( $result )
 			? array( 'ba_publication_error' => $result->get_error_code() )
 			: array( 'ba_publication_updated' => 1 );
@@ -413,6 +433,51 @@ class BadAround_Moderation_Admin {
 			return;
 		}
 		echo '<script>(function(){var b=document.getElementById("publish");if(b){b.value="' . esc_js( __( 'Salva modifiche', 'badaround-core' ) ) . '";}var s=document.getElementById("post-status-select");if(s){s.style.display="none";}}());</script>';
+	}
+
+	public function render_admin_notices() {
+		if ( ! current_user_can( 'ba_moderate_events' ) ) {
+			return;
+		}
+
+		if ( ! empty( $_GET['ba_publication_updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			echo '<div class="notice notice-success is-dismissible"><p><strong>' . esc_html__( 'Evento pubblicato.', 'badaround-core' ) . '</strong> ' . esc_html__( 'La segnalazione è ora disponibile nel frontend e nelle viste territoriali pertinenti.', 'badaround-core' ) . '</p></div>';
+			return;
+		}
+
+		if ( ! empty( $_GET['ba_publication_error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$code = sanitize_key( wp_unslash( $_GET['ba_publication_error'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			echo '<div class="notice notice-error"><p><strong>' . esc_html__( 'Pubblicazione non completata.', 'badaround-core' ) . '</strong> ' . esc_html( $this->publication_error_message( $code ) ) . '</p></div>';
+		}
+	}
+
+	private function publication_error_message( $code ) {
+		$messages = array(
+			'ba_publication_invalid_event'              => __( 'L’evento non è valido.', 'badaround-core' ),
+			'ba_publication_forbidden'                  => __( 'L’utente corrente non dispone dei permessi necessari per pubblicare.', 'badaround-core' ),
+			'ba_publication_transition_not_allowed'     => __( 'La pubblicazione è consentita solo dopo l’approvazione.', 'badaround-core' ),
+			'ba_publication_not_approved'               => __( 'L’evento non risulta ancora approvato.', 'badaround-core' ),
+			'ba_publication_title_missing'              => __( 'Non è stato possibile costruire un titolo pubblico.', 'badaround-core' ),
+			'ba_publication_content_missing'            => __( 'Non è stato possibile costruire una descrizione pubblica.', 'badaround-core' ),
+			'ba_publication_type_missing'               => __( 'Manca la categoria dell’evento.', 'badaround-core' ),
+			'ba_publication_subcategory_missing'        => __( 'Manca la sottocategoria dell’evento.', 'badaround-core' ),
+			'ba_publication_territory_missing'          => __( 'Manca il territorio canonico associato alla segnalazione.', 'badaround-core' ),
+			'ba_publication_date_missing'               => __( 'Manca la data pubblicabile dell’evento.', 'badaround-core' ),
+			'ba_publication_location_missing'           => __( 'Manca una localizzazione pubblicabile.', 'badaround-core' ),
+			'ba_publication_location_too_precise'       => __( 'La posizione pubblica è troppo precisa e deve essere approssimata.', 'badaround-core' ),
+			'ba_publication_private_report_missing'     => __( 'Non è disponibile il report riservato collegato.', 'badaround-core' ),
+			'ba_publication_private_data_detected'      => __( 'La proiezione pubblica contiene dati riservati e deve essere corretta.', 'badaround-core' ),
+			'ba_publication_exact_coordinates_detected' => __( 'Le coordinate pubbliche coincidono con quelle esatte.', 'badaround-core' ),
+			'ba_publication_plate_not_masked'           => __( 'La targa non risulta correttamente mascherata.', 'badaround-core' ),
+			'ba_publication_sensitive_meta_detected'    => __( 'Sono presenti dati riservati nella proiezione pubblica.', 'badaround-core' ),
+			'ba_publication_media_segregation_invalid'  => __( 'Un allegato originale non risulta correttamente segregato.', 'badaround-core' ),
+			'ba_publication_public_media_missing'       => __( 'Una copia media pubblica collegata non è disponibile.', 'badaround-core' ),
+			'ba_publication_wp_status_failed'           => __( 'WordPress non ha confermato lo stato pubblicato.', 'badaround-core' ),
+		);
+
+		return isset( $messages[ $code ] )
+			? $messages[ $code ]
+			: sprintf( __( 'Errore di pubblicazione: %s', 'badaround-core' ), $code );
 	}
 
 	private function moderation_queue_count() {
