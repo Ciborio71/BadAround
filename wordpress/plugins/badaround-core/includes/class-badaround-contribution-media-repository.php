@@ -76,6 +76,29 @@ class BadAround_Contribution_Media_Repository {
 		);
 	}
 
+	public function cleanup_contribution( $contribution_id ) {
+		global $wpdb;
+		$contribution_id = absint( $contribution_id );
+		if ( ! $contribution_id ) { return; }
+
+		$rows = $this->list_for_contribution( $contribution_id );
+		$base = $this->secure_base_dir();
+		foreach ( $rows as $row ) {
+			if ( $base && ! empty( $row['original_storage_key'] ) ) {
+				$path = wp_normalize_path( trailingslashit( $base ) . 'contribution-' . $contribution_id . '/' . basename( $row['original_storage_key'] ) );
+				$root = wp_normalize_path( trailingslashit( $base ) );
+				if ( 0 === strpos( $path, $root ) && is_file( $path ) ) {
+					@unlink( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+				}
+			}
+		}
+		$wpdb->delete( $wpdb->prefix . 'ba_contribution_media', array( 'contribution_id' => $contribution_id ) );
+		$dir = $base ? wp_normalize_path( trailingslashit( $base ) . 'contribution-' . $contribution_id ) : '';
+		if ( $dir && is_dir( $dir ) ) {
+			@rmdir( $dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		}
+	}
+
 	public function has_pending_review( $contribution_id ) {
 		global $wpdb;
 		$count = (int) $wpdb->get_var(
