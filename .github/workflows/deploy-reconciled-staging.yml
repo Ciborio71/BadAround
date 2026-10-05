@@ -18,7 +18,7 @@ concurrency:
 jobs:
   validate:
     name: Validate authorized reconciled release
-    if: github.ref == 'refs/heads/release/mvp-reconciled'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout authorized release
@@ -128,7 +128,7 @@ jobs:
   deploy:
     name: Deploy authorized core and theme
     needs: validate
-    if: github.ref == 'refs/heads/release/mvp-reconciled'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: staging
     steps:
