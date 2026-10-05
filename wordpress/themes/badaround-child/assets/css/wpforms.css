@@ -299,16 +299,16 @@
 }
 
 /* Standard radio / checkbox lists */
-.ba-report-mount .wpforms-field-radio:not(.badaround-event-category):not(.ba-drilldown-field):not(.ba-relationship-field) ul,
-.ba-report-mount .wpforms-field-checkbox ul{
+.ba-report-mount .wpforms-field-radio:not(.badaround-event-category):not(.ba-drilldown-field):not(.ba-relationship-field):not(.ba-detail-choice-field) ul,
+.ba-report-mount .wpforms-field-checkbox:not(.ba-detail-choice-field) ul{
 	display:grid!important;
 	gap:8px!important;
 	margin:0!important;
 	padding:0!important;
 	list-style:none!important;
 }
-.ba-report-mount .wpforms-field-radio:not(.badaround-event-category):not(.ba-drilldown-field):not(.ba-relationship-field) li,
-.ba-report-mount .wpforms-field-checkbox li{
+.ba-report-mount .wpforms-field-radio:not(.badaround-event-category):not(.ba-drilldown-field):not(.ba-relationship-field):not(.ba-detail-choice-field) li,
+.ba-report-mount .wpforms-field-checkbox:not(.ba-detail-choice-field) li{
 	display:flex!important;
 	align-items:flex-start!important;
 	gap:8px!important;
@@ -318,12 +318,33 @@
 	border-radius:10px!important;
 	background:#fff!important;
 }
-.ba-report-mount .wpforms-field-radio:not(.badaround-event-category):not(.ba-drilldown-field):not(.ba-relationship-field) li:has(input:checked),
-.ba-report-mount .wpforms-field-checkbox li:has(input:checked){
+.ba-report-mount .wpforms-field-radio:not(.badaround-event-category):not(.ba-drilldown-field):not(.ba-relationship-field):not(.ba-detail-choice-field) li:has(input:checked),
+.ba-report-mount .wpforms-field-checkbox:not(.ba-detail-choice-field) li:has(input:checked){
 	border-color:#a8d9dd!important;
 	background:#f2fbfc!important;
 }
 .ba-report-mount .wpforms-field-label-inline{color:#344d64!important;font-size:.82rem!important;line-height:1.4!important}
+
+/* Step 3 layout consistency */
+.ba-report-mount .wpforms-page-3{
+	display:grid;
+	grid-template-columns:repeat(3,minmax(0,1fr));
+	column-gap:14px;
+	align-items:start;
+}
+.ba-report-mount .wpforms-page-3>.wpforms-field,
+.ba-report-mount .wpforms-page-3>.wpforms-field-pagebreak{
+	grid-column:1 / -1;
+}
+.ba-report-mount #wpforms-6-field_39-container{grid-column:1}
+.ba-report-mount #wpforms-6-field_40-container{grid-column:2}
+.ba-report-mount #wpforms-6-field_41-container{grid-column:3}
+.ba-report-mount #wpforms-6-field_39-container,
+.ba-report-mount #wpforms-6-field_40-container,
+.ba-report-mount #wpforms-6-field_41-container{
+	width:100%;
+	margin-top:4px!important;
+}
 
 /* Step 3 — detail choices inherit the card system */
 .ba-report-mount .wpforms-page-3 .ba-detail-choice-field{
@@ -338,14 +359,16 @@
 	padding:0!important;
 	list-style:none!important;
 }
-.ba-report-mount .wpforms-page-3 .ba-detail-choice-field li{
+.ba-report-mount .wpforms-page-3 .ba-detail-choice-field ul>li{
 	position:relative!important;
 	display:block!important;
 	min-width:0!important;
 	margin:0!important;
 	padding:0!important;
 	border:0!important;
+	border-radius:0!important;
 	background:transparent!important;
+	box-shadow:none!important;
 }
 .ba-report-mount .wpforms-page-3 .ba-detail-choice-field input[type="radio"],
 .ba-report-mount .wpforms-page-3 .ba-detail-choice-field input[type="checkbox"]{
@@ -790,6 +813,10 @@
 	.ba-report-mount .ba-drilldown-field{margin-top:18px!important;padding-top:18px!important}
 	.ba-report-mount .ba-drilldown-field ul{grid-template-columns:1fr!important}
 	.ba-report-mount .ba-relationship-field ul{grid-template-columns:1fr!important}
+	.ba-report-mount .wpforms-page-3{grid-template-columns:1fr!important;column-gap:0!important}
+	.ba-report-mount #wpforms-6-field_39-container,
+	.ba-report-mount #wpforms-6-field_40-container,
+	.ba-report-mount #wpforms-6-field_41-container{grid-column:1!important}
 	.ba-report-mount .wpforms-page-3 .ba-detail-choice-field ul{grid-template-columns:1fr!important}
 	.ba-report-mount .wpforms-page-2{
 		grid-template-columns:1fr!important;
