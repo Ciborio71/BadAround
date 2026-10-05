@@ -175,7 +175,6 @@
 	const eventTiming = field(16);
 	const eventDate = field(17);
 	const timeKnowledge = field(18);
-	const exactTime = field(19);
 	const eventDateInput = eventDate?.querySelector('input');
 	const exactDateRadio = eventTiming?.querySelector('input[type="radio"][value="In una data precisa"]');
 
@@ -186,12 +185,6 @@
 		const revealTimeKnowledge = exactDateSelected && hasDate;
 		timeKnowledge.classList.toggle('ba-progressive-hidden', !revealTimeKnowledge);
 		timeKnowledge.setAttribute('aria-hidden', revealTimeKnowledge ? 'false' : 'true');
-
-		if (!revealTimeKnowledge && exactTime) {
-			exactTime.classList.add('ba-progressive-hidden');
-		} else if (exactTime && getComputedStyle(exactTime).display !== 'none') {
-			exactTime.classList.remove('ba-progressive-hidden');
-		}
 	};
 	eventTiming?.querySelectorAll('input[type="radio"]').forEach((radio) => {
 		radio.addEventListener('change',() => requestAnimationFrame(syncExactDateFlow));
