@@ -2,7 +2,7 @@
 /**
  * Plugin Name: BadAround Core
  * Description: Core application logic for the BadAround platform.
- * Version: 0.13.0
+ * Version: 0.14.0
  * Author: BadAround
  * Text Domain: badaround-core
  */
@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'BADAROUND_CORE_VERSION', '0.13.0' );
+define( 'BADAROUND_CORE_VERSION', '0.14.0' );
 define( 'BADAROUND_CORE_FILE', __FILE__ );
 define( 'BADAROUND_CORE_PATH', plugin_dir_path( __FILE__ ) );
 
@@ -35,6 +35,7 @@ require_once BADAROUND_CORE_PATH . 'includes/class-badaround-sentinel-service.ph
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-sentinel-matching-service.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-contribution-repository.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-contribution-service.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-contribution-media-repository.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-contribution-post-type.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-contribution-moderation-service.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-contribution-moderation-admin.php';
