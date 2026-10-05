@@ -762,6 +762,10 @@
 	box-shadow:0 0 0 3px rgba(231,122,122,.10)!important;
 }
 
+.ba-report-mount .ba-context-hidden{
+	display:none!important;
+}
+
 /* Details and content surfaces */
 .ba-report-mount .ba-form-section{margin:6px 0!important;padding:14px 0!important}
 .ba-report-mount .ba-form-section--sensitive{
