@@ -517,6 +517,17 @@
 	grid-column:3;
 	width:100%;
 }
+.ba-report-mount #wpforms-6-field_17-container,
+.ba-report-mount #wpforms-6-field_18-container,
+.ba-report-mount #wpforms-6-field_19-container{
+	align-self:start;
+	margin-top:0!important;
+	padding-top:10px!important;
+}
+.ba-report-mount #wpforms-6-field_18-container{
+	margin-bottom:0!important;
+	padding-bottom:10px!important;
+}
 .ba-report-mount #wpforms-6-field_17-container input,
 .ba-report-mount #wpforms-6-field_19-container input{
 	width:100%!important;
