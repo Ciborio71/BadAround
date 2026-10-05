@@ -346,12 +346,39 @@
 	margin-top:4px!important;
 }
 
-/* Step 3 — detail choices inherit the card system */
-.ba-report-mount .wpforms-page-3 .ba-detail-choice-field{
+/* Steps 4–5 layout consistency */
+.ba-report-mount .wpforms-page-4,
+.ba-report-mount .wpforms-page-5{
+	row-gap:4px;
+}
+.ba-report-mount .wpforms-page-4 .ba-detail-choice-field,
+.ba-report-mount .wpforms-page-5 .ba-detail-choice-field{
+	margin:20px 0!important;
+	padding:16px 0!important;
+}
+.ba-report-mount #wpforms-6-field_61-container,
+.ba-report-mount #wpforms-6-field_62-container{
+	display:inline-block;
+	vertical-align:top;
+	width:calc(50% - 8px)!important;
+}
+.ba-report-mount #wpforms-6-field_61-container{margin-right:12px!important}
+.ba-report-mount .wpforms-page-5 .ba-detail-choice-field:has(input[type="checkbox"]){
+	padding:12px 0!important;
+}
+.ba-report-mount .wpforms-page-5 .ba-detail-choice-field:has(input[type="checkbox"]) ul{
+	grid-template-columns:1fr!important;
+}
+.ba-report-mount .wpforms-page-5 .ba-detail-choice-field:has(input[type="checkbox"]) .wpforms-field-label-inline{
+	min-height:60px!important;
+}
+
+/* Steps 3–5 — choices inherit the shared card system */
+.ba-report-mount .ba-detail-choice-field{
 	margin:18px 0!important;
 	padding:16px 0!important;
 }
-.ba-report-mount .wpforms-page-3 .ba-detail-choice-field ul{
+.ba-report-mount .ba-detail-choice-field ul{
 	display:grid!important;
 	grid-template-columns:repeat(auto-fit,minmax(220px,1fr))!important;
 	gap:10px!important;
@@ -359,7 +386,7 @@
 	padding:0!important;
 	list-style:none!important;
 }
-.ba-report-mount .wpforms-page-3 .ba-detail-choice-field ul>li{
+.ba-report-mount .ba-detail-choice-field ul>li{
 	position:relative!important;
 	display:block!important;
 	min-width:0!important;
@@ -370,15 +397,15 @@
 	background:transparent!important;
 	box-shadow:none!important;
 }
-.ba-report-mount .wpforms-page-3 .ba-detail-choice-field input[type="radio"],
-.ba-report-mount .wpforms-page-3 .ba-detail-choice-field input[type="checkbox"]{
+.ba-report-mount .ba-detail-choice-field input[type="radio"],
+.ba-report-mount .ba-detail-choice-field input[type="checkbox"]{
 	position:absolute!important;
 	width:1px!important;
 	height:1px!important;
 	opacity:0!important;
 	pointer-events:none!important;
 }
-.ba-report-mount .wpforms-page-3 .ba-detail-choice-field .wpforms-field-label-inline{
+.ba-report-mount .ba-detail-choice-field .wpforms-field-label-inline{
 	position:relative;
 	display:grid!important;
 	grid-template-columns:40px 1fr 20px;
@@ -399,7 +426,7 @@
 	cursor:pointer;
 	transition:border-color .15s ease,background-color .15s ease,box-shadow .15s ease,transform .15s ease!important;
 }
-.ba-report-mount .wpforms-page-3 .ba-detail-choice-field .wpforms-field-label-inline:hover{
+.ba-report-mount .ba-detail-choice-field .wpforms-field-label-inline:hover{
 	transform:translateY(-1px);
 	border-color:#9ccfd4!important;
 	background:#fbfefe!important;
@@ -426,21 +453,21 @@
 	background:#fff;
 }
 .ba-detail-choice-indicator.is-checkbox{border-radius:5px}
-.ba-report-mount .wpforms-page-3 .ba-detail-choice-field input:checked+.wpforms-field-label-inline{
+.ba-report-mount .ba-detail-choice-field input:checked+.wpforms-field-label-inline{
 	border-color:var(--ba-report-teal)!important;
 	background:#effafa!important;
 	color:#135f67!important;
 	box-shadow:0 0 0 3px rgba(7,152,168,.07)!important;
 }
-.ba-report-mount .wpforms-page-3 .ba-detail-choice-field input:checked+.wpforms-field-label-inline .ba-detail-choice-indicator{
+.ba-report-mount .ba-detail-choice-field input:checked+.wpforms-field-label-inline .ba-detail-choice-indicator{
 	border-color:var(--ba-report-teal);
 	background:var(--ba-report-teal);
 	box-shadow:inset 0 0 0 4px #fff;
 }
-.ba-report-mount .wpforms-page-3 .ba-detail-choice-field input[type="checkbox"]:checked+.wpforms-field-label-inline .ba-detail-choice-indicator{
+.ba-report-mount .ba-detail-choice-field input[type="checkbox"]:checked+.wpforms-field-label-inline .ba-detail-choice-indicator{
 	box-shadow:none;
 }
-.ba-report-mount .wpforms-page-3 .ba-detail-choice-field input[type="checkbox"]:checked+.wpforms-field-label-inline .ba-detail-choice-indicator::before{
+.ba-report-mount .ba-detail-choice-field input[type="checkbox"]:checked+.wpforms-field-label-inline .ba-detail-choice-indicator::before{
 	content:"✓";
 	color:#fff;
 	font-size:.68rem;
@@ -814,10 +841,16 @@
 	.ba-report-mount .ba-drilldown-field ul{grid-template-columns:1fr!important}
 	.ba-report-mount .ba-relationship-field ul{grid-template-columns:1fr!important}
 	.ba-report-mount .wpforms-page-3{grid-template-columns:1fr!important;column-gap:0!important}
+	.ba-report-mount #wpforms-6-field_61-container,
+	.ba-report-mount #wpforms-6-field_62-container{
+		display:block!important;
+		width:100%!important;
+		margin-right:0!important;
+	}
 	.ba-report-mount #wpforms-6-field_39-container,
 	.ba-report-mount #wpforms-6-field_40-container,
 	.ba-report-mount #wpforms-6-field_41-container{grid-column:1!important}
-	.ba-report-mount .wpforms-page-3 .ba-detail-choice-field ul{grid-template-columns:1fr!important}
+	.ba-report-mount .ba-detail-choice-field ul{grid-template-columns:1fr!important}
 	.ba-report-mount .wpforms-page-2{
 		grid-template-columns:1fr!important;
 		column-gap:0!important;
