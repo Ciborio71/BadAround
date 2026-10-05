@@ -54,7 +54,11 @@ $form_id = badaround_report_form_id();
 				<div>
 					<span class="ba-report-stage__eyebrow" data-ba-report-eyebrow>SEGNALA UN EVENTO</span>
 					<h2 data-ba-report-title>Cosa è successo?</h2>
-					<p data-ba-report-copy>Scegli la categoria più vicina al tuo caso. Mostreremo solo le domande necessarie.</p>
+					<div class="ba-report-stage__copy" data-ba-report-copy>
+						<p><strong>Un furto, un danno, un comportamento sospetto, un pericolo o stai cercando testimoni?</strong><br>Segnala ciò che è successo e aiuta chi vive o frequenta la stessa zona.</p>
+						<p><strong>Scegli la categoria più vicina al tuo caso.</strong></p>
+						<p><strong>Non preoccuparti se non è perfetta: ti guideremo noi e ti mostreremo solo le domande necessarie.</strong></p>
+					</div>
 				</div>
 				<div class="ba-report-stage__actions">
 					<button class="ba-report-save" type="button" data-ba-report-save>
