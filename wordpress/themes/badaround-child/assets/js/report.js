@@ -701,12 +701,30 @@
 		return container.style.display === 'none';
 	};
 
-	const progressiveFieldCandidates = (page) => [...page.children].filter((container) => {
-		if (!container.classList?.contains('wpforms-field')) return false;
-		if (container.classList.contains('wpforms-field-html')) return false;
-		if (container.classList.contains('wpforms-field-pagebreak')) return false;
-		return !!container.dataset.fieldId;
-	});
+	const progressiveFieldCandidates = (page) => {
+		const candidates = [...page.children].filter((container) => {
+			if (!container.classList?.contains('wpforms-field')) return false;
+			if (container.classList.contains('wpforms-field-html')) return false;
+			if (container.classList.contains('wpforms-field-pagebreak')) return false;
+			return !!container.dataset.fieldId;
+		});
+
+		/* Step 2 follows the user journey, not the legacy WPForms DOM order:
+		 * first WHERE (Google map/location), then public location context,
+		 * finally WHEN. No fields are physically moved. */
+		if (page.classList.contains('wpforms-page-2')) {
+			const order = [31,29,32,33,34,16,17,18,19,20,22,23,24,25];
+			return candidates.sort((a,b) => {
+				const aId = Number(a.dataset.fieldId || 0);
+				const bId = Number(b.dataset.fieldId || 0);
+				const aIndex = order.indexOf(aId);
+				const bIndex = order.indexOf(bId);
+				return (aIndex < 0 ? 999 : aIndex) - (bIndex < 0 ? 999 : bIndex);
+			});
+		}
+
+		return candidates;
+	};
 
 	const fieldRequiredControls = (container) => [...container.querySelectorAll('input[required],select[required],textarea[required]')];
 
@@ -875,7 +893,9 @@
 			next.textContent = labels[step] || 'Continua →';
 		}
 
-		if (shouldScroll && pageIndex !== lastPage) {
+		const pageChanged = pageIndex !== lastPage;
+		if (pageChanged) {
+			selectionAnchor = null;
 			document.querySelector('.ba-report-workspace')?.scrollIntoView({behavior:'smooth',block:'start'});
 		}
 		lastPage = pageIndex;
@@ -924,9 +944,10 @@
 		}
 		allowPageNavigationScroll = true;
 		setTimeout(() => {
+			syncProgressiveDisclosure();
 			syncStep(true);
 			allowPageNavigationScroll = false;
-		},120);
+		},180);
 	});
 
 	/* Save & Resume is a distinct mode, not another report step. */
