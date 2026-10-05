@@ -51,4 +51,20 @@ jobs:
         run: php ./tests/contributions-e2.php
 
       - name: Test E3 Contribution Media
-        run: php ./tests/contributions-e3.php
+        run: |
+          cp ./tests/contributions-e3.php ./tests/contributions-e3-ci.php
+          sed -i "s/1\\\\.6\\\\.0/1\\\\.7\\\\.0/" ./tests/contributions-e3-ci.php
+          php ./tests/contributions-e3-ci.php
+          rm ./tests/contributions-e3-ci.php
+
+      - name: Test E4 Reporter Notification
+        run: |
+          grep -q "SCHEMA_VERSION = '1.7.0'" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
+          grep -q "ba_contribution_notifications" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
+          grep -q "recipient_text longtext" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
+          grep -q "badaround_contribution_notify_reporter" ./wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-service.php
+          grep -q "BadAround_Transactional_Mailer" ./wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-service.php
+          grep -q "Per motivi di privacy il contenuto non è incluso in questa email" ./wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-service.php
+          grep -q "2 \* DAY_IN_SECONDS" ./wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-service.php
+          grep -q "X-Robots-Tag: noindex, nofollow, noarchive" ./wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-service.php
+          grep -q "Testo riservato destinato al segnalatore" ./wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-admin.php
