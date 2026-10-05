@@ -22,13 +22,6 @@ $form_id = badaround_report_form_id();
 				</div>
 			</div>
 
-			<button class="ba-report-save" type="button" data-ba-report-save>
-				<span class="ba-report-save__icon" aria-hidden="true">☁</span>
-				<span>
-					<strong>Salva bozza</strong>
-					<small>Riprendi più tardi</small>
-				</span>
-			</button>
 		</header>
 
 		<nav class="ba-report-steps" aria-label="Avanzamento della segnalazione">
@@ -63,7 +56,16 @@ $form_id = badaround_report_form_id();
 					<h2 data-ba-report-title>Cosa è successo?</h2>
 					<p data-ba-report-copy>Scegli la categoria più vicina al tuo caso. Mostreremo solo le domande necessarie.</p>
 				</div>
-				<div class="ba-report-context" data-ba-report-context hidden></div>
+				<div class="ba-report-stage__actions">
+					<button class="ba-report-save" type="button" data-ba-report-save>
+						<span class="ba-report-save__icon" aria-hidden="true">☁</span>
+						<span>
+							<strong>Salva bozza</strong>
+							<small>Riprendi più tardi</small>
+						</span>
+					</button>
+					<div class="ba-report-context" data-ba-report-context hidden></div>
+				</div>
 			</header>
 
 			<div class="ba-report-mount" data-form-id="<?php echo esc_attr( $form_id ); ?>">
