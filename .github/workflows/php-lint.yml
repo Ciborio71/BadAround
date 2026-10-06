@@ -54,6 +54,9 @@ jobs:
       - name: Test F1 Native Report canonical foundation
         run: php ./tests/native-report-f1.php
 
+      - name: Test F1.2 Canonical Report Contract
+        run: php ./tests/native-report-f12.php
+
       - name: Test D1 Sentinel lifecycle
         run: php ./tests/sentinels-d1.php
 
