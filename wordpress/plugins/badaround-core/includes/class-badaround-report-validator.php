@@ -12,12 +12,8 @@ class BadAround_Report_Validator {
 		if ( ! is_array( $report ) ) {
 			return new WP_Error( 'ba_report_invalid_payload', __( 'La segnalazione non è valida.', 'badaround-core' ) );
 		}
-
-		$raw_error = $this->validate_raw_contract( $report );
-		if ( is_wp_error( $raw_error ) ) {
-			return $raw_error;
-		}
-
+		// Compatibility entry point used by the certified legacy adapter.
+		// Strict unknown-field/type preflight belongs to the native F1.3 intake.
 		$report = $this->normalize( $report );
 		$error  = $this->validate( $report );
 		return is_wp_error( $error ) ? $error : $report;
