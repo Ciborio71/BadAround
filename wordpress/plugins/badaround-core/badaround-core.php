@@ -28,6 +28,7 @@ require_once BADAROUND_CORE_PATH . 'includes/class-badaround-event-taxonomy-init
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-report-intake-service.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-wpforms-field-mapper.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-wpforms-report-adapter.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-wpforms-contract-map.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-event-type-resolver.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-territory-resolver.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-media-repository.php';
