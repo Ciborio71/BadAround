@@ -22,52 +22,17 @@ class BadAround_Report_Schema {
 	public static function definition() {
 		return array(
 			'version' => self::VERSION,
-			'category_subtypes' => array(
-				'vehicle' => array(
-					'vehicle_stolen',
-					'vehicle_parked_damage',
-					'vehicle_hit_and_run',
-					'vehicle_parts_stolen',
-					'vehicle_observed',
-					'vehicle_other',
-				),
-				'public_space' => array(
-					'civic_waste',
-					'civic_surface_damage',
-					'civic_public_lighting',
-					'civic_road_signage',
-					'civic_public_furniture_green',
-					'civic_other',
-				),
-				'property' => array(
-					'property_theft',
-					'property_attempted_breakin',
-					'property_intrusion',
-					'property_vandalism',
-					'property_observed_behavior',
-					'property_other',
-				),
-				'animal' => array(
-					'animal_missing',
-					'animal_sighted_or_found',
-					'animal_injured',
-					'animal_risk',
-				),
-				'item_document' => array(
-					'wallet_docs',
-					'keys',
-					'electronics',
-					'valuables',
-					'other',
-				),
-				'hazard' => array(
-					'hazard_falling_element',
-					'hazard_road_disruption',
-					'hazard_flood_or_ice',
-					'hazard_road_obstruction',
-					'hazard_fire_or_smoke',
-					'hazard_other',
-				),
+			'category_subtypes' => self::category_subtypes(),
+			'temporal_semantics' => array(
+				'date_format' => 'Y-m-d',
+				'time_format' => 'H:i:s',
+				'timezone' => 'site-configured-iana-timezone',
+				'rule' => 'Interpret wall-clock values in the WordPress site timezone; never infer timezone from the frontend widget.',
+			),
+			'idempotency' => array(
+				'key' => 'submission_id',
+				'max_reports' => 1,
+				'max_events' => 1,
 			),
 			'validation_rules' => self::validation_rules(),
 			'fields' => self::fields(),
@@ -89,7 +54,7 @@ class BadAround_Report_Schema {
 	public static function fields() {
 		return array(
 			'schema_version' => self::field( 'string', true, self::PRIVACY_PRIVATE, 'report-envelope', 'none', array( 'enum' => array( self::VERSION ) ) ),
-			'submission_id' => self::field( 'uuid', true, self::PRIVACY_PRIVATE, 'source-identity', 'none' ),
+			'submission_id' => self::field( 'uuid', true, self::PRIVACY_PRIVATE, 'source-identity', 'none', array( 'format' => 'rfc4122', 'idempotency' => 'one-report-one-event' ) ),
 
 			'event.category' => self::field(
 				'enum',
@@ -97,9 +62,9 @@ class BadAround_Report_Schema {
 				self::PRIVACY_PUBLIC,
 				'ba_tipo_evento',
 				'direct-after-moderation',
-				array( 'enum' => array( 'vehicle', 'public_space', 'property', 'animal', 'item_document', 'hazard' ) )
+				array( 'enum' => array_keys( self::category_subtypes() ) )
 			),
-			'event.subtype' => self::field( 'enum', true, self::PRIVACY_PUBLIC, 'ba_tipo_evento', 'direct-after-moderation' ),
+			'event.subtype' => self::field( 'enum', true, self::PRIVACY_PUBLIC, 'ba_tipo_evento', 'direct-after-moderation', array( 'enum' => self::all_subtypes() ) ),
 			'event.other_type' => self::field(
 				'string',
 				true,
@@ -125,8 +90,12 @@ class BadAround_Report_Schema {
 			'location.exact_address' => self::field( 'string', true, self::PRIVACY_PRIVATE, 'ba_reports.exact_address', 'never', array( 'max_length' => 500 ) ),
 			'location.exact_lat' => self::field( 'decimal', false, self::PRIVACY_PRIVATE, 'ba_reports.exact_lat', 'never', array( 'min' => -90, 'max' => 90 ) ),
 			'location.exact_lng' => self::field( 'decimal', false, self::PRIVACY_PRIVATE, 'ba_reports.exact_lng', 'never', array( 'min' => -180, 'max' => 180 ) ),
-			'location.place_id' => self::field( 'string', false, self::PRIVACY_PRIVATE, 'ba_reports.content_original', 'never', array( 'max_length' => 255 ) ),
+			'location.place_id' => self::field( 'string', false, self::PRIVACY_PRIVATE, 'ba_reports.content_original', 'never', array( 'max_length' => 255, 'identity' => 'external-reference-only' ) ),
 			'location.area_label' => self::field( 'string', false, self::PRIVACY_PUBLIC, '_ba_public_place_name', 'direct-after-moderation', array( 'max_length' => 191 ) ),
+			'location.region' => self::field( 'string', false, self::PRIVACY_PUBLIC, 'ba_territorio', 'derived-after-territory-resolution', array( 'max_length' => 191 ) ),
+			'location.province' => self::field( 'string', false, self::PRIVACY_PUBLIC, 'ba_territorio', 'derived-after-territory-resolution', array( 'max_length' => 191 ) ),
+			'location.municipality' => self::field( 'string', false, self::PRIVACY_PUBLIC, 'ba_territorio', 'derived-after-territory-resolution', array( 'max_length' => 191 ) ),
+			'location.locality' => self::field( 'string', false, self::PRIVACY_PUBLIC, 'ba_territorio', 'derived-after-territory-resolution', array( 'max_length' => 191 ) ),
 			'location.public_precision' => self::field(
 				'enum',
 				true,
@@ -446,7 +415,7 @@ class BadAround_Report_Schema {
 			),
 
 			'media.availability' => self::field( 'enum', false, self::PRIVACY_PRIVATE, 'ba_reports.content_original', 'none', array( 'enum' => array( 'yes', 'no', 'possible', 'surveillance' ) ) ),
-			'media.items' => self::field( 'array', false, self::PRIVACY_QUARANTINE, 'ba_report_media', 'approved-derivative-only', array( 'max_items' => 5 ) ),
+			'media.items' => self::field( 'array', false, self::PRIVACY_QUARANTINE, 'ba_report_media', 'approved-derivative-only', array( 'max_items' => 5, 'max_bytes_per_item' => 5242880, 'allowed_extensions' => array( 'jpg', 'jpeg', 'png', 'webp', 'heic' ), 'allowed_mime' => array( 'image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif' ), 'item_identity' => 'media_id', 'submission_relation' => 'submission_id' ) ),
 
 			'reward.status' => self::field( 'enum', true, self::PRIVACY_PUBLIC, 'ba_reports.content_original', 'direct-after-moderation', array( 'enum' => array( 'none', 'fixed', 'negotiable' ) ) ),
 			'reward.amount' => self::field(
@@ -531,19 +500,68 @@ class BadAround_Report_Schema {
 	}
 
 	public static function category_subtypes() {
-		$definition = self::definition();
-		return $definition['category_subtypes'];
+		return array(
+			'vehicle' => array( 'vehicle_stolen', 'vehicle_parked_damage', 'vehicle_hit_and_run', 'vehicle_parts_stolen', 'vehicle_observed', 'vehicle_other' ),
+			'public_space' => array( 'civic_waste', 'civic_surface_damage', 'civic_public_lighting', 'civic_road_signage', 'civic_public_furniture_green', 'civic_other' ),
+			'property' => array( 'property_theft', 'property_attempted_breakin', 'property_intrusion', 'property_vandalism', 'property_observed_behavior', 'property_other' ),
+			'animal' => array( 'animal_missing', 'animal_sighted_or_found', 'animal_injured', 'animal_risk' ),
+			'item_document' => array( 'wallet_docs', 'keys', 'electronics', 'valuables', 'other' ),
+			'hazard' => array( 'hazard_falling_element', 'hazard_road_disruption', 'hazard_flood_or_ice', 'hazard_road_obstruction', 'hazard_fire_or_smoke', 'hazard_other' ),
+		);
+	}
+
+	public static function all_subtypes() {
+		$out = array();
+		foreach ( self::category_subtypes() as $subtypes ) {
+			$out = array_merge( $out, $subtypes );
+		}
+		return $out;
+	}
+
+	public static function enum_groups() {
+		$groups = array();
+		foreach ( self::fields() as $key => $definition ) {
+			if ( ! empty( $definition['constraints']['enum'] ) ) {
+				$groups[ $key ] = $definition['constraints']['enum'];
+			} elseif ( ! empty( $definition['constraints']['item_enum'] ) ) {
+				$groups[ $key ] = $definition['constraints']['item_enum'];
+			}
+		}
+		return $groups;
 	}
 
 	private static function field( $type, $required, $privacy, $destination, $public_projection, $constraints = array(), $conditions = array() ) {
+		$normalization = array(
+			'string'  => array( 'trim' ),
+			'uuid'    => array( 'trim', 'lowercase', 'rfc4122' ),
+			'email'   => array( 'trim', 'lowercase', 'email' ),
+			'date'    => array( 'Y-m-d' ),
+			'time'    => array( 'H:i:s' ),
+			'enum'    => array( 'semantic-enum' ),
+			'decimal' => array( 'numeric-decimal' ),
+			'number'  => array( 'numeric' ),
+			'bool'    => array( 'boolean' ),
+			'plate'   => array( 'trim', 'uppercase', 'alphanumeric' ),
+			'phone'   => array( 'trim', 'phone' ),
+			'array'   => array( 'list' ),
+		);
+		$exposure = in_array( $privacy, array( self::PRIVACY_PUBLIC, self::PRIVACY_DERIVED_PUBLIC ), true )
+			? ( self::PRIVACY_DERIVED_PUBLIC === $privacy ? 'derived-public' : 'public-after-moderation' )
+			: 'private';
+
 		return array(
 			'type'              => $type,
 			'required'          => (bool) $required,
+			'nullable'          => false,
 			'conditions'        => $conditions,
 			'privacy'           => $privacy,
+			'exposure'          => $exposure,
 			'destination'       => $destination,
 			'public_projection' => $public_projection,
 			'constraints'       => $constraints,
+			'validation_rules'  => $constraints,
+			'normalization'     => isset( $normalization[ $type ] ) ? $normalization[ $type ] : array(),
+			'cardinality'       => 'array' === $type ? 'many' : 'one',
 		);
 	}
 }
