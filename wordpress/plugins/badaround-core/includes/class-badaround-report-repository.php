@@ -139,6 +139,37 @@ class BadAround_Report_Repository {
 		);
 	}
 
+	public function intake_status( $report_id ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'ba_reports';
+		return (string) $wpdb->get_var(
+			$wpdb->prepare( "SELECT status FROM {$table} WHERE id = %d LIMIT 1", absint( $report_id ) )
+		);
+	}
+
+	public function payload_hash_for_report( $report_id ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'ba_reports';
+		return (string) $wpdb->get_var(
+			$wpdb->prepare( "SELECT payload_hash FROM {$table} WHERE id = %d LIMIT 1", absint( $report_id ) )
+		);
+	}
+
+	public function mark_intake_status( $report_id, $status ) {
+		global $wpdb;
+		$status = sanitize_key( $status );
+		if ( ! in_array( $status, array( 'received', 'validated', 'failed' ), true ) ) {
+			return false;
+		}
+		return false !== $wpdb->update(
+			$wpdb->prefix . 'ba_reports',
+			array( 'status' => $status, 'updated_at' => current_time( 'mysql', true ) ),
+			array( 'id' => absint( $report_id ) ),
+			array( '%s', '%s' ),
+			array( '%d' )
+		);
+	}
+
 	public function event_id_for_report( $report_id ) {
 		global $wpdb;
 		$table = $wpdb->prefix . 'ba_reports';
