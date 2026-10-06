@@ -69,7 +69,8 @@ class BadAround_Native_Report_REST_Controller {
 		BadAround_Audit_Log::record( 'report', 0, 'native_api_request_received', 'native_api', null, $request_id );
 
 		$content_type = strtolower( trim( (string) $request->get_header( 'content-type' ) ) );
-		if ( 0 !== strpos( $content_type, 'application/json' ) ) {
+		$media_type = trim( explode( ';', $content_type, 2 )[0] );
+		if ( 'application/json' !== $media_type ) {
 			return $this->error_response( 'unsupported_media_type', null, 415, $request_id );
 		}
 
