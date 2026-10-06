@@ -33,6 +33,9 @@ class BadAround_Core {
 		$contribution_moderation = new BadAround_Contribution_Moderation_Admin();
 		$contribution_moderation->register_hooks();
 
+		$native_report_api = new BadAround_Native_Report_REST_Controller();
+		$native_report_api->register_hooks();
+
 		$wpforms_event_intake = new BadAround_WPForms_Event_Intake();
 		$wpforms_event_intake->register_hooks();
 
