@@ -58,19 +58,7 @@ class BadAround_Report_Validator {
 			return new WP_Error( 'ba_report_invalid_payload', __( 'La segnalazione non è valida.', 'badaround-core' ) );
 		}
 
-		$rules    = BadAround_Report_Schema::validation_rules();
-		$category = $this->get_path( $report, 'event.category' );
-		$subtype  = $this->get_path( $report, 'event.subtype' );
-		if ( in_array( 'category_subtype_compatibility', $rules, true ) && $category && $subtype ) {
-			$matrix = BadAround_Report_Schema::category_subtypes();
-			if ( ! isset( $matrix[ $category ] ) || ! in_array( $subtype, $matrix[ $category ], true ) ) {
-				return new WP_Error(
-					'ba_report_category_subtype_mismatch',
-					__( 'Categoria e sottocategoria non sono compatibili.', 'badaround-core' ),
-					array( 'field' => 'event.subtype' )
-				);
-			}
-		}
+		$rules = BadAround_Report_Schema::validation_rules();
 
 		foreach ( BadAround_Report_Schema::fields() as $path => $definition ) {
 			$conditions = isset( $definition['conditions'] ) ? $definition['conditions'] : array();
@@ -94,6 +82,19 @@ class BadAround_Report_Validator {
 			$error = $this->validate_field( $path, $value, $definition );
 			if ( is_wp_error( $error ) ) {
 				return $error;
+			}
+		}
+
+		$category = $this->get_path( $report, 'event.category' );
+		$subtype  = $this->get_path( $report, 'event.subtype' );
+		if ( in_array( 'category_subtype_compatibility', $rules, true ) && $category && $subtype ) {
+			$matrix = BadAround_Report_Schema::category_subtypes();
+			if ( ! isset( $matrix[ $category ] ) || ! in_array( $subtype, $matrix[ $category ], true ) ) {
+				return new WP_Error(
+					'ba_report_category_subtype_mismatch',
+					__( 'Categoria e sottocategoria non sono compatibili.', 'badaround-core' ),
+					array( 'field' => 'event.subtype' )
+				);
 			}
 		}
 
