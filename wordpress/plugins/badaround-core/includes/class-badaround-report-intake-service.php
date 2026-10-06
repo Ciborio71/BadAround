@@ -58,6 +58,17 @@ class BadAround_Report_Intake_Service {
 
 			$existing_event_id = $this->repository->event_id_for_report( $report_id );
 			if ( $existing_event_id ) {
+				if (
+					'native' === $source['type']
+					&& method_exists( $this->repository, 'native_payload_matches_report' )
+					&& ! $this->repository->native_payload_matches_report( $report_id, $canonical_report )
+				) {
+					BadAround_Audit_Log::technical_error( 'report', $report_id, 'intake_idempotency_conflict', 'submission_id_payload_mismatch', $request_id );
+					return new WP_Error(
+						'ba_report_idempotency_conflict',
+						__( 'Lo stesso submission_id è già associato a una segnalazione differente.', 'badaround-core' )
+					);
+				}
 				BadAround_Audit_Log::record( 'report', $report_id, 'intake_duplicate_ignored', $source['type'], null, $request_id );
 				return array(
 					'report_id' => $report_id,
