@@ -5,6 +5,34 @@ $GLOBALS['f15_routes'] = array();
 $GLOBALS['f15_transients'] = array();
 $GLOBALS['f15_audit'] = array();
 
+class F15_WPDB {
+	public $locked = array();
+	public $force_lock_fail = false;
+	public function prepare( $query, ...$args ) {
+		foreach ( $args as $arg ) {
+			$replacement = is_int( $arg ) ? (string) $arg : "'" . str_replace( "'", "''", (string) $arg ) . "'";
+			$query = preg_replace( '/%[sd]/', $replacement, $query, 1 );
+		}
+		return $query;
+	}
+	public function get_var( $query ) {
+		if ( 0 === strpos( $query, 'SELECT GET_LOCK(' ) ) {
+			if ( $this->force_lock_fail ) return 0;
+			if ( preg_match( "/GET_LOCK\('([^']+)'/", $query, $m ) ) {
+				if ( ! empty( $this->locked[ $m[1] ] ) ) return 0;
+				$this->locked[ $m[1] ] = true;
+			}
+			return 1;
+		}
+		if ( 0 === strpos( $query, 'SELECT RELEASE_LOCK(' ) ) {
+			if ( preg_match( "/RELEASE_LOCK\('([^']+)'/", $query, $m ) ) unset( $this->locked[ $m[1] ] );
+			return 1;
+		}
+		return null;
+	}
+}
+$GLOBALS['wpdb'] = new F15_WPDB();
+
 function __( $text ) { return $text; }
 function add_action() { return true; }
 function register_rest_route( $namespace, $route, $args ) {
@@ -21,6 +49,7 @@ function wp_unslash( $value ) { return $value; }
 function wp_parse_url( $value ) { return parse_url( $value ); }
 function sanitize_key( $value ) { return strtolower( preg_replace( '/[^a-z0-9_\-]/i', '', (string) $value ) ); }
 function absint( $value ) { return abs( (int) $value ); }
+function get_current_user_id() { return 999; }
 
 class WP_REST_Server {
 	const CREATABLE = 'POST';
@@ -142,6 +171,7 @@ f15_assert( 'moderation_pending' === $response->data['next_state'], 'resulting e
 f15_assert( 901 === $response->data['event_id'], 'technical event identifier is returned' );
 f15_assert( ! isset( $response->data['report_id'] ) && ! isset( $response->data['normalized_payload'] ) && ! isset( $response->data['privacy'] ), 'success response exposes no private report payload' );
 f15_assert( f15_payload() === $fake->received, 'controller forwards canonical JSON unchanged to frozen Golden Path service' );
+f15_assert( isset( $response->headers['Cache-Control'] ) && 'no-store, private' === $response->headers['Cache-Control'], 'success response is non-cacheable' );
 
 $missing_marker = f15_request( f15_payload(), array( 'X-BadAround-Intake' => '' ) );
 f15_assert( $controller->permission_check( $missing_marker ) instanceof WP_Error, 'missing request-integrity marker is rejected' );
@@ -151,6 +181,7 @@ f15_assert( $controller->permission_check( $cross ) instanceof WP_Error, 'cross-
 $wrong_ct = f15_request( f15_payload(), array( 'Content-Type' => 'text/plain' ) );
 $r = $controller->rest_create( $wrong_ct );
 f15_assert( 415 === $r->status && 'unsupported_media_type' === $r->data['error']['code'], 'wrong content type rejected' );
+f15_assert( isset( $r->headers['Cache-Control'] ) && 'no-store, private' === $r->headers['Cache-Control'], 'error response is non-cacheable' );
 
 $r = $controller->rest_create( f15_request( '{"broken":' ) );
 f15_assert( 400 === $r->status && 'malformed_request' === $r->data['error']['code'], 'malformed JSON rejected' );
@@ -234,12 +265,53 @@ $longPayload = f15_payload(); $longPayload['content']['description'] = str_repea
 $longResponse = ( new BadAround_Native_Report_REST_Controller( $longFake ) )->rest_create( f15_request( $longPayload ) );
 f15_assert( 422 === $longResponse->status, 'excessively long field is rejected by domain validation mapping' );
 
+$privilegeKeys = array( 'post_status', 'approved', 'moderation_status', 'user_id', 'author_id', 'event_id', '_ba_moderation_status' );
+foreach ( $privilegeKeys as $key ) {
+	$payload = f15_payload();
+	$payload[ $key ] = 'publish';
+	$f = new F15_Fake_Golden_Path( f15_error( 'unknown_field', $key ) );
+	$rr = ( new BadAround_Native_Report_REST_Controller( $f ) )->rest_create( f15_request( $payload ) );
+	f15_assert( 422 === $rr->status && 'unknown_field' === $rr->data['error']['code'], 'privilege/state injection blocked: ' . $key );
+}
+
+$taxonomyPayloads = array(
+	'legacy_slug' => array_replace_recursive( f15_payload(), array( 'event' => array( 'category' => 'hazard', 'subtype' => 'furto-del-veicolo' ) ) ),
+	'legacy_term_id' => array_merge( f15_payload(), array( 'taxonomy_term_id' => 7 ) ),
+	'arbitrary_taxonomy' => array_merge( f15_payload(), array( 'taxonomy' => 'category', 'term_id' => 999 ) ),
+);
+foreach ( $taxonomyPayloads as $name => $payload ) {
+	$f = new F15_Fake_Golden_Path( f15_error( 'invalid_category_subtype', 'event.subtype' ) );
+	if ( 'legacy_slug' !== $name ) $f->result = f15_error( 'unknown_field', array_key_exists( 'taxonomy_term_id', $payload ) ? 'taxonomy_term_id' : 'taxonomy' );
+	$rr = ( new BadAround_Native_Report_REST_Controller( $f ) )->rest_create( f15_request( $payload ) );
+	f15_assert( 422 === $rr->status, 'taxonomy injection rejected: ' . $name );
+}
+
+$replayFake = new F15_Fake_Golden_Path( f15_success( true ) );
+$replayController = new BadAround_Native_Report_REST_Controller( $replayFake );
+for ( $i = 0; $i < 3; $i++ ) {
+	$rr = $replayController->rest_create( f15_request( f15_payload() ) );
+	f15_assert( 200 === $rr->status && true === $rr->data['duplicate'], 'replay remains idempotent #' . ( $i + 1 ) );
+}
+
+$GLOBALS['f15_transients'] = array();
+$GLOBALS['wpdb']->force_lock_fail = true;
+$lockFail = ( new BadAround_Native_Report_REST_Controller( new F15_Fake_Golden_Path( f15_success() ) ) )->rest_create( f15_request( f15_payload() ) );
+$GLOBALS['wpdb']->force_lock_fail = false;
+f15_assert( 429 === $lockFail->status && 'rate_limited' === $lockFail->data['error']['code'], 'rate limiter fails closed when atomic counter lock is contended' );
+
+$authFake = new F15_Fake_Golden_Path( f15_error( 'unknown_field', 'post_status' ) );
+$authPayload = f15_payload(); $authPayload['post_status'] = 'publish';
+$authResult = ( new BadAround_Native_Report_REST_Controller( $authFake ) )->rest_create( f15_request( $authPayload ) );
+f15_assert( 422 === $authResult->status, 'authenticated caller receives no moderation-state privilege');
+
 $source = file_get_contents( dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-native-report-rest-controller.php' );
 f15_assert( false === stripos( $source, 'wpforms' ), 'public native endpoint has no WPForms runtime dependency' );
 f15_assert( false === strpos( $source, 'wp_insert_term' ) && false === strpos( $source, 'wp_set_object_terms' ), 'controller performs no taxonomy mutation' );
 f15_assert( false === strpos( $source, "post_status' => 'publish" ) && false === strpos( $source, 'wp_publish_post' ), 'controller cannot auto-publish' );
 f15_assert( false === strpos( $source, 'Access-Control-Allow-Origin' ), 'controller does not open wildcard CORS' );
 f15_assert( false === strpos( $source, '__return_true' ), 'permission callback is not unconditional' );
+f15_assert( false !== strpos( $source, 'GET_LOCK' ) && false !== strpos( $source, 'RELEASE_LOCK' ), 'rate-limit counter increment is serialized across workers' );
+f15_assert( false === strpos( $source, 'current_user_can' ) && false === strpos( $source, 'get_current_user_id' ), 'authenticated users receive no transport-level privilege' );
 f15_assert( false === strpos( $source, 'normalized_payload' ) || false === strpos( $source, "'normalized_payload' =>" ), 'controller does not construct private normalized payload in response' );
 
 $all_audit = json_encode( $GLOBALS['f15_audit'] );
