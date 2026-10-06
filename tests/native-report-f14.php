@@ -101,6 +101,9 @@ $b=$busyGold->submit(report());
 f14_assert('error'===$b['status']&&'submission_in_progress'===$b['error']['code'],'concurrent persistence request is rejected before event creation');
 
 $source=file_get_contents(dirname(__DIR__).'/wordpress/plugins/badaround-core/includes/class-badaround-report-persistence-service.php');
+$moderation_source=file_get_contents(dirname(__DIR__).'/wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php');
+f14_assert(false!==strpos($moderation_source,"canonical']['content']['description"),'native moderation reads canonical description before legacy fallback');
+f14_assert(strpos($moderation_source,"canonical']['content']['description") < strpos($moderation_source,"private_fields'][55]"),'legacy field 55 is fallback only, not native dependency');
 f14_assert(false===strpos($source,'wp_insert_term'),'persistence service cannot create taxonomy terms');
 f14_assert(false===stripos($source,'wpforms6:'),'persistence service contains no legacy WPForms taxonomy identity');
 f14_assert(false===strpos($source,"'post_status'  => 'publish'"),'persistence service cannot auto-publish');
