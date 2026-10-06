@@ -380,7 +380,7 @@ class BadAround_Report_Schema {
 				)
 			),
 
-			'content.description' => self::field( 'string', true, self::PRIVACY_MODERATION_ONLY, 'ba_reports.content_original', 'moderated-text', array( 'min_length' => 10, 'max_length' => 5000 ) ),
+			'content.description' => self::field( 'string', true, self::PRIVACY_MODERATION_ONLY, 'ba_reports.content_original', 'moderated-text', array( 'max_length' => 5000 ) ),
 			'damage.status' => self::field( 'enum', true, self::PRIVACY_PUBLIC, 'ba_reports.content_original', 'direct-after-moderation', array( 'enum' => array( 'yes', 'no', 'unverified', 'not_applicable' ) ) ),
 			'damage.description' => self::field(
 				'string',
