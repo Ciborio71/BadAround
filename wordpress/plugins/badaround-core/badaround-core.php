@@ -32,6 +32,7 @@ require_once BADAROUND_CORE_PATH . 'includes/class-badaround-report-persistence-
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-report-intake-service.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-report-intake-service.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-report-golden-path-service.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-report-rest-controller.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-wpforms-field-mapper.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-wpforms-report-adapter.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-wpforms-contract-map.php';
