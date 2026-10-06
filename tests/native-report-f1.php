@@ -209,6 +209,15 @@ $vehicle['witness'] = array( 'status' => 'unknown' );
 $vehicle_valid = $validator->validate_and_normalize( $vehicle );
 ba_assert( ! is_wp_error( $vehicle_valid ), 'vehicle branch validates with required vehicle fields' );
 ba_assert( 'AB123CD' === $vehicle_valid['vehicle']['plate_raw'], 'plate is normalized server-side' );
+$vehicle_meta = ( new BadAround_Report_Intake_Service(
+	new F1_Fake_Repository(),
+	new BadAround_Report_Validator(),
+	new F1_Fake_Taxonomy(),
+	new F1_Fake_Territory(),
+	new F1_Fake_Publication()
+) )->event_meta( $vehicle_valid );
+ba_assert( 'f38-c9' === $vehicle_meta['_ba_vehicle_type'], 'canonical vehicle type preserves certified downstream storage code' );
+ba_assert( 'Nero' === $vehicle_meta['_ba_vehicle_color'], 'canonical vehicle color preserves certified downstream display value' );
 
 $future = canonical_fixture();
 $future['time']['date'] = '2026-10-07';
@@ -229,6 +238,7 @@ class F1_Fake_Repository {
 	public $event_id = 0;
 	public $persist_count = 0;
 	public $stored_canonical = null;
+	public $stored_payload = null;
 	public function native_source_identity( $submission_id ) { return array( 'form_id' => 101, 'entry_id' => 202 ); }
 	public function create_native_intake_record( $submission_id ) { return 77; }
 	public function create_intake_record( $form_id, $entry_id ) { return 77; }
@@ -237,7 +247,7 @@ class F1_Fake_Repository {
 	public function acquire_source_lock( $form_id, $entry_id ) { return true; }
 	public function release_source_lock( $form_id, $entry_id ) {}
 	public function event_id_for_report( $report_id ) { return $this->event_id; }
-	public function persist_canonical_private_data( $report_id, $canonical, $payload = null ) { $this->persist_count++; $this->stored_canonical = $canonical; return true; }
+	public function persist_canonical_private_data( $report_id, $canonical, $payload = null ) { $this->persist_count++; $this->stored_canonical = $canonical; $this->stored_payload = $payload; return true; }
 	public function native_payload_matches_report( $report_id, $canonical ) { return $canonical === $this->stored_canonical; }
 	public function link_event( $report_id, $event_id ) { $this->event_id = $event_id; return true; }
 }
@@ -348,6 +358,37 @@ ba_assert( 'hazard_road_obstruction' === $wp_canonical['event']['subtype'], 'WPF
 ba_assert( 'area' === $wp_canonical['location']['public_precision'], 'WPForms location precision becomes semantic canonical enum' );
 ba_assert( 'anonymous' === $wp_canonical['reporter']['public_identity_mode'], 'WPForms public identity choice becomes semantic canonical enum' );
 ba_assert( BadAround_WPForms_Field_Mapper::FORM_SCHEMA_VERSION === $wp_canonical['consents']['version'], 'WPForms compatibility path preserves legacy consent version' );
-ba_assert( ! is_wp_error( $validator->validate_and_normalize( $wp_canonical ) ), 'WPForms adapter output satisfies canonical server validator' );
+$wp_validated = $validator->validate_and_normalize( $wp_canonical );
+ba_assert( ! is_wp_error( $wp_validated ), 'WPForms adapter output satisfies canonical server validator' );
+
+$legacy_payload = $adapter->legacy_payload( $wp_fields, array(), $wp_form );
+$legacy_meta = ( new BadAround_WPForms_Field_Mapper() )->event_meta( $legacy_payload );
+$new_meta = $service->event_meta( $wp_validated );
+foreach ( array( '_ba_time_precision', '_ba_public_location_precision', '_ba_public_place_name', '_ba_reward_available', '_ba_occurred_date' ) as $meta_key ) {
+	ba_assert(
+		( isset( $legacy_meta[ $meta_key ] ) ? $legacy_meta[ $meta_key ] : null ) === ( isset( $new_meta[ $meta_key ] ) ? $new_meta[ $meta_key ] : null ),
+		'WPForms canonical adapter preserves downstream meta ' . $meta_key
+	);
+}
+
+$wp_repo = new F1_Fake_Repository();
+$wp_service = new BadAround_Report_Intake_Service(
+	$wp_repo,
+	new BadAround_Report_Validator(),
+	new F1_Fake_Taxonomy(),
+	new F1_Fake_Territory(),
+	new F1_Fake_Publication()
+);
+$wp_result = $wp_service->ingest(
+	$wp_canonical,
+	array(
+		'type' => 'wpforms',
+		'form_id' => 6,
+		'entry_id' => 123,
+		'legacy_payload' => $legacy_payload,
+	)
+);
+ba_assert( ! is_wp_error( $wp_result ), 'WPForms source can feed the canonical domain intake service' );
+ba_assert( $legacy_payload === $wp_repo->stored_payload, 'WPForms compatibility path preserves the legacy private content envelope byte-semantically' );
 
 echo "F1 Native Report canonical foundation tests complete.\n";
