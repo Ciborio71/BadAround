@@ -265,6 +265,7 @@ $longPayload = f15_payload(); $longPayload['content']['description'] = str_repea
 $longResponse = ( new BadAround_Native_Report_REST_Controller( $longFake ) )->rest_create( f15_request( $longPayload ) );
 f15_assert( 422 === $longResponse->status, 'excessively long field is rejected by domain validation mapping' );
 
+$GLOBALS['f15_transients'] = array();
 $privilegeKeys = array( 'post_status', 'approved', 'moderation_status', 'user_id', 'author_id', 'event_id', '_ba_moderation_status' );
 foreach ( $privilegeKeys as $key ) {
 	$payload = f15_payload();
@@ -274,6 +275,7 @@ foreach ( $privilegeKeys as $key ) {
 	f15_assert( 422 === $rr->status && 'unknown_field' === $rr->data['error']['code'], 'privilege/state injection blocked: ' . $key );
 }
 
+$GLOBALS['f15_transients'] = array();
 $taxonomyPayloads = array(
 	'legacy_slug' => array_replace_recursive( f15_payload(), array( 'event' => array( 'category' => 'hazard', 'subtype' => 'furto-del-veicolo' ) ) ),
 	'legacy_term_id' => array_merge( f15_payload(), array( 'taxonomy_term_id' => 7 ) ),
@@ -286,6 +288,7 @@ foreach ( $taxonomyPayloads as $name => $payload ) {
 	f15_assert( 422 === $rr->status, 'taxonomy injection rejected: ' . $name );
 }
 
+$GLOBALS['f15_transients'] = array();
 $replayFake = new F15_Fake_Golden_Path( f15_success( true ) );
 $replayController = new BadAround_Native_Report_REST_Controller( $replayFake );
 for ( $i = 0; $i < 3; $i++ ) {
@@ -299,6 +302,7 @@ $lockFail = ( new BadAround_Native_Report_REST_Controller( new F15_Fake_Golden_P
 $GLOBALS['wpdb']->force_lock_fail = false;
 f15_assert( 429 === $lockFail->status && 'rate_limited' === $lockFail->data['error']['code'], 'rate limiter fails closed when atomic counter lock is contended' );
 
+$GLOBALS['f15_transients'] = array();
 $authFake = new F15_Fake_Golden_Path( f15_error( 'unknown_field', 'post_status' ) );
 $authPayload = f15_payload(); $authPayload['post_status'] = 'publish';
 $authResult = ( new BadAround_Native_Report_REST_Controller( $authFake ) )->rest_create( f15_request( $authPayload ) );
