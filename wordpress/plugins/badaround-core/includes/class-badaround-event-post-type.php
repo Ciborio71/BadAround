@@ -96,6 +96,7 @@ class BadAround_Event_Post_Type {
 			'_ba_source_type'               => 'string',
 			'_ba_source_form_id'            => 'integer',
 			'_ba_source_entry_id'           => 'integer',
+			'_ba_source_submission_id'       => 'string',
 			'_ba_imported_at'               => 'string',
 			'_ba_moderation_status'         => 'string',
 			'_ba_event_status'              => 'string',
