@@ -63,6 +63,9 @@ jobs:
       - name: Test F1.4 Native Persistence & Golden Path
         run: php ./tests/native-report-f14.php
 
+      - name: Test F1.5 Public Native Intake Boundary
+        run: php ./tests/native-report-f15.php
+
       - name: Test D1 Sentinel lifecycle
         run: php ./tests/sentinels-d1.php
 
