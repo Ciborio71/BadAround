@@ -64,6 +64,8 @@ class BadAround_Audit_Log {
 	public static function technical_error() { self::$records[] = func_get_args(); return true; }
 }
 
+class BadAround_Media_Repository {}
+
 $GLOBALS['ba_test_posts'] = array();
 function wp_insert_post( $args, $wp_error = false ) {
 	$id = 900 + count( $GLOBALS['ba_test_posts'] );
@@ -73,6 +75,7 @@ function wp_insert_post( $args, $wp_error = false ) {
 function wp_set_object_terms() { return array( 1 ); }
 
 require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-report-schema.php';
+require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-report-persistence-service.php';
 require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-report-normalizer.php';
 require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-report-validator.php';
 require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-report-repository.php';
