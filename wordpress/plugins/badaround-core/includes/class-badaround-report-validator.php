@@ -19,16 +19,16 @@ class BadAround_Report_Validator {
 	}
 
 	public function normalize( $report ) {
-		$report = is_array( $report ) ? $report : array();
-
-		$this->set_path( $report, 'schema_version', BadAround_Report_Schema::VERSION );
+		$input      = is_array( $report ) ? $report : array();
+		$normalized = array();
+		$this->set_path( $normalized, 'schema_version', BadAround_Report_Schema::VERSION );
 
 		foreach ( BadAround_Report_Schema::fields() as $path => $definition ) {
-			if ( ! $this->has_path( $report, $path ) ) {
+			if ( 'schema_version' === $path || ! $this->has_path( $input, $path ) ) {
 				continue;
 			}
 
-			$value = $this->get_path( $report, $path );
+			$value = $this->get_path( $input, $path );
 			switch ( $definition['type'] ) {
 				case 'string':
 					$value = is_scalar( $value ) ? sanitize_textarea_field( (string) $value ) : '';
@@ -83,10 +83,21 @@ class BadAround_Report_Validator {
 					}
 					break;
 			}
-			$this->set_path( $report, $path, $value );
+			$this->set_path( $normalized, $path, $value );
 		}
 
-		return $report;
+		/*
+		 * Conditional values are server-authoritative. Stale/forged values for
+		 * inactive branches are removed before persistence or public projection.
+		 */
+		foreach ( BadAround_Report_Schema::fields() as $path => $definition ) {
+			$conditions = isset( $definition['conditions'] ) ? $definition['conditions'] : array();
+			if ( $conditions && ! $this->conditions_match( $normalized, $conditions ) ) {
+				$this->unset_path( $normalized, $path );
+			}
+		}
+
+		return $normalized;
 	}
 
 	public function validate( $report ) {
@@ -372,6 +383,21 @@ class BadAround_Report_Validator {
 			$current = $current[ $segment ];
 		}
 		return true;
+	}
+
+	private function unset_path( &$array, $path ) {
+		$segments = explode( '.', $path );
+		$current  =& $array;
+		foreach ( $segments as $index => $segment ) {
+			if ( ! is_array( $current ) || ! array_key_exists( $segment, $current ) ) {
+				return;
+			}
+			if ( $index === count( $segments ) - 1 ) {
+				unset( $current[ $segment ] );
+				return;
+			}
+			$current =& $current[ $segment ];
+		}
 	}
 
 	private function set_path( &$array, $path, $value ) {
