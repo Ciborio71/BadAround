@@ -110,8 +110,8 @@ class BadAround_Report_Schema {
 			),
 
 			'location.exact_address' => self::field( 'string', true, self::PRIVACY_PRIVATE, 'ba_reports.exact_address', 'never', array( 'max_length' => 500 ) ),
-			'location.exact_lat' => self::field( 'decimal', true, self::PRIVACY_PRIVATE, 'ba_reports.exact_lat', 'never', array( 'min' => -90, 'max' => 90 ) ),
-			'location.exact_lng' => self::field( 'decimal', true, self::PRIVACY_PRIVATE, 'ba_reports.exact_lng', 'never', array( 'min' => -180, 'max' => 180 ) ),
+			'location.exact_lat' => self::field( 'decimal', false, self::PRIVACY_PRIVATE, 'ba_reports.exact_lat', 'never', array( 'min' => -90, 'max' => 90 ) ),
+			'location.exact_lng' => self::field( 'decimal', false, self::PRIVACY_PRIVATE, 'ba_reports.exact_lng', 'never', array( 'min' => -180, 'max' => 180 ) ),
 			'location.place_id' => self::field( 'string', false, self::PRIVACY_PRIVATE, 'ba_reports.content_original', 'never', array( 'max_length' => 255 ) ),
 			'location.area_label' => self::field( 'string', false, self::PRIVACY_PUBLIC, '_ba_public_place_name', 'direct-after-moderation', array( 'max_length' => 191 ) ),
 			'location.public_precision' => self::field(
