@@ -202,6 +202,7 @@ $vehicle['vehicle'] = array(
 	'plate_raw' => 'ab 123 cd',
 	'color' => 'black',
 );
+$vehicle['witness'] = array( 'status' => 'unknown' );
 $vehicle_valid = $validator->validate_and_normalize( $vehicle );
 ba_assert( ! is_wp_error( $vehicle_valid ), 'vehicle branch validates with required vehicle fields' );
 ba_assert( 'AB123CD' === $vehicle_valid['vehicle']['plate_raw'], 'plate is normalized server-side' );
