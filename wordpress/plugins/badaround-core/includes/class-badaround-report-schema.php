@@ -89,7 +89,7 @@ class BadAround_Report_Schema {
 			'event.subtype' => self::field( 'enum', true, self::PRIVACY_PUBLIC, 'ba_tipo_evento', 'direct-after-moderation' ),
 			'event.other_type' => self::field(
 				'string',
-				false,
+				true,
 				self::PRIVACY_MODERATION_ONLY,
 				'ba_reports.content_original',
 				'moderated-text',
@@ -167,7 +167,7 @@ class BadAround_Report_Schema {
 			),
 			'time.date' => self::field(
 				'date',
-				false,
+				true,
 				self::PRIVACY_PUBLIC,
 				'_ba_occurred_date',
 				'direct-after-moderation',
@@ -176,7 +176,7 @@ class BadAround_Report_Schema {
 			),
 			'time.knowledge' => self::field(
 				'enum',
-				false,
+				true,
 				self::PRIVACY_PRIVATE,
 				'ba_reports.content_original',
 				'none',
@@ -185,7 +185,7 @@ class BadAround_Report_Schema {
 			),
 			'time.exact_time' => self::field(
 				'time',
-				false,
+				true,
 				self::PRIVACY_PUBLIC,
 				'_ba_occurred_time',
 				'direct-after-moderation',
@@ -194,7 +194,7 @@ class BadAround_Report_Schema {
 			),
 			'time.range_start' => self::field(
 				'time',
-				false,
+				true,
 				self::PRIVACY_MODERATION_ONLY,
 				'ba_reports.content_original',
 				'moderated',
@@ -203,7 +203,7 @@ class BadAround_Report_Schema {
 			),
 			'time.range_end' => self::field(
 				'time',
-				false,
+				true,
 				self::PRIVACY_MODERATION_ONLY,
 				'ba_reports.content_original',
 				'moderated',
@@ -212,7 +212,7 @@ class BadAround_Report_Schema {
 			),
 			'time.approximate_period' => self::field(
 				'enum',
-				false,
+				true,
 				self::PRIVACY_PUBLIC,
 				'ba_reports.content_original',
 				'direct-after-moderation',
@@ -221,7 +221,7 @@ class BadAround_Report_Schema {
 			),
 			'time.duration' => self::field(
 				'enum',
-				false,
+				true,
 				self::PRIVACY_PUBLIC,
 				'ba_reports.content_original',
 				'direct-after-moderation',
@@ -233,7 +233,7 @@ class BadAround_Report_Schema {
 			),
 			'time.frequency' => self::field(
 				'enum',
-				false,
+				true,
 				self::PRIVACY_PUBLIC,
 				'ba_reports.content_original',
 				'direct-after-moderation',
@@ -243,7 +243,7 @@ class BadAround_Report_Schema {
 
 			'vehicle.role' => self::field(
 				'enum',
-				false,
+				true,
 				self::PRIVACY_PRIVATE,
 				'ba_reports.content_original',
 				'none',
@@ -252,7 +252,7 @@ class BadAround_Report_Schema {
 			),
 			'vehicle.type' => self::field(
 				'enum',
-				false,
+				true,
 				self::PRIVACY_PUBLIC,
 				'_ba_vehicle_type',
 				'direct-after-moderation',
@@ -288,7 +288,7 @@ class BadAround_Report_Schema {
 			),
 			'vehicle.plate_knowledge' => self::field(
 				'enum',
-				false,
+				true,
 				self::PRIVACY_PRIVATE,
 				'ba_reports.content_original',
 				'none',
@@ -297,7 +297,7 @@ class BadAround_Report_Schema {
 			),
 			'vehicle.plate_raw' => self::field(
 				'plate',
-				false,
+				true,
 				self::PRIVACY_PRIVATE,
 				'ba_reports.full_plate',
 				'masked-derived-only',
@@ -318,7 +318,7 @@ class BadAround_Report_Schema {
 
 			'animal.type' => self::field(
 				'enum',
-				false,
+				true,
 				self::PRIVACY_PUBLIC,
 				'ba_reports.content_original',
 				'direct-after-moderation',
@@ -329,8 +329,8 @@ class BadAround_Report_Schema {
 			'animal.name' => self::field( 'string', false, self::PRIVACY_MODERATION_ONLY, 'ba_reports.content_original', 'moderated-text', array( 'max_length' => 120 ), array( array( array( 'path' => 'event.category', 'op' => 'eq', 'value' => 'animal' ) ) ) ),
 			'animal.appearance' => self::field( 'string', false, self::PRIVACY_MODERATION_ONLY, 'ba_reports.content_original', 'moderated-text', array( 'max_length' => 500 ), array( array( array( 'path' => 'event.category', 'op' => 'eq', 'value' => 'animal' ) ) ) ),
 
-			'object.description' => self::field( 'string', false, self::PRIVACY_MODERATION_ONLY, 'ba_reports.content_original', 'moderated-text', array( 'max_length' => 500 ), array( array( array( 'path' => 'event.category', 'op' => 'eq', 'value' => 'item_document' ) ) ) ),
-			'object.status' => self::field( 'enum', false, self::PRIVACY_PUBLIC, 'ba_reports.content_original', 'direct-after-moderation', array( 'enum' => array( 'lost', 'found' ) ), array( array( array( 'path' => 'event.category', 'op' => 'eq', 'value' => 'item_document' ) ) ) ),
+			'object.description' => self::field( 'string', true, self::PRIVACY_MODERATION_ONLY, 'ba_reports.content_original', 'moderated-text', array( 'max_length' => 500 ), array( array( array( 'path' => 'event.category', 'op' => 'eq', 'value' => 'item_document' ) ) ) ),
+			'object.status' => self::field( 'enum', true, self::PRIVACY_PUBLIC, 'ba_reports.content_original', 'direct-after-moderation', array( 'enum' => array( 'lost', 'found' ) ), array( array( array( 'path' => 'event.category', 'op' => 'eq', 'value' => 'item_document' ) ) ) ),
 			'object.owner_verification_detail' => self::field(
 				'string',
 				false,
@@ -343,7 +343,7 @@ class BadAround_Report_Schema {
 
 			'property.tampered_entry_point' => self::field(
 				'enum',
-				false,
+				true,
 				self::PRIVACY_PRIVATE,
 				'ba_reports.content_original',
 				'never',
@@ -352,7 +352,7 @@ class BadAround_Report_Schema {
 			),
 			'property.stolen_item_categories' => self::field(
 				'array',
-				false,
+				true,
 				self::PRIVACY_MODERATION_ONLY,
 				'ba_reports.content_original',
 				'moderated',
@@ -361,7 +361,7 @@ class BadAround_Report_Schema {
 			),
 			'property.access_method' => self::field(
 				'enum',
-				false,
+				true,
 				self::PRIVACY_PRIVATE,
 				'ba_reports.content_original',
 				'never',
@@ -384,7 +384,7 @@ class BadAround_Report_Schema {
 			'damage.status' => self::field( 'enum', true, self::PRIVACY_PUBLIC, 'ba_reports.content_original', 'direct-after-moderation', array( 'enum' => array( 'yes', 'no', 'unverified', 'not_applicable' ) ) ),
 			'damage.description' => self::field(
 				'string',
-				false,
+				true,
 				self::PRIVACY_MODERATION_ONLY,
 				'ba_reports.content_original',
 				'moderated-text',
@@ -393,7 +393,7 @@ class BadAround_Report_Schema {
 			),
 			'witness.status' => self::field(
 				'enum',
-				false,
+				true,
 				self::PRIVACY_MODERATION_ONLY,
 				'ba_reports.content_original',
 				'moderated',
@@ -438,7 +438,7 @@ class BadAround_Report_Schema {
 			'reward.status' => self::field( 'enum', true, self::PRIVACY_PUBLIC, 'ba_reports.content_original', 'direct-after-moderation', array( 'enum' => array( 'none', 'fixed', 'negotiable' ) ) ),
 			'reward.amount' => self::field(
 				'number',
-				false,
+				true,
 				self::PRIVACY_PUBLIC,
 				'_ba_reward_amount',
 				'direct-after-moderation',
@@ -447,7 +447,7 @@ class BadAround_Report_Schema {
 			),
 			'reward.conditions' => self::field(
 				'string',
-				false,
+				true,
 				self::PRIVACY_MODERATION_ONLY,
 				'ba_reports.content_original',
 				'moderated-text',
@@ -456,7 +456,7 @@ class BadAround_Report_Schema {
 			),
 			'reward.expires_on' => self::field(
 				'date',
-				false,
+				true,
 				self::PRIVACY_PUBLIC,
 				'_ba_expires_at',
 				'direct-after-moderation',
@@ -465,7 +465,7 @@ class BadAround_Report_Schema {
 			),
 			'reward.confirmed' => self::field(
 				'bool',
-				false,
+				true,
 				self::PRIVACY_PRIVATE,
 				'ba_reports.content_original',
 				'none',
@@ -487,7 +487,7 @@ class BadAround_Report_Schema {
 			),
 			'reporter.pseudonym' => self::field(
 				'string',
-				false,
+				true,
 				self::PRIVACY_DERIVED_PUBLIC,
 				'ba_reports.content_original',
 				'derived-display-name',
@@ -522,11 +522,11 @@ class BadAround_Report_Schema {
 		return $definition['category_subtypes'];
 	}
 
-	private static function field( $type, $required, $privacy, $destination, $public_projection, $constraints = array(), $required_when = array() ) {
+	private static function field( $type, $required, $privacy, $destination, $public_projection, $constraints = array(), $conditions = array() ) {
 		return array(
 			'type'              => $type,
 			'required'          => (bool) $required,
-			'required_when'     => $required_when,
+			'conditions'        => $conditions,
 			'privacy'           => $privacy,
 			'destination'       => $destination,
 			'public_projection' => $public_projection,
