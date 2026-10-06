@@ -108,9 +108,10 @@ class BadAround_Report_Validator {
 			return new WP_Error( 'ba_report_invalid_payload', __( 'La segnalazione non è valida.', 'badaround-core' ) );
 		}
 
+		$rules    = BadAround_Report_Schema::validation_rules();
 		$category = $this->get_path( $report, 'event.category' );
 		$subtype  = $this->get_path( $report, 'event.subtype' );
-		if ( $category && $subtype ) {
+		if ( in_array( 'category_subtype_compatibility', $rules, true ) && $category && $subtype ) {
 			$matrix = BadAround_Report_Schema::category_subtypes();
 			if ( ! isset( $matrix[ $category ] ) || ! in_array( $subtype, $matrix[ $category ], true ) ) {
 				return new WP_Error(
@@ -148,7 +149,7 @@ class BadAround_Report_Validator {
 
 		$lat_present = $this->has_meaningful_value( $report, 'location.exact_lat' );
 		$lng_present = $this->has_meaningful_value( $report, 'location.exact_lng' );
-		if ( $lat_present xor $lng_present ) {
+		if ( in_array( 'coordinate_pair_integrity', $rules, true ) && ( $lat_present xor $lng_present ) ) {
 			return new WP_Error(
 				'ba_report_incomplete_coordinates',
 				__( 'Latitudine e longitudine devono essere fornite insieme.', 'badaround-core' ),
@@ -156,29 +157,39 @@ class BadAround_Report_Validator {
 			);
 		}
 
-		$time_error = $this->validate_time_rules( $report );
-		if ( is_wp_error( $time_error ) ) {
-			return $time_error;
+		if (
+			in_array( 'event_date_not_future', $rules, true )
+			|| in_array( 'event_time_not_future_when_today', $rules, true )
+			|| in_array( 'time_range_order', $rules, true )
+		) {
+			$time_error = $this->validate_time_rules( $report, $rules );
+			if ( is_wp_error( $time_error ) ) {
+				return $time_error;
+			}
 		}
 
-		$reward_error = $this->validate_reward_rules( $report );
-		if ( is_wp_error( $reward_error ) ) {
-			return $reward_error;
+		if ( in_array( 'reward_contract', $rules, true ) ) {
+			$reward_error = $this->validate_reward_rules( $report );
+			if ( is_wp_error( $reward_error ) ) {
+				return $reward_error;
+			}
 		}
 
-		foreach ( array(
+		if ( in_array( 'mandatory_consents', $rules, true ) ) {
+			foreach ( array(
 			'consents.truthfulness',
 			'consents.media_rights',
 			'consents.publication_rules',
 			'consents.terms',
 			'consents.privacy',
-		) as $consent_path ) {
-			if ( true !== $this->get_path( $report, $consent_path ) ) {
-				return new WP_Error(
-					'ba_report_consent_required',
-					sprintf( __( 'Conferma obbligatoria mancante: %s', 'badaround-core' ), $consent_path ),
-					array( 'field' => $consent_path )
-				);
+			) as $consent_path ) {
+				if ( true !== $this->get_path( $report, $consent_path ) ) {
+					return new WP_Error(
+						'ba_report_consent_required',
+						sprintf( __( 'Conferma obbligatoria mancante: %s', 'badaround-core' ), $consent_path ),
+						array( 'field' => $consent_path )
+					);
+				}
 			}
 		}
 
@@ -275,15 +286,15 @@ class BadAround_Report_Validator {
 		return true;
 	}
 
-	private function validate_time_rules( $report ) {
+	private function validate_time_rules( $report, $rules ) {
 		$date = $this->get_path( $report, 'time.date' );
 		if ( $date && $this->valid_date( $date ) ) {
 			$today = wp_date( 'Y-m-d', current_time( 'timestamp' ) );
-			if ( $date > $today ) {
+			if ( in_array( 'event_date_not_future', $rules, true ) && $date > $today ) {
 				return $this->field_error( 'ba_report_future_date', 'time.date', __( 'La data dell’evento non può essere nel futuro.', 'badaround-core' ) );
 			}
 
-			if ( $date === $today ) {
+			if ( in_array( 'event_time_not_future_when_today', $rules, true ) && $date === $today ) {
 				$now = wp_date( 'H:i', current_time( 'timestamp' ) );
 				$exact = $this->get_path( $report, 'time.exact_time' );
 				$start = $this->get_path( $report, 'time.range_start' );
@@ -298,7 +309,7 @@ class BadAround_Report_Validator {
 
 		$start = $this->get_path( $report, 'time.range_start' );
 		$end   = $this->get_path( $report, 'time.range_end' );
-		if ( $start && $end && $end < $start ) {
+		if ( in_array( 'time_range_order', $rules, true ) && $start && $end && $end < $start ) {
 			return $this->field_error( 'ba_report_invalid_time_range', 'time.range_end', __( 'L’orario finale non può precedere quello iniziale.', 'badaround-core' ) );
 		}
 
