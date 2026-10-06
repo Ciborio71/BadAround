@@ -159,6 +159,29 @@ class BadAround_Report_Repository {
 		return $this->find_by_source_identity( 'native', $parts['form_id'], $parts['entry_id'] );
 	}
 
+	public function native_payload_matches_report( $report_id, $canonical ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'ba_reports';
+		$payload = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT content_original FROM {$table} WHERE id = %d AND source_type = %s LIMIT 1",
+				absint( $report_id ),
+				'native'
+			)
+		);
+		if ( ! is_string( $payload ) || '' === $payload ) {
+			return false;
+		}
+		$decoded = json_decode( $payload, true );
+		if ( ! is_array( $decoded ) || empty( $decoded['canonical'] ) || ! is_array( $decoded['canonical'] ) ) {
+			return false;
+		}
+
+		$stored_hash = hash( 'sha256', wp_json_encode( $decoded['canonical'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+		$input_hash  = hash( 'sha256', wp_json_encode( $canonical, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+		return hash_equals( $stored_hash, $input_hash );
+	}
+
 	public function find_by_source_identity( $source_type, $source_form_id, $source_entry_id ) {
 		global $wpdb;
 		$table = $wpdb->prefix . 'ba_reports';
