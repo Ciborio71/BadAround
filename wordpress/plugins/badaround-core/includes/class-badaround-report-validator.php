@@ -95,8 +95,10 @@ class BadAround_Report_Validator {
 		}
 
 		foreach ( BadAround_Report_Schema::fields() as $path => $definition ) {
-			$required = ! empty( $definition['required'] ) || $this->conditions_match( $report, $definition['required_when'] );
-			$present  = $this->has_meaningful_value( $report, $path );
+			$conditions = isset( $definition['conditions'] ) ? $definition['conditions'] : array();
+			$active     = empty( $conditions ) || $this->conditions_match( $report, $conditions );
+			$required   = ! empty( $definition['required'] ) && $active;
+			$present    = $this->has_meaningful_value( $report, $path );
 
 			if ( $required && ! $present ) {
 				return new WP_Error(
@@ -106,7 +108,7 @@ class BadAround_Report_Validator {
 				);
 			}
 
-			if ( ! $present ) {
+			if ( ! $active || ! $present ) {
 				continue;
 			}
 
@@ -125,6 +127,16 @@ class BadAround_Report_Validator {
 				'ba_report_category_subtype_mismatch',
 				__( 'Categoria e sottocategoria non sono compatibili.', 'badaround-core' ),
 				array( 'field' => 'event.subtype' )
+			);
+		}
+
+		$lat_present = $this->has_meaningful_value( $report, 'location.exact_lat' );
+		$lng_present = $this->has_meaningful_value( $report, 'location.exact_lng' );
+		if ( $lat_present xor $lng_present ) {
+			return new WP_Error(
+				'ba_report_incomplete_coordinates',
+				__( 'Latitudine e longitudine devono essere fornite insieme.', 'badaround-core' ),
+				array( 'field' => 'location.exact_lat' )
 			);
 		}
 
