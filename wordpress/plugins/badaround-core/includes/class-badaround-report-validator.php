@@ -13,94 +13,48 @@ class BadAround_Report_Validator {
 			return new WP_Error( 'ba_report_invalid_payload', __( 'La segnalazione non è valida.', 'badaround-core' ) );
 		}
 
+		$raw_error = $this->validate_raw_contract( $report );
+		if ( is_wp_error( $raw_error ) ) {
+			return $raw_error;
+		}
+
 		$report = $this->normalize( $report );
 		$error  = $this->validate( $report );
 		return is_wp_error( $error ) ? $error : $report;
 	}
 
 	public function normalize( $report ) {
-		$input      = is_array( $report ) ? $report : array();
-		$normalized = array();
-		$schema_version = isset( $input['schema_version'] ) && is_scalar( $input['schema_version'] )
-			? sanitize_text_field( (string) $input['schema_version'] )
-			: '';
-		$this->set_path( $normalized, 'schema_version', $schema_version );
+		return ( new BadAround_Report_Normalizer() )->normalize( $report );
+	}
 
-		foreach ( BadAround_Report_Schema::fields() as $path => $definition ) {
-			if ( 'schema_version' === $path || ! $this->has_path( $input, $path ) ) {
+	public function validate_raw_contract( $report ) {
+		if ( ! is_array( $report ) ) {
+			return new WP_Error( 'ba_report_invalid_payload', __( 'La segnalazione non è valida.', 'badaround-core' ) );
+		}
+
+		$allowed = BadAround_Report_Schema::fields();
+		$unknown = $this->unknown_paths( $report, $allowed );
+		if ( ! empty( $unknown ) ) {
+			return new WP_Error(
+				'ba_report_unknown_field',
+				__( 'Il payload contiene campi non previsti dal contract.', 'badaround-core' ),
+				array( 'field' => $unknown[0], 'unknown_fields' => $unknown )
+			);
+		}
+
+		foreach ( $allowed as $path => $definition ) {
+			if ( ! $this->has_path( $report, $path ) ) {
 				continue;
 			}
-
-			$value = $this->get_path( $input, $path );
-			switch ( $definition['type'] ) {
-				case 'string':
-					$value = is_scalar( $value ) ? sanitize_textarea_field( (string) $value ) : '';
-					break;
-				case 'email':
-					$value = is_scalar( $value ) ? sanitize_email( (string) $value ) : '';
-					break;
-				case 'phone':
-					$value = is_scalar( $value ) ? preg_replace( '/[^0-9+().\s-]/u', '', (string) $value ) : '';
-					$value = trim( (string) $value );
-					break;
-				case 'enum':
-					$value = is_scalar( $value ) ? sanitize_key( (string) $value ) : '';
-					break;
-				case 'uuid':
-					$value = is_scalar( $value ) ? strtolower( trim( (string) $value ) ) : '';
-					break;
-				case 'date':
-					$value = $this->normalize_date( $value );
-					break;
-				case 'time':
-					$value = $this->normalize_time( $value );
-					break;
-				case 'number':
-				case 'decimal':
-					$value = is_numeric( $value ) ? (float) $value : $value;
-					break;
-				case 'bool':
-					$value = $this->normalize_bool( $value );
-					break;
-				case 'plate':
-					$value = is_scalar( $value )
-						? strtoupper( preg_replace( '/[^A-Z0-9?]/i', '', (string) $value ) )
-						: '';
-					break;
-				case 'array':
-					if ( ! is_array( $value ) ) {
-						$value = array();
-					} else {
-						$value = array_values(
-							array_unique(
-								array_filter(
-									array_map(
-										static function ( $item ) {
-											return is_scalar( $item ) ? sanitize_key( (string) $item ) : '';
-										},
-										$value
-									)
-								)
-							)
-						);
-					}
-					break;
+			$value = $this->get_path( $report, $path );
+			if ( null === $value && ! empty( $definition['nullable'] ) ) {
+				continue;
 			}
-			$this->set_path( $normalized, $path, $value );
-		}
-
-		/*
-		 * Conditional values are server-authoritative. Stale/forged values for
-		 * inactive branches are removed before persistence or public projection.
-		 */
-		foreach ( BadAround_Report_Schema::fields() as $path => $definition ) {
-			$conditions = isset( $definition['conditions'] ) ? $definition['conditions'] : array();
-			if ( $conditions && ! $this->conditions_match( $normalized, $conditions ) ) {
-				$this->unset_path( $normalized, $path );
+			if ( ! $this->raw_type_matches( $value, $definition['type'] ) ) {
+				return $this->field_error( 'ba_report_invalid_type', $path, __( 'Tipo di dato non valido.', 'badaround-core' ) );
 			}
 		}
-
-		return $normalized;
+		return true;
 	}
 
 	public function validate( $report ) {
@@ -281,6 +235,30 @@ class BadAround_Report_Validator {
 
 		if ( is_array( $value ) && isset( $constraints['max_items'] ) && count( $value ) > (int) $constraints['max_items'] ) {
 			return $this->field_error( 'ba_report_too_many_items', $path, __( 'Troppi elementi.', 'badaround-core' ) );
+		}
+
+		if ( 'media.items' === $path && is_array( $value ) ) {
+			foreach ( $value as $index => $item ) {
+				if ( ! is_array( $item ) ) {
+					return $this->field_error( 'ba_report_invalid_media_metadata', $path, __( 'Metadata media non validi.', 'badaround-core' ) );
+				}
+				$media_id  = isset( $item['media_id'] ) ? trim( (string) $item['media_id'] ) : '';
+				$mime_type = isset( $item['mime_type'] ) ? strtolower( trim( (string) $item['mime_type'] ) ) : '';
+				$file_size = isset( $item['file_size'] ) ? $item['file_size'] : null;
+				$extension = isset( $item['extension'] ) ? strtolower( ltrim( trim( (string) $item['extension'] ), '.' ) ) : '';
+				if ( '' === $media_id || '' === $mime_type || ! is_numeric( $file_size ) || (int) $file_size < 0 || '' === $extension ) {
+					return $this->field_error( 'ba_report_invalid_media_metadata', $path, __( 'Metadata media incompleti.', 'badaround-core' ) );
+				}
+				if ( isset( $constraints['max_bytes_per_item'] ) && (int) $file_size > (int) $constraints['max_bytes_per_item'] ) {
+					return $this->field_error( 'ba_report_media_too_large', $path, __( 'Dimensione media superiore al limite.', 'badaround-core' ) );
+				}
+				if ( isset( $constraints['allowed_mime'] ) && ! in_array( $mime_type, $constraints['allowed_mime'], true ) ) {
+					return $this->field_error( 'ba_report_invalid_media_type', $path, __( 'Tipo MIME non consentito.', 'badaround-core' ) );
+				}
+				if ( isset( $constraints['allowed_extensions'] ) && ! in_array( $extension, $constraints['allowed_extensions'], true ) ) {
+					return $this->field_error( 'ba_report_invalid_media_type', $path, __( 'Estensione media non consentita.', 'badaround-core' ) );
+				}
+			}
 		}
 
 		return true;
@@ -475,6 +453,54 @@ class BadAround_Report_Validator {
 		}
 		$date = DateTimeImmutable::createFromFormat( '!Y-m-d', $value );
 		return $date && $date->format( 'Y-m-d' ) === $value;
+	}
+
+	private function unknown_paths( $payload, $fields ) {
+		$known = array_keys( $fields );
+		$unknown = array();
+		$walk = function ( $value, $prefix = '' ) use ( &$walk, &$unknown, $known, $fields ) {
+			if ( ! is_array( $value ) ) {
+				return;
+			}
+			if ( '' !== $prefix && isset( $fields[ $prefix ] ) && 'array' === $fields[ $prefix ]['type'] ) {
+				return;
+			}
+			foreach ( $value as $key => $child ) {
+				$path = '' === $prefix ? (string) $key : $prefix . '.' . $key;
+				$exact = in_array( $path, $known, true );
+				$prefix_allowed = false;
+				foreach ( $known as $candidate ) {
+					if ( 0 === strpos( $candidate, $path . '.' ) ) { $prefix_allowed = true; break; }
+				}
+				if ( ! $exact && ! $prefix_allowed ) {
+					$unknown[] = $path;
+					continue;
+				}
+				if ( ! $exact && is_array( $child ) ) {
+					$walk( $child, $path );
+				}
+			}
+		};
+		$walk( $payload );
+		return array_values( array_unique( $unknown ) );
+	}
+
+	private function raw_type_matches( $value, $type ) {
+		switch ( $type ) {
+			case 'array': return is_array( $value );
+			case 'bool': return is_bool( $value ) || in_array( $value, array( 0, 1, '0', '1', 'true', 'false', 'yes', 'no', 'on', 'off' ), true );
+			case 'number':
+			case 'decimal': return is_numeric( $value );
+			case 'string':
+			case 'email':
+			case 'phone':
+			case 'enum':
+			case 'uuid':
+			case 'date':
+			case 'time':
+			case 'plate': return is_scalar( $value );
+		}
+		return true;
 	}
 
 	private function field_error( $code, $path, $message ) {
