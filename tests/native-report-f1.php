@@ -24,6 +24,8 @@ function wp_date( $format, $timestamp = null ) {
 }
 function wp_generate_uuid4() { return 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'; }
 function wp_json_encode( $value, $flags = 0 ) { return json_encode( $value, $flags ); }
+function wp_unslash( $value ) { return $value; }
+function wp_salt( $scheme = 'auth' ) { return 'f1-test-salt-' . $scheme; }
 
 class WP_Error {
 	private $code;
@@ -75,6 +77,7 @@ require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/cl
 require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-report-repository.php';
 require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-event-taxonomy-map.php';
 require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-report-intake-service.php';
+require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-wpforms-field-mapper.php';
 require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-wpforms-report-adapter.php';
 
 function ba_assert( $condition, $message ) {
@@ -225,6 +228,7 @@ ba_assert( $id1 !== $id3, 'different native UUID produces a different source ide
 class F1_Fake_Repository {
 	public $event_id = 0;
 	public $persist_count = 0;
+	public $stored_canonical = null;
 	public function native_source_identity( $submission_id ) { return array( 'form_id' => 101, 'entry_id' => 202 ); }
 	public function create_native_intake_record( $submission_id ) { return 77; }
 	public function create_intake_record( $form_id, $entry_id ) { return 77; }
@@ -233,7 +237,8 @@ class F1_Fake_Repository {
 	public function acquire_source_lock( $form_id, $entry_id ) { return true; }
 	public function release_source_lock( $form_id, $entry_id ) {}
 	public function event_id_for_report( $report_id ) { return $this->event_id; }
-	public function persist_canonical_private_data( $report_id, $canonical, $payload = null ) { $this->persist_count++; return true; }
+	public function persist_canonical_private_data( $report_id, $canonical, $payload = null ) { $this->persist_count++; $this->stored_canonical = $canonical; return true; }
+	public function native_payload_matches_report( $report_id, $canonical ) { return $canonical === $this->stored_canonical; }
 	public function link_event( $report_id, $event_id ) { $this->event_id = $event_id; return true; }
 }
 class F1_Fake_Taxonomy {
@@ -262,6 +267,14 @@ ba_assert( ! is_wp_error( $second ) && true === $second['duplicate'], 'retry wit
 ba_assert( 1 === count( $GLOBALS['ba_test_posts'] ), 'same submission_id produces exactly one ba_evento' );
 ba_assert( 1 === $fake_repo->persist_count, 'same submission_id produces exactly one private persistence write' );
 
+$conflict_payload = canonical_fixture();
+$conflict_payload['content']['description'] = 'Payload diverso con lo stesso submission id.';
+$conflict = $service->ingest( $conflict_payload, array( 'type' => 'native' ) );
+ba_assert(
+	is_wp_error( $conflict ) && 'ba_report_idempotency_conflict' === $conflict->get_error_code(),
+	'same submission_id with a different payload is rejected as an idempotency conflict'
+);
+
 $meta = $service->event_meta( canonical_fixture() );
 ba_assert( 'f32-c6' === $meta['_ba_public_location_precision'], 'canonical area precision preserves certified downstream storage code' );
 ba_assert( 'f16-c4' === $meta['_ba_time_precision'], 'canonical exact time mode preserves certified downstream storage code' );
@@ -270,13 +283,71 @@ $mapping = BadAround_Event_Taxonomy_Map::mapping();
 ba_assert( 'veicoli' === $mapping['categories']['vehicle'], 'canonical vehicle category maps to existing BadAround taxonomy slug' );
 ba_assert( 'veicolo-rubato' === $mapping['subtypes']['vehicle_stolen'], 'canonical vehicle_stolen maps to existing subtype slug' );
 
-class F1_Fake_Legacy_Mapper {}
-$adapter = new BadAround_WPForms_Report_Adapter( new F1_Fake_Legacy_Mapper() );
+$adapter = new BadAround_WPForms_Report_Adapter();
 $uuid_a = $adapter->wpforms_submission_id( 6, 123 );
 $uuid_b = $adapter->wpforms_submission_id( 6, 123 );
 $uuid_c = $adapter->wpforms_submission_id( 6, 124 );
 ba_assert( $uuid_a === $uuid_b, 'WPForms compatibility adapter creates deterministic canonical submission UUID' );
 ba_assert( $uuid_a !== $uuid_c, 'different WPForms entry maps to different canonical UUID' );
 ba_assert( 1 === preg_match( '/^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $uuid_a ), 'WPForms canonical submission identity is UUIDv5-shaped' );
+
+$wp_fields = array(
+	2 => array( 'value' => 'Pericoli', 'value_raw' => 'hazard' ),
+	8 => array( 'value' => 'Ostacolo pericoloso sulla carreggiata', 'value_raw' => 'hazard_road_obstruction' ),
+	11 => array( 'value' => 'Voglio segnalare una situazione presente nel territorio' ),
+	16 => array( 'value' => 'In una data precisa' ),
+	17 => array( 'value' => '01/10/2026' ),
+	18 => array( 'value' => 'No, non conosco l’orario' ),
+	29 => array( 'value' => 'Pomezia' ),
+	31 => array( 'value' => 'Via Roma 10, Pomezia', 'lat' => 41.669, 'lng' => 12.501, 'place_id' => 'place-test' ),
+	32 => array( 'value' => 'Mostra soltanto la zona o il quartiere' ),
+	33 => array( 'value' => 'Strada o marciapiede' ),
+	34 => array( 'value' => 'No' ),
+	55 => array( 'value' => 'Ostacolo presente sulla carreggiata e visibile dalla strada.' ),
+	56 => array( 'value' => 'No' ),
+	60 => array( 'value' => 'No' ),
+	64 => array( 'value' => 'No' ),
+	65 => array( 'value' => 'No' ),
+	73 => array( 'first' => 'Mario', 'last' => 'Rossi', 'value' => 'Mario Rossi' ),
+	74 => array( 'value' => 'mario@example.invalid' ),
+	76 => array( 'value' => 'Segnalazione anonima' ),
+	78 => array( 'value' => 'No, non desidero ricevere messaggi' ),
+	81 => array( 'value' => '1' ),
+	82 => array( 'value' => '1' ),
+	83 => array( 'value' => '1' ),
+	84 => array( 'value' => '1' ),
+	85 => array( 'value' => '1' ),
+);
+$wp_form = array(
+	'id' => 6,
+	'fields' => array(
+		2 => array( 'choices' => array( 9 => array( 'label' => 'Pericoli', 'value' => 'hazard' ) ) ),
+		8 => array( 'choices' => array( 68 => array( 'label' => 'Ostacolo pericoloso sulla carreggiata', 'value' => 'hazard_road_obstruction' ) ) ),
+		11 => array( 'choices' => array( 90 => array( 'label' => 'Voglio segnalare una situazione presente nel territorio' ) ) ),
+		16 => array( 'choices' => array( 4 => array( 'label' => 'In una data precisa' ) ) ),
+		18 => array( 'choices' => array( 6 => array( 'label' => 'No, non conosco l’orario' ) ) ),
+		32 => array( 'choices' => array( 6 => array( 'label' => 'Mostra soltanto la zona o il quartiere' ) ) ),
+		33 => array( 'choices' => array( 8 => array( 'label' => 'Strada o marciapiede' ) ) ),
+		34 => array( 'choices' => array( 20 => array( 'label' => 'No' ) ) ),
+		56 => array( 'choices' => array( 5 => array( 'label' => 'No' ) ) ),
+		60 => array( 'choices' => array( 14 => array( 'label' => 'No' ) ) ),
+		64 => array( 'choices' => array( 14 => array( 'label' => 'No' ) ) ),
+		65 => array( 'choices' => array( 18 => array( 'label' => 'No' ) ) ),
+		76 => array( 'choices' => array( 7 => array( 'label' => 'Segnalazione anonima' ) ) ),
+		78 => array( 'choices' => array( 10 => array( 'label' => 'No, non desidero ricevere messaggi' ) ) ),
+		81 => array( 'choices' => array( 1 => array( 'label' => 'Dichiaro' ) ) ),
+		82 => array( 'choices' => array( 1 => array( 'label' => 'Dichiaro' ) ) ),
+		83 => array( 'choices' => array( 1 => array( 'label' => 'Confermo' ) ) ),
+		84 => array( 'choices' => array( 1 => array( 'label' => 'Accetto' ) ) ),
+		85 => array( 'choices' => array( 1 => array( 'label' => 'Privacy' ) ) ),
+	),
+);
+$wp_canonical = $adapter->to_canonical( $wp_fields, array(), $wp_form, 123 );
+ba_assert( 'hazard' === $wp_canonical['event']['category'], 'WPForms category ID is confined to adapter and becomes canonical hazard' );
+ba_assert( 'hazard_road_obstruction' === $wp_canonical['event']['subtype'], 'WPForms subtype ID becomes canonical event key' );
+ba_assert( 'area' === $wp_canonical['location']['public_precision'], 'WPForms location precision becomes semantic canonical enum' );
+ba_assert( 'anonymous' === $wp_canonical['reporter']['public_identity_mode'], 'WPForms public identity choice becomes semantic canonical enum' );
+ba_assert( BadAround_WPForms_Field_Mapper::FORM_SCHEMA_VERSION === $wp_canonical['consents']['version'], 'WPForms compatibility path preserves legacy consent version' );
+ba_assert( ! is_wp_error( $validator->validate_and_normalize( $wp_canonical ) ), 'WPForms adapter output satisfies canonical server validator' );
 
 echo "F1 Native Report canonical foundation tests complete.\n";
