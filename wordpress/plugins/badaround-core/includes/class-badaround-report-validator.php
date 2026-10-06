@@ -108,6 +108,19 @@ class BadAround_Report_Validator {
 			return new WP_Error( 'ba_report_invalid_payload', __( 'La segnalazione non è valida.', 'badaround-core' ) );
 		}
 
+		$category = $this->get_path( $report, 'event.category' );
+		$subtype  = $this->get_path( $report, 'event.subtype' );
+		if ( $category && $subtype ) {
+			$matrix = BadAround_Report_Schema::category_subtypes();
+			if ( ! isset( $matrix[ $category ] ) || ! in_array( $subtype, $matrix[ $category ], true ) ) {
+				return new WP_Error(
+					'ba_report_category_subtype_mismatch',
+					__( 'Categoria e sottocategoria non sono compatibili.', 'badaround-core' ),
+					array( 'field' => 'event.subtype' )
+				);
+			}
+		}
+
 		foreach ( BadAround_Report_Schema::fields() as $path => $definition ) {
 			$conditions = isset( $definition['conditions'] ) ? $definition['conditions'] : array();
 			$active     = empty( $conditions ) || $this->conditions_match( $report, $conditions );
@@ -131,17 +144,6 @@ class BadAround_Report_Validator {
 			if ( is_wp_error( $error ) ) {
 				return $error;
 			}
-		}
-
-		$category = $this->get_path( $report, 'event.category' );
-		$subtype  = $this->get_path( $report, 'event.subtype' );
-		$matrix   = BadAround_Report_Schema::category_subtypes();
-		if ( ! isset( $matrix[ $category ] ) || ! in_array( $subtype, $matrix[ $category ], true ) ) {
-			return new WP_Error(
-				'ba_report_category_subtype_mismatch',
-				__( 'Categoria e sottocategoria non sono compatibili.', 'badaround-core' ),
-				array( 'field' => 'event.subtype' )
-			);
 		}
 
 		$lat_present = $this->has_meaningful_value( $report, 'location.exact_lat' );
