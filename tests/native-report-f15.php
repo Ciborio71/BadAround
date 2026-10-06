@@ -180,11 +180,24 @@ f15_assert( $controller->permission_check( $cross ) instanceof WP_Error, 'cross-
 
 $wrong_ct = f15_request( f15_payload(), array( 'Content-Type' => 'text/plain' ) );
 $r = $controller->rest_create( $wrong_ct );
-f15_assert( 415 === $r->status && 'unsupported_media_type' === $r->data['error']['code'], 'wrong content type rejected' );
+f15_assert( 415 === $r->status && 'unsupported_media_type' === $r->data['error']['code'], 'text/plain rejected' );
 f15_assert( isset( $r->headers['Cache-Control'] ) && 'no-store, private' === $r->headers['Cache-Control'], 'error response is non-cacheable' );
 
+foreach ( array( 'application/x-www-form-urlencoded', 'multipart/form-data; boundary=abc', 'application/jsonp' ) as $invalid_type ) {
+	$rr = $controller->rest_create( f15_request( f15_payload(), array( 'Content-Type' => $invalid_type ) ) );
+	f15_assert( 415 === $rr->status && 'unsupported_media_type' === $rr->data['error']['code'], 'unexpected content type rejected: ' . $invalid_type );
+}
+$json_charset = $controller->rest_create( f15_request( f15_payload(), array( 'Content-Type' => 'application/json; charset=UTF-8' ) ) );
+f15_assert( 201 === $json_charset->status, 'application/json with charset remains accepted' );
+
 $r = $controller->rest_create( f15_request( '{"broken":' ) );
-f15_assert( 400 === $r->status && 'malformed_request' === $r->data['error']['code'], 'malformed JSON rejected' );
+f15_assert( 400 === $r->status && 'malformed_request' === $r->data['error']['code'], 'truncated JSON rejected' );
+$r = $controller->rest_create( f15_request( '{"ok":true} trailing' ) );
+f15_assert( 400 === $r->status && 'malformed_request' === $r->data['error']['code'], 'JSON with trailing garbage rejected' );
+$r = $controller->rest_create( f15_request( 'null' ) );
+f15_assert( 400 === $r->status && 'malformed_request' === $r->data['error']['code'], 'null JSON body rejected' );
+$r = $controller->rest_create( f15_request( '[]' ) );
+f15_assert( 400 === $r->status || 422 === $r->status, 'top-level JSON array is not accepted as a valid report object' );
 
 $oversized = str_repeat( 'x', BadAround_Native_Report_REST_Controller::MAX_PAYLOAD_BYTES + 1 );
 $r = $controller->rest_create( f15_request( $oversized ) );
