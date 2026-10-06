@@ -153,14 +153,29 @@ class BadAround_Native_Report_REST_Controller {
 	}
 
 	private function consume_rate_limit() {
+		global $wpdb;
+
 		$ip = ! empty( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
 		$key = 'ba_native_report_rl_' . substr( hash_hmac( 'sha256', $ip, wp_salt( 'nonce' ) ), 0, 32 );
-		$count = (int) get_transient( $key );
-		if ( $count >= self::RATE_IP_LIMIT ) {
+		$lock_name = 'ba_native_rl_' . substr( hash( 'sha256', $key ), 0, 32 );
+
+		// Serialize transient increments across PHP workers. Fail closed when the
+		// short lock cannot be acquired: under contention a 429 is safer than
+		// allowing an unbounded anonymous burst.
+		$locked = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, %d)', $lock_name, 1 ) );
+		if ( 1 !== $locked ) {
 			return false;
 		}
-		set_transient( $key, $count + 1, self::RATE_IP_TTL );
-		return true;
+
+		try {
+			$count = (int) get_transient( $key );
+			if ( $count >= self::RATE_IP_LIMIT ) {
+				return false;
+			}
+			return (bool) set_transient( $key, $count + 1, self::RATE_IP_TTL );
+		} finally {
+			$wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_name ) );
+		}
 	}
 
 	private function same_origin( $left, $right ) {
