@@ -392,3 +392,164 @@ ba_assert( ! is_wp_error( $wp_result ), 'WPForms source can feed the canonical d
 ba_assert( $legacy_payload === $wp_repo->stored_payload, 'WPForms compatibility path preserves the legacy private content envelope byte-semantically' );
 
 echo "F1 Native Report canonical foundation tests complete.\n";
+
+
+/**
+ * F1.1 Canonical Event Taxonomy Gate.
+ * The expected subtype count is always derived from BadAround_Report_Schema.
+ */
+$GLOBALS['ba_f11_terms'] = array();
+$GLOBALS['ba_f11_meta'] = array();
+$GLOBALS['ba_f11_next_id'] = 1;
+$GLOBALS['ba_f11_mutations'] = 0;
+
+function ba_f11_reset_taxonomy() {
+	$GLOBALS['ba_f11_terms'] = array();
+	$GLOBALS['ba_f11_meta'] = array();
+	$GLOBALS['ba_f11_next_id'] = 1;
+	$GLOBALS['ba_f11_mutations'] = 0;
+}
+function ba_f11_seed_term( $slug, $parent = 0, $canonical_key = '' ) {
+	$id = $GLOBALS['ba_f11_next_id']++;
+	$GLOBALS['ba_f11_terms'][ $id ] = new WP_Term( $id, $parent, $slug );
+	if ( '' !== $canonical_key ) {
+		$GLOBALS['ba_f11_meta'][ $id ]['_ba_canonical_event_key'] = $canonical_key;
+	}
+	return $id;
+}
+function get_terms( $args ) {
+	$out = array();
+	foreach ( $GLOBALS['ba_f11_terms'] as $term ) {
+		if ( isset( $args['slug'] ) && $args['slug'] !== $term->slug ) {
+			continue;
+		}
+		if ( isset( $args['meta_key'], $args['meta_value'] ) ) {
+			$value = isset( $GLOBALS['ba_f11_meta'][ $term->term_id ][ $args['meta_key'] ] )
+				? $GLOBALS['ba_f11_meta'][ $term->term_id ][ $args['meta_key'] ]
+				: '';
+			if ( (string) $args['meta_value'] !== (string) $value ) {
+				continue;
+			}
+		}
+		$out[] = $term;
+	}
+	return $out;
+}
+function get_term_meta( $term_id, $key, $single = false ) {
+	return isset( $GLOBALS['ba_f11_meta'][ $term_id ][ $key ] ) ? $GLOBALS['ba_f11_meta'][ $term_id ][ $key ] : '';
+}
+function add_term_meta( $term_id, $key, $value, $unique = false ) {
+	if ( $unique && isset( $GLOBALS['ba_f11_meta'][ $term_id ][ $key ] ) ) {
+		return false;
+	}
+	$GLOBALS['ba_f11_meta'][ $term_id ][ $key ] = $value;
+	$GLOBALS['ba_f11_mutations']++;
+	return 10000 + $term_id;
+}
+function wp_insert_term( $name, $taxonomy, $args = array() ) {
+	$slug = isset( $args['slug'] ) ? $args['slug'] : '';
+	$parent = isset( $args['parent'] ) ? (int) $args['parent'] : 0;
+	foreach ( $GLOBALS['ba_f11_terms'] as $term ) {
+		if ( $term->slug === $slug ) {
+			return new WP_Error( 'term_exists', 'Term exists', array( 'term_id' => $term->term_id ) );
+		}
+	}
+	$id = $GLOBALS['ba_f11_next_id']++;
+	$GLOBALS['ba_f11_terms'][ $id ] = new WP_Term( $id, $parent, $slug );
+	$GLOBALS['ba_f11_mutations']++;
+	return array( 'term_id' => $id, 'term_taxonomy_id' => $id );
+}
+
+require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-event-taxonomy-initializer.php';
+
+function ba_f11_subtype_count() {
+	$count = 0;
+	foreach ( BadAround_Report_Schema::category_subtypes() as $subtypes ) {
+		$count += count( $subtypes );
+	}
+	return $count;
+}
+
+$f11_schema = BadAround_Report_Schema::category_subtypes();
+$f11_mapping = BadAround_Event_Taxonomy_Map::mapping();
+ba_assert( 6 === count( $f11_schema ), 'F1.1 schema defines six canonical categories' );
+ba_assert( ba_f11_subtype_count() === count( $f11_mapping['subtypes'] ), 'F1.1 subtype count is derived from schema without magic number' );
+
+ba_f11_reset_taxonomy();
+$f11_first = ( new BadAround_Event_Taxonomy_Initializer() )->run();
+ba_assert( ! is_wp_error( $f11_first ), 'F1.1 bootstrap succeeds on controlled empty taxonomy' );
+ba_assert( 6 === $f11_first['category_count'], 'F1.1 materializes all six canonical categories' );
+ba_assert( ba_f11_subtype_count() === $f11_first['subtype_count'], 'F1.1 materializes every schema subtype' );
+ba_assert( 6 + ba_f11_subtype_count() === $f11_first['created'], 'F1.1 empty taxonomy creates each canonical term exactly once' );
+
+$f11_ids_after_first = array_keys( $GLOBALS['ba_f11_terms'] );
+$f11_mutations_before_second = $GLOBALS['ba_f11_mutations'];
+$f11_second = ( new BadAround_Event_Taxonomy_Initializer() )->run();
+ba_assert( ! is_wp_error( $f11_second ), 'F1.1 second bootstrap succeeds' );
+ba_assert( 0 === $f11_second['mutation_count'], 'F1.1 second bootstrap reports zero mutations' );
+ba_assert( $f11_mutations_before_second === $GLOBALS['ba_f11_mutations'], 'F1.1 second bootstrap changes no taxonomy state' );
+ba_assert( $f11_ids_after_first === array_keys( $GLOBALS['ba_f11_terms'] ), 'F1.1 second bootstrap preserves term IDs' );
+
+$f11_runtime = new BadAround_Event_Taxonomy_Map();
+foreach ( $f11_schema as $f11_category => $f11_subtypes ) {
+	$f11_category_terms = get_terms( array(
+		'taxonomy' => 'ba_tipo_evento',
+		'hide_empty' => false,
+		'meta_key' => '_ba_canonical_event_key',
+		'meta_value' => $f11_category,
+	) );
+	ba_assert( 1 === count( $f11_category_terms ), 'F1.1 category key unique: ' . $f11_category );
+	ba_assert( 0 === (int) $f11_category_terms[0]->parent, 'F1.1 category top-level: ' . $f11_category );
+	ba_assert( $f11_runtime->resolve_category( $f11_category ) instanceof WP_Term, 'F1.1 runtime resolves category: ' . $f11_category );
+
+	foreach ( $f11_subtypes as $f11_subtype ) {
+		$f11_terms = get_terms( array(
+			'taxonomy' => 'ba_tipo_evento',
+			'hide_empty' => false,
+			'meta_key' => '_ba_canonical_event_key',
+			'meta_value' => $f11_subtype,
+		) );
+		ba_assert( 1 === count( $f11_terms ), 'F1.1 subtype key unique: ' . $f11_subtype );
+		ba_assert( (int) $f11_category_terms[0]->term_id === (int) $f11_terms[0]->parent, 'F1.1 subtype parent correct: ' . $f11_subtype );
+		$f11_before_runtime = $GLOBALS['ba_f11_mutations'];
+		ba_assert( $f11_runtime->resolve_subtype( $f11_subtype, $f11_category_terms[0] ) instanceof WP_Term, 'F1.1 runtime resolves subtype: ' . $f11_subtype );
+		ba_assert( $f11_before_runtime === $GLOBALS['ba_f11_mutations'], 'F1.1 runtime resolution is read-only: ' . $f11_subtype );
+	}
+}
+
+ba_f11_reset_taxonomy();
+$f11_vehicle = ba_f11_seed_term( 'veicoli', 0, 'vehicle' );
+$f11_legacy_subtype = ba_f11_seed_term( 'veicolo-rubato', $f11_vehicle );
+$f11_partial = ( new BadAround_Event_Taxonomy_Initializer() )->run();
+ba_assert( ! is_wp_error( $f11_partial ), 'F1.1 safely completes a partially populated taxonomy' );
+ba_assert( 1 <= $f11_partial['adopted'], 'F1.1 adopts a unique slug + parent candidate' );
+ba_assert( 'vehicle_stolen' === get_term_meta( $f11_legacy_subtype, '_ba_canonical_event_key', true ), 'F1.1 safe adoption adds canonical identity' );
+
+ba_f11_reset_taxonomy();
+$f11_vehicle = ba_f11_seed_term( 'veicoli', 0, 'vehicle' );
+ba_f11_seed_term( 'veicolo-rubato', $f11_vehicle, 'vehicle_stolen' );
+ba_f11_seed_term( 'duplicate-vehicle-stolen', $f11_vehicle, 'vehicle_stolen' );
+$f11_conflict = ( new BadAround_Event_Taxonomy_Initializer() )->run();
+ba_assert( is_wp_error( $f11_conflict ) && 'ba_canonical_taxonomy_conflict' === $f11_conflict->get_error_code(), 'F1.1 duplicate canonical key triggers STOP' );
+ba_assert( 0 === $GLOBALS['ba_f11_mutations'], 'F1.1 duplicate-key conflict is detected before mutation' );
+
+ba_f11_reset_taxonomy();
+$f11_public_space = ba_f11_seed_term( 'spazi-pubblici', 0, 'public_space' );
+ba_f11_seed_term( 'veicolo-rubato', $f11_public_space );
+$f11_conflict = ( new BadAround_Event_Taxonomy_Initializer() )->run();
+ba_assert( is_wp_error( $f11_conflict ), 'F1.1 wrong-parent slug candidate triggers STOP' );
+ba_assert( 0 === $GLOBALS['ba_f11_mutations'], 'F1.1 wrong-parent conflict is detected before mutation' );
+
+ba_f11_reset_taxonomy();
+$f11_vehicle = ba_f11_seed_term( 'veicoli', 0, 'vehicle' );
+ba_f11_seed_term( 'veicolo-rubato', $f11_vehicle, 'some_other_key' );
+$f11_conflict = ( new BadAround_Event_Taxonomy_Initializer() )->run();
+ba_assert( is_wp_error( $f11_conflict ), 'F1.1 incompatible canonical meta triggers STOP' );
+ba_assert( 0 === $GLOBALS['ba_f11_mutations'], 'F1.1 incompatible-meta conflict is detected before mutation' );
+
+$f11_mapper_source = file_get_contents( dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-event-taxonomy-map.php' );
+ba_assert( false === strpos( $f11_mapper_source, 'wp_insert_term' ), 'F1.1 runtime mapper contains no term creation call' );
+ba_assert( false === strpos( $f11_mapper_source, 'update_term_meta' ), 'F1.1 runtime mapper contains no term-meta update call' );
+ba_assert( false === strpos( $f11_mapper_source, 'add_term_meta' ), 'F1.1 runtime mapper contains no term-meta creation call' );
+
+echo "F1.1 Canonical Event Taxonomy Gate tests complete.\n";

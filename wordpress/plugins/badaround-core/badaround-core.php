@@ -24,6 +24,7 @@ require_once BADAROUND_CORE_PATH . 'includes/class-badaround-report-repository.p
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-report-schema.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-report-validator.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-event-taxonomy-map.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-event-taxonomy-initializer.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-report-intake-service.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-wpforms-field-mapper.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-wpforms-report-adapter.php';
