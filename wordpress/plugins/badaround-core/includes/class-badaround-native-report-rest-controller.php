@@ -87,8 +87,12 @@ class BadAround_Native_Report_REST_Controller {
 			return $this->error_response( 'rate_limited', null, 429, $request_id, array( 'retryable' => true ) );
 		}
 
+		$root = json_decode( $body );
+		if ( JSON_ERROR_NONE !== json_last_error() || ! is_object( $root ) ) {
+			return $this->error_response( 'malformed_request', null, 400, $request_id );
+		}
 		$payload = json_decode( $body, true );
-		if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $payload ) ) {
+		if ( ! is_array( $payload ) ) {
 			return $this->error_response( 'malformed_request', null, 400, $request_id );
 		}
 
