@@ -40,6 +40,7 @@ class F14Media{
 }
 class F14Pub{public $calls=0;function prepare_public_projection($e){$this->calls++;return true;}}
 
+require_once dirname(__DIR__).'/wordpress/plugins/badaround-core/includes/class-badaround-report-result.php';
 require_once dirname(__DIR__).'/wordpress/plugins/badaround-core/includes/class-badaround-report-persistence-service.php';
 require_once dirname(__DIR__).'/wordpress/plugins/badaround-core/includes/class-badaround-native-report-golden-path-service.php';
 
