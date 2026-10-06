@@ -21,7 +21,10 @@ class BadAround_Report_Validator {
 	public function normalize( $report ) {
 		$input      = is_array( $report ) ? $report : array();
 		$normalized = array();
-		$this->set_path( $normalized, 'schema_version', BadAround_Report_Schema::VERSION );
+		$schema_version = isset( $input['schema_version'] ) && is_scalar( $input['schema_version'] )
+			? sanitize_text_field( (string) $input['schema_version'] )
+			: '';
+		$this->set_path( $normalized, 'schema_version', $schema_version );
 
 		foreach ( BadAround_Report_Schema::fields() as $path => $definition ) {
 			if ( 'schema_version' === $path || ! $this->has_path( $input, $path ) ) {
