@@ -203,6 +203,7 @@ $oversized = str_repeat( 'x', BadAround_Native_Report_REST_Controller::MAX_PAYLO
 $r = $controller->rest_create( f15_request( $oversized ) );
 f15_assert( 413 === $r->status && 'payload_too_large' === $r->data['error']['code'], 'oversized payload rejected before domain intake' );
 
+$GLOBALS['f15_transients'] = array();
 $error_cases = array(
 	'invalid_schema_version' => array( 'field' => 'schema_version', 'status' => 422 ),
 	'missing_required_field' => array( 'field' => 'submission_id', 'status' => 422 ),
@@ -219,15 +220,18 @@ foreach ( $error_cases as $code => $expected ) {
 	f15_assert( $expected['status'] === $rr->status && $code === $rr->data['error']['code'], 'domain error mapped safely: ' . $code );
 }
 
+$GLOBALS['f15_transients'] = array();
 $retryFake = new F15_Fake_Golden_Path( f15_success( true ) );
 $retryController = new BadAround_Native_Report_REST_Controller( $retryFake );
 $retry = $retryController->rest_create( f15_request( f15_payload() ) );
 f15_assert( 200 === $retry->status && true === $retry->data['duplicate'], 'same-id retry returns deterministic completed response without new object semantics' );
 
+$GLOBALS['f15_transients'] = array();
 $busyFake = new F15_Fake_Golden_Path( f15_error( 'submission_in_progress', 'submission_id' ) );
 $busy = ( new BadAround_Native_Report_REST_Controller( $busyFake ) )->rest_create( f15_request( f15_payload() ) );
 f15_assert( 409 === $busy->status && true === $busy->data['error']['retryable'], 'in-progress/concurrent duplicate returns HTTP 409 retryable response' );
 
+$GLOBALS['f15_transients'] = array();
 $conflictFake = new F15_Fake_Golden_Path( f15_error( 'duplicate_submission', 'submission_id' ) );
 $conflict = ( new BadAround_Native_Report_REST_Controller( $conflictFake ) )->rest_create( f15_request( f15_payload() ) );
 f15_assert( 409 === $conflict->status, 'same id with conflicting payload maps to HTTP 409' );
@@ -253,6 +257,7 @@ $internal = ( new BadAround_Native_Report_REST_Controller( $throwFake ) )->rest_
 f15_assert( 500 === $internal->status && 'internal_error' === $internal->data['error']['code'], 'internal exception is sanitized' );
 f15_assert( false === strpos( json_encode( $internal->data ), 'SECRET_SQL_STACK' ), 'stack/SQL/private exception detail is not exposed' );
 
+$GLOBALS['f15_transients'] = array();
 $negativePayloads = array(
 	'script_markup' => array_replace_recursive( f15_payload(), array( 'content' => array( 'description' => '<script>alert(1)</script>Ostacolo' ) ) ),
 	'sql_like_string' => array_replace_recursive( f15_payload(), array( 'content' => array( 'description' => "Robert'); DROP TABLE ba_reports;--" ) ) ),
@@ -265,6 +270,7 @@ foreach ( $negativePayloads as $name => $payload ) {
 	f15_assert( false === strpos( json_encode( $rr->data ), '<script>' ) && false === strpos( json_encode( $rr->data ), 'DROP TABLE' ), $name . ' is never reflected in public response' );
 }
 
+$GLOBALS['f15_transients'] = array();
 $nestedFake = new F15_Fake_Golden_Path( function( $payload ) {
 	if ( isset( $payload['unexpected']['nested'] ) ) return f15_error( 'unknown_field', 'unexpected' );
 	return f15_success();
@@ -273,6 +279,7 @@ $nested = f15_payload(); $nested['unexpected'] = array( 'nested' => array( 'x' =
 $nestedResponse = ( new BadAround_Native_Report_REST_Controller( $nestedFake ) )->rest_create( f15_request( $nested ) );
 f15_assert( 422 === $nestedResponse->status && 'unknown_field' === $nestedResponse->data['error']['code'], 'unexpected nested object reaches strict F1.3 unknown-field rejection' );
 
+$GLOBALS['f15_transients'] = array();
 $longFake = new F15_Fake_Golden_Path( f15_error( 'too_long', 'content.description' ) );
 $longPayload = f15_payload(); $longPayload['content']['description'] = str_repeat( 'A', 20000 );
 $longResponse = ( new BadAround_Native_Report_REST_Controller( $longFake ) )->rest_create( f15_request( $longPayload ) );
