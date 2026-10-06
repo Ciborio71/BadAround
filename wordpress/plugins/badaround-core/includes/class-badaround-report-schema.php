@@ -69,7 +69,20 @@ class BadAround_Report_Schema {
 					'hazard_other',
 				),
 			),
+			'validation_rules' => self::validation_rules(),
 			'fields' => self::fields(),
+		);
+	}
+
+	public static function validation_rules() {
+		return array(
+			'category_subtype_compatibility',
+			'coordinate_pair_integrity',
+			'event_date_not_future',
+			'event_time_not_future_when_today',
+			'time_range_order',
+			'reward_contract',
+			'mandatory_consents',
 		);
 	}
 
