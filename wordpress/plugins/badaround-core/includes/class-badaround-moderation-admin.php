@@ -124,6 +124,19 @@ class BadAround_Moderation_Admin {
 		echo '<p class="description">' . esc_html__( 'Solo questi campi canonici/pubblicabili vengono salvati qui. PII, indirizzo esatto, coordinate precise e targa completa restano nel report riservato.', 'badaround-core' ) . '</p>';
 	}
 
+	public function private_description_from_payload( $payload ) {
+		if ( is_array( $payload ) && ! empty( $payload['canonical']['content']['description'] ) ) {
+			return (string) $payload['canonical']['content']['description'];
+		}
+		if ( is_array( $payload ) && ! empty( $payload['private_fields'][55] ) ) {
+			// Legacy WPForms storage compatibility only; native reports use canonical.content.description.
+			return is_array( $payload['private_fields'][55] )
+				? implode( "\n", array_map( 'strval', $payload['private_fields'][55] ) )
+				: (string) $payload['private_fields'][55];
+		}
+		return '';
+	}
+
 	public function render_private_box( $post ) {
 		if ( ! current_user_can( 'ba_view_private_reports' ) ) {
 			echo '<p>' . esc_html__( 'Accesso non autorizzato.', 'badaround-core' ) . '</p>';
@@ -135,10 +148,7 @@ class BadAround_Moderation_Admin {
 			return;
 		}
 		$payload = json_decode( (string) $report->content_original, true );
-		$original_text = '';
-		if ( is_array( $payload ) && ! empty( $payload['private_fields'][55] ) ) {
-			$original_text = is_array( $payload['private_fields'][55] ) ? implode( "\n", array_map( 'strval', $payload['private_fields'][55] ) ) : (string) $payload['private_fields'][55];
-		}
+		$original_text = $this->private_description_from_payload( $payload );
 		$rows = array(
 			__( 'Report ID', 'badaround-core' )       => $report->id,
 			__( 'Segnalante', 'badaround-core' )      => trim( $report->author_name . ' ' . $report->author_surname ),

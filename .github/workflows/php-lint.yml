@@ -51,6 +51,21 @@ jobs:
           grep -q "approve_received_images_for_event" ./wordpress/plugins/badaround-core/includes/class-badaround-media-repository.php
           grep -q "progressiveFieldCandidates" ./wordpress/themes/badaround-child/assets/js/report.js
 
+      - name: Test F1 Native Report canonical foundation
+        run: php ./tests/native-report-f1.php
+
+      - name: Test F1.2 Canonical Report Contract
+        run: php ./tests/native-report-f12.php
+
+      - name: Test F1.3 Native Validation & Intake
+        run: php ./tests/native-report-f13.php
+
+      - name: Test F1.4 Native Persistence & Golden Path
+        run: php ./tests/native-report-f14.php
+
+      - name: Test F1.5 Public Native Intake Boundary
+        run: php ./tests/native-report-f15.php
+
       - name: Test D1 Sentinel lifecycle
         run: php ./tests/sentinels-d1.php
 

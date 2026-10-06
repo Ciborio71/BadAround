@@ -49,6 +49,58 @@ class BadAround_Media_Repository {
 		return $stored;
 	}
 
+	public function link_validated_private_media( $report_id, $event_id, $items ) {
+		global $wpdb;
+		$report_id = absint( $report_id );
+		$event_id  = absint( $event_id );
+		$ids = array();
+
+		foreach ( (array) $items as $item ) {
+			$media_id = is_array( $item ) && isset( $item['media_id'] ) ? absint( $item['media_id'] ) : 0;
+			if ( ! $media_id ) {
+				return new WP_Error( 'ba_media_invalid_reference', __( 'Riferimento media non valido.', 'badaround-core' ) );
+			}
+			$row = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT id, report_id, event_id, sensitivity, public_attachment_id FROM {$wpdb->prefix}ba_report_media WHERE id = %d AND deleted_at IS NULL LIMIT 1",
+					$media_id
+				)
+			);
+			if ( ! $row || (int) $row->report_id !== $report_id || 'private' !== $row->sensitivity || ! empty( $row->public_attachment_id ) ) {
+				return new WP_Error( 'ba_media_private_boundary_invalid', __( 'Il media validato non appartiene al boundary privato del report.', 'badaround-core' ) );
+			}
+			if ( ! empty( $row->event_id ) && (int) $row->event_id !== $event_id ) {
+				return new WP_Error( 'ba_media_event_conflict', __( 'Il media è già collegato a un altro evento.', 'badaround-core' ) );
+			}
+			$ids[] = $media_id;
+		}
+
+		foreach ( $ids as $media_id ) {
+			$updated = $wpdb->update(
+				$wpdb->prefix . 'ba_report_media',
+				array( 'event_id' => $event_id ),
+				array( 'id' => $media_id, 'report_id' => $report_id ),
+				array( '%d' ),
+				array( '%d', '%d' )
+			);
+			if ( false === $updated ) {
+				return new WP_Error( 'ba_media_event_link_failed', __( 'Impossibile collegare il media privato all’evento.', 'badaround-core' ) );
+			}
+		}
+		return $ids;
+	}
+
+	public function unlink_event( $report_id, $event_id ) {
+		global $wpdb;
+		return false !== $wpdb->update(
+			$wpdb->prefix . 'ba_report_media',
+			array( 'event_id' => null ),
+			array( 'report_id' => absint( $report_id ), 'event_id' => absint( $event_id ), 'sensitivity' => 'private' ),
+			array( '%d' ),
+			array( '%d', '%d', '%s' )
+		);
+	}
+
 	public function private_file_for_media_id( $media_id ) {
 		global $wpdb;
 
