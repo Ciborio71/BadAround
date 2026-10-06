@@ -15,13 +15,15 @@ class BadAround_Report_Intake_Service {
 	private $taxonomy_map;
 	private $territory_resolver;
 	private $publication_service;
+	private $persistence_service;
 
-	public function __construct( $repository = null, $validator = null, $taxonomy_map = null, $territory_resolver = null, $publication_service = null ) {
+	public function __construct( $repository = null, $validator = null, $taxonomy_map = null, $territory_resolver = null, $publication_service = null, $persistence_service = null ) {
 		$this->repository          = $repository ?: new BadAround_Report_Repository();
 		$this->validator           = $validator ?: new BadAround_Report_Validator();
 		$this->taxonomy_map        = $taxonomy_map ?: new BadAround_Event_Taxonomy_Map();
 		$this->territory_resolver  = $territory_resolver ?: new BadAround_Territory_Resolver();
 		$this->publication_service = $publication_service ?: new BadAround_Publication_Service();
+		$this->persistence_service = $persistence_service ?: new BadAround_Report_Persistence_Service( $this->repository, $this->taxonomy_map, $this->territory_resolver, null, $this->publication_service );
 	}
 
 	public function ingest( $canonical_report, $source = array() ) {
@@ -86,57 +88,24 @@ class BadAround_Report_Intake_Service {
 				return new WP_Error( 'ba_report_private_persistence_failed', __( 'Impossibile salvare i dati riservati della segnalazione.', 'badaround-core' ) );
 			}
 
-			$post_id = wp_insert_post(
-				array(
-					'post_type'    => BadAround_Event_Post_Type::POST_TYPE,
-					'post_status'  => 'pending',
-					'post_title'   => sprintf( __( 'Segnalazione da moderare #%d', 'badaround-core' ), $report_id ),
-					'post_content' => '',
-					'post_excerpt' => '',
-					'meta_input'   => array_merge(
-						$this->source_post_meta( $source, $report_id ),
-						$this->event_meta( $canonical_report )
-					),
-				),
-				true
+			$persisted = $this->persistence_service->persist(
+				$report_id,
+				$canonical_report,
+				$source,
+				array( 'prepare_public_projection' => true )
 			);
-
-			if ( is_wp_error( $post_id ) ) {
-				BadAround_Audit_Log::technical_error( 'report', $report_id, 'event_creation_failed', $post_id->get_error_code(), $request_id );
-				return $post_id;
-			}
-			$post_id = absint( $post_id );
-
-			$taxonomy = $this->taxonomy_map->assign( $post_id, $canonical_report );
-			if ( is_wp_error( $taxonomy ) ) {
-				BadAround_Audit_Log::technical_error( 'event', $post_id, 'event_type_mapping_failed', $taxonomy->get_error_code(), $request_id );
+			if ( is_wp_error( $persisted ) ) {
+				return $persisted;
 			}
 
-			$location     = isset( $canonical_report['location'] ) ? $canonical_report['location'] : array();
-			$territory_id = $this->territory_resolver->resolve(
-				isset( $location['area_label'] ) ? $location['area_label'] : '',
-				isset( $location['exact_address'] ) ? $location['exact_address'] : ''
-			);
-			if ( $territory_id ) {
-				wp_set_object_terms( $post_id, array( $territory_id ), BadAround_Event_Post_Type::TERRITORY_TAX, false );
-			} else {
-				BadAround_Audit_Log::technical_error( 'event', $post_id, 'territory_mapping_failed', 'canonical_territory_unresolved', $request_id );
-			}
-
-			$projection = $this->publication_service->prepare_public_projection( $post_id );
-			if ( is_wp_error( $projection ) ) {
-				BadAround_Audit_Log::technical_error( 'event', $post_id, 'public_projection_prepare_failed', $projection->get_error_code(), $request_id );
-			}
-
-			$this->repository->link_event( $report_id, $post_id );
-
+			$post_id = absint( $persisted['event_id'] );
 			BadAround_Audit_Log::record( 'report', $report_id, 'submission_normalized', $source['type'], null, $request_id );
 			BadAround_Audit_Log::record( 'event', $post_id, 'event_created_pending_moderation', $source['type'], null, $request_id );
 
 			return array(
 				'report_id' => $report_id,
 				'event_id'  => $post_id,
-				'duplicate' => false,
+				'duplicate' => ! empty( $persisted['duplicate'] ),
 			);
 		} finally {
 			$this->release_source_lock( $source );
@@ -144,41 +113,7 @@ class BadAround_Report_Intake_Service {
 	}
 
 	public function event_meta( $report ) {
-		$location = isset( $report['location'] ) ? $report['location'] : array();
-		$time     = isset( $report['time'] ) ? $report['time'] : array();
-		$vehicle  = isset( $report['vehicle'] ) ? $report['vehicle'] : array();
-		$reward   = isset( $report['reward'] ) ? $report['reward'] : array();
-		$category = isset( $report['event']['category'] ) ? $report['event']['category'] : '';
-
-		$meta = array(
-			'_ba_moderation_status'         => 'new',
-			'_ba_event_status'              => 'open',
-			'_ba_time_precision'            => $this->time_precision_storage_code( isset( $time['mode'] ) ? $time['mode'] : '' ),
-			'_ba_public_location_precision' => $this->location_precision_storage_code( isset( $location['public_precision'] ) ? $location['public_precision'] : '' ),
-			'_ba_public_place_name'         => isset( $location['area_label'] ) ? sanitize_text_field( $location['area_label'] ) : '',
-			'_ba_vehicle_involved'          => 'vehicle' === $category,
-			'_ba_vehicle_type'              => $this->vehicle_type_storage_code( isset( $vehicle['type'] ) ? $vehicle['type'] : '' ),
-			'_ba_vehicle_make'              => isset( $vehicle['make'] ) ? sanitize_text_field( $vehicle['make'] ) : '',
-			'_ba_vehicle_model'             => isset( $vehicle['model'] ) ? sanitize_text_field( $vehicle['model'] ) : '',
-			'_ba_vehicle_color'             => $this->vehicle_color_storage_label( isset( $vehicle['color'] ) ? $vehicle['color'] : '' ),
-			'_ba_reward_available'          => in_array( isset( $reward['status'] ) ? $reward['status'] : 'none', array( 'fixed', 'negotiable' ), true ),
-			'_ba_reward_amount'             => isset( $reward['amount'] ) && is_numeric( $reward['amount'] ) ? (float) $reward['amount'] : null,
-			'_ba_expires_at'                => isset( $reward['expires_on'] ) ? $this->storage_date( $reward['expires_on'] ) : '',
-		);
-
-		if ( ! empty( $time['date'] ) ) {
-			$meta['_ba_occurred_date'] = $this->storage_date( $time['date'] );
-		}
-		if ( ! empty( $time['exact_time'] ) ) {
-			$meta['_ba_occurred_time'] = sanitize_text_field( $time['exact_time'] );
-		}
-
-		return array_filter(
-			$meta,
-			static function ( $value ) {
-				return null !== $value && '' !== $value;
-			}
-		);
+		return $this->persistence_service->event_meta( $report );
 	}
 
 	private function normalize_source( $source, $report ) {
