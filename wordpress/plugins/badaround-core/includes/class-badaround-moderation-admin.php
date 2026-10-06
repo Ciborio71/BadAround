@@ -136,7 +136,10 @@ class BadAround_Moderation_Admin {
 		}
 		$payload = json_decode( (string) $report->content_original, true );
 		$original_text = '';
-		if ( is_array( $payload ) && ! empty( $payload['private_fields'][55] ) ) {
+		if ( is_array( $payload ) && ! empty( $payload['canonical']['content']['description'] ) ) {
+			$original_text = (string) $payload['canonical']['content']['description'];
+		} elseif ( is_array( $payload ) && ! empty( $payload['private_fields'][55] ) ) {
+			// Legacy WPForms storage compatibility only; native reports use canonical.content.description.
 			$original_text = is_array( $payload['private_fields'][55] ) ? implode( "\n", array_map( 'strval', $payload['private_fields'][55] ) ) : (string) $payload['private_fields'][55];
 		}
 		$rows = array(
