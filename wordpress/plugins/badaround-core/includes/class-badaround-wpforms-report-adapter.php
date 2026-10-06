@@ -351,7 +351,7 @@ class BadAround_WPForms_Report_Adapter {
 				'publication_rules' => $this->has_value( $public, $private, 83 ),
 				'terms'             => $this->has_value( $public, $private, 84 ),
 				'privacy'           => $this->has_value( $public, $private, 85 ),
-				'version'           => BadAround_Report_Schema::VERSION,
+				'version'           => BadAround_WPForms_Field_Mapper::FORM_SCHEMA_VERSION,
 			),
 		);
 	}
