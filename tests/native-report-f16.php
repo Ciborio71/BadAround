@@ -45,8 +45,23 @@ if ( in_array( '--html', $argv, true ) ) {
 	echo '</body></html>'; exit;
 }
 function f16_assert( $ok, $message ) { if ( ! $ok ) { fwrite( STDERR, "FAIL: $message\n" ); exit( 1 ); } echo "PASS: $message\n"; }
+$_SERVER['HTTP_HOST'] = 'staging.badaround.it';
 $_GET['native_report'] = '1';
 f16_assert( badaround_native_report_qa_enabled(), 'staging administrator QA gate' );
+foreach ( array( 'www.badaround.it', 'alias.badaround.it', 'staging.badaround.it.evil.invalid', 'staging.badaround.it:8080', '' ) as $host ) {
+	$_SERVER['HTTP_HOST'] = $host;
+	f16_assert( ! badaround_native_report_qa_enabled(), 'request host rejected: ' . $host );
+}
+unset( $_SERVER['HTTP_HOST'] );
+f16_assert( ! badaround_native_report_qa_enabled(), 'missing request host fails closed' );
+$_SERVER['HTTP_HOST'] = 'staging.badaround.it:443';
+f16_assert( badaround_native_report_qa_enabled(), 'explicit HTTPS port accepted' );
+$_SERVER['HTTP_HOST'] = 'staging.badaround.it';
+foreach ( array( '01', 'true', 1, array( '1' ), '' ) as $query ) {
+	$_GET['native_report'] = $query;
+	f16_assert( ! badaround_native_report_qa_enabled(), 'only exact query string 1 activates native form' );
+}
+$_GET['native_report'] = '1';
 $GLOBALS['test_admin'] = false;
 f16_assert( ! badaround_native_report_qa_enabled(), 'anonymous query cannot activate native form' );
 $GLOBALS['test_admin'] = true; $GLOBALS['test_origin'] = 'https://www.badaround.it';
@@ -75,4 +90,48 @@ f16_assert( strpos( $html, 'aria-describedby=' ) !== false && strpos( $html, '<f
 f16_assert( strpos( $html, 'wpforms' ) === false && strpos( $html, 'type="file"' ) === false, 'no builder runtime or fictitious upload' );
 $GLOBALS['missing_taxonomy'] = true;
 f16_assert( null === badaround_native_report_config(), 'missing taxonomy fails closed without mutations' );
+ob_start(); require $base . 'themes/badaround-child/template-parts/native-report/shell.php'; $unavailable = ob_get_clean();
+f16_assert( strpos( $unavailable, 'href="https://staging.badaround.it/segnala-un-evento/"' ) !== false && strpos( $unavailable, 'data-native-report' ) === false, 'missing taxonomy supplies actionable legacy fallback without wizard' );
+$GLOBALS['missing_taxonomy'] = false;
+// Exercise the actual page decision and enqueue function, not copied gate logic.
+function add_filter() {}
+function apply_filters( $hook, $value ) { return $value; }
+function get_stylesheet_directory() { return dirname( __DIR__ ) . '/wordpress/themes/badaround-child'; }
+function get_stylesheet_directory_uri() { return home_url( '/wp-content/themes/badaround-child' ); }
+function is_front_page() { return false; }
+function is_singular() { return false; }
+function is_tax() { return false; }
+function is_404() { return false; }
+function is_page() { return false; }
+function is_page_template( $templates ) { return in_array( $GLOBALS['test_screen'] ?? 'page-segnala-evento.php', (array) $templates, true ); }
+function wp_enqueue_style( $handle ) { $GLOBALS['test_assets'][ $handle ] = true; }
+function wp_enqueue_script( $handle, $url, $deps ) { $GLOBALS['test_assets'][ $handle ] = $deps; }
+function wp_script_add_data() {}
+function get_header() {}
+function get_footer() {}
+function get_template_part( $part ) { require get_stylesheet_directory() . '/' . $part . '.php'; }
+function wpforms() {
+	return (object) array( 'frontend' => new class {
+		public function output( $id ) { echo '<div data-test-wpforms="' . (int) $id . '"></div>'; }
+	} );
+}
+require get_stylesheet_directory() . '/functions.php';
+foreach ( array( 'native', 'normal', 'anonymous', 'non-staging' ) as $scenario ) {
+	$_GET = 'normal' === $scenario ? array() : array( 'native_report' => '1' );
+	$GLOBALS['test_admin'] = 'anonymous' !== $scenario;
+	$_SERVER['HTTP_HOST'] = 'non-staging' === $scenario ? 'www.badaround.it' : 'staging.badaround.it';
+	$GLOBALS['test_assets'] = array(); badaround_child_enqueue_assets();
+	ob_start(); require get_stylesheet_directory() . '/page-segnala-evento.php'; $page = ob_get_clean();
+	$native = 'native' === $scenario;
+	f16_assert( $native === ( strpos( $page, 'data-native-report' ) !== false ), 'actual page native exposure: ' . $scenario );
+	f16_assert( ! $native === ( strpos( $page, 'data-test-wpforms="6"' ) !== false ), 'actual page WPForms fallback: ' . $scenario );
+	f16_assert( $native === isset( $GLOBALS['test_assets']['badaround-native-wizard'] ), 'native JS conditional enqueue: ' . $scenario );
+	f16_assert( ! $native === isset( $GLOBALS['test_assets']['badaround-report-ui'], $GLOBALS['test_assets']['badaround-wpforms'] ), 'legacy assets preserved/isolated: ' . $scenario );
+	if ( $native ) {
+		f16_assert( $GLOBALS['test_assets']['badaround-native-model'] === array() && $GLOBALS['test_assets']['badaround-native-wizard'] === array( 'badaround-native-errors' ), 'native production dependency chain has no builder dependency' );
+	}
+}
+$GLOBALS['test_screen'] = 'other-page.php'; $GLOBALS['test_assets'] = array();
+badaround_child_enqueue_assets();
+f16_assert( ! $GLOBALS['test_assets'], 'unrelated page does not enqueue native or report assets' );
 echo "F1.6 PHP/SSR tests complete.\n";

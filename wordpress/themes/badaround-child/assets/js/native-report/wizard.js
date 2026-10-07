@@ -9,6 +9,8 @@
     const wrappers = Array.from(form.querySelectorAll('[data-native-field]'));
     const next = form.querySelector('[data-native-next]'), back = form.querySelector('[data-native-back]'), submit = form.querySelector('[data-native-submit]');
     const success = container.querySelector('[data-native-success]');
+    // Presentation classification of frozen F1.3 errors, never a validator.
+    const correctableCodes = new Set(['invalid_type', 'missing_required_field', 'conditional_field_required', 'invalid_email', 'invalid_phone', 'invalid_date_time', 'invalid_enum', 'invalid_category_subtype', 'invalid_location', 'invalid_plate', 'invalid_boolean', 'invalid_array', 'invalid_number', 'value_too_short', 'value_too_long', 'value_too_small', 'value_too_large', 'reward_amount_required', 'reward_confirmation_required']);
     const read = wrapper => {
       const field = config.fields[wrapper.dataset.nativeField];
       const inputs = wrapper.querySelectorAll('[data-native-input]');
@@ -111,10 +113,12 @@
         success.querySelector('h2').focus();
       } else {
         model.lastError = result.error; // Code retained for troubleshooting, no payload/PII logging.
-        const validationRejection = result.error.httpStatus === 422;
+        const validationRejection = result.error.httpStatus === 422 && !result.error.retryable
+          && correctableCodes.has(result.error.code) && config.fields[result.error.field] && model.active(result.error.field);
         if (validationRejection) model.snapshot = null;
         else if (!result.error.retryable) model.blocked = true;
-        displayErrors([result.error]);
+        // A locked snapshot must stay on review, where an allowed retry is reachable.
+        displayErrors([model.snapshot ? {...result.error, field:null} : result.error]);
       }
     });
     container.querySelector('[data-native-new]').addEventListener('click', () => {

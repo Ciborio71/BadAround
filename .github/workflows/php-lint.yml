@@ -51,6 +51,18 @@ jobs:
           grep -q "approve_received_images_for_event" ./wordpress/plugins/badaround-core/includes/class-badaround-media-repository.php
           grep -q "progressiveFieldCandidates" ./wordpress/themes/badaround-child/assets/js/report.js
 
+          grep -q "BADAROUND_CORE_VERSION', '0.17.0'" ./wordpress/plugins/badaround-core/badaround-core.php
+          grep -q "BadAround_Contribution_Service" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
+          grep -q "BadAround_Contribution_Moderation_Admin" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
+          grep -q "BadAround_Sentinel_Service" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
+          grep -q "BadAround_Sentinel_Matching_Service" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
+          grep -q "ensure_public_location" ./wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+          grep -q "Approva e pubblica" ./wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php
+          grep -Fq "array( 'prepare_public_projection' => true )" ./wordpress/plugins/badaround-core/includes/class-badaround-report-intake-service.php
+          grep -q "public_projection_prepare_failed" ./wordpress/plugins/badaround-core/includes/class-badaround-report-persistence-service.php
+          grep -q "baUserTouched" ./wordpress/themes/badaround-child/assets/js/report.js
+          grep -q "wpforms-6-field_17-container" ./wordpress/themes/badaround-child/assets/css/wpforms.css
+
       - name: Test F1 Native Report canonical foundation
         run: php ./tests/native-report-f1.php
 

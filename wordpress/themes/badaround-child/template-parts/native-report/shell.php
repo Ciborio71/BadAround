@@ -2,7 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 $config = badaround_native_report_config();
 if ( ! $config ) {
-	echo '<p role="alert">Modulo nativo non disponibile: verifica della tassonomia richiesta. Usa il modulo di riferimento.</p>';
+	echo '<p role="alert">Modulo nativo non disponibile: verifica della tassonomia richiesta. <a href="' . esc_url( get_permalink() ) . '">Torna al modulo di riferimento</a>.</p>';
 	return;
 }
 ?>

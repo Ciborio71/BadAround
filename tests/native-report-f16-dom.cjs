@@ -88,6 +88,22 @@ test('structured server field error routes to matching step; edits keep UUID',as
   assert.equal(h.model.step,5);assert.equal(h.model.snapshot,null);assert.equal(h.doc.querySelector('[name="reporter.email"]').getAttribute('aria-invalid'),'true');
   h.set('reporter.email','changed@example.invalid');assert.equal(h.model.submissionId,id);assert.equal(h.model.values['reporter.email'],'changed@example.invalid');h.dom.window.close();
 });
+test('non-validation 422 preserves snapshot and blocks unsafe editing or resubmission',async()=>{
+  for(const code of ['insert_failed','persistence_invalid_intake','unrecognized_error']) {
+    const h=create(()=>({ok:false,status:422,json:async()=>({status:'error',error:{code,field:null,retryable:false}})}));
+    populate(h);for(let i=0;i<6;i++)h.click('next');const id=h.model.submissionId;h.submit();await tick();
+    assert(h.model.snapshot);assert.equal(h.model.submissionId,id);assert.equal(h.model.step,6);
+    assert(h.doc.querySelector('[name="content.description"]').disabled);assert(h.doc.querySelector('[data-native-back]').disabled);
+    assert(h.doc.querySelector('[data-native-submit]').disabled);h.submit();assert.equal(h.requests.length,1);h.dom.window.close();
+  }
+});
+test('retryable 422 retains exact snapshot and retries even if it names a user field',async()=>{
+  const h=create((payload,count)=>count===1?{ok:false,status:422,json:async()=>({status:'error',error:{code:'invalid_email',field:'reporter.email',retryable:true}})}:completed(payload));
+  populate(h);for(let i=0;i<6;i++)h.click('next');h.submit();await tick();
+  assert(h.model.snapshot);assert.equal(h.model.step,6);h.submit();await tick();
+  assert.equal(h.requests.length,2);assert.equal(h.requests[0].options.body,h.requests[1].options.body);
+  assert(!h.doc.querySelector('[data-native-success]').hidden);h.dom.window.close();
+});
 test('all control descriptions resolve, labels associated and no executable user HTML',()=>{
   const h=create(completed);populate(h);h.set('content.description','<img src=x onerror=alert(1)>');for(let i=0;i<6;i++)h.click('next');
   assert(!h.doc.querySelector('[data-native-review] img'));assert(h.doc.querySelector('[data-native-review]').textContent.includes('<img'));

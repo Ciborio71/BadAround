@@ -3,7 +3,9 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /** F1.6 QA gate: staging administrators only; the normal URL keeps its legacy form. */
 function badaround_native_report_qa_enabled() {
+	$request_host = strtolower( $_SERVER['HTTP_HOST'] ?? '' );
 	return 'staging.badaround.it' === wp_parse_url( home_url( '/' ), PHP_URL_HOST )
+		&& in_array( $request_host, array( 'staging.badaround.it', 'staging.badaround.it:443' ), true )
 		&& current_user_can( 'manage_options' )
 		&& isset( $_GET['native_report'] ) && is_string( $_GET['native_report'] ) && '1' === $_GET['native_report']
 		&& class_exists( 'BadAround_Report_Schema' ) && class_exists( 'BadAround_Event_Taxonomy_Map' )
