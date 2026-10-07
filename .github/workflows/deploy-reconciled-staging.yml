@@ -73,7 +73,8 @@ jobs:
           grep -q "ensure_public_location" ./wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
           grep -q "approve_received_images_for_event" ./wordpress/plugins/badaround-core/includes/class-badaround-media-repository.php
           grep -q "Approva e pubblica" ./wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php
-          grep -q "public_projection_prepare_failed" ./wordpress/plugins/badaround-core/includes/class-badaround-wpforms-event-intake.php
+          grep -Fq "array( 'prepare_public_projection' => true )" ./wordpress/plugins/badaround-core/includes/class-badaround-report-intake-service.php
+          grep -q "public_projection_prepare_failed" ./wordpress/plugins/badaround-core/includes/class-badaround-report-persistence-service.php
           grep -q "progressiveFieldCandidates" ./wordpress/themes/badaround-child/assets/js/report.js
           grep -q "baUserTouched" ./wordpress/themes/badaround-child/assets/js/report.js
           grep -q "wpforms-6-field_17-container" ./wordpress/themes/badaround-child/assets/css/wpforms.css
