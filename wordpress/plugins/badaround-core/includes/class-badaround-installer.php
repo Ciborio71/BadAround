@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Owns the versioned database schema for private and relational data. */
 class BadAround_Installer {
-	const SCHEMA_VERSION = '1.8.0';
+	const SCHEMA_VERSION = '1.9.0';
 	const OPTION_NAME    = 'ba_db_schema_version';
 
 	public function register_hooks() {
@@ -374,6 +374,7 @@ class BadAround_Installer {
 			KEY request_id (request_id)
 		) {$charset_collate};";
 
+		$sql .= BadAround_Native_Media_Ledger::schema_sql($wpdb->prefix, $charset_collate);
 		dbDelta( $sql );
 		update_option( self::OPTION_NAME, self::SCHEMA_VERSION, false );
 	}

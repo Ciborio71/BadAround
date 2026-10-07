@@ -33,6 +33,9 @@ class BadAround_Core {
 		$contribution_moderation = new BadAround_Contribution_Moderation_Admin();
 		$contribution_moderation->register_hooks();
 
+		(new BadAround_Native_Media_REST_Controller())->register_hooks();
+		BadAround_Native_Media_Cleanup::register_hooks();
+
 		$native_report_api = new BadAround_Native_Report_REST_Controller();
 		$native_report_api->register_hooks();
 
