@@ -130,6 +130,11 @@ class BadAround_Media_Repository {
 	}
 
 	public function approve_for_publication( $media_id, $event_id ) {
+		if (class_exists('BadAround_Native_Media_Fence')) {
+			$fence=BadAround_Native_Media_Fence::check($event_id, $media_id);
+			if (is_wp_error($fence)) return $fence;
+		}
+
 		global $wpdb;
 		$media_id = absint( $media_id );
 		$event_id = absint( $event_id );
@@ -177,6 +182,11 @@ class BadAround_Media_Repository {
 	}
 
 	public function approve_received_images_for_event( $event_id ) {
+		if (class_exists('BadAround_Native_Media_Fence')) {
+			$fence=BadAround_Native_Media_Fence::check($event_id);
+			if (is_wp_error($fence)) return $fence;
+		}
+
 		global $wpdb;
 
 		$event_id = absint( $event_id );
@@ -207,6 +217,11 @@ class BadAround_Media_Repository {
 	}
 
 	public function materialize_approved_public_media_for_event( $event_id ) {
+		if (class_exists('BadAround_Native_Media_Fence')) {
+			$fence=BadAround_Native_Media_Fence::check($event_id);
+			if (is_wp_error($fence)) return $fence;
+		}
+
 		global $wpdb;
 		$event_id = absint( $event_id );
 		$rows = $wpdb->get_results(
@@ -231,6 +246,11 @@ class BadAround_Media_Repository {
 	}
 
 	private function materialize_public_copy( $media_id, $event_id ) {
+		if (class_exists('BadAround_Native_Media_Fence')) {
+			$fence=BadAround_Native_Media_Fence::check($event_id, $media_id);
+			if (is_wp_error($fence)) return $fence;
+		}
+
 		global $wpdb;
 		$file = $this->private_file_for_media_id( $media_id );
 		if ( is_wp_error( $file ) ) {

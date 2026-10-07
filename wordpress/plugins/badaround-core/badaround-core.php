@@ -2,7 +2,7 @@
 /**
  * Plugin Name: BadAround Core
  * Description: Core application logic for the BadAround platform.
- * Version: 0.17.0
+ * Version: 0.18.0
  * Author: BadAround
  * Text Domain: badaround-core
  */
@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'BADAROUND_CORE_VERSION', '0.17.0' );
+define( 'BADAROUND_CORE_VERSION', '0.18.0' );
 define( 'BADAROUND_CORE_FILE', __FILE__ );
 define( 'BADAROUND_CORE_PATH', plugin_dir_path( __FILE__ ) );
 
@@ -56,6 +56,17 @@ require_once BADAROUND_CORE_PATH . 'includes/class-badaround-contribution-modera
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-moderation-service.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-moderation-admin.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-wpforms-event-intake.php';
+
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-media-config.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-media-capability.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-media-ledger.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-media-storage.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-media-validator.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-media-service.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-media-persistence.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-media-fence.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-media-cleanup.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-media-rest-controller.php';
 
 register_activation_hook( BADAROUND_CORE_FILE, array( 'BadAround_Installer', 'activate' ) );
 

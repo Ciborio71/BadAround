@@ -349,6 +349,11 @@ class BadAround_Publication_Service {
 			return new WP_Error( 'ba_publication_forbidden', __( 'Non sei autorizzato a pubblicare questo evento.', 'badaround-core' ) );
 		}
 
+		if (class_exists('BadAround_Native_Media_Fence')) {
+			$fence=BadAround_Native_Media_Fence::check($event_id);
+			if (is_wp_error($fence)) return $fence;
+		}
+
 		$current = sanitize_key( (string) get_post_meta( $event_id, '_ba_moderation_status', true ) );
 		if ( self::STATUS_PUBLISHED === $current && 'publish' === get_post_status( $event_id ) ) {
 			$prepared = $this->prepare_public_projection( $event_id );
