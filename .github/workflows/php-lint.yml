@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - develop
+      - release/mvp-reconciled
   push:
     branches:
       - "feature/**"
@@ -21,14 +22,29 @@ jobs:
     name: Lint plugin and child theme
     runs-on: ubuntu-latest
 
+    services:
+      media-db:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: f17b-synthetic-ci
+          MARIADB_DATABASE: f17b
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.2"
+          extensions: gd, posix, fileinfo, pdo_mysql, pdo_sqlite, mbstring
     
       - name: Lint BadAround core plugin
         run: find ./wordpress/plugins/badaround-core -type f -name '*.php' -print0 | xargs -0 -n1 php -l
@@ -40,8 +56,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -q "Version: 0.17.0" ./wordpress/plugins/badaround-core/badaround-core.php
-          grep -q "SCHEMA_VERSION = '1.8.0'" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
+          grep -q "Version: 0.18.0" ./wordpress/plugins/badaround-core/badaround-core.php
+          grep -q "SCHEMA_VERSION = '1.9.0'" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
           grep -Eq "'per_page'[[:space:]]*=>[[:space:]]*6" ./wordpress/themes/badaround-child/front-page.php
           grep -q "grid-template-columns:repeat(3,minmax(0,1fr))" ./wordpress/themes/badaround-child/assets/css/home.css
           grep -q 'data-ba-map-context="home"' ./wordpress/themes/badaround-child/front-page.php
@@ -51,7 +67,7 @@ jobs:
           grep -q "approve_received_images_for_event" ./wordpress/plugins/badaround-core/includes/class-badaround-media-repository.php
           grep -q "progressiveFieldCandidates" ./wordpress/themes/badaround-child/assets/js/report.js
 
-          grep -q "BADAROUND_CORE_VERSION', '0.17.0'" ./wordpress/plugins/badaround-core/badaround-core.php
+          grep -q "BADAROUND_CORE_VERSION', '0.18.0'" ./wordpress/plugins/badaround-core/badaround-core.php
           grep -q "BadAround_Contribution_Service" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
           grep -q "BadAround_Contribution_Moderation_Admin" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
           grep -q "BadAround_Sentinel_Service" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
@@ -80,6 +96,35 @@ jobs:
 
       - name: Test F1.6 Native Form server-rendered foundation
         run: php ./tests/native-report-f16.php
+
+      - name: Test F1.7B native media backend and recovery with real MariaDB constraints
+        env:
+          BA_TEST_DSN: mysql:host=127.0.0.1;port=3306;dbname=f17b
+          BA_TEST_DB_USER: root
+          BA_TEST_DB_PASSWORD: f17b-synthetic-ci
+        run: php ./tests/native-media-f17b.php
+
+      - name: Differential test against exact frozen F1.5 transport
+        env:
+          BA_TEST_DSN: mysql:host=127.0.0.1;port=3306;dbname=f17b
+          BA_TEST_DB_USER: root
+          BA_TEST_DB_PASSWORD: f17b-synthetic-ci
+        run: php ./tests/native-media-no-media-differential.php
+
+      - name: Test F1.7B real HTTP multipart on synthetic local fixtures
+        run: python3 ./tests/native-media-http.py
+
+      - name: Verify frozen F1.2 F1.3 F1.6 and legacy intake sources
+        run: |
+          git diff --exit-code bcc2c74ca3391f1d16f9b1eb9719650ea4d27952 -- \
+            wordpress/plugins/badaround-core/includes/class-badaround-report-schema.php \
+            wordpress/plugins/badaround-core/includes/class-badaround-report-validator.php \
+            wordpress/plugins/badaround-core/includes/class-badaround-report-normalizer.php \
+            wordpress/plugins/badaround-core/includes/class-badaround-native-report-intake-service.php \
+            wordpress/plugins/badaround-core/includes/class-badaround-native-report-golden-path-service.php \
+            wordpress/plugins/badaround-core/includes/class-badaround-report-persistence-service.php \
+            wordpress/plugins/badaround-core/includes/class-badaround-wpforms-event-intake.php \
+            wordpress/themes/badaround-child
 
       - name: Setup Node for native form tests
         uses: actions/setup-node@v4
@@ -117,7 +162,7 @@ jobs:
 
       - name: Test E4 Reporter Notification
         run: |
-          grep -q "SCHEMA_VERSION = '1.8.0'" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
+          grep -q "SCHEMA_VERSION = '1.9.0'" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
           grep -q "ba_contribution_notifications" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
           grep -q "recipient_text longtext" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
           grep -q "badaround_contribution_notify_reporter" ./wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-service.php

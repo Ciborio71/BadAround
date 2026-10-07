@@ -1,0 +1,204 @@
+<?php
+require __DIR__."/native-media-harness.php";
+$assertions=0;
+function check($ok,$message){global $assertions;++$assertions;if(!$ok){fwrite(STDERR,"FAIL: $message\n");exit(1);}echo "PASS: $message\n";}
+function code($v){return is_wp_error($v) ? $v->get_error_code() : ($v['error']['code']??'success');}
+function stream($bytes){$r=fopen('php://temp','w+b');fwrite($r,$bytes);rewind($r);return $r;}
+function make_image($codec='png',$colour=0){$im=imagecreatetruecolor(2,2);imagesetpixel($im,0,0,$colour);ob_start();('image'.$codec)($im);return ob_get_clean();}
+function session(){global $service;$id=BadAround_Native_Media_Config::new_uuid();$r=$service->create($id,BadAround_Native_Media_Capability::encode(random_bytes(32)),hash('sha256',$id));if(is_wp_error($r))throw new Exception(code($r));$r['submission_id']=$id;return $r;}
+function upload_image($s,$bytes=null,$key=null,$name='test.png'){global $service;$r=stream($bytes??make_image());try{return $service->upload($s['media_session_id'],$key??BadAround_Native_Media_Config::new_uuid(),$s['capability'],$r,$name,hash('sha256',$s['submission_id']));}finally{fclose($r);}}
+function payload($s,$items){$p=f13_fixture();$p['submission_id']=$s['submission_id'];$p['media']=['availability'=>'yes','items'=>$items];return $p;}
+function adapter($s,$repo=null,$store=null){global $service,$ledger;$repo=$repo ?: new BadAround_Report_Repository();$svc=$store ?: $service;$linker=new BadAround_Native_Media_Linker($ledger);$persist=new BadAround_Report_Persistence_Service($repo,new TestTax(),new TestTerritory(),$linker,new TestProjection());$media=new BadAround_Native_Media_Persistence($svc,$repo,$persist,$linker);$gold=new BadAround_Native_Report_Golden_Path_Service(new BadAround_Native_Report_Intake_Service(null,null,$repo),$media,$repo);return new BadAround_Native_Media_Report_Adapter($svc,$repo,$gold);}
+
+check(!(new BadAround_Native_Media_Config())->enabled(),'default configuration fails closed');
+check($service->ready(),'constrained decoder and private local storage available');
+check($validator->codecs()===['jpeg','png','webp'],'effective GD codec probe; HEIC not advertised');
+$sid=BadAround_Native_Media_Config::new_uuid();$nonce=BadAround_Native_Media_Capability::encode(random_bytes(32));$s=$service->create($sid,$nonce,'test-ip');$s['submission_id']=$sid;
+check(!is_wp_error($s) && !$s['duplicate'],'session created');$again=$service->create($sid,$nonce,'test-ip');check($again['duplicate'] && $again['capability']===$s['capability'] && $again['upload_expires_at']===$s['upload_expires_at'],'replay retains identity capability deadlines');
+check(code($service->create($sid,BadAround_Native_Media_Capability::encode(random_bytes(32)),'test-ip'))==='media_manifest_conflict','wrong creation nonce conflicts');
+check(code($service->status($s['media_session_id'],'wrong'))==='media_capability_invalid','wrong capability fails');check(code($service->status(BadAround_Native_Media_Config::new_uuid(),$s['capability']))==='media_capability_invalid','unknown session uses same ownership error');
+check(code($service->status($s['media_session_id'],''))==='media_capability_invalid','missing capability fails');
+$row=$ledger->session($s['media_session_id']);check(!$ledger->insert_session($row),'database enforces unique session and submission');
+$bytes=make_image();$key=BadAround_Native_Media_Config::new_uuid();$up=upload_image($s,$bytes,$key);check(code($up)==='success','real binary upload accepted');$descriptor=$up['descriptor'];
+$again=upload_image($s,$bytes,$key);check($again['duplicate'] && $again['descriptor']===$descriptor,'same upload key and bytes returns same UUID');
+check(code(upload_image($s,make_image('png',42),$key))==='media_manifest_conflict','same key different bytes conflicts');
+$dedup=upload_image($s,$bytes);check($dedup['duplicate'] && $dedup['descriptor']===$descriptor,'within-session content dedup uses one accepted image');
+$other=session();$otherUp=upload_image($other,$bytes);check($otherUp['descriptor']['media_id']!==$descriptor['media_id'],'no global content dedup');
+check(code($service->remove($other['media_session_id'],$descriptor['media_id'],$other['capability']))==='media_reference_invalid','foreign item is indistinguishable from missing item');
+check(code($service->remove($other['media_session_id'],BadAround_Native_Media_Config::new_uuid(),$other['capability']))==='media_reference_invalid','guessed item uses same error');
+$status=$service->status($s['media_session_id'],$s['capability']);check(strpos(json_encode($status),$root)===false && !isset($status['capability']),'status contains no path URL original or capability');
+$remove=$service->remove($other['media_session_id'],$otherUp['descriptor']['media_id'],$other['capability']);check(code($remove)==='success' && code($service->remove($other['media_session_id'],$otherUp['descriptor']['media_id'],$other['capability']))==='success','remove is idempotent with tombstone');
+$expired=session();$GLOBALS['now']+=$settings['upload_ttl']??7200;check(code(upload_image($expired))==='media_session_expired','upload expiry enforced');$GLOBALS['now']=$fixture_epoch;
+foreach(['empty'=>'','svg'=>'<svg xmlns="http://www.w3.org/2000/svg"/>','gif'=>'GIF89a','xml'=>'<?xml version="1.0"?>','pdf'=>'%PDF-1.7','zip'=>"PK\x03\x04",'executable'=>'MZ','truncated'=>substr($bytes,0,-12)] as $label=>$binary){$temp=session();check(is_wp_error(upload_image($temp,$binary)),"reject $label binary");}
+foreach(['test.svg','test.gif','test.php.png','../test.png','test.jpg'] as $filename){$temp=session();check(is_wp_error(upload_image($temp,$bytes,null,$filename)),"reject filename/MIME mismatch $filename");}
+$temp=session();check(code(upload_image($temp,str_repeat('x',5242881)))==='media_file_too_large','actual stream rejects 5 MiB plus one');
+$padded=make_image('jpeg').str_repeat("\0",5242880-strlen(make_image('jpeg')));$temp=session();check(code(upload_image($temp,$padded,null,'exact.jpg'))==='success','exact 5 MiB decoded JPEG accepted; no Content-Length trust');
+$temp=session();for($i=0;$i<5;++$i)check(code(upload_image($temp,make_image('png',$i+1)))==='success','slot '.$i.' accepted');check(code(upload_image($temp,make_image('png',999)))==='media_manifest_invalid','sixth file rejected');
+// Valid container headers with forbidden animation or dimensions, no decoder allocation.
+$chunk=fn($type,$data)=>pack('N',strlen($data)).$type.$data.pack('N',crc32($type.$data));
+$apng=substr($bytes,0,33).$chunk('acTL',pack('NN',1,0)).substr($bytes,33);$temp=session();check(code(upload_image($temp,$apng))==='media_image_invalid','APNG rejected');
+$bomb="\x89PNG\r\n\x1a\n".$chunk('IHDR',pack('NNCCCCC',10001,2,8,2,0,0,0)).substr($bytes,33);$temp=session();check(code(upload_image($temp,$bomb))==='media_image_invalid','excessive side rejected before decode');
+$bomb="\x89PNG\r\n\x1a\n".$chunk('IHDR',pack('NNCCCCC',6000,6000,8,2,0,0,0)).substr($bytes,33);$temp=session();check(code(upload_image($temp,$bomb))==='media_image_invalid','pixel bomb rejected overflow safely');
+$webp=make_image('webp');$animated=$webp.'ANIM'.pack('V',6).str_repeat("\0",6);$animated=substr_replace($animated,pack('V',strlen($animated)-8),4,4);$temp=session();check(code(upload_image($temp,$animated,null,'a.webp'))==='media_image_invalid','animated WebP rejected');
+$badconfig=new BadAround_Native_Media_Config(array_merge($settings,['decoder_php_binary'=>'/missing-decoder']));check((new BadAround_Native_Media_Validator($badconfig))->codecs()===[],'unavailable decoder advertises no support');
+check(is_wp_error($storage->path('../escape.php')),'storage traversal rejected');check(!$storage->root() || strpos($storage->root(),$public)!==0,'private root outside public tree');
+symlink($public,$root.'/native-staging/evil');check(is_wp_error($storage->path('native-staging/evil/test.bin')),'symlink route rejected');unlink($root.'/native-staging/evil');
+// Native binding A, completed read-only replay, and immutable manifest.
+$p=payload($s,[$descriptor]);$a=adapter($s);$result=$a->submit($p,$s['capability']);if($result['status']!=='success'){fwrite(STDERR,json_encode($result['error']??[])." DB: ".$db->last_error."\n");}
+check($result['status']==='success','A complete binding through frozen F1.3/F1.4');$report=$result['report_id'];$event=$result['event_id'];
+check(get_post_status($event)==='pending' && get_post_meta($event,'_ba_moderation_status')==='new','one private report/event Da moderare, not published');
+$before=$db->writes;$GLOBALS['now']=$fixture_epoch+90000;$again=$a->submit($p,$s['capability']);check($again['status']==='success' && $again['duplicate'] && $db->writes===$before,'completed retry after expiry is read-only');$GLOBALS['now']=$fixture_epoch;
+$changed=$p;$changed['content']['description'].=' changed';check(code($a->submit($changed,$s['capability']))==='media_manifest_conflict','changed pinned payload conflicts');
+check(code($service->remove($s['media_session_id'],$descriptor['media_id'],$s['capability']))==='media_manifest_conflict','bound evidence cannot be removed by client');
+check(count($ledger->final_set($report))===1,'exact final set has one original, no extras');
+$unique=$ledger->session($s['media_session_id']);$unique['session_id']=BadAround_Native_Media_Config::new_uuid();check(!$ledger->insert_session($unique),'database rejects second session for same submission');
+$unique=$ledger->item($descriptor['media_id']);$unique['media_id']=BadAround_Native_Media_Config::new_uuid();check(!$ledger->insert_item($unique),'database rejects duplicate session/client upload identity');$unique['client_upload_id']=BadAround_Native_Media_Config::new_uuid();check(!$ledger->insert_item($unique),'database rejects duplicate UUID-to-final-row binding');
+$committedBefore=$ledger->session($s['media_session_id']);$readOnly=$a->completed($committedBefore,(new BadAround_Report_Normalizer())->normalize($p));check($readOnly['status']==='success' && $committedBefore===$ledger->session($s['media_session_id']),'completed receipt does not renew TTL or change ledger state');
+
+// D: rename has succeeded before final-row insert failure. Deterministic target reconciles.
+$d=session();$du=upload_image($d,make_image('png',65));$dp=payload($d,[$du['descriptor']]);$db->fail=fn($q)=>strpos($q,'INSERT INTO test_ba_report_media ')===0;
+$da=adapter($d);$failed=$da->submit($dp,$d['capability']);check(code($failed)==='media_binding_failed','D DB finalization fault surfaced after promotion');
+$di=$ledger->item($du['descriptor']['media_id']);check($storage->verify($di['promotion_target'],$di['file_size'],$di['checksum']),'D promoted deterministic original survives');
+$recovered=$da->submit($dp,$d['capability']);check($recovered['status']==='success' && count($ledger->final_set($recovered['report_id']))===1,'D recovery creates one final mapping');
+// B: two-item manifest, second final insert fails after first item is durable.
+$b=session();$bu1=upload_image($b,make_image('png',100));$bu2=upload_image($b,make_image('png',101));$bp=payload($b,[$bu1['descriptor'],$bu2['descriptor']]);$hits=0;$db->fail=function($q)use(&$hits){return strpos($q,'INSERT INTO test_ba_report_media ')===0 && ++$hits===2;};$ba=adapter($b);$bad=$ba->submit($bp,$b['capability']);check(code($bad)==='media_binding_failed','B partial binding remains same intent');$good=$ba->submit($bp,$b['capability']);check($good['status']==='success' && count($ledger->final_set($good['report_id']))===2,'B reconciles missing only, no duplicate row');
+class FailPromotion extends BadAround_Native_Media_Storage {public $once=true;function promote($i,$r){if($this->once){$this->once=false;return BadAround_Native_Media_Config::error('media_binding_failed');}return parent::promote($i,$r);}}
+$c=session();$cu=upload_image($c,make_image('png',102));$cp=payload($c,[$cu['descriptor']]);$cs=new BadAround_Native_Media_Service($config,$ledger,new FailPromotion($config),$validator,fn()=>$GLOBALS['now']);$ca=adapter($c,null,$cs);check(code($ca->submit($cp,$c['capability']))==='media_binding_failed','C promotion fault retryable');check($ca->submit($cp,$c['capability'])['status']==='success','C exact retry recovers');
+// E: commit receipt failed after report/event creation. Frozen persistence returns existing event.
+$e=session();$eu=upload_image($e,make_image('png',103));$ep=payload($e,[$eu['descriptor']]);$db->fail=fn($q)=>strpos($q,'UPDATE test_ba_native_media_sessions SET state=\'committed\'')===0;$ea=adapter($e);$bad=$ea->submit($ep,$e['capability']);check(code($bad)==='media_binding_failed','E receipt fault retains existing event');$post_count=count($GLOBALS['posts']);$good=$ea->submit($ep,$e['capability']);if($good['status']!=='success')fwrite(STDERR,json_encode($good['error']??[])." audit: ".json_encode(array_slice(BadAround_Audit_Log::$records,-8))." DB: ".$db->last_error."\n");check($good['status']==='success' && count($GLOBALS['posts'])===$post_count,'E existing event still reconciles exact media set and receipt');
+// Publication guard covers direct, batch, materializer, first and already-published paths.
+$mediaRepo=new BadAround_Media_Repository();$mediaRow=$ledger->final_set($report)[0]['id'];
+foreach([$mediaRepo->approve_for_publication($mediaRow,$event),$mediaRepo->approve_received_images_for_event($event),$mediaRepo->materialize_approved_public_media_for_event($event),(new BadAround_Publication_Service())->publish($event)] as $fenced)check(code($fenced)==='ba_native_media_publication_blocked','native raw cannot use legacy publication');
+$GLOBALS['posts'][$event]['post_status']='publish';$GLOBALS['posts'][$event]['meta_input']['_ba_moderation_status']='published';check(code((new BadAround_Publication_Service())->publish($event))==='ba_native_media_publication_blocked','already-published recovery fenced');$GLOBALS['posts'][$event]['post_status']='pending';
+$db->query("DELETE FROM test_ba_native_media_items WHERE session_id=".$db->pdo->quote($s['media_session_id']));check(code(BadAround_Native_Media_Fence::check($event))==='ba_native_media_publication_blocked','missing ledger never falls back to legacy raw');
+$GLOBALS['posts'][5000]=['post_status'=>'pending','meta_input'=>['_ba_source_type'=>'wpforms']];check(BadAround_Native_Media_Fence::check(5000)===true,'WPForms legacy event unaffected');
+$no=session();$np=payload($no,[]);$np['media']['availability']='no';$repo=new BadAround_Report_Repository();$canon=(new BadAround_Report_Normalizer())->normalize($np);$rid=$repo->create_native_intake_record($np['submission_id']);$repo->persist_canonical_private_data($rid,$canon);$GLOBALS['posts'][5001]=['post_status'=>'pending','meta_input'=>['_ba_source_type'=>'native','_ba_primary_report_id'=>$rid]];check(BadAround_Native_Media_Fence::check(5001)===true,'native no-media publication unaffected');
+// Pre-pin ownership, descriptors, expired intent, concurrency and quota controls.
+$pre=session();$pu=upload_image($pre,make_image('png',333));$pp=payload($pre,[$pu['descriptor']]);$pc=(new BadAround_Report_Normalizer())->normalize($pp);
+check(code($service->pin($pc,''))==='media_capability_invalid','report preflight requires capability');
+$foreign=$pc;$foreign['media']['items']=[$otherUp['descriptor']];check(code($service->pin($foreign,$pre['capability']))==='media_reference_invalid','report preflight rejects foreign/removed media');
+$wrong=$pc;$wrong['media']['items'][0]['file_size']++;check(code($service->pin($wrong,$pre['capability']))==='media_descriptor_mismatch','descriptor must exactly match verified bytes');
+$twice=$pc;$twice['media']['items'][]=$pu['descriptor'];check(code($service->pin($twice,$pre['capability']))==='media_manifest_invalid','duplicate canonical UUID rejected');
+$held=$ledger->locked(['session:'.$pre['media_session_id']],function()use($pre,$settings,$config,$storage,$validator){$db2=new MediaTestDB();$s2=new BadAround_Native_Media_Service($config,new BadAround_Native_Media_Ledger($db2),$storage,$validator,fn()=>$GLOBALS['now']);return $s2->remove($pre['media_session_id'],BadAround_Native_Media_Config::new_uuid(),$pre['capability']);});check(code($held)==='media_commit_in_progress','remove race cannot enter locked session');
+$pin=$service->pin($pc,$pre['capability']);check(!is_wp_error($pin) && $pin['state']==='pinned','immutable preflight pin persists before report reservation');
+check(code(upload_image($pre,make_image('png',334)))==='media_manifest_conflict','upload forbidden after pin');
+check(code($service->remove($pre['media_session_id'],$pu['descriptor']['media_id'],$pre['capability']))==='media_manifest_conflict','remove forbidden after pin');
+$GLOBALS['now']=$fixture_epoch+90000;(new BadAround_Native_Media_Cleanup($service))->run();$pi=$ledger->item($pu['descriptor']['media_id']);check($pi['state']==='accepted_quarantined' && $storage->verify($pi['storage_key'],$pi['file_size'],$pi['checksum']),'pinned original survives orphan TTL');check(code(adapter($pre)->submit($pp,$pre['capability']))==='media_session_expired','expired first commit denied without new client grant');$GLOBALS['now']=$fixture_epoch;
+// Expired pinned client capability never grants writes, but the server can recover its durable intent.
+$GLOBALS['now']=$fixture_epoch+90000;$recoveryFactory=function($svc,$repo){$linker=new BadAround_Native_Media_Linker($svc->ledger);$p=new BadAround_Report_Persistence_Service($repo,new TestTax(),new TestTerritory(),$linker,new TestProjection());return new BadAround_Native_Report_Golden_Path_Service(new BadAround_Native_Report_Intake_Service(null,null,$repo),new BadAround_Native_Media_Persistence($svc,$repo,$p,$linker),$repo);};
+check((new BadAround_Native_Media_Cleanup($service,$recoveryFactory))->recover()>0 && $ledger->session($pre['media_session_id'])['state']==='committed','server recovery can complete authorized expired pinned intent');$GLOBALS['now']=$fixture_epoch;
+
+// A receiving item reserves its full cap and cannot be replayed or pinned.
+$receiving=session();$client=BadAround_Native_Media_Config::new_uuid();$mid=BadAround_Native_Media_Config::new_uuid();$ri=['media_id'=>$mid,'session_id'=>$receiving['media_session_id'],'client_upload_id'=>$client,'storage_key'=>'native-staging/'.$receiving['media_session_id'].'/'.$mid.'.bin','state'=>'receiving','ip_hash'=>hash('sha256','receiving'),'file_size'=>5242880,'lease_expires_at'=>$fixture_epoch+900,'created_at'=>$fixture_epoch,'updated_at'=>$fixture_epoch];check($ledger->insert_item($ri),'receiving reservation is durable');check(code(upload_image($receiving,$bytes,$client))==='media_upload_incomplete','concurrent same-upload replay never creates a second writer');
+$GLOBALS['now']=$fixture_epoch+901;(new BadAround_Native_Media_Cleanup($service))->run();check($ledger->item($mid)['state']==='invalid','interrupted lease collected only after writer lock/state recheck');$GLOBALS['now']=$fixture_epoch;
+$limitedConfig=new BadAround_Native_Media_Config(array_merge($settings,['session_ip_limit'=>1]));$limited=new BadAround_Native_Media_Service($limitedConfig,$ledger,$storage,$validator,fn()=>$GLOBALS['now']);$nonce2=BadAround_Native_Media_Capability::encode(random_bytes(32));check(code($limited->create(BadAround_Native_Media_Config::new_uuid(),$nonce2,'limited-ip'))==='success','session IP allowance works');check(code($limited->create(BadAround_Native_Media_Config::new_uuid(),$nonce2,'limited-ip'))==='media_rate_limited','session IP burst blocked');
+$byteLimited=new BadAround_Native_Media_Service(new BadAround_Native_Media_Config(array_merge($settings,['session_bytes_limit'=>1])),$ledger,$storage,$validator,fn()=>$GLOBALS['now']);$ls=session();$str=stream($bytes);check(code($byteLimited->upload($ls['media_session_id'],BadAround_Native_Media_Config::new_uuid(),$ls['capability'],$str,'a.png',hash('sha256','byte-limit')))==='media_rate_limited','actual received bytes limited');fclose($str);
+// Actual legacy field-63 storage/approval is exercised, rather than only source greps.
+$legacyRepo=new BadAround_Report_Repository();$lr=$legacyRepo->create_intake_record(6,987);$GLOBALS['posts'][5100]=['post_status'=>'pending','meta_input'=>['_ba_source_type'=>'wpforms','_ba_primary_report_id'=>$lr]];
+$legacyInput=$public.'/wpforms-field63.png';file_put_contents($legacyInput,$bytes);$stored=$mediaRepo->ingest_wpforms_files($lr,5100,['value_raw'=>[$legacyInput]]);check(is_array($stored) && count($stored)===1,'WPForms field 63 actual original ingestion unchanged');$legacyRow=$ledger->final_row($stored[0]);check($legacyRow['review_status']==='received' && $legacyRow['sensitivity']==='private','legacy review state preserved');check($mediaRepo->approve_for_publication($stored[0],5100)===true,'legacy private image can still be approved');check($mediaRepo->approve_received_images_for_event(5100)===true,'legacy batch approval remains enabled');check(BadAround_Native_Media_Fence::check(5100)===true,'legacy media publication passes provenance fence');
+$GLOBALS['posts'][7100]=['ID'=>7100,'post_type'=>'attachment','post_status'=>'inherit'];$db->update('test_ba_report_media',['public_attachment_id'=>7100,'review_status'=>'published'],['id'=>$stored[0]]);
+check($mediaRepo->materialize_approved_public_media_for_event(5100)===[7100],'legacy materializer keeps approved public attachment');
+class LegacyRecoveryPublication extends BadAround_Publication_Service {function prepare_public_projection($e){return true;}}
+$GLOBALS['posts'][5100]['post_status']='publish';$GLOBALS['posts'][5100]['meta_input']['_ba_moderation_status']='published';check((new LegacyRecoveryPublication())->publish(5100)===true,'legacy already-published recovery remains available');
+
+// Cleanup cannot collect pinned/bound originals; expired open original is collected.
+$orphan=session();$ou=upload_image($orphan,make_image('png',555));if(is_wp_error($ou))throw new Exception('orphan upload: '.code($ou));$oi=$ledger->item($ou['descriptor']['media_id']);$GLOBALS['now']=$fixture_epoch+90000;(new BadAround_Native_Media_Cleanup($service))->run();check($ledger->item($oi['media_id'])['state']==='expired' && $ledger->item($oi['media_id'])['storage_deleted']==1,'expired orphan physically deleted before quota release');check($ledger->session($b['media_session_id'])['state']==='committed' && $storage->verify($ledger->item($bu1['descriptor']['media_id'])['storage_key'],$bu1['descriptor']['file_size'],$ledger->item($bu1['descriptor']['media_id'])['checksum']),'bound originals protected from cleanup');$GLOBALS['now']=$fixture_epoch;
+// Lock exclusion is real (separate SQL connections / file locks), not an in-memory boolean.
+$db2=new MediaTestDB();$l2=new BadAround_Native_Media_Ledger($db2);$locked=$ledger->locked(['test-concurrency'],fn()=>$l2->locked(['test-concurrency'],fn()=>true));check(code($locked)==='media_commit_in_progress','concurrent workers cannot enter same ledger lock');
+$budget=new BadAround_Native_Media_Service(new BadAround_Native_Media_Config(array_merge($settings,['temporary_budget'=>1])),$ledger,$storage,$validator,fn()=>$GLOBALS['now']);$bs=session();$st=stream($bytes);check(code($budget->upload($bs['media_session_id'],BadAround_Native_Media_Config::new_uuid(),$bs['capability'],$st,'test.png',hash('sha256','budget')))==='media_service_unavailable','temporary storage budget fails closed');fclose($st);
+$api=new BadAround_Native_Media_REST_Controller($service);$api->register_rest_routes();check(count($GLOBALS['routes'])===4,'four native media routes registered');
+$resp=$api->rest_create(new WP_REST_Request('{}',['x-badaround-media'=>'wrong']));check($resp->status===401 && isset($resp->data['error']) && !isset($resp->data['errors']) && $resp->headers['Cache-Control']==='no-store, private','media integrity failure has singular structured error and private caching');
+$resp=$api->rest_create(new WP_REST_Request('{}',['x-badaround-media'=>BadAround_Native_Media_REST_Controller::MARKER,'origin'=>'https://attacker.invalid']));check($resp->status===401,'cross origin media request rejected');
+
+// Selected subset, excluded uploads, and immutable ordered manifests.
+$subset=session();$su1=upload_image($subset,make_image('png',700));$su2=upload_image($subset,make_image('png',701));$su3=upload_image($subset,make_image('png',702));
+$sp=payload($subset,[$su1['descriptor']]);$subsetResult=adapter($subset)->submit($sp,$subset['capability']);
+check($subsetResult['status']==='success' && count($ledger->final_set($subsetResult['report_id']))===1,'selected subset binds only explicitly selected media');
+check($ledger->item($su2['descriptor']['media_id'])['state']==='accepted_quarantined','unselected upload remains unbound');
+check(code($service->remove($subset['media_session_id'],$su2['descriptor']['media_id'],$subset['capability']))==='success','unselected upload remains removable after commit');
+$GLOBALS['now']=$fixture_epoch+90000;(new BadAround_Native_Media_Cleanup($service))->run();
+check($ledger->item($su3['descriptor']['media_id'])['state']==='expired','unselected orphan expires in committed session');
+check($ledger->item($su1['descriptor']['media_id'])['state']==='bound_pending_review','selected bound evidence survives subset cleanup');$GLOBALS['now']=$fixture_epoch;
+check(code($service->status($subset['media_session_id'],$subset['capability'],$su1['descriptor']['media_id']))==='success','per-item owner status supported');
+check(code($service->status($subset['media_session_id'],$subset['capability'],BadAround_Native_Media_Config::new_uuid()))==='media_reference_invalid','per-item missing reference uses uniform error');
+check(code($service->status($subset['media_session_id'],$subset['capability'],$pu['descriptor']['media_id']))==='media_reference_invalid','per-item foreign reference uses same error');
+$reverse=$bp;$reverse['media']['items']=array_reverse($reverse['media']['items']);check(code(adapter($b)->submit($reverse,$b['capability']))==='media_manifest_conflict','ordered manifest cannot be reordered after completion');
+$extraManifest=$sp;$extraManifest['media']['items'][]=$su2['descriptor'];check(code(adapter($subset)->submit($extraManifest,$subset['capability']))==='media_manifest_conflict','changed completed manifest conflicts before reference lookup');
+$revokedConfig=new BadAround_Native_Media_Config(array_merge($settings,['revoked_key_ids'=>['test']]));$revoked=new BadAround_Native_Media_Capability($revokedConfig);
+check(!$revoked->verify($ledger->session($subset['media_session_id']),$subset['capability']),'explicit key revocation invalidates verifier');
+check(!BadAround_Native_Media_Capability::canonical_secret($subset['capability'].'='),'noncanonical bearer encoding rejected');
+$row=$ledger->session($subset['media_session_id']);$keyless=new BadAround_Native_Media_Capability(new BadAround_Native_Media_Config());
+check($keyless->verify($row,$subset['capability']),'completed verifier does not require reconstructing bearer from retired key');
+check(!isset($row['capability']) && !isset($row['creation_nonce']),'session ledger persists only secret hashes');
+// Cumulative byte and attempt quotas survive rate-window rollover and count failed streams.
+$limitedSession=session();$lowSettings=array_merge($settings,['session_bytes_limit'=>strlen($bytes)+1]);$lowService=new BadAround_Native_Media_Service(new BadAround_Native_Media_Config($lowSettings),$ledger,$storage,$validator,fn()=>$GLOBALS['now']);
+$str=stream($bytes);$lowUpload=$lowService->upload($limitedSession['media_session_id'],BadAround_Native_Media_Config::new_uuid(),$limitedSession['capability'],$str,'test.png','lifetime-bytes');fclose($str);
+check(code($lowUpload)==='success','cumulative byte quota permits first stream');$GLOBALS['now']=$fixture_epoch+901;
+$str=stream($bytes);$lowUpload=$lowService->upload($limitedSession['media_session_id'],BadAround_Native_Media_Config::new_uuid(),$limitedSession['capability'],$str,'test.png','lifetime-bytes');fclose($str);
+check(code($lowUpload)==='media_rate_limited','byte quota never resets at IP-window boundary');$GLOBALS['now']=$fixture_epoch;
+$attemptSession=session();$lowAttempts=new BadAround_Native_Media_Service(new BadAround_Native_Media_Config(array_merge($settings,['upload_session_limit'=>1])),$ledger,$storage,$validator,fn()=>$GLOBALS['now']);
+$str=stream($bytes);check(code($lowAttempts->upload($attemptSession['media_session_id'],BadAround_Native_Media_Config::new_uuid(),$attemptSession['capability'],$str,'test.png','attempt-lifetime'))==='success','lifetime attempt first accepted');fclose($str);$GLOBALS['now']=$fixture_epoch+901;
+$str=stream(make_image('png',900));check(code($lowAttempts->upload($attemptSession['media_session_id'],BadAround_Native_Media_Config::new_uuid(),$attemptSession['capability'],$str,'test.png','attempt-lifetime'))==='media_rate_limited','new upload attempt lifetime quota survives window rollover');fclose($str);$GLOBALS['now']=$fixture_epoch;
+$badSession=session();$badStream=stream('invalid bytes');$service->upload($badSession['media_session_id'],BadAround_Native_Media_Config::new_uuid(),$badSession['capability'],$badStream,'test.png','badbytes');fclose($badStream);
+check((int)$ledger->session($badSession['media_session_id'])['received_bytes']===strlen('invalid bytes'),'invalid stream bytes counted durably');
+// Persistent concurrency admissions include duplicate byte readers and cleanup rechecks locks.
+$ops=session();$op1=BadAround_Native_Media_Config::new_uuid();$op2=BadAround_Native_Media_Config::new_uuid();
+foreach([$op1,$op2] as $op)$ledger->insert_operation(['operation_id'=>$op,'session_id'=>$ops['media_session_id'],'ip_hash'=>hash('sha256',$ops['submission_id']),'lease_expires_at'=>$fixture_epoch+900]);
+check(code(upload_image($ops))==='media_rate_limited','session upload concurrency counts all binary operations');
+$ledger->release_operation($op1);$ledger->release_operation($op2);$oupload=upload_image($ops,$bytes);check(code($oupload)==='success','released operation quota admits upload');
+foreach([$op1,$op2] as $op)$ledger->insert_operation(['operation_id'=>$op,'session_id'=>$ops['media_session_id'],'ip_hash'=>hash('sha256',$ops['submission_id']),'lease_expires_at'=>$fixture_epoch+900]);
+check(code(upload_image($ops,$bytes))==='media_rate_limited','duplicate-content reader is subject to concurrency quota');
+$GLOBALS['now']=$fixture_epoch+901;
+$ledger->locked(['operation:'.$op1],function()use($service,$settings,$op1){$dbOther=new MediaTestDB($GLOBALS['db']->pdo->getAttribute(PDO::ATTR_DRIVER_NAME)==='sqlite' ? $GLOBALS['db']->pdo : null);
+ $otherService=new BadAround_Native_Media_Service($service->config,new BadAround_Native_Media_Ledger($dbOther),$service->storage,$service->validator,fn()=>$GLOBALS['now']);(new BadAround_Native_Media_Cleanup($otherService))->run();check((int)$otherService->ledger->active_operations($GLOBALS['ops']['media_session_id'],'irrelevant')['session_count']>=1,'cleanup cannot release an operation whose active worker owns the lock');});
+(new BadAround_Native_Media_Cleanup($service))->run();check((int)$ledger->active_operations($ops['media_session_id'],'irrelevant')['session_count']===0,'stale operation quotas released by bounded cleanup');$GLOBALS['now']=$fixture_epoch;
+// Genuine static codecs and JPEG frame boundaries.
+foreach(['jpeg'=>'jpg','webp'=>'webp'] as $codec=>$ext){$imgSession=session();check(code(upload_image($imgSession,make_image($codec),null,'image.'.$ext))==='success','verified static '.$codec.' accepted');}
+$imgSession=session();check(is_wp_error(upload_image($imgSession,make_image('jpeg').make_image('jpeg'),null,'multi.jpg')),'concatenated JPEG frames rejected');
+$mpf="\xff\xd8\xff\xe2".pack('n',6)."MPF\0".substr(make_image('jpeg'),2);$imgSession=session();check(is_wp_error(upload_image($imgSession,$mpf,null,'multi.jpg')),'MPO/MPF multi-picture JPEG rejected');
+$imgSession=session();check(is_wp_error(upload_image($imgSession,substr($bytes,0,33).pack('N',0x7fffffff).'IDAT'.substr($bytes,41))),'malformed PNG chunk length rejected');
+$imgSession=session();check(is_wp_error(upload_image($imgSession,"\0\0\0\x18ftypheic\0\0\0\0heicmif1",null,'test.heic')),'HEIC rejected when no approved decoder is present');
+// Additional fault boundary: final row exists, ledger mapping update fails.
+$mapSession=session();$mapUpload=upload_image($mapSession,make_image('png',1000));$mapPayload=payload($mapSession,[$mapUpload['descriptor']]);
+$db->fail=fn($q)=>strpos($q,'UPDATE test_ba_native_media_items SET storage_key=')===0;
+$mapAdapter=adapter($mapSession);check(code($mapAdapter->submit($mapPayload,$mapSession['capability']))==='media_binding_failed','post-insert mapping fault is retryable');
+$mapped=$mapAdapter->submit($mapPayload,$mapSession['capability']);check($mapped['status']==='success' && count($ledger->final_set($mapped['report_id']))===1,'post-insert retry discovers unique deterministic final row');
+
+// Lookup failure cannot be mistaken for an absent final mapping or release quota.
+$lookupSession=session();$lookupUpload=upload_image($lookupSession,make_image('png',1001));$lookupPayload=payload($lookupSession,[$lookupUpload['descriptor']]);$lookupAdapter=adapter($lookupSession);
+$db->fail=fn($q)=>strpos($q,'SELECT * FROM test_ba_report_media WHERE report_id=')===0 && strpos($q,'original_storage_key=')!==false;
+check(code($lookupAdapter->submit($lookupPayload,$lookupSession['capability']))==='media_binding_failed','failed deterministic lookup cannot create a guessed final mapping');
+$lookupDone=$lookupAdapter->submit($lookupPayload,$lookupSession['capability']);check($lookupDone['status']==='success' && count($ledger->final_set($lookupDone['report_id']))===1,'lookup retry produces exactly one final original');
+// B with an already existing event and partially bound ledger, followed by E early return.
+$partialSession=session();$partial1=upload_image($partialSession,make_image('png',1002));$partial2=upload_image($partialSession,make_image('png',1003));$partialPayload=payload($partialSession,[$partial1['descriptor'],$partial2['descriptor']]);$partialAdapter=adapter($partialSession);
+$db->fail=fn($q)=>strpos($q,"UPDATE test_ba_native_media_sessions SET state='committed'")===0;check(code($partialAdapter->submit($partialPayload,$partialSession['capability']))==='media_binding_failed','partial-existing-event fixture stops before receipt');
+$partialItem=$ledger->item($partial2['descriptor']['media_id']);$partialEvent=(int)$partialItem['event_id'];$partialReport=(int)$partialItem['report_id'];$postsBefore=count($GLOBALS['posts']);
+$ledger->update_item($partialItem,['state'=>'binding','event_id'=>null]);$db->update('test_ba_report_media',['event_id'=>null],['id'=>$partialItem['report_media_id']]);
+$partialDone=$partialAdapter->submit($partialPayload,$partialSession['capability']);check($partialDone['status']==='success' && (int)$partialDone['event_id']===$partialEvent && count($GLOBALS['posts'])===$postsBefore && count($ledger->final_set($partialReport))===2,'B/E existing event reconciles missing association without second report event or original');
+// Corruption after pin is an invariant failure, never a descriptor rewrite.
+$corrupt=session();$corruptUpload=upload_image($corrupt,make_image('png',1004));$corruptPayload=payload($corrupt,[$corruptUpload['descriptor']]);$corruptCanon=(new BadAround_Report_Normalizer())->normalize($corruptPayload);$service->pin($corruptCanon,$corrupt['capability']);$corruptItem=$ledger->item($corruptUpload['descriptor']['media_id']);$ledger->update_item($corruptItem,['mime_type'=>'image/jpeg']);
+check(code(adapter($corrupt)->submit($corruptPayload,$corrupt['capability']))==='media_binding_invariant_failed','pinned descriptor inconsistency fails closed without promotion');
+// Ledger provenance still fences raw if post source metadata or final media association vanish.
+$GLOBALS['posts'][$partialEvent]['meta_input']['_ba_source_type']='';$db->update('test_ba_report_media',['event_id'=>null],['report_id'=>$partialReport]);check(code(BadAround_Native_Media_Fence::check($partialEvent))==='ba_native_media_publication_blocked','native ledger blocks publication when post metadata or final links are inconsistent');
+
+// Receipt is metadata-only after legitimate moderation and never calls persistence again.
+$subsetRow=$ledger->item($su1['descriptor']['media_id']);$db->update('test_ba_report_media',['review_status'=>'native_published','public_attachment_id'=>7200],['id'=>$subsetRow['report_media_id']]);
+$GLOBALS['posts'][$subsetResult['event_id']]['post_status']='publish';$dbWrites=$db->writes;
+$readOnly=adapter($subset)->submit($sp,$subset['capability']);check($readOnly['status']==='success' && $db->writes===$dbWrites && get_post_status($subsetResult['event_id'])==='publish','completed retry preserves later moderation and derivative reference');
+// Report selector validates canonical input before constructing any media service.
+$badPayload=$sp;$badPayload['schema_version']='invalid-version';$factory=fn()=>throw new Exception('must not construct media adapter');$rc=new BadAround_Native_Report_REST_Controller(new stdClass(),$factory);
+$response=$rc->rest_create(new WP_REST_Request(json_encode($badPayload),['content-type'=>'application/json','x-badaround-intake'=>'badaround-report/v1']));check($response->status===422 && $response->data['error']['code']==='invalid_schema_version','frozen validation error precedence preserved before media service construction');
+// Session API and origin / Fetch Metadata protocol, with no cookie ownership.
+$GLOBALS['transients']=[];$apiSessionId=BadAround_Native_Media_Config::new_uuid();$apiNonce=BadAround_Native_Media_Capability::encode(random_bytes(32));$createBody=json_encode(['submission_id'=>$apiSessionId,'creation_nonce'=>$apiNonce]);
+$createHeaders=['content-type'=>'application/json','x-badaround-media'=>BadAround_Native_Media_REST_Controller::MARKER,'origin'=>'https://staging.badaround.it','sec-fetch-site'=>'same-origin'];
+$response=$api->rest_create(new WP_REST_Request($createBody,$createHeaders));check($response->status===201 && BadAround_Native_Media_Capability::canonical_secret($response->data['capability']),'session REST creates server-issued canonical bearer');
+$response2=$api->rest_create(new WP_REST_Request($createBody,$createHeaders));check($response2->status===200 && $response2->data['capability']===$response->data['capability'],'session REST replay returns same bearer');
+foreach(['cross-site','same-site'] as $fetch){$h=$createHeaders;$h['sec-fetch-site']=$fetch;$r=$api->rest_create(new WP_REST_Request($createBody,$h));check($r->status===401,'media Fetch Metadata rejects '.$fetch);}
+foreach(['https://staging.badaround.it:444','https://staging.badaround.it.evil.invalid','null','https://staging.badaround.it/?x=1'] as $origin){$h=$createHeaders;$h['origin']=$origin;$r=$api->rest_create(new WP_REST_Request($createBody,$h));check($r->status===401,'media origin exact-match policy rejects malformed or foreign origin');}
+$disabledApi=new BadAround_Native_Media_REST_Controller(new BadAround_Native_Media_Service(new BadAround_Native_Media_Config(),$ledger,$storage,$validator));check($disabledApi->rest_create(new WP_REST_Request($createBody,$createHeaders))->status===503,'unconfigured API explicitly unavailable');
+foreach(['media_capability_invalid'=>401,'media_session_expired'=>410,'media_reference_invalid'=>404,'media_descriptor_mismatch'=>422,'media_upload_incomplete'=>409,'media_commit_in_progress'=>409,'media_binding_failed'=>500,'media_manifest_invalid'=>422,'media_manifest_conflict'=>409,'media_binding_invariant_failed'=>500,'media_rate_limited'=>429,'media_service_unavailable'=>503] as $error=>$http){check(BadAround_Native_Media_REST_Controller::status_code($error)===$http,'ratified error mapping '.$error);}
+
+$audit=json_encode(BadAround_Audit_Log::$records);check(strpos($audit,$s['capability'])===false && strpos($audit,$nonce)===false && strpos($audit,$root)===false,'audit never contains bearer nonce or filesystem path');
+echo "F1.7B integration: $assertions assertions PASS (".$db->pdo->getAttribute(PDO::ATTR_DRIVER_NAME).")\n";
+// Remove only generated fixture trees; no live originals used.
+foreach([$root,$public] as $dir){$it=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir,FilesystemIterator::SKIP_DOTS),RecursiveIteratorIterator::CHILD_FIRST);foreach($it as $f){$f->isDir() ? rmdir($f->getPathname()) : unlink($f->getPathname());}rmdir($dir);}

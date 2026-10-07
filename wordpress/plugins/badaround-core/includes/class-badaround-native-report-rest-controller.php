@@ -19,8 +19,10 @@ class BadAround_Native_Report_REST_Controller {
 	const RATE_IP_TTL          = 900;
 
 	private $golden_path;
+	private $media_factory;
 
-	public function __construct( $golden_path = null ) {
+	public function __construct( $golden_path = null, $media_factory = null ) {
+		$this->media_factory = $media_factory;
 		$this->golden_path = $golden_path ?: new BadAround_Native_Report_Golden_Path_Service();
 	}
 
@@ -104,7 +106,29 @@ class BadAround_Native_Report_REST_Controller {
 		}
 
 		try {
-			$result = $this->golden_path->submit( $payload );
+			// Empty/absent media delegates directly; no media construction or lookup.
+			$items = isset($payload['media']['items']) ? $payload['media']['items'] : null;
+			if (is_array($items) && count($items)>0) {
+				$validator = new BadAround_Report_Validator();
+				$valid = $validator->validate_raw_contract($payload);
+				if (!is_wp_error($valid)) {
+					$canonical = (new BadAround_Report_Normalizer())->normalize($payload);
+					$valid = $validator->validate($canonical);
+				}
+				if (is_wp_error($valid)) {
+					$result = BadAround_Report_Result::from_wp_error($valid);
+				} else {
+					$home=wp_parse_url(home_url('/'));
+					$fetch_site=strtolower(trim((string)$request->get_header('sec-fetch-site')));
+					if (!is_ssl() || !isset($home['scheme']) || $home['scheme']!=='https' || ($fetch_site!=='' && !in_array($fetch_site,array('same-origin','none'),true))) {
+						return $this->error_response('media_capability_invalid',null,401,$request_id);
+					}
+					$adapter = $this->media_factory ? call_user_func($this->media_factory) : new BadAround_Native_Media_Report_Adapter();
+					$result = $adapter->submit($payload, $request->get_header('x-badaround-media-capability'));
+				}
+			} else {
+				$result = $this->golden_path->submit( $payload );
+			}
 		} catch ( Throwable $error ) {
 			BadAround_Audit_Log::technical_error( 'report', 0, 'native_api_internal_error', 'unexpected_exception', $request_id );
 			return $this->error_response( 'internal_error', null, 500, $request_id );
@@ -210,10 +234,12 @@ class BadAround_Native_Report_REST_Controller {
 		$response->header( 'Cache-Control', 'no-store, private' );
 		$response->header( 'X-Content-Type-Options', 'nosniff' );
 		$response->header( 'X-BadAround-Request-ID', $request_id );
+		if ($code==='media_rate_limited') $response->header('Retry-After','900');
 		return $response;
 	}
 
 	private function http_status_for_error( $code ) {
+		if (class_exists('BadAround_Native_Media_REST_Controller') && BadAround_Native_Media_REST_Controller::report_error($code)) return BadAround_Native_Media_REST_Controller::status_code($code);
 		if ( 'submission_in_progress' === $code || 'duplicate_submission' === $code ) return 409;
 		if ( 'rate_limited' === $code ) return 429;
 		if ( in_array( $code, array( 'internal_error', 'intake_failed', 'intake_persistence_failed', 'intake_state_update_failed', 'persistence_failed' ), true ) ) return 500;
@@ -229,6 +255,7 @@ class BadAround_Native_Report_REST_Controller {
 	}
 
 	private function is_retryable( $code ) {
+		if (class_exists('BadAround_Native_Media_REST_Controller') && BadAround_Native_Media_REST_Controller::report_error($code)) return BadAround_Native_Media_REST_Controller::retryable($code);
 		return in_array( $code, array( 'submission_in_progress', 'rate_limited', 'internal_error', 'intake_failed', 'intake_persistence_failed', 'intake_state_update_failed', 'persistence_failed' ), true );
 	}
 }
