@@ -1,0 +1,32 @@
+/* Scoped to F1.6 QA; existing reporting/legacy assets are preserved. */
+.ba-native{max-width:880px;margin-inline:auto;color:var(--ba-text);overflow-wrap:anywhere}
+.ba-native [hidden]{display:none!important}
+.ba-native h2{margin:24px 0 20px;font-size:clamp(1.3rem,4vw,1.9rem)}
+.ba-native .ba-native-notice{padding:16px;border-radius:var(--ba-radius-sm);background:var(--ba-teal-100)}
+.ba-native .ba-native-progress{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;list-style:none;margin:24px 0;padding:0;counter-reset:step}
+.ba-native .ba-native-progress li{counter-increment:step;padding:10px;border:1px solid var(--ba-border);border-radius:10px;font-size:.85rem}
+.ba-native .ba-native-progress li::before{content:counter(step) '. ';font-weight:800}
+.ba-native .ba-native-progress .is-active{border:2px solid var(--ba-teal-700);font-weight:800}
+.ba-native .ba-native-progress .is-complete::after{content:' ✓'}
+.ba-native .ba-native-field{margin-bottom:24px;min-width:0}
+.ba-native .ba-native-field label,.ba-native .ba-native-field legend{font-weight:700;font-size:1rem}
+.ba-native .ba-native-field label{display:block;margin-bottom:8px}
+.ba-native .ba-native-field input:not([type=checkbox]),.ba-native .ba-native-field select,.ba-native .ba-native-field textarea{display:block;width:100%;max-width:100%;min-height:48px;border:1px solid var(--ba-border);border-radius:10px;padding:12px;font-size:16px;background:#fff;color:var(--ba-text)}
+.ba-native .ba-native-field input:disabled,.ba-native .ba-native-field select:disabled,.ba-native .ba-native-field textarea:disabled{background:var(--ba-surface-alt)}
+.ba-native .ba-native-field fieldset{padding:16px;border:1px solid var(--ba-border);border-radius:10px}
+.ba-native .ba-native-field .ba-native-choice{display:flex;gap:12px;align-items:center;min-height:48px;padding:8px 0;cursor:pointer}
+.ba-native .ba-native-choice input{flex-shrink:0;width:22px;height:22px;accent-color:var(--ba-teal-700)}
+.ba-native .ba-native-help{color:var(--ba-muted);font-size:.86rem;margin:6px 0}
+.ba-native [data-native-required]{font-size:.8rem;font-weight:500}
+.ba-native .ba-native-error{color:#a42020;font-weight:700;margin:8px 0}
+.ba-native [aria-invalid=true]{border-color:#a42020!important}
+.ba-native .ba-native-summary{border:2px solid #a42020;background:#fff5f5;padding:16px;border-radius:12px;margin:20px 0}
+.ba-native .ba-native-summary button{background:transparent;color:#a42020;text-align:left;text-decoration:underline;padding:10px;border:0;min-height:44px}
+.ba-native .ba-native-actions{display:flex;justify-content:space-between;gap:12px;margin-top:24px;border-top:1px solid var(--ba-border);padding-top:20px}
+.ba-native .ba-button{min-height:48px}
+.ba-native button:disabled{opacity:.65;cursor:wait}
+.ba-native :focus-visible{outline:3px solid var(--ba-teal-700);outline-offset:3px}
+.ba-native [data-native-review] dt{font-weight:800;margin-top:16px}
+.ba-native [data-native-review] dd{margin:4px 0 16px;white-space:pre-wrap}
+@media(max-width:600px){.ba-native .ba-native-progress{grid-template-columns:repeat(2,minmax(0,1fr))}.ba-native .ba-native-actions{position:sticky;bottom:0;background:#fff;padding:12px 0;padding-bottom:max(12px,env(safe-area-inset-bottom))}.ba-native .ba-native-actions .ba-button{flex:1;padding-inline:12px}.ba-native .ba-native-summary{padding:12px}}
+@media(prefers-reduced-motion:reduce){.ba-native *{scroll-behavior:auto}}

@@ -6,6 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'BADAROUND_CHILD_VERSION', '0.6.0' );
 
+require_once __DIR__ . '/inc/native-report.php';
+
 /**
  * Public media standard.
  * Originals remain governed by the private/moderated media pipeline; these sizes are presentation derivatives only.
@@ -251,19 +253,30 @@ function badaround_child_enqueue_assets() {
 			array( 'badaround-components' ),
 			(string) filemtime( $dir . '/assets/css/report.css' )
 		);
-		wp_enqueue_style(
-			'badaround-wpforms',
-			$uri . '/assets/css/wpforms.css',
-			array( 'badaround-report' ),
-			(string) filemtime( $dir . '/assets/css/wpforms.css' )
-		);
-		wp_enqueue_script(
-			'badaround-report-ui',
-			$uri . '/assets/js/report.js',
-			array(),
-			(string) filemtime( $dir . '/assets/js/report.js' ),
-			true
-		);
+		if ( badaround_native_report_qa_enabled() ) {
+			wp_enqueue_style( 'badaround-native-report', $uri . '/assets/css/native-report.css', array( 'badaround-report' ), (string) filemtime( $dir . '/assets/css/native-report.css' ) );
+			$previous = array();
+			foreach ( array( 'model', 'api', 'errors', 'wizard' ) as $module ) {
+				$handle = 'badaround-native-' . $module;
+				wp_enqueue_script( $handle, $uri . '/assets/js/native-report/' . $module . '.js', $previous, (string) filemtime( $dir . '/assets/js/native-report/' . $module . '.js' ), true );
+				wp_script_add_data( $handle, 'strategy', 'defer' );
+				$previous = array( $handle );
+			}
+		} else {
+			wp_enqueue_style(
+				'badaround-wpforms',
+				$uri . '/assets/css/wpforms.css',
+				array( 'badaround-report' ),
+				(string) filemtime( $dir . '/assets/css/wpforms.css' )
+			);
+			wp_enqueue_script(
+				'badaround-report-ui',
+				$uri . '/assets/js/report.js',
+				array(),
+				(string) filemtime( $dir . '/assets/js/report.js' ),
+				true
+			);
+		}
 	}
 
 	if ( $is_home || $is_location ) {
