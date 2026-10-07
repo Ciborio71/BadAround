@@ -115,6 +115,11 @@ class BadAround_Native_Media_Report_Adapter {
 	}
 	public function completed($session,$canonical) {
 		$l=$this->service->ledger;$receipt=json_decode($session['receipt_json'],true);
+		if(!is_array($receipt) || array_diff(array('submission_id','report_id','event_id','manifest_hash','media_rows'),array_keys($receipt)) || !is_array($receipt['media_rows'])
+			|| $receipt['submission_id']!==$canonical['submission_id'] || $session['submission_id']!==$canonical['submission_id']
+			|| !isset($session['canonical_hash'],$session['manifest_hash'])
+			|| !hash_equals($session['canonical_hash'],hash('sha256',BadAround_Native_Media_Service::json($canonical)))
+			|| !hash_equals($session['manifest_hash'],hash('sha256',BadAround_Native_Media_Service::json($canonical['media']['items'])))) { return BadAround_Report_Result::error('media_binding_invariant_failed'); }
 		if(!$receipt || $receipt['manifest_hash']!==$session['manifest_hash'] || (int)$session['report_id']!==(int)$receipt['report_id'] || (int)$session['event_id']!==(int)$receipt['event_id'] || !$this->repository->native_payload_matches_report($receipt['report_id'],$canonical) || (int)$this->repository->event_id_for_report($receipt['report_id'])!==(int)$receipt['event_id']) { return BadAround_Report_Result::error('media_binding_invariant_failed'); }
 		$ids=array();
 		foreach($canonical['media']['items'] as $d) {

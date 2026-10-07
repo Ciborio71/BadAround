@@ -111,6 +111,13 @@ jobs:
           BA_TEST_DB_PASSWORD: f17b-synthetic-ci
         run: php ./tests/native-media-no-media-differential.php
 
+      - name: Independent F1.7C security and recovery review with real MariaDB
+        env:
+          BA_TEST_DSN: mysql:host=127.0.0.1;port=3306;dbname=f17b
+          BA_TEST_DB_USER: root
+          BA_TEST_DB_PASSWORD: f17b-synthetic-ci
+        run: php ./tests/native-media-f17c.php
+
       - name: Test F1.7B real HTTP multipart on synthetic local fixtures
         run: python3 ./tests/native-media-http.py
 

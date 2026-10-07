@@ -15,15 +15,22 @@ class BadAround_Native_Media_Fence {
 		// Ledger provenance remains authoritative if post metadata/final rows are missing.
 		$native=$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}ba_native_media_items WHERE event_id=%d OR (report_id=%d AND report_id>0) OR (report_media_id=%d AND report_media_id>0)",$event,$report,$media));
 		if (!empty($wpdb->last_error) || (int)$native>0) { return self::blocked($event); }
-		if ($source==='native' || $report>0) {
-			$row=$wpdb->get_row($wpdb->prepare("SELECT source_type, content_original FROM {$wpdb->prefix}ba_reports WHERE id=%d",$report),ARRAY_A);
-			if (!empty($wpdb->last_error) || ($source==='native' && (!$row || $row['source_type']!=='native'))) { return self::blocked($event); }
-			if ($row && $row['source_type']==='native') {
-				$data=json_decode($row['content_original'],true);
+		// The durable report/event mapping survives lost or mislabeled post metadata.
+		$reports=$wpdb->get_results($wpdb->prepare("SELECT id, source_type, content_original FROM {$wpdb->prefix}ba_reports WHERE event_id=%d OR (id=%d AND id>0)",$event,$report),ARRAY_A);
+		if (!empty($wpdb->last_error) || !is_array($reports)) { return self::blocked($event); }
+		$primary=null;
+		foreach ($reports as $row) {
+			if ((int)$row['id']===$report) { $primary=$row; }
+			$data=json_decode($row['content_original'],true);
+			$nativeEnvelope=is_array($data) && isset($data['schema_version']) && $data['schema_version']===BadAround_Report_Schema::VERSION;
+			if ($row['source_type']==='native' || $nativeEnvelope) {
+				if ($row['source_type']!=='native') { return self::blocked($event); }
 				if (!isset($data['canonical']) || !is_array($data['canonical'])) { return self::blocked($event); }
+				if (array_key_exists('media',$data['canonical']) && (!is_array($data['canonical']['media']) || (array_key_exists('items',$data['canonical']['media']) && !is_array($data['canonical']['media']['items'])))) { return self::blocked($event); }
 				if (!empty($data['canonical']['media']['items'])) { return self::blocked($event); }
 			}
 		}
+		if ($source==='native' && (!$primary || $primary['source_type']!=='native')) { return self::blocked($event); }
 		return true;
 	}
 	private static function blocked($event) {

@@ -225,12 +225,16 @@ class BadAround_Native_Media_Service {
 	}
 	public function pin($canonical,$bearer,$repository=null) {
 		$id=$canonical['submission_id'];$json=self::json($canonical);$manifest=$canonical['media']['items'];
+		// Readiness may spawn the bounded decoder. Never run it under commit/admission locks.
+		// Completed replay skips readiness entirely; only its durable verifier and receipt matter.
+		$observed=$this->ledger->submission($id);
+		if(!$observed || !$this->capability->verify($observed,$bearer)) { return $this->error('media_capability_invalid'); }
+		if($observed['state']!=='committed' && !$this->ready()) { return $this->error('media_service_unavailable'); }
 		return $this->ledger->locked(array('admission','submission:'.$id),function()use($id,$json,$manifest,$bearer,$repository,$canonical){
 			$row=$this->ledger->submission($id);
 			if(!$row || !$this->capability->verify($row,$bearer)) { return $this->error('media_capability_invalid'); }
 			return $this->ledger->locked(array('session:'.$row['session_id']),function()use($row,$json,$manifest,$repository,$canonical){
 				$row=$this->ledger->session($row['session_id']);$hash=hash('sha256',$json);$mh=hash('sha256',self::json($manifest));
-				if($row['state']!=='committed' && !$this->ready()) { return $this->error('media_service_unavailable'); }
 				if(in_array($row['state'],array('pinned','binding','committed'),true)) {
 					if(!hash_equals($row['canonical_hash'],$hash) || !hash_equals($row['manifest_hash'],$mh)) { return $this->error('media_manifest_conflict','media.items'); }
 					if($row['state']!=='committed' && $this->now()>=(int)$row['commit_expires_at']) { return $this->error('media_session_expired'); }
