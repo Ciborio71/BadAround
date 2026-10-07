@@ -66,6 +66,21 @@ jobs:
       - name: Test F1.5 Public Native Intake Boundary
         run: php ./tests/native-report-f15.php
 
+      - name: Test F1.6 Native Form server-rendered foundation
+        run: php ./tests/native-report-f16.php
+
+      - name: Setup Node for native form tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: tests/package-lock.json
+
+      - name: Test F1.6 Native Form model and DOM
+        run: |
+          npm ci --prefix tests --ignore-scripts --no-audit --no-fund
+          npm test --prefix tests
+
       - name: Test D1 Sentinel lifecycle
         run: php ./tests/sentinels-d1.php
 
