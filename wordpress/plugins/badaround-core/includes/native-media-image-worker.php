@@ -38,4 +38,3 @@ try {
 	unset($image);
 	echo json_encode(array('ok'=>true,'width'=>$size[0],'height'=>$size[1]));
 } catch (Throwable $e) { ba_media_worker_error('media_image_invalid'); }
-

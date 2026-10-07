@@ -27,4 +27,3 @@ class BadAround_Native_Media_Capability {
 			&& hash_equals($session['capability_hash'], self::verifier($bearer));
 	}
 }
-
