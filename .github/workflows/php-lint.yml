@@ -121,8 +121,9 @@ jobs:
       - name: Test F1.7B real HTTP multipart on synthetic local fixtures
         run: python3 ./tests/native-media-http.py
 
-      - name: Verify frozen F1.2 F1.3 F1.6 and legacy intake sources
+      - name: Verify frozen backend and scoped F1.7D foundation extensions
         run: |
+          git diff --exit-code beb33ec3325480f77a266b3b6356f5860b00e16e -- wordpress/plugins/badaround-core
           git diff --exit-code bcc2c74ca3391f1d16f9b1eb9719650ea4d27952 -- \
             wordpress/plugins/badaround-core/includes/class-badaround-report-schema.php \
             wordpress/plugins/badaround-core/includes/class-badaround-report-validator.php \
@@ -131,7 +132,21 @@ jobs:
             wordpress/plugins/badaround-core/includes/class-badaround-native-report-golden-path-service.php \
             wordpress/plugins/badaround-core/includes/class-badaround-report-persistence-service.php \
             wordpress/plugins/badaround-core/includes/class-badaround-wpforms-event-intake.php \
-            wordpress/themes/badaround-child
+            wordpress/themes/badaround-child/assets/js/native-report/model.js \
+            wordpress/themes/badaround-child/template-parts/native-report/shell.php \
+            wordpress/themes/badaround-child/page-segnala-evento.php \
+            wordpress/themes/badaround-child/assets/css/report.css \
+            wordpress/themes/badaround-child/assets/js/report.js
+          python3 - <<'PY'
+          import pathlib, subprocess
+          theme='wordpress/themes/badaround-child/'
+          allowed={'assets/css/native-report.css','assets/js/native-report/api.js','assets/js/native-report/errors.js','assets/js/native-report/media.js','assets/js/native-report/media-view.js','assets/js/native-report/wizard.js','functions.php','inc/native-report.php','template-parts/native-report/step.php'}
+          changed=subprocess.check_output(['git','diff','--name-only','beb33ec3325480f77a266b3b6356f5860b00e16e','--',theme],text=True).splitlines()
+          assert all(p.removeprefix(theme) in allowed for p in changed), changed
+          css=theme+'assets/css/native-report.css'
+          frozen=subprocess.check_output(['git','show','beb33ec3325480f77a266b3b6356f5860b00e16e:'+css],text=True)
+          assert pathlib.Path(css).read_text().startswith(frozen), 'F1.6 base CSS changed'
+          PY
 
       - name: Setup Node for native form tests
         uses: actions/setup-node@v4
@@ -140,7 +155,7 @@ jobs:
           cache: "npm"
           cache-dependency-path: tests/package-lock.json
 
-      - name: Test F1.6 Native Form model and DOM
+      - name: Test F1.6 foundation and F1.7D media model DOM and real HTTP integration
         run: |
           npm ci --prefix tests --ignore-scripts --no-audit --no-fund
           npm test --prefix tests

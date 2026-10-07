@@ -145,6 +145,7 @@ function badaround_native_report_config() {
 		'endpoint' => rest_url( BadAround_Native_Report_REST_Controller::REST_NAMESPACE . BadAround_Native_Report_REST_Controller::REST_ROUTE ),
 		'markerHeader' => BadAround_Native_Report_REST_Controller::REQUEST_HEADER,
 		'markerValue' => BadAround_Native_Report_REST_Controller::REQUEST_HEADER_VALUE,
+		'media' => array( 'endpoint' => rest_url( 'badaround/v1/report-media-sessions' ) ),
 		'timezone' => wp_timezone_string(), 'fields' => $fields, 'categories' => $categories,
 		'steps' => array( 'event' => 'Cosa è successo', 'location' => 'Dove', 'time' => 'Quando', 'details' => 'Dettagli', 'media' => 'Immagini', 'contact' => 'Contatto e privacy', 'review' => 'Riepilogo e invio' ),
 	);

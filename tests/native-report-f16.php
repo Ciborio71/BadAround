@@ -41,7 +41,7 @@ if ( in_array( '--html', $argv, true ) ) {
 	echo '<body class="page-template-page-segnala-evento"><main class="ba-report-app"><section class="ba-report-workspace ba-container"><header class="ba-report-workspace__head"><h1>Segnala un evento</h1></header><div class="ba-report-stage">';
 	require $base . 'themes/badaround-child/template-parts/native-report/shell.php';
 	echo '</div></section></main>';
-	foreach ( array( 'model', 'api', 'errors', 'wizard' ) as $js ) { echo '<script src="/wordpress/themes/badaround-child/assets/js/native-report/' . $js . '.js"></script>'; }
+	foreach ( array( 'model', 'api', 'errors', 'media', 'media-view', 'wizard' ) as $js ) { echo '<script src="/wordpress/themes/badaround-child/assets/js/native-report/' . $js . '.js"></script>'; }
 	echo '</body></html>'; exit;
 }
 function f16_assert( $ok, $message ) { if ( ! $ok ) { fwrite( STDERR, "FAIL: $message\n" ); exit( 1 ); } echo "PASS: $message\n"; }
@@ -87,7 +87,7 @@ f16_assert( 7 === substr_count( $html, '<section data-native-step=' ), 'seven st
 f16_assert( count( $config['fields'] ) === substr_count( $html, 'data-native-field=' ), 'server-rendered field structure' );
 f16_assert( strpos( $html, '<noscript>' ) !== false && strpos( $html, 'data-native-submit disabled hidden' ) !== false, 'no-JS consultation and disabled submit' );
 f16_assert( strpos( $html, 'aria-describedby=' ) !== false && strpos( $html, '<fieldset' ) !== false && strpos( $html, 'role="alert"' ) !== false, 'accessible labels/groups/error summary' );
-f16_assert( strpos( $html, 'wpforms' ) === false && strpos( $html, 'type="file"' ) === false, 'no builder runtime or fictitious upload' );
+f16_assert( strpos( $html, 'wpforms' ) === false && strpos( $html, 'type="file"' ) !== false, 'no builder runtime; scoped Step 5 file picker' );
 $GLOBALS['missing_taxonomy'] = true;
 f16_assert( null === badaround_native_report_config(), 'missing taxonomy fails closed without mutations' );
 ob_start(); require $base . 'themes/badaround-child/template-parts/native-report/shell.php'; $unavailable = ob_get_clean();
@@ -128,7 +128,7 @@ foreach ( array( 'native', 'normal', 'anonymous', 'non-staging' ) as $scenario )
 	f16_assert( $native === isset( $GLOBALS['test_assets']['badaround-native-wizard'] ), 'native JS conditional enqueue: ' . $scenario );
 	f16_assert( ! $native === isset( $GLOBALS['test_assets']['badaround-report-ui'], $GLOBALS['test_assets']['badaround-wpforms'] ), 'legacy assets preserved/isolated: ' . $scenario );
 	if ( $native ) {
-		f16_assert( $GLOBALS['test_assets']['badaround-native-model'] === array() && $GLOBALS['test_assets']['badaround-native-wizard'] === array( 'badaround-native-errors' ), 'native production dependency chain has no builder dependency' );
+		f16_assert( $GLOBALS['test_assets']['badaround-native-model'] === array() && $GLOBALS['test_assets']['badaround-native-wizard'] === array( 'badaround-native-media-view' ) && $GLOBALS['test_assets']['badaround-native-media'] === array( 'badaround-native-errors' ), 'native production dependency chain has no builder dependency' );
 	}
 }
 $GLOBALS['test_screen'] = 'other-page.php'; $GLOBALS['test_assets'] = array();
