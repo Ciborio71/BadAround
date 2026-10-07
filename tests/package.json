@@ -1,0 +1,7 @@
+{
+  "name": "badaround-native-form-tests",
+  "private": true,
+  "scripts": {"test": "node --test native-report-f16.cjs native-report-f16-dom.cjs"},
+  "devDependencies": {"jsdom": "30.1.2"},
+  "engines": {"node": ">=24"}
+}
