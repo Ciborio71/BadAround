@@ -3,8 +3,16 @@ name: Deploy reconciled to staging
 on:
   workflow_dispatch:
     inputs:
+      deployment_track:
+        description: "Authorized staging deployment track"
+        required: true
+        default: release
+        type: choice
+        options:
+          - release
+          - f17_qa
       expected_sha:
-        description: "Exact approved release/mvp-reconciled commit SHA"
+        description: "Exact SHA authorized for the selected deployment track"
         required: true
         type: string
 
@@ -17,30 +25,90 @@ concurrency:
 
 jobs:
   validate:
-    name: Validate authorized reconciled release
+    name: Validate authorized staging track
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout authorized release
-        uses: actions/checkout@v4
-        with:
-          ref: release/mvp-reconciled
-          fetch-depth: 1
-
-      - name: Verify approved SHA
+      - name: Resolve authorized track
+        id: track
         shell: bash
         env:
+          DEPLOYMENT_TRACK: ${{ inputs.deployment_track }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
         run: |
           set -euo pipefail
+          case "$DEPLOYMENT_TRACK" in
+            release)
+              REF='release/mvp-reconciled'
+              APPROVED_SHA='bcc2c74ca3391f1d16f9b1eb9719650ea4d27952'
+              CORE_VERSION='0.17.0'
+              SCHEMA_VERSION='1.8.0'
+              ;;
+            f17_qa)
+              REF='recovery/native-media-f17-qa-rc'
+              APPROVED_SHA='d6156e236d35da062c7f444bc73442e2905db54e'
+              CORE_VERSION='0.18.0'
+              SCHEMA_VERSION='1.9.0'
+              ;;
+            *) echo 'Unauthorized deployment track' >&2; exit 1 ;;
+          esac
+          test "$EXPECTED_SHA" = "$APPROVED_SHA"
+          {
+            echo "ref=$REF"
+            echo "approved_sha=$APPROVED_SHA"
+            echo "core_version=$CORE_VERSION"
+            echo "schema_version=$SCHEMA_VERSION"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Checkout authorized track
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.track.outputs.ref }}
+          fetch-depth: 1
+
+      - name: Verify approved track SHA
+        shell: bash
+        env:
+          DEPLOYMENT_TRACK: ${{ inputs.deployment_track }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          APPROVED_SHA: ${{ steps.track.outputs.approved_sha }}
+        run: |
+          set -euo pipefail
           ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$EXPECTED_SHA" = "$APPROVED_SHA"
           test "$ACTUAL_SHA" = "$EXPECTED_SHA"
-          echo "Authorized SHA: $ACTUAL_SHA"
+          test "$ACTUAL_SHA" = "$APPROVED_SHA"
+          if [ "$DEPLOYMENT_TRACK" = 'f17_qa' ]; then
+            test "$(git rev-parse HEAD^{tree})" = 'b1bd80f431a62c7492acb33887022e0e1013c09f'
+          fi
+          echo "Authorized $DEPLOYMENT_TRACK SHA: $ACTUAL_SHA"
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.2"
+          extensions: gd, posix, fileinfo, pdo_sqlite, mbstring
+
+      - name: Verify track and canonical versions
+        shell: bash
+        env:
+          CORE_VERSION: ${{ steps.track.outputs.core_version }}
+          SCHEMA_VERSION: ${{ steps.track.outputs.schema_version }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PYTHON'
+          import os, pathlib, re
+          core=pathlib.Path('wordpress/plugins/badaround-core/badaround-core.php').read_text()
+          installer=pathlib.Path('wordpress/plugins/badaround-core/includes/class-badaround-installer.php').read_text()
+          report=pathlib.Path('wordpress/plugins/badaround-core/includes/class-badaround-report-schema.php').read_text()
+          header=re.search(r'^ \* Version: ([^\s]+)$',core,re.M)
+          constant=re.search(r"define\(\s*'BADAROUND_CORE_VERSION',\s*'([^']+)'\s*\)",core)
+          schema=re.search(r"const SCHEMA_VERSION\s*=\s*'([^']+)'",installer)
+          canonical=re.search(r"const VERSION\s*=\s*'([^']+)'",report)
+          assert header and constant and header[1]==constant[1]==os.environ['CORE_VERSION'], 'Core version mismatch'
+          assert schema and schema[1]==os.environ['SCHEMA_VERSION'], 'Schema version mismatch'
+          assert canonical and canonical[1]=='badaround-report/v1', 'Canonical report version mismatch'
+          PYTHON
 
       - name: Lint core plugin
         run: find ./wordpress/plugins/badaround-core -type f -name '*.php' -print0 | xargs -0 -n1 php -l
@@ -50,11 +118,14 @@ jobs:
 
       - name: Golden-state invariants
         shell: bash
+        env:
+          CORE_VERSION: ${{ steps.track.outputs.core_version }}
+          SCHEMA_VERSION: ${{ steps.track.outputs.schema_version }}
         run: |
           set -euo pipefail
-          grep -q "Version: 0.17.0" ./wordpress/plugins/badaround-core/badaround-core.php
-          grep -q "BADAROUND_CORE_VERSION', '0.17.0'" ./wordpress/plugins/badaround-core/badaround-core.php
-          grep -q "SCHEMA_VERSION = '1.8.0'" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
+          grep -Fq "Version: $CORE_VERSION" ./wordpress/plugins/badaround-core/badaround-core.php
+          grep -Fq "BADAROUND_CORE_VERSION', '$CORE_VERSION'" ./wordpress/plugins/badaround-core/badaround-core.php
+          grep -Fq "SCHEMA_VERSION = '$SCHEMA_VERSION'" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
           grep -q "BadAround_Contribution_Service" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
           grep -q "BadAround_Contribution_Moderation_Admin" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
           grep -q "BadAround_Sentinel_Service" ./wordpress/plugins/badaround-core/includes/class-badaround-core.php
@@ -102,8 +173,87 @@ jobs:
       - name: E5
         run: php ./tests/contributions-e5.php
 
+      - name: F1.7 reviewed media and fail-closed invariants
+        if: inputs.deployment_track == 'f17_qa'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PYTHON'
+          import pathlib
+          core=pathlib.Path('wordpress/plugins/badaround-core')
+          theme=pathlib.Path('wordpress/themes/badaround-child')
+          checks={
+            core/'badaround-core.php':['includes/class-badaround-native-media-service.php','includes/class-badaround-native-media-rest-controller.php'],
+            core/'includes/class-badaround-core.php':['(new BadAround_Native_Media_REST_Controller())->register_hooks()','BadAround_Native_Media_Cleanup::register_hooks()'],
+            core/'includes/class-badaround-native-media-rest-controller.php':['class BadAround_Native_Media_REST_Controller','/report-media-sessions','badaround-report-media/v1'],
+            core/'includes/class-badaround-native-media-ledger.php':['ba_native_media_sessions','ba_native_media_items','ba_native_media_upload_keys','ba_native_media_limits','ba_native_media_operations'],
+            core/'includes/class-badaround-installer.php':['BadAround_Native_Media_Ledger::schema_sql'],
+            core/'includes/class-badaround-native-media-fence.php':['class BadAround_Native_Media_Fence'],
+            core/'includes/class-badaround-publication-service.php':['BadAround_Native_Media_Fence::check'],
+            core/'includes/class-badaround-media-repository.php':['BadAround_Native_Media_Fence::check'],
+            theme/'assets/js/native-report/media.js':['class MediaTransport','class Media','X-BadAround-Media-Capability','badaround-report-media/v1'],
+            theme/'assets/js/native-report/media-view.js':['ns.mountMedia','data-native-media'],
+            theme/'assets/js/native-report/api.js':['X-BadAround-Media-Capability'],
+            theme/'assets/js/native-report/wizard.js':['mediaView.media.freeze()','mediaView?.media.reportCapability()'],
+            theme/'template-parts/native-report/step.php':['data-native-media','type="file"'],
+          }
+          for path,identifiers in checks.items():
+            text=path.read_text()
+            for identifier in identifiers:
+              assert identifier in text, str(path)+': missing '+identifier
+          PYTHON
+          php <<'PHP'
+          <?php
+          define('ABSPATH', '/tmp/');
+          require 'wordpress/plugins/badaround-core/includes/class-badaround-native-media-config.php';
+          $config=new BadAround_Native_Media_Config(array());
+          if ($config->enabled() || $config->get('enabled')!==false || $config->get('keys')!==array()
+            || $config->get('active_key_id')!=='' || $config->get('temporary_budget')!==0
+            || $config->get('archive_budget')!==0 || $config->get('hosting_verified')!==false) {
+            fwrite(STDERR, "Media defaults are not fail-closed\n"); exit(1);
+          }
+          PHP
+
+      - name: F1.7 canonical and no-media foundations
+        if: inputs.deployment_track == 'f17_qa'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for suite in f1 f12 f13 f14 f15 f16; do
+            php "./tests/native-report-$suite.php"
+          done
+
+      - name: F1.7 backend media and security recovery
+        if: inputs.deployment_track == 'f17_qa'
+        shell: bash
+        run: |
+          set -euo pipefail
+          php ./tests/native-media-f17b.php
+          php ./tests/native-media-f17c.php
+          php ./tests/native-media-no-media-differential.php
+          python3 ./tests/native-media-http.py
+
+      - name: Setup Node for F1.7 wizard tests
+        if: inputs.deployment_track == 'f17_qa'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: F1.7 Step 5 integrated wizard JS DOM and HTTP tests
+        if: inputs.deployment_track == 'f17_qa'
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix tests --ignore-scripts --no-audit --no-fund
+          npm test --prefix tests
+
       - name: Build release manifest
         shell: bash
+        env:
+          DEPLOYMENT_TRACK: ${{ inputs.deployment_track }}
+          AUTHORIZED_REF: ${{ steps.track.outputs.ref }}
+          CORE_VERSION: ${{ steps.track.outputs.core_version }}
+          SCHEMA_VERSION: ${{ steps.track.outputs.schema_version }}
         run: |
           set -euo pipefail
           mkdir -p ./release-manifest
@@ -111,9 +261,11 @@ jobs:
           CORE_TREE="$(find ./wordpress/plugins/badaround-core -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')"
           THEME_TREE="$(find ./wordpress/themes/badaround-child -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')"
           {
+            echo "deployment_track=$DEPLOYMENT_TRACK"
+            echo "ref=$AUTHORIZED_REF"
             echo "sha=$SHA"
-            echo "core_version=0.17.0"
-            echo "schema_version=1.8.0"
+            echo "core_version=$CORE_VERSION"
+            echo "schema_version=$SCHEMA_VERSION"
             echo "core_tree_sha256=$CORE_TREE"
             echo "theme_tree_sha256=$THEME_TREE"
             echo "generated_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -127,25 +279,86 @@ jobs:
           if-no-files-found: error
 
   deploy:
-    name: Deploy authorized core and theme
+    name: Deploy authorized core and theme track
     needs: validate
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: staging
     steps:
-      - name: Checkout authorized release
-        uses: actions/checkout@v4
-        with:
-          ref: release/mvp-reconciled
-          fetch-depth: 1
-
-      - name: Re-verify approved SHA
+      - name: Independently resolve authorized track
+        id: track
         shell: bash
         env:
+          DEPLOYMENT_TRACK: ${{ inputs.deployment_track }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          case "$DEPLOYMENT_TRACK" in
+            release)
+              REF='release/mvp-reconciled'
+              APPROVED_SHA='bcc2c74ca3391f1d16f9b1eb9719650ea4d27952'
+              CORE_VERSION='0.17.0'
+              SCHEMA_VERSION='1.8.0'
+              ;;
+            f17_qa)
+              REF='recovery/native-media-f17-qa-rc'
+              APPROVED_SHA='d6156e236d35da062c7f444bc73442e2905db54e'
+              CORE_VERSION='0.18.0'
+              SCHEMA_VERSION='1.9.0'
+              ;;
+            *) echo 'Unauthorized deployment track' >&2; exit 1 ;;
+          esac
+          test "$EXPECTED_SHA" = "$APPROVED_SHA"
+          {
+            echo "ref=$REF"
+            echo "approved_sha=$APPROVED_SHA"
+            echo "core_version=$CORE_VERSION"
+            echo "schema_version=$SCHEMA_VERSION"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Checkout authorized track
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.track.outputs.ref }}
+          fetch-depth: 1
+
+      - name: Re-verify approved track SHA before FTPS
+        shell: bash
+        env:
+          DEPLOYMENT_TRACK: ${{ inputs.deployment_track }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          APPROVED_SHA: ${{ steps.track.outputs.approved_sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$EXPECTED_SHA" = "$APPROVED_SHA"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
+          test "$ACTUAL_SHA" = "$APPROVED_SHA"
+          if [ "$DEPLOYMENT_TRACK" = 'f17_qa' ]; then
+            test "$(git rev-parse HEAD^{tree})" = 'b1bd80f431a62c7492acb33887022e0e1013c09f'
+          fi
+          echo "Authorized $DEPLOYMENT_TRACK SHA: $ACTUAL_SHA"
+
+      - name: Re-verify track and canonical versions before FTPS
+        shell: bash
+        env:
+          CORE_VERSION: ${{ steps.track.outputs.core_version }}
+          SCHEMA_VERSION: ${{ steps.track.outputs.schema_version }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PYTHON'
+          import os, pathlib, re
+          core=pathlib.Path('wordpress/plugins/badaround-core/badaround-core.php').read_text()
+          installer=pathlib.Path('wordpress/plugins/badaround-core/includes/class-badaround-installer.php').read_text()
+          report=pathlib.Path('wordpress/plugins/badaround-core/includes/class-badaround-report-schema.php').read_text()
+          header=re.search(r'^ \* Version: ([^\s]+)$',core,re.M)
+          constant=re.search(r"define\(\s*'BADAROUND_CORE_VERSION',\s*'([^']+)'\s*\)",core)
+          schema=re.search(r"const SCHEMA_VERSION\s*=\s*'([^']+)'",installer)
+          canonical=re.search(r"const VERSION\s*=\s*'([^']+)'",report)
+          assert header and constant and header[1]==constant[1]==os.environ['CORE_VERSION'], 'Core version mismatch'
+          assert schema and schema[1]==os.environ['SCHEMA_VERSION'], 'Schema version mismatch'
+          assert canonical and canonical[1]=='badaround-report/v1', 'Canonical report version mismatch'
+          PYTHON
 
       - name: Upload core plugin over FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
