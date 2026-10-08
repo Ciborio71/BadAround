@@ -41,9 +41,9 @@ jobs:
           case "$DEPLOYMENT_TRACK" in
             release)
               REF='release/mvp-reconciled'
-              APPROVED_SHA='bcc2c74ca3391f1d16f9b1eb9719650ea4d27952'
-              CORE_VERSION='0.17.0'
-              SCHEMA_VERSION='1.8.0'
+              APPROVED_SHA='27be97f7468a9fe1ac41b4482e22e98307ac0c0a'
+              CORE_VERSION='0.18.0'
+              SCHEMA_VERSION='1.9.0'
               ;;
             f17_qa)
               REF='recovery/native-media-f17-qa-rc'
@@ -326,9 +326,9 @@ jobs:
           case "$DEPLOYMENT_TRACK" in
             release)
               REF='release/mvp-reconciled'
-              APPROVED_SHA='bcc2c74ca3391f1d16f9b1eb9719650ea4d27952'
-              CORE_VERSION='0.17.0'
-              SCHEMA_VERSION='1.8.0'
+              APPROVED_SHA='27be97f7468a9fe1ac41b4482e22e98307ac0c0a'
+              CORE_VERSION='0.18.0'
+              SCHEMA_VERSION='1.9.0'
               ;;
             f17_qa)
               REF='recovery/native-media-f17-qa-rc'
