@@ -12,6 +12,7 @@ on:
           - release
           - f17_qa
           - f110_freeze
+          - f114_staging
       expected_sha:
         description: "Exact SHA authorized for the selected deployment track"
         required: true
@@ -57,6 +58,12 @@ jobs:
               CORE_VERSION='0.18.0'
               SCHEMA_VERSION='1.9.0'
               ;;
+            f114_staging)
+              REF='feature/f1-14-native-default'
+              APPROVED_SHA='be9abde7adaee8445293d0cbfc4558ffbbbca51f'
+              CORE_VERSION='0.18.0'
+              SCHEMA_VERSION='1.9.0'
+              ;;
             *) echo 'Unauthorized deployment track' >&2; exit 1 ;;
           esac
           test "$EXPECTED_SHA" = "$APPROVED_SHA"
@@ -89,6 +96,8 @@ jobs:
             test "$(git rev-parse HEAD^{tree})" = 'b1bd80f431a62c7492acb33887022e0e1013c09f'
           elif [ "$DEPLOYMENT_TRACK" = 'f110_freeze' ]; then
             test "$(git rev-parse HEAD^{tree})" = 'e1381a7cd1d48059303d1593e7647a11a3b04fb3'
+          elif [ "$DEPLOYMENT_TRACK" = 'f114_staging' ]; then
+            test "$(git rev-parse HEAD^{tree})" = '4df5080bfe4f1c7f6d8642208c43294ad3c347f9'
           fi
           echo "Authorized $DEPLOYMENT_TRACK SHA: $ACTUAL_SHA"
 
@@ -183,7 +192,7 @@ jobs:
         run: php ./tests/contributions-e5.php
 
       - name: F1.7 reviewed media and fail-closed invariants
-        if: inputs.deployment_track == 'f17_qa' || inputs.deployment_track == 'f110_freeze'
+        if: inputs.deployment_track == 'f17_qa' || inputs.deployment_track == 'f110_freeze' || inputs.deployment_track == 'f114_staging'
         shell: bash
         run: |
           set -euo pipefail
@@ -224,7 +233,7 @@ jobs:
           PHP
 
       - name: F1.7 canonical and no-media foundations
-        if: inputs.deployment_track == 'f17_qa' || inputs.deployment_track == 'f110_freeze'
+        if: inputs.deployment_track == 'f17_qa' || inputs.deployment_track == 'f110_freeze' || inputs.deployment_track == 'f114_staging'
         shell: bash
         run: |
           set -euo pipefail
@@ -233,11 +242,17 @@ jobs:
           done
 
       - name: F1.10 municipality privacy regression
-        if: inputs.deployment_track == 'f110_freeze'
+        if: inputs.deployment_track == 'f110_freeze' || inputs.deployment_track == 'f114_staging'
         run: php ./tests/map-02r-priv-01.php
 
+      - name: F1.14 native default and rollback routing regression
+        if: inputs.deployment_track == 'f114_staging'
+        run: |
+          php ./tests/native-report-f114.php
+          php ./tests/native-report-f114.php --rollback
+
       - name: Fetch and verify exact frozen differential baseline
-        if: inputs.deployment_track == 'f17_qa' || inputs.deployment_track == 'f110_freeze'
+        if: inputs.deployment_track == 'f17_qa' || inputs.deployment_track == 'f110_freeze' || inputs.deployment_track == 'f114_staging'
         shell: bash
         run: |
           set -euo pipefail
@@ -251,10 +266,12 @@ jobs:
             test "$(git rev-parse HEAD)" = 'd6156e236d35da062c7f444bc73442e2905db54e'
           elif [ "${{ inputs.deployment_track }}" = 'f110_freeze' ]; then
             test "$(git rev-parse HEAD)" = '27be97f7468a9fe1ac41b4482e22e98307ac0c0a'
+          elif [ "${{ inputs.deployment_track }}" = 'f114_staging' ]; then
+            test "$(git rev-parse HEAD)" = 'be9abde7adaee8445293d0cbfc4558ffbbbca51f'
           fi
 
       - name: F1.7 backend media and security recovery
-        if: inputs.deployment_track == 'f17_qa' || inputs.deployment_track == 'f110_freeze'
+        if: inputs.deployment_track == 'f17_qa' || inputs.deployment_track == 'f110_freeze' || inputs.deployment_track == 'f114_staging'
         shell: bash
         run: |
           set -euo pipefail
@@ -264,13 +281,13 @@ jobs:
           python3 ./tests/native-media-http.py
 
       - name: Setup Node for F1.7 wizard tests
-        if: inputs.deployment_track == 'f17_qa' || inputs.deployment_track == 'f110_freeze'
+        if: inputs.deployment_track == 'f17_qa' || inputs.deployment_track == 'f110_freeze' || inputs.deployment_track == 'f114_staging'
         uses: actions/setup-node@v4
         with:
           node-version: "24"
 
       - name: F1.7 Step 5 integrated wizard JS DOM and HTTP tests
-        if: inputs.deployment_track == 'f17_qa' || inputs.deployment_track == 'f110_freeze'
+        if: inputs.deployment_track == 'f17_qa' || inputs.deployment_track == 'f110_freeze' || inputs.deployment_track == 'f114_staging'
         shell: bash
         run: |
           set -euo pipefail
@@ -342,6 +359,12 @@ jobs:
               CORE_VERSION='0.18.0'
               SCHEMA_VERSION='1.9.0'
               ;;
+            f114_staging)
+              REF='feature/f1-14-native-default'
+              APPROVED_SHA='be9abde7adaee8445293d0cbfc4558ffbbbca51f'
+              CORE_VERSION='0.18.0'
+              SCHEMA_VERSION='1.9.0'
+              ;;
             *) echo 'Unauthorized deployment track' >&2; exit 1 ;;
           esac
           test "$EXPECTED_SHA" = "$APPROVED_SHA"
@@ -374,6 +397,8 @@ jobs:
             test "$(git rev-parse HEAD^{tree})" = 'b1bd80f431a62c7492acb33887022e0e1013c09f'
           elif [ "$DEPLOYMENT_TRACK" = 'f110_freeze' ]; then
             test "$(git rev-parse HEAD^{tree})" = 'e1381a7cd1d48059303d1593e7647a11a3b04fb3'
+          elif [ "$DEPLOYMENT_TRACK" = 'f114_staging' ]; then
+            test "$(git rev-parse HEAD^{tree})" = '4df5080bfe4f1c7f6d8642208c43294ad3c347f9'
           fi
           echo "Authorized $DEPLOYMENT_TRACK SHA: $ACTUAL_SHA"
 
