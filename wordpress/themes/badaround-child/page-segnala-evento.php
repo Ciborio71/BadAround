@@ -3,7 +3,8 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 get_header();
-$form_id = badaround_native_report_qa_enabled() ? 0 : badaround_report_form_id();
+$use_native = badaround_native_report_use_native();
+$form_id = $use_native ? 0 : badaround_report_form_id();
 ?>
 <main class="ba-report-app" id="main-content">
 	<section class="ba-report-workspace ba-container--wide" aria-labelledby="ba-report-page-title">
@@ -24,7 +25,7 @@ $form_id = badaround_native_report_qa_enabled() ? 0 : badaround_report_form_id()
 
 		</header>
 
-		<?php if ( badaround_native_report_qa_enabled() ) : ?>
+		<?php if ( $use_native ) : ?>
 		<div class="ba-report-stage"><?php get_template_part( 'template-parts/native-report/shell' ); ?></div>
 		<?php else : ?>
 		<nav class="ba-report-steps" aria-label="Avanzamento della segnalazione">
