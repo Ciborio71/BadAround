@@ -11,7 +11,7 @@ const css=fs.readFileSync(cssPath,'utf8');
 test('F1.9 typography and Astra isolation stay scoped to native wizard',()=>{
   assert(css.includes('--ba-native-font:'));
   assert(css.includes('.ba-native :where(h1,h2,h3,p,label,legend,input,select,textarea,button,small,dt,dd)'));
-  const f19=css.slice(css.indexOf('/* F1.9'));
+  const f19=css.slice(css.indexOf('/* F1.9')).replace(/^\/\*[\s\S]*?\*\//,'').trim();
   const rules=f19.split('}').map(x=>x.trim()).filter(Boolean);
   for(const rule of rules){
     if(rule.startsWith('@media') || rule.startsWith('@')) continue;
@@ -27,8 +27,7 @@ test('F1.9 typography and Astra isolation stay scoped to native wizard',()=>{
 
 test('F1.9 step transition focuses heading and scrolls only when step is outside safe viewport',()=>{
   const h=create();
-  h.set('event.category','hazard');
-  h.set('event.subtype','hazard_road_obstruction');
+  h.fill();
   const target=h.doc.querySelector('[data-native-step="location"]');
   target.getBoundingClientRect=()=>({top:900,bottom:1200,left:0,right:0,width:800,height:300});
   let scrollArg=null;
@@ -44,8 +43,7 @@ test('F1.9 step transition focuses heading and scrolls only when step is outside
 
 test('F1.9 visible next step receives focus without forced scroll',()=>{
   const h=create();
-  h.set('event.category','hazard');
-  h.set('event.subtype','hazard_road_obstruction');
+  h.fill();
   const target=h.doc.querySelector('[data-native-step="location"]');
   target.getBoundingClientRect=()=>({top:120,bottom:500,left:0,right:0,width:800,height:380});
   let calls=0;
@@ -121,10 +119,13 @@ test('F1.9 navigation controls keep coherent touch targets and non-overflow resp
 
 test('F1.9 choice controls remain native labels with keyboard-focusable inputs',()=>{
   const h=create();
-  const choice=h.doc.querySelector('.ba-native-choice');
+  const choice=Array.from(h.doc.querySelectorAll('.ba-native-choice')).find(label=>{
+    const step=label.closest('[data-native-step]');
+    const input=label.querySelector('input');
+    return step && !step.hidden && input && !input.disabled;
+  });
   assert(choice && choice.tagName==='LABEL');
   const input=choice.querySelector('input');
-  assert(input);
   input.focus();
   assert.equal(h.doc.activeElement,input);
   if(input.type==='checkbox'){
