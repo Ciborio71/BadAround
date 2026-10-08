@@ -67,7 +67,8 @@ f16_assert( ! badaround_native_report_qa_enabled(), 'anonymous query cannot acti
 $GLOBALS['test_admin'] = true; $GLOBALS['test_origin'] = 'https://www.badaround.it';
 f16_assert( ! badaround_native_report_qa_enabled(), 'production cannot activate QA form' );
 $GLOBALS['test_origin'] = 'https://staging.badaround.it'; unset( $_GET['native_report'] );
-f16_assert( ! badaround_native_report_qa_enabled(), 'ordinary administrator URL preserves legacy form' );
+f16_assert( ! badaround_native_report_qa_enabled(), 'ordinary administrator URL is not QA mode' );
+f16_assert( badaround_native_report_use_native(), 'ordinary URL uses native default independently of QA mode' );
 f16_assert( 'badaround-report/v1' === $config['schemaVersion'], 'schema version from frozen F1.2' );
 $schema = BadAround_Report_Schema::fields();
 $excluded = array( 'schema_version', 'submission_id', 'consents.version', 'media.items', 'location.place_id' );
@@ -116,20 +117,18 @@ function wpforms() {
 	} );
 }
 require get_stylesheet_directory() . '/functions.php';
-foreach ( array( 'native', 'normal', 'anonymous', 'non-staging' ) as $scenario ) {
-	$_GET = 'normal' === $scenario ? array() : array( 'native_report' => '1' );
+foreach ( array( 'qa-admin', 'normal-admin', 'anonymous', 'non-staging' ) as $scenario ) {
+	$_GET = 'qa-admin' === $scenario ? array( 'native_report' => '1' ) : array();
 	$GLOBALS['test_admin'] = 'anonymous' !== $scenario;
 	$_SERVER['HTTP_HOST'] = 'non-staging' === $scenario ? 'www.badaround.it' : 'staging.badaround.it';
 	$GLOBALS['test_assets'] = array(); badaround_child_enqueue_assets();
 	ob_start(); require get_stylesheet_directory() . '/page-segnala-evento.php'; $page = ob_get_clean();
-	$native = 'native' === $scenario;
-	f16_assert( $native === ( strpos( $page, 'data-native-report' ) !== false ), 'actual page native exposure: ' . $scenario );
-	f16_assert( ! $native === ( strpos( $page, 'data-test-wpforms="6"' ) !== false ), 'actual page WPForms fallback: ' . $scenario );
-	f16_assert( $native === isset( $GLOBALS['test_assets']['badaround-native-wizard'] ), 'native JS conditional enqueue: ' . $scenario );
-	f16_assert( ! $native === isset( $GLOBALS['test_assets']['badaround-report-ui'], $GLOBALS['test_assets']['badaround-wpforms'] ), 'legacy assets preserved/isolated: ' . $scenario );
-	if ( $native ) {
-		f16_assert( $GLOBALS['test_assets']['badaround-native-model'] === array() && $GLOBALS['test_assets']['badaround-native-wizard'] === array( 'badaround-native-media-view' ) && $GLOBALS['test_assets']['badaround-native-media'] === array( 'badaround-native-errors' ), 'native production dependency chain has no builder dependency' );
-	}
+	$native = true;
+	f16_assert( $native === ( strpos( $page, 'data-native-report' ) !== false ), 'actual page native default exposure: ' . $scenario );
+	f16_assert( strpos( $page, 'data-test-wpforms="6"' ) === false, 'WPForms not rendered in native default: ' . $scenario );
+	f16_assert( isset( $GLOBALS['test_assets']['badaround-native-wizard'] ), 'native JS default enqueue: ' . $scenario );
+	f16_assert( ! isset( $GLOBALS['test_assets']['badaround-report-ui'], $GLOBALS['test_assets']['badaround-wpforms'] ), 'legacy assets isolated from native default: ' . $scenario );
+	f16_assert( $GLOBALS['test_assets']['badaround-native-model'] === array() && $GLOBALS['test_assets']['badaround-native-wizard'] === array( 'badaround-native-media-view' ) && $GLOBALS['test_assets']['badaround-native-media'] === array( 'badaround-native-errors' ), 'native production dependency chain has no builder dependency' );
 }
 $GLOBALS['test_screen'] = 'other-page.php'; $GLOBALS['test_assets'] = array();
 badaround_child_enqueue_assets();
