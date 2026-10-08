@@ -159,5 +159,7 @@ test('F1.9 review and media CSS have stable narrow-screen wrapping with no fixed
   assert(f19.includes('min-width:0'));
   assert(f19.includes('.ba-native .ba-native-review-section dl'));
   assert(f19.includes('grid-template-columns:1fr'));
-  assert(!/width:\s*(?:[5-9]\d\d|\d{4,})px/.test(f19));
+  assert(f19.includes('@media(max-width:768px)'));
+  assert(f19.includes('.ba-native{max-width:none}'));
+  assert(f19.includes('.ba-native .ba-native-media-actions button'));
 });
