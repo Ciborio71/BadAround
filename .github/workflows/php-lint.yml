@@ -100,6 +100,11 @@ jobs:
       - name: Test F1.6 Native Form server-rendered foundation
         run: php ./tests/native-report-f16.php
 
+      - name: Test F1.14 Native Default and WPForms Rollback
+        run: |
+          php ./tests/native-report-f114.php
+          php ./tests/native-report-f114.php --rollback
+
       - name: Test F1.7B native media backend and recovery with real MariaDB constraints
         env:
           BA_TEST_DSN: mysql:host=127.0.0.1;port=3306;dbname=f17b
@@ -141,13 +146,12 @@ jobs:
             wordpress/plugins/badaround-core/includes/class-badaround-wpforms-event-intake.php \
             wordpress/themes/badaround-child/assets/js/native-report/model.js \
             wordpress/themes/badaround-child/template-parts/native-report/shell.php \
-            wordpress/themes/badaround-child/page-segnala-evento.php \
             wordpress/themes/badaround-child/assets/css/report.css \
             wordpress/themes/badaround-child/assets/js/report.js
           python3 - <<'PY'
           import pathlib, subprocess
           theme='wordpress/themes/badaround-child/'
-          allowed={'assets/css/native-report.css','assets/js/native-report/api.js','assets/js/native-report/errors.js','assets/js/native-report/media.js','assets/js/native-report/media-view.js','assets/js/native-report/wizard.js','functions.php','inc/native-report.php','template-parts/native-report/step.php'}
+          allowed={'assets/css/native-report.css','assets/js/native-report/api.js','assets/js/native-report/errors.js','assets/js/native-report/media.js','assets/js/native-report/media-view.js','assets/js/native-report/wizard.js','functions.php','inc/native-report.php','page-segnala-evento.php','template-parts/native-report/step.php'}
           changed=subprocess.check_output(['git','diff','--name-only','beb33ec3325480f77a266b3b6356f5860b00e16e','--',theme],text=True).splitlines()
           assert all(p.removeprefix(theme) in allowed for p in changed), changed
           css=theme+'assets/css/native-report.css'
