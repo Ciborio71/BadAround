@@ -40,7 +40,6 @@ function wp_enqueue_script( $handle, $url = '', $deps = array() ) { $GLOBALS['as
 function wp_script_add_data() {}
 function wp_resource_hints() {}
 function nocache_headers() {}
-function header() {}
 class WP_Term { public $name; public $slug; public $parent; public $term_id; }
 class BadAround_Event_Post_Type { const EVENT_TYPE_TAX = 'ba_tipo_evento'; }
 function get_terms( $query ) {
