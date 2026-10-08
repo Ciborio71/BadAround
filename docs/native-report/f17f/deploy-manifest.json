@@ -1,0 +1,1049 @@
+{
+  "candidate_sha": "d6156e236d35da062c7f444bc73442e2905db54e",
+  "deployment": {
+    "exclusions": [
+      "tests/",
+      "docs/",
+      ".github/",
+      "private storage",
+      "wp-config.php",
+      "hosting configuration/secrets"
+    ],
+    "executed": false,
+    "hosting_media_enablement": "blocked",
+    "launcher_remediation": "required",
+    "media_enabled": false,
+    "migration_executed_on_staging": false,
+    "server_dirs": {
+      "core": "/staging.badaround.it/wp-content/plugins/badaround-core/",
+      "theme": "/staging.badaround.it/wp-content/themes/badaround-child/"
+    },
+    "source_roots": {
+      "core": "wordpress/plugins/badaround-core",
+      "theme": "wordpress/themes/badaround-child"
+    }
+  },
+  "file_counts": {
+    "core": 58,
+    "theme": 53
+  },
+  "files": [
+    {
+      "bytes": 1526,
+      "component": "core",
+      "deploy_relative_path": "README.md",
+      "git_blob_sha": "0cbeb55387b2adae6ff38f067f8e51d1227d8be1",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/README.md",
+      "sha256": "8f2c9b9bb488cf38fad5b91d87d5951e5700f7249185783ddeeeb6c342495253"
+    },
+    {
+      "bytes": 908,
+      "component": "core",
+      "deploy_relative_path": "assets/css/contributions.css",
+      "git_blob_sha": "cb0cbad4f3bb38b4f9eaec6278f8be6af67f0a19",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/assets/css/contributions.css",
+      "sha256": "58c1c18a9e8aa0d39b1296eec7e29965c5442e1557aa22515d8b126cc47db2d7"
+    },
+    {
+      "bytes": 1294,
+      "component": "core",
+      "deploy_relative_path": "assets/js/contributions.js",
+      "git_blob_sha": "bdf9083d141c76d528bd1175bdaf1a5fd1b7099b",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/assets/js/contributions.js",
+      "sha256": "c9682b5ca944f50e1fa8d477ef004f2eb2be3f0d67b5c444a3d295911c1670c8"
+    },
+    {
+      "bytes": 2033,
+      "component": "core",
+      "deploy_relative_path": "assets/js/territory-admin.js",
+      "git_blob_sha": "fbeae851b2767eada85ab841567de7c55365d493",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/assets/js/territory-admin.js",
+      "sha256": "8ccb3c8e7a177c90a58565ffa0d3c5607f8547d665baeebf97de7e8a4c5e27f1"
+    },
+    {
+      "bytes": 5086,
+      "component": "core",
+      "deploy_relative_path": "badaround-core.php",
+      "git_blob_sha": "bb0cb06c00c399fdb51192f8ef066d092f71318c",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/badaround-core.php",
+      "sha256": "c61229813483cf5f7b98f21135c271681c1eb76440d456697018f8593f2a12b3"
+    },
+    {
+      "bytes": 3019,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-audit-log.php",
+      "git_blob_sha": "708942d23cdc06151784cfd5087d101526b8046c",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-audit-log.php",
+      "sha256": "9332004f41b54c24e0ae4a061399b10514168deb6d5028446467c7a881173f8b"
+    },
+    {
+      "bytes": 14934,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-contribution-media-repository.php",
+      "git_blob_sha": "f43297b0d195745e447533395481fc1a59b11e78",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-contribution-media-repository.php",
+      "sha256": "0ec73c3e36c918710eca1937a691d249f08dd2d78147b2e14833df38618479df"
+    },
+    {
+      "bytes": 19741,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-contribution-moderation-admin.php",
+      "git_blob_sha": "9bc5b818cc46c3844f3b25a55c760795e4ab95be",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-admin.php",
+      "sha256": "3fd92d825e993fdfc1e16e37c99a265e5b09792fda4fd40c50b4e9699515fdff"
+    },
+    {
+      "bytes": 25039,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-contribution-moderation-service.php",
+      "git_blob_sha": "6ff6f1286de63f6a33671218685759a3c9538503",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-service.php",
+      "sha256": "4e3bfd1e4ebdbea49bde42a08dde20eb37630e698b871b66dc15f616bb26e47f"
+    },
+    {
+      "bytes": 845,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-contribution-post-type.php",
+      "git_blob_sha": "dcb79abffbfb3483b7d276120443685ec8a23d9a",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-contribution-post-type.php",
+      "sha256": "acda05889f89880193e4e1a541f0bca44b444b61307cf82da54d27405a2a7b00"
+    },
+    {
+      "bytes": 9463,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-contribution-repository.php",
+      "git_blob_sha": "4bbd8fca79f4bc60fbe7f98cca4d8375490c6c9b",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-contribution-repository.php",
+      "sha256": "91bf7187b4acfe5a14d5995deb41e7aa50e00e920ca4692c22d4e78a80702ac9"
+    },
+    {
+      "bytes": 23427,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-contribution-service.php",
+      "git_blob_sha": "e04be8511e2b520259925e411c99633293d16ce7",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-contribution-service.php",
+      "sha256": "3c097bd032fb6bba4f9e2860bc4c4a1bc2a089b0feb572de85e5b356601e43f8"
+    },
+    {
+      "bytes": 1401,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-core.php",
+      "git_blob_sha": "cea411334de28f1d4cd3f1de04b8a234c5a251b8",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-core.php",
+      "sha256": "f050ef1368550669fe5f096b13989faa4ebc6ca3628a5a408ed79377bd127849"
+    },
+    {
+      "bytes": 4092,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-discovery-contract.php",
+      "git_blob_sha": "0045906ec4910fcbb5a149efd7c63785b39c7b4c",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-discovery-contract.php",
+      "sha256": "11ef72d50d0e1f9b6d1eee34ed83965a2916e55b5c8e599d49fa602fef38d9cc"
+    },
+    {
+      "bytes": 14388,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-discovery-query.php",
+      "git_blob_sha": "1045935131e378d7fba41d6a62ab246cb1814e72",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-discovery-query.php",
+      "sha256": "a8648376addb268dc35a1736668bea9152670d6a510cca063d0968327b094b07"
+    },
+    {
+      "bytes": 6910,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-event-post-type.php",
+      "git_blob_sha": "195e1f481893f5f24d66561245ff90852862ed31",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-event-post-type.php",
+      "sha256": "edb31bac1ca7926cf9fe44a0701f450f67edf3ea40bd8af25e2dff444d0cd649"
+    },
+    {
+      "bytes": 8539,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-event-taxonomy-initializer.php",
+      "git_blob_sha": "32ecf82ddb26e62749916acceacb525da2a59b35",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-event-taxonomy-initializer.php",
+      "sha256": "3c523de70978cce105342df3d4cadee5e72588937ca9a02b0a1b8d6ed2b54ae2"
+    },
+    {
+      "bytes": 5868,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-event-taxonomy-map.php",
+      "git_blob_sha": "8652b301192b3535182c045220177dbdf3664241",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-event-taxonomy-map.php",
+      "sha256": "85aa68bfb0648d29ae33428f7d8bb7cf6af2a979229f5f213ac4a77877e80eb9"
+    },
+    {
+      "bytes": 2785,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-event-type-resolver.php",
+      "git_blob_sha": "114f4e3e6cd8b89daa7363c7b9bbc431fa80ae24",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-event-type-resolver.php",
+      "sha256": "5dc4abea6d5efefa851daec82956d77ff0139138057c9f7a7807b8df25f4a987"
+    },
+    {
+      "bytes": 13853,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-installer.php",
+      "git_blob_sha": "162a9848054ae073aa0ddf1551cb7f8aa416b437",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-installer.php",
+      "sha256": "99cba95253d2b123f2afa551e38cccb35e79f0b29a0727e498ed16128bc7e292"
+    },
+    {
+      "bytes": 16294,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-media-repository.php",
+      "git_blob_sha": "087493adcbb03ba2cd388bfd42ee803d35cba4e6",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-media-repository.php",
+      "sha256": "8e53bd317d6d07f241f0b6dcfaf174342132ba9416a1ec0c581ab5e199c3f42a"
+    },
+    {
+      "bytes": 31219,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-moderation-admin.php",
+      "git_blob_sha": "af9cc76e9f6eccc3f93dfafdffeb8c0e8359e5f1",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php",
+      "sha256": "ed7d47b3ca7005af46f2690cc48f997a55b6f9674da9595d74546799f07cc094"
+    },
+    {
+      "bytes": 4735,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-moderation-service.php",
+      "git_blob_sha": "58406fb5b5adb4dc7f2bd8d491f76bea971d19a7",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-moderation-service.php",
+      "sha256": "284f48d8927dccc8774efc1df525cdb47f53550859117be526ebf457f9194398"
+    },
+    {
+      "bytes": 1736,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-native-media-capability.php",
+      "git_blob_sha": "d38d69277bfbad454f75b6140ba4c99664dce1b1",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-media-capability.php",
+      "sha256": "f03faf95acb7aaf64c44688af91b9b0554b3fc3df587774c22f003d1ea208943"
+    },
+    {
+      "bytes": 4626,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-native-media-cleanup.php",
+      "git_blob_sha": "f8ff9f68e5564d9902cf09129c9e02580bab3429",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-media-cleanup.php",
+      "sha256": "ed2ae1dbf5717768b1cf13db79f45a5bacaf68782307727dc28c43dc59889294"
+    },
+    {
+      "bytes": 2966,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-native-media-config.php",
+      "git_blob_sha": "4d45130045074a76c6390b4a1b5b03c36cb37120",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-media-config.php",
+      "sha256": "7389aaeb2b13627f40702e7e8cfb3b5f063f726237b949e73552178269ef59de"
+    },
+    {
+      "bytes": 3014,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-native-media-fence.php",
+      "git_blob_sha": "5f3ffe85aaa4576529ed01147a3c643521eaa616",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-media-fence.php",
+      "sha256": "7608888eb10764819906d3e555b43b8eccbee3da9ca1dee9b6d0414e7cfc3366"
+    },
+    {
+      "bytes": 12756,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-native-media-ledger.php",
+      "git_blob_sha": "199601c0bac80a1bab5161d08a1d6d2abea03b38",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-media-ledger.php",
+      "sha256": "3ea5ccd4029df2bb0f5621baa47299408bc8bb87e457199fb6db9d6e6a7160ca"
+    },
+    {
+      "bytes": 13284,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-native-media-persistence.php",
+      "git_blob_sha": "a909d30608c93f08b28e8631b582515c84c0d918",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-media-persistence.php",
+      "sha256": "29b2caaeb73862e775e0d538427f0941a7adcc35d44fa7fdc3a5d3102261bc3d"
+    },
+    {
+      "bytes": 8109,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-native-media-rest-controller.php",
+      "git_blob_sha": "8b27a0b934d8e9f2e87320872a0d845d82ac73ec",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-media-rest-controller.php",
+      "sha256": "f513b67c5b6706462447d5f01b56e014c259ad4a2cf9923d7ec62547a18bbc0e"
+    },
+    {
+      "bytes": 21599,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-native-media-service.php",
+      "git_blob_sha": "13fc3c3b9dc4bd6efb4fcd45dd7f6665d006fa09",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-media-service.php",
+      "sha256": "ac4bbd16a3eb3e0f0764a455cdf81c7f8db4bacffe8c8659c80c22ca6cef824d"
+    },
+    {
+      "bytes": 5641,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-native-media-storage.php",
+      "git_blob_sha": "5e542e74dd8aee0b840cdd2ece8f01e3918757fa",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-media-storage.php",
+      "sha256": "c4b030295343670e7a5c393277e299fdaa39647b9994261b9147a299cc045a61"
+    },
+    {
+      "bytes": 7852,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-native-media-validator.php",
+      "git_blob_sha": "8ee6da783c2466c7b40252a2d3ac47874d28323a",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-media-validator.php",
+      "sha256": "45c8152bf7bbe71752e0ea70426c092c0dfcf6d0538153fae148b203a0f11187"
+    },
+    {
+      "bytes": 2491,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-native-report-golden-path-service.php",
+      "git_blob_sha": "5662762eda43bd1416b4362f8c96fab020c4cd72",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-report-golden-path-service.php",
+      "sha256": "15a650547897c09262eba7b0726da7338fe4bee75c6e6e58d65255924b2005bc"
+    },
+    {
+      "bytes": 5240,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-native-report-intake-service.php",
+      "git_blob_sha": "4320d5c7c28d4c5dcb51a099a259e1a23c80cbdd",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-report-intake-service.php",
+      "sha256": "6a0c75af987af6bb11e9a3f0119ff5d0015d680bae6e6ce1346e9760ee6109c9"
+    },
+    {
+      "bytes": 11192,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-native-report-rest-controller.php",
+      "git_blob_sha": "b10da23b238af8dde3ccd5a717f312dc0e726d62",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-report-rest-controller.php",
+      "sha256": "f6fb665b765d19cb6d803a6403cea1d6b0fea1c1e4108594b401bcbac81d4dcc"
+    },
+    {
+      "bytes": 18045,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-publication-service.php",
+      "git_blob_sha": "6d0a7a88dc8a294d4db4840cfae71d0d475d9e4c",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php",
+      "sha256": "f1a1db4b4e1022d6cb7479e940ae3ac21a45d587af05a7ca20ca91d67ab474c9"
+    },
+    {
+      "bytes": 2499,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-report-idempotency-service.php",
+      "git_blob_sha": "0ac2bcb1b4f25c6f6a9e0166d06f3fea2dc9b7b0",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-idempotency-service.php",
+      "sha256": "1cefcc370edcb1e36c7d7517bda036a34167e1e598c24170e6b27f3c6cbe887b"
+    },
+    {
+      "bytes": 9460,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-report-intake-service.php",
+      "git_blob_sha": "d088c0ad440677558d8ba8d27f404225ad3608db",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-intake-service.php",
+      "sha256": "e66e7dfc97313379db10a373868d79bae51daba11801e1d3e5ceb533bb1cffd5"
+    },
+    {
+      "bytes": 6352,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-report-normalizer.php",
+      "git_blob_sha": "b775d0b2ace24aecadf73b1cba9b92d9f024807e",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-normalizer.php",
+      "sha256": "0e601bc539b93ecaa4b5063b1fda60667b3438e0dc9d2b2c0d008e996f80a411"
+    },
+    {
+      "bytes": 12354,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-report-persistence-service.php",
+      "git_blob_sha": "b42f8506e9defe1574f6869ca20e0114664181fc",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-persistence-service.php",
+      "sha256": "30b5fde250a7295e4eea00aed073c602160d032fdd1a46f6363c1cd9738da0e3"
+    },
+    {
+      "bytes": 12834,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-report-repository.php",
+      "git_blob_sha": "084ddca9ae41984f27d1a7964a41ca7fb5b73dff",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-repository.php",
+      "sha256": "ae3ae9e14b30df76118039a68969202ec27dbcba565ec693b20a16b6bb88a387"
+    },
+    {
+      "bytes": 3085,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-report-result.php",
+      "git_blob_sha": "95f50a590d28338347c556a254d67d9fb2b5a6a7",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-result.php",
+      "sha256": "99610adf08a730b2211d1215259894152a670993bdb9f72c5ff3bbf595a9d354"
+    },
+    {
+      "bytes": 23650,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-report-schema.php",
+      "git_blob_sha": "c7af52de488844078da955cba5f90657e00760ea",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-schema.php",
+      "sha256": "d0aff04c5640d35ddc3955c2af016ca19f91d6d213e68d9f855363075d721ee4"
+    },
+    {
+      "bytes": 18980,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-report-validator.php",
+      "git_blob_sha": "b1f5f73e4bfd46c18cee4596f7001f075f80ae63",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-validator.php",
+      "sha256": "5900cf525e3a5c58b47c6c12d5b55ce378b6b97306c2cf1b0420761e8172f4fd"
+    },
+    {
+      "bytes": 3929,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-sentinel-match-repository.php",
+      "git_blob_sha": "600c2d2b2dba26362d0c0bc68e56283d5e562db6",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-sentinel-match-repository.php",
+      "sha256": "044fec10c64afd56fbfbce427fc9b7152de72de2cc7604254007b1409283e7e5"
+    },
+    {
+      "bytes": 9441,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-sentinel-matching-service.php",
+      "git_blob_sha": "40bd0b95ba6d6f204f0500f81aac5c2dd0f80aa7",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-sentinel-matching-service.php",
+      "sha256": "8bc28cf08fedf2878fd49bab8c65b1392f0610f93b75a93a38a0567df9bdb26f"
+    },
+    {
+      "bytes": 4933,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-sentinel-repository.php",
+      "git_blob_sha": "9d44da6307d1693420e87b349f413a9340ee32e2",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-sentinel-repository.php",
+      "sha256": "5f2e6e02c51aee46b0a1577964a00af578110b02d5d0d4c3647ef477e863e63e"
+    },
+    {
+      "bytes": 18685,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-sentinel-service.php",
+      "git_blob_sha": "f51f35aaa93ca1bc568cd29d6aadc77380b32e2e",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-sentinel-service.php",
+      "sha256": "48aea20daf1efac0b90ba55edf5f46c25c4b7ba97986de83d2c4d85dd861e87a"
+    },
+    {
+      "bytes": 5031,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-territory-admin.php",
+      "git_blob_sha": "c2df0e4e408da82742f3111f9d8e32c17a60cf95",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-territory-admin.php",
+      "sha256": "2ad4e2b34070b6319d31e5332c4efda63642cac375cd06d8549c5636a859b6a5"
+    },
+    {
+      "bytes": 2596,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-territory-resolver.php",
+      "git_blob_sha": "d52d5f3b7cdc5ac146f4ee87373b89d285d93fb6",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-territory-resolver.php",
+      "sha256": "66b6f8f80e16276005218f5e9842c231d77848d15c977da5725c9e1cf8369cca"
+    },
+    {
+      "bytes": 1951,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-transactional-mailer.php",
+      "git_blob_sha": "25474355bd9497395b22ab32ba75818e85c6df48",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-transactional-mailer.php",
+      "sha256": "9f25b73b96ca2729fcc26a057332db57e6ba4d464c3e9a8d1f01df46d73431db"
+    },
+    {
+      "bytes": 3594,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-wpforms-contract-map.php",
+      "git_blob_sha": "bf394ed0d8a0165c903c108be110f897f7672feb",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-wpforms-contract-map.php",
+      "sha256": "71655326006f650312f57231949db6fa8b92c931c9774f756fcb9c78a73886bc"
+    },
+    {
+      "bytes": 2606,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-wpforms-event-intake.php",
+      "git_blob_sha": "0b9df43a33830865174cd09ccba444122a61f5f7",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-wpforms-event-intake.php",
+      "sha256": "9ad1bb448fea548ec5619eeca0a106b57f06f59053b3e1da8ec530f796f5a94e"
+    },
+    {
+      "bytes": 12101,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-wpforms-field-mapper.php",
+      "git_blob_sha": "dc4277e98f9bef12343fc9a6e07d709cfbedb726",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-wpforms-field-mapper.php",
+      "sha256": "65fcececd9df8bfddaaebb77bcbb927cb27b99ca28b206fb14f89eb2b8284755"
+    },
+    {
+      "bytes": 15026,
+      "component": "core",
+      "deploy_relative_path": "includes/class-badaround-wpforms-report-adapter.php",
+      "git_blob_sha": "068f2eda6bd002a409ae28c19d2458365c9bdde9",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-wpforms-report-adapter.php",
+      "sha256": "3df06e48c2b428a6e3b8a3ba466a510c269cba8ecb45d30c6078177f52513103"
+    },
+    {
+      "bytes": 2473,
+      "component": "core",
+      "deploy_relative_path": "includes/native-media-image-worker.php",
+      "git_blob_sha": "94d8c02f6773216db2ec4cd97fec3bc034c762e0",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/includes/native-media-image-worker.php",
+      "sha256": "c01071adb30e82afe860ead6c533fde8cf1ddb7e80e8d148faeb9d7d49b3aa88"
+    },
+    {
+      "bytes": 162,
+      "component": "core",
+      "deploy_relative_path": "uninstall.php",
+      "git_blob_sha": "ff0777b8e07e5723933bd1a0a04934a8d3ed76a2",
+      "mode": "100644",
+      "path": "wordpress/plugins/badaround-core/uninstall.php",
+      "sha256": "d3dc895566ef6d78587f739912a4b4fe89cff902628aa5eab1b615f8aba0abb5"
+    },
+    {
+      "bytes": 954,
+      "component": "theme",
+      "deploy_relative_path": "404.php",
+      "git_blob_sha": "7028be039dad96e845e826d3a6a623ef2e9eb85d",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/404.php",
+      "sha256": "f05091bdf636cd710bbd2ab01aaaab5d9fc02e66d6c8933b06cb7589d9eebc8a"
+    },
+    {
+      "bytes": 253,
+      "component": "theme",
+      "deploy_relative_path": "README.md",
+      "git_blob_sha": "acab615f6f3fdffa2a2f66a9c6cb4e4449511800",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/README.md",
+      "sha256": "cc84ea5147ae7eae4542f937e0d64fa6071750dc70d5517e9adc5d4d07dace98"
+    },
+    {
+      "bytes": 9213,
+      "component": "theme",
+      "deploy_relative_path": "assets/css/account.css",
+      "git_blob_sha": "d705bba791e0f860fcbd4b2fec0f504055bb25d5",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/css/account.css",
+      "sha256": "b4e74df84b335aae4ac96cc8584f84182ef4fc2630754d3497d51065ae6e802a"
+    },
+    {
+      "bytes": 3404,
+      "component": "theme",
+      "deploy_relative_path": "assets/css/base.css",
+      "git_blob_sha": "30bdbfcab913a73e3fa587245f1ee926c3bb6c16",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/css/base.css",
+      "sha256": "967a6b9d8f2ee05a9cb2f21c57c2c1449e4d383ff3d1683f1043a2d67f1c8584"
+    },
+    {
+      "bytes": 3361,
+      "component": "theme",
+      "deploy_relative_path": "assets/css/components.css",
+      "git_blob_sha": "16b7c6d60e6979e23b3b14f9d8a126c380e5059c",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/css/components.css",
+      "sha256": "9e4439809aef715d7e8968374e09839818d561d8c3cb81aa416623cde439d6a4"
+    },
+    {
+      "bytes": 22218,
+      "component": "theme",
+      "deploy_relative_path": "assets/css/home.css",
+      "git_blob_sha": "f3685fc23705f41d6cccc32002126a15276adafe",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/css/home.css",
+      "sha256": "1b4fc8d372689f31dd69c7ea0086daed9949d171b776bb19e08b6f976910105e"
+    },
+    {
+      "bytes": 10075,
+      "component": "theme",
+      "deploy_relative_path": "assets/css/how-it-works.css",
+      "git_blob_sha": "66ae5dd7526fc8d6418d71ae3440d29bb0762dc2",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/css/how-it-works.css",
+      "sha256": "acfae71c35dc1b2aeb3cb004b6154dbce83fccb8c6eb095ba4b03d05271b90cf"
+    },
+    {
+      "bytes": 16880,
+      "component": "theme",
+      "deploy_relative_path": "assets/css/map.css",
+      "git_blob_sha": "c5c92734150f02c9577cf242f49b5df7b34ad214",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/css/map.css",
+      "sha256": "cc8ec70c303636b70f9133ef16673937bd876e1350f63668a24ad20ae1cf7ec1"
+    },
+    {
+      "bytes": 5048,
+      "component": "theme",
+      "deploy_relative_path": "assets/css/native-report.css",
+      "git_blob_sha": "a86c05efa5539ea81d3301d128e522006d355b07",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/css/native-report.css",
+      "sha256": "de62dfa25c968346aebc490c316838d67c15884ac4c6e201e1fbc560839102d7"
+    },
+    {
+      "bytes": 13327,
+      "component": "theme",
+      "deploy_relative_path": "assets/css/pages.css",
+      "git_blob_sha": "03db0b7ab61fd18053408cc3157a702d176dff69",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/css/pages.css",
+      "sha256": "fbb23c9aac147e23e7adac86b9a95884e2564f25ca8499ba936c1be4e622ade0"
+    },
+    {
+      "bytes": 8986,
+      "component": "theme",
+      "deploy_relative_path": "assets/css/report.css",
+      "git_blob_sha": "b42dee72488385622d684e279d5f41019d137e5d",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/css/report.css",
+      "sha256": "fb322fccd7ac8379a428b83cf56e3d36571d622a2bace28fb617215fa0c25fc2"
+    },
+    {
+      "bytes": 5011,
+      "component": "theme",
+      "deploy_relative_path": "assets/css/search.css",
+      "git_blob_sha": "8b2f8d5e3ddb5104b876d14f4cd9ef2563a8ea8e",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/css/search.css",
+      "sha256": "afef0d75108ae8a56c52b59f35134809e065d4431ae9bce2a2b4a1427f7df884"
+    },
+    {
+      "bytes": 24118,
+      "component": "theme",
+      "deploy_relative_path": "assets/css/sentinels.css",
+      "git_blob_sha": "fe95bec5e41506d0b769b8a1739e9281f760981c",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/css/sentinels.css",
+      "sha256": "24ba40b28a0a0a048894c2a0eadf6056fddddbb6b219c48984641ffca508dc82"
+    },
+    {
+      "bytes": 4482,
+      "component": "theme",
+      "deploy_relative_path": "assets/css/shell.css",
+      "git_blob_sha": "8a6448748ff88b9dee6a7ae7c43c7ccd4bbd98cc",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/css/shell.css",
+      "sha256": "455dc5a9e2e816967235c94ecfd13f5bebcffda7a0cc8c2e8e61607d0faf6564"
+    },
+    {
+      "bytes": 3686,
+      "component": "theme",
+      "deploy_relative_path": "assets/css/states.css",
+      "git_blob_sha": "1fca67a0c2cd5d223b71097eadb193ac504b1989",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/css/states.css",
+      "sha256": "7785561e49cf7e5aebe9f0229500c924e868ff73d247419a61cfaf92a0ab97a3"
+    },
+    {
+      "bytes": 32245,
+      "component": "theme",
+      "deploy_relative_path": "assets/css/wpforms.css",
+      "git_blob_sha": "8eba25807faf77195a479cba75a661647c85f8d7",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/css/wpforms.css",
+      "sha256": "6d709a4136798be172a6cc3c9e18bd2544b47fa0b5c3b0b33ed6846182b94a8b"
+    },
+    {
+      "bytes": 836,
+      "component": "theme",
+      "deploy_relative_path": "assets/js/account.js",
+      "git_blob_sha": "6e26f6e7146d781db46b4a23ba693170dc8f908c",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/js/account.js",
+      "sha256": "d8a9de646c829ed253d1fc97e024f6998ca46c0823d24ebb2cf2e8876dc8e858"
+    },
+    {
+      "bytes": 22681,
+      "component": "theme",
+      "deploy_relative_path": "assets/js/map.js",
+      "git_blob_sha": "77b84fcd51a396ee4036cb54d9bae3dd2090222f",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/js/map.js",
+      "sha256": "c41bde0354409d3d0df39e026cad364bf28ea0dd24ef1fd1e37a857344750253"
+    },
+    {
+      "bytes": 1982,
+      "component": "theme",
+      "deploy_relative_path": "assets/js/native-report/api.js",
+      "git_blob_sha": "860951adf929976b47f30271ee9600fddde0904e",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/js/native-report/api.js",
+      "sha256": "524e06006c05ce90902751e85e41a73a858a05028426589e1ffa4a5e67ac5415"
+    },
+    {
+      "bytes": 6784,
+      "component": "theme",
+      "deploy_relative_path": "assets/js/native-report/errors.js",
+      "git_blob_sha": "cbbaa98f47c123df1ee656bec70daf2da9092150",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/js/native-report/errors.js",
+      "sha256": "bc0a6ee9eab2e42333e808d64ddb38c86d043ef2a11af6d346b57ada5989bbf2"
+    },
+    {
+      "bytes": 6181,
+      "component": "theme",
+      "deploy_relative_path": "assets/js/native-report/media-view.js",
+      "git_blob_sha": "1ebad46def07a08ce51322425486cc5b8b03a96b",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/js/native-report/media-view.js",
+      "sha256": "754bbddde910dbfef4d306bb0328436cf843bb574cda2229766543f509ab2421"
+    },
+    {
+      "bytes": 14312,
+      "component": "theme",
+      "deploy_relative_path": "assets/js/native-report/media.js",
+      "git_blob_sha": "321b4b26f89ee8ca436a93dfd9ddde2d4e79428a",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/js/native-report/media.js",
+      "sha256": "c642730324a1569f25b6dc84bc8323827afb124b2e7ebd41c92736ab807fd071"
+    },
+    {
+      "bytes": 5931,
+      "component": "theme",
+      "deploy_relative_path": "assets/js/native-report/model.js",
+      "git_blob_sha": "d8127f3b0641d3667a332135784e049dba162505",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/js/native-report/model.js",
+      "sha256": "397028f8f8c2794e4c0e3a754021628d5a84c0b9cbc92d9b47a42a1850acd2be"
+    },
+    {
+      "bytes": 12074,
+      "component": "theme",
+      "deploy_relative_path": "assets/js/native-report/wizard.js",
+      "git_blob_sha": "1d16ca0d34f6b01c3be7df065d10e9e9166ba481",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/js/native-report/wizard.js",
+      "sha256": "eaaac068d179fa03cb57ac8ddce1d0458a601cb5c87cf196e9dc3db38bcbaf33"
+    },
+    {
+      "bytes": 966,
+      "component": "theme",
+      "deploy_relative_path": "assets/js/navigation.js",
+      "git_blob_sha": "96f976d2ca9db452176a3c8e85da555d5bde7102",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/js/navigation.js",
+      "sha256": "6d0e4244f53180aad18fa1467a0c0d35fb47909c65f304327787635d8d765add"
+    },
+    {
+      "bytes": 44317,
+      "component": "theme",
+      "deploy_relative_path": "assets/js/report.js",
+      "git_blob_sha": "1521dcd4e1d024519cb21a5ea3cd45a0890bbcb9",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/js/report.js",
+      "sha256": "287e9cdb2bd430e6f7a0614c5a501eff27559019cf690514c894f0e8a5bee699"
+    },
+    {
+      "bytes": 3287,
+      "component": "theme",
+      "deploy_relative_path": "assets/js/sentinels.js",
+      "git_blob_sha": "ce4b1044d53d5ee4cbc65d566cf36515e7a64d4d",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/js/sentinels.js",
+      "sha256": "c508263900da980ca3345db2370caa449bd7e13dd8867a3f58c735ccb2ac01dc"
+    },
+    {
+      "bytes": 326,
+      "component": "theme",
+      "deploy_relative_path": "assets/js/ui.js",
+      "git_blob_sha": "e93c977344e6c3bb17183fc933839b6b63cb0c47",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/assets/js/ui.js",
+      "sha256": "d9c67d9f459b4546aa5a0478249c5ea13a25c03a1a4b4a51277cd6883611b065"
+    },
+    {
+      "bytes": 1849,
+      "component": "theme",
+      "deploy_relative_path": "footer.php",
+      "git_blob_sha": "e93f7ea86d2b04f7aa98f5ab22c6c3e72b878840",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/footer.php",
+      "sha256": "7760c5c8b2bb7296677c05fa72bc21cfd0a5b29f43d900d7b0fe52f388bbbe18"
+    },
+    {
+      "bytes": 14160,
+      "component": "theme",
+      "deploy_relative_path": "front-page.php",
+      "git_blob_sha": "3924cba416a37041552982ea74e94d040b2dda5f",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/front-page.php",
+      "sha256": "c5d1e159385ab439ff113a488d1468aaf599b4c044867feffedd07468bb3abdd"
+    },
+    {
+      "bytes": 14552,
+      "component": "theme",
+      "deploy_relative_path": "functions.php",
+      "git_blob_sha": "48e5b4e6b9a620f0da9d0f9c4101900f714ed638",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/functions.php",
+      "sha256": "c217154b258997b794b09d7c7dd6a17eb8ce3191a30882f5ed63fb7e337627ef"
+    },
+    {
+      "bytes": 3001,
+      "component": "theme",
+      "deploy_relative_path": "header.php",
+      "git_blob_sha": "22d85f89cbab9e7396d1fc33162536be020b9e97",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/header.php",
+      "sha256": "12ddef55ff5620e3ce91beee230562a6a004d5400ba4b09ef5f4fa3bb40d7030"
+    },
+    {
+      "bytes": 18254,
+      "component": "theme",
+      "deploy_relative_path": "inc/native-report.php",
+      "git_blob_sha": "9da4d3b1db9398570ffe9d9f2e6b57b1150089cc",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/inc/native-report.php",
+      "sha256": "c4a258b282dd6f5a3b9ed7eb7d8cf04af4c0ed9bfe53e48f76b2b77da8a5f228"
+    },
+    {
+      "bytes": 9252,
+      "component": "theme",
+      "deploy_relative_path": "page-area-personale.php",
+      "git_blob_sha": "96042991f7f121647b44bdaf2bdc7d8cda39d7b8",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/page-area-personale.php",
+      "sha256": "f73b385b5bab3ff9c225816edca5ef9203760cb3219c88972d441fd6a7ad2c34"
+    },
+    {
+      "bytes": 11551,
+      "component": "theme",
+      "deploy_relative_path": "page-cerca.php",
+      "git_blob_sha": "7e16d57b7fbc7b5d619dd52707947df538b05eb7",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/page-cerca.php",
+      "sha256": "eeb799022f5bebc9a058d5a29d0eb9639475034b24ba5ef7a6ff101ad192c18a"
+    },
+    {
+      "bytes": 8951,
+      "component": "theme",
+      "deploy_relative_path": "page-come-funziona.php",
+      "git_blob_sha": "f822c922b2f31d785d2bb1916480dae70f09f556",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/page-come-funziona.php",
+      "sha256": "879e5ec91f589d55964a8b6017f40adf51505eeedf8e08e233d7069fd0393bb4"
+    },
+    {
+      "bytes": 4160,
+      "component": "theme",
+      "deploy_relative_path": "page-mappa.php",
+      "git_blob_sha": "769973b1f7101b9acbe46220a2de0e386f3d12e2",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/page-mappa.php",
+      "sha256": "f187a5ef8840d0c88f9d4a3e69f64ba12b37297d40266cb2c3d791b96e890146"
+    },
+    {
+      "bytes": 4176,
+      "component": "theme",
+      "deploy_relative_path": "page-segnala-evento.php",
+      "git_blob_sha": "fceb892ce12af5ed4be042452f2a13efe9410e53",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/page-segnala-evento.php",
+      "sha256": "07d4c3983b95fc0b63776b7a645bce7637e3d028a9a015d09fed7328919c1fb3"
+    },
+    {
+      "bytes": 914,
+      "component": "theme",
+      "deploy_relative_path": "page-segnalazione-inviata.php",
+      "git_blob_sha": "4e7766f0796aefff30ad704c546c6ba6e6ba7b4b",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/page-segnalazione-inviata.php",
+      "sha256": "28733b633130c00a8f6e7707a1bc20a1557151eb613b34c72ddc3d4923394a8d"
+    },
+    {
+      "bytes": 11845,
+      "component": "theme",
+      "deploy_relative_path": "page-segnalazioni.php",
+      "git_blob_sha": "10f4b448cafb5cf3d069978b0a2e39eab2d8b798",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/page-segnalazioni.php",
+      "sha256": "6cd7134805b25ae78ff41c25b2f433b95a6c62e96c1996e978c027bbf27d66bf"
+    },
+    {
+      "bytes": 12240,
+      "component": "theme",
+      "deploy_relative_path": "page-sentinelle.php",
+      "git_blob_sha": "0df9fec28789f8fde122f41fbc0e83cfccf19949",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/page-sentinelle.php",
+      "sha256": "8fdf0c9d9e7c74b84cd1208d65a1c072e0da2a15118352b6c1ab4e19ca8b447d"
+    },
+    {
+      "bytes": 4748,
+      "component": "theme",
+      "deploy_relative_path": "page-stati-sistema.php",
+      "git_blob_sha": "451d13c9cfeda3a924445c37d006488cd2c11445",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/page-stati-sistema.php",
+      "sha256": "a9d34295ad833717e5133496e0067a804e3fa1ab375a773f6c7eb8fb47fd09f9"
+    },
+    {
+      "bytes": 366,
+      "component": "theme",
+      "deploy_relative_path": "single-ba_evento.php",
+      "git_blob_sha": "fff83ef683392ac5085d41b5a6ee39dcc806bc15",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/single-ba_evento.php",
+      "sha256": "a5b972fbba4b4eab69af5aa877c2396e48c4bba3890ba10b0dfe34965f16bb59"
+    },
+    {
+      "bytes": 366,
+      "component": "theme",
+      "deploy_relative_path": "single-badaround_event.php",
+      "git_blob_sha": "fff83ef683392ac5085d41b5a6ee39dcc806bc15",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/single-badaround_event.php",
+      "sha256": "a5b972fbba4b4eab69af5aa877c2396e48c4bba3890ba10b0dfe34965f16bb59"
+    },
+    {
+      "bytes": 180,
+      "component": "theme",
+      "deploy_relative_path": "style.css",
+      "git_blob_sha": "fee46bf2d10c50474ba5c4842d2482bdef0e17a8",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/style.css",
+      "sha256": "3c3ded5039634bb73617405ad86b26b879e723508d56b07294f514c23ecd4568"
+    },
+    {
+      "bytes": 90,
+      "component": "theme",
+      "deploy_relative_path": "taxonomy-ba_territorio.php",
+      "git_blob_sha": "2516b4990e49ffed2aa91288af546bb996336911",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/taxonomy-ba_territorio.php",
+      "sha256": "40debbcc10f45dd643d8e6e86880eadc8774081603d2eceff82dbfc4bf937714"
+    },
+    {
+      "bytes": 90,
+      "component": "theme",
+      "deploy_relative_path": "taxonomy-badaround_location.php",
+      "git_blob_sha": "2516b4990e49ffed2aa91288af546bb996336911",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/taxonomy-badaround_location.php",
+      "sha256": "40debbcc10f45dd643d8e6e86880eadc8774081603d2eceff82dbfc4bf937714"
+    },
+    {
+      "bytes": 3569,
+      "component": "theme",
+      "deploy_relative_path": "template-parts/components/event-card.php",
+      "git_blob_sha": "25f04bf2280c42b034e96781f87b2f86e6b1f24b",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/template-parts/components/event-card.php",
+      "sha256": "b854e9161e5dd96db2166c95e89f96377a21aec832f6fed435c02df94770fff6"
+    },
+    {
+      "bytes": 3172,
+      "component": "theme",
+      "deploy_relative_path": "template-parts/components/system-state.php",
+      "git_blob_sha": "605f34f9a65d669a621242c5b2936fc3995e3141",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/template-parts/components/system-state.php",
+      "sha256": "e95ff9887d0ff441341c81c5b05ed0be3f900cd22eaa2c6a954bf23065b6680a"
+    },
+    {
+      "bytes": 2480,
+      "component": "theme",
+      "deploy_relative_path": "template-parts/native-report/shell.php",
+      "git_blob_sha": "f812f5f14528ef28fa3fbf3d88338bb40cbdf5ef",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/template-parts/native-report/shell.php",
+      "sha256": "811b2b0d73cf957a4525fd9d24328afeb1aa412a5cbab090c1e1bdd160209bab"
+    },
+    {
+      "bytes": 2314,
+      "component": "theme",
+      "deploy_relative_path": "template-parts/native-report/step.php",
+      "git_blob_sha": "ccdc03aae7a912be1d826eb1e8df9c846388dd90",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/template-parts/native-report/step.php",
+      "sha256": "0cb9b840c297bd69fcde43bd63855d9a6d41cabd5ab257e64eba42b9b38281c4"
+    },
+    {
+      "bytes": 10000,
+      "component": "theme",
+      "deploy_relative_path": "template-parts/single-event-layout.php",
+      "git_blob_sha": "433f868efa5f0579d09062053584638a3598f10b",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/template-parts/single-event-layout.php",
+      "sha256": "17dbb2a49a878652580742a6c7e4a4838ca3abd5afaa7f0a971a63c8eef024a0"
+    },
+    {
+      "bytes": 6475,
+      "component": "theme",
+      "deploy_relative_path": "template-parts/territory-layout.php",
+      "git_blob_sha": "ae3c89a54a40c7bbca70ba1f86240c608bdc83ec",
+      "mode": "100644",
+      "path": "wordpress/themes/badaround-child/template-parts/territory-layout.php",
+      "sha256": "990999df6022777d1b510d01c3afdb1c7b2d2167f63d2738b58ff0a0c3a5abe8"
+    }
+  ],
+  "format": "badaround-f17f-deploy-manifest/v1",
+  "qa_branch": "recovery/native-media-f17-qa-rc",
+  "release_baseline_sha": "bcc2c74ca3391f1d16f9b1eb9719650ea4d27952",
+  "reviewed_backend_sha": "beb33ec3325480f77a266b3b6356f5860b00e16e",
+  "reviewed_integrated_sha": "d6156e236d35da062c7f444bc73442e2905db54e",
+  "trees": {
+    "backend_includes": "6a7b16f95bd874d581df8cfd0d874a99c270a1e1",
+    "candidate": "b1bd80f431a62c7492acb33887022e0e1013c09f",
+    "core": "1aaa7d6363a09f74e477e7ed926f8e4bf35bfcba",
+    "native_backend_subset": "8fccc9579b6bd1c5ff757855a699c17bd201aab0",
+    "native_frontend": "605cd315a3b25bd3face0e204e93b239a7886491",
+    "theme": "f379b7acbd16956ad896824502533bf3ccbb0e53"
+  },
+  "versions": {
+    "canonical_report": "badaround-report/v1",
+    "core": "0.18.0",
+    "schema": "1.9.0"
+  }
+}
