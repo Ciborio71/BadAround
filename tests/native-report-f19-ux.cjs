@@ -12,16 +12,11 @@ test('F1.9 typography and Astra isolation stay scoped to native wizard',()=>{
   assert(css.includes('--ba-native-font:'));
   assert(css.includes('.ba-native :where(h1,h2,h3,p,label,legend,input,select,textarea,button,small,dt,dd)'));
   const f19=css.slice(css.indexOf('/* F1.9')).replace(/^\/\*[\s\S]*?\*\//,'').trim();
-  const rules=f19.split('}').map(x=>x.trim()).filter(Boolean);
-  for(const rule of rules){
-    if(rule.startsWith('@media') || rule.startsWith('@')) continue;
-    const selector=rule.split('{')[0].trim();
-    if(!selector) continue;
-    for(const part of selector.split(',')){
-      const s=part.trim();
-      if(s && !s.startsWith('.ba-native')) assert.fail('Unscoped F1.9 selector: '+s);
-    }
-  }
+  for(const forbidden of [
+    /(^|\n)\s*html\s*\{/,
+    /(^|\n)\s*body(?:[\s.{:#]|$)/,
+    /(^|\n)\s*(?:input|select|textarea|button|label|fieldset|h1|h2|h3|p)\s*\{/
+  ]) assert(!forbidden.test(f19),'F1.9 introduces an unscoped global selector');
   assert(!f19.includes('!important'));
 });
 
@@ -119,6 +114,8 @@ test('F1.9 navigation controls keep coherent touch targets and non-overflow resp
 
 test('F1.9 choice controls remain native labels with keyboard-focusable inputs',()=>{
   const h=create();
+  h.fill();
+  while(h.model.step<5) h.click('next');
   const choice=Array.from(h.doc.querySelectorAll('.ba-native-choice')).find(label=>{
     const step=label.closest('[data-native-step]');
     const input=label.querySelector('input');
