@@ -1,15 +1,51 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-/** F1.6 QA gate: staging administrators only; the normal URL keeps its legacy form. */
+/**
+ * F1.14 report-entry control.
+ *
+ * Native is the default when its frozen runtime dependencies are available.
+ * Emergency rollback is an administratively controlled constant:
+ *
+ * define( 'BADAROUND_NATIVE_REPORT_DEFAULT', false );
+ *
+ * Absence of the constant means native-default. No database state is involved.
+ */
+function badaround_native_report_available() {
+	return class_exists( 'BadAround_Report_Schema' )
+		&& class_exists( 'BadAround_Event_Taxonomy_Map' )
+		&& class_exists( 'BadAround_Native_Report_REST_Controller' );
+}
+
+function badaround_native_report_default_enabled() {
+	if ( defined( 'BADAROUND_NATIVE_REPORT_DEFAULT' ) ) {
+		return true === BADAROUND_NATIVE_REPORT_DEFAULT;
+	}
+	return true;
+}
+
+function badaround_report_entry_mode() {
+	return badaround_native_report_available() && badaround_native_report_default_enabled()
+		? 'native'
+		: 'wpforms';
+}
+
+function badaround_native_report_use_native() {
+	return 'native' === badaround_report_entry_mode();
+}
+
+/**
+ * Legacy F1.6 QA marker retained only for staging/admin diagnostic headers.
+ * It no longer controls normal routing. The public default does not require
+ * authentication or ?native_report=1.
+ */
 function badaround_native_report_qa_enabled() {
 	$request_host = strtolower( $_SERVER['HTTP_HOST'] ?? '' );
-	return 'staging.badaround.it' === wp_parse_url( home_url( '/' ), PHP_URL_HOST )
+	return badaround_native_report_use_native()
+		&& 'staging.badaround.it' === wp_parse_url( home_url( '/' ), PHP_URL_HOST )
 		&& in_array( $request_host, array( 'staging.badaround.it', 'staging.badaround.it:443' ), true )
 		&& current_user_can( 'manage_options' )
-		&& isset( $_GET['native_report'] ) && is_string( $_GET['native_report'] ) && '1' === $_GET['native_report']
-		&& class_exists( 'BadAround_Report_Schema' ) && class_exists( 'BadAround_Event_Taxonomy_Map' )
-		&& class_exists( 'BadAround_Native_Report_REST_Controller' );
+		&& isset( $_GET['native_report'] ) && is_string( $_GET['native_report'] ) && '1' === $_GET['native_report'];
 }
 
 function badaround_native_report_qa_headers() {
