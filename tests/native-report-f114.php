@@ -28,6 +28,7 @@ function esc_html( $value ) { return esc_attr( $value ); }
 function esc_url( $value ) { return esc_attr( $value ); }
 function wp_json_encode( $value, $flags = 0 ) { return json_encode( $value, $flags ); }
 function get_privacy_policy_url() { return home_url( '/privacy-policy/' ); }
+function get_permalink() { return home_url( '/segnala-un-evento/' ); }
 function sanitize_key( $value ) { return preg_replace( '/[^a-z0-9_-]/', '', strtolower( $value ) ); }
 function is_wp_error() { return false; }
 function is_front_page() { return false; }
