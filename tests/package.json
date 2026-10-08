@@ -1,7 +1,7 @@
 {
   "name": "badaround-native-form-tests",
   "private": true,
-  "scripts": {"test": "node --test native-report-f16.cjs native-report-f16-dom.cjs"},
+  "scripts": {"test": "node --test native-report-f16.cjs native-report-f16-dom.cjs native-media-f17d.cjs native-media-f17d-extra.cjs native-media-f17d-dom.cjs native-media-f17d-http.cjs native-media-f17e.cjs"},
   "devDependencies": {"jsdom": "30.1.2"},
   "engines": {"node": ">=24"}
 }

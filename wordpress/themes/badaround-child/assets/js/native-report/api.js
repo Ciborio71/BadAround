@@ -1,7 +1,7 @@
 (function (root) {
   'use strict';
   const ns = root.BadAroundNative = root.BadAroundNative || {};
-  ns.send = async function (config, payload, fetcher = root.fetch.bind(root), origin = root.location.origin) {
+  ns.send = async function (config, payload, fetcher = root.fetch.bind(root), origin = root.location.origin, mediaCapability = null) {
     const url = new URL(config.endpoint, origin);
     if (url.origin !== origin) return {ok:false, error:{code:'cross_origin_config', retryable:false}};
     const controller = new AbortController();
@@ -9,7 +9,8 @@
     try {
       const response = await fetcher(url.href, {
         method:'POST', mode:'same-origin', credentials:'omit', cache:'no-store', signal:controller.signal,
-        headers:{'Content-Type':'application/json', [config.markerHeader]:config.markerValue},
+        headers:{'Content-Type':'application/json', [config.markerHeader]:config.markerValue,
+          ...(payload.media?.items?.length && mediaCapability ? {'X-BadAround-Media-Capability':mediaCapability} : {})},
         body:JSON.stringify(payload)
       });
       let body;

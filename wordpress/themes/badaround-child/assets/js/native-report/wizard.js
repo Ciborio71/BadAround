@@ -2,6 +2,10 @@
   'use strict';
   const ns = window.BadAroundNative;
   function boot(container) {
+    if (container.nativeReport) return; // Reinitialization must retain the current logical wizard.
+    let disposed=false; const listeners=[];
+    function listen(target,type,handler) { target.addEventListener(type,handler);listeners.push(()=>target.removeEventListener(type,handler)); }
+    function teardown() { if(disposed)return; disposed=true;listeners.forEach(remove=>remove());mediaView?.dispose(); }
     const config = JSON.parse(container.querySelector('[data-native-config]').textContent);
     const model = new ns.Model(config);
     const form = container.querySelector('[data-native-form]');
@@ -9,6 +13,10 @@
     const wrappers = Array.from(form.querySelectorAll('[data-native-field]'));
     const next = form.querySelector('[data-native-next]'), back = form.querySelector('[data-native-back]'), submit = form.querySelector('[data-native-submit]');
     const success = container.querySelector('[data-native-success]');
+    let mediaView = null;
+    function mountMedia() {
+      if (ns.mountMedia && config.media) mediaView = ns.mountMedia(container, model, config.media, () => render());
+    }
     // Presentation classification of frozen F1.3 errors, never a validator.
     const correctableCodes = new Set(['invalid_type', 'missing_required_field', 'conditional_field_required', 'invalid_email', 'invalid_phone', 'invalid_date_time', 'invalid_enum', 'invalid_category_subtype', 'invalid_location', 'invalid_plate', 'invalid_boolean', 'invalid_array', 'invalid_number', 'value_too_short', 'value_too_long', 'value_too_small', 'value_too_large', 'reward_amount_required', 'reward_confirmation_required']);
     const read = wrapper => {
@@ -29,8 +37,19 @@
         list.append(term, detail);
       });
       region.append(list);
+      if (mediaView && mediaView.media.count) {
+        const title=document.createElement('p');title.textContent=`Immagini accettate: ${new Set(mediaView.media.items.filter(row=>row.state==='accepted').map(row=>row.descriptor.media_id)).size}. Gli originali restano riservati.`;
+        const previews=document.createElement('ul');previews.className='ba-native-review-media';
+        mediaView.media.items.filter(row=>row.state==='accepted').forEach(row=>{
+          const li=document.createElement('li'), img=document.createElement('img'), state=document.createElement('span');
+          img.src=row.preview;img.alt='Anteprima locale';state.textContent='Accettata';li.append(img,state);previews.append(li);
+        });region.append(title,previews);
+        const unresolved=mediaView.media.items.filter(row=>row.state!=='accepted' || row.error).length;
+        if(unresolved){const pending=document.createElement('p');pending.textContent=`${unresolved} immagini da completare o rimuovere nello Step 5 prima dell’invio.`;region.append(pending);}
+      }
     }
     function render(focus = false) {
+      if(disposed)return;
       const current = steps[model.step];
       const subtype = form.querySelector('[name="event.subtype"]');
       const previous = model.effective('event.subtype') || '';
@@ -61,14 +80,16 @@
       submit.hidden = current !== 'review'; submit.disabled = model.busy || model.completed || !!model.blocked;
       submit.textContent = model.busy ? 'Invio in corso…' : model.snapshot ? 'Riprova invio' : 'Invia segnalazione';
       form.setAttribute('aria-busy', String(model.busy));
+      if (mediaView) mediaView.render();
       if (current === 'review') review();
       if (focus) form.querySelector(`[data-native-step="${current}"] h2`).focus();
     }
     function displayErrors(errors) {
       const first = errors.find(error => config.fields[error.field] && model.active(error.field));
       if (first) model.step = steps.indexOf(config.fields[first.field].step);
-      render(); ns.presentErrors(container, errors, config, path => {
+      render(); ns.presentErrors(container, errors, config, (path, file) => {
         model.step = steps.indexOf(config.fields[path].step); render();
+        if (file && mediaView) return mediaView.focus(file);
         const wrapper = wrappers.find(w => w.dataset.nativeField === path);
         wrapper.querySelector('input,select,textarea,fieldset').focus();
       });
@@ -81,52 +102,69 @@
         }
       });
     });
-    form.addEventListener('input', event => {
+    mountMedia();
+    listen(form,'input', event => {
       const wrapper = event.target.closest('[data-native-field]'); if (!wrapper) return;
       model.set(wrapper.dataset.nativeField, read(wrapper));
       ns.presentErrors(container, [], config); render();
     });
     // Some select/checkbox assistive technology emits change without input.
-    form.addEventListener('change', event => {
+    listen(form,'change', event => {
       const wrapper = event.target.closest('[data-native-field]'); if (!wrapper) return;
       model.set(wrapper.dataset.nativeField, read(wrapper)); render();
     });
-    next.addEventListener('click', () => {
+    listen(next,'click', () => {
+      if(model.busy || model.snapshot || model.completed || model.step>=steps.length-1)return;
       const errors = model.validate(steps[model.step]);
       if (errors.length) return displayErrors(errors);
       model.step++; ns.presentErrors(container, [], config); render(true);
     });
-    back.addEventListener('click', () => { if (model.step > 0 && !model.snapshot) { model.step--; ns.presentErrors(container, [], config); render(true); } });
-    form.addEventListener('submit', async event => {
+    listen(back,'click', () => { if (model.step > 0 && !model.snapshot) { model.step--; ns.presentErrors(container, [], config); render(true); } });
+    listen(form,'submit', async event => {
       event.preventDefault();
       if (steps[model.step] !== 'review' || model.busy || model.completed || model.blocked) return;
       if (!model.snapshot) {
+        const mediaErrors=mediaView?.media.errors() || []; if (mediaErrors.length) return displayErrors(mediaErrors);
         const errors = model.validate(); if (errors.length) return displayErrors(errors);
-        model.snapshot = model.payload();
+        const payload=model.payload();
+        const descriptors=mediaView ? mediaView.media.freeze() : [];
+        if (descriptors.length) { payload.media.items=descriptors;model.snapshot=ns.freezeMediaPayload(payload); }
+        else model.snapshot=payload;
       }
       model.busy = true; ns.presentErrors(container, [], config); render();
-      const result = await ns.send(config, model.snapshot);
-      model.busy = false;
+      const result = await ns.send(config, model.snapshot, undefined, undefined, mediaView?.media.reportCapability());
+      if(disposed)return;
       if (result.ok) {
+        model.busy = false;
         model.completed = true; model.lastError = null;
+        mediaView?.dispose();
         form.hidden = true; container.querySelector('nav').hidden = true; success.hidden = false;
         success.querySelector('h2').focus();
       } else {
         model.lastError = result.error; // Code retained for troubleshooting, no payload/PII logging.
         const validationRejection = result.error.httpStatus === 422 && !result.error.retryable
           && correctableCodes.has(result.error.code) && config.fields[result.error.field] && model.active(result.error.field);
-        if (validationRejection) model.snapshot = null;
+        const mediaBearing=!!model.snapshot.media?.items?.length;
+        const editableMedia=mediaBearing && await mediaView.media.editable(result.error,validationRejection);
+        if(disposed)return;
+        model.busy = false; // Includes owner-status reconciliation in the double-submit guard.
+        if (mediaBearing) {
+          if (editableMedia) { model.snapshot=null;mediaView.media.unlock(); }
+          else { if(result.error.retryable)mediaView.media.markUncertain();else model.blocked=true; }
+        } else if (validationRejection) { model.snapshot = null;mediaView?.media.unlock(); }
         else if (!result.error.retryable) model.blocked = true;
         // A locked snapshot must stay on review, where an allowed retry is reachable.
-        displayErrors([model.snapshot ? {...result.error, field:null} : result.error]);
+        displayErrors([model.snapshot ? {...result.error, field:null} : editableMedia ? {...result.error,field:config.fields[result.error.field] ? result.error.field : 'media.availability'} : result.error]);
       }
     });
-    container.querySelector('[data-native-new]').addEventListener('click', () => {
+    listen(container.querySelector('[data-native-new]'),'click', () => {
+      mediaView?.dispose();
       form.reset(); model.reset(); model.blocked = false; model.lastError = null;
       wrappers.forEach(wrapper => {
         const value = model.values[wrapper.dataset.nativeField];
         if (value !== undefined) wrapper.querySelector('[data-native-input]').value = value;
       });
+      mountMedia();
       success.hidden = true; form.hidden = false; container.querySelector('nav').hidden = false;
       ns.presentErrors(container, [], config); render(true);
     });
@@ -134,7 +172,8 @@
     form.querySelector('[data-native-navigation]').hidden = false;
     render();
     // Object stays in memory only: useful for QA, no local/session storage.
-    container.nativeReport = {model, config};
+    container.nativeReport = {model, config, teardown};
+    listen(window,'pagehide',event=>{if(!event.persisted)teardown();});
   }
   document.querySelectorAll('[data-native-report]').forEach(container => {
     try { boot(container); } catch (_) {
