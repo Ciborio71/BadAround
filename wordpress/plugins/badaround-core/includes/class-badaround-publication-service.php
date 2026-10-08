@@ -188,6 +188,36 @@ class BadAround_Publication_Service {
 		$public_lng = get_post_meta( $event_id, '_ba_public_lng', true );
 		$radius     = absint( get_post_meta( $event_id, '_ba_public_radius_m', true ) );
 		$has_public_coords = is_numeric( $public_lat ) && is_numeric( $public_lng );
+		$precision = sanitize_key( (string) get_post_meta( $event_id, '_ba_public_location_precision', true ) );
+
+		if ( 'f32-c7' === $precision ) {
+			$territory = $this->deepest_term( $event_id, BadAround_Event_Post_Type::TERRITORY_TAX );
+			$municipality = $this->municipality_term( $territory );
+			if ( ! $municipality ) {
+				return new WP_Error( 'ba_publication_municipality_missing', __( 'Il Comune canonico non è risolvibile dalla gerarchia territoriale.', 'badaround-core' ) );
+			}
+			if ( ! $territory || (int) $territory->term_id !== (int) $municipality->term_id ) {
+				return new WP_Error( 'ba_publication_municipality_territory_too_precise', __( 'Il territorio pubblico deve fermarsi al Comune canonico.', 'badaround-core' ) );
+			}
+			if ( sanitize_text_field( $municipality->name ) !== $place_name ) {
+				return new WP_Error( 'ba_publication_municipality_label_invalid', __( 'La località pubblica deve coincidere con il Comune canonico.', 'badaround-core' ) );
+			}
+			if ( '' !== trim( (string) get_post_meta( $event_id, '_ba_public_address', true ) ) ) {
+				return new WP_Error( 'ba_publication_municipality_address_too_precise', __( 'Con precisione comunale non può essere esposto un indirizzo più preciso.', 'badaround-core' ) );
+			}
+			if ( $has_public_coords ) {
+				$verified = strtolower( trim( (string) get_term_meta( $municipality->term_id, '_ba_geo_verified', true ) ) );
+				$center_lat = get_term_meta( $municipality->term_id, '_ba_center_lat', true );
+				$center_lng = get_term_meta( $municipality->term_id, '_ba_center_lng', true );
+				$center_matches = is_numeric( $center_lat ) && is_numeric( $center_lng )
+					&& abs( (float) $public_lat - (float) $center_lat ) < 0.000001
+					&& abs( (float) $public_lng - (float) $center_lng ) < 0.000001;
+				if ( ! in_array( $verified, array( '1', 'true', 'yes', 'on' ), true ) || ! $center_matches || $radius < 3000 ) {
+					return new WP_Error( 'ba_publication_municipality_coordinates_invalid', __( 'Le coordinate pubbliche comunali devono provenire da un centro territoriale verificato.', 'badaround-core' ) );
+				}
+			}
+		}
+
 		if ( '' === $place_name && ! $has_public_coords ) {
 			return new WP_Error( 'ba_publication_location_missing', __( 'È necessaria una posizione pubblica o approssimata.', 'badaround-core' ) );
 		}
