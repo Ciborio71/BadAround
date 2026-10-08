@@ -223,6 +223,19 @@ jobs:
             php "./tests/native-report-$suite.php"
           done
 
+      - name: Fetch and verify exact frozen differential baseline
+        if: inputs.deployment_track == 'f17_qa'
+        shell: bash
+        run: |
+          set -euo pipefail
+          FROZEN_SHA='bcc2c74ca3391f1d16f9b1eb9719650ea4d27952'
+          FROZEN_FILE='wordpress/plugins/badaround-core/includes/class-badaround-native-report-rest-controller.php'
+          git fetch --no-tags --depth=1 origin "$FROZEN_SHA"
+          git cat-file -e "${FROZEN_SHA}^{commit}"
+          FROZEN_HASH="$(git show "$FROZEN_SHA:$FROZEN_FILE" | sha256sum | awk '{print $1}')"
+          test "$FROZEN_HASH" = '112d15d2db24896e88ed9c5de011734cf70aa1f74ad9267823744483d58dc085'
+          test "$(git rev-parse HEAD)" = 'd6156e236d35da062c7f444bc73442e2905db54e'
+
       - name: F1.7 backend media and security recovery
         if: inputs.deployment_track == 'f17_qa'
         shell: bash
