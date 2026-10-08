@@ -26,26 +26,53 @@
     };
     function review() {
       const region = form.querySelector('[data-native-review]'); region.replaceChildren();
-      const list = document.createElement('dl');
+      const sections = new Map();
       Object.entries(config.fields).forEach(([path, field]) => {
         if (!model.active(path)) return;
         const value = model.effective(path); if (value === undefined || value === '') return;
+        const stepKey = field.step || 'review';
+        let section = sections.get(stepKey);
+        if (!section) {
+          section = document.createElement('section');
+          section.className = 'ba-native-review-section';
+          const heading = document.createElement('h3');
+          heading.textContent = config.steps[stepKey] || 'Riepilogo';
+          const list = document.createElement('dl');
+          section.append(heading, list);
+          sections.set(stepKey, section);
+          region.append(section);
+        }
+        const list = section.querySelector('dl');
         const term = document.createElement('dt'); term.textContent = field.label;
         const detail = document.createElement('dd');
         const label = v => field.options[v] || String(v);
-        detail.textContent = (typeof value === 'boolean' ? (value ? 'Confermato' : 'Non confermato') : Array.isArray(value) ? value.map(label).join(', ') : label(value)) + ' — ' + field.help;
+        const valueText = typeof value === 'boolean'
+          ? (value ? 'Confermato' : 'Non confermato')
+          : Array.isArray(value) ? value.map(label).join(', ') : label(value);
+        const valueNode = document.createElement('span'); valueNode.textContent = valueText;
+        detail.append(valueNode);
+        if (field.help) {
+          const help = document.createElement('small');
+          help.className = 'ba-native-review-help';
+          help.textContent = field.help;
+          detail.append(help);
+        }
         list.append(term, detail);
       });
-      region.append(list);
       if (mediaView && mediaView.media.count) {
+        const mediaSection = document.createElement('section');
+        mediaSection.className = 'ba-native-review-section';
+        const heading = document.createElement('h3'); heading.textContent = config.steps.media || 'Immagini';
         const title=document.createElement('p');title.textContent=`Immagini accettate: ${new Set(mediaView.media.items.filter(row=>row.state==='accepted').map(row=>row.descriptor.media_id)).size}. Gli originali restano riservati.`;
         const previews=document.createElement('ul');previews.className='ba-native-review-media';
         mediaView.media.items.filter(row=>row.state==='accepted').forEach(row=>{
           const li=document.createElement('li'), img=document.createElement('img'), state=document.createElement('span');
           img.src=row.preview;img.alt='Anteprima locale';state.textContent='Accettata';li.append(img,state);previews.append(li);
-        });region.append(title,previews);
+        });
+        mediaSection.append(heading,title,previews);
         const unresolved=mediaView.media.items.filter(row=>row.state!=='accepted' || row.error).length;
-        if(unresolved){const pending=document.createElement('p');pending.textContent=`${unresolved} immagini da completare o rimuovere nello Step 5 prima dell’invio.`;region.append(pending);}
+        if(unresolved){const pending=document.createElement('p');pending.className='ba-native-error';pending.textContent=`${unresolved} immagini da completare o rimuovere nello Step 5 prima dell’invio.`;mediaSection.append(pending);}
+        region.append(mediaSection);
       }
     }
     function render(focus = false) {
@@ -82,7 +109,25 @@
       form.setAttribute('aria-busy', String(model.busy));
       if (mediaView) mediaView.render();
       if (current === 'review') review();
-      if (focus) form.querySelector(`[data-native-step="${current}"] h2`).focus();
+      if (focus) focusStep(current);
+    }
+    function focusStep(current) {
+      const section = form.querySelector(`[data-native-step="${current}"]`);
+      const heading = section?.querySelector('h2');
+      if (!section || !heading) return;
+      try { heading.focus({preventScroll:true}); } catch (_) { heading.focus(); }
+      const rect = section.getBoundingClientRect();
+      const header = document.querySelector('.ba-site-header');
+      const headerBottom = header ? header.getBoundingClientRect().bottom : 0;
+      const safeTop = Math.max(16, headerBottom + 16);
+      const safeBottom = Math.max(safeTop + 120, (window.innerHeight || document.documentElement.clientHeight || 0) - 24);
+      if (rect.top >= safeTop && rect.top <= safeBottom) return;
+      const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const top = Math.max(0, (window.scrollY || window.pageYOffset || 0) + rect.top - safeTop);
+      if (typeof window.scrollTo === 'function') {
+        try { window.scrollTo({top,behavior:reduceMotion ? 'auto' : 'smooth'}); }
+        catch (_) { window.scrollTo(0,top); }
+      }
     }
     function displayErrors(errors) {
       const first = errors.find(error => config.fields[error.field] && model.active(error.field));
