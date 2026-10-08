@@ -253,7 +253,7 @@ function badaround_child_enqueue_assets() {
 			array( 'badaround-components' ),
 			(string) filemtime( $dir . '/assets/css/report.css' )
 		);
-		if ( badaround_native_report_qa_enabled() ) {
+		if ( badaround_native_report_use_native() ) {
 			wp_enqueue_style( 'badaround-native-report', $uri . '/assets/css/native-report.css', array( 'badaround-report' ), (string) filemtime( $dir . '/assets/css/native-report.css' ) );
 			$previous = array();
 			foreach ( array( 'model', 'api', 'errors', 'media', 'media-view', 'wizard' ) as $module ) {
