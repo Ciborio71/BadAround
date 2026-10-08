@@ -2,6 +2,10 @@
   'use strict';
   const ns = window.BadAroundNative;
   function boot(container) {
+    if (container.nativeReport) return; // Reinitialization must retain the current logical wizard.
+    let disposed=false; const listeners=[];
+    function listen(target,type,handler) { target.addEventListener(type,handler);listeners.push(()=>target.removeEventListener(type,handler)); }
+    function teardown() { if(disposed)return; disposed=true;listeners.forEach(remove=>remove());mediaView?.dispose(); }
     const config = JSON.parse(container.querySelector('[data-native-config]').textContent);
     const model = new ns.Model(config);
     const form = container.querySelector('[data-native-form]');
@@ -34,15 +38,18 @@
       });
       region.append(list);
       if (mediaView && mediaView.media.count) {
-        const title=document.createElement('p');title.textContent=`Immagini accettate: ${mediaView.media.descriptors().length}. Gli originali restano riservati.`;
+        const title=document.createElement('p');title.textContent=`Immagini accettate: ${new Set(mediaView.media.items.filter(row=>row.state==='accepted').map(row=>row.descriptor.media_id)).size}. Gli originali restano riservati.`;
         const previews=document.createElement('ul');previews.className='ba-native-review-media';
-        mediaView.media.items.forEach(row=>{
+        mediaView.media.items.filter(row=>row.state==='accepted').forEach(row=>{
           const li=document.createElement('li'), img=document.createElement('img'), state=document.createElement('span');
-          img.src=row.preview;img.alt='Anteprima locale';state.textContent=row.state==='accepted' ? 'Accettata' : 'Da completare o rimuovere';li.append(img,state);previews.append(li);
+          img.src=row.preview;img.alt='Anteprima locale';state.textContent='Accettata';li.append(img,state);previews.append(li);
         });region.append(title,previews);
+        const unresolved=mediaView.media.items.filter(row=>row.state!=='accepted' || row.error).length;
+        if(unresolved){const pending=document.createElement('p');pending.textContent=`${unresolved} immagini da completare o rimuovere nello Step 5 prima dell’invio.`;region.append(pending);}
       }
     }
     function render(focus = false) {
+      if(disposed)return;
       const current = steps[model.step];
       const subtype = form.querySelector('[name="event.subtype"]');
       const previous = model.effective('event.subtype') || '';
@@ -96,23 +103,24 @@
       });
     });
     mountMedia();
-    form.addEventListener('input', event => {
+    listen(form,'input', event => {
       const wrapper = event.target.closest('[data-native-field]'); if (!wrapper) return;
       model.set(wrapper.dataset.nativeField, read(wrapper));
       ns.presentErrors(container, [], config); render();
     });
     // Some select/checkbox assistive technology emits change without input.
-    form.addEventListener('change', event => {
+    listen(form,'change', event => {
       const wrapper = event.target.closest('[data-native-field]'); if (!wrapper) return;
       model.set(wrapper.dataset.nativeField, read(wrapper)); render();
     });
-    next.addEventListener('click', () => {
+    listen(next,'click', () => {
+      if(model.busy || model.snapshot || model.completed || model.step>=steps.length-1)return;
       const errors = model.validate(steps[model.step]);
       if (errors.length) return displayErrors(errors);
       model.step++; ns.presentErrors(container, [], config); render(true);
     });
-    back.addEventListener('click', () => { if (model.step > 0 && !model.snapshot) { model.step--; ns.presentErrors(container, [], config); render(true); } });
-    form.addEventListener('submit', async event => {
+    listen(back,'click', () => { if (model.step > 0 && !model.snapshot) { model.step--; ns.presentErrors(container, [], config); render(true); } });
+    listen(form,'submit', async event => {
       event.preventDefault();
       if (steps[model.step] !== 'review' || model.busy || model.completed || model.blocked) return;
       if (!model.snapshot) {
@@ -125,6 +133,7 @@
       }
       model.busy = true; ns.presentErrors(container, [], config); render();
       const result = await ns.send(config, model.snapshot, undefined, undefined, mediaView?.media.reportCapability());
+      if(disposed)return;
       if (result.ok) {
         model.busy = false;
         model.completed = true; model.lastError = null;
@@ -137,6 +146,7 @@
           && correctableCodes.has(result.error.code) && config.fields[result.error.field] && model.active(result.error.field);
         const mediaBearing=!!model.snapshot.media?.items?.length;
         const editableMedia=mediaBearing && await mediaView.media.editable(result.error,validationRejection);
+        if(disposed)return;
         model.busy = false; // Includes owner-status reconciliation in the double-submit guard.
         if (mediaBearing) {
           if (editableMedia) { model.snapshot=null;mediaView.media.unlock(); }
@@ -147,7 +157,7 @@
         displayErrors([model.snapshot ? {...result.error, field:null} : editableMedia ? {...result.error,field:config.fields[result.error.field] ? result.error.field : 'media.availability'} : result.error]);
       }
     });
-    container.querySelector('[data-native-new]').addEventListener('click', () => {
+    listen(container.querySelector('[data-native-new]'),'click', () => {
       mediaView?.dispose();
       form.reset(); model.reset(); model.blocked = false; model.lastError = null;
       wrappers.forEach(wrapper => {
@@ -162,8 +172,8 @@
     form.querySelector('[data-native-navigation]').hidden = false;
     render();
     // Object stays in memory only: useful for QA, no local/session storage.
-    container.nativeReport = {model, config, teardown:()=>mediaView?.dispose()};
-    window.addEventListener('pagehide',event=>{if(!event.persisted)mediaView?.dispose();});
+    container.nativeReport = {model, config, teardown};
+    listen(window,'pagehide',event=>{if(!event.persisted)teardown();});
   }
   document.querySelectorAll('[data-native-report]').forEach(container => {
     try { boot(container); } catch (_) {

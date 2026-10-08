@@ -121,7 +121,7 @@ jobs:
       - name: Test F1.7B real HTTP multipart on synthetic local fixtures
         run: python3 ./tests/native-media-http.py
 
-      - name: Verify frozen backend and scoped F1.7D foundation extensions
+      - name: Verify frozen backend and scoped F1.7D/E foundation extensions
         run: |
           git diff --exit-code beb33ec3325480f77a266b3b6356f5860b00e16e -- wordpress/plugins/badaround-core
           git diff --exit-code bcc2c74ca3391f1d16f9b1eb9719650ea4d27952 -- \
@@ -155,7 +155,7 @@ jobs:
           cache: "npm"
           cache-dependency-path: tests/package-lock.json
 
-      - name: Test F1.6 foundation and F1.7D media model DOM and real HTTP integration
+      - name: Test F1.6 foundation and F1.7D/E media adversarial DOM and real HTTP integration
         run: |
           npm ci --prefix tests --ignore-scripts --no-audit --no-fund
           npm test --prefix tests

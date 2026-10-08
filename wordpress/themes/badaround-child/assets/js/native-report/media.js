@@ -20,6 +20,7 @@
   }
   // All URLs are built from a fixed same-origin route and server-issued UUIDs.
   class MediaTransport {
+    #pending=new Set(); #disposed=false;
     constructor(config, deps = {}) {
       this.origin=deps.origin || root.location.origin;
       this.base=new URL(config.endpoint,this.origin);
@@ -33,35 +34,52 @@
     }
     headers(capability) { return {'X-BadAround-Media':'badaround-report-media/v1', ...(capability ? {'X-BadAround-Media-Capability':capability} : {})}; }
     async json(method, url, capability, body) {
-      const controller=new AbortController(), timer=setTimeout(()=>controller.abort(),30000);
+      if (this.#disposed) throw fault('network_error');
+      const controller=new AbortController(), cancel=()=>controller.abort(), timer=setTimeout(cancel,30000);
+      this.#pending.add(cancel);
       try {
         const response=await this.fetch(url,{method,mode:'same-origin',credentials:'omit',redirect:'error',cache:'no-store',signal:controller.signal,
           headers:{...this.headers(capability), ...(body ? {'Content-Type':'application/json'} : {})}, ...(body ? {body:JSON.stringify(body)} : {})});
+        if (this.#disposed) throw fault('network_error');
         let data; try { data=await response.json(); } catch (_) { throw fault('invalid_response'); }
+        if (this.#disposed) throw fault('network_error');
+        if (!data || typeof data!=='object' || Array.isArray(data)) throw fault('invalid_response');
         if (!response.ok || data.status!=='success') throw fault(typeof data.error?.code==='string' ? data.error.code : 'invalid_response');
         return data;
-      } catch (error) { throw fault(error.code || 'network_error'); } finally { clearTimeout(timer); }
+      } catch (error) { throw fault(error.code || 'network_error'); } finally { clearTimeout(timer); this.#pending.delete(cancel); }
     }
     create(submission, nonce) { return this.json('POST',this.url(),null,{submission_id:submission,creation_nonce:nonce}); }
     status(session, capability, media) { return this.json('GET',this.url(session,media),capability); }
     remove(session, capability, media) { return this.json('DELETE',this.url(session,media),capability); }
     upload(session, capability, key, file, progress) {
+      if (this.#disposed) return Promise.reject(fault('network_error'));
       return new Promise((resolve,reject)=>{
+        let settled=false;
+        const finish=(error,data)=>{
+          if (settled) return; settled=true; this.#pending.delete(cancel);
+          xhr.onload=xhr.onerror=xhr.ontimeout=xhr.onabort=xhr.upload.onprogress=()=>{};
+          if (error) reject(error); else resolve(data);
+        };
+        const cancel=()=>{finish(fault('network_error'));xhr.abort?.();};
         const xhr=this.xhr(), url=this.url(session)+'/items', form=this.form();
         form.append('file',file); form.append('client_upload_id',key);
         xhr.open('POST',url,true); xhr.withCredentials=false; xhr.timeout=60000;
         Object.entries(this.headers(capability)).forEach(([name,value])=>xhr.setRequestHeader(name,value));
-        xhr.upload.onprogress=event=>progress(event.lengthComputable && event.total>0 ? Math.min(100,Math.floor(event.loaded/event.total*100)) : null);
+        this.#pending.add(cancel);
+        xhr.upload.onprogress=event=>{if(!settled)progress(event.lengthComputable && event.total>0 ? Math.min(100,Math.floor(event.loaded/event.total*100)) : null);};
         xhr.onload=()=>{
-          let data; try { data=JSON.parse(xhr.responseText); } catch (_) { return reject(fault('invalid_response')); }
-          if (xhr.responseURL && xhr.responseURL!==url) return reject(fault('invalid_response'));
-          if (xhr.status<200 || xhr.status>=300 || data.status!=='success') return reject(fault(typeof data.error?.code==='string' ? data.error.code : 'invalid_response'));
-          resolve(data);
+          if(settled)return;
+          let data; try { data=JSON.parse(xhr.responseText); } catch (_) { return finish(fault('invalid_response')); }
+          if (!data || typeof data!=='object' || Array.isArray(data)) return finish(fault('invalid_response'));
+          if (xhr.responseURL && xhr.responseURL!==url) return finish(fault('invalid_response'));
+          if (xhr.status<200 || xhr.status>=300 || data.status!=='success') return finish(fault(typeof data.error?.code==='string' ? data.error.code : 'invalid_response'));
+          finish(null,data);
         };
-        xhr.onerror=xhr.ontimeout=xhr.onabort=()=>reject(fault('network_error'));
-        xhr.send(form);
+        xhr.onerror=xhr.ontimeout=xhr.onabort=()=>finish(fault('network_error'));
+        try { xhr.send(form); } catch (_) { finish(fault('network_error')); }
       });
     }
+    dispose() { this.#disposed=true; for (const cancel of this.#pending) cancel(); this.#pending.clear(); }
   }
   class Media {
     #nonce=null; #session=null; #capability=null; #creating=null; #rows=[]; #locked=false; #disposed=false; #uncertain=false;
@@ -73,7 +91,7 @@
     get locked() { return this.#locked; }
     get count() { return this.items.length; }
     descriptors() {
-      const seen=new Set(); return this.#rows.filter(r=>r.state==='accepted').flatMap(r=>{
+      const seen=new Set(); return this.#rows.filter(r=>r.descriptor && ['accepted','removing'].includes(r.state)).flatMap(r=>{
         if (seen.has(r.descriptor.media_id)) return []; seen.add(r.descriptor.media_id); return [{...r.descriptor}];
       });
     }
@@ -116,9 +134,12 @@
       if (this.#disposed) throw fault('network_error');
       const invalid=this.check(row.file); if (invalid) throw fault(invalid);
       row.attempted=true; row.unknown=true;
-      const reply=await this.transport.upload(this.#session,this.#capability,row.id,row.file,p=>{row.progress=p;this.notify('progress');});
+      const reply=await this.transport.upload(this.#session,this.#capability,row.id,row.file,p=>{if(!this.#disposed){row.progress=p;this.notify('progress');}});
+      if (this.#disposed) throw fault('network_error');
       if (!descriptor(reply.descriptor) || reply.state!=='accepted_quarantined' || !this.supported.includes(reply.descriptor.mime_type.slice(6))
         || reply.descriptor.file_size!==row.file.size || reply.descriptor.mime_type!==TYPES[row.file.name.split('.').pop().toLowerCase()]) throw fault('media_descriptor_mismatch');
+      const existing=this.#rows.find(r=>r!==row && r.descriptor?.media_id===reply.descriptor.media_id);
+      if (existing && ['media_id','mime_type','file_size','extension'].some(k=>existing.descriptor[k]!==reply.descriptor[k])) throw fault('media_descriptor_mismatch');
       row.descriptor=freeze({...reply.descriptor}); row.unknown=false; return reply;
     }
     async pump() {
@@ -126,9 +147,9 @@
       const row=this.#rows.find(r=>r.state==='selected'); if (!row) return;
       const uncertainBefore=row.unknown;
       row.working=true; row.state='uploading'; row.error=null; row.progress=null; this.notify('uploading');
-      try { await this.receive(row); row.state='accepted'; }
-      catch (error) { row.state='failed'; row.error=error.code || 'network_error'; if (rejectedBytes.has(row.error) && !uncertainBefore) row.unknown=false; }
-      finally { row.working=false; this.notify(row.state); if (!this.#disposed) this.pump(); }
+      try { await this.receive(row); if(!this.#disposed)row.state='accepted'; }
+      catch (error) { if(this.#disposed)return; row.state='failed'; row.error=error.code || 'network_error'; if (rejectedBytes.has(row.error) && !uncertainBefore) row.unknown=false; }
+      finally { if(this.#disposed)return; row.working=false; this.notify(row.state); if (!this.#disposed) this.pump(); }
     }
     retry(id) {
       const row=this.#rows.find(r=>r.id===id);
@@ -148,22 +169,23 @@
             group.push(r);r.state='removing';r.working=true;r.error=null;
           });this.notify('removing');
           const reply=await this.transport.remove(this.#session,this.#capability,row.descriptor.media_id);
+          if(this.#disposed)return;
           if (reply.state!=='removed' || reply.media_id!==row.descriptor.media_id) throw fault('invalid_response');
         }
         group.forEach(r=>{r.state='removed';r.descriptor=null;this.urls.revokeObjectURL(r.preview);r.preview=null;});
-      } catch (error) { group.forEach(r=>{r.state=r.descriptor ? 'accepted' : previous;r.error=error.code || 'network_error';}); }
-      finally { group.forEach(r=>{r.working=false;}); this.notify(row.state==='removed' ? 'removed' : 'remove_failed'); this.pump(); }
+      } catch (error) { if(this.#disposed)return; group.forEach(r=>{r.state=r.descriptor ? 'accepted' : previous;r.error=error.code || 'network_error';}); }
+      finally { if(this.#disposed)return; group.forEach(r=>{r.working=false;}); this.notify(row.state==='removed' ? 'removed' : 'remove_failed'); this.pump(); }
     }
-    freeze() { if (this.errors().length) throw fault('media_upload_pending'); this.#locked=true; this.notify('locked'); return freeze(this.descriptors()); }
+    freeze() { if (this.#disposed || this.errors().length) throw fault('media_upload_pending'); this.#locked=true; this.notify('locked'); return freeze(this.descriptors()); }
     reportCapability() { return this.descriptors().length ? this.#capability : null; }
     markUncertain() { this.#uncertain=true; }
     async editable(error, frozenValidation=false) {
       if (this.#uncertain || !(prePin.has(error.code) || frozenValidation)) return false;
-      try { const status=await this.transport.status(this.#session,this.#capability); return status.state==='open'; } catch (_) { return false; }
+      try { const status=await this.transport.status(this.#session,this.#capability); return !this.#disposed && status.state==='open'; } catch (_) { return false; }
     }
-    unlock() { if (!this.#uncertain) { this.#locked=false; this.notify('unlocked'); } }
+    unlock() { if (!this.#disposed && !this.#uncertain) { this.#locked=false; this.notify('unlocked'); } }
     dispose() {
-      this.#disposed=true; this.#rows.forEach(r=>{if(r.preview)this.urls.revokeObjectURL(r.preview);r.preview=null;});
+      if(this.#disposed)return; this.#disposed=true; this.transport.dispose?.(); this.#rows.forEach(r=>{if(r.preview)this.urls.revokeObjectURL(r.preview);r.preview=null;});
       this.#capability=null; this.#session=null; this.#nonce=null; this.#rows=[];
     }
   }
