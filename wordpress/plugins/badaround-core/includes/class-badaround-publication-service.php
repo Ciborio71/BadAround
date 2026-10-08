@@ -25,11 +25,39 @@ class BadAround_Publication_Service {
 
 		$territory = $this->deepest_term( $event_id, BadAround_Event_Post_Type::TERRITORY_TAX );
 		$subtype   = $this->deepest_term( $event_id, BadAround_Event_Post_Type::EVENT_TYPE_TAX );
+		$precision = sanitize_key( (string) get_post_meta( $event_id, '_ba_public_location_precision', true ) );
 
-		$place_name = trim( (string) get_post_meta( $event_id, '_ba_public_place_name', true ) );
-		if ( '' === $place_name && $territory ) {
-			$place_name = sanitize_text_field( $territory->name );
+		/*
+		 * Municipality precision is a semantic boundary, not merely a larger
+		 * radius. The public taxonomy and label must stop at the canonical
+		 * Comune level even when the event was resolved to a deeper locality.
+		 */
+		if ( 'f32-c7' === $precision ) {
+			$municipality = $this->municipality_term( $territory );
+			if ( ! $municipality ) {
+				return new WP_Error( 'ba_publication_municipality_missing', __( 'Il Comune canonico non è risolvibile dalla gerarchia territoriale.', 'badaround-core' ) );
+			}
+
+			$territory_result = wp_set_object_terms(
+				$event_id,
+				array( (int) $municipality->term_id ),
+				BadAround_Event_Post_Type::TERRITORY_TAX,
+				false
+			);
+			if ( is_wp_error( $territory_result ) ) {
+				return $territory_result;
+			}
+
+			$territory = $municipality;
+			$place_name = sanitize_text_field( $municipality->name );
 			update_post_meta( $event_id, '_ba_public_place_name', $place_name );
+			delete_post_meta( $event_id, '_ba_public_address' );
+		} else {
+			$place_name = trim( (string) get_post_meta( $event_id, '_ba_public_place_name', true ) );
+			if ( '' === $place_name && $territory ) {
+				$place_name = sanitize_text_field( $territory->name );
+				update_post_meta( $event_id, '_ba_public_place_name', $place_name );
+			}
 		}
 
 		$location_result = $this->ensure_public_location( $event_id, $territory );
@@ -254,9 +282,38 @@ class BadAround_Publication_Service {
 	private function ensure_public_location( $event_id, $territory = null ) {
 		global $wpdb;
 
+		$precision = sanitize_key( (string) get_post_meta( $event_id, '_ba_public_location_precision', true ) );
 		$public_lat = get_post_meta( $event_id, '_ba_public_lat', true );
 		$public_lng = get_post_meta( $event_id, '_ba_public_lng', true );
 		$radius     = absint( get_post_meta( $event_id, '_ba_public_radius_m', true ) );
+
+		/*
+		 * Municipality precision must never inherit a more precise public point
+		 * and must never derive one from the private report coordinates.
+		 * Only an explicitly verified canonical municipality centre is allowed.
+		 */
+		if ( 'f32-c7' === $precision ) {
+			delete_post_meta( $event_id, '_ba_public_lat' );
+			delete_post_meta( $event_id, '_ba_public_lng' );
+			delete_post_meta( $event_id, '_ba_public_radius_m' );
+
+			$municipality = $this->municipality_term( $territory );
+			if ( ! $municipality ) {
+				return new WP_Error( 'ba_publication_municipality_missing', __( 'Il Comune canonico non è risolvibile dalla gerarchia territoriale.', 'badaround-core' ) );
+			}
+
+			$verified = strtolower( trim( (string) get_term_meta( $municipality->term_id, '_ba_geo_verified', true ) ) );
+			$center_lat = get_term_meta( $municipality->term_id, '_ba_center_lat', true );
+			$center_lng = get_term_meta( $municipality->term_id, '_ba_center_lng', true );
+			if ( in_array( $verified, array( '1', 'true', 'yes', 'on' ), true ) && is_numeric( $center_lat ) && is_numeric( $center_lng ) ) {
+				update_post_meta( $event_id, '_ba_public_lat', round( (float) $center_lat, 6 ) );
+				update_post_meta( $event_id, '_ba_public_lng', round( (float) $center_lng, 6 ) );
+				update_post_meta( $event_id, '_ba_public_radius_m', 3000 );
+			}
+
+			return true;
+		}
+
 		if ( is_numeric( $public_lat ) && is_numeric( $public_lng ) && $radius >= 100 ) {
 			return true;
 		}
@@ -283,16 +340,6 @@ class BadAround_Publication_Service {
 		);
 		$radius = isset( $radii[ $precision ] ) ? $radii[ $precision ] : 750;
 
-		if ( 'f32-c7' === $precision && $territory instanceof WP_Term ) {
-			$center_lat = get_term_meta( $territory->term_id, '_ba_center_lat', true );
-			$center_lng = get_term_meta( $territory->term_id, '_ba_center_lng', true );
-			if ( is_numeric( $center_lat ) && is_numeric( $center_lng ) ) {
-				update_post_meta( $event_id, '_ba_public_lat', round( (float) $center_lat, 6 ) );
-				update_post_meta( $event_id, '_ba_public_lng', round( (float) $center_lng, 6 ) );
-				update_post_meta( $event_id, '_ba_public_radius_m', $radius );
-				return true;
-			}
-		}
 
 		$lat = (float) $report->exact_lat;
 		$lng = (float) $report->exact_lng;
@@ -324,6 +371,40 @@ class BadAround_Publication_Service {
 
 		BadAround_Audit_Log::record( 'event', $event_id, 'public_location_generalized', 'publication' );
 		return true;
+	}
+
+	/**
+	 * Resolve the canonical municipality from the frozen territorial hierarchy:
+	 * Regione -> Provincia -> Comune -> Localita/Frazione/Quartiere.
+	 *
+	 * This intentionally uses ancestry only. Names are never interpreted as
+	 * administrative levels, so a Provincia named "Roma" cannot be mistaken
+	 * for a Comune named "Roma".
+	 */
+	private function municipality_term( $territory ) {
+		if ( ! ( $territory instanceof WP_Term ) || BadAround_Event_Post_Type::TERRITORY_TAX !== $territory->taxonomy ) {
+			return null;
+		}
+
+		$ancestor_ids = array_reverse(
+			array_map(
+				'absint',
+				get_ancestors( $territory->term_id, BadAround_Event_Post_Type::TERRITORY_TAX, 'taxonomy' )
+			)
+		);
+		$chain = array_merge( $ancestor_ids, array( absint( $territory->term_id ) ) );
+
+		/* Root = Regione, index 1 = Provincia, index 2 = Comune. */
+		if ( count( $chain ) < 3 || empty( $chain[2] ) ) {
+			return null;
+		}
+
+		$municipality = get_term( (int) $chain[2], BadAround_Event_Post_Type::TERRITORY_TAX );
+		if ( ! $municipality || is_wp_error( $municipality ) ) {
+			return null;
+		}
+
+		return $municipality;
 	}
 
 	private function deepest_term( $event_id, $taxonomy ) {
