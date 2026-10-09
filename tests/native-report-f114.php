@@ -42,8 +42,24 @@ function wp_script_add_data() {}
 function wp_resource_hints() {}
 function nocache_headers() {}
 class WP_Term { public $name; public $slug; public $parent; public $term_id; }
-class BadAround_Event_Post_Type { const EVENT_TYPE_TAX = 'ba_tipo_evento'; }
+class BadAround_Event_Post_Type { const EVENT_TYPE_TAX = 'ba_tipo_evento'; const TERRITORY_TAX = 'ba_territorio'; }
 function get_terms( $query ) {
+	if ( isset( $query['taxonomy'] ) && BadAround_Event_Post_Type::TERRITORY_TAX === $query['taxonomy'] ) {
+		$fixture = array(
+			array( 2, 'Lazio', 'lazio', 0 ),
+			array( 3, 'Roma', 'roma', 2 ),
+			array( 4, 'Pomezia', 'pomezia', 3 ),
+			array( 5, 'Torvaianica', 'torvaianica', 4 ),
+		);
+		return array_map(
+			static function ( $row ) {
+				$term = new WP_Term();
+				$term->term_id = $row[0]; $term->name = $row[1]; $term->slug = $row[2]; $term->parent = $row[3];
+				return $term;
+			},
+			$fixture
+		);
+	}
 	$map = BadAround_Event_Taxonomy_Map::mapping();
 	$key = $query['meta_value']; $term = new WP_Term();
 	$keys = array_merge( array_keys( $map['categories'] ), array_keys( $map['subtypes'] ) );
@@ -90,11 +106,20 @@ if ( $rollback ) {
 	f114_assert( false === strpos( $html, 'data-test-wpforms="6"' ), 'native default does not render WPForms' );
 	f114_assert( isset( $GLOBALS['assets']['badaround-native-wizard'] ), 'native default loads native assets' );
 	f114_assert( ! isset( $GLOBALS['assets']['badaround-report-ui'], $GLOBALS['assets']['badaround-wpforms'] ), 'native default isolates legacy assets' );
+	f114_assert( false !== strpos( $html, 'data-native-territory="region"' ), 'Step 2 region is a canonical registry selector' );
+	f114_assert( false !== strpos( $html, 'data-native-territory="municipality"' ), 'Step 2 municipality is a canonical registry selector' );
+	f114_assert( false !== strpos( $html, '>Pomezia</option>' ), 'canonical municipality Pomezia is rendered' );
+	f114_assert( false === strpos( $html, '>Milano</option>' ), 'unsupported free municipality is not rendered' );
 }
 
 $inc = file_get_contents( $base . 'themes/badaround-child/inc/native-report.php' );
 f114_assert( false !== strpos( $inc, "BADAROUND_NATIVE_REPORT_DEFAULT" ), 'explicit administrative rollback constant exists' );
 f114_assert( false !== strpos( $inc, "X-Robots-Tag: noindex, nofollow, noarchive" ), 'QA-only robots header retained' );
 f114_assert( false !== strpos( $inc, "badaround_native_report_qa_enabled()" ), 'legacy QA diagnostic marker retained separately' );
+f114_assert( false !== strpos( $inc, 'badaround_native_report_territory_registry()' ), 'canonical territory registry adapter is present' );
+$model_js = file_get_contents( $base . 'themes/badaround-child/assets/js/native-report/model.js' );
+$wizard_js = file_get_contents( $base . 'themes/badaround-child/assets/js/native-report/wizard.js' );
+f114_assert( false !== strpos( $model_js, 'canonicalTerritoryEnabled' ), 'client validation requires a canonical region/province/municipality chain' );
+f114_assert( false !== strpos( $wizard_js, 'syncTerritories()' ), 'wizard cascades canonical territory selectors' );
 
 echo $rollback ? "F1.14 rollback routing tests complete.\n" : "F1.14 native-default routing tests complete.\n";
