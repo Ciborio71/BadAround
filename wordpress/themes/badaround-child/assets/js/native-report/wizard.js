@@ -17,6 +17,32 @@
     function mountMedia() {
       if (ns.mountMedia && config.media) mediaView = ns.mountMedia(container, model, config.media, () => render());
     }
+    const territoryPaths = ['location.region','location.province','location.municipality','location.locality'];
+    function syncTerritories() {
+      territoryPaths.forEach((path,index) => {
+        const field=config.fields[path];
+        if (!field?.territoryEntries?.length) return;
+        const wrapper=wrappers.find(item => item.dataset.nativeField === path);
+        const select=wrapper?.querySelector('[data-native-territory]');
+        if (!select) return;
+        const allowed=field.territoryEntries.filter(entry => {
+          for (let ancestorIndex=0; ancestorIndex<index; ancestorIndex++) {
+            const selected=model.effective(territoryPaths[ancestorIndex]);
+            if (!selected || entry.lineage?.[ancestorIndex] !== selected) return false;
+          }
+          return true;
+        });
+        const current=model.effective(path) || '';
+        select.replaceChildren(new Option('Seleziona…',''));
+        allowed.forEach(entry => select.add(new Option(entry.label,entry.value)));
+        if (allowed.some(entry => entry.value === current)) select.value=current;
+        else {
+          if (current) model.set(path,'');
+          select.value='';
+        }
+        select.disabled = !allowed.length || model.busy || !!model.snapshot || model.completed;
+      });
+    }
     // Presentation classification of frozen F1.3 errors, never a validator.
     const correctableCodes = new Set(['invalid_type', 'missing_required_field', 'conditional_field_required', 'invalid_email', 'invalid_phone', 'invalid_date_time', 'invalid_enum', 'invalid_category_subtype', 'invalid_location', 'invalid_plate', 'invalid_boolean', 'invalid_array', 'invalid_number', 'value_too_short', 'value_too_long', 'value_too_small', 'value_too_large', 'reward_amount_required', 'reward_confirmation_required']);
     const read = wrapper => {
@@ -78,6 +104,7 @@
     function render(focus = false) {
       if(disposed)return;
       const current = steps[model.step];
+      syncTerritories();
       const subtype = form.querySelector('[name="event.subtype"]');
       const previous = model.effective('event.subtype') || '';
       subtype.replaceChildren(new Option('Seleziona…',''));
