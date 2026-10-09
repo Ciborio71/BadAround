@@ -14,7 +14,7 @@ const source = fs.readFileSync(
 const tick = () => new Promise(resolve => setImmediate(resolve));
 
 test('F1.14R published territory-only event remains listed and creates no map marker', async () => {
-  const dom = new JSDOM(\`<!doctype html><html><body>
+  const dom = new JSDOM(`<!doctype html><html><body>
     <aside data-ba-map-results>
       <button data-ba-map-close></button>
       <span data-ba-map-count></span>
@@ -27,7 +27,7 @@ test('F1.14R published territory-only event remains listed and creates no map ma
       <div data-ba-map data-ba-map-context="full"></div>
       <div data-ba-map-status hidden></div>
     </div>
-  </body></html>\`, {
+  </body></html>`, {
     url:'https://staging.badaround.it/mappa/',
     runScripts:'outside-only'
   });
