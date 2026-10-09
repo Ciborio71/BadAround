@@ -15,7 +15,7 @@ class WP_Term {public $term_id,$parent,$slug,$name,$taxonomy='ba_territorio';fun
 class BadAround_Event_Post_Type {const POST_TYPE='ba_evento';const TERRITORY_TAX='ba_territorio';const EVENT_TYPE_TAX='ba_tipo_evento';}
 class BadAround_Moderation_Service {const STATUS_APPROVED='approved';}
 class BadAround_Audit_Log {public static function record(){return true;}}
-class DB {public $prefix='wp_',$postmeta='wp_postmeta';function prepare($sql){return $sql;}function get_row($q){return (object)['author_name'=>'','author_surname'=>'','author_email'=>'','author_phone'=>'','exact_address'=>'Private Address 99','exact_lat'=>null,'exact_lng'=>null,'full_plate'=>'','content_original'=>''];}function get_var($q){return 0;}function get_results($q){return [];}}
+class DB {public $prefix='wp_',$postmeta='wp_postmeta';function prepare($sql){return $sql;}function get_row($q){return (object)array_merge(['author_name'=>'','author_surname'=>'','author_email'=>'','author_phone'=>'','exact_address'=>'Private Address 99','exact_lat'=>null,'exact_lng'=>null,'full_plate'=>'','content_original'=>''],$GLOBALS['private_fixture']??[]);}function get_var($q){return 0;}function get_results($q){return [];}}
 $wpdb=new DB();
 $GLOBALS['terms']=[1=>new WP_Term(1,0,'Lazio'),2=>new WP_Term(2,1,'Roma'),3=>new WP_Term(3,2,'Pomezia'),4=>new WP_Term(4,3,'Torvaianica'),5=>new WP_Term(5,0,'Standalone'),10=>new WP_Term(10,0,'Veicoli','ba_tipo_evento'),11=>new WP_Term(11,10,'Furto','ba_tipo_evento')];
 $GLOBALS['meta']=[];$GLOBALS['posts']=[];$GLOBALS['object_terms']=[];$GLOBALS['term_meta']=[];
@@ -51,4 +51,31 @@ seed(107,4,'f16-c8','',['_ba_public_lat'=>41.6,'_ba_public_lng'=>12.5,'_ba_publi
 seed(108,4,'f16-c8','',['_ba_public_lat'=>41.6]);check(is_wp_error($svc->validate_public_projection(108)),'partial coordinates fail');
 seed(109,4,'corrupt_mode');check(is_wp_error($svc->validate_public_projection(109)),'malformed time fails closed');
 seed(110,4,'f16-c4');check(is_wp_error($svc->validate_public_projection(110)),'exact time without date fails closed');
+function error_is($result,$expected,$name) {
+ $actual=is_wp_error($result)?$result->get_error_code():'NOT_ERROR';
+ check($actual===$expected,$name.' expected='.$expected.' actual='.$actual);
+}
+seed(111,0);get_post(111)->post_title='Segnalazione pubblicabile';get_post(111)->post_content='Descrizione pubblicabile';
+error_is($svc->validate_public_projection(111),'ba_publication_territory_missing','A missing canonical territory');
+seed(112,0);get_post(112)->post_title='Segnalazione pubblicabile';get_post(112)->post_content='Descrizione pubblicabile';$GLOBALS['meta'][112]['_ba_public_place_name']='Private Address 99';
+error_is($svc->validate_public_projection(112),'ba_publication_territory_missing','B private address alone is not territory');
+seed(113);check(true===$svc->prepare_public_projection(113),'C malformed time prepared');$GLOBALS['meta'][113]['_ba_time_precision']='corrupt_mode';
+error_is($svc->validate_public_projection(113),'ba_publication_time_invalid','C malformed time rejected');
+seed(114);check(true===$svc->prepare_public_projection(114),'C missing time prepared');$GLOBALS['meta'][114]['_ba_time_precision']='';
+error_is($svc->validate_public_projection(114),'ba_publication_date_missing','C absent time provenance rejected');
+$GLOBALS['private_fixture']=['exact_lat'=>41.6,'exact_lng'=>12.5];
+seed(115,4,'f16-c8','',['_ba_public_lat'=>41.6,'_ba_public_lng'=>12.5,'_ba_public_radius_m'=>150]);
+check(true===$svc->prepare_public_projection(115),'D exact-coordinate scenario prepared');
+error_is($svc->validate_public_projection(115),'ba_publication_exact_coordinates_detected','D exact coordinates leak rejected');
+unset($GLOBALS['private_fixture']);
+$GLOBALS['private_fixture']=['full_plate'=>'AB123CD'];
+seed(116);check(true===$svc->prepare_public_projection(116),'E full-plate scenario prepared');get_post(116)->post_content='Plate AB123CD exposed';$GLOBALS['meta'][116]['_ba_vehicle_plate_masked']='AB***CD';
+error_is($svc->validate_public_projection(116),'ba_publication_plate_not_masked','E full plate leak rejected');
+unset($GLOBALS['private_fixture']);
+$GLOBALS['private_fixture']=['author_email'=>'private-reporter@example.invalid'];
+seed(117);check(true===$svc->prepare_public_projection(117),'F PII scenario prepared');get_post(117)->post_content='Email private-reporter@example.invalid leaked';
+error_is($svc->validate_public_projection(117),'ba_publication_private_data_detected','F reporter PII leak rejected');
+unset($GLOBALS['private_fixture']);
+seed(118,5);get_post(118)->post_title='Segnalazione pubblicabile';get_post(118)->post_content='Descrizione pubblicabile';
+error_is($svc->validate_public_projection(118),'ba_publication_territory_missing','G invalid territory-only hierarchy rejected');
 echo "F1_14R_TARGETED_CONTRACT=PASS\n";
