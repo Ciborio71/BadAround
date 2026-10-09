@@ -83,6 +83,25 @@
         if (['number','decimal'].includes(field.type) && (!Number.isFinite(Number(value)) || (c.min !== undefined && Number(value) < c.min) || (c.max !== undefined && Number(value) > c.max))) push(path, 'invalid_number');
       });
       const present = path => this.active(path) && this.effective(path) !== undefined && this.effective(path) !== '';
+      const territoryPaths = ['location.region','location.province','location.municipality','location.locality'];
+      const canonicalTerritoryEnabled = territoryPaths.slice(0,3).every(path => (this.config.fields[path]?.territoryEntries || []).length);
+      if (canonicalTerritoryEnabled && (!step || step === 'location')) {
+        territoryPaths.slice(0,3).forEach(path => {
+          if (!present(path)) push(path, 'missing_required_field');
+        });
+        territoryPaths.forEach((path,index) => {
+          if (!present(path)) return;
+          const field=this.config.fields[path], value=this.effective(path);
+          const match=(field.territoryEntries || []).find(entry => entry.value === value);
+          if (!match) { push(path, 'invalid_location'); return; }
+          for (let ancestorIndex=0; ancestorIndex<index; ancestorIndex++) {
+            const ancestorValue=this.effective(territoryPaths[ancestorIndex]);
+            if (ancestorValue && match.lineage?.[ancestorIndex] !== ancestorValue) {
+              push(path, 'invalid_location'); break;
+            }
+          }
+        });
+      }
       if (present('location.exact_lat') !== present('location.exact_lng')) push('location.exact_lat', 'invalid_location');
       if (this.active('time.range_end') && this.values['time.range_start'] && this.values['time.range_end'] < this.values['time.range_start']) push('time.range_end', 'invalid_date_time');
       // Timezone and future-time rules remain authoritative on the server.
