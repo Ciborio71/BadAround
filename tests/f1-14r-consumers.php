@@ -22,7 +22,14 @@ $GLOBALS['term_meta'][4]=['_ba_center_lat'=>41.6,'_ba_center_lng'=>12.5,'_ba_geo
 check(null === $geo_method->invoke($discovery,$event),'consumer 1 rejects unverified center');
 $GLOBALS['term_meta'][4]['_ba_geo_verified']='1';
 $verified = $geo_method->invoke($discovery,$event);
-check(is_array($verified) && $verified['source']==='territory_center' && $verified['radius_m']>=100,'consumer 1 verified centroid explicitly allowed');
+check(null === $verified,'consumer 1 verified centroid cannot substitute for absent public coordinates');
+$GLOBALS['private_fixture']=['exact_lat'=>41.6,'exact_lng'=>12.5,'exact_address'=>'Private Address 99'];
+check(null === $geo_method->invoke($discovery,$event),'private coordinates and address never used by Discovery');
+unset($GLOBALS['private_fixture']);
+$GLOBALS['meta'][$event]['_ba_public_lat']=41.6;
+check(null === $geo_method->invoke($discovery,$event),'partial public coordinates cannot use centroid');
+unset($GLOBALS['meta'][$event]['_ba_public_lat']);
+check(null === $geo_method->invoke($discovery,$event),'no fake zero-zero geometry');
 $GLOBALS['term_meta'][4]=[];
 $with_coords=202;
 seed($with_coords,4,'f16-c4','2026-10-08',['_ba_public_lat'=>41.6,'_ba_public_lng'=>12.5,'_ba_public_radius_m'=>150]);
