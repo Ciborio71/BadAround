@@ -126,6 +126,58 @@ function badaround_native_report_step( $path ) {
 	return 'details';
 }
 
+function badaround_native_report_territory_registry() {
+	$terms = get_terms(
+		array(
+			'taxonomy'   => BadAround_Event_Post_Type::TERRITORY_TAX,
+			'hide_empty' => false,
+			'number'     => 0,
+		)
+	);
+	if ( is_wp_error( $terms ) || ! $terms ) {
+		return array();
+	}
+
+	$by_id = array();
+	foreach ( $terms as $term ) {
+		$by_id[ (int) $term->term_id ] = $term;
+	}
+
+	$levels = array( 'region', 'province', 'municipality', 'locality' );
+	$out    = array_fill_keys( $levels, array() );
+	foreach ( $terms as $term ) {
+		$lineage_ids = array();
+		$seen        = array();
+		$parent_id   = (int) $term->parent;
+		while ( $parent_id && isset( $by_id[ $parent_id ] ) && ! isset( $seen[ $parent_id ] ) ) {
+			$seen[ $parent_id ] = true;
+			array_unshift( $lineage_ids, $parent_id );
+			$parent_id = (int) $by_id[ $parent_id ]->parent;
+		}
+		$depth = count( $lineage_ids );
+		if ( $depth > 3 ) {
+			continue;
+		}
+		$lineage = array();
+		foreach ( $lineage_ids as $ancestor_id ) {
+			$lineage[] = (string) $by_id[ $ancestor_id ]->name;
+		}
+		$level = $levels[ $depth ];
+		$out[ $level ][] = array(
+			'id'      => (int) $term->term_id,
+			'value'   => (string) $term->name,
+			'label'   => (string) $term->name,
+			'lineage' => $lineage,
+		);
+	}
+	foreach ( $out as &$entries ) {
+		usort( $entries, static function ( $a, $b ) { return strcasecmp( $a['label'], $b['label'] ); } );
+	}
+	unset( $entries );
+
+	return $out;
+}
+
 function badaround_native_report_config() {
 	$labels = badaround_native_report_labels();
 	$map = new BadAround_Event_Taxonomy_Map();
@@ -175,6 +227,27 @@ function badaround_native_report_config() {
 	$fields['vehicle.plate_raw']['help'] = 'La targa completa resta riservata. L’eventuale versione pubblica sarà mascherata.';
 	$fields['reporter.public_identity_mode']['help'] = 'Nome e cognome restano nei dati riservati; la modalità scelta autorizza solo l’identità pubblica indicata. Email e telefono non sono pubblicati.';
 	$fields['content.description']['help'] = 'Riporta i fatti. Evita nomi, recapiti, accuse e dati personali non necessari. Il testo sarà moderato.';
+
+	$territories = badaround_native_report_territory_registry();
+	$territory_paths = array(
+		'location.region'       => 'region',
+		'location.province'     => 'province',
+		'location.municipality' => 'municipality',
+		'location.locality'     => 'locality',
+	);
+	foreach ( $territory_paths as $path => $level ) {
+		$entries = isset( $territories[ $level ] ) ? $territories[ $level ] : array();
+		$fields[ $path ]['territoryLevel']   = $level;
+		$fields[ $path ]['territoryEntries'] = $entries;
+		$fields[ $path ]['options'] = array();
+		foreach ( $entries as $entry ) {
+			$fields[ $path ]['options'][ $entry['value'] ] = $entry['label'];
+		}
+		$fields[ $path ]['help'] = $entries
+			? 'Seleziona un territorio già presente nel registry canonico BadAround.'
+			: 'Nessun territorio canonico disponibile per questo livello.';
+	}
+
 	return array(
 		'schemaVersion' => BadAround_Report_Schema::VERSION,
 		'consentVersion' => 'native-f16-v1', // Version of this QA presentation, not a claim of finalized legal policies.
@@ -203,7 +276,10 @@ function badaround_native_report_field( $path, $field ) {
 		<label class="ba-native-choice" for="<?php echo esc_attr( $id ); ?>"><input id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $path ); ?>" type="checkbox" data-native-input aria-describedby="<?php echo esc_attr( $description ); ?>"><?php echo esc_html( $field['label'] ); ?></label>
 	<?php else : ?>
 		<label for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $field['label'] ); ?><span data-native-required><?php echo $field['required'] ? ' (obbligatorio quando applicabile)' : ''; ?></span></label>
-		<?php if ( 'enum' === $type ) : ?>
+		<?php if ( ! empty( $field['territoryLevel'] ) ) : ?>
+		<select id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $path ); ?>" data-native-input data-native-territory="<?php echo esc_attr( $field['territoryLevel'] ); ?>" aria-describedby="<?php echo esc_attr( $description ); ?>"><option value="">Seleziona…</option>
+		<?php foreach ( $field['territoryEntries'] as $entry ) : ?><option value="<?php echo esc_attr( $entry['value'] ); ?>"><?php echo esc_html( $entry['label'] ); ?></option><?php endforeach; ?></select>
+		<?php elseif ( 'enum' === $type ) : ?>
 		<select id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $path ); ?>" data-native-input aria-describedby="<?php echo esc_attr( $description ); ?>"><option value="">Seleziona…</option>
 		<?php foreach ( $field['options'] as $value => $label ) : ?><option value="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $label ); ?></option><?php endforeach; ?></select>
 		<?php elseif ( 'string' === $type && ( $c['max_length'] ?? 0 ) >= 500 ) : ?>
