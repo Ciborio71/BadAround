@@ -1,0 +1,53 @@
+name: F1.14R QA frozen differential (governance-only)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tests/governance/f114r-qa-differential.py'
+      - '.github/workflows/f114r-qa-differential.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  f114r-differential:
+    name: Exact F1.14R QA-only differential and negative guards
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout governance checks
+        uses: actions/checkout@v4
+        with:
+          path: governance
+          fetch-depth: 1
+      - name: Checkout immutable F1.14R candidate
+        uses: actions/checkout@v4
+        with:
+          ref: 9f285a5bea02f043ef22e59bee15acd194406ab0
+          path: candidate
+          fetch-depth: 0
+      - name: Positive test — exact candidate, scope and original frozen F1.7
+        run: python3 governance/tests/governance/f114r-qa-differential.py
+      - name: Negative tests — pinning and track isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test_reject() {
+            if python3 governance/tests/governance/f114r-qa-differential.py "$@"; then
+              echo "Unexpected acceptance: $*" >&2
+              exit 1
+            fi
+          }
+          test_reject --track release
+          test_reject --track f17_qa
+          test_reject --track f110_freeze
+          test_reject --sha 0000000000000000000000000000000000000000
+          test_reject --tree 0000000000000000000000000000000000000000
+          test_reject --ref main
+          test_reject --core 0.17.0
+          test_reject --schema 1.8.0
+          test_reject --theme 0.2.0
+      - name: Static media freeze and whitespace verification
+        run: |
+          git -C candidate diff --check beb33ec3325480f77a266b3b6356f5860b00e16e
