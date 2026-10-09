@@ -406,39 +406,8 @@ class BadAround_Discovery_Query {
 			);
 		}
 
-		$territories = get_the_terms( $event_id, BadAround_Event_Post_Type::TERRITORY_TAX );
-		if ( is_wp_error( $territories ) || ! $territories ) {
-			return null;
-		}
-
-		usort(
-			$territories,
-			static function ( $a, $b ) {
-				return count( get_ancestors( $b->term_id, BadAround_Event_Post_Type::TERRITORY_TAX, 'taxonomy' ) )
-					<=> count( get_ancestors( $a->term_id, BadAround_Event_Post_Type::TERRITORY_TAX, 'taxonomy' ) );
-			}
-		);
-
-		foreach ( $territories as $term ) {
-			$verified = strtolower( trim( (string) get_term_meta( $term->term_id, '_ba_geo_verified', true ) ) );
-			$center_lat = get_term_meta( $term->term_id, '_ba_center_lat', true );
-			$center_lng = get_term_meta( $term->term_id, '_ba_center_lng', true );
-			if ( in_array( $verified, array( '1', 'true', 'yes', 'on' ), true ) && is_numeric( $center_lat ) && is_numeric( $center_lng ) ) {
-				return array(
-					'lat'       => (float) $center_lat,
-					'lng'       => (float) $center_lng,
-					'radius_m'  => $radius >= 100 ? $radius : 1000,
-					'source'    => 'territory_center',
-					'precision' => sanitize_key( (string) get_term_meta( $term->term_id, '_ba_geo_level', true ) ),
-					'territory' => array(
-						'id'   => (int) $term->term_id,
-						'name' => $term->name,
-						'slug' => $term->slug,
-					),
-				);
-			}
-		}
-
+		// Territory labels remain available through non-spatial projection fields.
+		// Never substitute a territorial center for missing event public coordinates.
 		return null;
 	}
 
