@@ -2,6 +2,11 @@ name: Deploy F1.14R publication contract to staging
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/deploy-f114r-publication-staging.yml"
 
 permissions:
   contents: read
