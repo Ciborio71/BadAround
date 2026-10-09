@@ -16,9 +16,32 @@ function get_permalink() { return home_url( '/segnala-un-evento/' ); }
 function sanitize_key( $value ) { return preg_replace( '/[^a-z0-9_-]/', '', strtolower( $value ) ); }
 function is_wp_error() { return false; }
 class WP_Term { public $name; public $slug; public $parent; public $term_id; }
-class BadAround_Event_Post_Type { const EVENT_TYPE_TAX = 'ba_tipo_evento'; }
+class BadAround_Event_Post_Type { const EVENT_TYPE_TAX = 'ba_tipo_evento'; const TERRITORY_TAX = 'ba_territorio'; }
 function get_terms( $query ) {
 	if ( ! empty( $GLOBALS['missing_taxonomy'] ) ) { return array(); }
+	if ( isset( $query['taxonomy'] ) && BadAround_Event_Post_Type::TERRITORY_TAX === $query['taxonomy'] ) {
+		$fixture = array(
+			array( 2, 'Lazio', 'lazio', 0 ),
+			array( 3, 'Roma', 'roma', 2 ),
+			array( 4, 'Pomezia', 'pomezia', 3 ),
+			array( 5, 'Torvaianica', 'torvaianica', 4 ),
+		);
+		$terms = array_map(
+			static function ( $row ) {
+				$term = new WP_Term();
+				$term->term_id = $row[0]; $term->name = $row[1]; $term->slug = $row[2]; $term->parent = $row[3];
+				return $term;
+			},
+			$fixture
+		);
+		if ( isset( $query['name'] ) ) {
+			$terms = array_values( array_filter( $terms, static function ( $term ) use ( $query ) { return $term->name === $query['name']; } ) );
+		}
+		if ( isset( $query['parent'] ) ) {
+			$terms = array_values( array_filter( $terms, static function ( $term ) use ( $query ) { return (int) $term->parent === (int) $query['parent']; } ) );
+		}
+		return $terms;
+	}
 	$map = BadAround_Event_Taxonomy_Map::mapping();
 	$key = $query['meta_value']; $term = new WP_Term();
 	$keys = array_merge( array_keys( $map['categories'] ), array_keys( $map['subtypes'] ) );
