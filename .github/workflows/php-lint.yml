@@ -138,6 +138,7 @@ jobs:
             ':(exclude)wordpress/plugins/badaround-core/includes/class-badaround-territory-resolver.php'
           git diff --check beb33ec3325480f77a266b3b6356f5860b00e16e -- \
             wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php \
+            wordpress/plugins/badaround-core/includes/class-badaround-report-persistence-service.php \
             wordpress/plugins/badaround-core/includes/class-badaround-territory-resolver.php
           git diff --exit-code bcc2c74ca3391f1d16f9b1eb9719650ea4d27952 -- \
             wordpress/plugins/badaround-core/includes/class-badaround-report-schema.php \
@@ -145,7 +146,6 @@ jobs:
             wordpress/plugins/badaround-core/includes/class-badaround-report-normalizer.php \
             wordpress/plugins/badaround-core/includes/class-badaround-native-report-intake-service.php \
             wordpress/plugins/badaround-core/includes/class-badaround-native-report-golden-path-service.php \
-            wordpress/plugins/badaround-core/includes/class-badaround-report-persistence-service.php \
             wordpress/plugins/badaround-core/includes/class-badaround-wpforms-event-intake.php \
             wordpress/themes/badaround-child/template-parts/native-report/shell.php \
             wordpress/themes/badaround-child/assets/css/report.css \
