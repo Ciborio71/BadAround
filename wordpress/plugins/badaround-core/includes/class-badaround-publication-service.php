@@ -179,8 +179,23 @@ class BadAround_Publication_Service {
 
 		$occurred_date = trim( (string) get_post_meta( $event_id, '_ba_occurred_date', true ) );
 		$occurred_at   = trim( (string) get_post_meta( $event_id, '_ba_occurred_at', true ) );
-		if ( '' === $occurred_date && '' === $occurred_at ) {
-			return new WP_Error( 'ba_publication_date_missing', __( 'La data pubblicabile dell’evento è obbligatoria.', 'badaround-core' ) );
+		$time_precision = sanitize_key( (string) get_post_meta( $event_id, '_ba_time_precision', true ) );
+		$canonical_time_precisions = array( 'f16-c4', 'f16-c5', 'f16-c6', 'f16-c7', 'f16-c8' );
+
+		if ( $time_precision && ! in_array( $time_precision, $canonical_time_precisions, true ) ) {
+			return new WP_Error( 'ba_publication_time_invalid', __( 'Lo stato temporale pubblico non è riconosciuto.', 'badaround-core' ) );
+		}
+
+		/*
+		 * F1.2/F1.6 canonical time semantics:
+		 * f16-c4 = exact (requires a publishable date/datetime);
+		 * f16-c5 = approximate, f16-c6 = ongoing, f16-c7 = repeated,
+		 * f16-c8 = unknown. These latter states are complete canonical states and
+		 * must not be turned into fabricated dates merely to satisfy publication.
+		 */
+		$valid_without_date = in_array( $time_precision, array( 'f16-c5', 'f16-c6', 'f16-c7', 'f16-c8' ), true );
+		if ( '' === $occurred_date && '' === $occurred_at && ! $valid_without_date ) {
+			return new WP_Error( 'ba_publication_date_missing', __( 'La data pubblicabile dell’evento è obbligatoria quando il tempo è noto in modo esatto.', 'badaround-core' ) );
 		}
 
 		$place_name = trim( (string) get_post_meta( $event_id, '_ba_public_place_name', true ) );
@@ -358,7 +373,20 @@ class BadAround_Publication_Service {
 		);
 
 		if ( ! $report || ! is_numeric( $report->exact_lat ) || ! is_numeric( $report->exact_lng ) ) {
-			return new WP_Error( 'ba_publication_location_missing', __( 'Non sono disponibili coordinate sufficienti per creare una posizione pubblica approssimata.', 'badaround-core' ) );
+			/*
+			 * A canonical territory is valid public location evidence even when no
+			 * coordinate exists. Keep the event publishable as territory/label-only;
+			 * map/discovery may add a marker only from independently verified public
+			 * geo evidence. Never manufacture coordinates from the private address.
+			 */
+			$place_name = trim( (string) get_post_meta( $event_id, '_ba_public_place_name', true ) );
+			if ( $territory instanceof WP_Term && '' !== $place_name ) {
+				delete_post_meta( $event_id, '_ba_public_lat' );
+				delete_post_meta( $event_id, '_ba_public_lng' );
+				delete_post_meta( $event_id, '_ba_public_radius_m' );
+				return true;
+			}
+			return new WP_Error( 'ba_publication_location_missing', __( 'Non è disponibile un territorio canonico pubblicabile.', 'badaround-core' ) );
 		}
 
 		$precision = sanitize_key( (string) get_post_meta( $event_id, '_ba_public_location_precision', true ) );
