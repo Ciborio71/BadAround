@@ -47,7 +47,7 @@ seed(103,0);check(is_wp_error($svc->validate_public_projection(103)),'missing te
 seed(104,5);check(is_wp_error($svc->validate_public_projection(104)),'incomplete canonical chain fails');
 seed(105,4,'f16-c4','2026-10-08',['_ba_public_lat'=>41.6,'_ba_public_lng'=>12.5,'_ba_public_radius_m'=>150]);check(true===$svc->prepare_public_projection(105)&&true===$svc->validate_public_projection(105),'valid existing public coordinates pass');
 seed(106,4,'f16-c8','',['_ba_public_place_name'=>'Private Address 99']);check(is_wp_error($svc->validate_public_projection(106)),'exact private address in projection fails');
-seed(107,4,'f16-c8','',['_ba_public_lat'=>41.6,'_ba_public_lng'=>12.5,'_ba_public_radius_m'=>150]);check(true===$svc->validate_public_projection(107),'valid coordinates and unknown time pass');
+seed(107,4,'f16-c8','',['_ba_public_lat'=>41.6,'_ba_public_lng'=>12.5,'_ba_public_radius_m'=>150]);check(true===$svc->prepare_public_projection(107)&&true===$svc->validate_public_projection(107),'valid coordinates and unknown time pass');
 seed(108,4,'f16-c8','',['_ba_public_lat'=>41.6]);check(is_wp_error($svc->validate_public_projection(108)),'partial coordinates fail');
 seed(109,4,'corrupt_mode');check(is_wp_error($svc->validate_public_projection(109)),'malformed time fails closed');
 seed(110,4,'f16-c4');check(is_wp_error($svc->validate_public_projection(110)),'exact time without date fails closed');
