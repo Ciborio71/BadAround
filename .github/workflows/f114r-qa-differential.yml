@@ -35,7 +35,7 @@ jobs:
       - name: Checkout immutable F1.14R candidate
         uses: actions/checkout@v4
         with:
-          ref: adc130897eaf7d818b318a01ce8a935b33b63289
+          ref: cd2acad23a16e916ececb7a244b5c4543f02e836
           path: candidate
           fetch-depth: 0
       - name: Setup PHP on exact candidate
@@ -49,8 +49,8 @@ jobs:
           node-version: "24"
       - name: Verify candidate SHA and tree before every suite
         run: |
-          test "$(git -C candidate rev-parse HEAD)" = 'adc130897eaf7d818b318a01ce8a935b33b63289'
-          test "$(git -C candidate rev-parse HEAD^{tree})" = '17387770e7da215cd50ab5dd7b1e1839a9a0d794'
+          test "$(git -C candidate rev-parse HEAD)" = 'cd2acad23a16e916ececb7a244b5c4543f02e836'
+          test "$(git -C candidate rev-parse HEAD^{tree})" = 'a945465562b8b3d91890d1dcd4f2688be6dcd790'
       - name: Positive test — exact candidate, scope and original frozen F1.7
         run: python3 governance/tests/governance/f114r-qa-differential.py
       - name: Negative tests — pinning and track isolation
@@ -80,7 +80,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = 'adc130897eaf7d818b318a01ce8a935b33b63289'
+          test "$(git rev-parse HEAD)" = 'cd2acad23a16e916ececb7a244b5c4543f02e836'
           for f in wordpress/plugins/badaround-core/**/*.php wordpress/themes/badaround-child/**/*.php; do
             if [ -f "$f" ]; then php -l "$f" >/dev/null; fi
           done
@@ -91,13 +91,14 @@ jobs:
           php tests/native-media-no-media-differential.php
           python3 tests/native-media-http.py
           php tests/f1-14r-publication-contract.php
+          php tests/f1-14r-consumers.php
           npm ci --prefix tests --ignore-scripts --no-audit --no-fund
           npm test --prefix tests
       - name: Golden State and F1.9 Sentinel/Contribution regressions
         working-directory: candidate
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = 'adc130897eaf7d818b318a01ce8a935b33b63289'
+          test "$(git rev-parse HEAD)" = 'cd2acad23a16e916ececb7a244b5c4543f02e836'
           for s in d1 d2 d3; do php "tests/sentinels-$s.php"; done
           for s in e1 e2 e5; do php "tests/contributions-$s.php"; done
           grep -q "ba_contribution_notifications" wordpress/plugins/badaround-core/includes/class-badaround-installer.php
