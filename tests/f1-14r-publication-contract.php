@@ -35,18 +35,20 @@ function wp_salt($v='auth'){return 'test';}
 function current_time($v,$gmt=false){return '2026-10-09 12:00:00';}
 require_once dirname(__DIR__).'/wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php';
 function check($ok,$msg){if(!$ok){fwrite(STDERR,"FAIL $msg\n");exit(1);}echo "PASS $msg\n";}
-function seed($id,$territory=4,$mode='unknown',$date='',$coords=[]){
+function seed($id,$territory=4,$mode='f16-c8',$date='',$coords=[]){
  $GLOBALS['posts'][$id]=(object)['ID'=>$id,'post_type'=>'ba_evento','post_status'=>'pending','post_title'=>'Segnalazione da moderare #17','post_content'=>''];
  $GLOBALS['object_terms'][$id]=['ba_territorio'=>$territory?[$territory]:[],'ba_tipo_evento'=>[11]];
  $GLOBALS['meta'][$id]=array_merge(['_ba_moderation_status'=>'approved','_ba_time_precision'=>$mode,'_ba_occurred_date'=>$date,'_ba_public_place_name'=>$territory?get_term($territory)->name:'','_ba_public_location_precision'=>'f32-c4'],$coords);
 }
 $svc=new BadAround_Publication_Service();
 seed(101);check(true===$svc->prepare_public_projection(101),'territory-only preparation');check(true===$svc->validate_public_projection(101),'unknown time and territory-only validate');check(''===get_post_meta(101,'_ba_public_lat'),'no fabricated latitude');check(!str_contains(get_post(101)->post_content,'Private Address'),'private address absent');
-seed(102,4,'exact','2026-10-08');check(true===$svc->prepare_public_projection(102)&&true===$svc->validate_public_projection(102),'known date and territory-only');
+seed(102,4,'f16-c4','2026-10-08');check(true===$svc->prepare_public_projection(102)&&true===$svc->validate_public_projection(102),'known date and territory-only');
 seed(103,0);check(is_wp_error($svc->validate_public_projection(103)),'missing territory fails');
 seed(104,5);check(is_wp_error($svc->validate_public_projection(104)),'incomplete canonical chain fails');
-seed(105,4,'exact','2026-10-08',['_ba_public_lat'=>41.6,'_ba_public_lng'=>12.5,'_ba_public_radius_m'=>150]);check(true===$svc->prepare_public_projection(105)&&true===$svc->validate_public_projection(105),'valid existing public coordinates pass');
-seed(106,4,'unknown','',['_ba_public_place_name'=>'Private Address 99']);check(is_wp_error($svc->validate_public_projection(106)),'exact private address in projection fails');
-seed(107,4,'unknown','',['_ba_public_lat'=>41.6,'_ba_public_lng'=>12.5,'_ba_public_radius_m'=>150]);check(true===$svc->validate_public_projection(107),'valid coordinates and unknown time pass');
-seed(108,4,'unknown','',['_ba_public_lat'=>41.6]);check(is_wp_error($svc->validate_public_projection(108)),'partial coordinates fail');
+seed(105,4,'f16-c4','2026-10-08',['_ba_public_lat'=>41.6,'_ba_public_lng'=>12.5,'_ba_public_radius_m'=>150]);check(true===$svc->prepare_public_projection(105)&&true===$svc->validate_public_projection(105),'valid existing public coordinates pass');
+seed(106,4,'f16-c8','',['_ba_public_place_name'=>'Private Address 99']);check(is_wp_error($svc->validate_public_projection(106)),'exact private address in projection fails');
+seed(107,4,'f16-c8','',['_ba_public_lat'=>41.6,'_ba_public_lng'=>12.5,'_ba_public_radius_m'=>150]);check(true===$svc->validate_public_projection(107),'valid coordinates and unknown time pass');
+seed(108,4,'f16-c8','',['_ba_public_lat'=>41.6]);check(is_wp_error($svc->validate_public_projection(108)),'partial coordinates fail');
+seed(109,4,'corrupt_mode');check(is_wp_error($svc->validate_public_projection(109)),'malformed time fails closed');
+seed(110,4,'f16-c4');check(is_wp_error($svc->validate_public_projection(110)),'exact time without date fails closed');
 echo "F1_14R_TARGETED_CONTRACT=PASS\n";
