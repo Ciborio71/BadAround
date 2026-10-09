@@ -7,8 +7,8 @@ import sys
 
 TRACK = "f114r_qa"
 REF = "fix/f1-14r-native-publication-contract"
-SHA = "cd2acad23a16e916ececb7a244b5c4543f02e836"
-TREE = "a945465562b8b3d91890d1dcd4f2688be6dcd790"
+SHA = "1d329cf0233a75580b2bdff3795bad4d071dee91"
+TREE = "e94b3d7fa33bceae65eee2321d1370292c8a1883"
 BASE = "27be97f7468a9fe1ac41b4482e22e98307ac0c0a"
 FROZEN = "beb33ec3325480f77a266b3b6356f5860b00e16e"
 SERVICE = "wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php"
@@ -18,10 +18,10 @@ TEST = "tests/f1-14r-publication-contract.php"
 CONSUMERS = "tests/f1-14r-consumers.php"
 BLOBS = {
     SERVICE: "b92224d39e6860578e1993db9a57d296800728dc",
-    DISCOVERY: "d224ac5a6571b28b89e07e3be895faedf6533ca1",
+    DISCOVERY: "e9554e0817f92925cbccb5299b406a4bc3cfb3b7",
     TERRITORY: "f5a35eb6e2097dd63ef5bdc46992fa9fdc4c981a",
     TEST: "a8df692e5d4bb332d0748ea49fedec75979b9c7a",
-    CONSUMERS: "3b0d22b2e82141b2df98cb1226b864b2ff7b32ef",
+    CONSUMERS: "fb1bb645694899c08ccaa48544183cef35a6e5f9",
 }
 
 def git(repo, *args):
