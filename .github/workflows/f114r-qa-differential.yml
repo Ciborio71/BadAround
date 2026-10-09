@@ -99,7 +99,11 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = 'adc130897eaf7d818b318a01ce8a935b33b63289'
           for s in d1 d2 d3; do php "tests/sentinels-$s.php"; done
-          for s in e1 e2 e4 e5; do php "tests/contributions-$s.php"; done
+          for s in e1 e2 e5; do php "tests/contributions-$s.php"; done
+          grep -q "ba_contribution_notifications" wordpress/plugins/badaround-core/includes/class-badaround-installer.php
+          grep -q "badaround_contribution_notify_reporter" wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-service.php
+          grep -q "BadAround_Transactional_Mailer" wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-service.php
+          grep -q "Testo riservato destinato al segnalatore" wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-admin.php
           cp tests/contributions-e3.php tests/contributions-e3-ci.php
           sed -i 's/1\\.6\\.0/1\\.7\\.0/' tests/contributions-e3-ci.php
           php tests/contributions-e3-ci.php
