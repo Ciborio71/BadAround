@@ -62,6 +62,53 @@ class BadAround_Territory_Resolver {
 		return $best_id;
 	}
 
+	/**
+	 * Resolve an explicit canonical hierarchy without inferring identity from
+	 * the private street address. Region, province and municipality must form
+	 * one parent chain; locality is optional and, when supplied, must be its child.
+	 */
+	public function resolve_location( $location ) {
+		if ( ! is_array( $location ) ) {
+			return 0;
+		}
+		$required = array( 'region', 'province', 'municipality' );
+		foreach ( $required as $key ) {
+			if ( empty( $location[ $key ] ) ) {
+				return 0;
+			}
+		}
+
+		$parent_id  = 0;
+		$resolved_id = 0;
+		foreach ( array( 'region', 'province', 'municipality', 'locality' ) as $key ) {
+			$value = isset( $location[ $key ] ) ? trim( sanitize_text_field( $location[ $key ] ) ) : '';
+			if ( '' === $value ) {
+				if ( 'locality' === $key ) {
+					break;
+				}
+				return 0;
+			}
+			$candidates = get_terms(
+				array(
+					'taxonomy'   => BadAround_Event_Post_Type::TERRITORY_TAX,
+					'hide_empty' => false,
+					'name'       => $value,
+					'parent'     => $parent_id,
+				)
+			);
+			if ( is_wp_error( $candidates ) || 1 !== count( $candidates ) ) {
+				return 0;
+			}
+			$term = reset( $candidates );
+			if ( (int) $term->parent !== $parent_id ) {
+				return 0;
+			}
+			$resolved_id = (int) $term->term_id;
+			$parent_id   = $resolved_id;
+		}
+		return $resolved_id;
+	}
+
 	private function disambiguate_by_ancestors( $candidates, $address ) {
 		$matches = array();
 		foreach ( $candidates as $term ) {
