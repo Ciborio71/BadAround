@@ -105,6 +105,9 @@ jobs:
           php ./tests/native-report-f114.php
           php ./tests/native-report-f114.php --rollback
 
+      - name: Test F1.14R Publication Contract Reconciliation
+        run: php ./tests/f1-14r-publication-contract.php
+
       - name: Test F1.7B native media backend and recovery with real MariaDB constraints
         env:
           BA_TEST_DSN: mysql:host=127.0.0.1;port=3306;dbname=f17b
@@ -134,10 +137,12 @@ jobs:
           git diff --exit-code beb33ec3325480f77a266b3b6356f5860b00e16e -- \
             wordpress/plugins/badaround-core \
             ':(exclude)wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php' \
+            ':(exclude)wordpress/plugins/badaround-core/includes/class-badaround-discovery-query.php' \
             ':(exclude)wordpress/plugins/badaround-core/includes/class-badaround-report-persistence-service.php' \
             ':(exclude)wordpress/plugins/badaround-core/includes/class-badaround-territory-resolver.php'
           git diff --check beb33ec3325480f77a266b3b6356f5860b00e16e -- \
             wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php \
+            wordpress/plugins/badaround-core/includes/class-badaround-discovery-query.php \
             wordpress/plugins/badaround-core/includes/class-badaround-report-persistence-service.php \
             wordpress/plugins/badaround-core/includes/class-badaround-territory-resolver.php
           git diff --exit-code bcc2c74ca3391f1d16f9b1eb9719650ea4d27952 -- \
@@ -160,7 +165,7 @@ jobs:
           frozen=subprocess.check_output(['git','show','beb33ec3325480f77a266b3b6356f5860b00e16e:'+css],text=True)
           assert pathlib.Path(css).read_text().startswith(frozen), 'F1.6 base CSS changed'
           core='wordpress/plugins/badaround-core/'
-          allowed_core={'includes/class-badaround-publication-service.php','includes/class-badaround-report-persistence-service.php','includes/class-badaround-territory-resolver.php'}
+          allowed_core={'includes/class-badaround-publication-service.php','includes/class-badaround-discovery-query.php','includes/class-badaround-report-persistence-service.php','includes/class-badaround-territory-resolver.php'}
           changed_core=subprocess.check_output(['git','diff','--name-only','beb33ec3325480f77a266b3b6356f5860b00e16e','--',core],text=True).splitlines()
           assert all(p.removeprefix(core) in allowed_core for p in changed_core), changed_core
           PY
