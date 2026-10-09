@@ -179,9 +179,18 @@ class BadAround_Publication_Service {
 
 		$occurred_date = trim( (string) get_post_meta( $event_id, '_ba_occurred_date', true ) );
 		$occurred_at   = trim( (string) get_post_meta( $event_id, '_ba_occurred_at', true ) );
-		$time_mode = sanitize_key( (string) get_post_meta( $event_id, '_ba_time_precision', true ) );
-		if ( '' === $occurred_date && '' === $occurred_at && 'unknown' !== $time_mode ) {
-			return new WP_Error( 'ba_publication_date_missing', __( 'La data pubblicabile dell’evento è obbligatoria salvo tempo esplicitamente sconosciuto.', 'badaround-core' ) );
+		$time_precision = sanitize_key( (string) get_post_meta( $event_id, '_ba_time_precision', true ) );
+		$canonical_time_precisions = array( 'f16-c4', 'f16-c5', 'f16-c6', 'f16-c7', 'f16-c8' );
+
+		if ( $time_precision && ! in_array( $time_precision, $canonical_time_precisions, true ) ) {
+			return new WP_Error( 'ba_publication_time_invalid', __( 'Lo stato temporale pubblico non è riconosciuto.', 'badaround-core' ) );
+		}
+
+		/* Preserve frozen Native time semantics: exact requires date; other canonical
+		 * modes, including f16-c8 (unknown), never fabricate an occurred timestamp. */
+		$valid_without_date = in_array( $time_precision, array( 'f16-c5', 'f16-c6', 'f16-c7', 'f16-c8' ), true );
+		if ( '' === $occurred_date && '' === $occurred_at && ! $valid_without_date ) {
+			return new WP_Error( 'ba_publication_date_missing', __( 'La data pubblicabile dell’evento è obbligatoria quando il tempo è noto in modo esatto.', 'badaround-core' ) );
 		}
 
 		$place_name = trim( (string) get_post_meta( $event_id, '_ba_public_place_name', true ) );
