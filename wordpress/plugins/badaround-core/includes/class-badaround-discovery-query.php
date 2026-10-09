@@ -420,22 +420,35 @@ class BadAround_Discovery_Query {
 		);
 
 		foreach ( $territories as $term ) {
+			$verified = strtolower( trim( (string) get_term_meta( $term->term_id, '_ba_geo_verified', true ) ) );
 			$center_lat = get_term_meta( $term->term_id, '_ba_center_lat', true );
 			$center_lng = get_term_meta( $term->term_id, '_ba_center_lng', true );
-			if ( is_numeric( $center_lat ) && is_numeric( $center_lng ) ) {
-				return array(
-					'lat'       => (float) $center_lat,
-					'lng'       => (float) $center_lng,
-					'radius_m'  => $radius >= 100 ? $radius : 1000,
-					'source'    => 'territory_center',
-					'precision' => sanitize_key( (string) get_term_meta( $term->term_id, '_ba_geo_level', true ) ),
-					'territory' => array(
-						'id'   => (int) $term->term_id,
-						'name' => $term->name,
-						'slug' => $term->slug,
-					),
-				);
+			if ( ! in_array( $verified, array( '1', 'true', 'yes', 'on' ), true ) || ! is_numeric( $center_lat ) || ! is_numeric( $center_lng ) ) {
+				continue;
 			}
+
+			$depth = count( get_ancestors( $term->term_id, BadAround_Event_Post_Type::TERRITORY_TAX, 'taxonomy' ) );
+			$territory_radius = 1000;
+			if ( 0 === $depth ) {
+				$territory_radius = 25000;
+			} elseif ( 1 === $depth ) {
+				$territory_radius = 10000;
+			} elseif ( 2 === $depth ) {
+				$territory_radius = 3000;
+			}
+
+			return array(
+				'lat'       => (float) $center_lat,
+				'lng'       => (float) $center_lng,
+				'radius_m'  => max( $radius >= 100 ? $radius : 0, $territory_radius ),
+				'source'    => 'territory_center',
+				'precision' => sanitize_key( (string) get_term_meta( $term->term_id, '_ba_geo_level', true ) ),
+				'territory' => array(
+					'id'   => (int) $term->term_id,
+					'name' => $term->name,
+					'slug' => $term->slug,
+				),
+			);
 		}
 
 		return null;
