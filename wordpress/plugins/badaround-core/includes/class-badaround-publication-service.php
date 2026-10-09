@@ -173,14 +173,15 @@ class BadAround_Publication_Service {
 		}
 
 		$territories = wp_get_post_terms( $event_id, BadAround_Event_Post_Type::TERRITORY_TAX );
-		if ( is_wp_error( $territories ) || ! $territories ) {
-			return new WP_Error( 'ba_publication_territory_missing', __( 'Il territorio pubblico è obbligatorio.', 'badaround-core' ) );
+		if ( is_wp_error( $territories ) || ! $territories || ! $this->municipality_term( $this->deepest_term( $event_id, BadAround_Event_Post_Type::TERRITORY_TAX ) ) ) {
+			return new WP_Error( 'ba_publication_territory_missing', __( 'È necessario un territorio pubblico canonico valido fino al Comune.', 'badaround-core' ) );
 		}
 
 		$occurred_date = trim( (string) get_post_meta( $event_id, '_ba_occurred_date', true ) );
 		$occurred_at   = trim( (string) get_post_meta( $event_id, '_ba_occurred_at', true ) );
-		if ( '' === $occurred_date && '' === $occurred_at ) {
-			return new WP_Error( 'ba_publication_date_missing', __( 'La data pubblicabile dell’evento è obbligatoria.', 'badaround-core' ) );
+		$time_mode = sanitize_key( (string) get_post_meta( $event_id, '_ba_time_precision', true ) );
+		if ( '' === $occurred_date && '' === $occurred_at && 'unknown' !== $time_mode ) {
+			return new WP_Error( 'ba_publication_date_missing', __( 'La data pubblicabile dell’evento è obbligatoria salvo tempo esplicitamente sconosciuto.', 'badaround-core' ) );
 		}
 
 		$place_name = trim( (string) get_post_meta( $event_id, '_ba_public_place_name', true ) );
@@ -188,6 +189,9 @@ class BadAround_Publication_Service {
 		$public_lng = get_post_meta( $event_id, '_ba_public_lng', true );
 		$radius     = absint( get_post_meta( $event_id, '_ba_public_radius_m', true ) );
 		$has_public_coords = is_numeric( $public_lat ) && is_numeric( $public_lng );
+		if ( ( is_numeric( $public_lat ) xor is_numeric( $public_lng ) ) || ( ! $has_public_coords && $radius > 0 ) ) {
+			return new WP_Error( 'ba_publication_incomplete_public_coordinates', __( 'Le coordinate pubbliche devono essere complete oppure assenti.', 'badaround-core' ) );
+		}
 		$precision = sanitize_key( (string) get_post_meta( $event_id, '_ba_public_location_precision', true ) );
 
 		if ( 'f32-c7' === $precision ) {
@@ -345,6 +349,14 @@ class BadAround_Publication_Service {
 		}
 
 		if ( is_numeric( $public_lat ) && is_numeric( $public_lng ) && $radius >= 100 ) {
+			return true;
+		}
+
+		/* Native territory-only projection: never derive a point from private report coordinates. */
+		if ( $this->municipality_term( $territory ) ) {
+			delete_post_meta( $event_id, '_ba_public_lat' );
+			delete_post_meta( $event_id, '_ba_public_lng' );
+			delete_post_meta( $event_id, '_ba_public_radius_m' );
 			return true;
 		}
 
