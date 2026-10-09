@@ -7,8 +7,8 @@ import sys
 
 TRACK = "f114r_qa"
 REF = "fix/f1-14r-native-publication-contract"
-SHA = "9f285a5bea02f043ef22e59bee15acd194406ab0"
-TREE = "9dca6719c07b9f3f9fbf82d5edb2976f7eacafa5"
+SHA = "adc130897eaf7d818b318a01ce8a935b33b63289"
+TREE = "17387770e7da215cd50ab5dd7b1e1839a9a0d794"
 BASE = "27be97f7468a9fe1ac41b4482e22e98307ac0c0a"
 FROZEN = "beb33ec3325480f77a266b3b6356f5860b00e16e"
 SERVICE = "wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php"
@@ -19,7 +19,7 @@ BLOBS = {
     SERVICE: "b92224d39e6860578e1993db9a57d296800728dc",
     DISCOVERY: "d224ac5a6571b28b89e07e3be895faedf6533ca1",
     TERRITORY: "f5a35eb6e2097dd63ef5bdc46992fa9fdc4c981a",
-    TEST: "332e59f66f3c41a4874acaebc539eff3845478ba",
+    TEST: "6ce245d4f459988194d40abd870b4c493f5d183d",
 }
 
 def git(repo, *args):
