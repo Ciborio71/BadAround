@@ -165,6 +165,12 @@ class BadAround_Report_Persistence_Service {
 	}
 
 	private function resolve_territory( $location ) {
+		$has_explicit_chain = ! empty( $location['region'] ) && ! empty( $location['province'] ) && ! empty( $location['municipality'] );
+		if ( $has_explicit_chain && method_exists( $this->territory_resolver, 'resolve_location' ) ) {
+			// An explicit Step 2 hierarchy is authoritative: never override a mismatch
+			// by inferring a different territory from the private exact address.
+			return absint( $this->territory_resolver->resolve_location( $location ) );
+		}
 		foreach ( array( 'locality', 'municipality', 'province', 'region', 'area_label' ) as $key ) {
 			if ( empty( $location[ $key ] ) ) continue;
 			$resolved = $this->territory_resolver->resolve(
