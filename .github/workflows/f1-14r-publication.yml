@@ -1,0 +1,83 @@
+name: F1.14R Publication Contract
+
+on:
+  push:
+    branches:
+      - "feature/f1-14r-publication-contract"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    name: Targeted publication reconciliation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring
+
+      - name: PHP lint
+        run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-discovery-query.php
+          php -l tests/f1-14r-publication-contract.php
+
+      - name: F1.14R contract matrix
+        run: php tests/f1-14r-publication-contract.php
+
+      - name: Existing native persistence regression
+        run: php tests/native-report-f14.php
+
+      - name: Existing municipality privacy regression
+        run: php tests/map-02r-priv-01.php
+
+      - name: Existing native wizard regression
+        run: |
+          php tests/native-report-f16.php
+          php tests/native-report-f114.php
+          php tests/native-report-f114.php --rollback
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: tests/package-lock.json
+
+      - name: Map without coordinates regression
+        run: |
+          npm ci --prefix tests --ignore-scripts --no-audit --no-fund
+          node --test tests/f1-14r-map-no-coords.cjs
+
+      - name: Scope and media immutability
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='8aef59745c067718aa890c5437058c3cc64fabe7'
+          git diff --check "$BASE"...HEAD
+          git diff --exit-code "$BASE"...HEAD --             wordpress/plugins/badaround-core/includes/class-badaround-native-media-capability.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-cleanup.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-config.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-fence.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-ledger.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-persistence.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-rest-controller.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-service.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-storage.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-validator.php
+          python3 - <<'PY'
+          import subprocess
+          base='8aef59745c067718aa890c5437058c3cc64fabe7'
+          allowed={
+            '.github/workflows/php-lint.yml',
+            '.github/workflows/f1-14r-publication.yml',
+            'tests/package.json',
+            'tests/f1-14r-publication-contract.php',
+            'tests/f1-14r-map-no-coords.cjs',
+            'wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php',
+            'wordpress/plugins/badaround-core/includes/class-badaround-discovery-query.php',
+          }
+          changed=set(subprocess.check_output(['git','diff','--name-only',base+'...HEAD'],text=True).splitlines())
+          unexpected=sorted(changed-allowed)
+          assert not unexpected, unexpected
+          PY
