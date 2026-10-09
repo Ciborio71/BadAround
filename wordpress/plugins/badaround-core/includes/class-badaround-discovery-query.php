@@ -420,9 +420,10 @@ class BadAround_Discovery_Query {
 		);
 
 		foreach ( $territories as $term ) {
+			$verified = strtolower( trim( (string) get_term_meta( $term->term_id, '_ba_geo_verified', true ) ) );
 			$center_lat = get_term_meta( $term->term_id, '_ba_center_lat', true );
 			$center_lng = get_term_meta( $term->term_id, '_ba_center_lng', true );
-			if ( is_numeric( $center_lat ) && is_numeric( $center_lng ) ) {
+			if ( in_array( $verified, array( '1', 'true', 'yes', 'on' ), true ) && is_numeric( $center_lat ) && is_numeric( $center_lng ) ) {
 				return array(
 					'lat'       => (float) $center_lat,
 					'lng'       => (float) $center_lng,
