@@ -131,9 +131,7 @@ $deepest_term = static function ( $terms, $tax ) {
 						$occurred_date = sanitize_text_field( (string) get_post_meta( $event_id, '_ba_occurred_date', true ) );
 						$occurred_time = sanitize_text_field( (string) get_post_meta( $event_id, '_ba_occurred_time', true ) );
 						$when = trim( $occurred_date . ( $occurred_time ? ' · ' . $occurred_time : '' ) );
-						if ( ! $when ) {
-							$when = get_the_date();
-						}
+						/* No occurred date is legitimate for time.mode=unknown. Do not substitute the publication date. */
 
 						$public_place = sanitize_text_field( (string) get_post_meta( $event_id, '_ba_public_place_name', true ) );
 						$meta_parts = array_filter( array( $when, $public_place ?: $term->name ) );
