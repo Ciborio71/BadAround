@@ -30,6 +30,7 @@ function wp_json_encode( $value, $flags = 0 ) { return json_encode( $value, $fla
 function get_privacy_policy_url() { return home_url( '/privacy-policy/' ); }
 function get_permalink() { return home_url( '/segnala-un-evento/' ); }
 function sanitize_key( $value ) { return preg_replace( '/[^a-z0-9_-]/', '', strtolower( $value ) ); }
+function sanitize_text_field( $value ) { return trim( strip_tags( (string) $value ) ); }
 function is_wp_error() { return false; }
 function is_front_page() { return false; }
 function is_singular() { return false; }
