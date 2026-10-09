@@ -280,6 +280,7 @@ f114r_assert( is_wp_error( $r ) && 'ba_publication_plate_not_masked' === $r->get
 
 /* H. reporter PII leak -> FAIL. */
 f114r_event( 109, 5, 'f32-c4', array(), f114r_report( array( 'author_email' => 'private@example.test' ) ) );
+$GLOBALS['f114r_posts'][109]->post_title = 'Titolo pubblico';
 $GLOBALS['f114r_posts'][109]->post_content = 'Contenuto pubblico private@example.test';
 $r = $svc->validate_public_projection( 109 );
 f114r_assert( is_wp_error( $r ) && 'ba_publication_private_data_detected' === $r->get_error_code(), 'H PII leak is rejected' );
