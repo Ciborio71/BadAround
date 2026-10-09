@@ -15,6 +15,17 @@ jobs:
   f114r-differential:
     name: Exact F1.14R QA-only differential and negative guards
     runs-on: ubuntu-latest
+    services:
+      media-db:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: f17b-synthetic-ci
+          MARIADB_DATABASE: f17b
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
       - name: Checkout governance checks
         uses: actions/checkout@v4
@@ -27,6 +38,19 @@ jobs:
           ref: 9f285a5bea02f043ef22e59bee15acd194406ab0
           path: candidate
           fetch-depth: 0
+      - name: Setup PHP on exact candidate
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: gd, posix, fileinfo, pdo_mysql, pdo_sqlite, mbstring
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify candidate SHA and tree before every suite
+        run: |
+          test "$(git -C candidate rev-parse HEAD)" = '9f285a5bea02f043ef22e59bee15acd194406ab0'
+          test "$(git -C candidate rev-parse HEAD^{tree})" = '9dca6719c07b9f3f9fbf82d5edb2976f7eacafa5'
       - name: Positive test — exact candidate, scope and original frozen F1.7
         run: python3 governance/tests/governance/f114r-qa-differential.py
       - name: Negative tests — pinning and track isolation
@@ -51,3 +75,32 @@ jobs:
       - name: Static media freeze and whitespace verification
         run: |
           git -C candidate diff --check beb33ec3325480f77a266b3b6356f5860b00e16e
+      - name: Full immutable candidate regression (F1.2-F1.7, MAP-02R, F1.14R)
+        working-directory: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '9f285a5bea02f043ef22e59bee15acd194406ab0'
+          for f in wordpress/plugins/badaround-core/**/*.php wordpress/themes/badaround-child/**/*.php; do
+            if [ -f "$f" ]; then php -l "$f" >/dev/null; fi
+          done
+          for s in f1 f12 f13 f14 f15 f16; do php "tests/native-report-$s.php"; done
+          php tests/map-02r-priv-01.php
+          php tests/native-media-f17b.php
+          php tests/native-media-f17c.php
+          php tests/native-media-no-media-differential.php
+          python3 tests/native-media-http.py
+          php tests/f1-14r-publication-contract.php
+          npm ci --prefix tests --ignore-scripts --no-audit --no-fund
+          npm test --prefix tests
+      - name: Golden State and F1.9 Sentinel/Contribution regressions
+        working-directory: candidate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '9f285a5bea02f043ef22e59bee15acd194406ab0'
+          for s in d1 d2 d3; do php "tests/sentinels-$s.php"; done
+          for s in e1 e2 e4 e5; do php "tests/contributions-$s.php"; done
+          cp tests/contributions-e3.php tests/contributions-e3-ci.php
+          sed -i 's/1\\.6\\.0/1\\.7\\.0/' tests/contributions-e3-ci.php
+          php tests/contributions-e3-ci.php
+          rm tests/contributions-e3-ci.php
