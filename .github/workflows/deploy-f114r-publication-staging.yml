@@ -1,0 +1,134 @@
+name: Deploy F1.14R publication contract to staging
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate exact F1.14R publication candidate
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact candidate branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/f1-14r-publication-contract
+          fetch-depth: 1
+
+      - name: Verify exact SHA and tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 'e03be5782363dd8ef134c43d4ddba681e61490ff'
+          test "$(git rev-parse HEAD^{tree})" = 'db9a5d5e72a5c5479a7648c86642bef981cd0255'
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring
+
+      - name: Verify versions and lint
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "Version: 0.18.0" ./wordpress/plugins/badaround-core/badaround-core.php
+          grep -Fq "BADAROUND_CORE_VERSION', '0.18.0'" ./wordpress/plugins/badaround-core/badaround-core.php
+          grep -Fq "SCHEMA_VERSION = '1.9.0'" ./wordpress/plugins/badaround-core/includes/class-badaround-installer.php
+          php -l ./wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+          php -l ./wordpress/plugins/badaround-core/includes/class-badaround-discovery-query.php
+          php -l ./tests/f1-14r-publication-contract.php
+
+      - name: F1.14R targeted publication regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          php ./tests/f1-14r-publication-contract.php
+          php ./tests/native-report-f14.php
+          php ./tests/map-02r-priv-01.php
+          php ./tests/native-report-f16.php
+          php ./tests/native-report-f114.php
+          php ./tests/native-report-f114.php --rollback
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: tests/package-lock.json
+
+      - name: Map without coordinates regression
+        run: |
+          npm ci --prefix tests --ignore-scripts --no-audit --no-fund
+          node --test tests/f1-14r-map-no-coords.cjs
+
+      - name: Verify media unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='8aef59745c067718aa890c5437058c3cc64fabe7'
+          git diff --exit-code "$BASE"...HEAD --             wordpress/plugins/badaround-core/includes/class-badaround-native-media-capability.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-cleanup.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-config.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-fence.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-ledger.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-persistence.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-rest-controller.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-service.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-storage.php             wordpress/plugins/badaround-core/includes/class-badaround-native-media-validator.php
+
+      - name: Build release manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ./release-manifest
+          CORE_TREE="$(find ./wordpress/plugins/badaround-core -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')"
+          {
+            echo "deployment_track=f114r_publication_staging"
+            echo "ref=feature/f1-14r-publication-contract"
+            echo "sha=$(git rev-parse HEAD)"
+            echo "tree=$(git rev-parse HEAD^{tree})"
+            echo "core_version=0.18.0"
+            echo "schema_version=1.9.0"
+            echo "core_tree_sha256=$CORE_TREE"
+            echo "generated_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > ./release-manifest/staging-release.txt
+
+      - name: Upload release manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: badaround-f114r-publication-staging-manifest
+          path: ./release-manifest/staging-release.txt
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy exact F1.14R publication candidate
+    needs: validate
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout exact candidate branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/f1-14r-publication-contract
+          fetch-depth: 1
+
+      - name: Re-verify exact SHA and tree before FTPS
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 'e03be5782363dd8ef134c43d4ddba681e61490ff'
+          test "$(git rev-parse HEAD^{tree})" = 'db9a5d5e72a5c5479a7648c86642bef981cd0255'
+
+      - name: Upload core plugin over FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./wordpress/plugins/badaround-core/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/
+          dangerous-clean-slate: false
+          log-level: minimal
