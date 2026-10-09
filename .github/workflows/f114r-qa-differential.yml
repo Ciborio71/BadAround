@@ -72,6 +72,28 @@ jobs:
           test_reject --core 0.17.0
           test_reject --schema 1.8.0
           test_reject --theme 0.2.0
+      - name: Negative overlay mutation tests — unrelated, media and Discovery-plus-extra
+        shell: bash
+        run: |
+          set -euo pipefail
+          reject_overlay() {
+            if python3 governance/tests/governance/f114r-qa-differential.py; then
+              echo "UNEXPECTED ACCEPTANCE of unauthorized overlay" >&2
+              exit 1
+            fi
+          }
+          touch candidate/tests/f114r-unapproved-extra.tmp
+          reject_overlay
+          rm candidate/tests/f114r-unapproved-extra.tmp
+          printf '\n/* unauthorized media drift */\n' >> candidate/wordpress/plugins/badaround-core/includes/class-badaround-native-media-fence.php
+          reject_overlay
+          git -C candidate checkout -- wordpress/plugins/badaround-core/includes/class-badaround-native-media-fence.php
+          printf '\n/* unauthorized discovery overlay */\n' >> candidate/wordpress/plugins/badaround-core/includes/class-badaround-discovery-query.php
+          touch candidate/tests/f114r-second-extra.tmp
+          reject_overlay
+          git -C candidate checkout -- wordpress/plugins/badaround-core/includes/class-badaround-discovery-query.php
+          rm candidate/tests/f114r-second-extra.tmp
+          python3 governance/tests/governance/f114r-qa-differential.py
       - name: Static media freeze and whitespace verification
         run: |
           git -C candidate diff --check beb33ec3325480f77a266b3b6356f5860b00e16e
