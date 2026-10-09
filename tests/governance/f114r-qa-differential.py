@@ -35,6 +35,9 @@ def validate(repo, track, ref, sha, tree, core, schema, theme):
     assert (core, schema, theme) == ("0.18.0", "1.9.0", "0.1.0"), "wrong versions"
     assert git(repo, "rev-parse", "HEAD") == SHA, "checked-out SHA mismatch"
     assert git(repo, "rev-parse", "HEAD^{tree}") == TREE, "checked-out tree mismatch"
+    # Rejected even when HEAD identity matches: no uncommitted or untracked overlay.
+    dirty = git(repo, "status", "--porcelain", "--untracked-files=normal")
+    assert not dirty, "unapproved working-tree overlay: " + dirty
     # Four and only four scope changes relative to frozen canonical release.
     changed = git(repo, "diff", "--name-only", BASE, "HEAD").splitlines()
     assert set(changed) == set(BLOBS), "unexpected or missing application change: " + str(changed)
