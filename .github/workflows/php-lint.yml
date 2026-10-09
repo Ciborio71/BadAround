@@ -153,7 +153,7 @@ jobs:
           python3 - <<'PY'
           import pathlib, subprocess
           theme='wordpress/themes/badaround-child/'
-          allowed={'assets/css/native-report.css','assets/js/native-report/api.js','assets/js/native-report/errors.js','assets/js/native-report/media.js','assets/js/native-report/media-view.js','assets/js/native-report/wizard.js','functions.php','inc/native-report.php','page-segnala-evento.php','template-parts/native-report/step.php'}
+          allowed={'assets/css/native-report.css','assets/js/native-report/api.js','assets/js/native-report/errors.js','assets/js/native-report/media.js','assets/js/native-report/media-view.js','assets/js/native-report/model.js','assets/js/native-report/wizard.js','functions.php','inc/native-report.php','page-segnala-evento.php','template-parts/native-report/step.php'}
           changed=subprocess.check_output(['git','diff','--name-only','beb33ec3325480f77a266b3b6356f5860b00e16e','--',theme],text=True).splitlines()
           assert all(p.removeprefix(theme) in allowed for p in changed), changed
           css=theme+'assets/css/native-report.css'
