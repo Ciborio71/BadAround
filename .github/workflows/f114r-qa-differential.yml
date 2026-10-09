@@ -35,7 +35,7 @@ jobs:
       - name: Checkout immutable F1.14R candidate
         uses: actions/checkout@v4
         with:
-          ref: 9f285a5bea02f043ef22e59bee15acd194406ab0
+          ref: adc130897eaf7d818b318a01ce8a935b33b63289
           path: candidate
           fetch-depth: 0
       - name: Setup PHP on exact candidate
@@ -49,8 +49,8 @@ jobs:
           node-version: "24"
       - name: Verify candidate SHA and tree before every suite
         run: |
-          test "$(git -C candidate rev-parse HEAD)" = '9f285a5bea02f043ef22e59bee15acd194406ab0'
-          test "$(git -C candidate rev-parse HEAD^{tree})" = '9dca6719c07b9f3f9fbf82d5edb2976f7eacafa5'
+          test "$(git -C candidate rev-parse HEAD)" = 'adc130897eaf7d818b318a01ce8a935b33b63289'
+          test "$(git -C candidate rev-parse HEAD^{tree})" = '17387770e7da215cd50ab5dd7b1e1839a9a0d794'
       - name: Positive test — exact candidate, scope and original frozen F1.7
         run: python3 governance/tests/governance/f114r-qa-differential.py
       - name: Negative tests — pinning and track isolation
@@ -80,7 +80,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = '9f285a5bea02f043ef22e59bee15acd194406ab0'
+          test "$(git rev-parse HEAD)" = 'adc130897eaf7d818b318a01ce8a935b33b63289'
           for f in wordpress/plugins/badaround-core/**/*.php wordpress/themes/badaround-child/**/*.php; do
             if [ -f "$f" ]; then php -l "$f" >/dev/null; fi
           done
@@ -97,7 +97,7 @@ jobs:
         working-directory: candidate
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = '9f285a5bea02f043ef22e59bee15acd194406ab0'
+          test "$(git rev-parse HEAD)" = 'adc130897eaf7d818b318a01ce8a935b33b63289'
           for s in d1 d2 d3; do php "tests/sentinels-$s.php"; done
           for s in e1 e2 e4 e5; do php "tests/contributions-$s.php"; done
           cp tests/contributions-e3.php tests/contributions-e3-ci.php
