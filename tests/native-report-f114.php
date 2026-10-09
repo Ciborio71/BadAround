@@ -51,7 +51,7 @@ function get_terms( $query ) {
 			array( 4, 'Pomezia', 'pomezia', 3 ),
 			array( 5, 'Torvaianica', 'torvaianica', 4 ),
 		);
-		return array_map(
+		$terms = array_map(
 			static function ( $row ) {
 				$term = new WP_Term();
 				$term->term_id = $row[0]; $term->name = $row[1]; $term->slug = $row[2]; $term->parent = $row[3];
@@ -59,6 +59,13 @@ function get_terms( $query ) {
 			},
 			$fixture
 		);
+		if ( isset( $query['name'] ) ) {
+			$terms = array_values( array_filter( $terms, static function ( $term ) use ( $query ) { return $term->name === $query['name']; } ) );
+		}
+		if ( isset( $query['parent'] ) ) {
+			$terms = array_values( array_filter( $terms, static function ( $term ) use ( $query ) { return (int) $term->parent === (int) $query['parent']; } ) );
+		}
+		return $terms;
 	}
 	$map = BadAround_Event_Taxonomy_Map::mapping();
 	$key = $query['meta_value']; $term = new WP_Term();
@@ -79,6 +86,7 @@ $base = dirname( __DIR__ ) . '/wordpress/';
 require $base . 'plugins/badaround-core/includes/class-badaround-report-schema.php';
 require $base . 'plugins/badaround-core/includes/class-badaround-event-taxonomy-map.php';
 require $base . 'plugins/badaround-core/includes/class-badaround-native-report-rest-controller.php';
+require $base . 'plugins/badaround-core/includes/class-badaround-territory-resolver.php';
 require $base . 'themes/badaround-child/inc/native-report.php';
 
 $_SERVER['HTTP_HOST'] = 'staging.badaround.it';
@@ -88,6 +96,14 @@ f114_assert( badaround_native_report_available(), 'native runtime available' );
 f114_assert( ( $rollback ? 'wpforms' : 'native' ) === badaround_report_entry_mode(), 'single routing control selects expected engine' );
 f114_assert( ( ! $rollback ) === badaround_native_report_use_native(), 'native helper reflects control point' );
 f114_assert( ! badaround_native_report_qa_enabled(), 'ordinary anonymous URL is not QA mode' );
+
+$territory_registry = badaround_native_report_territory_registry();
+f114_assert( 'Pomezia' === $territory_registry['municipality'][0]['value'], 'registry exposes canonical municipality Pomezia' );
+f114_assert( array( 'Lazio', 'Roma' ) === $territory_registry['municipality'][0]['lineage'], 'registry preserves municipality lineage' );
+$resolver = new BadAround_Territory_Resolver();
+f114_assert( 4 === $resolver->resolve_location( array( 'region' => 'Lazio', 'province' => 'Roma', 'municipality' => 'Pomezia' ) ), 'explicit canonical municipality chain resolves deterministically' );
+f114_assert( 5 === $resolver->resolve_location( array( 'region' => 'Lazio', 'province' => 'Roma', 'municipality' => 'Pomezia', 'locality' => 'Torvaianica' ) ), 'explicit canonical locality chain resolves deterministically' );
+f114_assert( 0 === $resolver->resolve_location( array( 'region' => 'Lombardia', 'province' => 'Milano', 'municipality' => 'Milano' ) ), 'unsupported hierarchy fails closed before persistence' );
 
 require $base . 'themes/badaround-child/functions.php';
 $GLOBALS['assets'] = array();
