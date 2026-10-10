@@ -122,7 +122,7 @@ foreach ( array( 'native', 'normal', 'anonymous', 'non-staging' ) as $scenario )
 	$_SERVER['HTTP_HOST'] = 'non-staging' === $scenario ? 'www.badaround.it' : 'staging.badaround.it';
 	$GLOBALS['test_assets'] = array(); badaround_child_enqueue_assets();
 	ob_start(); require get_stylesheet_directory() . '/page-segnala-evento.php'; $page = ob_get_clean();
-	$native = 'native' === $scenario;
+	$native = 'non-staging' !== $scenario; // F1.14 staging defaults to Native; F1.6 diagnostic remains admin-only.
 	f16_assert( $native === ( strpos( $page, 'data-native-report' ) !== false ), 'actual page native exposure: ' . $scenario );
 	f16_assert( ! $native === ( strpos( $page, 'data-test-wpforms="6"' ) !== false ), 'actual page WPForms fallback: ' . $scenario );
 	f16_assert( $native === isset( $GLOBALS['test_assets']['badaround-native-wizard'] ), 'native JS conditional enqueue: ' . $scenario );
