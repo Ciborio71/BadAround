@@ -1,0 +1,138 @@
+name: F1.14R QA frozen differential (governance-only)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tests/governance/f114r-qa-differential.py'
+      - '.github/workflows/f114r-qa-differential.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  f114r-differential:
+    name: Exact F1.14R QA-only differential and negative guards
+    runs-on: ubuntu-latest
+    services:
+      media-db:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: f17b-synthetic-ci
+          MARIADB_DATABASE: f17b
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - name: Checkout governance checks
+        uses: actions/checkout@v4
+        with:
+          path: governance
+          fetch-depth: 1
+      - name: Checkout immutable F1.14R candidate
+        uses: actions/checkout@v4
+        with:
+          ref: 7f9c3f7d0f21f734dda306529e6b5c9779eb8455
+          path: candidate
+          fetch-depth: 0
+      - name: Setup PHP on exact candidate
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: gd, posix, fileinfo, pdo_mysql, pdo_sqlite, mbstring
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify candidate SHA and tree before every suite
+        run: |
+          test "$(git -C candidate rev-parse HEAD)" = '7f9c3f7d0f21f734dda306529e6b5c9779eb8455'
+          test "$(git -C candidate rev-parse HEAD^{tree})" = '479fdcb6b0039bb4b72ccada03a8e43fb36c87f0'
+      - name: Positive test — exact candidate, scope and original frozen F1.7
+        run: python3 governance/tests/governance/f114r-qa-differential.py
+      - name: Negative tests — pinning and track isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test_reject() {
+            if python3 governance/tests/governance/f114r-qa-differential.py "$@"; then
+              echo "Unexpected acceptance: $*" >&2
+              exit 1
+            fi
+          }
+          test_reject --track release
+          test_reject --track f17_qa
+          test_reject --track f110_freeze
+          test_reject --sha 0000000000000000000000000000000000000000
+          test_reject --tree 0000000000000000000000000000000000000000
+          test_reject --ref main
+          test_reject --core 0.17.0
+          test_reject --schema 1.8.0
+          test_reject --theme 0.2.0
+      - name: Negative overlay mutation tests — unrelated, media and Discovery-plus-extra
+        shell: bash
+        run: |
+          set -euo pipefail
+          reject_overlay() {
+            if python3 governance/tests/governance/f114r-qa-differential.py; then
+              echo "UNEXPECTED ACCEPTANCE of unauthorized overlay" >&2
+              exit 1
+            fi
+          }
+          touch candidate/tests/f114r-unapproved-extra.tmp
+          reject_overlay
+          rm candidate/tests/f114r-unapproved-extra.tmp
+          printf '\n/* unauthorized media drift */\n' >> candidate/wordpress/plugins/badaround-core/includes/class-badaround-native-media-fence.php
+          reject_overlay
+          git -C candidate checkout -- wordpress/plugins/badaround-core/includes/class-badaround-native-media-fence.php
+          printf '\n/* unauthorized discovery overlay */\n' >> candidate/wordpress/plugins/badaround-core/includes/class-badaround-discovery-query.php
+          touch candidate/tests/f114r-second-extra.tmp
+          reject_overlay
+          git -C candidate checkout -- wordpress/plugins/badaround-core/includes/class-badaround-discovery-query.php
+          rm candidate/tests/f114r-second-extra.tmp
+          python3 governance/tests/governance/f114r-qa-differential.py
+      - name: Static media freeze and whitespace verification
+        run: |
+          git -C candidate diff --check beb33ec3325480f77a266b3b6356f5860b00e16e
+      - name: Full immutable candidate regression (F1.2-F1.7, MAP-02R, F1.14R)
+        working-directory: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '7f9c3f7d0f21f734dda306529e6b5c9779eb8455'
+          for f in wordpress/plugins/badaround-core/**/*.php wordpress/themes/badaround-child/**/*.php; do
+            if [ -f "$f" ]; then php -l "$f" >/dev/null; fi
+          done
+          for s in f1 f12 f13 f14 f15 f16; do php "tests/native-report-$s.php"; done
+          php tests/map-02r-priv-01.php
+          php tests/native-media-f17b.php
+          php tests/native-media-f17c.php
+          php tests/native-media-no-media-differential.php
+          python3 tests/native-media-http.py
+          php tests/f1-14r-publication-contract.php
+          php tests/f1-14r-consumers.php
+          git fetch --no-tags --depth=1 origin be9abde7adaee8445293d0cbfc4558ffbbbca51f
+          git show be9abde7adaee8445293d0cbfc4558ffbbbca51f:tests/native-report-f114.php > tests/native-report-f114.php
+          test "$(git hash-object tests/native-report-f114.php)" = '6bebad1ef20807d01bd3ae858f2e0dc221885fc3'
+          php tests/native-report-f114.php
+          php tests/native-report-f114.php --rollback
+          npm ci --prefix tests --ignore-scripts --no-audit --no-fund
+          npm test --prefix tests
+      - name: Golden State and F1.9 Sentinel/Contribution regressions
+        working-directory: candidate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '7f9c3f7d0f21f734dda306529e6b5c9779eb8455'
+          for s in d1 d2 d3; do php "tests/sentinels-$s.php"; done
+          for s in e1 e2 e5; do php "tests/contributions-$s.php"; done
+          grep -q "ba_contribution_notifications" wordpress/plugins/badaround-core/includes/class-badaround-installer.php
+          grep -q "badaround_contribution_notify_reporter" wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-service.php
+          grep -q "BadAround_Transactional_Mailer" wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-service.php
+          grep -q "Testo riservato destinato al segnalatore" wordpress/plugins/badaround-core/includes/class-badaround-contribution-moderation-admin.php
+          cp tests/contributions-e3.php tests/contributions-e3-ci.php
+          sed -i 's/1\\.6\\.0/1\\.7\\.0/' tests/contributions-e3-ci.php
+          php tests/contributions-e3-ci.php
+          rm tests/contributions-e3-ci.php
