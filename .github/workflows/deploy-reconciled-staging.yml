@@ -66,8 +66,8 @@ jobs:
               SCHEMA_VERSION='1.9.0'
               ;;
             f114r_qa)
-              REF='fix/f1-14r-native-publication-contract'
-              APPROVED_SHA='1d329cf0233a75580b2bdff3795bad4d071dee91'
+              REF='fix/f114r-s15-native-routing'
+              APPROVED_SHA='7f9c3f7d0f21f734dda306529e6b5c9779eb8455'
               CORE_VERSION='0.18.0'
               SCHEMA_VERSION='1.9.0'
               ;;
@@ -106,7 +106,7 @@ jobs:
           elif [ "$DEPLOYMENT_TRACK" = 'f114_staging' ]; then
             test "$(git rev-parse HEAD^{tree})" = '4df5080bfe4f1c7f6d8642208c43294ad3c347f9'
           elif [ "$DEPLOYMENT_TRACK" = 'f114r_qa' ]; then
-            test "$(git rev-parse HEAD^{tree})" = 'e94b3d7fa33bceae65eee2321d1370292c8a1883'
+            test "$(git rev-parse HEAD^{tree})" = '479fdcb6b0039bb4b72ccada03a8e43fb36c87f0'
             grep -Fq 'Version: 0.1.0' wordpress/themes/badaround-child/style.css
           fi
           echo "Authorized $DEPLOYMENT_TRACK SHA: $ACTUAL_SHA"
@@ -261,8 +261,8 @@ jobs:
         run: |
           set -euo pipefail
           if [ "${{ inputs.deployment_track }}" = 'f114r_qa' ]; then
-            test "$(git rev-parse HEAD)" = '1d329cf0233a75580b2bdff3795bad4d071dee91'
-            test "$(git rev-parse HEAD^{tree})" = 'e94b3d7fa33bceae65eee2321d1370292c8a1883'
+            test "$(git rev-parse HEAD)" = '7f9c3f7d0f21f734dda306529e6b5c9779eb8455'
+            test "$(git rev-parse HEAD^{tree})" = '479fdcb6b0039bb4b72ccada03a8e43fb36c87f0'
             git fetch --no-tags --depth=1 origin 'be9abde7adaee8445293d0cbfc4558ffbbbca51f'
             git show 'be9abde7adaee8445293d0cbfc4558ffbbbca51f:tests/native-report-f114.php' > tests/native-report-f114.php
             test "$(git hash-object tests/native-report-f114.php)" = '6bebad1ef20807d01bd3ae858f2e0dc221885fc3'
@@ -318,8 +318,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = '1d329cf0233a75580b2bdff3795bad4d071dee91'
-          test "$(git rev-parse HEAD^{tree})" = 'e94b3d7fa33bceae65eee2321d1370292c8a1883'
+          test "$(git rev-parse HEAD)" = '7f9c3f7d0f21f734dda306529e6b5c9779eb8455'
+          test "$(git rev-parse HEAD^{tree})" = '479fdcb6b0039bb4b72ccada03a8e43fb36c87f0'
           test "$(git hash-object wordpress/plugins/badaround-core/includes/class-badaround-discovery-query.php)" = 'e9554e0817f92925cbccb5299b406a4bc3cfb3b7'
           php tests/f1-14r-publication-contract.php
           php tests/f1-14r-consumers.php
@@ -396,8 +396,8 @@ jobs:
               SCHEMA_VERSION='1.9.0'
               ;;
             f114r_qa)
-              REF='fix/f1-14r-native-publication-contract'
-              APPROVED_SHA='1d329cf0233a75580b2bdff3795bad4d071dee91'
+              REF='fix/f114r-s15-native-routing'
+              APPROVED_SHA='7f9c3f7d0f21f734dda306529e6b5c9779eb8455'
               CORE_VERSION='0.18.0'
               SCHEMA_VERSION='1.9.0'
               ;;
@@ -436,7 +436,7 @@ jobs:
           elif [ "$DEPLOYMENT_TRACK" = 'f114_staging' ]; then
             test "$(git rev-parse HEAD^{tree})" = '4df5080bfe4f1c7f6d8642208c43294ad3c347f9'
           elif [ "$DEPLOYMENT_TRACK" = 'f114r_qa' ]; then
-            test "$(git rev-parse HEAD^{tree})" = 'e94b3d7fa33bceae65eee2321d1370292c8a1883'
+            test "$(git rev-parse HEAD^{tree})" = '479fdcb6b0039bb4b72ccada03a8e43fb36c87f0'
             grep -Fq 'Version: 0.1.0' wordpress/themes/badaround-child/style.css
           fi
           echo "Authorized $DEPLOYMENT_TRACK SHA: $ACTUAL_SHA"
