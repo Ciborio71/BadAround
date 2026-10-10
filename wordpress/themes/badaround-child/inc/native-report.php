@@ -1,7 +1,37 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-/** F1.6 QA gate: staging administrators only; the normal URL keeps its legacy form. */
+/**
+ * F1.14 staging-only routing. Native is the public staging default when the
+ * frozen native dependencies are present. Production keeps the existing legacy
+ * route. Define BADAROUND_NATIVE_REPORT_DEFAULT=false for emergency rollback.
+ */
+function badaround_native_report_available() {
+	return class_exists( 'BadAround_Report_Schema' )
+		&& class_exists( 'BadAround_Event_Taxonomy_Map' )
+		&& class_exists( 'BadAround_Native_Report_REST_Controller' );
+}
+
+function badaround_native_report_default_enabled() {
+	return ! defined( 'BADAROUND_NATIVE_REPORT_DEFAULT' )
+		|| true === BADAROUND_NATIVE_REPORT_DEFAULT;
+}
+
+function badaround_report_entry_mode() {
+	$site_host = strtolower( (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST ) );
+	$request_host = strtolower( (string) ( $_SERVER['HTTP_HOST'] ?? '' ) );
+	$is_staging = 'staging.badaround.it' === $site_host
+		&& in_array( $request_host, array( 'staging.badaround.it', 'staging.badaround.it:443' ), true );
+	return $is_staging && badaround_native_report_available() && badaround_native_report_default_enabled()
+		? 'native'
+		: 'wpforms';
+}
+
+function badaround_native_report_use_native() {
+	return 'native' === badaround_report_entry_mode();
+}
+
+/** F1.6 diagnostic gate remains staging administrator-only and distinct from default routing. */
 function badaround_native_report_qa_enabled() {
 	$request_host = strtolower( $_SERVER['HTTP_HOST'] ?? '' );
 	return 'staging.badaround.it' === wp_parse_url( home_url( '/' ), PHP_URL_HOST )
