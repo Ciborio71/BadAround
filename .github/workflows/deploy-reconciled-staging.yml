@@ -255,9 +255,18 @@ jobs:
         if: inputs.deployment_track == 'f110_freeze' || inputs.deployment_track == 'f114_staging' || inputs.deployment_track == 'f114r_qa'
         run: php ./tests/map-02r-priv-01.php
 
-      - name: F1.14 native default and rollback routing regression
+      - name: F1.14 historical native default and rollback routing regression
         if: inputs.deployment_track == 'f114_staging' || inputs.deployment_track == 'f114r_qa'
+        shell: bash
         run: |
+          set -euo pipefail
+          if [ "${{ inputs.deployment_track }}" = 'f114r_qa' ]; then
+            test "$(git rev-parse HEAD)" = '1d329cf0233a75580b2bdff3795bad4d071dee91'
+            test "$(git rev-parse HEAD^{tree})" = 'e94b3d7fa33bceae65eee2321d1370292c8a1883'
+            git fetch --no-tags --depth=1 origin 'be9abde7adaee8445293d0cbfc4558ffbbbca51f'
+            git show 'be9abde7adaee8445293d0cbfc4558ffbbbca51f:tests/native-report-f114.php' > tests/native-report-f114.php
+            test "$(git hash-object tests/native-report-f114.php)" = '6bebad1ef20807d01bd3ae858f2e0dc221885fc3'
+          fi
           php ./tests/native-report-f114.php
           php ./tests/native-report-f114.php --rollback
 
