@@ -6,9 +6,9 @@ import subprocess
 import sys
 
 TRACK = "f114r_qa"
-REF = "fix/f1-14r-native-publication-contract"
-SHA = "1d329cf0233a75580b2bdff3795bad4d071dee91"
-TREE = "e94b3d7fa33bceae65eee2321d1370292c8a1883"
+REF = "fix/f114r-s15-native-routing"
+SHA = "9a4105f4c19f631b00a2aa0427e2023faa2f82df"
+TREE = "fa3859087de31f535551b97fe37698e7cbfddfae"
 BASE = "27be97f7468a9fe1ac41b4482e22e98307ac0c0a"
 FROZEN = "beb33ec3325480f77a266b3b6356f5860b00e16e"
 SERVICE = "wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php"
@@ -22,6 +22,9 @@ BLOBS = {
     TERRITORY: "f5a35eb6e2097dd63ef5bdc46992fa9fdc4c981a",
     TEST: "a8df692e5d4bb332d0748ea49fedec75979b9c7a",
     CONSUMERS: "fb1bb645694899c08ccaa48544183cef35a6e5f9",
+    "wordpress/themes/badaround-child/inc/native-report.php": "13f4b4da4fff1718ef05ddb543d8ac6dd0bd4dd9",
+    "wordpress/themes/badaround-child/page-segnala-evento.php": "9ae52dc9d58456696e442fac5649368c9b5f7685",
+    "wordpress/themes/badaround-child/functions.php": "f7ea1d191e262eff59c9ec791f9bcb0e5cef9d24",
 }
 
 def git(repo, *args):
