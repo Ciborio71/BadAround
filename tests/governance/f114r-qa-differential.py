@@ -54,7 +54,7 @@ def validate(repo, track, ref, sha, tree, core, schema, theme):
         "assets/css/native-report.css", "assets/js/native-report/api.js",
         "assets/js/native-report/errors.js", "assets/js/native-report/media.js",
         "assets/js/native-report/media-view.js", "assets/js/native-report/wizard.js",
-        "functions.php", "inc/native-report.php", "template-parts/native-report/step.php",
+        "functions.php", "inc/native-report.php", "page-segnala-evento.php", "template-parts/native-report/step.php",
         "template-parts/territory-layout.php",
     }
     prefix = "wordpress/themes/badaround-child/"
