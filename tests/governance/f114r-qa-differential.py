@@ -7,8 +7,8 @@ import sys
 
 TRACK = "f114r_qa"
 REF = "fix/f114r-s15-native-routing"
-SHA = "9a4105f4c19f631b00a2aa0427e2023faa2f82df"
-TREE = "fa3859087de31f535551b97fe37698e7cbfddfae"
+SHA = "7f9c3f7d0f21f734dda306529e6b5c9779eb8455"
+TREE = "479fdcb6b0039bb4b72ccada03a8e43fb36c87f0"
 BASE = "27be97f7468a9fe1ac41b4482e22e98307ac0c0a"
 FROZEN = "beb33ec3325480f77a266b3b6356f5860b00e16e"
 SERVICE = "wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php"
@@ -25,6 +25,7 @@ BLOBS = {
     "wordpress/themes/badaround-child/inc/native-report.php": "13f4b4da4fff1718ef05ddb543d8ac6dd0bd4dd9",
     "wordpress/themes/badaround-child/page-segnala-evento.php": "9ae52dc9d58456696e442fac5649368c9b5f7685",
     "wordpress/themes/badaround-child/functions.php": "f7ea1d191e262eff59c9ec791f9bcb0e5cef9d24",
+    "tests/native-report-f16.php": "56cfcfceb391d7d20ddb6fbe9b9f26cc84b1da17",
 }
 
 def git(repo, *args):
