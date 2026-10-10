@@ -35,7 +35,7 @@ jobs:
       - name: Checkout immutable F1.14R candidate
         uses: actions/checkout@v4
         with:
-          ref: 9a4105f4c19f631b00a2aa0427e2023faa2f82df
+          ref: 7f9c3f7d0f21f734dda306529e6b5c9779eb8455
           path: candidate
           fetch-depth: 0
       - name: Setup PHP on exact candidate
@@ -49,8 +49,8 @@ jobs:
           node-version: "24"
       - name: Verify candidate SHA and tree before every suite
         run: |
-          test "$(git -C candidate rev-parse HEAD)" = '9a4105f4c19f631b00a2aa0427e2023faa2f82df'
-          test "$(git -C candidate rev-parse HEAD^{tree})" = 'fa3859087de31f535551b97fe37698e7cbfddfae'
+          test "$(git -C candidate rev-parse HEAD)" = '7f9c3f7d0f21f734dda306529e6b5c9779eb8455'
+          test "$(git -C candidate rev-parse HEAD^{tree})" = '479fdcb6b0039bb4b72ccada03a8e43fb36c87f0'
       - name: Positive test — exact candidate, scope and original frozen F1.7
         run: python3 governance/tests/governance/f114r-qa-differential.py
       - name: Negative tests — pinning and track isolation
@@ -102,7 +102,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = '9a4105f4c19f631b00a2aa0427e2023faa2f82df'
+          test "$(git rev-parse HEAD)" = '7f9c3f7d0f21f734dda306529e6b5c9779eb8455'
           for f in wordpress/plugins/badaround-core/**/*.php wordpress/themes/badaround-child/**/*.php; do
             if [ -f "$f" ]; then php -l "$f" >/dev/null; fi
           done
@@ -125,7 +125,7 @@ jobs:
         working-directory: candidate
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = '9a4105f4c19f631b00a2aa0427e2023faa2f82df'
+          test "$(git rev-parse HEAD)" = '7f9c3f7d0f21f734dda306529e6b5c9779eb8455'
           for s in d1 d2 d3; do php "tests/sentinels-$s.php"; done
           for s in e1 e2 e5; do php "tests/contributions-$s.php"; done
           grep -q "ba_contribution_notifications" wordpress/plugins/badaround-core/includes/class-badaround-installer.php
