@@ -55,7 +55,7 @@ test('zero Google initial requests: load only after explicit click, without map 
   class Widget extends h.win.HTMLElement {}
   h.win.customElements.define('fake-place-widget',Widget);
   h.win.google={maps:{importLibrary:async library=>{assert.equal(library,'places');return {PlaceAutocompleteElement:class {constructor(){return h.win.document.createElement('fake-place-widget');}}};},Map:class {constructor(){mapCreated++;}}}};
-  h.win.__badaroundSmartPlacesReady();
+  h.win[new URL(h.win.document.querySelector('script[data-ba-smart-address]').src).searchParams.get('callback')]();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(mapCreated,0);
   assert(h.container.querySelector('[data-smart-widget] fake-place-widget'));
@@ -91,7 +91,7 @@ async function liveWidget(){
   const controller=adapter.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:territory}},h.model);
   h.button.click();
   h.win.google={maps:{importLibrary:async()=>({PlaceAutocompleteElement:class {constructor(){return h.win.document.createElement('fake-r6-place-widget');}}})}};
-  h.win.__badaroundSmartPlacesReady();
+  h.win[new URL(h.win.document.querySelector('script[data-ba-smart-address]').src).searchParams.get('callback')]();
   await new Promise(resolve=>setImmediate(resolve));
   const widget=h.container.querySelector('fake-r6-place-widget');
   assert(widget,'widget must be ready');
