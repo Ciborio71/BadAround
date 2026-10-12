@@ -169,7 +169,18 @@ function badaround_native_report_config() {
 	$fields['vehicle.plate_raw']['help'] = 'La targa completa resta riservata. L’eventuale versione pubblica sarà mascherata.';
 	$fields['reporter.public_identity_mode']['help'] = 'Nome e cognome restano nei dati riservati; la modalità scelta autorizza solo l’identità pubblica indicata. Email e telefono non sono pubblicati.';
 	$fields['content.description']['help'] = 'Riporta i fatti. Evita nomi, recapiti, accuse e dati personali non necessari. Il testo sarà moderato.';
+	// Public canonical taxonomy names only; the server remains authoritative via resolve_path().
+	$territories = array();
+	$terms = get_terms( array( 'taxonomy' => 'ba_territorio', 'hide_empty' => false ) );
+	if ( is_array( $terms ) && ! is_wp_error( $terms ) ) {
+		foreach ( $terms as $term ) {
+			$territories[] = array( 'id' => (int) $term->term_id, 'parent' => (int) $term->parent, 'name' => $term->name );
+		}
+	}
+	$wpforms_settings = get_option( 'wpforms_settings', array() );
+	$smart_key = is_array( $wpforms_settings ) ? (string) ( $wpforms_settings['geolocation-google-places-api-key'] ?? '' ) : '';
 	return array(
+		'smartAddress' => $smart_key ? array( 'key' => $smart_key, 'territories' => $territories, 'country' => 'IT' ) : null,
 		'schemaVersion' => BadAround_Report_Schema::VERSION,
 		'consentVersion' => 'native-f16-v1', // Version of this QA presentation, not a claim of finalized legal policies.
 		'endpoint' => rest_url( BadAround_Native_Report_REST_Controller::REST_NAMESPACE . BadAround_Native_Report_REST_Controller::REST_ROUTE ),
