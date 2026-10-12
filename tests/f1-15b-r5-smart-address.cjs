@@ -77,3 +77,114 @@ test('frozen adapters and report schema are not touched by the smart address mod
   assert(!source.includes('console.log'));
   assert(source.includes("importLibrary('places')"));
 });
+
+function deferred(){
+  let resolve,reject;
+  const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});
+  return {promise,resolve,reject};
+}
+async function liveWidget(){
+  const h=setup(),requests=[];
+  class Widget extends h.win.HTMLElement {}
+  h.win.customElements.define('fake-r6-place-widget',Widget);
+  const adapter=h.win.BadAroundNative.SmartAddress;
+  const controller=adapter.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:territory}},h.model);
+  h.button.click();
+  h.win.google={maps:{importLibrary:async()=>({PlaceAutocompleteElement:class {constructor(){return h.win.document.createElement('fake-r6-place-widget');}}})}};
+  h.win.__badaroundSmartPlacesReady();
+  await new Promise(resolve=>setImmediate(resolve));
+  const widget=h.container.querySelector('fake-r6-place-widget');
+  assert(widget,'widget must be ready');
+  const select=(options={})=>{
+    const event=new h.win.Event('gmp-select');
+    const waiting=options.waiting||deferred();
+    const place={
+      addressComponents:options.components||[
+        ac('country','Italia','IT'), ac('administrative_area_level_1','Lazio','Lazio'),
+        ac('administrative_area_level_2','Roma','RM'),ac('locality','Pomezia','Pomezia'),
+        ac('sublocality','Torvaianica','Torvaianica')
+      ],
+      formattedAddress:options.address||'Via Gran Bretagna 66, Pomezia',
+      location:{lat:()=>41.66,lng:()=>12.43},
+      id:'provider-internal-id-not-to-be-persisted',
+      fetchFields({fields}){requests.push(fields);return waiting.promise;}
+    };
+    event.placePrediction={toPlace:()=>place};
+    widget.dispatchEvent(event);
+    return waiting;
+  };
+  const input=p=>h.container.querySelector('[name="'+p+'"]');
+  return {...h,controller,widget,requests,select,input,close(){controller.dispose();h.dom.window.close();}};
+}
+test('R6-01: unreconciled second selection never retains the first canonical territory or private coordinates',async()=>{
+  const h=await liveWidget();
+  const first=h.select();first.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.model.values['location.locality'],'Torvaianica');
+  assert.equal(h.model.values['location.exact_lat'],'41.66');
+  const second=h.select({components:[ac('country','Italia','IT'),ac('administrative_area_level_1','Lazio','Lazio'),ac('administrative_area_level_2','Roma','RM'),ac('locality','Comune non censito','X')]});
+  second.resolve();await new Promise(resolve=>setImmediate(resolve));
+  for(const p of ['location.region','location.province','location.municipality','location.locality','location.exact_lat','location.exact_lng'])
+    assert.equal(h.input(p).value,'',p+' cannot retain stale values');
+  assert(h.container.querySelector('[data-smart-status]').textContent.includes('manualmente'));
+  h.close();
+});
+test('R6-02: user edits during pending Place Details; late response cannot overwrite manual values',async()=>{
+  const h=await liveWidget(),pending=h.select();
+  h.input('location.region').value='Manuale';
+  h.input('location.region').dispatchEvent(new h.win.Event('input',{bubbles:true}));
+  pending.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.input('location.region').value,'Manuale');
+  assert.equal(h.input('location.exact_lat').value,'');
+  assert.equal(h.input('location.exact_address').value,'');
+  h.close();
+});
+test('R6-02: second Google selection wins even when first resolves last',async()=>{
+  const h=await liveWidget(),old=h.select({address:'Vecchio indirizzo'});
+  const latest=h.select({address:'Nuovo indirizzo'});
+  latest.resolve();await new Promise(resolve=>setImmediate(resolve));
+  old.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.input('location.exact_address').value,'Nuovo indirizzo');
+  h.close();
+});
+test('R6-03: no Google Place ID requested, stored or sent to the Native model',async()=>{
+  const h=await liveWidget(),selection=h.select();
+  selection.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.deepEqual(h.requests,[['addressComponents','formattedAddress','location']]);
+  assert.equal(h.model.values['location.place_id'],undefined);
+  assert.equal(h.model.values['location.exact_lat'],'41.66');
+  assert.equal(h.model.values['location.municipality'],'Pomezia');
+  h.close();
+});
+test('R6-04: manual edit after selected address invalidates private coordinates and stale street when territory changes',async()=>{
+  const h=await liveWidget(),p=h.select();p.resolve();await new Promise(resolve=>setImmediate(resolve));
+  h.input('location.province').value='Provincia inserita manualmente';
+  h.input('location.province').dispatchEvent(new h.win.Event('input',{bubbles:true}));
+  assert.equal(h.input('location.exact_lat').value,'');
+  assert.equal(h.input('location.exact_lng').value,'');
+  assert.equal(h.input('location.exact_address').value,'');
+  assert.equal(h.model.values['location.province'],'Provincia inserita manualmente');
+  h.close();
+});
+test('R6-04: foreign address cannot inject coordinates or old territory',async()=>{
+  const h=await liveWidget(),first=h.select();first.resolve();await new Promise(resolve=>setImmediate(resolve));
+  const out=h.select({components:[ac('country','France','FR')],address:'Paris'});
+  out.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.input('location.region').value,'');
+  assert.equal(h.input('location.exact_lat').value,'');
+  assert.equal(h.input('location.exact_address').value,'');
+  h.close();
+});
+test('R6-04: absent coordinates leave manual address and canonical hierarchy usable',async()=>{
+  const h=await liveWidget();
+  const wait=deferred();
+  const event=new h.win.Event('gmp-select');
+  event.placePrediction={toPlace:()=>({
+    addressComponents:[ac('country','Italia','IT'),ac('administrative_area_level_1','Lazio','Lazio'),ac('administrative_area_level_2','Roma','RM'),ac('locality','Pomezia','Pomezia')],
+    formattedAddress:'Pomezia, Roma', location:null,fetchFields:()=>wait.promise
+  })};
+  h.widget.dispatchEvent(event);wait.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.input('location.municipality').value,'Pomezia');
+  assert.equal(h.input('location.exact_lat').value,'');
+  assert.equal(h.input('location.exact_lng').value,'');
+  h.close();
+});
