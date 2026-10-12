@@ -177,7 +177,7 @@ function badaround_native_report_config() {
 			$territories[] = array( 'id' => (int) $term->term_id, 'parent' => (int) $term->parent, 'name' => $term->name );
 		}
 	}
-	$wpforms_settings = get_option( 'wpforms_settings', array() );
+	$wpforms_settings = function_exists( 'get_option' ) ? get_option( 'wpforms_settings', array() ) : array();
 	$smart_key = is_array( $wpforms_settings ) ? (string) ( $wpforms_settings['geolocation-google-places-api-key'] ?? '' ) : '';
 	return array(
 		'smartAddress' => $smart_key ? array( 'key' => $smart_key, 'territories' => $territories, 'country' => 'IT' ) : null,
