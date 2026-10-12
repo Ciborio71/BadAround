@@ -188,3 +188,93 @@ test('R6-04: absent coordinates leave manual address and canonical hierarchy usa
   assert.equal(h.input('location.exact_lng').value,'');
   h.close();
 });
+
+function loaderHarness(){
+  const h=setup(),win=h.win;
+  const pending=new Map();let seq=0;
+  const realSet=win.setTimeout,realClear=win.clearTimeout;
+  win.setTimeout=(fn,ms)=>{assert.equal(ms,15000);const id=++seq;pending.set(id,fn);return id;};
+  win.clearTimeout=id=>pending.delete(id);
+  const tick=()=>new Promise(resolve=>setImmediate(resolve));
+  const activate=()=>h.win.BadAroundNative.SmartAddress.loadPlaces('FAKE_KEY',win.document);
+  const script=()=>win.document.querySelector('script[data-ba-smart-address]');
+  const scripts=()=>win.document.querySelectorAll('script[data-ba-smart-address]');
+  const invokeCallback=el=>{const cb=new URL(el.src).searchParams.get('callback');return {name:cb,invoke:win[cb]};};
+  const close=()=>{win.setTimeout=realSet;win.clearTimeout=realClear;h.dom.window.close();};
+  return {...h,win,pending,activate,script,scripts,invokeCallback,tick,close};
+}
+test('R6D timeout removes loader script, clears callback, and permits explicit retry',async()=>{
+  const h=loaderHarness();
+  const first=h.activate();
+  const old=h.script();
+  const callback=h.invokeCallback(old);
+  assert.equal(h.scripts().length,1);
+  assert.equal(h.pending.size,1);
+  const expire=[...h.pending.values()][0];
+  expire();
+  await assert.rejects(first,/places_timeout/);
+  assert.equal(h.scripts().length,0);
+  assert.equal(h.win[callback.name],undefined);
+  const second=h.activate();
+  assert.equal(h.scripts().length,1);
+  const fresh=h.script(),newCb=h.invokeCallback(fresh);
+  assert.notEqual(callback.name,newCb.name);
+  h.win.google={maps:{importLibrary:async name=>({library:name})}};
+  newCb.invoke();
+  assert.deepEqual(await second,{library:'places'});
+  assert.equal(h.pending.size,0);
+  h.close();
+});
+test('R6D in-flight callers share one pending loader and never inject duplicate scripts',async()=>{
+  const h=loaderHarness();
+  const a=h.activate(),b=h.activate(),c=h.activate();
+  assert.equal(h.scripts().length,1);
+  assert.strictEqual(a,b);
+  assert.strictEqual(b,c);
+  h.win.google={maps:{importLibrary:async()=>({ready:true})}};
+  h.invokeCallback(h.script()).invoke();
+  assert.equal((await a).ready,true);
+  assert.equal((await b).ready,true);
+  assert.equal((await c).ready,true);
+  h.close();
+});
+test('R6D late callback from expired attempt cannot complete or poison new retry',async()=>{
+  const h=loaderHarness();
+  const old=h.activate(),oldScript=h.script();
+  const expired=h.invokeCallback(oldScript);
+  [...h.pending.values()][0]();
+  await assert.rejects(old,/places_timeout/);
+  const retry=h.activate();
+  const current=h.invokeCallback(h.script());
+  assert.notEqual(expired.name,current.name);
+  expired.invoke(); // stale callback reference from an earlier script
+  assert.equal(h.pending.size,1);
+  assert.equal(h.win[current.name]!==undefined,true);
+  h.win.google={maps:{importLibrary:async()=>({ready:'new-attempt'})}};
+  current.invoke();
+  assert.equal((await retry).ready,'new-attempt');
+  h.close();
+});
+test('R6D network error cleans script and permits a subsequent attempt',async()=>{
+  const h=loaderHarness();
+  const promise=h.activate(),failed=h.script(),cb=h.invokeCallback(failed);
+  failed.onerror();
+  await assert.rejects(promise,/places_unavailable/);
+  assert.equal(h.scripts().length,0);
+  assert.equal(h.win[cb.name],undefined);
+  assert.equal(h.pending.size,0);
+  const retry=h.activate();
+  assert.equal(h.scripts().length,1);
+  h.win.google={maps:{importLibrary:async()=>({ok:true})}};
+  h.invokeCallback(h.script()).invoke();
+  assert.equal((await retry).ok,true);
+  h.close();
+});
+test('R6D existing Google Maps bootstrap is reused without a new script',async()=>{
+  const h=loaderHarness();
+  h.win.google={maps:{importLibrary:async lib=>({library:lib})}};
+  assert.equal((await h.activate()).library,'places');
+  assert.equal(h.scripts().length,0);
+  assert.equal(h.pending.size,0);
+  h.close();
+});
