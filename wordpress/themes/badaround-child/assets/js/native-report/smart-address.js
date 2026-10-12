@@ -55,6 +55,8 @@
     }).catch(error => {loaderPromise=null;throw error;});
     return loaderPromise;
   }
+  // The native report does not require a Google Place ID; we intentionally
+  // avoid requesting, logging or persisting provider IDs in this adapter.
   function mount(container, config, model) {
     const ui = container.querySelector('[data-native-smart-address]');
     if (!ui) return {dispose() {}};
@@ -62,68 +64,97 @@
     const start = ui.querySelector('[data-smart-start]');
     const status = ui.querySelector('[data-smart-status]');
     const holder = ui.querySelector('[data-smart-widget]');
-    const locationPaths = LEVELS.map(v => 'location.' + v);
-    const exactPaths = ['location.exact_address','location.exact_lat','location.exact_lng'];
-    let disposed=false, selected=false, widget, requestId=0;
+    const paths = LEVELS.map(v => 'location.' + v);
+    const privatePaths = ['location.exact_address','location.exact_lat','location.exact_lng'];
+    let disposed=false, selected=false, widget, requestId=0, applying=false;
     const say = msg => {if(!disposed)status.textContent=msg;};
     const field = path => container.querySelector('[name="' + path + '"]');
     function assign(path,value) {
       const el = field(path);
       if(!el || el.disabled) return;
-      el.value = value === undefined || value === null ? '' : String(value);
-      el.dispatchEvent(new root.Event('input',{bubbles:true}));
+      const previous = applying; applying=true;
+      try {
+        el.value = value === undefined || value === null ? '' : String(value);
+        el.dispatchEvent(new root.Event('input',{bubbles:true}));
+      } finally {applying=previous;}
     }
-    function clearSelection() {
-      if(!selected)return;
-      selected=false;requestId++;
-      for (const path of ['location.exact_lat','location.exact_lng']) assign(path,'');
-      say('Indirizzo modificato: verifica il territorio e le coordinate prima di proseguire.');
+    function clearLocation(clearAddress=true) {
+      for (const path of paths) assign(path,'');
+      if (clearAddress) assign('location.exact_address','');
+      assign('location.exact_lat','');
+      assign('location.exact_lng','');
+    }
+    function invalidate(reason,territoryChanged=false) {
+      requestId++;
+      selected=false;
+      // If a manually edited territory could disagree with the selected
+      // street address, require the user to confirm/re-enter exact address.
+      if (territoryChanged) assign('location.exact_address','');
+      assign('location.exact_lat','');
+      assign('location.exact_lng','');
+      say(reason);
     }
     function changed(event) {
-      if (!selected || !event.isTrusted || !event.target?.matches?.('[data-native-input]')) return;
-      const path = event.target.name;
-      if (locationPaths.concat(exactPaths).includes(path)) clearSelection();
+      if (disposed || applying || !event.target?.matches?.('[data-native-input]')) return;
+      const path=event.target.name;
+      if (!paths.includes(path) && !privatePaths.includes(path)) return;
+      // User interaction wins over any asynchronous Place Details response.
+      // This works during a pending request AND after a selected suggestion.
+      if (requestId || selected) invalidate('Dati geografici modificati: verifica il territorio e inserisci l’indirizzo preciso, se necessario.', paths.includes(path));
     }
     container.addEventListener('input',changed);
     async function choose(event) {
+      if (disposed) return;
       const id=++requestId;
+      selected=false;
+      // Do not submit an old territory or exact coordinate while resolving a new Place.
+      clearLocation(true);
       try {
         const place=event.placePrediction?.toPlace?.();
-        if(!place)throw new Error('place_unavailable');
+        if (!place) throw new Error('place_unavailable');
         say('Verifica dell’indirizzo in corso…');
-        await place.fetchFields({fields:['addressComponents','formattedAddress','location','id']});
-        if(disposed || id!==requestId)return;
+        await place.fetchFields({fields:['addressComponents','formattedAddress','location']});
+        if (disposed || id!==requestId) return;
         const mapped=resolveTerritory(place.addressComponents,config.smartAddress.territories);
-        if(mapped.error==='outside_italy'){say('Il risultato selezionato non è in Italia. Usa la ricerca italiana o il territorio manuale.');return;}
+        if (mapped.error === 'outside_italy') {
+          say('Il risultato selezionato non è in Italia. Scegli un indirizzo italiano o compila il territorio manualmente.');
+          return;
+        }
+        // Even when Google cannot reconcile the territory, never recover the
+        // old values. The user must explicitly enter the canonical hierarchy.
+        if (mapped.location) for(const level of LEVELS) assign('location.'+level,mapped.location[level]||'');
+        if (place.formattedAddress) assign('location.exact_address',place.formattedAddress);
         const lat=typeof place.location?.lat==='function'?place.location.lat():null;
         const lng=typeof place.location?.lng==='function'?place.location.lng():null;
-        selected=false;
-        if(mapped.location) for(const level of LEVELS)assign('location.'+level,mapped.location[level]||'');
-        if(place.formattedAddress)assign('location.exact_address',place.formattedAddress);
-        if(Number.isFinite(lat)&&Number.isFinite(lng)){assign('location.exact_lat',lat);assign('location.exact_lng',lng);}
-        else {assign('location.exact_lat','');assign('location.exact_lng','');}
-        selected=true;
+        // A coordinate pair may accompany only a fully reconciled hierarchy.
+        if (mapped.location && Number.isFinite(lat) && Number.isFinite(lng)) {
+          assign('location.exact_lat',lat);
+          assign('location.exact_lng',lng);
+        }
+        selected=Boolean(mapped.location);
         say(mapped.location
-          ? 'Territorio riconciliato con BadAround. Verifica Regione, Provincia, Comune e Località prima di proseguire.'
-          : 'Google ha trovato l’indirizzo, ma il territorio canonico non è verificato. Compila o correggi manualmente Regione, Provincia e Comune. Nessun termine sarà creato.');
-      } catch (_) {if(!disposed && id===requestId)say('Impossibile leggere il risultato Google. Usa i campi manuali.');}
+          ? 'Territorio riconciliato con BadAround. Conferma Regione, Provincia, Comune e Località prima di proseguire.'
+          : 'Il territorio canonico non è stato riconosciuto. Compila manualmente Regione, Provincia e Comune; le coordinate Google non sono utilizzate.');
+      } catch (_) {
+        if (!disposed && id===requestId) say('Risultato Google non disponibile. Compila il territorio e l’indirizzo manualmente.');
+      }
     }
     async function activate() {
-      if(disposed)return;
-      start.disabled=true;say('Caricamento della ricerca Google…');
+      if (disposed) return;
+      start.disabled=true; say('Caricamento della ricerca Google…');
       try {
         const places=await loadPlaces(config.smartAddress.key);
-        if(disposed)return;
+        if (disposed) return;
         const Element=places.PlaceAutocompleteElement || root.google?.maps?.places?.PlaceAutocompleteElement;
-        if(!Element)throw new Error('widget_unavailable');
+        if (!Element) throw new Error('widget_unavailable');
         widget=new Element({includedRegionCodes:['it']});
         widget.includedRegionCodes=['it'];
         widget.addEventListener('gmp-select',choose);
         holder.replaceChildren(widget);
         start.hidden=true;
-        say('Cerca un indirizzo italiano, quindi seleziona un suggerimento. Il territorio manuale resta disponibile.');
+        say('Cerca un indirizzo italiano e seleziona un suggerimento. Puoi sempre usare i campi manuali.');
       } catch (_) {
-        if(!disposed){start.disabled=false;say('Google non è disponibile. Puoi compilare tutti i campi manualmente oppure riprovare.');}
+        if (!disposed) {start.disabled=false;say('Google non è disponibile. I campi manuali restano utilizzabili.');}
       }
     }
     start.addEventListener('click',activate);
