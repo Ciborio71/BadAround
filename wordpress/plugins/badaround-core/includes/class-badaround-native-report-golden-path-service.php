@@ -48,7 +48,11 @@ class BadAround_Native_Report_Golden_Path_Service {
 					'type'          => 'native',
 					'submission_id' => $submission_id,
 				),
-				array( 'prepare_public_projection' => false )
+				array(
+					'prepare_public_projection' => false,
+					// Carried from native intake validation, not from client payload.
+					'territory_term_id' => isset( $intake['territory_term_id'] ) ? absint( $intake['territory_term_id'] ) : null,
+				)
 			);
 			if ( is_wp_error( $persisted ) ) {
 				$this->repository->mark_intake_status( $report_id, 'failed' );
