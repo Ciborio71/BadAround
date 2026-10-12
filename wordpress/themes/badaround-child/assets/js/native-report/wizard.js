@@ -5,7 +5,7 @@
     if (container.nativeReport) return; // Reinitialization must retain the current logical wizard.
     let disposed=false; const listeners=[];
     function listen(target,type,handler) { target.addEventListener(type,handler);listeners.push(()=>target.removeEventListener(type,handler)); }
-    function teardown() { if(disposed)return; disposed=true;listeners.forEach(remove=>remove());mediaView?.dispose(); }
+    function teardown() { if(disposed)return; disposed=true;listeners.forEach(remove=>remove());mediaView?.dispose();smartAddress?.dispose(); }
     const config = JSON.parse(container.querySelector('[data-native-config]').textContent);
     const model = new ns.Model(config);
     const form = container.querySelector('[data-native-form]');
@@ -14,6 +14,7 @@
     const next = form.querySelector('[data-native-next]'), back = form.querySelector('[data-native-back]'), submit = form.querySelector('[data-native-submit]');
     const success = container.querySelector('[data-native-success]');
     let mediaView = null;
+    const smartAddress = ns.SmartAddress?.mount(container, config, model);
     function mountMedia() {
       if (ns.mountMedia && config.media) mediaView = ns.mountMedia(container, model, config.media, () => render());
     }

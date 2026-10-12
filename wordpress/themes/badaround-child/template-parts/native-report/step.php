@@ -2,6 +2,12 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 if ( 'location' === $key ) : ?>
 	<p>Indica Regione, Provincia, Comune e, se conosciuta, località. Civico e coordinate precise restano riservati; la posizione pubblica viene approssimata.</p>
+  <div class="ba-native-smart-address" data-native-smart-address>
+    <p><strong>Trova l'indirizzo con Google</strong> (facoltativo). I campi del territorio qui sotto rimangono sempre disponibili.</p>
+    <button type="button" class="ba-button" data-smart-start>Cerca indirizzo con Google</button>
+    <div data-smart-widget></div>
+    <p data-smart-status role="status" aria-live="polite">La ricerca si attiva soltanto quando lo richiedi.</p>
+  </div>
 <?php elseif ( 'time' === $key ) : ?>
 	<p>Gli orari si riferiscono al fuso <?php echo esc_html( $config['timezone'] ); ?>.</p>
 <?php elseif ( 'media' === $key ) : ?>
