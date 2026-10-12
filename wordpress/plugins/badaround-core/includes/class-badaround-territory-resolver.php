@@ -62,6 +62,56 @@ class BadAround_Territory_Resolver {
 		return $best_id;
 	}
 
+	/**
+	 * F1.15A.3: native-only canonical hierarchy identity; no address heuristics.
+	 * Canonical v1 transports names, not term IDs. A duplicate at any level
+	 * is rejected rather than selecting an arbitrary WordPress term.
+	 *
+	 * @return int|WP_Error Deepest unambiguous canonical term.
+	 */
+	public function resolve_path( $location ) {
+		$taxonomy = BadAround_Event_Post_Type::TERRITORY_TAX;
+		if ( ! is_array( $location ) ) {
+			return new WP_Error( 'ba_report_invalid_location', 'Percorso territoriale non valido.', array( 'field' => 'location.region' ) );
+		}
+		$parent = 0;
+		$terminal = 0;
+		foreach ( array( 'region', 'province', 'municipality', 'locality' ) as $level ) {
+			$value = isset( $location[ $level ] ) && is_string( $location[ $level ] ) ? trim( $location[ $level ] ) : '';
+			if ( '' === $value ) {
+				if ( 'locality' === $level ) {
+					return $terminal;
+				}
+				return new WP_Error( 'ba_report_invalid_location', 'Livello territoriale obbligatorio mancante.', array( 'field' => 'location.' . $level ) );
+			}
+			$terms = get_terms( array(
+				'taxonomy' => $taxonomy,
+				'hide_empty' => false,
+				'name' => $value,
+				'parent' => $parent,
+			) );
+			if ( is_wp_error( $terms ) || ! is_array( $terms ) ) {
+				return new WP_Error( 'ba_report_invalid_location', 'Territorio non verificabile.', array( 'field' => 'location.' . $level ) );
+			}
+			$matches = array();
+			foreach ( $terms as $term ) {
+				if ( isset( $term->term_id, $term->parent, $term->name, $term->taxonomy )
+					&& $taxonomy === $term->taxonomy
+					&& (int) $term->parent === $parent
+					&& $term->name === $value
+					&& (int) $term->term_id > 0 ) {
+					$matches[] = (int) $term->term_id;
+				}
+			}
+			if ( 1 !== count( $matches ) ) {
+				return new WP_Error( 'ba_report_invalid_location', 'Territorio inesistente o ambiguo.', array( 'field' => 'location.' . $level ) );
+			}
+			$terminal = $matches[0];
+			$parent = $terminal;
+		}
+		return $terminal;
+	}
+
 	private function disambiguate_by_ancestors( $candidates, $address ) {
 		$matches = array();
 		foreach ( $candidates as $term ) {
