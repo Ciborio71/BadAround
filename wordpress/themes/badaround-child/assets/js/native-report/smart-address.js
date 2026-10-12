@@ -31,28 +31,57 @@
     return {location:result, termIds:ids};
   }
   let loaderPromise;
+  let loaderAttempt = 0;
   function loadPlaces(key, doc = root.document) {
+    // Prefer an existing Google JavaScript bootstrap, for compatibility with
+    // Maps and Legacy. No second script may be injected during an active attempt.
     if (root.google?.maps?.importLibrary) return root.google.maps.importLibrary('places');
     if (loaderPromise) return loaderPromise;
+    const attempt = ++loaderAttempt;
+    const callback = '__badaroundSmartPlacesReady' + attempt;
     loaderPromise = new Promise((resolve,reject) => {
-      const callback = '__badaroundSmartPlacesReady';
       const script = doc.createElement('script');
-      const timer = root.setTimeout(() => {cleanup();reject(new Error('places_timeout'));}, 15000);
-      function cleanup() {root.clearTimeout(timer);delete root[callback];}
-      root[callback] = () => {
-        cleanup();
-        if (!root.google?.maps?.importLibrary) return reject(new Error('places_unavailable'));
+      let settled = false;
+      const timer = root.setTimeout(() => finish(new Error('places_timeout')), 15000);
+      function finish(error) {
+        if (settled) return;
+        settled = true;
+        root.clearTimeout(timer);
+        delete root[callback];
+        script.onerror = null;
+        // Remove failed/expired scripts before allowing another attempt.
+        // Removal prevents a pending external script from executing in normal
+        // browsers; a unique callback also fences an exceptionally late load.
+        if (error) {
+          script.remove();
+          reject(error);
+          return;
+        }
         resolve(root.google.maps.importLibrary('places'));
+      }
+      root[callback] = () => {
+        if (!root.google?.maps?.importLibrary) {
+          finish(new Error('places_unavailable'));
+          return;
+        }
+        finish();
       };
-      script.onerror = () => {cleanup();reject(new Error('places_unavailable'));};
+      script.onerror = () => finish(new Error('places_unavailable'));
       const url = new URL('https://maps.googleapis.com/maps/api/js');
       url.searchParams.set('key', key);
       url.searchParams.set('v','weekly');
       url.searchParams.set('loading','async');
       url.searchParams.set('callback',callback);
-      script.src=url.toString();script.async=true;script.dataset.baSmartAddress='1';
-      doc.head.appendChild(script);
-    }).catch(error => {loaderPromise=null;throw error;});
+      script.src=url.toString();
+      script.async=true;
+      script.dataset.baSmartAddress='1';
+      try { doc.head.appendChild(script); }
+      catch (_) { finish(new Error('places_unavailable')); }
+    }).catch(error => {
+      // Keep a single rejected attempt from poisoning future explicit retries.
+      loaderPromise = null;
+      throw error;
+    });
     return loaderPromise;
   }
   // The native report does not require a Google Place ID; we intentionally
