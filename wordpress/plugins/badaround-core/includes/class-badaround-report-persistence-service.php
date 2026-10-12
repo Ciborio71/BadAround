@@ -80,7 +80,13 @@ class BadAround_Report_Persistence_Service {
 		BadAround_Audit_Log::record( 'event', $event_id, 'taxonomy_assigned', isset( $source['type'] ) ? $source['type'] : 'native', null, $request_id );
 
 		$location = isset( $canonical_report['location'] ) && is_array( $canonical_report['location'] ) ? $canonical_report['location'] : array();
-		$territory_id = $this->resolve_territory( $location );
+		// Native requests with a verified path assign exactly the intake-selected
+		// term. Legacy submissions retain the existing free-text resolver.
+		$has_verified_path = 'native' === ( isset( $source['type'] ) ? $source['type'] : '' )
+			&& array_key_exists( 'territory_term_id', $options );
+		$territory_id = $has_verified_path
+			? absint( $options['territory_term_id'] )
+			: $this->resolve_territory( $location );
 		if ( ! $territory_id ) {
 			return $this->rollback_event(
 				$report_id,
