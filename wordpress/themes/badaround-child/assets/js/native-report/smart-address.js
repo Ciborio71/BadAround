@@ -16,7 +16,7 @@
       locality: variants(component(components, 'sublocality')).concat(variants(component(components, 'sublocality_level_1')),variants(component(components, 'neighborhood')))
     };
     // Only explicit administrative component names/aliases; never infer identity from free-text address.
-    candidates.province = candidates.province.flatMap(v => [v, v.replace(/^(?:città metropolitana di|provincia di)\s+/iu,'')]);
+    candidates.province = candidates.province.flatMap(v => [v, v.replace(/^(?:città metropolitana di|provincia di)\s+/iu,''), normalize(v)==='citta metropolitana di roma capitale'?'Roma':'']);
     const result = {}, ids = {};
     let parent = 0;
     for (const level of LEVELS) {
@@ -57,7 +57,8 @@
   }
   function mount(container, config, model) {
     const ui = container.querySelector('[data-native-smart-address]');
-    if (!ui || !config.smartAddress) return {dispose() {}};
+    if (!ui) return {dispose() {}};
+    if (!config.smartAddress?.key) {ui.hidden=true;return {dispose() {}};}
     const start = ui.querySelector('[data-smart-start]');
     const status = ui.querySelector('[data-smart-status]');
     const holder = ui.querySelector('[data-smart-widget]');
