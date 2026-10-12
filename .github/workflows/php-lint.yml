@@ -124,7 +124,70 @@ jobs:
       - name: Test F1.7B real HTTP multipart on synthetic local fixtures
         run: python3 ./tests/native-media-http.py
 
+      # F1.15A.3 is a tightly scoped change on the certified application SHA.
+      # Compare against that exact SHA, not the older F1.7 foundation freeze.
+      # The original historical freeze below remains intact for other branches.
+      - name: Verify F1.15A.3 exact-scope freeze and adversarial guard
+        if: github.ref_name == 'feature/f1.15a3-canonical-territory-path'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import subprocess
+          BASE = '7f9c3f7d0f21f734dda306529e6b5c9779eb8455'
+          CORE = 'wordpress/plugins/badaround-core/includes/'
+          ALLOWED = frozenset({
+              CORE + 'class-badaround-territory-resolver.php',
+              CORE + 'class-badaround-native-report-intake-service.php',
+              CORE + 'class-badaround-native-report-golden-path-service.php',
+              CORE + 'class-badaround-report-persistence-service.php',
+              'tests/f1-15a3-territory.php',
+              'tests/native-report-f13.php',
+              '.github/workflows/f1-15a3-territory.yml',
+              '.github/workflows/php-lint.yml',
+          })
+          REQUIRED = frozenset({
+              CORE + 'class-badaround-territory-resolver.php',
+              CORE + 'class-badaround-native-report-intake-service.php',
+              CORE + 'class-badaround-native-report-golden-path-service.php',
+              CORE + 'class-badaround-report-persistence-service.php',
+          })
+          def forbidden(paths):
+              return sorted(set(paths) - ALLOWED)
+          changed = set(subprocess.check_output(
+              ['git', 'diff', '--name-only', BASE, 'HEAD', '--'], text=True
+          ).splitlines())
+          assert REQUIRED <= changed, 'Native territorial identity changes missing'
+          assert not forbidden(changed), 'Unapproved changes: ' + repr(forbidden(changed))
+          # Adversarial probes: a protected change MUST be rejected; never weaken
+          # checks with whole-directory, prefix or extension allowlisting.
+          protected = (
+              CORE + 'class-badaround-report-schema.php',
+              CORE + 'class-badaround-report-validator.php',
+              CORE + 'class-badaround-report-normalizer.php',
+              CORE + 'class-badaround-publication-service.php',
+              CORE + 'class-badaround-discovery-query.php',
+              CORE + 'class-badaround-native-media-persistence.php',
+              CORE + 'class-badaround-wpforms-event-intake.php',
+              'wordpress/themes/badaround-child/assets/js/native-report/model.js',
+              'wordpress/themes/badaround-child/assets/js/report.js',
+              'wordpress/themes/badaround-child/assets/css/wpforms.css',
+              CORE + 'class-badaround-installer.php',
+              'wordpress/plugins/badaround-core/badaround-core.php',
+          )
+          for path in protected:
+              assert forbidden(changed | {path}) == [path], 'Guard allows protected change: ' + path
+          print('F1.15A3_EXACT_SCOPE=PASS')
+          print('F1.15A3_ADVERSARIAL_PROTECTED_PATHS=PASS (' + str(len(protected)) + ')')
+          PY
+          git diff --check 7f9c3f7d0f21f734dda306529e6b5c9779eb8455 HEAD --
+          php tests/f1-15a3-territory.php
+          php tests/native-report-f13.php
+          php tests/native-report-f14.php
+          php tests/f1-14r-publication-contract.php
+
       - name: Verify frozen backend and scoped F1.7D/E foundation extensions
+        if: github.ref_name != 'feature/f1.15a3-canonical-territory-path'
         run: |
           git diff --exit-code beb33ec3325480f77a266b3b6356f5860b00e16e -- \
             wordpress/plugins/badaround-core \
