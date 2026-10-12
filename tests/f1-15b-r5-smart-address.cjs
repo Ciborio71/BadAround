@@ -67,7 +67,7 @@ test('when Google fails, manual canonical controls are still usable',async()=>{
   h.win.document.querySelector('script[src*="maps.googleapis.com"]').onerror();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(h.button.disabled,false);
-  assert(h.container.querySelector('[data-smart-status]').textContent.includes('campi manualmente'));
+  assert(h.container.querySelector('[data-smart-status]').textContent.includes('campi manuali'));
   assert.equal(h.container.querySelector('[name="location.region"]').disabled,false);
   controller.dispose();h.dom.window.close();
 });
