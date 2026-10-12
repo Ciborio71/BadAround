@@ -34,8 +34,8 @@ test('country guard, omissions and homonymous ambiguous terms are fail-closed',(
 function setup(){
   const dom=new JSDOM(`<!doctype html><html><head></head><body><section data-native-report>
   <div data-native-smart-address><button data-smart-start type="button">Cerca</button><div data-smart-widget></div><p data-smart-status></p></div>
-  <input name="location.region"><input name="location.province"><input name="location.municipality"><input name="location.locality">
-  <input name="location.exact_address"><input name="location.exact_lat"><input name="location.exact_lng">
+  <input data-native-input name="location.region"><input data-native-input name="location.province"><input data-native-input name="location.municipality"><input data-native-input name="location.locality">
+  <input data-native-input name="location.exact_address"><input data-native-input name="location.exact_lat"><input data-native-input name="location.exact_lng">
   </section></body></html>`,{url:'https://staging.badaround.it/segnala-un-evento/',runScripts:'outside-only'});
   dom.window.eval(source);
   const win=dom.window,container=win.document.querySelector('[data-native-report]');
@@ -149,7 +149,7 @@ test('R6-02: second Google selection wins even when first resolves last',async()
 test('R6-03: no Google Place ID requested, stored or sent to the Native model',async()=>{
   const h=await liveWidget(),selection=h.select();
   selection.resolve();await new Promise(resolve=>setImmediate(resolve));
-  assert.deepEqual(h.requests,[['addressComponents','formattedAddress','location']]);
+  assert.equal(JSON.stringify(h.requests),JSON.stringify([['addressComponents','formattedAddress','location']]));
   assert.equal(h.model.values['location.place_id'],undefined);
   assert.equal(h.model.values['location.exact_lat'],'41.66');
   assert.equal(h.model.values['location.municipality'],'Pomezia');
