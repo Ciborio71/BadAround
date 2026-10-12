@@ -1,0 +1,38 @@
+name: F1.15A3 Canonical Territory QA
+
+on:
+  push:
+    branches:
+      - feature/f1.15a3-canonical-territory-path
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  targeted-territory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+      - name: PHP syntax
+        run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-territory-resolver.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-native-report-intake-service.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-native-report-golden-path-service.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-report-persistence-service.php
+          php -l tests/f1-15a3-territory.php
+      - name: F1.15A3 synthetic path and persistence
+        run: php tests/f1-15a3-territory.php
+      - name: F1.4 persistence regression
+        run: php tests/native-report-f14.php
+      - name: F1.3 intake regression
+        run: php tests/native-report-f13.php
+      - name: F1.2 frozen schema unmodified
+        run: |
+          git diff --exit-code 7f9c3f7d0f21f734dda306529e6b5c9779eb8455 -- wordpress/plugins/badaround-core/includes/class-badaround-report-schema.php
+      - name: Forbidden component modifications
+        run: |
+          git diff --exit-code 7f9c3f7d0f21f734dda306529e6b5c9779eb8455 -- wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php wordpress/plugins/badaround-core/includes/class-badaround-wpforms-event-intake.php wordpress/plugins/badaround-core/includes/class-badaround-discovery-contract.php
