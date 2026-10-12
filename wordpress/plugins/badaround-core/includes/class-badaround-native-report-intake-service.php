@@ -41,6 +41,16 @@ class BadAround_Native_Report_Intake_Service {
 			return BadAround_Report_Result::from_wp_error( $valid );
 		}
 
+		// Native-only: resolve the complete canonical path before any idempotency
+		// reservation or private report persistence. Never use address/area_label.
+		$territory_id = ( new BadAround_Territory_Resolver() )->resolve_path(
+			isset( $normalized['location'] ) ? $normalized['location'] : array()
+		);
+		if ( is_wp_error( $territory_id ) ) {
+			BadAround_Audit_Log::technical_error( 'report', 0, 'validation_failed', $territory_id->get_error_code(), $request_id );
+			return BadAround_Report_Result::from_wp_error( $territory_id );
+		}
+
 		$submission_id = isset( $normalized['submission_id'] ) ? $normalized['submission_id'] : '';
 		$reservation = $this->idempotency->reserve( $submission_id );
 		if ( is_wp_error( $reservation ) ) {
@@ -65,7 +75,7 @@ class BadAround_Native_Report_Intake_Service {
 					);
 				}
 				BadAround_Audit_Log::record( 'report', $report_id, 'idempotency_duplicate', 'native', null, $request_id );
-				return BadAround_Report_Result::success( $submission_id, $report_id, $normalized, 'COMPLETED', true );
+				return $this->territory_success( $territory_id, $submission_id, $report_id, $normalized, 'COMPLETED', true );
 			}
 
 			if ( BadAround_Report_Idempotency_Service::STATE_FAILED_RETRYABLE === $reservation['state'] ) {
@@ -95,7 +105,7 @@ class BadAround_Native_Report_Intake_Service {
 			BadAround_Audit_Log::record( 'report', $report_id, 'intake_validated', 'native', null, $request_id );
 			BadAround_Audit_Log::record( 'report', $report_id, 'intake_completed', 'native', null, $request_id );
 
-			return BadAround_Report_Result::success(
+			return $this->territory_success( $territory_id,
 				$submission_id,
 				$report_id,
 				$normalized,
@@ -110,4 +120,11 @@ class BadAround_Native_Report_Intake_Service {
 			$this->idempotency->release( $submission_id );
 		}
 	}
+	/** Ephemeral internal result metadata; never part of canonical payload. */
+	private function territory_success( $territory_id, $submission_id, $report_id, $normalized, $state, $duplicate ) {
+		$result = BadAround_Report_Result::success( $submission_id, $report_id, $normalized, $state, $duplicate );
+		$result['territory_term_id'] = (int) $territory_id;
+		return $result;
+	}
+
 }
