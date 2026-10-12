@@ -16,8 +16,7 @@ const territory=[
 const ac=(type,longText,shortText)=>({types:[type],longText,shortText});
 test('canonical Pomezia/Torvaianica match is strict and complete',()=>{
   const x=resolveTerritory([ac('country','Italia','IT'),ac('administrative_area_level_1','Lazio','Lazio'),ac('administrative_area_level_2','Città metropolitana di Roma Capitale','RM'),ac('locality','Pomezia','Pomezia'),ac('sublocality','Torvaianica','Torvaianica')],territory);
-  // Full name does not equal canonical Roma: no heuristic based on postal address.
-  assert.equal(x.error,'unresolved_province');
+  assert.deepEqual(x.location,{region:'Lazio',province:'Roma',municipality:'Pomezia',locality:'Torvaianica'});
 });
 test('exact hierarchy is accepted; location is optional',()=>{
   const base=[ac('country','Italy','IT'),ac('administrative_area_level_1','Lazio','Lazio'),ac('administrative_area_level_2','Roma','RM'),ac('locality','Pomezia','Pomezia')];
@@ -55,7 +54,7 @@ test('zero Google initial requests: load only after explicit click, without map 
   let mapCreated=0;
   class Widget extends h.win.HTMLElement {}
   h.win.customElements.define('fake-place-widget',Widget);
-  h.win.google={maps:{importLibrary:async library=>{assert.equal(library,'places');return {PlaceAutocompleteElement:class extends Widget {constructor(){super();return h.win.document.createElement('fake-place-widget');}}};},Map:class {constructor(){mapCreated++;}}}};
+  h.win.google={maps:{importLibrary:async library=>{assert.equal(library,'places');return {PlaceAutocompleteElement:class {constructor(){return h.win.document.createElement('fake-place-widget');}}};},Map:class {constructor(){mapCreated++;}}}};
   h.win.__badaroundSmartPlacesReady();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(mapCreated,0);
