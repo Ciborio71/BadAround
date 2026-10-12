@@ -36,6 +36,25 @@ require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/cl
 require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-report-validator.php';
 require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-report-result.php';
 require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-report-idempotency-service.php';
+// Synthetic pre-existing ba_territorio tree for F1.15A.3 native-only validation.
+class BadAround_Event_Post_Type { const TERRITORY_TAX = 'ba_territorio'; }
+class F13_Term {
+	public $term_id, $parent, $name, $taxonomy = 'ba_territorio';
+	public function __construct( $id, $parent, $name ) {
+		$this->term_id = $id; $this->parent = $parent; $this->name = $name;
+	}
+}
+$GLOBALS['f13_territories'] = array(
+	new F13_Term( 2, 0, 'Lazio' ), new F13_Term( 3, 2, 'Roma' ),
+	new F13_Term( 4, 3, 'Pomezia' ), new F13_Term( 5, 4, 'Torvaianica' ),
+);
+function get_terms( $args ) {
+	return array_values( array_filter( $GLOBALS['f13_territories'], static function ( $term ) use ( $args ) {
+		return $term->taxonomy === $args['taxonomy']
+			&& $term->name === $args['name'] && $term->parent === $args['parent'];
+	} ) );
+}
+require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-territory-resolver.php';
 require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-native-report-intake-service.php';
 
 function f13_assert($ok,$message){ if(!$ok){ fwrite(STDERR,"FAIL: {$message}\n"); exit(1);} echo "PASS: {$message}\n"; }
@@ -52,7 +71,9 @@ function f13_fixture(){
 		),
 		'location'=>array(
 			'exact_address'=>'Via Roma 10, Pomezia','exact_lat'=>41.669,'exact_lng'=>12.501,
-			'place_id'=>'place-test','area_label'=>'Pomezia','public_precision'=>'area',
+			'place_id'=>'place-test','area_label'=>'Pomezia',
+			'region'=>'Lazio','province'=>'Roma','municipality'=>'Pomezia','locality'=>'Torvaianica',
+			'public_precision'=>'area',
 			'place_type'=>'road_sidewalk','immediate_danger'=>'no'
 		),
 		'time'=>array('mode'=>'exact','date'=>'2026-10-01','knowledge'=>'unknown'),
