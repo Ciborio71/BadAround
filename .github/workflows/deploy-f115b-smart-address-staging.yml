@@ -9,6 +9,19 @@ on:
         description: 'Exact approved Smart Address commit SHA'
         required: true
         type: string
+      deployment_mode:
+        description: 'Use dry-run for a non-writing FTPS synchronization plan; deploy requires a second confirmation'
+        required: true
+        type: choice
+        options:
+          - dry-run
+          - deploy
+        default: dry-run
+      deploy_confirmation:
+        description: 'Required for real deploy only: DEPLOY_F115B_STAGING (leave blank for dry-run)'
+        required: false
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -114,7 +127,26 @@ jobs:
           test "$(git rev-parse HEAD)" = "$APPROVED_APPLICATION_SHA"
           test "$(git rev-parse HEAD^{tree})" = "$APPROVED_APPLICATION_TREE"
 
-      - name: Upload child theme over staging FTPS
+      - name: Explicit dispatch mode safety gate
+        shell: bash
+        env:
+          MODE: ${{ inputs.deployment_mode }}
+          CONFIRMATION: ${{ inputs.deploy_confirmation }}
+        run: |
+          set -euo pipefail
+          if [ "$MODE" = "dry-run" ]; then
+            test -z "$CONFIRMATION"
+            echo 'FTPS_DRY_RUN_MODE=PASS'
+          elif [ "$MODE" = "deploy" ]; then
+            test "$CONFIRMATION" = "DEPLOY_F115B_STAGING"
+            echo 'FTPS_REAL_DEPLOY_CONFIRMATION=PASS'
+          else
+            echo 'Invalid deployment mode' >&2
+            exit 1
+          fi
+
+      - name: FTPS dry-run (plan only, NO REMOTE WRITES)
+        if: ${{ inputs.deployment_mode == 'dry-run' && inputs.deploy_confirmation == '' }}
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.STAGING_SFTP_HOST }}
@@ -132,4 +164,26 @@ jobs:
             **/*-OLD
             **/*-OLD/**
             **/.ftp-deploy-sync-state.json
-          log-level: minimal
+          log-level: verbose
+          dry-run: true
+
+      - name: FTPS real staging child-theme deploy (EXPLICIT CONFIRMATION REQUIRED)
+        if: ${{ inputs.deployment_mode == 'deploy' && inputs.deploy_confirmation == 'DEPLOY_F115B_STAGING' }}
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./wordpress/themes/badaround-child/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/*-OLD
+            **/*-OLD/**
+            **/.ftp-deploy-sync-state.json
+          log-level: verbose
