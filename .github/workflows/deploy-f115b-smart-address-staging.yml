@@ -125,4 +125,11 @@ jobs:
           local-dir: ./wordpress/themes/badaround-child/
           server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
           dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/*-OLD
+            **/*-OLD/**
+            **/.ftp-deploy-sync-state.json
           log-level: minimal
