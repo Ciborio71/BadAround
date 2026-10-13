@@ -1,0 +1,116 @@
+# F1.15B-R.7A.3B — REGISTRATION PROPOSAL ONLY
+# This workflow cannot upload to staging. A separately approved PR must
+# replace the hard-false gate after a verified live-child-theme backup exists.
+name: F1.15B R7A1 Staging Theme Preflight (no deploy)
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: "Exact approved application commit (must match frozen Smart Address candidate)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+
+env:
+  APPROVED_APPLICATION_SHA: 9c45f22eaa2a15d96cd225f077651bfdff344f6a
+  FROZEN_BASELINE_SHA: 25b9ff5ad9d747b10cef7c2f3981fab15fbe4ed3
+  APPROVED_APPLICATION_TREE: ba0b3e7f09cfe3b372d5e2c993ce818ba99eee0b
+
+jobs:
+  preflight:
+    name: Verify exact child-theme candidate and scope (read-only)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact approved application SHA
+        uses: actions/checkout@v4
+        with:
+          ref: 9c45f22eaa2a15d96cd225f077651bfdff344f6a
+          fetch-depth: 0
+
+      - name: Verify approved SHA and frozen scope
+        shell: bash
+        env:
+          REQUESTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          test "$REQUESTED_SHA" = "$APPROVED_APPLICATION_SHA"
+          test "$(git rev-parse HEAD)" = "$APPROVED_APPLICATION_SHA"
+          test "$(git rev-parse HEAD^{tree})" = "$APPROVED_APPLICATION_TREE"
+          git cat-file -e "$FROZEN_BASELINE_SHA^{commit}"
+          git diff --check "$FROZEN_BASELINE_SHA" HEAD
+          git diff --exit-code "$FROZEN_BASELINE_SHA" HEAD -- wordpress/plugins/badaround-core/
+          git diff --exit-code "$FROZEN_BASELINE_SHA" HEAD -- wordpress/themes/badaround-child/assets/js/report.js wordpress/themes/badaround-child/assets/css/wpforms.css
+          python3 - <<'PY'
+          import os, subprocess
+          base=os.environ['FROZEN_BASELINE_SHA']
+          paths=subprocess.check_output(['git','diff','--name-only',base,'HEAD'],text=True).splitlines()
+          allowed={
+            '.github/workflows/f1-15b-r5-smart-address.yml',
+            'tests/f1-15b-r5-smart-address.cjs',
+            'wordpress/themes/badaround-child/assets/js/native-report/smart-address.js',
+            'wordpress/themes/badaround-child/assets/js/native-report/wizard.js',
+            'wordpress/themes/badaround-child/functions.php',
+            'wordpress/themes/badaround-child/inc/native-report.php',
+            'wordpress/themes/badaround-child/template-parts/native-report/step.php',
+          }
+          assert set(paths)==allowed, f'Unexpected candidate diff: {sorted(set(paths)^allowed)}'
+          print('PINNED_SHA_AND_EXACT_SCOPE=PASS')
+          PY
+
+      - name: Set up PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Child theme PHP syntax
+        run: find wordpress/themes/badaround-child -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Smart Address JavaScript syntax
+        run: |
+          node --check wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
+          node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
+
+      - name: Native Smart Address and wizard regressions
+        run: |
+          npm ci --prefix tests
+          node --test tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs
+          php tests/f1-15a3-territory.php
+
+      - name: Build read-only child-theme SHA256 manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-manifest
+          find wordpress/themes/badaround-child -type f -print0 | sort -z | xargs -0 sha256sum > release-manifest/approved-theme-files.sha256
+          git rev-parse HEAD > release-manifest/approved-application-commit.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: f1-15b-r7a1-approved-theme-manifest
+          path: release-manifest/
+          if-no-files-found: error
+
+  # Intentionally non-executable. This is *not* a deploy authorization.
+  # An independent, reviewed approval must first establish:
+  #   1. snapshot of the ACTUAL currently installed staging child-theme,
+  #   2. offline/restorable backup hash and demonstrated restore procedure,
+  #   3. staging-only permissions, exact pinned checkout, and operator sign-off,
+  #   4. pre/post-release smoke checks and rollback trigger.
+  deploy_disabled:
+    if: ${{ false }}
+    needs: preflight
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "DEPLOY DISABLED — requires separate authorization and verified backup"
