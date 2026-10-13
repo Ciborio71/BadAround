@@ -1,0 +1,189 @@
+# F1.15B-R.7A.3E — staging-only child-theme deployment proposal.
+# MERGE / workflow_dispatch / deploy each require separate explicit authorization.
+name: Deploy F1.15B Smart Address child theme to staging (pinned)
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: 'Exact approved Smart Address commit SHA'
+        required: true
+        type: string
+      deployment_mode:
+        description: 'Use dry-run for a non-writing FTPS synchronization plan; deploy requires a second confirmation'
+        required: true
+        type: choice
+        options:
+          - dry-run
+          - deploy
+        default: dry-run
+      deploy_confirmation:
+        description: 'Required for real deploy only: DEPLOY_F115B_STAGING (leave blank for dry-run)'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+
+env:
+  APPROVED_APPLICATION_SHA: 9c45f22eaa2a15d96cd225f077651bfdff344f6a
+  APPROVED_APPLICATION_TREE: ba0b3e7f09cfe3b372d5e2c993ce818ba99eee0b
+  FROZEN_BASELINE_SHA: 25b9ff5ad9d747b10cef7c2f3981fab15fbe4ed3
+
+jobs:
+  validate:
+    name: Validate immutable application identity and frozen scope
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout immutable candidate
+        uses: actions/checkout@v4
+        with:
+          ref: 9c45f22eaa2a15d96cd225f077651bfdff344f6a
+          fetch-depth: 0
+
+      - name: Verify requested SHA, checkout tree and exact frozen scope
+        shell: bash
+        env:
+          REQUESTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          test "$REQUESTED_SHA" = "$APPROVED_APPLICATION_SHA"
+          test "$(git rev-parse HEAD)" = "$APPROVED_APPLICATION_SHA"
+          test "$(git rev-parse HEAD^{tree})" = "$APPROVED_APPLICATION_TREE"
+          git cat-file -e "$FROZEN_BASELINE_SHA^{commit}"
+          git diff --check "$FROZEN_BASELINE_SHA" HEAD --
+          git diff --exit-code "$FROZEN_BASELINE_SHA" HEAD -- wordpress/plugins/badaround-core/
+          git diff --exit-code "$FROZEN_BASELINE_SHA" HEAD -- wordpress/themes/badaround-child/assets/js/report.js wordpress/themes/badaround-child/assets/css/wpforms.css
+          python3 - <<'PY'
+          import os
+          import subprocess
+          base = os.environ['FROZEN_BASELINE_SHA']
+          actual = set(subprocess.check_output(
+              ['git', 'diff', '--name-only', base, 'HEAD', '--'], text=True
+          ).splitlines())
+          expected = {
+              '.github/workflows/f1-15b-r5-smart-address.yml',
+              'tests/f1-15b-r5-smart-address.cjs',
+              'wordpress/themes/badaround-child/assets/js/native-report/smart-address.js',
+              'wordpress/themes/badaround-child/assets/js/native-report/wizard.js',
+              'wordpress/themes/badaround-child/functions.php',
+              'wordpress/themes/badaround-child/inc/native-report.php',
+              'wordpress/themes/badaround-child/template-parts/native-report/step.php',
+          }
+          assert actual == expected, f'Unexpected candidate diff: {sorted(actual ^ expected)}'
+          print('PINNED_SHA_TREE_AND_EXACT_SCOPE=PASS')
+          PY
+
+      - name: Set up PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Child theme PHP syntax
+        run: find wordpress/themes/badaround-child -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Smart Address and Native wizard JavaScript syntax
+        run: |
+          node --check wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
+          node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
+
+      - name: Targeted Smart Address and Native regression tests
+        run: |
+          npm ci --prefix tests
+          node --test tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs
+          php tests/f1-15a3-territory.php
+
+  deploy:
+    name: Upload approved child theme to staging only
+    needs: validate
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout immutable approved candidate
+        uses: actions/checkout@v4
+        with:
+          ref: 9c45f22eaa2a15d96cd225f077651bfdff344f6a
+          fetch-depth: 1
+
+      - name: Verify exact SHA and tree again before upload
+        shell: bash
+        env:
+          REQUESTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          test "$REQUESTED_SHA" = "$APPROVED_APPLICATION_SHA"
+          test "$(git rev-parse HEAD)" = "$APPROVED_APPLICATION_SHA"
+          test "$(git rev-parse HEAD^{tree})" = "$APPROVED_APPLICATION_TREE"
+
+      - name: Explicit dispatch mode safety gate
+        shell: bash
+        env:
+          MODE: ${{ inputs.deployment_mode }}
+          CONFIRMATION: ${{ inputs.deploy_confirmation }}
+        run: |
+          set -euo pipefail
+          if [ "$MODE" = "dry-run" ]; then
+            test -z "$CONFIRMATION"
+            echo 'FTPS_DRY_RUN_MODE=PASS'
+          elif [ "$MODE" = "deploy" ]; then
+            test "$CONFIRMATION" = "DEPLOY_F115B_STAGING"
+            echo 'FTPS_REAL_DEPLOY_CONFIRMATION=PASS'
+          else
+            echo 'Invalid deployment mode' >&2
+            exit 1
+          fi
+
+      - name: FTPS dry-run (plan only, NO REMOTE WRITES)
+        if: ${{ inputs.deployment_mode == 'dry-run' && inputs.deploy_confirmation == '' }}
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./wordpress/themes/badaround-child/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/*-OLD
+            **/*-OLD/**
+            **/.ftp-deploy-sync-state.json
+          log-level: verbose
+          dry-run: true
+
+      - name: FTPS real staging child-theme deploy (EXPLICIT CONFIRMATION REQUIRED)
+        if: ${{ inputs.deployment_mode == 'deploy' && inputs.deploy_confirmation == 'DEPLOY_F115B_STAGING' }}
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./wordpress/themes/badaround-child/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/*-OLD
+            **/*-OLD/**
+            **/.ftp-deploy-sync-state.json
+          log-level: verbose
