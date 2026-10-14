@@ -124,7 +124,7 @@ $find = static function ( $name, $parent ) use ( $tax, &$by_parent ) {
 	$by_parent[ $key ] = $exact ? (int) $exact[0]->term_id : 0;
 	return $by_parent[ $key ];
 };
-$resolve = static function ( $name, $parent, $kind, $istat_code ) use ( $tax, $apply, &$find, &$created, &$existing, &$planned ) {
+$resolve = static function ( $name, $parent, $kind, $istat_code ) use ( $tax, $apply, &$find, &$created, &$existing, &$planned, &$by_parent ) {
 	$id = $find( $name, $parent );
 	if ( $id ) {
 		$existing[ $kind ]++;
@@ -143,6 +143,7 @@ $resolve = static function ( $name, $parent, $kind, $istat_code ) use ( $tax, $a
 		WP_CLI::error( 'Cannot create canonical ' . $kind . ': ' . $name );
 	}
 	$id = (int) $result['term_id'];
+	$by_parent[ $parent . '|' . $name ] = $id;
 	add_term_meta( $id, '_ba_istat_' . $kind . '_code', (string) $istat_code, true );
 	$created[ $kind ]++;
 	return $id;
