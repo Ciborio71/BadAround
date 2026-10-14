@@ -1,4 +1,4 @@
-/* Scoped to F1.6 QA; existing reporting/legacy assets are preserved. */
+/* Native reporting design system. Scoped to the native wizard; independent of WPForms markup. */
 .ba-native{max-width:880px;margin-inline:auto;color:var(--ba-text);overflow-wrap:anywhere}
 .ba-native [hidden]{display:none!important}
 .ba-native h2{margin:24px 0 20px;font-size:clamp(1.3rem,4vw,1.9rem)}
@@ -406,4 +406,26 @@
 }
 @media(prefers-reduced-motion:reduce){
 	.ba-native :where(input,select,textarea,.ba-native-choice){transition:none}
+}
+
+/* LEG-RETIRE-01: reusable privacy-sensitive card treatment from the former report UI.
+ * Applied to Native field identities; no WPForms DOM selectors or dependencies. */
+.ba-native .ba-native-field:is(
+  [data-native-field="location.exact_address"],
+  [data-native-field="vehicle.plate_raw"],
+  [data-native-field="object.owner_verification_detail"],
+  [data-native-field="authority.reference"]
+){
+  padding:16px;
+  border:1px solid #f1dfaf;
+  border-radius:14px;
+  background:#fffbf1;
+}
+@media(max-width:600px){
+  .ba-native .ba-native-field:is(
+    [data-native-field="location.exact_address"],
+    [data-native-field="vehicle.plate_raw"],
+    [data-native-field="object.owner_verification_detail"],
+    [data-native-field="authority.reference"]
+  ){padding:12px}
 }
