@@ -33,9 +33,6 @@ require_once BADAROUND_CORE_PATH . 'includes/class-badaround-report-intake-servi
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-report-intake-service.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-report-golden-path-service.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-report-rest-controller.php';
-require_once BADAROUND_CORE_PATH . 'includes/class-badaround-wpforms-field-mapper.php';
-require_once BADAROUND_CORE_PATH . 'includes/class-badaround-wpforms-report-adapter.php';
-require_once BADAROUND_CORE_PATH . 'includes/class-badaround-wpforms-contract-map.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-event-type-resolver.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-territory-resolver.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-media-repository.php';
@@ -55,7 +52,6 @@ require_once BADAROUND_CORE_PATH . 'includes/class-badaround-contribution-modera
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-contribution-moderation-admin.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-moderation-service.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-moderation-admin.php';
-require_once BADAROUND_CORE_PATH . 'includes/class-badaround-wpforms-event-intake.php';
 
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-media-config.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-media-capability.php';
