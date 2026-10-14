@@ -31,6 +31,10 @@ $apply = in_array( '--apply', $arguments, true );
 if ( ! $csv_path || ! is_file( $csv_path ) || ! is_readable( $csv_path ) ) {
 	WP_CLI::error( 'Pass an existing readable local ISTAT CSV file.' );
 }
+$expected_csv_sha256 = 'd33642d067b70060dd4e03a8504742e784908591e1e54b67cd7e486daeeb50f7';
+if ( ! hash_equals( $expected_csv_sha256, hash_file( 'sha256', $csv_path ) ) ) {
+	WP_CLI::error( 'Unapproved or modified CSV; no changes performed.' );
+}
 if ( $apply && 'staging.badaround.it' !== wp_parse_url( home_url( '/' ), PHP_URL_HOST ) ) {
 	WP_CLI::error( 'GEO-IT-01 apply is restricted to staging.badaround.it.' );
 }
@@ -107,6 +111,14 @@ if ( 7894 !== count( $rows ) ) {
 }
 WP_CLI::log( 'ISTAT_SOURCE_SHA256=' . hash_file( 'sha256', $csv_path ) );
 WP_CLI::log( 'ISTAT_ACTIVE_MUNICIPALITIES=' . count( $rows ) );
+$pilot = array( array( 'Lazio', 0, 2 ), array( 'Roma', 2, 3 ), array( 'Pomezia', 3, 4 ), array( 'Torvaianica', 4, 5 ) );
+foreach ( $pilot as $expected ) {
+  $term = get_term( $expected[2], 'ba_territorio' );
+  if ( ! $term || is_wp_error( $term ) || $term->name !== $expected[0] || (int) $term->parent !== $expected[1] ) {
+    WP_CLI::error( 'Certified pilot taxonomy identity changed; no import permitted.' );
+  }
+}
+WP_CLI::log( 'PILOT_PATH_IDS=2>3>4>5' );
 $tax = 'ba_territorio';
 $created = array( 'region' => 0, 'province' => 0, 'municipality' => 0 );
 $existing = array( 'region' => 0, 'province' => 0, 'municipality' => 0 );
