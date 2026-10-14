@@ -9,6 +9,7 @@ on:
     branches:
       - feature/f1.15a3-canonical-territory-path
       - feature/f1-15b-r5-smart-address-native
+      - feature/leg-retire-01-native-only
   workflow_dispatch:
 permissions:
   contents: read
