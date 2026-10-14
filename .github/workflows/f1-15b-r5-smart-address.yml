@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - feature/f1-15b-r5-smart-address-native
+      - feature/leg-retire-01-native-only
   pull_request:
     branches:
       - feature/f1.15a3-canonical-territory-path
+      - feature/f1-15b-r5-smart-address-native
   workflow_dispatch:
 permissions:
   contents: read
@@ -24,6 +26,9 @@ jobs:
           php-version: '8.2'
       - name: PHP syntax on presentation surface
         run: |
+          php -l wordpress/plugins/badaround-core/badaround-core.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-core.php
+          php -l wordpress/themes/badaround-child/page-segnala-evento.php
           php -l wordpress/themes/badaround-child/functions.php
           php -l wordpress/themes/badaround-child/inc/native-report.php
           php -l wordpress/themes/badaround-child/template-parts/native-report/step.php
@@ -39,6 +44,8 @@ jobs:
         run: node --test tests/native-report-f16-dom.cjs
       - name: Frozen contract and disallowed consumer guard
         run: |
-          git diff --exit-code 25b9ff5ad9d747b10cef7c2f3981fab15fbe4ed3 -- wordpress/plugins/badaround-core/includes/class-badaround-report-schema.php wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php wordpress/plugins/badaround-core/includes/class-badaround-discovery-contract.php wordpress/plugins/badaround-core/includes/class-badaround-discovery-query.php wordpress/plugins/badaround-core/includes/class-badaround-native-media-service.php wordpress/plugins/badaround-core/includes/class-badaround-wpforms-event-intake.php
+          git diff --exit-code 25b9ff5ad9d747b10cef7c2f3981fab15fbe4ed3 -- wordpress/plugins/badaround-core/includes/class-badaround-report-schema.php wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php wordpress/plugins/badaround-core/includes/class-badaround-discovery-contract.php wordpress/plugins/badaround-core/includes/class-badaround-discovery-query.php wordpress/plugins/badaround-core/includes/class-badaround-native-media-service.php
+      - name: Legacy retirement static contract
+        run: node --test tests/leg-retire-01-native-only.cjs
       - name: Territory resolver regression
         run: php tests/f1-15a3-territory.php

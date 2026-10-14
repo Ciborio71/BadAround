@@ -2,13 +2,12 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 $config = badaround_native_report_config();
 if ( ! $config ) {
-	echo '<p role="alert">Modulo nativo non disponibile: verifica della tassonomia richiesta. <a href="' . esc_url( get_permalink() ) . '">Torna al modulo di riferimento</a>.</p>';
+	echo '<p role="alert">Il modulo di segnalazione non è temporaneamente disponibile. Riprova più tardi.</p>';
 	return;
 }
 ?>
 <div class="ba-native" data-native-report>
-	<p class="ba-native-notice">Anteprima di collaudo. La segnalazione sarà sottoposta a moderazione e non verrà pubblicata automaticamente.</p>
-	<a href="<?php echo esc_url( get_permalink() ); ?>">Torna al modulo di riferimento</a>
+	<p class="ba-native-notice">La tua segnalazione sarà esaminata prima di un’eventuale pubblicazione. Dati personali e informazioni riservate non sono pubblicati automaticamente.</p>
 	<noscript><p>Per usare il wizard e inviare la segnalazione attiva JavaScript. I campi sono riportati di seguito per consultazione.</p></noscript>
 	<p data-native-boot role="status">Preparazione del modulo…</p>
 	<nav aria-label="Avanzamento della segnalazione"><ol class="ba-native-progress">

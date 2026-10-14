@@ -253,29 +253,13 @@ function badaround_child_enqueue_assets() {
 			array( 'badaround-components' ),
 			(string) filemtime( $dir . '/assets/css/report.css' )
 		);
-		if ( badaround_native_report_use_native() ) {
-			wp_enqueue_style( 'badaround-native-report', $uri . '/assets/css/native-report.css', array( 'badaround-report' ), (string) filemtime( $dir . '/assets/css/native-report.css' ) );
-			$previous = array();
-			foreach ( array( 'model', 'api', 'errors', 'media', 'media-view', 'smart-address', 'wizard' ) as $module ) {
-				$handle = 'badaround-native-' . $module;
-				wp_enqueue_script( $handle, $uri . '/assets/js/native-report/' . $module . '.js', $previous, (string) filemtime( $dir . '/assets/js/native-report/' . $module . '.js' ), true );
-				wp_script_add_data( $handle, 'strategy', 'defer' );
-				$previous = array( $handle );
-			}
-		} else {
-			wp_enqueue_style(
-				'badaround-wpforms',
-				$uri . '/assets/css/wpforms.css',
-				array( 'badaround-report' ),
-				(string) filemtime( $dir . '/assets/css/wpforms.css' )
-			);
-			wp_enqueue_script(
-				'badaround-report-ui',
-				$uri . '/assets/js/report.js',
-				array(),
-				(string) filemtime( $dir . '/assets/js/report.js' ),
-				true
-			);
+		wp_enqueue_style( 'badaround-native-report', $uri . '/assets/css/native-report.css', array( 'badaround-report' ), (string) filemtime( $dir . '/assets/css/native-report.css' ) );
+		$previous = array();
+		foreach ( array( 'model', 'api', 'errors', 'media', 'media-view', 'smart-address', 'wizard' ) as $module ) {
+			$handle = 'badaround-native-' . $module;
+			wp_enqueue_script( $handle, $uri . '/assets/js/native-report/' . $module . '.js', $previous, (string) filemtime( $dir . '/assets/js/native-report/' . $module . '.js' ), true );
+			wp_script_add_data( $handle, 'strategy', 'defer' );
+			$previous = array( $handle );
 		}
 	}
 
@@ -312,44 +296,6 @@ function badaround_child_map_resource_hints( $urls, $relation_type ) {
 	return $urls;
 }
 add_filter( 'wp_resource_hints', 'badaround_child_map_resource_hints', 10, 2 );
-
-/**
- * WPForms id can be provided without editing the page template.
- */
-function badaround_report_form_id() {
-	return (int) apply_filters( 'badaround_report_form_id', 6 );
-}
-
-
-/**
- * BadAround reporting map defaults.
- * Keep the first geolocation view in Italy and use a close street-level zoom.
- */
-function badaround_wpforms_geolocation_default_location( $location ) {
-	if ( ! is_page_template( 'page-segnala-evento.php' ) ) {
-		return $location;
-	}
-
-	return array(
-		'lat' => 41.9028,
-		'lng' => 12.4964,
-	);
-}
-add_filter( 'wpforms_geolocation_map_default_location', 'badaround_wpforms_geolocation_default_location', 20 );
-
-function badaround_wpforms_geolocation_map_zoom( $zoom, $context ) {
-	if ( ! is_page_template( 'page-segnala-evento.php' ) ) {
-		return $zoom;
-	}
-
-	if ( 'field' === $context ) {
-		return 18;
-	}
-
-	return $zoom;
-}
-add_filter( 'wpforms_geolocation_map_zoom', 'badaround_wpforms_geolocation_map_zoom', 20, 2 );
-
 
 /**
  * B4 — minimal SEO for the canonical public event detail.
