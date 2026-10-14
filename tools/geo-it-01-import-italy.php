@@ -4,7 +4,7 @@
  *
  * Usage (from project root, with a local copy of ISTAT's official CSV):
  *   wp eval-file tools/geo-it-01-import-italy.php /absolute/path/Elenco-comuni-italiani.csv
- *   wp eval-file tools/geo-it-01-import-italy.php /absolute/path/Elenco-comuni-italiani.csv apply confirm-national-terms start=0 limit=100
+ *   wp eval-file tools/geo-it-01-import-italy.php /absolute/path/Elenco-comuni-italiani.csv apply confirm-national-terms start=310 limit=1000
  *
  * NEVER run --apply on staging or production without a separately approved
  * backup, reviewed preflight counts and reversible rollout plan.
@@ -37,8 +37,8 @@ foreach ( $arguments as $argument ) {
     $batch_limit = (int) $matches[1];
   }
 }
-if ( $apply && ( null === $start || null === $batch_limit || $batch_limit < 1 || $batch_limit > 100 || $start < 0 || $start >= 7894 ) ) {
-  WP_CLI::error( 'Apply must specify positional start=N (0-7893) and limit=N (1-100).' );
+if ( $apply && ( null === $start || null === $batch_limit || $batch_limit < 1 || $batch_limit > 1000 || $start < 0 || $start >= 7894 ) ) {
+  WP_CLI::error( 'Apply must specify positional start=N (0-7893) and limit=N (1-1000).' );
 }
 if ( ! $csv_path || ! is_file( $csv_path ) || ! is_readable( $csv_path ) ) {
 	WP_CLI::error( 'Pass an existing readable local ISTAT CSV file.' );
@@ -194,7 +194,7 @@ $last = min( count( $rows ), $start + $batch_limit );
 $processed = 0;
 $started_at = microtime( true );
 for ( $i = $start; $i < $last; ++$i ) {
-  // Stop voluntarily before the 60-second WP-CLI execution ceiling.
+  // Stop voluntarily before the 60-second WP-CLI execution ceiling.\n  // Re-run starting at the returned next_start; all successful rows are idempotent.
   if ( $processed > 0 && microtime( true ) - $started_at > 35 ) {
     break;
   }
