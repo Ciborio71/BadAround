@@ -4,6 +4,7 @@ on:
     branches:
       - feature/f1-15b-r5-smart-address-native
       - feature/leg-retire-01-native-only
+      - feature/geo-it-01-national-territory
   pull_request:
     branches:
       - feature/f1.15a3-canonical-territory-path
@@ -26,6 +27,7 @@ jobs:
           php-version: '8.2'
       - name: PHP syntax on presentation surface
         run: |
+          php -l tools/geo-it-01-import-italy.php
           php -l wordpress/plugins/badaround-core/badaround-core.php
           php -l wordpress/plugins/badaround-core/includes/class-badaround-core.php
           php -l wordpress/themes/badaround-child/page-segnala-evento.php
