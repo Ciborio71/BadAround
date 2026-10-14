@@ -4,7 +4,7 @@
  *
  * Usage (from project root, with a local copy of ISTAT's official CSV):
  *   wp eval-file tools/geo-it-01-import-italy.php /absolute/path/Elenco-comuni-italiani.csv
- *   wp eval-file tools/geo-it-01-import-italy.php /absolute/path/Elenco-comuni-italiani.csv --apply --confirm-national-terms --start=0 --limit=100
+ *   wp eval-file tools/geo-it-01-import-italy.php /absolute/path/Elenco-comuni-italiani.csv apply confirm-national-terms start=0 limit=100
  *
  * NEVER run --apply on staging or production without a separately approved
  * backup, reviewed preflight counts and reversible rollout plan.
@@ -27,18 +27,18 @@ if ( ! taxonomy_exists( 'ba_territorio' ) ) {
 }
 $arguments = isset( $args ) && is_array( $args ) ? $args : array();
 $csv_path = isset( $arguments[0] ) ? (string) $arguments[0] : '';
-$apply = in_array( '--apply', $arguments, true );
+$apply = in_array( 'apply', $arguments, true );
 $start = null;
 $batch_limit = null;
 foreach ( $arguments as $argument ) {
-  if ( preg_match( '/^--start=(\\d+)$/', (string) $argument, $matches ) ) {
+  if ( preg_match( '/^start=(\\d+)$/', (string) $argument, $matches ) ) {
     $start = (int) $matches[1];
-  } elseif ( preg_match( '/^--limit=(\\d+)$/', (string) $argument, $matches ) ) {
+  } elseif ( preg_match( '/^limit=(\\d+)$/', (string) $argument, $matches ) ) {
     $batch_limit = (int) $matches[1];
   }
 }
 if ( $apply && ( null === $start || null === $batch_limit || $batch_limit < 1 || $batch_limit > 100 || $start < 0 || $start >= 7894 ) ) {
-  WP_CLI::error( 'Apply must specify --start=N (0-7893) and --limit=N (1-100).' );
+  WP_CLI::error( 'Apply must specify positional start=N (0-7893) and limit=N (1-100).' );
 }
 if ( ! $csv_path || ! is_file( $csv_path ) || ! is_readable( $csv_path ) ) {
 	WP_CLI::error( 'Pass an existing readable local ISTAT CSV file.' );
@@ -50,8 +50,8 @@ if ( ! hash_equals( $expected_csv_sha256, hash_file( 'sha256', $csv_path ) ) ) {
 if ( $apply && 'staging.badaround.it' !== wp_parse_url( home_url( '/' ), PHP_URL_HOST ) ) {
 	WP_CLI::error( 'GEO-IT-01 apply is restricted to staging.badaround.it.' );
 }
-if ( $apply && ! in_array( '--confirm-national-terms', $arguments, true ) ) {
-	WP_CLI::error( 'Apply requires --confirm-national-terms after reviewing dry-run and backup.' );
+if ( $apply && ! in_array( 'confirm-national-terms', $arguments, true ) ) {
+	WP_CLI::error( 'Apply requires positional confirm-national-terms after reviewing dry-run and backup.' );
 }
 $handle = fopen( $csv_path, 'rb' );
 if ( ! $handle ) {
