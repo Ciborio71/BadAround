@@ -28,6 +28,9 @@ $apply = in_array( '--apply', $arguments, true );
 if ( ! $csv_path || ! is_file( $csv_path ) || ! is_readable( $csv_path ) ) {
 	WP_CLI::error( 'Pass an existing readable local ISTAT CSV file.' );
 }
+if ( $apply && 'staging.badaround.it' !== wp_parse_url( home_url( '/' ), PHP_URL_HOST ) ) {
+	WP_CLI::error( 'GEO-IT-01 apply is restricted to staging.badaround.it.' );
+}
 if ( $apply && ! in_array( '--confirm-national-terms', $arguments, true ) ) {
 	WP_CLI::error( 'Apply requires --confirm-national-terms after reviewing dry-run and backup.' );
 }
@@ -36,7 +39,7 @@ if ( ! $handle ) {
 	WP_CLI::error( 'CSV cannot be opened.' );
 }
 function geo_it_01_decode( $value ) {
-	$value = trim( (string) $value );
+	$value = preg_replace( '/^\\xEF\\xBB\\xBF/', '', trim( (string) $value ) );
 	if ( ! mb_check_encoding( $value, 'UTF-8' ) ) {
 		$value = iconv( 'Windows-1252', 'UTF-8//IGNORE', $value );
 	}
@@ -96,8 +99,8 @@ while ( ( $cells = fgetcsv( $handle, 0, ';', '"', '\\' ) ) !== false ) {
 	$rows[] = $row;
 }
 fclose( $handle );
-if ( count( $rows ) < 7000 || count( $rows ) > 9000 ) {
-	WP_CLI::error( 'Expected 7000-9000 active municipalities; parsed ' . count( $rows ) );
+if ( 7894 !== count( $rows ) ) {
+	WP_CLI::error( 'Expected 7894 active municipalities at the approved 2026-02-21 ISTAT baseline; parsed ' . count( $rows ) );
 }
 WP_CLI::log( 'ISTAT_SOURCE_SHA256=' . hash_file( 'sha256', $csv_path ) );
 WP_CLI::log( 'ISTAT_ACTIVE_MUNICIPALITIES=' . count( $rows ) );
@@ -131,6 +134,9 @@ $resolve = static function ( $name, $parent, $kind, $istat_code ) use ( $tax, $a
 		$current_code = get_term_meta( $id, '_ba_istat_' . $kind . '_code', true );
 		if ( $current_code && (string) $current_code !== (string) $istat_code ) {
 			WP_CLI::error( 'ISTAT code collision on existing term: ' . $name );
+		}
+		if ( $apply && ! $current_code ) {
+			add_term_meta( $id, '_ba_istat_' . $kind . '_code', (string) $istat_code, true );
 		}
 		return $id;
 	}
