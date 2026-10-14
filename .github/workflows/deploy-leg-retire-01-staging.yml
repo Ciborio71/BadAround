@@ -1,0 +1,106 @@
+name: LEG-RETIRE-01 — Deploy Native-only candidate to staging
+
+on:
+  push:
+    branches:
+      - feature/leg-retire-01-native-only
+
+permissions:
+  contents: read
+
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+
+env:
+  APPROVED_PREDEPLOY_SHA: 0da13653222d61ae71d5a7577d53e6931e963073
+
+jobs:
+  validate:
+    name: Validate Native-only exact approved source
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify approved candidate and deployment-workflow-only commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/feature/leg-retire-01-native-only'
+          test "$(git rev-parse HEAD^)" = "$APPROVED_PREDEPLOY_SHA"
+          test "$(git diff --name-only "$APPROVED_PREDEPLOY_SHA" HEAD)" = '.github/workflows/deploy-leg-retire-01-staging.yml'
+          git diff --check "$APPROVED_PREDEPLOY_SHA" HEAD
+          test -f wordpress/themes/badaround-child/template-parts/native-report/shell.php
+          ! grep -Eq 'wpforms|BADAROUND_NATIVE_REPORT_DEFAULT' wordpress/themes/badaround-child/page-segnala-evento.php
+          ! grep -q 'wpforms_process_complete' wordpress/plugins/badaround-core/includes/class-badaround-core.php
+          test ! -f wordpress/themes/badaround-child/assets/js/report.js
+          test ! -f wordpress/themes/badaround-child/assets/css/wpforms.css
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: PHP syntax — full theme and core
+        shell: bash
+        run: |
+          find wordpress/themes/badaround-child -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+          find wordpress/plugins/badaround-core -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: JavaScript syntax — Native modules
+        shell: bash
+        run: |
+          for file in wordpress/themes/badaround-child/assets/js/native-report/*.js; do node --check "$file"; done
+      - name: Native and Smart Address regression
+        shell: bash
+        run: |
+          npm ci --prefix tests
+          node --test tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs tests/leg-retire-01-native-only.cjs
+          php tests/f1-15a3-territory.php
+
+  deploy:
+    name: Deploy approved core and child theme to staging
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Recheck exact branch and parent identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/feature/leg-retire-01-native-only'
+          test "$(git rev-parse HEAD^)" = "$APPROVED_PREDEPLOY_SHA"
+      - name: Upload BadAround core to staging only
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./wordpress/plugins/badaround-core/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/
+          dangerous-clean-slate: false
+          log-level: minimal
+      - name: Upload BadAround child theme to staging only
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./wordpress/themes/badaround-child/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/*-OLD
+            **/*-OLD/**
+            **/.ftp-deploy-sync-state.json
+          log-level: minimal
