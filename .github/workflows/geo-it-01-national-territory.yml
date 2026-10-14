@@ -1,0 +1,31 @@
+name: GEO-IT-01 — National territory importer isolated QA
+on:
+  push:
+    branches:
+      - feature/geo-it-01-national-territory
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: PHP syntax importer
+        run: php -l tools/geo-it-01-import-italy.php
+      - name: Verify frozen contract and browser JS unchanged
+        run: |
+          git diff --exit-code 229b323d2e7f3983cfcf6661d249888ca699cb7b -- wordpress/plugins/badaround-core/ wordpress/themes/badaround-child/
+      - name: Existing Smart Address, Native DOM and territory tests
+        run: |
+          npm ci --prefix tests
+          node --test tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs tests/leg-retire-01-native-only.cjs
+          php tests/f1-15a3-territory.php
