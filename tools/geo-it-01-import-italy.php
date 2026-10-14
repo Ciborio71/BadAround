@@ -4,7 +4,7 @@
  *
  * Usage (from project root, with a local copy of ISTAT's official CSV):
  *   wp eval-file tools/geo-it-01-import-italy.php /absolute/path/Elenco-comuni-italiani.csv
- *   wp eval-file tools/geo-it-01-import-italy.php /absolute/path/Elenco-comuni-italiani.csv --apply --confirm-national-terms
+ *   wp eval-file tools/geo-it-01-import-italy.php /absolute/path/Elenco-comuni-italiani.csv --apply --confirm-national-terms --start=0 --limit=100
  *
  * NEVER run --apply on staging or production without a separately approved
  * backup, reviewed preflight counts and reversible rollout plan.
@@ -28,6 +28,18 @@ if ( ! taxonomy_exists( 'ba_territorio' ) ) {
 $arguments = isset( $args ) && is_array( $args ) ? $args : array();
 $csv_path = isset( $arguments[0] ) ? (string) $arguments[0] : '';
 $apply = in_array( '--apply', $arguments, true );
+$start = null;
+$batch_limit = null;
+foreach ( $arguments as $argument ) {
+  if ( preg_match( '/^--start=(\\d+)$/', (string) $argument, $matches ) ) {
+    $start = (int) $matches[1];
+  } elseif ( preg_match( '/^--limit=(\\d+)$/', (string) $argument, $matches ) ) {
+    $batch_limit = (int) $matches[1];
+  }
+}
+if ( $apply && ( null === $start || null === $batch_limit || $batch_limit < 1 || $batch_limit > 100 || $start < 0 || $start >= 7894 ) ) {
+  WP_CLI::error( 'Apply must specify --start=N (0-7893) and --limit=N (1-100).' );
+}
 if ( ! $csv_path || ! is_file( $csv_path ) || ! is_readable( $csv_path ) ) {
 	WP_CLI::error( 'Pass an existing readable local ISTAT CSV file.' );
 }
@@ -178,9 +190,18 @@ if ( ! $apply ) {
 	WP_CLI::log( 'Apply is deliberately a separate approval gate; no WordPress mutations performed.' );
 	return;
 }
-foreach ( $rows as $row ) {
+$last = min( count( $rows ), $start + $batch_limit );
+$processed = 0;
+$started_at = microtime( true );
+for ( $i = $start; $i < $last; ++$i ) {
+  // Stop voluntarily before the 60-second WP-CLI execution ceiling.
+  if ( $processed > 0 && microtime( true ) - $started_at > 35 ) {
+    break;
+  }
+  $row = $rows[$i];
 	$region_id = $resolve( $row['region'], 0, 'region', $row['region_code'] );
 	$province_id = $resolve( $row['province'], $region_id, 'province', $row['province_code'] );
 	$resolve( $row['municipality'], $province_id, 'municipality', $row['municipality_code'] );
+  ++$processed;
 }
-WP_CLI::success( 'GEO_IT_01_IMPORT_COMPLETE=' . wp_json_encode( array( 'created' => $created, 'existing' => $existing ) ) );
+WP_CLI::success( 'GEO_IT_01_BATCH=' . wp_json_encode( array( 'start' => $start, 'processed' => $processed, 'next_start' => $start + $processed, 'total' => count($rows), 'created' => $created, 'existing' => $existing ) ) );
