@@ -48,6 +48,16 @@ test('Legacy reusable card aesthetics live in native-scoped CSS, without legacy 
   assert.doesNotMatch(css, /wpforms-\d+|\.wpforms-|#wpforms-/);
   assert.doesNotMatch(shared, /wpforms-\d+|\.wpforms-|#wpforms-/);
 });
+
+test('Native report presents final user copy without links back to the retired form', () => {
+  const shell = read(theme + 'template-parts/native-report/shell.php');
+  assert.match(shell, /La tua segnalazione sarà esaminata/);
+  assert.match(shell, /moderazione|pubblicazione/i);
+  assert.doesNotMatch(shell, /Anteprima di collaudo|Torna al modulo di riferimento|wpforms-6/i);
+  assert.match(shell, /data-native-form/);
+  assert.match(shell, /data-native-errors/);
+});
+
 test('Smart Address script and frozen contracts remain identical to certified candidate', () => {
   for (const relative of [
     theme + 'assets/js/native-report/smart-address.js',
