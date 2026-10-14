@@ -4,13 +4,16 @@
  *
  * Usage (from project root, with a local copy of ISTAT's official CSV):
  *   wp eval-file tools/geo-it-01-import-italy.php /absolute/path/Elenco-comuni-italiani.csv
- *   wp eval-file tools/geo-it-01-import-italy.php /absolute/path/Elenco-comuni-italiani.csv --apply
+ *   wp eval-file tools/geo-it-01-import-italy.php /absolute/path/Elenco-comuni-italiani.csv --apply --confirm-national-terms
  *
  * NEVER run --apply on staging or production without a separately approved
  * backup, reviewed preflight counts and reversible rollout plan.
  *
  * Data source:
- * https://www.istat.it/storage/codici-unita-amministrative/Elenco-comuni-italiani.csv
+ * https://www.istat.it/classificazione/codici-dei-comuni-delle-province-e-delle-regioni/
+ * Official source is XLSX (2026-02-21). Convert the original workbook to
+ * semicolon-separated UTF-8 CSV without modifying labels or ISTAT codes;
+ * record the source workbook SHA256 and visually verify column headers.
  *
  * This script does not read Google Places results or modify the report schema.
  * It only adds missing ba_territorio terms and ISTAT identities. It never
