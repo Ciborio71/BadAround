@@ -101,7 +101,7 @@
     const manualFields=container.querySelector('[data-native-location-fields]');
     let manual=false;
     function syncVisibility(){if(manualFields)manualFields.hidden=!manual;}
-    function offerManual(message){say(message+' Puoi utilizzare i campi manuali.');if(manualButton)manualButton.hidden=false;if(confirmation)if(confirmation)confirmation.hidden=true;}
+    function offerManual(message){say(message+' Puoi utilizzare i campi manuali.');if(manualButton)manualButton.hidden=false;if(confirmation)confirmation.hidden=true;}
     const paths = LEVELS.map(v => 'location.' + v);
     const privatePaths = ['location.exact_address','location.exact_lat','location.exact_lng'];
     let disposed=false, selected=false, widget, requestId=0, applying=false;
@@ -181,17 +181,16 @@
         if(selected){manual=false;syncVisibility();if(confirmationLabel)confirmationLabel.textContent=fullAddress;if(confirmation)confirmation.hidden=false;}
         else offerManual('Indirizzo incompleto. Inserisci la posizione manualmente.');
         if(!mapped.location)offerManual('Territorio non riconosciuto. Inserisci manualmente.');
-        say(mapped.location
-          ? 'Posizione riconosciuta.'
-          : 'Il territorio canonico non è stato riconosciuto. Compila manualmente Regione, Provincia e Comune; le coordinate Google non sono utilizzate.');
+        else if(selected)say('Posizione riconosciuta.');
       } catch (_) {
         if (!disposed && id===requestId) offerManual('Google non disponibile. Inserisci la posizione manualmente.');
       }
     }
     async function activate() {
-      if (disposed) return;
+      if (disposed || start.disabled || widget) return;
       start.disabled=true; say('Caricamento della ricerca Google…');
       try {
+        if (!config.smartAddress?.key) throw new Error('places_unavailable');
         const places=await loadPlaces(config.smartAddress.key);
         if (disposed) return;
         const Element=places.PlaceAutocompleteElement || root.google?.maps?.places?.PlaceAutocompleteElement;
@@ -225,11 +224,18 @@
       // Navigation alone must not initialize Google: only the search field may do so.
       return false;
     }
-    function reset(){requestId++;selected=false;manual=false;if(confirmation)confirmation.hidden=true;syncVisibility();say('Seleziona il campo per cercare un luogo.');}
+    function reset(){
+      requestId++;selected=false;manual=false;
+      if(confirmation)confirmation.hidden=true;
+      if(confirmationLabel)confirmationLabel.textContent='';
+      if(manualButton)manualButton.hidden=Boolean(config.smartAddress?.key);
+      syncVisibility();
+      say('Seleziona il campo per cercare un luogo.');
+    }
     function changedGoogle(event){
       if(!selected)return;
       if(event.type==='gmp-select')return;
-      invalidate('Indirizzo modificato: seleziona di nuovo un suggerimento.');
+      invalidate('Indirizzo modificato: seleziona di nuovo un suggerimento.',true);
     }
     holder.addEventListener('input',changedGoogle);
     holder.addEventListener('change',changedGoogle);

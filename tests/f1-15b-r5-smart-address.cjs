@@ -351,3 +351,30 @@ test('SF2: frozen schema untouched and non-geographic required questions moved o
   assert(step.includes('data-native-location-fields hidden'));
   assert(step.includes('data-smart-confirmation hidden'));
 });
+
+test('SF4: double focus/click while loading uses one Google bootstrap',()=>{
+  const h=setup(),adapter=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:territory}},h.model);
+  h.button.dispatchEvent(new h.win.Event('focus'));
+  h.button.dispatchEvent(new h.win.Event('click'));
+  assert.equal(h.win.document.querySelectorAll('script[data-ba-smart-address]').length,1);
+  adapter.dispose();h.dom.window.close();
+});
+test('SF4: editing an accepted Google suggestion clears stale private address and coordinates',async()=>{
+  const h=await liveWidget(),selection=h.select();selection.resolve();
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.controller.canAdvance(),true);
+  h.widget.dispatchEvent(new h.win.Event('input',{bubbles:true}));
+  assert.equal(h.input('location.exact_address').value,'');
+  assert.equal(h.input('location.exact_lat').value,'');
+  assert.equal(h.input('location.exact_lng').value,'');
+  assert.equal(h.controller.canAdvance(),false);
+  h.close();
+});
+test('SF4: missing Places browser key never loads Google and provides explicit manual entry',()=>{
+  const h=setup(),adapter=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{territories:territory}},h.model);
+  assert.equal(h.win.document.querySelectorAll('script[data-ba-smart-address]').length,0);
+  assert.equal(h.container.querySelector('[data-smart-manual]').hidden,false);
+  h.container.querySelector('[data-smart-manual]').click();
+  assert.equal(h.container.querySelector('[data-native-location-fields]').hidden,false);
+  adapter.dispose();h.dom.window.close();
+});
