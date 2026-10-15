@@ -1,0 +1,60 @@
+name: SF5 FTPS PATH DIAGNOSTIC READ-ONLY
+on:
+  push:
+    branches:
+      - diagnostic/sf5-ftps-path-readonly
+permissions:
+  contents: read
+jobs:
+  locate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install read-only FTPS listing client
+        run: npm install --prefix /tmp/ftps-inspect --no-audit --no-fund basic-ftp@5
+      - name: Check likely WordPress document roots without uploading
+        env:
+          FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        shell: bash
+        run: |
+          node <<'NODE'
+          const ftp = require('/tmp/ftps-inspect/node_modules/basic-ftp');
+          (async () => {
+            const client = new ftp.Client(20000);
+            client.ftp.verbose = false;
+            try {
+              await client.access({
+                host: process.env.FTP_HOST,
+                user: process.env.FTP_USER,
+                password: process.env.FTP_PASSWORD,
+                port: 21,
+                secure: true
+              });
+              const roots = [
+                '/staging.badaround.it/wp-content/themes/badaround-child',
+                '/staging.badaround.it/httpdocs/wp-content/themes/badaround-child',
+                '/httpdocs/wp-content/themes/badaround-child',
+                '/wp-content/themes/badaround-child',
+                '/staging.badaround.it/public_html/wp-content/themes/badaround-child'
+              ];
+              for (const root of roots) {
+                try {
+                  const files = await client.list(root+'/template-parts/native-report');
+                  const step = files.find(x=>x.name==='step.php');
+                  const jsfiles = await client.list(root+'/assets/js/native-report');
+                  const smart = jsfiles.find(x=>x.name==='smart-address.js');
+                  console.log('PATH CHECK '+root+' step.php='+ (step ? step.size:'ABSENT') +' smart-address.js='+(smart ? smart.size:'ABSENT'));
+                } catch (e) {
+                  console.log('PATH CHECK '+root+' unavailable (code='+String(e.code||'unavailable')+')');
+                }
+              }
+            } catch (e) {
+              console.log('FTPS secure listing unavailable: '+String(e.code||e.name));
+              process.exitCode=1;
+            } finally {client.close();}
+          })();
+          NODE
