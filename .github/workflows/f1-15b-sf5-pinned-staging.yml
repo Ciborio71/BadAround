@@ -1,0 +1,128 @@
+name: F1.15B-SF5 — Pinned Single Field STAGING ONLY
+
+on:
+  push:
+    branches:
+      - feature/f1-15b-sf2-native-single-field
+
+permissions:
+  contents: read
+
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify exact authorized source and workflow-only trigger
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/feature/f1-15b-sf2-native-single-field'
+          test "$(git rev-parse HEAD^)" = 'f7df23991bb5901e1214f8a7b423ed588dbbb48b'
+          test "$(git diff --name-only HEAD^ HEAD)" = '.github/workflows/f1-15b-sf5-pinned-staging.yml'
+          git diff --check 'f7df23991bb5901e1214f8a7b423ed588dbbb48b' HEAD
+          git diff --quiet 9e1b0873b88ba1dffbc37a0cb3c03ab8e0092c7c -- wordpress/plugins/badaround-core tools/geo-it-01-import-italy.php
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: PHP and JS syntax
+        run: |
+          php -l wordpress/themes/badaround-child/inc/native-report.php
+          php -l wordpress/themes/badaround-child/template-parts/native-report/step.php
+          node --check wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
+          node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
+      - name: Native DOM and smart address regression
+        run: |
+          npm ci --prefix tests
+          node --test tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Recheck pinned source identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = 'f7df23991bb5901e1214f8a7b423ed588dbbb48b'
+      - name: Download exact live theme files to rollback snapshot
+        shell: bash
+        env:
+          FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$FTP_HOST" && test -n "$FTP_USER" && test -n "$FTP_PASSWORD"
+          mkdir -p rollback
+          files=(
+            "template-parts/native-report/step.php"
+            "inc/native-report.php"
+            "assets/js/native-report/smart-address.js"
+            "assets/js/native-report/wizard.js"
+            "assets/css/native-report.css"
+          )
+          for path in "${files[@]}"; do
+            mkdir -p "rollback/$(dirname "$path")"
+            curl --fail --silent --show-error --ssl-reqd --ftp-pasv --user "$FTP_USER:$FTP_PASSWORD" --max-time 45 "ftp://$FTP_HOST:21/staging.badaround.it/wp-content/themes/badaround-child/$path" --output "rollback/$path"
+            test -s "rollback/$path"
+          done
+          echo "Five existing staging files captured for rollback."
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sf5-staging-rollback-before-deploy
+          path: rollback/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Deploy exact five files with rollback on any failure
+        shell: bash
+        env:
+          FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: |
+          set -euo pipefail
+          files=(
+            "template-parts/native-report/step.php"
+            "inc/native-report.php"
+            "assets/js/native-report/smart-address.js"
+            "assets/js/native-report/wizard.js"
+            "assets/css/native-report.css"
+          )
+          base="ftp://$FTP_HOST:21/staging.badaround.it/wp-content/themes/badaround-child"
+          rollback() {
+            echo "::warning::Deployment verification failed. Attempting restoration from the captured files."
+            for path in "${files[@]}"; do
+              curl --fail --silent --show-error --ssl-reqd --ftp-pasv --user "$FTP_USER:$FTP_PASSWORD" --max-time 45 --upload-file "rollback/$path" "$base/$path" || true
+            done
+          }
+          trap rollback ERR
+          for path in "${files[@]}"; do
+            curl --fail --silent --show-error --ssl-reqd --ftp-pasv --user "$FTP_USER:$FTP_PASSWORD" --max-time 45 --upload-file "wordpress/themes/badaround-child/$path" "$base/$path"
+          done
+          for path in "${files[@]}"; do
+            curl --fail --silent --show-error --ssl-reqd --ftp-pasv --user "$FTP_USER:$FTP_PASSWORD" --max-time 45 "$base/$path" --output /tmp/sf5-check
+            cmp "wordpress/themes/badaround-child/$path" /tmp/sf5-check
+          done
+          trap - ERR
+          echo "SF5 five-file staging upload and byte-for-byte remote verification PASS."
+      - name: Public non-mutating staging smoke check
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error --max-time 30 "https://staging.badaround.it/segnala-un-evento/?sf5-smoke=${GITHUB_SHA}" --output /tmp/sf5-page.html
+          grep -q "Posizione dell'evento" /tmp/sf5-page.html
+          grep -q "data-native-location-fields" /tmp/sf5-page.html
+          grep -q "data-smart-confirmation" /tmp/sf5-page.html
+          echo "SF5 HTML smoke PASS."
