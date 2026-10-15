@@ -222,7 +222,7 @@
         field(missing)?.focus?.();return false;
       }
       say('Seleziona un indirizzo dai suggerimenti Google prima di continuare.');
-      if(!start.hidden)start.focus();else widget?.focus?.();
+      // Navigation alone must not initialize Google: only the search field may do so.
       return false;
     }
     function reset(){requestId++;selected=false;manual=false;if(confirmation)confirmation.hidden=true;syncVisibility();say('Seleziona il campo per cercare un luogo.');}
