@@ -306,8 +306,8 @@ test('SF2: route without house number is stored in private exact address',async(
     ac('route','Piazza del Plebiscito','Piazza del Plebiscito')
   ]});
   selection.resolve();await new Promise(resolve=>setImmediate(resolve));
-  // Fixture registry covers Lazio, so mapping correctly refuses this place.
-  assert.equal(h.input('location.exact_address').value,'');
+  // Even an unresolved canonical match must preserve the verified private street.
+  assert.equal(h.input('location.exact_address').value,'Piazza del Plebiscito, 80132 Napoli NA, Italia');
   assert.equal(h.controller.canAdvance(),false);
   h.close();
 });
@@ -317,4 +317,37 @@ test('SF2: selected Google address is invalidated on widget input edit',async()=
   h.widget.dispatchEvent(new h.win.Event('input',{bubbles:true}));
   assert.equal(h.controller.canAdvance(),false);
   h.close();
+});
+
+test('SF2: synthetic canonical mappings for Milano, Napoli and Moricone',()=>{
+  const municipalities=[
+    {region:'Lombardia',province:'Milano',municipality:'Milano'},
+    {region:'Campania',province:'Napoli',municipality:'Napoli'},
+    {region:'Lazio',province:'Roma',municipality:'Moricone'}
+  ];
+  const entries=[];let id=1;
+  for(const item of municipalities){
+    let parent=0;
+    for(const name of [item.region,item.province,item.municipality]){
+      let current=entries.find(x=>x.parent===parent&&x.name===name);
+      if(!current){current={id:id++,parent,name};entries.push(current);}
+      parent=current.id;
+    }
+  }
+  for(const expected of municipalities){
+    const google=[
+      ac('country','Italia','IT'),
+      ac('administrative_area_level_1',expected.region,expected.region),
+      ac('administrative_area_level_2',expected.province,expected.province),
+      ac('locality',expected.municipality,expected.municipality)
+    ];
+    assert.deepEqual(resolveTerritory(google,entries).location,{...expected,locality:''});
+  }
+});
+test('SF2: frozen schema untouched and non-geographic required questions moved out of Step 2',()=>{
+  const inc=fs.readFileSync(path.join(__dirname,'../wordpress/themes/badaround-child/inc/native-report.php'),'utf8');
+  const step=fs.readFileSync(path.join(__dirname,'../wordpress/themes/badaround-child/template-parts/native-report/step.php'),'utf8');
+  assert(inc.includes("array( 'location.place_type', 'location.immediate_danger' )"));
+  assert(step.includes('data-native-location-fields hidden'));
+  assert(step.includes('data-smart-confirmation hidden'));
 });
