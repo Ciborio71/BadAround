@@ -1,12 +1,14 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 if ( 'location' === $key ) : ?>
-	<p>Indica Regione, Provincia, Comune e, se conosciuta, località. Civico e coordinate precise restano riservati; la posizione pubblica viene approssimata.</p>
-  <div class="ba-native-smart-address" data-native-smart-address>
-    <p><strong>Trova l'indirizzo con Google</strong> (facoltativo). I campi del territorio qui sotto rimangono sempre disponibili.</p>
-    <button type="button" class="ba-button" data-smart-start>Cerca indirizzo con Google</button>
-    <div data-smart-widget></div>
-    <p data-smart-status role="status" aria-live="polite">La ricerca si attiva soltanto quando lo richiedi.</p>
+	<p>Cerca una via, piazza o località in Italia. L'indirizzo esatto resta riservato.</p>
+<div class="ba-native-smart-address" data-native-smart-address>
+  <label for="ba-smart-search">Posizione dell'evento</label>
+  <input id="ba-smart-search" data-smart-start type="text" readonly autocomplete="off" placeholder="Cerca indirizzo o località" aria-describedby="ba-smart-status">
+  <div data-smart-widget></div>
+  <p id="ba-smart-status" data-smart-status role="status" aria-live="polite">Seleziona il campo per cercare un luogo.</p>
+  <div data-smart-confirmation hidden><strong>Posizione riconosciuta</strong><p data-smart-address-label></p><small>L'indirizzo preciso non sarà pubblicato automaticamente.</small></div>
+  <button data-smart-manual type="button" class="ba-button" hidden>Inserisci manualmente</button>
   </div>
 <?php elseif ( 'time' === $key ) : ?>
 	<p>Gli orari si riferiscono al fuso <?php echo esc_html( $config['timezone'] ); ?>.</p>
@@ -19,9 +21,11 @@ if ( 'location' === $key ) : ?>
 	<p>Controlla i dati prima dell’invio. I dati indicati come riservati saranno usati internamente.</p>
 	<div data-native-review></div>
 <?php endif;
+if ( 'location' === $key ) : ?><div data-native-location-fields hidden><?php endif;
 foreach ( $config['fields'] as $path => $field ) {
 	if ( $field['step'] === $key ) { badaround_native_report_field( $path, $field ); }
 }
+if ( 'location' === $key ) : ?></div><?php endif;
 if ( 'media' === $key ) : ?>
 	<div class="ba-native-media" data-native-media>
 		<label for="ba-native-media-files">Scegli immagini (facoltativo)</label>

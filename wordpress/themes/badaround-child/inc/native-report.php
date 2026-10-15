@@ -83,6 +83,7 @@ function badaround_native_report_option_label( $path, $value ) {
 
 function badaround_native_report_step( $path ) {
 	if ( 0 === strpos( $path, 'event.' ) || 'reporter.relationship' === $path ) { return 'event'; }
+	if ( in_array( $path, array( 'location.place_type', 'location.immediate_danger' ), true ) ) { return 'details'; }
 	if ( 0 === strpos( $path, 'location.' ) ) { return 'location'; }
 	if ( 0 === strpos( $path, 'time.' ) ) { return 'time'; }
 	if ( 0 === strpos( $path, 'media.' ) ) { return 'media'; }

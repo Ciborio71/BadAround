@@ -108,6 +108,7 @@
       submit.hidden = current !== 'review'; submit.disabled = model.busy || model.completed || !!model.blocked;
       submit.textContent = model.busy ? 'Invio in corso…' : model.snapshot ? 'Riprova invio' : 'Invia segnalazione';
       form.setAttribute('aria-busy', String(model.busy));
+      smartAddress?.syncVisibility?.();
       if (mediaView) mediaView.render();
       if (current === 'review') review();
       if (focus) focusStep(current);
@@ -161,6 +162,7 @@
     });
     listen(next,'click', () => {
       if(model.busy || model.snapshot || model.completed || model.step>=steps.length-1)return;
+      if (steps[model.step] === 'location' && smartAddress && !smartAddress.canAdvance()) return;
       const errors = model.validate(steps[model.step]);
       if (errors.length) return displayErrors(errors);
       model.step++; ns.presentErrors(container, [], config); render(true);
@@ -206,6 +208,7 @@
     listen(container.querySelector('[data-native-new]'),'click', () => {
       mediaView?.dispose();
       form.reset(); model.reset(); model.blocked = false; model.lastError = null;
+       smartAddress?.reset?.();
       wrappers.forEach(wrapper => {
         const value = model.values[wrapper.dataset.nativeField];
         if (value !== undefined) wrapper.querySelector('[data-native-input]').value = value;
