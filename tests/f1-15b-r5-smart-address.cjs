@@ -109,7 +109,11 @@ async function liveWidget(){
       id:'provider-internal-id-not-to-be-persisted',
       fetchFields({fields}){requests.push(fields);return waiting.promise;}
     };
-    event.placePrediction={toPlace:()=>place};
+    event.placePrediction={
+      toPlace:()=>place,
+      text:{text:options.predictionText||''},
+      structuredFormat:{mainText:{text:options.mainText||''}}
+    };
     widget.dispatchEvent(event);
     return waiting;
   };
@@ -377,4 +381,45 @@ test('SF4: missing Places browser key never loads Google and provides explicit m
   h.container.querySelector('[data-smart-manual]').click();
   assert.equal(h.container.querySelector('[data-native-location-fields]').hidden,false);
   adapter.dispose();h.dom.window.close();
+});
+
+test('SF6: verified selected Google suggestion restores Piazza del Plebiscito when Place Details omit route',async()=>{
+  const h=await liveWidget();
+  const p=h.select({
+    address:'80132 Napoli NA, Italia',
+    mainText:'Piazza del Plebiscito',
+    predictionText:'Piazza del Plebiscito, Napoli, NA, Italia',
+    components:[
+      ac('country','Italia','IT'),ac('administrative_area_level_1','Lazio','Lazio'),
+      ac('administrative_area_level_2','Roma','RM'),ac('locality','Pomezia','Pomezia')
+    ]
+  });
+  p.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.input('location.exact_address').value,'Piazza del Plebiscito, 80132 Napoli NA, Italia');
+  assert.equal(h.container.querySelector('[data-smart-address-label]').textContent,'Piazza del Plebiscito, 80132 Napoli NA, Italia');
+  h.close();
+});
+test('SF6: suggestion name is not duplicated when full formatted address already contains it',async()=>{
+  const h=await liveWidget();
+  const p=h.select({
+    address:'Piazza del Plebiscito, Napoli, NA, Italia',
+    mainText:'Piazza del Plebiscito'
+  });
+  p.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.input('location.exact_address').value,'Piazza del Plebiscito, Napoli, NA, Italia');
+  h.close();
+});
+test('SF6: city-only Google selection does not fabricate a street',async()=>{
+  const h=await liveWidget();
+  const p=h.select({address:'Pomezia, Roma, Italia',mainText:'Pomezia'});
+  p.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.input('location.exact_address').value,'Pomezia, Roma, Italia');
+  h.close();
+});
+test('SF6: never reuse the query or accept a postal code as a street name',async()=>{
+  const h=await liveWidget();
+  const p=h.select({address:'00071 Pomezia RM, Italia',mainText:'00071 Pomezia',predictionText:'00071 Pomezia, Italia'});
+  p.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.input('location.exact_address').value,'00071 Pomezia RM, Italia');
+  h.close();
 });

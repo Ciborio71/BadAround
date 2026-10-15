@@ -1,0 +1,26 @@
+name: SF6 — Address Name Preservation CI
+on:
+  push:
+    branches: [feature/f1-15b-sf6-street-preservation]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax
+        run: node --check wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
+      - name: Test Google selected-address regressions and Native wizard
+        run: |
+          npm ci --prefix tests
+          node --test tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs
+      - name: Canonical schema/frozen files remain unmodified
+        run: |
+          git diff --check HEAD^ HEAD
+          test "$(git diff --name-only HEAD^ HEAD | grep -Ec '^wordpress/plugins/badaround-core/' || true)" -eq 0

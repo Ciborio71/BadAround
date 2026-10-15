@@ -166,8 +166,28 @@
         const street = variants(component(place.addressComponents,'route'))[0] || '';
         const number = variants(component(place.addressComponents,'street_number'))[0] || '';
         const formatted = String(place.formattedAddress||'').trim();
-        const fullAddress = street && !normalize(formatted).includes(normalize(street))
-          ? [street+(number?', '+number:''),formatted].filter(Boolean).join(', ')
+        // Google may place the selected square/POI name in the prediction's
+        // structured mainText, while Place Details formattedAddress contains
+        // only its postal locality. The prediction belongs to the selected
+        // Google result, NOT to the user's free-text query.
+        const prediction=event.placePrediction;
+        const suggestionName=String(
+          prediction?.structuredFormat?.mainText?.text ||
+          prediction?.text?.text?.split(',')[0] || ''
+        ).trim();
+        const administrative=new Set([
+          ...LEVELS.map(level=>normalize(mapped.location?.[level])),
+          ...['Italia','Italy'].map(normalize)
+        ]);
+        const isDistinctName=suggestionName &&
+          !administrative.has(normalize(suggestionName)) &&
+          !/^\\d{5}(?:\\s|$)/.test(suggestionName) &&
+          suggestionName.length <= 160;
+        const verifiedName=street || (isDistinctName?suggestionName:'');
+        const verifiedStreet=street+(number?', '+number:'');
+        const prefix=street?verifiedStreet:verifiedName;
+        const fullAddress=prefix && !normalize(formatted).includes(normalize(verifiedName))
+          ? [prefix,formatted].filter(Boolean).join(', ')
           : formatted;
         if (fullAddress) assign('location.exact_address',fullAddress.slice(0,500));
         const lat=typeof place.location?.lat==='function'?place.location.lat():null;
