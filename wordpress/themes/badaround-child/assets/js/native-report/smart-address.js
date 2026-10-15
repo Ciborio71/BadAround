@@ -101,7 +101,7 @@
     const manualFields=container.querySelector('[data-native-location-fields]');
     let manual=false;
     function syncVisibility(){if(manualFields)manualFields.hidden=!manual;}
-    function offerManual(message){say(message);if(manualButton)manualButton.hidden=false;confirmation.hidden=true;}
+    function offerManual(message){say(message+' Puoi utilizzare i campi manuali.');if(manualButton)manualButton.hidden=false;if(confirmation)if(confirmation)confirmation.hidden=true;}
     const paths = LEVELS.map(v => 'location.' + v);
     const privatePaths = ['location.exact_address','location.exact_lat','location.exact_lng'];
     let disposed=false, selected=false, widget, requestId=0, applying=false;
@@ -125,7 +125,7 @@
     function invalidate(reason,territoryChanged=false) {
       requestId++;
       selected=false;
-      confirmation.hidden=true;
+      if(confirmation)confirmation.hidden=true;
       // If a manually edited territory could disagree with the selected
       // street address, require the user to confirm/re-enter exact address.
       if (territoryChanged) assign('location.exact_address','');
@@ -146,7 +146,7 @@
       if (disposed) return;
       const id=++requestId;
       selected=false;
-      confirmation.hidden=true;
+      if(confirmation)confirmation.hidden=true;
       // Do not submit an old territory or exact coordinate while resolving a new Place.
       clearLocation(true);
       try {
@@ -178,11 +178,11 @@
           assign('location.exact_lng',lng);
         }
         selected=Boolean(mapped.location && fullAddress);
-        if(selected){manual=false;syncVisibility();confirmationLabel.textContent=fullAddress;confirmation.hidden=false;}
+        if(selected){manual=false;syncVisibility();if(confirmationLabel)confirmationLabel.textContent=fullAddress;if(confirmation)confirmation.hidden=false;}
         else offerManual('Indirizzo incompleto. Inserisci la posizione manualmente.');
         if(!mapped.location)offerManual('Territorio non riconosciuto. Inserisci manualmente.');
         say(mapped.location
-          ? 'Territorio riconciliato con BadAround. Conferma Regione, Provincia, Comune e Località prima di proseguire.'
+          ? 'Posizione riconosciuta.'
           : 'Il territorio canonico non è stato riconosciuto. Compila manualmente Regione, Provincia e Comune; le coordinate Google non sono utilizzate.');
       } catch (_) {
         if (!disposed && id===requestId) offerManual('Google non disponibile. Inserisci la posizione manualmente.');
@@ -208,12 +208,12 @@
       }
     }
     function openManual(){
-      requestId++;selected=false;manual=true;confirmation.hidden=true;clearLocation(true);syncVisibility();
+      requestId++;selected=false;manual=true;if(confirmation)confirmation.hidden=true;clearLocation(true);syncVisibility();
       say('Compila Regione, Provincia, Comune e indirizzo preciso. La località è facoltativa.');
       field('location.region')?.focus?.();
     }
     function canAdvance(){
-      if(selected&&!confirmation.hidden&&!manual)return true;
+      if(selected&&(!confirmation||!confirmation.hidden)&&!manual)return true;
       if(manual){
         const required=['location.region','location.province','location.municipality','location.exact_address'];
         const missing=required.find(path=>!String(field(path)?.value||'').trim());
@@ -225,7 +225,7 @@
       if(!start.hidden)start.focus();else widget?.focus?.();
       return false;
     }
-    function reset(){requestId++;selected=false;manual=false;confirmation.hidden=true;syncVisibility();say('Seleziona il campo per cercare un luogo.');}
+    function reset(){requestId++;selected=false;manual=false;if(confirmation)confirmation.hidden=true;syncVisibility();say('Seleziona il campo per cercare un luogo.');}
     function changedGoogle(event){
       if(!selected)return;
       if(event.type==='gmp-select')return;

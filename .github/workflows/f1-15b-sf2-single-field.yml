@@ -1,0 +1,41 @@
+name: F1.15B-SF2 Single Field Isolated QA
+on:
+  push:
+    branches:
+      - feature/f1-15b-sf2-native-single-field
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  single-field:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: PHP syntax
+        run: |
+          php -l wordpress/themes/badaround-child/inc/native-report.php
+          php -l wordpress/themes/badaround-child/template-parts/native-report/step.php
+      - name: JS syntax
+        run: |
+          node --check wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
+          node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
+      - name: Install jsdom
+        run: npm ci --prefix tests
+      - name: Smart Address DOM regressions
+        run: node --test tests/f1-15b-r5-smart-address.cjs
+      - name: Native wizard DOM regressions
+        run: node --test tests/native-report-f16-dom.cjs
+      - name: Freeze guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check HEAD^ HEAD
+          ! git diff --name-only HEAD^ HEAD | grep -E 'wordpress/plugins/badaround-core/|wordpress/themes/badaround-child/assets/js/map.js|tools/geo-it-01-import-italy.php'

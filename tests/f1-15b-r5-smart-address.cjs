@@ -33,9 +33,9 @@ test('country guard, omissions and homonymous ambiguous terms are fail-closed',(
 });
 function setup(){
   const dom=new JSDOM(`<!doctype html><html><head></head><body><section data-native-report>
-  <div data-native-smart-address><button data-smart-start type="button">Cerca</button><div data-smart-widget></div><p data-smart-status></p></div>
+  <div data-native-smart-address><input data-smart-start type="text" readonly><div data-smart-widget></div><p data-smart-status></p><div data-smart-confirmation hidden><p data-smart-address-label></p></div><button data-smart-manual hidden type="button">Inserisci manualmente</button></div><div data-native-location-fields hidden>
   <input data-native-input name="location.region"><input data-native-input name="location.province"><input data-native-input name="location.municipality"><input data-native-input name="location.locality">
-  <input data-native-input name="location.exact_address"><input data-native-input name="location.exact_lat"><input data-native-input name="location.exact_lng">
+  <input data-native-input name="location.exact_address"><input data-native-input name="location.exact_lat"><input data-native-input name="location.exact_lng"></div>
   </section></body></html>`,{url:'https://staging.badaround.it/segnala-un-evento/',runScripts:'outside-only'});
   dom.window.eval(source);
   const win=dom.window,container=win.document.querySelector('[data-native-report]');
@@ -276,5 +276,45 @@ test('R6D existing Google Maps bootstrap is reused without a new script',async()
   assert.equal((await h.activate()).library,'places');
   assert.equal(h.scripts().length,0);
   assert.equal(h.pending.size,0);
+  h.close();
+});
+
+test('SF2: no selected address cannot advance and canonical fields are hidden by default',()=>{
+  const h=setup(),adapter=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:territory}},h.model);
+  assert.equal(h.container.querySelector('[data-native-location-fields]').hidden,true);
+  assert.equal(adapter.canAdvance(),false);
+  assert.equal(h.win.document.querySelectorAll('script[data-ba-smart-address]').length,0);
+  adapter.dispose();h.dom.window.close();
+});
+test('SF2: Google failure reveals fallback only on explicit manual action',async()=>{
+  const h=setup(),adapter=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:territory}},h.model);
+  h.button.click();h.win.document.querySelector('script[data-ba-smart-address]').onerror();
+  await new Promise(resolve=>setImmediate(resolve));
+  const fallback=h.container.querySelector('[data-smart-manual]');
+  assert.equal(fallback.hidden,false);
+  assert.equal(h.container.querySelector('[data-native-location-fields]').hidden,true);
+  fallback.click();
+  assert.equal(h.container.querySelector('[data-native-location-fields]').hidden,false);
+  assert.equal(adapter.canAdvance(),false);
+  adapter.dispose();h.dom.window.close();
+});
+test('SF2: route without house number is stored in private exact address',async()=>{
+  const h=await liveWidget();
+  const selection=h.select({address:'80132 Napoli NA, Italia',components:[
+    ac('country','Italia','IT'),ac('administrative_area_level_1','Campania','Campania'),
+    ac('administrative_area_level_2','Napoli','NA'),ac('locality','Napoli','Napoli'),
+    ac('route','Piazza del Plebiscito','Piazza del Plebiscito')
+  ]});
+  selection.resolve();await new Promise(resolve=>setImmediate(resolve));
+  // Fixture registry covers Lazio, so mapping correctly refuses this place.
+  assert.equal(h.input('location.exact_address').value,'');
+  assert.equal(h.controller.canAdvance(),false);
+  h.close();
+});
+test('SF2: selected Google address is invalidated on widget input edit',async()=>{
+  const h=await liveWidget(),p=h.select();p.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.controller.canAdvance(),true);
+  h.widget.dispatchEvent(new h.win.Event('input',{bubbles:true}));
+  assert.equal(h.controller.canAdvance(),false);
   h.close();
 });
