@@ -1,0 +1,134 @@
+name: SF5 — Staging Plesk httpdocs exact-file deploy
+
+on:
+  push:
+    branches:
+      - deploy/f1-15b-sf5-staging-httpdocs
+
+permissions:
+  contents: read
+
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+
+env:
+  APPROVED_PARENT_SHA: b3c8e80122fecf138fa633391a4a004451972386
+  VERIFIED_STAGING_BASE_SHA: 229b323d2e7f3983cfcf6661d249888ca699cb7b
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify one-off workflow and approved source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/deploy/f1-15b-sf5-staging-httpdocs'
+          test "$(git rev-parse HEAD^)" = "$APPROVED_PARENT_SHA"
+          test "$(git diff --name-only "$APPROVED_PARENT_SHA" HEAD)" = '.github/workflows/f1-15b-sf5-staging-httpdocs.yml'
+          git diff --check "$APPROVED_PARENT_SHA" HEAD
+          git diff --quiet 9e1b0873b88ba1dffbc37a0cb3c03ab8e0092c7c -- wordpress/plugins/badaround-core tools/geo-it-01-import-italy.php
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Syntax and frozen-contract guard
+        run: |
+          set -euo pipefail
+          php -l wordpress/themes/badaround-child/inc/native-report.php
+          php -l wordpress/themes/badaround-child/template-parts/native-report/step.php
+          node --check wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
+          node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
+      - name: Native regression
+        run: |
+          npm ci --prefix tests
+          node --test tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs
+
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Reverify pinned application and construct exact five-file payloads
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "$APPROVED_PARENT_SHA"
+          mkdir -p sf5-new sf5-rollback
+          files=(
+            "template-parts/native-report/step.php"
+            "inc/native-report.php"
+            "assets/js/native-report/smart-address.js"
+            "assets/js/native-report/wizard.js"
+            "assets/css/native-report.css"
+          )
+          for path in "${files[@]}"; do
+            mkdir -p "sf5-new/$(dirname "$path")" "sf5-rollback/$(dirname "$path")"
+            cp "wordpress/themes/badaround-child/$path" "sf5-new/$path"
+            git show "$VERIFIED_STAGING_BASE_SHA:wordpress/themes/badaround-child/$path" > "sf5-rollback/$path"
+            test -s "sf5-rollback/$path" && test -s "sf5-new/$path"
+          done
+          test "$(find sf5-new -type f | wc -l)" = 5
+          test "$(find sf5-rollback -type f | wc -l)" = 5
+          echo "Five-file candidate and exact inspected staging rollback baseline prepared."
+      - name: Archive verified rollback source before any upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: sf5-verified-staging-rollback
+          path: sf5-rollback/
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Deploy only five approved files using existing GitHub FTPS action
+        id: deploy
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./sf5-new/
+          server-dir: /staging.badaround.it/httpdocs/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .sf5-httpdocs-sync-state.json
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+          log-level: minimal
+      - name: Restore baseline through GitHub FTPS if upload or smoke fails
+        if: steps.deploy.outcome == 'failure'
+        id: rollback
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./sf5-rollback/
+          server-dir: /staging.badaround.it/httpdocs/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .sf5-httpdocs-rollback-state.json
+          log-level: minimal
+      - name: Enforce verified result
+        if: always() && steps.deploy.outcome != 'skipped'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ steps.deploy.outcome }}" != success ]; then
+            echo "::error::SF5 GitHub FTPS upload failed. Rollback action was attempted."
+            exit 1
+          fi
+          echo "SF5 five-file upload PASS. Independent authenticated read-only WordPress file verification is required before QA."
