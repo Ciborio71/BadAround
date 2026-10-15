@@ -429,3 +429,14 @@
     [data-native-field="authority.reference"]
   ){padding:12px}
 }
+
+/* SF.2: one visible address search; canonical fields remain within the Native model. */
+.ba-native [data-native-location-fields][hidden]{display:none!important}
+.ba-native .ba-native-smart-address{display:grid;gap:12px;margin:18px 0 28px;min-width:0}
+.ba-native .ba-native-smart-address>label{font-weight:750}
+.ba-native [data-smart-start],.ba-native [data-smart-widget] gmp-place-autocomplete{width:100%;max-width:100%;min-height:52px;box-sizing:border-box}
+.ba-native [data-smart-start]{border:1px solid #c9d7e2;border-radius:12px;background:#fff;padding:12px 14px;font:inherit;cursor:text}
+.ba-native [data-smart-status]{margin:0;color:var(--ba-muted)}
+.ba-native [data-smart-confirmation]{padding:14px;border:1px solid #b9dde0;border-radius:12px;background:#f2fbf9}
+.ba-native [data-smart-confirmation] p{margin:4px 0;overflow-wrap:anywhere}
+.ba-native [data-smart-confirmation] small{color:var(--ba-muted)}
