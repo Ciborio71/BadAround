@@ -144,8 +144,20 @@ function badaround_native_report_config() {
 	$territories = array();
 	$terms = get_terms( array( 'taxonomy' => 'ba_territorio', 'hide_empty' => false ) );
 	if ( is_array( $terms ) && ! is_wp_error( $terms ) ) {
+		$region_ids = array();
 		foreach ( $terms as $term ) {
-			$territories[] = array( 'id' => (int) $term->term_id, 'parent' => (int) $term->parent, 'name' => $term->name );
+			if ( 0 === (int) $term->parent ) { $region_ids[ (int) $term->term_id ] = true; }
+		}
+		foreach ( $terms as $term ) {
+			$entry = array( 'id' => (int) $term->term_id, 'parent' => (int) $term->parent, 'name' => $term->name );
+			// Only the ~110 province-level entries require UTS codes to
+			// reconcile Google's external provincial sigle. Municipality
+			// ISTAT codes remain server-side; no new visible inputs.
+			if ( isset( $region_ids[ (int) $term->parent ] ) ) {
+				$code = (string) get_term_meta( $term->term_id, '_ba_istat_province_code', true );
+				if ( '' !== $code ) { $entry['code'] = $code; }
+			}
+			$territories[] = $entry;
 		}
 	}
 	$wpforms_settings = function_exists( 'get_option' ) ? get_option( 'wpforms_settings', array() ) : array();

@@ -5,41 +5,99 @@
   const normalize = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLocaleLowerCase('it-IT');
   const component = (components, type) => (components || []).find(item => (item.types || []).includes(type));
   const variants = part => part ? [part.longText, part.shortText].filter(Boolean) : [];
+
+  // 2026 territorial-unit sigle, matched by ISTAT UTS code against the
+  // existing staging canonical province terms (110/110, read-only).
+  // Source: guglielmo/geojson-italy, commit
+  // ba3347df3a53352891109f8198c597a0273684c0,
+  // geojson/limits_IT_provinces.geojson: prov_uts_code -> prov_acr.
+  // This does NOT create identities: the canonical registry and parent must
+  // match. Unmapped codes fail closed on sigla-only Google responses.
+  const SIGLA_BY_UTS_CODE = Object.freeze({"100":"PO","101":"KR","102":"VV","103":"VB","108":"MB","109":"FM","110":"BT","113":"OT","114":"NU","115":"OR","116":"OG","117":"VS","119":"CI","201":"TO","210":"GE","215":"MI","227":"VE","237":"BO","248":"FI","258":"RM","263":"NA","272":"BA","280":"RC","282":"PA","283":"ME","287":"CT","312":"SS","318":"CA","002":"VC","003":"NO","004":"CN","005":"AT","006":"AL","007":"AO","008":"IM","009":"SV","011":"SP","012":"VA","013":"CO","014":"SO","016":"BG","017":"BS","018":"PV","019":"CR","020":"MN","021":"BZ","022":"TN","023":"VR","024":"VI","025":"BL","026":"TV","028":"PD","029":"RO","030":"UD","031":"GO","032":"TS","033":"PC","034":"PR","035":"RE","036":"MO","038":"FE","039":"RA","040":"FC","041":"PU","042":"AN","043":"MC","044":"AP","045":"MS","046":"LU","047":"PT","049":"LI","050":"PI","051":"AR","052":"SI","053":"GR","054":"PG","055":"TR","056":"VT","057":"RI","059":"LT","060":"FR","061":"CE","062":"BN","064":"AV","065":"SA","066":"AQ","067":"TE","068":"PE","069":"CH","070":"CB","071":"FG","073":"TA","074":"BR","075":"LE","076":"PZ","077":"MT","078":"CS","079":"CZ","081":"TP","084":"AG","085":"CL","086":"EN","088":"RG","089":"SR","093":"PN","094":"IS","096":"BI","097":"LC","098":"LO","099":"RN"});
+
+  // Conservative orthographic equivalence; every collision under a canonical
+  // parent is ambiguous and rejected rather than selected by first match.
+  const normalName = value => normalize(value)
+    .replace(/[’‘`´']/g,' ')
+    .replace(/[‐‑‒–—-]/g,' ')
+    .replace(/\s+/g,' ').trim();
+  const administrativeName = value => normalName(value)
+    .replace(/^(?:provincia(?: autonoma)?|citta metropolitana|libero consorzio(?: comunale)?)(?: di| del| della| dello| dell| dei| delle)?\s+/u,'')
+    .trim();
+  const namesOf = (value, level) => {
+    const raw=String(value||'').trim();
+    const parts=raw.split('/').map(x=>x.trim()).filter(Boolean);
+    // Slashed canonical bilingual labels are declared variants; never
+    // construct new municipality identities from partial substrings.
+    const variants=[raw,...(level==='region'||level==='province'?parts:[])];
+    return [...new Set(variants.map(x=>level==='province'?administrativeName(x):normalName(x)).filter(Boolean))];
+  };
   function resolveTerritory(components, registry) {
-    const entries = Array.isArray(registry) ? registry : [];
-    const country = component(components, 'country');
-    if (!country || !variants(country).some(v => normalize(v) === 'it' || normalize(v) === 'italia')) return {error:'outside_italy'};
-    const candidates = {
-      region: variants(component(components, 'administrative_area_level_1')),
-      province: variants(component(components, 'administrative_area_level_2')),
-      municipality: variants(component(components, 'locality')).concat(variants(component(components, 'administrative_area_level_3'))),
-      locality: variants(component(components, 'sublocality')).concat(variants(component(components, 'sublocality_level_1')),variants(component(components, 'neighborhood')))
+    const entries=Array.isArray(registry)?registry:[];
+    const country=component(components,'country');
+    if(!country || !variants(country).some(v=>['it','italia','italy'].includes(normalName(v))))
+      return {error:'outside_italy'};
+    const byParent=new Map();
+    for(const e of entries) {
+      const id=Number(e.id),parent=Number(e.parent);
+      if(!Number.isSafeInteger(id)||id<=0||!Number.isSafeInteger(parent)||parent<0)continue;
+      if(!byParent.has(parent))byParent.set(parent,[]);
+      byParent.get(parent).push(e);
+    }
+    const candidates={
+      region:variants(component(components,'administrative_area_level_1')),
+      province:variants(component(components,'administrative_area_level_2')),
+      municipality:variants(component(components,'locality'))
+        .concat(variants(component(components,'administrative_area_level_3'))),
+      locality:variants(component(components,'sublocality'))
+        .concat(variants(component(components,'sublocality_level_1')),
+                variants(component(components,'neighborhood')))
     };
-    // Only explicit administrative component names/aliases; never infer identity from free-text address.
-    candidates.province = candidates.province.flatMap(v => [v, v.replace(/^(?:città metropolitana di|provincia di)\\s+/iu,''), normalize(v)==='citta metropolitana di roma capitale'?'Roma':'']);
-    // The Google administrative_area_level_2 shortText is a province sigla,
-    // not the canonical ISTAT province name. Bind only explicit region-scoped
-    // administrative aliases to existing terms; never infer from address text.
-    if (candidates.region.some(v=>normalize(v)==='abruzzo') &&
-        candidates.province.some(v=>normalize(v)==='aq')) {
-      candidates.province.push("L'Aquila");
+    const result={},ids={};
+    const select=(level,parent,names,aliasCodes=[])=>{
+      const terms=byParent.get(parent)||[];
+      const keys=new Set(names.flatMap(n=>namesOf(n,level)));
+      const alias=new Set(aliasCodes);
+      const matches=terms.filter(e=>{
+        if(namesOf(e.name,level).some(k=>keys.has(k)))return true;
+        return level==='province' && alias.has(String(e.code||''));
+      });
+      return matches.length===1?{term:matches[0]}:{error:'unresolved_'+level};
+    };
+    const region=select('region',0,candidates.region);
+    if(region.error)return {error:region.error};
+    result.region=region.term.name;ids.region=Number(region.term.id);
+    const pComponent=component(components,'administrative_area_level_2');
+    const sigla=normalName(pComponent?.shortText||'').toUpperCase();
+    // Abbreviation is meaningful only when accompanied by an explicit
+    // administrative_area_level_2 component and a verified UTS code.
+    const codes=Object.keys(SIGLA_BY_UTS_CODE)
+      .filter(k=>SIGLA_BY_UTS_CODE[k]===sigla);
+    const province=select('province',ids.region,candidates.province,codes);
+    if(province.error)return {error:province.error,partial:result};
+    result.province=province.term.name;ids.province=Number(province.term.id);
+    // Both Google levels may contain municipal names. If each independently
+    // identifies a DIFFERENT canonical municipality, reject the conflict.
+    // A sublocality is never promoted to municipality via free text.
+    const municipalities=byParent.get(ids.province)||[];
+    const separate=[
+      variants(component(components,'locality')),
+      variants(component(components,'administrative_area_level_3'))
+    ].filter(a=>a.length);
+    const matched=new Map();
+    for(const group of separate){
+      const keys=new Set(group.flatMap(x=>namesOf(x,'municipality')));
+      const hit=municipalities.filter(x=>namesOf(x.name,'municipality').some(k=>keys.has(k)));
+      if(hit.length>1)return {error:'unresolved_municipality',partial:result};
+      if(hit.length===1)matched.set(Number(hit[0].id),hit[0]);
     }
-    // Apostrophe glyph variation is not a different place identity.
-    const namesEquivalent=v=>normalize(v).replace(/[’‘`´]/g,"'");
-    const byParent = new Map();
-    for (const entry of entries) {const k=Number(entry.parent)+':'+namesEquivalent(entry.name);if(!byParent.has(k))byParent.set(k,[]);byParent.get(k).push(entry);}
-    const result = {}, ids = {};
-    let parent = 0;
-    for (const level of LEVELS) {
-      const names = new Set(candidates[level].map(namesEquivalent).filter(Boolean));
-      const matches = [...new Map([...names].flatMap(name=>byParent.get(parent+':'+name)||[]).map(term=>[Number(term.id),term])).values()];
-      if (level === 'locality' && matches.length === 0) {result[level]='';break;}
-      if (matches.length !== 1) return {error:'unresolved_' + level, partial:result};
-      result[level] = matches[0].name;
-      ids[level] = Number(matches[0].id);
-      parent = ids[level];
-    }
-    return {location:result, termIds:ids};
+    if(matched.size!==1)return {error:'unresolved_municipality',partial:result};
+    const municipal=[...matched.values()][0];
+    result.municipality=municipal.name;ids.municipality=Number(municipal.id);
+    const locality=select('locality',ids.municipality,candidates.locality);
+    if(locality.term){result.locality=locality.term.name;ids.locality=Number(locality.term.id);}
+    else result.locality='';
+    return {location:result,termIds:ids,country:'Italy'};
   }
   let loaderPromise;
   let loaderAttempt = 0;
