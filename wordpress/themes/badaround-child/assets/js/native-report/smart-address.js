@@ -171,6 +171,11 @@
   function mount(container, config, model) {
     const ui = container.querySelector('[data-native-smart-address]');
     if (!ui) return {dispose() {}};
+    // PHP emits compact [term_id,parent_id,name] tuples to keep the initial
+    // JSON smaller. Hydrate once per wizard mount; accept legacy object fixtures.
+    const canonicalTerritories=(config.smartAddress?.territories||[]).map(entry=>
+      Array.isArray(entry)?{id:entry[0],parent:entry[1],name:entry[2]}:entry);
+
     // No provider key: display the manual fallback rather than hiding the whole address workflow.
     const start = ui.querySelector('[data-smart-start]');
     const status = ui.querySelector('[data-smart-status]');
@@ -235,7 +240,7 @@
         say('Verifica dell’indirizzo in corso…');
         await place.fetchFields({fields:['addressComponents','formattedAddress','location']});
         if (disposed || id!==requestId) return;
-        const mapped=resolveTerritory(place.addressComponents,config.smartAddress.territories);
+        const mapped=resolveTerritory(place.addressComponents,canonicalTerritories);
         if (mapped.error === 'outside_italy') {
           offerManual('Risultato fuori Italia. Inserisci un indirizzo italiano manualmente.');
           return;
