@@ -22,7 +22,7 @@
     const byParent=new Map();
     for(const e of entries) {
       if(!Number.isSafeInteger(Number(e.id))||Number(e.id)<=0||!e.name)continue;
-      for(const n of canonicalVariants(e.name)) {
+      for(const n of canonicalVariants(e.name).flatMap(x=>[x,...(x.startsWith("l'")?[x.slice(2)]:[]),...(x.startsWith('la ')?[x.slice(3)]:[])])) {
         const key=Number(e.parent)+':'+n;
         if(!byParent.has(key))byParent.set(key,new Map());
         byParent.get(key).set(Number(e.id),e);
@@ -41,6 +41,26 @@
     const siglaMap=new Map((PROVINCE_SIGLE[region.name]||'').split(';').filter(Boolean).map(s=>{
       const i=s.lastIndexOf(':');return [normalize(s.slice(i+1)),s.slice(0,i)];
     }));
+    // Google long and short variants are independent evidence. A recognized
+    // provincial name or sigla belonging to ANOTHER region vetoes assignment.
+    // Cross-region checking here is rejection-only, never global resolution.
+    const allNames=new Map(),allCodes=new Map();
+    for(const [r,items] of Object.entries(PROVINCE_SIGLE))
+      for(const pair of items.split(';').filter(Boolean)){
+        const i=pair.lastIndexOf(':'),label=pair.slice(0,i),code=normalize(pair.slice(i+1));
+        for(const n of canonicalVariants(label)){
+          if(!allNames.has(n))allNames.set(n,new Set());
+          allNames.get(n).add(r);
+        }
+        if(!allCodes.has(code))allCodes.set(code,new Set());
+        allCodes.get(code).add(r);
+      }
+    const longLabel=administrativeName(provincePart.longText||'');
+    if(allNames.has(longLabel) && !allNames.get(longLabel).has(region.name))
+      return {error:'conflicting_province',partial:{region:region.name}};
+    const shortCode=normalize(provincePart.shortText||'');
+    if(allCodes.has(shortCode) && !allCodes.get(shortCode).has(region.name))
+      return {error:'conflicting_province',partial:{region:region.name}};
     const provinces=new Map();
     for(const value of variants(provincePart)){
       const norm=normalize(value),stripped=administrativeName(value);
