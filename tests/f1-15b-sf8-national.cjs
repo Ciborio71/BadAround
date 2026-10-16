@@ -732,7 +732,7 @@ test('SF8 Città metropolitana di Roma Capitale is a verified institutional prov
 test('SF8 bilingual canonical region Valle d\'Aosta accepts Italian Google label',()=>{
  const c=CASES.find(c=>c.com==='Aosta'),g=google(c);
  g[1]=a('administrative_area_level_1',"Valle d'Aosta",'');
- g[2]=a('administrative_area_level_2','Aosta','');
+ g[2]=a('administrative_area_level_2',"Valle d'Aosta",'AO');
  assert.equal(resolveTerritory(g,registry(c)).location?.municipality,'Aosta');
 });
 test('SF8 bilingual autonomous province Bolzano/Bozen accepts Bozen',()=>{
@@ -752,4 +752,10 @@ test('SF8 false province long+short combination rejects conflicting canonical na
  r.push({id:99972,parent:c.rid,name:'Monza e della Brianza',code:'108'});
  const g=google(c,'Monza e della Brianza','MI');
  assert.equal(resolveTerritory(g,r).error,'unresolved_province');
+});
+
+test('SF8 Valle d’Aosta without canonical province label or AO stays fail-closed',()=>{
+ const c=CASES.find(c=>c.com==='Aosta'),g=google(c);
+ g[2]=a('administrative_area_level_2','Aosta','');
+ assert.equal(resolveTerritory(g,registry(c)).error,'unresolved_province');
 });
