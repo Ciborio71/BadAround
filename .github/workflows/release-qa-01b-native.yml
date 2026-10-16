@@ -56,7 +56,9 @@ jobs:
             php "$file" >/dev/null
           done
           echo 'PHP release regression PASS'
-      - name: Native UI, address, locality, privacy and retirement regression
+      # Historical LEG-RETIRE-01 compares exact pre-SF8 smart-address.js bytes;
+      # SF8–SF10 supersede the code with new regression suites.
+      - name: Native UI, address, locality and privacy regression
         run: |
           npm ci --prefix tests
           node --test \
@@ -64,7 +66,6 @@ jobs:
             tests/f1-15b-r5-smart-address.cjs \
             tests/native-report-f16-dom.cjs \
             tests/native-report-f16.cjs \
-            tests/leg-retire-01-native-only.cjs \
             tests/sf9-public-privacy-boundary.cjs
       - name: Candidate scope and artifact integrity
         run: |
