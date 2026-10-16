@@ -1,0 +1,32 @@
+name: SF8 — National Territory Gate
+on:
+  push:
+    branches:
+      - feature/f1-15b-sf8-national-reconciliation
+permissions:
+  contents: read
+jobs:
+  national:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - name: Syntax and immutable fences
+        run: |
+          node --check wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
+          node --check tests/f1-15b-sf8-national.cjs
+          php -l wordpress/themes/badaround-child/inc/native-report.php
+          git diff --check 60aa8b292fbb0fd272a3ace1353d1bffa08994e6 HEAD
+          ! git diff --name-only 60aa8b292fbb0fd272a3ace1353d1bffa08994e6 HEAD | grep -E '^wordpress/plugins/badaround-core/'
+          ! git diff --name-only 60aa8b292fbb0fd272a3ace1353d1bffa08994e6 HEAD | grep -E '^tools/geo-it-01-import-italy.php'
+      - name: National, Smart Address, Native wizard tests
+        run: |
+          npm ci --prefix tests
+          node --test tests/f1-15b-sf8-national.cjs tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs
