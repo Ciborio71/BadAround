@@ -1,0 +1,127 @@
+name: UX01 — Google Address Staging QA
+on:
+  push:
+    branches:
+      - deploy/f1-15b-ux01-address-staging
+permissions:
+  contents: read
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Pin exact authorized application source
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = '6f3c4407e6f8290c6a010d8548c31a56adf30d50'
+          test "$(git diff --name-only HEAD^ HEAD)" = '.github/workflows/f1-15b-ux01-address-staging.yml'
+          git diff --check HEAD^ HEAD
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Verify targeted sources
+        run: |
+          set -euo pipefail
+          php -l wordpress/themes/badaround-child/inc/native-report.php
+          php -l wordpress/themes/badaround-child/template-parts/native-report/step.php
+          node --check wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
+          node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
+          npm ci --prefix tests
+          node --test tests/sf8-national-territory.cjs tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs
+      - name: Prepare exactly one approved file and exact read-verified rollback
+        run: |
+          set -euo pipefail
+          for path in assets/js/native-report/smart-address.js; do
+            mkdir -p "ux01-new/$(dirname "$path")" "ux01-rollback/$(dirname "$path")"
+            cp "wordpress/themes/badaround-child/$path" "ux01-new/$path"
+            git show "694bf444be4e828c207d97ca8f1da41dc3fb6d43:wordpress/themes/badaround-child/$path" > "ux01-rollback/$path"
+          done
+          test "$(find ux01-new -type f | wc -l)" -eq 1
+          test "$(find ux01-rollback -type f | wc -l)" -eq 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ux01-address-rollback-file
+          path: ux01-rollback/
+          retention-days: 14
+      - name: Existing FTP-Deploy-Action upload — attempt 1
+        id: first
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./ux01-new/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .ux01-address-state.json
+          log-level: minimal
+      - name: Existing FTP-Deploy-Action upload — attempt 2 if needed
+        if: steps.first.outcome == 'failure'
+        id: second
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./ux01-new/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .ux01-address-state.json
+          log-level: minimal
+      - name: Existing FTP-Deploy-Action upload — attempt 3 if needed
+        if: steps.first.outcome == 'failure' && steps.second.outcome == 'failure'
+        id: third
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./ux01-new/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .ux01-address-state.json
+          log-level: minimal
+      - name: Restore verified baseline if every upload attempt failed
+        if: steps.first.outcome == 'failure' && steps.second.outcome == 'failure' && steps.third.outcome == 'failure'
+        id: restore
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./ux01-rollback/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .ux01-address-rollback.json
+          log-level: minimal
+      - name: Final upload result (live verification remains external)
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ "${{ steps.first.outcome }}" = success ] || [ "${{ steps.second.outcome }}" = success ] || [ "${{ steps.third.outcome }}" = success ]; then
+            echo "FTP_UPLOAD_PASS; independently compare WordPress active theme files before certifying."
+          else
+            echo "::error::FTP_UPLOAD_FAILED, baseline restore attempted; inspect read-only live WordPress files."
+            exit 1
+          fi
