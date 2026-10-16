@@ -1,0 +1,57 @@
+name: RELEASE-QA-02 — Native Form Completion Gate
+on:
+  push:
+    branches:
+      - feature/release-qa-02-native-completion
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Native PHP and JS syntax
+        run: |
+          set -euo pipefail
+          find wordpress/plugins/badaround-core wordpress/themes/badaround-child -name '*.php' -type f -print0 | xargs -0 -n1 php -l >/dev/null
+          for p in model wizard api smart-address media media-view errors; do
+            node --check "wordpress/themes/badaround-child/assets/js/native-report/$p.js"
+          done
+      - name: Native Form end-to-end synthetic UX, privacy, smart address and media DOM
+        run: |
+          set -euo pipefail
+          npm ci --prefix tests
+          node --test \
+            tests/native-report-f16.cjs \
+            tests/native-report-f16-dom.cjs \
+            tests/native-report-f19-ux.cjs \
+            tests/f1-15b-r5-smart-address.cjs \
+            tests/sf8-national-territory.cjs \
+            tests/sf9-public-privacy-boundary.cjs \
+            tests/native-media-f17d-dom.cjs \
+            tests/native-media-f17d-extra.cjs
+      - name: Native backend, publication, territory, and media synthetic constraints
+        run: |
+          set -euo pipefail
+          for file in \
+            tests/native-report-f13.php \
+            tests/native-report-f14.php \
+            tests/native-report-f15.php \
+            tests/f1-15a3-territory.php \
+            tests/f1-14r-publication-contract.php \
+            tests/f1-14r-consumers.php \
+            tests/map-02r-priv-01.php
+          do php "$file" >/dev/null; done
+      - name: Protect frozen application code and staging fixtures
+        run: |
+          set -euo pipefail
+          git diff --check f37b9b8a340f040361c5e0252f5da1919f828bc8 HEAD
+          ! git diff --name-only f37b9b8a340f040361c5e0252f5da1919f828bc8 HEAD | grep -E '^wordpress/|^tests/fixtures/'
