@@ -88,7 +88,7 @@ async function liveWidget(registry=territory){
   class Widget extends h.win.HTMLElement {}
   h.win.customElements.define('fake-r6-place-widget',Widget);
   const adapter=h.win.BadAroundNative.SmartAddress;
-  const controller=adapter.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:territory}},h.model);
+  const controller=adapter.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:registry}},h.model);
   h.button.click();
   h.win.google={maps:{importLibrary:async()=>({PlaceAutocompleteElement:class {constructor(){return h.win.document.createElement('fake-r6-place-widget');}}})}};
   h.win[new URL(h.win.document.querySelector('script[data-ba-smart-address]').src).searchParams.get('callback')]();
