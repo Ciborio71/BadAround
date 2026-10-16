@@ -1,0 +1,71 @@
+name: RELEASE-QA-01B — Native Candidate Gate
+on:
+  push:
+    branches:
+      - feature/release-qa-01b-native-candidate
+permissions:
+  contents: read
+jobs:
+  native-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Native-only routing and retired legacy fence
+        run: |
+          set -euo pipefail
+          test ! -e wordpress/themes/badaround-child/assets/js/report.js
+          grep -Fq "get_template_part( 'template-parts/native-report/shell' )" wordpress/themes/badaround-child/page-segnala-evento.php
+          test -f wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
+          test -f wordpress/themes/badaround-child/assets/js/native-report/wizard.js
+          grep -Fq "'post_status'  => 'pending'" wordpress/plugins/badaround-core/includes/class-badaround-report-persistence-service.php
+          grep -Fq "'prepare_public_projection' => false" wordpress/plugins/badaround-core/includes/class-badaround-native-report-golden-path-service.php
+      - name: Native core PHP lint
+        run: |
+          find wordpress/plugins/badaround-core -type f -name '*.php' -print0 | xargs -0 -n1 php -l >/dev/null
+          find wordpress/themes/badaround-child -type f -name '*.php' -print0 | xargs -0 -n1 php -l >/dev/null
+          echo 'Native core and theme PHP syntax PASS'
+      - name: WordPress-free Native, privacy, territorial, public projection and sentinel functional tests
+        run: |
+          set -euo pipefail
+          for file in \
+            tests/native-report-f1.php \
+            tests/native-report-f12.php \
+            tests/native-report-f13.php \
+            tests/native-report-f14.php \
+            tests/native-report-f15.php \
+            tests/native-report-f16.php \
+            tests/map-02r-priv-01.php \
+            tests/f1-15a3-territory.php \
+            tests/f1-14r-publication-contract.php \
+            tests/f1-14r-consumers.php \
+            tests/sentinels-d1.php \
+            tests/sentinels-d2.php \
+            tests/sentinels-d3.php
+          do
+            echo "== $file =="
+            php "$file" >/dev/null
+          done
+          echo 'PHP release regression PASS'
+      - name: Native UI, address, locality, privacy and retirement regression
+        run: |
+          npm ci --prefix tests
+          node --test \
+            tests/sf8-national-territory.cjs \
+            tests/f1-15b-r5-smart-address.cjs \
+            tests/native-report-f16-dom.cjs \
+            tests/native-report-f16.cjs \
+            tests/leg-retire-01-native-only.cjs \
+            tests/sf9-public-privacy-boundary.cjs
+      - name: Candidate scope and artifact integrity
+        run: |
+          set -euo pipefail
+          git diff --check b5003a661210b20cbc8d4d2f0c9cdb54dd99c615 HEAD
+          ! git diff --name-only b5003a661210b20cbc8d4d2f0c9cdb54dd99c615 HEAD | grep '^wordpress/'
