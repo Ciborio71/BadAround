@@ -423,3 +423,49 @@ test('SF6: never reuse the query or accept a postal code as a street name',async
   assert.equal(h.input('location.exact_address').value,'00071 Pomezia RM, Italia');
   h.close();
 });
+
+test('SF7: Rocca di Mezzo AQ canonical registry resolves Google AQ sigla',()=>{
+  const registry=[
+    {id:5545,parent:0,name:'Abruzzo'},
+    {id:5546,parent:5545,name:"L'Aquila"},
+    {id:5628,parent:5546,name:'Rocca di Mezzo'}
+  ];
+  const x=resolveTerritory([
+    ac('country','Italia','IT'),
+    ac('administrative_area_level_1','Abruzzo','Abruzzo'),
+    ac('administrative_area_level_2','Provincia dell’Aquila','AQ'),
+    ac('locality','Rocca di Mezzo','Rocca di Mezzo')
+  ],registry);
+  assert.deepEqual(x.location,{region:'Abruzzo',province:"L'Aquila",municipality:'Rocca di Mezzo',locality:''});
+  assert.equal(x.termIds.municipality,5628);
+});
+test('SF7: AQ province sigla cannot resolve into wrong region or arbitrary municipality',()=>{
+  const registry=[
+    {id:5545,parent:0,name:'Abruzzo'},
+    {id:5546,parent:5545,name:"L'Aquila"},
+    {id:5628,parent:5546,name:'Rocca di Mezzo'},
+    {id:2,parent:0,name:'Lazio'},
+    {id:3,parent:2,name:'Roma'}
+  ];
+  const x=resolveTerritory([
+    ac('country','Italia','IT'),
+    ac('administrative_area_level_1','Lazio','Lazio'),
+    ac('administrative_area_level_2','Provincia dell’Aquila','AQ'),
+    ac('locality','Rocca di Mezzo','Rocca di Mezzo')
+  ],registry);
+  assert.equal(x.error,'unresolved_province');
+});
+test('SF7: curly apostrophes and fully named province can resolve without a sigla',()=>{
+  const registry=[
+    {id:5545,parent:0,name:'Abruzzo'},
+    {id:5546,parent:5545,name:"L'Aquila"},
+    {id:5628,parent:5546,name:'Rocca di Mezzo'}
+  ];
+  const x=resolveTerritory([
+    ac('country','Italia','IT'),
+    ac('administrative_area_level_1','Abruzzo','Abruzzo'),
+    ac('administrative_area_level_2','L’Aquila',''),
+    ac('administrative_area_level_3','Rocca di Mezzo','')
+  ],registry);
+  assert.equal(x.location?.municipality,'Rocca di Mezzo');
+});
