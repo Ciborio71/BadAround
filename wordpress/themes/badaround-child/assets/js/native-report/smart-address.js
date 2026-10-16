@@ -22,8 +22,15 @@
     .replace(/[‐‑‒–—-]/g,' ')
     .replace(/\s+/g,' ').trim();
   const administrativeName = value => normalName(value)
-    .replace(/^(?:provincia(?: autonoma)?|citta metropolitana|libero consorzio(?: comunale)?)(?: di| del| della| dello| dell| dei| delle)?\s+/u,'')
+    // "Provincia dell'Aquila" -> "l aquila": preserve the article in
+    // the canonical name rather than treating it as administrative noise.
+    .replace(/^(?:provincia(?: autonoma)?|citta metropolitana|libero consorzio(?: comunale)?)\s+dell\s+/u,'l ')
+    .replace(/^(?:provincia(?: autonoma)?|citta metropolitana|libero consorzio(?: comunale)?)(?: di| del| della| dello| dei| delle)?\s+/u,'')
     .trim();
+  // Institutional spelling confirmed by Città metropolitana di Roma
+  // Capitale (https://www.cittametropolitanaroma.it/homepage/la-citta-metropolitana/).
+  // The alias is bound to existing canonical province UTS code 258.
+  const VERIFIED_ADMIN_ALIASES = Object.freeze({'258':['Roma Capitale']});
   const namesOf = (value, level) => {
     const raw=String(value||'').trim();
     const parts=raw.split('/').map(x=>x.trim()).filter(Boolean);
@@ -60,7 +67,10 @@
       const alias=new Set(aliasCodes);
       const matches=terms.filter(e=>{
         if(namesOf(e.name,level).some(k=>keys.has(k)))return true;
-        return level==='province' && alias.has(String(e.code||''));
+        if(level!=='province')return false;
+        const code=String(e.code||'');
+        return alias.has(code) || (VERIFIED_ADMIN_ALIASES[code]||[])
+          .some(n=>namesOf(n,'province').some(k=>keys.has(k)));
       });
       return matches.length===1?{term:matches[0]}:{error:'unresolved_'+level};
     };
@@ -94,7 +104,15 @@
     if(matched.size!==1)return {error:'unresolved_municipality',partial:result};
     const municipal=[...matched.values()][0];
     result.municipality=municipal.name;ids.municipality=Number(municipal.id);
-    const locality=select('locality',ids.municipality,candidates.locality);
+    // Google sometimes puts a fraction in locality and the actual Comune
+    // in administrative_area_level_3. Resolve that fraction ONLY if it is a
+    // pre-existing child of the confirmed canonical municipality.
+    const localityNames=[...candidates.locality];
+    const gLocality=variants(component(components,'locality'));
+    if(gLocality.length &&
+      !gLocality.some(v=>namesOf(municipal.name,'municipality').includes(normalName(v))))
+      localityNames.push(...gLocality);
+    const locality=select('locality',ids.municipality,localityNames);
     if(locality.term){result.locality=locality.term.name;ids.locality=Number(locality.term.id);}
     else result.locality='';
     return {location:result,termIds:ids,country:'Italy'};
