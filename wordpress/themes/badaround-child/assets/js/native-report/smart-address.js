@@ -83,8 +83,17 @@
     }
     if(municipalities.size!==1)return {error:municipalities.size?'conflicting_municipality':'unresolved_municipality',partial:{region:region.name,province:province.name}};
     const municipality=[...municipalities.values()][0];
-    const localNames=[component(components,'sublocality'),component(components,'sublocality_level_1'),component(components,'neighborhood')]
-      .filter(Boolean).flatMap(part=>variants(part).map(normalize));
+    // Places may classify a settlement as locality while placing its parent
+    // municipality in administrative_area_level_3. A locality component is
+    // eligible as the canonical CHILD only after the municipality has been
+    // uniquely resolved under the verified province. Never infer from the
+    // formatted address, coordinates, or a global settlement-name match.
+    const localNames=[
+      component(components,'sublocality'),
+      component(components,'sublocality_level_1'),
+      component(components,'neighborhood'),
+      component(components,'locality')
+    ].filter(Boolean).flatMap(part=>variants(part).map(normalize));
     const localities=matches(Number(municipality.id),localNames);
     if(localities.length>1)return {error:'ambiguous_locality'};
     const locality=localities[0];
