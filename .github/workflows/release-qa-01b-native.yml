@@ -1,8 +1,9 @@
-name: RELEASE-QA-01B — Native Candidate Gate
+name: RELEASE-QA-01C — MVP Native Release Gate
 on:
   push:
     branches:
       - feature/release-qa-01b-native-candidate
+      - release/mvp-native-rc
 permissions:
   contents: read
 jobs:
