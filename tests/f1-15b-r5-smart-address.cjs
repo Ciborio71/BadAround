@@ -8,7 +8,7 @@ const source=fs.readFileSync(path.join(__dirname,'../wordpress/themes/badaround-
 const {resolveTerritory}=require('../wordpress/themes/badaround-child/assets/js/native-report/smart-address.js');
 const territory=[
 {id:2,parent:0,name:'Lazio'},
-{id:3,parent:2,name:'Roma'},
+{id:3,parent:2,name:'Roma',code:'258'},
 {id:4,parent:3,name:'Pomezia'},
 {id:5,parent:4,name:'Torvaianica'},
 {id:6,parent:3,name:'Roma'}
@@ -427,7 +427,7 @@ test('SF6: never reuse the query or accept a postal code as a street name',async
 test('SF7: Rocca di Mezzo AQ canonical registry resolves Google AQ sigla',()=>{
   const registry=[
     {id:5545,parent:0,name:'Abruzzo'},
-    {id:5546,parent:5545,name:"L'Aquila"},
+    {id:5546,parent:5545,name:"L'Aquila",code:'066'},
     {id:5628,parent:5546,name:'Rocca di Mezzo'}
   ];
   const x=resolveTerritory([
@@ -442,7 +442,7 @@ test('SF7: Rocca di Mezzo AQ canonical registry resolves Google AQ sigla',()=>{
 test('SF7: AQ province sigla cannot resolve into wrong region or arbitrary municipality',()=>{
   const registry=[
     {id:5545,parent:0,name:'Abruzzo'},
-    {id:5546,parent:5545,name:"L'Aquila"},
+    {id:5546,parent:5545,name:"L'Aquila",code:'066'},
     {id:5628,parent:5546,name:'Rocca di Mezzo'},
     {id:2,parent:0,name:'Lazio'},
     {id:3,parent:2,name:'Roma'}
@@ -458,7 +458,7 @@ test('SF7: AQ province sigla cannot resolve into wrong region or arbitrary munic
 test('SF7: curly apostrophes and fully named province can resolve without a sigla',()=>{
   const registry=[
     {id:5545,parent:0,name:'Abruzzo'},
-    {id:5546,parent:5545,name:"L'Aquila"},
+    {id:5546,parent:5545,name:"L'Aquila",code:'066'},
     {id:5628,parent:5546,name:'Rocca di Mezzo'}
   ];
   const x=resolveTerritory([
