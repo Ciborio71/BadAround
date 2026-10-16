@@ -1,0 +1,29 @@
+name: SF8 — National Territory No-Deploy CI
+on:
+  push:
+    branches:
+      - feature/f1-15b-sf8-national-territory
+permissions:
+  contents: read
+jobs:
+  national_reconciliation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: JS syntax
+        run: |
+          node --check wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
+          node --check tests/sf8-national-territory.cjs
+      - name: JS dependencies
+        run: npm ci --prefix tests
+      - name: National hierarchy and Smart Address regression
+        run: node --test tests/sf8-national-territory.cjs tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs
+      - name: Frozen core and privacy fences
+        run: |
+          git diff --check 60aa8b292fbb0fd272a3ace1353d1bffa08994e6 HEAD
+          ! git diff --name-only 60aa8b292fbb0fd272a3ace1353d1bffa08994e6 HEAD | grep -E '^wordpress/plugins/badaround-core/|^wordpress/themes/badaround-child/inc/|^wordpress/themes/badaround-child/template-parts/'

@@ -1,0 +1,1179 @@
+{
+  "source": "staging ba_territorio read-only snapshot 2026-10-16 (WPVibe SELECT); ISTAT canonical parent hierarchy",
+  "regions": [
+    {
+      "id": 5545,
+      "name": "Abruzzo",
+      "parent": 0,
+      "code": "13"
+    },
+    {
+      "id": 6194,
+      "name": "Basilicata",
+      "parent": 0,
+      "code": "17"
+    },
+    {
+      "id": 6328,
+      "name": "Calabria",
+      "parent": 0,
+      "code": "18"
+    },
+    {
+      "id": 4989,
+      "name": "Campania",
+      "parent": 0,
+      "code": "15"
+    },
+    {
+      "id": 3735,
+      "name": "Emilia-Romagna",
+      "parent": 0,
+      "code": "08"
+    },
+    {
+      "id": 3566,
+      "name": "Friuli-Venezia Giulia",
+      "parent": 0,
+      "code": "06"
+    },
+    {
+      "id": 2,
+      "name": "Lazio",
+      "parent": 0,
+      "code": "12"
+    },
+    {
+      "id": 1163,
+      "name": "Liguria",
+      "parent": 0,
+      "code": "07"
+    },
+    {
+      "id": 1402,
+      "name": "Lombardia",
+      "parent": 0,
+      "code": "03"
+    },
+    {
+      "id": 4047,
+      "name": "Marche",
+      "parent": 0,
+      "code": "11"
+    },
+    {
+      "id": 5855,
+      "name": "Molise",
+      "parent": 0,
+      "code": "14"
+    },
+    {
+      "id": 48,
+      "name": "Piemonte",
+      "parent": 0,
+      "code": "01"
+    },
+    {
+      "id": 5941,
+      "name": "Puglia",
+      "parent": 0,
+      "code": "16"
+    },
+    {
+      "id": 7683,
+      "name": "Sardegna",
+      "parent": 0,
+      "code": "20"
+    },
+    {
+      "id": 6659,
+      "name": "Sicilia",
+      "parent": 0,
+      "code": "19"
+    },
+    {
+      "id": 4237,
+      "name": "Toscana",
+      "parent": 0,
+      "code": "09"
+    },
+    {
+      "id": 2714,
+      "name": "Trentino-Alto Adige/Südtirol",
+      "parent": 0,
+      "code": "04"
+    },
+    {
+      "id": 4513,
+      "name": "Umbria",
+      "parent": 0,
+      "code": "10"
+    },
+    {
+      "id": 1087,
+      "name": "Valle d'Aosta/Vallée d'Aoste",
+      "parent": 0,
+      "code": "02"
+    },
+    {
+      "id": 2999,
+      "name": "Veneto",
+      "parent": 0,
+      "code": "05"
+    }
+  ],
+  "provinces": [
+    {
+      "id": 6878,
+      "name": "Agrigento",
+      "parent": 6659,
+      "code": "084"
+    },
+    {
+      "id": 899,
+      "name": "Alessandria",
+      "parent": 48,
+      "code": "006"
+    },
+    {
+      "id": 4099,
+      "name": "Ancona",
+      "parent": 4047,
+      "code": "042"
+    },
+    {
+      "id": 4411,
+      "name": "Arezzo",
+      "parent": 4237,
+      "code": "051"
+    },
+    {
+      "id": 4203,
+      "name": "Ascoli Piceno",
+      "parent": 4047,
+      "code": "044"
+    },
+    {
+      "id": 781,
+      "name": "Asti",
+      "parent": 48,
+      "code": "005"
+    },
+    {
+      "id": 5267,
+      "name": "Avellino",
+      "parent": 4989,
+      "code": "064"
+    },
+    {
+      "id": 6004,
+      "name": "Bari",
+      "parent": 5941,
+      "code": "272"
+    },
+    {
+      "id": 7672,
+      "name": "Barletta-Andria-Trani",
+      "parent": 5941,
+      "code": "110"
+    },
+    {
+      "id": 3212,
+      "name": "Belluno",
+      "parent": 2999,
+      "code": "025"
+    },
+    {
+      "id": 5095,
+      "name": "Benevento",
+      "parent": 4989,
+      "code": "062"
+    },
+    {
+      "id": 1900,
+      "name": "Bergamo",
+      "parent": 1402,
+      "code": "016"
+    },
+    {
+      "id": 7164,
+      "name": "Biella",
+      "parent": 48,
+      "code": "096"
+    },
+    {
+      "id": 3919,
+      "name": "Bologna",
+      "parent": 3735,
+      "code": "237"
+    },
+    {
+      "id": 2715,
+      "name": "Bolzano/Bozen",
+      "parent": 2714,
+      "code": "021"
+    },
+    {
+      "id": 2144,
+      "name": "Brescia",
+      "parent": 1402,
+      "code": "017"
+    },
+    {
+      "id": 6076,
+      "name": "Brindisi",
+      "parent": 5941,
+      "code": "074"
+    },
+    {
+      "id": 7973,
+      "name": "Cagliari",
+      "parent": 7683,
+      "code": "318"
+    },
+    {
+      "id": 6922,
+      "name": "Caltanissetta",
+      "parent": 6659,
+      "code": "085"
+    },
+    {
+      "id": 5856,
+      "name": "Campobasso",
+      "parent": 5855,
+      "code": "070"
+    },
+    {
+      "id": 4990,
+      "name": "Caserta",
+      "parent": 4989,
+      "code": "061"
+    },
+    {
+      "id": 6966,
+      "name": "Catania",
+      "parent": 6659,
+      "code": "287"
+    },
+    {
+      "id": 6480,
+      "name": "Catanzaro",
+      "parent": 6328,
+      "code": "079"
+    },
+    {
+      "id": 5750,
+      "name": "Chieti",
+      "parent": 5545,
+      "code": "069"
+    },
+    {
+      "id": 1540,
+      "name": "Como",
+      "parent": 1402,
+      "code": "013"
+    },
+    {
+      "id": 6329,
+      "name": "Cosenza",
+      "parent": 6328,
+      "code": "078"
+    },
+    {
+      "id": 2535,
+      "name": "Cremona",
+      "parent": 1402,
+      "code": "019"
+    },
+    {
+      "id": 7421,
+      "name": "Crotone",
+      "parent": 6328,
+      "code": "101"
+    },
+    {
+      "id": 533,
+      "name": "Cuneo",
+      "parent": 48,
+      "code": "004"
+    },
+    {
+      "id": 6945,
+      "name": "Enna",
+      "parent": 6659,
+      "code": "086"
+    },
+    {
+      "id": 7631,
+      "name": "Fermo",
+      "parent": 4047,
+      "code": "109"
+    },
+    {
+      "id": 3975,
+      "name": "Ferrara",
+      "parent": 3735,
+      "code": "038"
+    },
+    {
+      "id": 4311,
+      "name": "Firenze",
+      "parent": 4237,
+      "code": "248"
+    },
+    {
+      "id": 5942,
+      "name": "Foggia",
+      "parent": 5941,
+      "code": "071"
+    },
+    {
+      "id": 4016,
+      "name": "Forlì-Cesena",
+      "parent": 3735,
+      "code": "040"
+    },
+    {
+      "id": 4897,
+      "name": "Frosinone",
+      "parent": 2,
+      "code": "060"
+    },
+    {
+      "id": 7751,
+      "name": "Gallura Nord-Est Sardegna",
+      "parent": 7683,
+      "code": "113"
+    },
+    {
+      "id": 1301,
+      "name": "Genova",
+      "parent": 1163,
+      "code": "210"
+    },
+    {
+      "id": 3702,
+      "name": "Gorizia",
+      "parent": 3566,
+      "code": "031"
+    },
+    {
+      "id": 4484,
+      "name": "Grosseto",
+      "parent": 4237,
+      "code": "053"
+    },
+    {
+      "id": 1164,
+      "name": "Imperia",
+      "parent": 1163,
+      "code": "008"
+    },
+    {
+      "id": 7111,
+      "name": "Isernia",
+      "parent": 5855,
+      "code": "094"
+    },
+    {
+      "id": 5546,
+      "name": "L'Aquila",
+      "parent": 5545,
+      "code": "066"
+    },
+    {
+      "id": 1369,
+      "name": "La Spezia",
+      "parent": 1163,
+      "code": "011"
+    },
+    {
+      "id": 4863,
+      "name": "Latina",
+      "parent": 2,
+      "code": "059"
+    },
+    {
+      "id": 6097,
+      "name": "Lecce",
+      "parent": 5941,
+      "code": "075"
+    },
+    {
+      "id": 7239,
+      "name": "Lecco",
+      "parent": 1402,
+      "code": "097"
+    },
+    {
+      "id": 4353,
+      "name": "Livorno",
+      "parent": 4237,
+      "code": "049"
+    },
+    {
+      "id": 7324,
+      "name": "Lodi",
+      "parent": 1402,
+      "code": "098"
+    },
+    {
+      "id": 4256,
+      "name": "Lucca",
+      "parent": 4237,
+      "code": "046"
+    },
+    {
+      "id": 4147,
+      "name": "Macerata",
+      "parent": 4047,
+      "code": "043"
+    },
+    {
+      "id": 2649,
+      "name": "Mantova",
+      "parent": 1402,
+      "code": "020"
+    },
+    {
+      "id": 4238,
+      "name": "Massa-Carrara",
+      "parent": 4237,
+      "code": "045"
+    },
+    {
+      "id": 6296,
+      "name": "Matera",
+      "parent": 6194,
+      "code": "077"
+    },
+    {
+      "id": 7944,
+      "name": "Medio Campidano",
+      "parent": 7683,
+      "code": "117"
+    },
+    {
+      "id": 6769,
+      "name": "Messina",
+      "parent": 6659,
+      "code": "283"
+    },
+    {
+      "id": 1766,
+      "name": "Milano",
+      "parent": 1402,
+      "code": "215"
+    },
+    {
+      "id": 3871,
+      "name": "Modena",
+      "parent": 3735,
+      "code": "036"
+    },
+    {
+      "id": 7575,
+      "name": "Monza e della Brianza",
+      "parent": 1402,
+      "code": "108"
+    },
+    {
+      "id": 5174,
+      "name": "Napoli",
+      "parent": 4989,
+      "code": "263"
+    },
+    {
+      "id": 445,
+      "name": "Novara",
+      "parent": 48,
+      "code": "003"
+    },
+    {
+      "id": 7778,
+      "name": "Nuoro",
+      "parent": 7683,
+      "code": "114"
+    },
+    {
+      "id": 7920,
+      "name": "Ogliastra",
+      "parent": 7683,
+      "code": "116"
+    },
+    {
+      "id": 7832,
+      "name": "Oristano",
+      "parent": 7683,
+      "code": "115"
+    },
+    {
+      "id": 3413,
+      "name": "Padova",
+      "parent": 2999,
+      "code": "028"
+    },
+    {
+      "id": 6686,
+      "name": "Palermo",
+      "parent": 6659,
+      "code": "282"
+    },
+    {
+      "id": 3783,
+      "name": "Parma",
+      "parent": 3735,
+      "code": "034"
+    },
+    {
+      "id": 2350,
+      "name": "Pavia",
+      "parent": 1402,
+      "code": "018"
+    },
+    {
+      "id": 4514,
+      "name": "Perugia",
+      "parent": 4513,
+      "code": "054"
+    },
+    {
+      "id": 4048,
+      "name": "Pesaro e Urbino",
+      "parent": 4047,
+      "code": "041"
+    },
+    {
+      "id": 5703,
+      "name": "Pescara",
+      "parent": 5545,
+      "code": "068"
+    },
+    {
+      "id": 3736,
+      "name": "Piacenza",
+      "parent": 3735,
+      "code": "033"
+    },
+    {
+      "id": 4373,
+      "name": "Pisa",
+      "parent": 4237,
+      "code": "050"
+    },
+    {
+      "id": 4290,
+      "name": "Pistoia",
+      "parent": 4237,
+      "code": "047"
+    },
+    {
+      "id": 7060,
+      "name": "Pordenone",
+      "parent": 3566,
+      "code": "093"
+    },
+    {
+      "id": 6195,
+      "name": "Potenza",
+      "parent": 6194,
+      "code": "076"
+    },
+    {
+      "id": 7413,
+      "name": "Prato",
+      "parent": 4237,
+      "code": "100"
+    },
+    {
+      "id": 7025,
+      "name": "Ragusa",
+      "parent": 6659,
+      "code": "088"
+    },
+    {
+      "id": 3997,
+      "name": "Ravenna",
+      "parent": 3735,
+      "code": "039"
+    },
+    {
+      "id": 6561,
+      "name": "Reggio Calabria",
+      "parent": 6328,
+      "code": "280"
+    },
+    {
+      "id": 3828,
+      "name": "Reggio nell'Emilia",
+      "parent": 3735,
+      "code": "035"
+    },
+    {
+      "id": 4669,
+      "name": "Rieti",
+      "parent": 2,
+      "code": "057"
+    },
+    {
+      "id": 7385,
+      "name": "Rimini",
+      "parent": 3735,
+      "code": "099"
+    },
+    {
+      "id": 3,
+      "name": "Roma",
+      "parent": 2,
+      "code": "258"
+    },
+    {
+      "id": 3515,
+      "name": "Rovigo",
+      "parent": 2999,
+      "code": "029"
+    },
+    {
+      "id": 5386,
+      "name": "Salerno",
+      "parent": 4989,
+      "code": "065"
+    },
+    {
+      "id": 7684,
+      "name": "Sassari",
+      "parent": 7683,
+      "code": "312"
+    },
+    {
+      "id": 1231,
+      "name": "Savona",
+      "parent": 1163,
+      "code": "009"
+    },
+    {
+      "id": 4448,
+      "name": "Siena",
+      "parent": 4237,
+      "code": "052"
+    },
+    {
+      "id": 7038,
+      "name": "Siracusa",
+      "parent": 6659,
+      "code": "089"
+    },
+    {
+      "id": 1688,
+      "name": "Sondrio",
+      "parent": 1402,
+      "code": "014"
+    },
+    {
+      "id": 8044,
+      "name": "Sulcis Iglesiente",
+      "parent": 7683,
+      "code": "119"
+    },
+    {
+      "id": 6046,
+      "name": "Taranto",
+      "parent": 5941,
+      "code": "073"
+    },
+    {
+      "id": 5655,
+      "name": "Teramo",
+      "parent": 5545,
+      "code": "067"
+    },
+    {
+      "id": 4574,
+      "name": "Terni",
+      "parent": 4513,
+      "code": "055"
+    },
+    {
+      "id": 49,
+      "name": "Torino",
+      "parent": 48,
+      "code": "201"
+    },
+    {
+      "id": 6660,
+      "name": "Trapani",
+      "parent": 6659,
+      "code": "081"
+    },
+    {
+      "id": 2832,
+      "name": "Trento",
+      "parent": 2714,
+      "code": "022"
+    },
+    {
+      "id": 3273,
+      "name": "Treviso",
+      "parent": 2999,
+      "code": "026"
+    },
+    {
+      "id": 3728,
+      "name": "Trieste",
+      "parent": 3566,
+      "code": "032"
+    },
+    {
+      "id": 3567,
+      "name": "Udine",
+      "parent": 3566,
+      "code": "030"
+    },
+    {
+      "id": 1088,
+      "name": "Valle d'Aosta/Vallée d'Aoste",
+      "parent": 1087,
+      "code": "007"
+    },
+    {
+      "id": 1403,
+      "name": "Varese",
+      "parent": 1402,
+      "code": "012"
+    },
+    {
+      "id": 3368,
+      "name": "Venezia",
+      "parent": 2999,
+      "code": "227"
+    },
+    {
+      "id": 7500,
+      "name": "Verbano-Cusio-Ossola",
+      "parent": 48,
+      "code": "103"
+    },
+    {
+      "id": 362,
+      "name": "Vercelli",
+      "parent": 48,
+      "code": "002"
+    },
+    {
+      "id": 3000,
+      "name": "Verona",
+      "parent": 2999,
+      "code": "023"
+    },
+    {
+      "id": 7449,
+      "name": "Vibo Valentia",
+      "parent": 6328,
+      "code": "102"
+    },
+    {
+      "id": 3099,
+      "name": "Vicenza",
+      "parent": 2999,
+      "code": "024"
+    },
+    {
+      "id": 4608,
+      "name": "Viterbo",
+      "parent": 2,
+      "code": "056"
+    }
+  ],
+  "municipalities": [
+    {
+      "id": 4101,
+      "name": "Ancona",
+      "parent": 4099,
+      "code": "042002"
+    },
+    {
+      "id": 7673,
+      "name": "Andria",
+      "parent": 7672,
+      "code": "110001"
+    },
+    {
+      "id": 1091,
+      "name": "Aosta",
+      "parent": 1088,
+      "code": "007003"
+    },
+    {
+      "id": 6009,
+      "name": "Bari",
+      "parent": 6004,
+      "code": "072006"
+    },
+    {
+      "id": 7674,
+      "name": "Barletta",
+      "parent": 7672,
+      "code": "110002"
+    },
+    {
+      "id": 3924,
+      "name": "Bologna",
+      "parent": 3919,
+      "code": "037006"
+    },
+    {
+      "id": 2723,
+      "name": "Bolzano",
+      "parent": 2715,
+      "code": "021008"
+    },
+    {
+      "id": 2726,
+      "name": "Bressanone",
+      "parent": 2715,
+      "code": "021011"
+    },
+    {
+      "id": 7979,
+      "name": "Cagliari",
+      "parent": 7973,
+      "code": "118006"
+    },
+    {
+      "id": 5862,
+      "name": "Campobasso",
+      "parent": 5856,
+      "code": "070006"
+    },
+    {
+      "id": 8047,
+      "name": "Carbonia",
+      "parent": 8044,
+      "code": "119003"
+    },
+    {
+      "id": 6981,
+      "name": "Catania",
+      "parent": 6966,
+      "code": "087015"
+    },
+    {
+      "id": 6493,
+      "name": "Catanzaro",
+      "parent": 6480,
+      "code": "079023"
+    },
+    {
+      "id": 6372,
+      "name": "Cosenza",
+      "parent": 6329,
+      "code": "078045"
+    },
+    {
+      "id": 1110,
+      "name": "Courmayeur",
+      "parent": 1088,
+      "code": "007022"
+    },
+    {
+      "id": 4324,
+      "name": "Firenze",
+      "parent": 4311,
+      "code": "048017"
+    },
+    {
+      "id": 4861,
+      "name": "Fiumicino",
+      "parent": 3,
+      "code": "058120"
+    },
+    {
+      "id": 4025,
+      "name": "Forlì",
+      "parent": 4016,
+      "code": "040012"
+    },
+    {
+      "id": 1326,
+      "name": "Genova",
+      "parent": 1301,
+      "code": "010025"
+    },
+    {
+      "id": 8053,
+      "name": "Iglesias",
+      "parent": 8044,
+      "code": "119009"
+    },
+    {
+      "id": 7134,
+      "name": "Isernia",
+      "parent": 7111,
+      "code": "094023"
+    },
+    {
+      "id": 5595,
+      "name": "L'Aquila",
+      "parent": 5546,
+      "code": "066049"
+    },
+    {
+      "id": 1384,
+      "name": "La Spezia",
+      "parent": 1369,
+      "code": "011015"
+    },
+    {
+      "id": 6131,
+      "name": "Lecce",
+      "parent": 6097,
+      "code": "075035"
+    },
+    {
+      "id": 6310,
+      "name": "Matera",
+      "parent": 6296,
+      "code": "077014"
+    },
+    {
+      "id": 2766,
+      "name": "Merano",
+      "parent": 2715,
+      "code": "021051"
+    },
+    {
+      "id": 6817,
+      "name": "Messina",
+      "parent": 6769,
+      "code": "083048"
+    },
+    {
+      "id": 1838,
+      "name": "Milano",
+      "parent": 1766,
+      "code": "015146"
+    },
+    {
+      "id": 7608,
+      "name": "Monza",
+      "parent": 7575,
+      "code": "108033"
+    },
+    {
+      "id": 5223,
+      "name": "Napoli",
+      "parent": 5174,
+      "code": "063049"
+    },
+    {
+      "id": 7805,
+      "name": "Nuoro",
+      "parent": 7778,
+      "code": "114027"
+    },
+    {
+      "id": 7768,
+      "name": "Olbia",
+      "parent": 7751,
+      "code": "113017"
+    },
+    {
+      "id": 7877,
+      "name": "Oristano",
+      "parent": 7832,
+      "code": "115045"
+    },
+    {
+      "id": 6739,
+      "name": "Palermo",
+      "parent": 6686,
+      "code": "082053"
+    },
+    {
+      "id": 4553,
+      "name": "Perugia",
+      "parent": 4514,
+      "code": "054039"
+    },
+    {
+      "id": 4081,
+      "name": "Pesaro",
+      "parent": 4048,
+      "code": "041044"
+    },
+    {
+      "id": 5731,
+      "name": "Pescara",
+      "parent": 5703,
+      "code": "068028"
+    },
+    {
+      "id": 4,
+      "name": "Pomezia",
+      "parent": 3,
+      "code": "058079"
+    },
+    {
+      "id": 1140,
+      "name": "Pont-Saint-Martin",
+      "parent": 1088,
+      "code": "007052"
+    },
+    {
+      "id": 7091,
+      "name": "Pordenone",
+      "parent": 7060,
+      "code": "093033"
+    },
+    {
+      "id": 6258,
+      "name": "Potenza",
+      "parent": 6195,
+      "code": "076063"
+    },
+    {
+      "id": 6624,
+      "name": "Reggio di Calabria",
+      "parent": 6561,
+      "code": "080063"
+    },
+    {
+      "id": 3857,
+      "name": "Reggio nell'Emilia",
+      "parent": 3828,
+      "code": "035033"
+    },
+    {
+      "id": 7396,
+      "name": "Rimini",
+      "parent": 7385,
+      "code": "099014"
+    },
+    {
+      "id": 5627,
+      "name": "Rocca di Cambio",
+      "parent": 5546,
+      "code": "066081"
+    },
+    {
+      "id": 5628,
+      "name": "Rocca di Mezzo",
+      "parent": 5546,
+      "code": "066082"
+    },
+    {
+      "id": 4827,
+      "name": "Rocca di Papa",
+      "parent": 3,
+      "code": "058086"
+    },
+    {
+      "id": 4832,
+      "name": "Roma",
+      "parent": 3,
+      "code": "058091"
+    },
+    {
+      "id": 5986,
+      "name": "San Giovanni Rotondo",
+      "parent": 5942,
+      "code": "071046"
+    },
+    {
+      "id": 7734,
+      "name": "Sassari",
+      "parent": 7684,
+      "code": "112050"
+    },
+    {
+      "id": 1287,
+      "name": "Savona",
+      "parent": 1231,
+      "code": "009056"
+    },
+    {
+      "id": 1878,
+      "name": "Sesto San Giovanni",
+      "parent": 1766,
+      "code": "015209"
+    },
+    {
+      "id": 4478,
+      "name": "Siena",
+      "parent": 4448,
+      "code": "052032"
+    },
+    {
+      "id": 7055,
+      "name": "Siracusa",
+      "parent": 7038,
+      "code": "089017"
+    },
+    {
+      "id": 6073,
+      "name": "Taranto",
+      "parent": 6046,
+      "code": "073027"
+    },
+    {
+      "id": 317,
+      "name": "Torino",
+      "parent": 49,
+      "code": "001272"
+    },
+    {
+      "id": 7937,
+      "name": "Tortolì",
+      "parent": 7920,
+      "code": "116017"
+    },
+    {
+      "id": 5,
+      "name": "Torvaianica",
+      "parent": 4,
+      "code": null
+    },
+    {
+      "id": 7681,
+      "name": "Trani",
+      "parent": 7672,
+      "code": "110009"
+    },
+    {
+      "id": 2964,
+      "name": "Trento",
+      "parent": 2832,
+      "code": "022205"
+    },
+    {
+      "id": 3734,
+      "name": "Trieste",
+      "parent": 3728,
+      "code": "032006"
+    },
+    {
+      "id": 3689,
+      "name": "Udine",
+      "parent": 3567,
+      "code": "030129"
+    },
+    {
+      "id": 3410,
+      "name": "Venezia",
+      "parent": 3368,
+      "code": "027042"
+    },
+    {
+      "id": 3091,
+      "name": "Verona",
+      "parent": 3000,
+      "code": "023091"
+    },
+    {
+      "id": 7969,
+      "name": "Villacidro",
+      "parent": 7944,
+      "code": "117025"
+    }
+  ]
+}
