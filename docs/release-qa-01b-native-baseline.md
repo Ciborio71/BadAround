@@ -41,3 +41,16 @@ The new `RELEASE-QA-01B — Native Candidate Gate` gives this Native lineage a s
 **STAGING: GO** for further QA. **MAIN MERGE: STOP** until PR #24 decision, baseline/ancestry reconciliation, and canonical CI governance are approved. **PRODUCTION: STOP** pending those and all legal/hosting decisions, as applicable.
 
 Additional manual E2E verification: map interactions, search/filter combinations, Sentinelle notification delivery, and mobile wizard after SF.10. No fixture modification and no social publishing under this audit.
+
+## RELEASE-QA-01B executed CI
+
+Targeted Native Candidate Gate **PASS** (GitHub Actions run [38979611531](https://github.com/Ciborio71/BadAround/actions/runs/38979611531)). Its job confirms:
+- strict Native-only entrypoint, no retired report.js, pending/moderation fence;
+- PHP syntax for the entire current plugin and child theme;
+- PHP Native F1.3–F1.5, territory, public projection, discovery, privacy geometry, Sentinelle D1–D3 functional harnesses;
+- JS Smart Address SF8/SF8B/UX01/SF10, Native DOM, F1.6 and SF9 boundary regressions;
+- zero changes under wordpress/ relative to SF9 candidate base.
+
+**Important exclusions**: historical F1/F1.2 WPForms mapper harnesses import deleted files; older F1.6 asserts the retired legacy fallback URL; LEG-RETIRE-01 asserts byte equality to an old pre-SF8 smart-address.js. These tests are **NOT PASS**; they are superseded in this targeted candidate gate and remain explicit CI-reconciliation debt. The historical PHP Syntax workflow still FAILS due to report.js and historical frozen-scope expectations. The release candidate is NOT fully CI-green until governance formally replaces or revises those historical assertions.
+
+No branch merges, no staging data modification, no production release.
