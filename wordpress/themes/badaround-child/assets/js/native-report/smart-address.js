@@ -48,7 +48,7 @@
       if(stripped.startsWith("l'"))names.add(stripped.slice(2));
       if(siglaMap.has(norm))names.add(normalize(siglaMap.get(norm)));
       const one=matches(Number(region.id),[...names]);
-      if(one.length>1)return {error:'ambiguous_province',partial:{region:region.name}};
+      if(one.length>1)return {error:'unresolved_province',partial:{region:region.name}};
       if(one.length===1)provinces.set(Number(one[0].id),one[0]);
     }
     if(provinces.size!==1)return {error:provinces.size?'conflicting_province':'unresolved_province',partial:{region:region.name}};
@@ -58,7 +58,7 @@
     const municipalities=new Map();
     for(const part of municipalityParts) {
       const one=matches(Number(province.id),variants(part).map(normalize));
-      if(one.length>1)return {error:'ambiguous_municipality'};
+      if(one.length>1)return {error:'unresolved_municipality'};
       if(one.length===1)municipalities.set(Number(one[0].id),one[0]);
     }
     if(municipalities.size!==1)return {error:municipalities.size?'conflicting_municipality':'unresolved_municipality',partial:{region:region.name,province:province.name}};
