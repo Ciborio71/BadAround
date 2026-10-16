@@ -145,7 +145,8 @@ function badaround_native_report_config() {
 	$terms = get_terms( array( 'taxonomy' => 'ba_territorio', 'hide_empty' => false ) );
 	if ( is_array( $terms ) && ! is_wp_error( $terms ) ) {
 		foreach ( $terms as $term ) {
-			$territories[] = array( 'id' => (int) $term->term_id, 'parent' => (int) $term->parent, 'name' => $term->name );
+			// SF10: compact ordered registry tuple [term_id, parent_id, name]; browser hydrates it once.
+			$territories[] = array( (int) $term->term_id, (int) $term->parent, $term->name );
 		}
 	}
 	$wpforms_settings = function_exists( 'get_option' ) ? get_option( 'wpforms_settings', array() ) : array();
