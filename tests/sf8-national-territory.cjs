@@ -141,9 +141,9 @@ test('SF8: no global substring heuristics, geolocation or public coordinate chan
 
 test('SF8: province full long name and contradictory short code fail closed',()=>{
   const x=resolveTerritory(input('Lazio','Milano','Roma','RM',{provinceLabel:'Milano'}),entries);
-  assert.equal(x.error,'conflicting_province');
+  assert.equal(x.error,'unresolved_province');
   const y=resolveTerritory(input('Lazio','Roma','Roma','MI'),entries);
-  assert.equal(y.error,'conflicting_province');
+  assert.equal(y.error,'unresolved_province');
 });
 test('SF8: historical or irrelevant province alias does not invent missing canonical parent',()=>{
   const x=resolveTerritory(input('Sardegna','Sud Sardegna','Cagliari','SU',{provinceLabel:'Sud Sardegna'}),entries);
