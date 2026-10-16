@@ -44,7 +44,7 @@ function setup(){
   return {dom,win,container,model,button:container.querySelector('[data-smart-start]')};
 }
 test('zero Google initial requests: load only after explicit click, without map instance',async()=>{
-  const h=setup(),controller=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:registry}},h.model);
+  const h=setup(),controller=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:territory}},h.model);
   assert.equal(h.win.document.querySelectorAll('script[src*="maps.googleapis.com"]').length,0);
   h.button.click();
   const scripts=h.win.document.querySelectorAll('script[src*="maps.googleapis.com"]');
