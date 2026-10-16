@@ -10,6 +10,17 @@
   const normalize = v => String(v||'').normalize('NFD')
     .replace(/[\u0300-\u036f]/g,'').replace(/[\u2018\u2019\u00b4]/g,"'")
     .replace(/[\u2010-\u2015-]/g,' ').replace(/\s+/g,' ').trim().toLocaleLowerCase('it-IT');
+  // Google may expand a selected "Piazza" to "P.za" in formattedAddress.
+  // Equivalent named streets are already present and must not be prepended twice.
+  // Only these explicit, auditable abbreviations are canonicalized (no fuzzy match).
+  const normalizeStreetName = v => normalize(String(v||'')
+    .replace(/\bp\s*\.\s*(?:zza|za)\b\.?/giu, 'piazza')
+    .replace(/\bpiazza\b/giu, 'piazza'));
+  const sameStreetInFormatted = (streetName,formatted) => {
+    if (!streetName || !formatted) return false;
+    const head=String(formatted).split(',')[0].trim();
+    return normalizeStreetName(head)===normalizeStreetName(streetName);
+  };
   const component = (components,type) => (components||[]).find(x=>(x.types||[]).includes(type));
   const variants = part => part ? [part.longText,part.shortText].filter(Boolean) : [];
   const canonicalVariants = name => [name,...String(name).split('/')].map(normalize);
@@ -255,7 +266,7 @@
         const verifiedName=street || (isDistinctName?suggestionName:'');
         const verifiedStreet=street+(number?', '+number:'');
         const prefix=street?verifiedStreet:verifiedName;
-        const fullAddress=prefix && !normalize(formatted).includes(normalize(verifiedName))
+        const fullAddress=prefix && !normalize(formatted).includes(normalize(verifiedName)) && !sameStreetInFormatted(verifiedName,formatted)
           ? [prefix,formatted].filter(Boolean).join(', ')
           : formatted;
         if (fullAddress) assign('location.exact_address',fullAddress.slice(0,500));
