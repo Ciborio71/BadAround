@@ -720,3 +720,36 @@ test('SF8 exact canonical ISTAT names remain authoritative after normalization',
  const c=CASES.find(c=>c.com==='Bolzano'),g=google(c,'Provincia autonoma di Bolzano','BZ');
  assert.equal(resolveTerritory(g,registry(c)).location?.municipality,'Bolzano');
 });
+
+test('SF8 full province label Provincia dell’Aquila without sigla maps L\'Aquila',()=>{
+ const c=CASES.find(c=>c.com==='Rocca di Mezzo'),g=google(c,'Provincia dell’Aquila','');
+ assert.equal(resolveTerritory(g,registry(c)).location?.municipality,'Rocca di Mezzo');
+});
+test('SF8 Città metropolitana di Roma Capitale is a verified institutional province alias',()=>{
+ const c=CASES.find(c=>c.com==='Pomezia'),g=google(c,'Città metropolitana di Roma Capitale','');
+ assert.equal(resolveTerritory(g,registry(c)).location?.municipality,'Pomezia');
+});
+test('SF8 bilingual canonical region Valle d\'Aosta accepts Italian Google label',()=>{
+ const c=CASES.find(c=>c.com==='Aosta'),g=google(c);
+ g[1]=a('administrative_area_level_1',"Valle d'Aosta",'');
+ g[2]=a('administrative_area_level_2','Aosta','');
+ assert.equal(resolveTerritory(g,registry(c)).location?.municipality,'Aosta');
+});
+test('SF8 bilingual autonomous province Bolzano/Bozen accepts Bozen',()=>{
+ const c=CASES.find(c=>c.com==='Bolzano'),g=google(c,'Provincia autonoma di Bozen','');
+ g[1]=a('administrative_area_level_1','Trentino Alto Adige','');
+ assert.equal(resolveTerritory(g,registry(c)).location?.municipality,'Bolzano');
+});
+test('SF8 municipality from administrative_area_level_3 and locality as child fraction',()=>{
+ const c=CASES.find(c=>c.com==='Pomezia'),r=registry(c);
+ r.push({id:5,parent:c.mid,name:'Torvaianica'});
+ const g=google(c);g[3]=a('locality','Torvaianica');
+ g.push(a('administrative_area_level_3','Pomezia'));
+ assert.deepEqual(resolveTerritory(g,r).location,{region:c.reg,province:c.prov,municipality:'Pomezia',locality:'Torvaianica'});
+});
+test('SF8 false province long+short combination rejects conflicting canonical names',()=>{
+ const c=CASES.find(c=>c.com==='Milano'),r=registry(c);
+ r.push({id:99972,parent:c.rid,name:'Monza e della Brianza',code:'108'});
+ const g=google(c,'Monza e della Brianza','MI');
+ assert.equal(resolveTerritory(g,r).error,'unresolved_province');
+});
