@@ -57,10 +57,10 @@
       }
     const longLabel=administrativeName(provincePart.longText||'');
     if(allNames.has(longLabel) && !allNames.get(longLabel).has(region.name))
-      return {error:'conflicting_province',partial:{region:region.name}};
+      return {error:'unresolved_province',partial:{region:region.name}};
     const shortCode=normalize(provincePart.shortText||'');
     if(allCodes.has(shortCode) && !allCodes.get(shortCode).has(region.name))
-      return {error:'conflicting_province',partial:{region:region.name}};
+      return {error:'unresolved_province',partial:{region:region.name}};
     const provinces=new Map();
     for(const value of variants(provincePart)){
       const norm=normalize(value),stripped=administrativeName(value);
