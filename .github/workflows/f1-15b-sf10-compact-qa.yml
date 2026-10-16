@@ -1,0 +1,33 @@
+name: SF10 — Compact Territory No-Deploy QA
+on:
+  push:
+    branches:
+      - feature/f1-15b-sf10-compact-territory-registry
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: PHP + JS syntax
+        run: |
+          php -l wordpress/themes/badaround-child/inc/native-report.php
+          node --check wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
+          node --check tests/sf8-national-territory.cjs
+      - name: Full Native and locality regression
+        run: |
+          npm ci --prefix tests
+          node --test tests/sf8-national-territory.cjs tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs
+      - name: Scope and frozen contract
+        run: |
+          git diff --check 6f3c4407e6f8290c6a010d8548c31a56adf30d50 HEAD
+          ! git diff --name-only 6f3c4407e6f8290c6a010d8548c31a56adf30d50 HEAD | grep -E '^wordpress/plugins/|^wordpress/themes/badaround-child/template-parts/'
