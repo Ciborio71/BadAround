@@ -6,7 +6,7 @@ const path=require('node:path');
 const data=require('./fixtures/sf8-italy-territories-2026.json');
 const {resolveTerritory}=require('../wordpress/themes/badaround-child/assets/js/native-report/smart-address.js');
 const source=fs.readFileSync(path.join(__dirname,'../wordpress/themes/badaround-child/assets/js/native-report/smart-address.js'),'utf8');
-const alias=JSON.parse(source.match(/const PROVINCE_SIGLE = (\\{[^\\n]+\\});/)[1]);
+const alias=JSON.parse(source.split('const PROVINCE_SIGLE = ')[1].split(';\n')[0]);
 const entries=[...data.regions,...data.provinces,...data.municipalities].map(({id,name,parent})=>({id,name,parent}));
 const codeByRegion=new Map();
 for(const [region,str] of Object.entries(alias))for(const pair of str.split(';')){
