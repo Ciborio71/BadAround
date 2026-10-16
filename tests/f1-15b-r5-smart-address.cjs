@@ -469,3 +469,33 @@ test('SF7: curly apostrophes and fully named province can resolve without a sigl
   ],registry);
   assert.equal(x.location?.municipality,'Rocca di Mezzo');
 });
+
+test('UX01: Google Piazza del Duomo vs P.za del Duomo is not duplicated',async()=>{
+  const h=await liveWidget();
+  const p=h.select({address:'P.za del Duomo, Milano MI, Italia',mainText:'Piazza del Duomo'});
+  p.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.input('location.exact_address').value,'P.za del Duomo, Milano MI, Italia');
+  assert.equal(h.container.querySelector('[data-smart-address-label]').textContent,'P.za del Duomo, Milano MI, Italia');
+  h.close();
+});
+test('UX01: explicit P.zza abbreviation is equivalent, without removing street details',async()=>{
+  const h=await liveWidget();
+  const p=h.select({address:'P.zza del Duomo, Milano MI, Italia',mainText:'Piazza del Duomo'});
+  p.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.input('location.exact_address').value,'P.zza del Duomo, Milano MI, Italia');
+  h.close();
+});
+test('UX01: a distinct selected square absent from Google details is still preserved',async()=>{
+  const h=await liveWidget();
+  const p=h.select({address:'20122 Milano MI, Italia',mainText:'Piazza del Duomo'});
+  p.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.input('location.exact_address').value,'Piazza del Duomo, 20122 Milano MI, Italia');
+  h.close();
+});
+test('UX01: a genuinely different first segment is not deduplicated',async()=>{
+  const h=await liveWidget();
+  const p=h.select({address:'Via del Duomo, Milano MI, Italia',mainText:'Piazza del Duomo'});
+  p.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.input('location.exact_address').value,'Piazza del Duomo, Via del Duomo, Milano MI, Italia');
+  h.close();
+});
