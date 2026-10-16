@@ -1,0 +1,27 @@
+name: SF7 — AQ Canonical Territory QA
+on:
+  push:
+    branches:
+      - feature/f1-15b-sf7-aq-territory-alias
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: JS syntax
+        run: node --check wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
+      - name: Smart Address and native wizard regression
+        run: |
+          npm ci --prefix tests
+          node --test tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs
+      - name: Schema and core unchanged
+        run: |
+          git diff --check HEAD~2 HEAD
+          ! git diff --name-only HEAD~2 HEAD | grep -E '^wordpress/plugins/badaround-core/'
