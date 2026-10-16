@@ -12,7 +12,7 @@
     .replace(/[\u2010-\u2015-]/g,' ').replace(/\s+/g,' ').trim().toLocaleLowerCase('it-IT');
   // Google may expand a selected "Piazza" to "P.za" in formattedAddress.
   // Equivalent named streets are already present and must not be prepended twice.
-  // Only these explicit, auditable abbreviations are canonicalized (no fuzzy match).
+  // Only these explicit, auditable abbreviations are canonicalized (no approximate matching).
   const normalizeStreetName = v => normalize(String(v||'')
     .replace(/\bp\s*\.\s*(?:zza|za)\b\.?/giu, 'piazza')
     .replace(/\bpiazza\b/giu, 'piazza'));
