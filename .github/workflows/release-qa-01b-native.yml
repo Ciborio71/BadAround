@@ -32,6 +32,9 @@ jobs:
           find wordpress/plugins/badaround-core -type f -name '*.php' -print0 | xargs -0 -n1 php -l >/dev/null
           find wordpress/themes/badaround-child -type f -name '*.php' -print0 | xargs -0 -n1 php -l >/dev/null
           echo 'Native core and theme PHP syntax PASS'
+      # Historical F1/F1.2 harnesses import removed WPForms mapper files; historical F1.6
+      # asserts a legacy fallback link which the approved Native-only UX retired.
+      # Their reconciliation remains an explicit release governance hold.
       # Historical F1 and F1.2 WPForms test harnesses import mapper files retired by Native-only routing.
       # They remain in history, not part of the active Native release candidate.
       - name: WordPress-free Native, privacy, territorial, public projection and sentinel functional tests
@@ -41,7 +44,6 @@ jobs:
             tests/native-report-f13.php \
             tests/native-report-f14.php \
             tests/native-report-f15.php \
-            tests/native-report-f16.php \
             tests/map-02r-priv-01.php \
             tests/f1-15a3-territory.php \
             tests/f1-14r-publication-contract.php \
