@@ -153,3 +153,57 @@ test('SF8: full provincial designation with genitive article is resolved by cano
   const x=resolveTerritory(input('Abruzzo',"L'Aquila",'Rocca di Mezzo','',{provinceLabel:'Provincia dell’Aquila'}),entries);
   assert.equal(x.location?.municipality,'Rocca di Mezzo');
 });
+
+test('SF8B: Google locality Torvaianica + administrative_area_level_3 Pomezia resolves canonical locality ID 5',()=>{
+  const google=[
+    component('country','Italia','IT'),
+    component('administrative_area_level_1','Lazio','Lazio'),
+    component('administrative_area_level_2','Città Metropolitana di Roma','RM'),
+    component('locality','Torvaianica','Torvaianica'),
+    component('administrative_area_level_3','Pomezia','Pomezia')
+  ];
+  const x=resolveTerritory(google,entries);
+  assert.deepEqual(x.location,{region:'Lazio',province:'Roma',municipality:'Pomezia',locality:'Torvaianica'});
+  assert.deepEqual(x.termIds,{region:2,province:3,municipality:4,locality:5});
+});
+test('SF8B: Google locality Torvaianica without explicit municipality cannot invent Pomezia',()=>{
+  const google=[
+    component('country','Italia','IT'),
+    component('administrative_area_level_1','Lazio','Lazio'),
+    component('administrative_area_level_2','Roma','RM'),
+    component('locality','Torvaianica','Torvaianica')
+  ];
+  const x=resolveTerritory(google,entries);
+  assert.equal(x.error,'unresolved_municipality');
+  assert.equal(x.location,undefined);
+});
+test('SF8B: normal municipality in Google locality stays municipality, not a fake child',()=>{
+  const x=resolveTerritory(input('Lazio','Roma','Pomezia','RM'),entries);
+  assert.equal(x.location.municipality,'Pomezia');
+  assert.equal(x.location.locality,'');
+  assert.equal(x.termIds.locality,undefined);
+});
+test('SF8B: noncanonical Google locality cannot be assigned through formatted address',()=>{
+  const fixture=[...entries,{id:999921,parent:3,name:'Comune QA'}];
+  const google=[
+    component('country','Italia','IT'),
+    component('administrative_area_level_1','Lazio','Lazio'),
+    component('administrative_area_level_2','Roma','RM'),
+    component('administrative_area_level_3','Comune QA','Comune QA'),
+    component('locality','Torvaianica','Torvaianica')
+  ];
+  const x=resolveTerritory(google,fixture);
+  assert.equal(x.location?.municipality,'Comune QA');
+  assert.equal(x.location?.locality,'');
+});
+test('SF8B: ambiguous canonically homonymous locality under one municipality fails closed',()=>{
+  const fixture=[...entries,{id:999922,parent:4,name:'Torvaianica'}];
+  const google=[
+    component('country','Italia','IT'),
+    component('administrative_area_level_1','Lazio','Lazio'),
+    component('administrative_area_level_2','Roma','RM'),
+    component('administrative_area_level_3','Pomezia','Pomezia'),
+    component('locality','Torvaianica','Torvaianica')
+  ];
+  assert.equal(resolveTerritory(google,fixture).error,'ambiguous_locality');
+});
