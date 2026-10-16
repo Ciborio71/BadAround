@@ -1,0 +1,30 @@
+name: SF9 — Public Privacy Boundary QA
+on:
+  push:
+    branches:
+      - feature/sf9-public-privacy-boundary-qa
+permissions:
+  contents: read
+jobs:
+  privacy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Source syntax
+        run: |
+          node --check tests/sf9-public-privacy-boundary.cjs
+          php -l tests/f1-14r-publication-contract.php
+      - name: SF9 public privacy and legacy publication functional suite
+        run: |
+          node --test tests/sf9-public-privacy-boundary.cjs
+          php tests/f1-14r-publication-contract.php
+      - name: Protect frozen application code
+        run: |
+          git diff --check 130b3109d68a86eb4a7340c7629e8ed088aa3499 HEAD
+          ! git diff --name-only 130b3109d68a86eb4a7340c7629e8ed088aa3499 HEAD | grep '^wordpress/'
