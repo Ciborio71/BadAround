@@ -1,0 +1,29 @@
+name: UX01 — Google Address Dedup No-Deploy QA
+on:
+  push:
+    branches:
+      - feature/f1-15b-ux01-google-address-dedup
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: JS syntax
+        run: |
+          node --check wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
+          node --check tests/sf8-national-territory.cjs
+      - name: Full Native and locality regression
+        run: |
+          npm ci --prefix tests
+          node --test tests/sf8-national-territory.cjs tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs
+      - name: Scope and frozen contract
+        run: |
+          git diff --check 694bf444be4e828c207d97ca8f1da41dc3fb6d43 HEAD
+          ! git diff --name-only 694bf444be4e828c207d97ca8f1da41dc3fb6d43 HEAD | grep -E '^wordpress/plugins/|^wordpress/themes/badaround-child/inc/|^wordpress/themes/badaround-child/template-parts/'
