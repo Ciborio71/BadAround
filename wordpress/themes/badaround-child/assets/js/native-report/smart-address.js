@@ -1,45 +1,76 @@
 (function (root) {
   'use strict';
   const ns = root.BadAroundNative = root.BadAroundNative || {};
+
   const LEVELS = ['region', 'province', 'municipality', 'locality'];
-  const normalize = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLocaleLowerCase('it-IT');
-  const component = (components, type) => (components || []).find(item => (item.types || []).includes(type));
-  const variants = part => part ? [part.longText, part.shortText].filter(Boolean) : [];
-  function resolveTerritory(components, registry) {
-    const entries = Array.isArray(registry) ? registry : [];
-    const country = component(components, 'country');
-    if (!country || !variants(country).some(v => normalize(v) === 'it' || normalize(v) === 'italia')) return {error:'outside_italy'};
-    const candidates = {
-      region: variants(component(components, 'administrative_area_level_1')),
-      province: variants(component(components, 'administrative_area_level_2')),
-      municipality: variants(component(components, 'locality')).concat(variants(component(components, 'administrative_area_level_3'))),
-      locality: variants(component(components, 'sublocality')).concat(variants(component(components, 'sublocality_level_1')),variants(component(components, 'neighborhood')))
-    };
-    // Only explicit administrative component names/aliases; never infer identity from free-text address.
-    candidates.province = candidates.province.flatMap(v => [v, v.replace(/^(?:città metropolitana di|provincia di)\\s+/iu,''), normalize(v)==='citta metropolitana di roma capitale'?'Roma':'']);
-    // The Google administrative_area_level_2 shortText is a province sigla,
-    // not the canonical ISTAT province name. Bind only explicit region-scoped
-    // administrative aliases to existing terms; never infer from address text.
-    if (candidates.region.some(v=>normalize(v)==='abruzzo') &&
-        candidates.province.some(v=>normalize(v)==='aq')) {
-      candidates.province.push("L'Aquila");
+  // Auditable region-scoped province/Uts sigle. Sources: ISTAT 2017 list;
+  // ISTAT SITUAS Sardinia update 2026-06-18 (OT,VS,OG,SU).
+  // A code is NEVER an identity without a matching canonical ba_territorio child.
+  const PROVINCE_SIGLE = {"Abruzzo":"Chieti:CH;L'Aquila:AQ;Pescara:PE;Teramo:TE","Basilicata":"Matera:MT;Potenza:PZ","Calabria":"Catanzaro:CZ;Cosenza:CS;Crotone:KR;Reggio Calabria:RC;Vibo Valentia:VV","Campania":"Avellino:AV;Benevento:BN;Caserta:CE;Napoli:NA;Salerno:SA","Emilia-Romagna":"Bologna:BO;Ferrara:FE;Forlì-Cesena:FC;Modena:MO;Parma:PR;Piacenza:PC;Ravenna:RA;Reggio nell'Emilia:RE;Rimini:RN","Friuli-Venezia Giulia":"Gorizia:GO;Pordenone:PN;Trieste:TS;Udine:UD","Lazio":"Frosinone:FR;Latina:LT;Rieti:RI;Roma:RM;Viterbo:VT","Liguria":"Genova:GE;Imperia:IM;La Spezia:SP;Savona:SV","Lombardia":"Bergamo:BG;Brescia:BS;Como:CO;Cremona:CR;Lecco:LC;Lodi:LO;Mantova:MN;Milano:MI;Monza e della Brianza:MB;Pavia:PV;Sondrio:SO;Varese:VA","Marche":"Ancona:AN;Ascoli Piceno:AP;Fermo:FM;Macerata:MC;Pesaro e Urbino:PU","Molise":"Campobasso:CB;Isernia:IS","Piemonte":"Alessandria:AL;Asti:AT;Biella:BI;Cuneo:CN;Novara:NO;Torino:TO;Verbano-Cusio-Ossola:VB;Vercelli:VC","Puglia":"Bari:BA;Barletta-Andria-Trani:BT;Brindisi:BR;Foggia:FG;Lecce:LE;Taranto:TA","Sardegna":"Cagliari:CA;Gallura Nord-Est Sardegna:OT;Medio Campidano:VS;Nuoro:NU;Ogliastra:OG;Oristano:OR;Sassari:SS;Sulcis Iglesiente:SU","Sicilia":"Agrigento:AG;Caltanissetta:CL;Catania:CT;Enna:EN;Messina:ME;Palermo:PA;Ragusa:RG;Siracusa:SR;Trapani:TP","Toscana":"Arezzo:AR;Firenze:FI;Grosseto:GR;Livorno:LI;Lucca:LU;Massa-Carrara:MS;Pisa:PI;Pistoia:PT;Prato:PO;Siena:SI","Trentino-Alto Adige/Südtirol":"Bolzano/Bozen:BZ;Trento:TN","Umbria":"Perugia:PG;Terni:TR","Valle d'Aosta/Vallée d'Aoste":"Valle d'Aosta/Vallée d'Aoste:AO","Veneto":"Belluno:BL;Padova:PD;Rovigo:RO;Treviso:TV;Venezia:VE;Verona:VR;Vicenza:VI"};
+  const normalize = v => String(v||'').normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'').replace(/[\u2018\u2019\u00b4]/g,"'")
+    .replace(/[\u2010-\u2015-]/g,' ').replace(/\s+/g,' ').trim().toLocaleLowerCase('it-IT');
+  const component = (components,type) => (components||[]).find(x=>(x.types||[]).includes(type));
+  const variants = part => part ? [part.longText,part.shortText].filter(Boolean) : [];
+  const canonicalVariants = name => [name,...String(name).split('/')].map(normalize);
+  const administrativeName = value => normalize(value)
+    .replace(/^(?:(?:provincia(?: autonoma)?|citta metropolitana|libero consorzio comunale)\s+(?:di|del|della|dello)\s+|provincia\s+dell')/u,'').trim();
+  function resolveTerritory(components,registry) {
+    const country=component(components,'country');
+    if (!country||!variants(country).some(v=>['it','italia','italy'].includes(normalize(v)))) return {error:'outside_italy'};
+    const entries=Array.isArray(registry)?registry:[];
+    const byParent=new Map();
+    for(const e of entries) {
+      if(!Number.isSafeInteger(Number(e.id))||Number(e.id)<=0||!e.name)continue;
+      for(const n of canonicalVariants(e.name)) {
+        const key=Number(e.parent)+':'+n;
+        if(!byParent.has(key))byParent.set(key,new Map());
+        byParent.get(key).set(Number(e.id),e);
+      }
     }
-    // Apostrophe glyph variation is not a different place identity.
-    const namesEquivalent=v=>normalize(v).replace(/[’‘`´]/g,"'");
-    const byParent = new Map();
-    for (const entry of entries) {const k=Number(entry.parent)+':'+namesEquivalent(entry.name);if(!byParent.has(k))byParent.set(k,[]);byParent.get(k).push(entry);}
-    const result = {}, ids = {};
-    let parent = 0;
-    for (const level of LEVELS) {
-      const names = new Set(candidates[level].map(namesEquivalent).filter(Boolean));
-      const matches = [...new Map([...names].flatMap(name=>byParent.get(parent+':'+name)||[]).map(term=>[Number(term.id),term])).values()];
-      if (level === 'locality' && matches.length === 0) {result[level]='';break;}
-      if (matches.length !== 1) return {error:'unresolved_' + level, partial:result};
-      result[level] = matches[0].name;
-      ids[level] = Number(matches[0].id);
-      parent = ids[level];
+    function matches(parent,names) {
+      const matches=new Map();
+      for(const n of names)for(const [id,e] of byParent.get(parent+':'+n)||[])matches.set(id,e);
+      return [...matches.values()];
     }
-    return {location:result, termIds:ids};
+    const regionCandidates=matches(0,variants(component(components,'administrative_area_level_1')).map(normalize));
+    if(regionCandidates.length!==1)return {error:'unresolved_region'};
+    const region=regionCandidates[0];
+    const provincePart=component(components,'administrative_area_level_2');
+    if(!provincePart)return {error:'unresolved_province',partial:{region:region.name}};
+    const siglaMap=new Map((PROVINCE_SIGLE[region.name]||'').split(';').filter(Boolean).map(s=>{
+      const i=s.lastIndexOf(':');return [normalize(s.slice(i+1)),s.slice(0,i)];
+    }));
+    const provinces=new Map();
+    for(const value of variants(provincePart)){
+      const norm=normalize(value),stripped=administrativeName(value);
+      const names=new Set([norm,stripped]);
+      if(stripped.startsWith("l'"))names.add(stripped.slice(2));
+      if(siglaMap.has(norm))names.add(normalize(siglaMap.get(norm)));
+      const one=matches(Number(region.id),[...names]);
+      if(one.length>1)return {error:'ambiguous_province',partial:{region:region.name}};
+      if(one.length===1)provinces.set(Number(one[0].id),one[0]);
+    }
+    if(provinces.size!==1)return {error:provinces.size?'conflicting_province':'unresolved_province',partial:{region:region.name}};
+    const province=[...provinces.values()][0];
+    const municipalityParts=[component(components,'locality'),component(components,'administrative_area_level_3')].filter(Boolean);
+    if(!municipalityParts.length)return {error:'unresolved_municipality',partial:{region:region.name,province:province.name}};
+    const municipalities=new Map();
+    for(const part of municipalityParts) {
+      const one=matches(Number(province.id),variants(part).map(normalize));
+      if(one.length>1)return {error:'ambiguous_municipality'};
+      if(one.length===1)municipalities.set(Number(one[0].id),one[0]);
+    }
+    if(municipalities.size!==1)return {error:municipalities.size?'conflicting_municipality':'unresolved_municipality',partial:{region:region.name,province:province.name}};
+    const municipality=[...municipalities.values()][0];
+    const localNames=[component(components,'sublocality'),component(components,'sublocality_level_1'),component(components,'neighborhood')]
+      .filter(Boolean).flatMap(part=>variants(part).map(normalize));
+    const localities=matches(Number(municipality.id),localNames);
+    if(localities.length>1)return {error:'ambiguous_locality'};
+    const locality=localities[0];
+    return {country:'IT',
+      location:{region:region.name,province:province.name,municipality:municipality.name,locality:locality?.name||''},
+      termIds:{region:Number(region.id),province:Number(province.id),municipality:Number(municipality.id),...(locality?{locality:Number(locality.id)}:{})}};
   }
   let loaderPromise;
   let loaderAttempt = 0;
