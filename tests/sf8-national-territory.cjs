@@ -138,3 +138,18 @@ test('SF8: no global substring heuristics, geolocation or public coordinate chan
   assert(!source.includes('fuzzy'));
   assert(!source.includes('get_ancestors'));
 });
+
+test('SF8: province full long name and contradictory short code fail closed',()=>{
+  const x=resolveTerritory(input('Lazio','Milano','Roma','RM',{provinceLabel:'Milano'}),entries);
+  assert.equal(x.error,'conflicting_province');
+  const y=resolveTerritory(input('Lazio','Roma','Roma','MI'),entries);
+  assert.equal(y.error,'conflicting_province');
+});
+test('SF8: historical or irrelevant province alias does not invent missing canonical parent',()=>{
+  const x=resolveTerritory(input('Sardegna','Sud Sardegna','Cagliari','SU',{provinceLabel:'Sud Sardegna'}),entries);
+  assert(x.error);
+});
+test('SF8: full provincial designation with genitive article is resolved by canonical parent',()=>{
+  const x=resolveTerritory(input('Abruzzo',"L'Aquila",'Rocca di Mezzo','',{provinceLabel:'Provincia dell’Aquila'}),entries);
+  assert.equal(x.location?.municipality,'Rocca di Mezzo');
+});
