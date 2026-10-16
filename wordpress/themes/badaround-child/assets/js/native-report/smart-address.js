@@ -16,13 +16,22 @@
       locality: variants(component(components, 'sublocality')).concat(variants(component(components, 'sublocality_level_1')),variants(component(components, 'neighborhood')))
     };
     // Only explicit administrative component names/aliases; never infer identity from free-text address.
-    candidates.province = candidates.province.flatMap(v => [v, v.replace(/^(?:città metropolitana di|provincia di)\s+/iu,''), normalize(v)==='citta metropolitana di roma capitale'?'Roma':'']);
+    candidates.province = candidates.province.flatMap(v => [v, v.replace(/^(?:città metropolitana di|provincia di)\\s+/iu,''), normalize(v)==='citta metropolitana di roma capitale'?'Roma':'']);
+    // The Google administrative_area_level_2 shortText is a province sigla,
+    // not the canonical ISTAT province name. Bind only explicit region-scoped
+    // administrative aliases to existing terms; never infer from address text.
+    if (candidates.region.some(v=>normalize(v)==='abruzzo') &&
+        candidates.province.some(v=>normalize(v)==='aq')) {
+      candidates.province.push("L'Aquila");
+    }
+    // Apostrophe glyph variation is not a different place identity.
+    const namesEquivalent=v=>normalize(v).replace(/[’‘`´]/g,"'");
     const byParent = new Map();
-    for (const entry of entries) {const k=Number(entry.parent)+':'+normalize(entry.name);if(!byParent.has(k))byParent.set(k,[]);byParent.get(k).push(entry);}
+    for (const entry of entries) {const k=Number(entry.parent)+':'+namesEquivalent(entry.name);if(!byParent.has(k))byParent.set(k,[]);byParent.get(k).push(entry);}
     const result = {}, ids = {};
     let parent = 0;
     for (const level of LEVELS) {
-      const names = new Set(candidates[level].map(normalize).filter(Boolean));
+      const names = new Set(candidates[level].map(namesEquivalent).filter(Boolean));
       const matches = [...new Map([...names].flatMap(name=>byParent.get(parent+':'+name)||[]).map(term=>[Number(term.id),term])).values()];
       if (level === 'locality' && matches.length === 0) {result[level]='';break;}
       if (matches.length !== 1) return {error:'unresolved_' + level, partial:result};
