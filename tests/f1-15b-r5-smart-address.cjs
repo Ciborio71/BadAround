@@ -44,7 +44,7 @@ function setup(){
   return {dom,win,container,model,button:container.querySelector('[data-smart-start]')};
 }
 test('zero Google initial requests: load only after explicit click, without map instance',async()=>{
-  const h=setup(),controller=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:territory}},h.model);
+  const h=setup(),controller=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:registry}},h.model);
   assert.equal(h.win.document.querySelectorAll('script[src*="maps.googleapis.com"]').length,0);
   h.button.click();
   const scripts=h.win.document.querySelectorAll('script[src*="maps.googleapis.com"]');
@@ -83,7 +83,7 @@ function deferred(){
   const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});
   return {promise,resolve,reject};
 }
-async function liveWidget(){
+async function liveWidget(registry=territory){
   const h=setup(),requests=[];
   class Widget extends h.win.HTMLElement {}
   h.win.customElements.define('fake-r6-place-widget',Widget);
@@ -498,4 +498,35 @@ test('UX01: a genuinely different first segment is not deduplicated',async()=>{
   p.resolve();await new Promise(resolve=>setImmediate(resolve));
   assert.equal(h.input('location.exact_address').value,'Piazza del Duomo, Via del Duomo, Milano MI, Italia');
   h.close();
+});
+
+test('SF10: compact territory tuples hydrate to exactly the same selected canonical fields',async()=>{
+  const compact=territory.map(({id,parent,name})=>[id,parent,name]);
+  const h=await liveWidget(compact);
+  const selection=h.select({address:'Via Gran Bretagna 66, Pomezia RM, Italia'});
+  selection.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.input('location.region').value,'Lazio');
+  assert.equal(h.input('location.province').value,'Roma');
+  assert.equal(h.input('location.municipality').value,'Pomezia');
+  assert.equal(h.input('location.locality').value,'Torvaianica');
+  assert.equal(h.input('location.exact_address').value,'Via Gran Bretagna 66, Pomezia RM, Italia');
+  h.close();
+});
+test('SF10: compact tuple registry remains fail-closed for unknown municipality',async()=>{
+  const compact=territory.map(({id,parent,name})=>[id,parent,name]);
+  const h=await liveWidget(compact);
+  const selection=h.select({components:[
+    ac('country','Italia','IT'),ac('administrative_area_level_1','Lazio','Lazio'),
+    ac('administrative_area_level_2','Roma','RM'),ac('locality','NonEsiste','NonEsiste')
+  ]});
+  selection.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.input('location.municipality').value,'');
+  assert.equal(h.input('location.exact_lat').value,'');
+  h.close();
+});
+test('SF10: browser PHP territory registry is compact, canonical and not included in report contract',()=>{
+  const php=fs.readFileSync(path.join(__dirname,'../wordpress/themes/badaround-child/inc/native-report.php'),'utf8');
+  assert(php.includes('compact ordered registry tuple'));
+  assert(php.includes("array( (int) $term->term_id, (int) $term->parent, $term->name )"));
+  assert(!source.includes('location.territories'));
 });
