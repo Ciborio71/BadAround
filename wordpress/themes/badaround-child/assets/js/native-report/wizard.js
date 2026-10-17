@@ -99,7 +99,7 @@
     };
     const cardGroups = new Map();
     // Pair only closely related fields; DOM and keyboard order remain left-to-right.
-    for (const pair of [['reporter.first_name','reporter.last_name'],['vehicle.make','vehicle.model'],['time.range_start','time.range_end']]) {
+    for (const pair of [['reporter.email','reporter.phone'],['reporter.first_name','reporter.last_name'],['vehicle.make','vehicle.model'],['time.range_start','time.range_end']]) {
       const fields = pair.map(path => wrappers.find(wrapper => wrapper.dataset.nativeField === path));
       if (fields.some(field => !field) || fields[0].parentElement !== fields[1].parentElement) continue;
       const row = document.createElement('div'); row.className = 'ba-native-field-pair';
@@ -235,6 +235,14 @@
       subtype.value = previous;
       wrappers.forEach(wrapper => {
         const path = wrapper.dataset.nativeField, field = config.fields[path], active = model.active(path);
+        if (path === 'damage.status') {
+          const theft = model.effective('event.subtype') === 'vehicle_stolen';
+          const label = wrapper.querySelector('label');
+          if (label?.firstChild?.nodeType === 3) label.firstChild.textContent = theft ? 'Ci sono danni aggiuntivi legati al furto?' : field.label;
+          wrapper.querySelector('.ba-native-help').textContent = theft
+            ? 'Indica eventuali danni materiali oltre al furto, per esempio a serrature o vetri. Se il mezzo non è stato ritrovato e non puoi verificarli, scegli «Da verificare».'
+            : field.help;
+        }
         const deferred = (path === 'event.subtype' && !model.values['event.category']) || (path === 'reporter.relationship' && !model.effective('event.subtype'));
         wrapper.hidden = !active || deferred;
         const inputs = wrapper.querySelectorAll('[data-native-input]');

@@ -25,7 +25,7 @@ test('changing parent invalidates old compact subtype and preserves original can
 });
 test('paired fields preserve semantic order, descriptions and payload',()=>{
  const h=create();h.fill();const before=JSON.stringify(h.model.payload());
- for(const names of [['reporter.first_name','reporter.last_name'],['vehicle.make','vehicle.model'],['time.range_start','time.range_end']]){
+ for(const names of [['reporter.email','reporter.phone'],['reporter.first_name','reporter.last_name'],['vehicle.make','vehicle.model'],['time.range_start','time.range_end']]){
   const row=wrapper(h,names[0]).parentElement;assert(row.classList.contains('ba-native-field-pair'));assert.deepEqual([...row.children].map(n=>n.dataset.nativeField),names);
  }
  assert.equal(JSON.stringify(h.model.payload()),before);assert(!h.doc.querySelector('[data-native-location-fields] .ba-native-field-pair'));h.close();
@@ -36,4 +36,10 @@ test('submission lock disables editing and legal confirmations never collapse',a
  h.model.snapshot=h.model.payload();h.set('reporter.email','changed@example.invalid');assert(edit.disabled);
  assert(!wrapper(h,'consents.privacy').querySelector('.ba-native-edit-choice'));
  assert(!wrapper(h,'consents.privacy').querySelector('.is-collapsed'));h.close();
+});
+
+test('theft damage wording clarifies additional damage without hiding required canonical field',()=>{
+ const h=create();h.set('event.category','vehicle');h.set('event.subtype','vehicle_stolen');
+ const w=wrapper(h,'damage.status');assert.match(w.querySelector('label').textContent,/danni aggiuntivi/);assert.match(w.querySelector('.ba-native-help').textContent,/Da verificare/);assert(!w.hidden);assert(w.querySelector('select').required);
+ h.set('event.category','hazard');h.set('event.subtype','hazard_road_obstruction');assert.match(w.querySelector('label').textContent,/Sono presenti danni/);assert(!w.querySelector('.ba-native-help').textContent.includes('oltre al furto'));h.close();
 });

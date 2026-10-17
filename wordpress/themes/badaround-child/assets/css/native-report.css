@@ -449,7 +449,8 @@
 .ba-native .ba-native-progress li{min-width:0;flex-wrap:wrap;gap:4px}
 .ba-native :where(input,select,textarea,button,a){scroll-margin-block:120px}
 .ba-native [data-native-form][aria-busy=true] [data-native-submit]{cursor:wait}
-.ba-native [data-native-step]>h2:focus,.ba-native [data-native-success]>h2:focus{outline:3px solid var(--ba-teal-700);outline-offset:4px}
+.ba-native [data-native-step]>h2:focus:not(:focus-visible),.ba-native [data-native-success]>h2:focus:not(:focus-visible){outline:none}
+.ba-native [data-native-step]>h2:focus-visible,.ba-native [data-native-success]>h2:focus-visible{outline:3px solid var(--ba-teal-700);outline-offset:4px}
 @media(max-width:600px){
   .ba-native .ba-native-actions{flex-wrap:wrap}
   .ba-native .ba-native-actions .ba-button{flex-basis:40%}
@@ -518,3 +519,23 @@
 }
 .ba-native .ba-native-field input[type=tel]{max-width:24rem}
 .ba-native .ba-native-field input[type=number],.ba-native [data-native-field="vehicle.plate_raw"] input{max-width:18rem}
+
+/* NF-UX-05: connected timeline migrated from the legacy report layout. */
+.ba-native .ba-native-progress{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0;margin:24px 0 32px;isolation:isolate}
+.ba-native .ba-native-progress li{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:0;padding:0 4px;border:0;border-radius:0;background:transparent;box-shadow:none;text-align:center;font-size:.78rem;line-height:1.35}
+.ba-native .ba-native-progress li::before{content:counter(step);display:grid;place-items:center;min-width:28px;width:28px;height:28px;margin:0;border:1px solid #9fb4c5;background:#fff;color:#53677c;font-size:.8rem;z-index:1}
+.ba-native .ba-native-progress li:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:#dce5ed;z-index:-1}
+.ba-native .ba-native-progress .is-active{border:0;background:transparent;box-shadow:none;color:var(--ba-navy-950)}
+.ba-native .ba-native-progress .is-active::before{background:var(--ba-teal-700);border-color:var(--ba-teal-700);color:#fff;box-shadow:0 0 0 4px #e2f3f4}
+.ba-native .ba-native-progress .is-complete::before{content:'✓';background:var(--ba-teal-700);border-color:var(--ba-teal-700);color:#fff}
+.ba-native .ba-native-progress .is-complete::after{background:var(--ba-teal-700)}
+@media(min-width:600px){
+ .ba-native [data-native-field="location.immediate_danger"] .ba-native-card-grid:not(.is-collapsed){grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:600px){
+ .ba-native .ba-native-progress li{font-size:.65rem;padding-inline:2px;overflow-wrap:normal}
+ .ba-native .ba-native-progress li::before{min-width:24px;width:24px;height:24px}
+ .ba-native .ba-native-progress li:not(:last-child)::after{top:12px}
+ .ba-native .ba-native-progress li:not(.is-active){font-size:0;gap:0}
+ .ba-native .ba-native-progress li:not(.is-active)::before{font-size:.75rem}
+}

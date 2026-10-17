@@ -54,6 +54,11 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   });
   for(let step=0;step<7;step++){
    assert.equal(await page.locator('[data-native-step]:visible').count(),1);
+   if(step===3 && width>=600){
+    const cards=await page.locator('[data-native-field="location.immediate_danger"] .ba-native-card-grid label').all();
+    const boxes=await Promise.all(cards.map(c=>c.boundingBox()));
+    assert.equal(boxes.length,3);assert(boxes.every(b=>Math.abs(b.y-boxes[0].y)<2),'danger choices share one row');
+   }
    for(const group of await page.locator('[data-native-step]:visible .ba-native-card-grid').all()){
     const selected=group.locator('label:has(input:checked)');
     if(await selected.count()){
@@ -68,6 +73,10 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
     }
    }
    if(step===5){
+    const email=await page.locator('[data-native-field="reporter.email"]').boundingBox();
+    const phone=await page.locator('[data-native-field="reporter.phone"]').boundingBox();
+    if(width>=768)assert(Math.abs(email.y-phone.y)<2,'desktop email and phone share row');
+    else assert(phone.y>=email.y+email.height-1,'mobile contacts stack');
     const first=await page.locator('[data-native-field="reporter.first_name"]').boundingBox();
     const last=await page.locator('[data-native-field="reporter.last_name"]').boundingBox();
     if(width>=768)assert(Math.abs(first.y-last.y)<2,'paired desktop names must share row');
