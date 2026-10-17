@@ -104,20 +104,21 @@
     }
     // Native presentation only: selects remain the sole canonical model inputs.
     const categoryCards = {
-      vehicle: {title:'Veicoli', desc:'Auto, moto e altri mezzi', icon:'vehicle', color:'#1688e8'},
-      property: {title:'Case e attività', desc:'Abitazioni, negozi e uffici', icon:'property', color:'#9c3152'},
-      hazard: {title:'Pericoli', desc:'Rischi e situazioni pericolose', icon:'hazard', color:'#e36b21'},
-      public_space: {title:'Spazi pubblici', desc:'Strade, aree pubbliche e decoro', icon:'public', color:'#087f8c'},
-      animal: {title:'Animali', desc:'Smarrimenti e segnalazioni', icon:'animal', color:'#7e3db6'},
-      item_document: {title:'Oggetti e documenti', desc:'Oggetti smarriti o ritrovati', icon:'object', color:'#a26f14'}
+      vehicle: {title:'Veicoli', desc:'Auto, moto e altri mezzi', icon:'vehicle', color:'#1677E8'},
+      property: {title:'Case e attività', desc:'Abitazioni, negozi e uffici', icon:'property', color:'#C9153D'},
+      hazard: {title:'Pericoli', desc:'Rischi e situazioni pericolose', icon:'hazard', color:'#F57C00'},
+      public_space: {title:'Spazi pubblici', desc:'Strade, aree pubbliche e decoro', icon:'public', color:'#0AA184'},
+      animal: {title:'Animali', desc:'Smarrimenti e segnalazioni', icon:'animal', color:'#7040C8'},
+      item_document: {title:'Oggetti e documenti', desc:'Oggetti smarriti o ritrovati', icon:'object', color:'#E3A415'}
     };
+    // Same SVG geometry and stroke/fill treatment as the home category pins.
     const cardIcons = {
-		vehicle:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 14h15l-1.8-5.2a2 2 0 0 0-1.9-1.3H8.2a2 2 0 0 0-1.9 1.3L4.5 14Z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 14v4m14-4v4M7.5 18h9M7.2 12h.01M16.8 12h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
-		property:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-7 9 7M6 9.5V20h12V9.5M9 20v-6h6v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
-		hazard:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 3.5 20h17L12 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 9v5m0 3h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
-		public:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9l8-5 8 5v11M2 20h20M8 13h8M9 17h6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>',
-		animal:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12c-2 0-3.5 1.4-3.5 3.2C4.5 18 7.6 20 12 20s7.5-2 7.5-4.8C19.5 13.4 18 12 16 12m-8 0c.7-2.1 2.1-3.3 4-3.3s3.3 1.2 4 3.3M6.5 8.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm11 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM12 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
-		object:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h8l2 3v9H6v-9l2-3Zm1 0V5h6v2M9 12h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>'
+      vehicle:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 14h14l-1.5-5h-11L5 14Zm1 0v3m12-3v3M8 17h8M8 9l1-3h6l1 3"/></svg>',
+      property:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7v9h-6v-6h-4v6H4v-9Z"/></svg>',
+      hazard:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 3.5 20h17L12 4Z"/><path d="M12 9v5m0 3h.01"/></svg>',
+      public:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h16M6 18V9h12v9M8 9V6h8v3M9 13h2m2 0h2"/></svg>',
+      animal:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor" stroke="none"><path d="M8 11c-1.3 0-2.3-1.3-2.3-2.8S6.5 5.5 7.8 5.5s2.2 1.2 2.2 2.7S9.3 11 8 11Zm8 0c-1.3 0-2-1.3-2-2.8s.9-2.7 2.2-2.7 2.1 1.2 2.1 2.7S17.3 11 16 11Zm-4 9c-3.2 0-5.4-1.7-5.4-3.8 0-1.8 1.4-3 3-3.9.8-.5 1.2-1.5 2.4-1.5s1.6 1 2.4 1.5c1.6.9 3 2.1 3 3.9 0 2.1-2.2 3.8-5.4 3.8Z"/></svg>',
+      object:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14v12H5V7Zm3-3h8v3H8V4Zm1 7h6m-6 4h4"/></svg>'
     };
     const cardGroups = new Map();
     // Pair only closely related fields; DOM and keyboard order remain left-to-right.

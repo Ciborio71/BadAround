@@ -52,3 +52,20 @@ test('change-only assistive interaction updates the canonical category',()=>{
  assert.equal(h.doc.querySelector('[name="event.category"]').value,'animal');
  h.close();
 });
+
+
+test('home and Native category icons share all six shapes and preserve canonical values',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const home=fs.readFileSync(path.join(__dirname,'../wordpress/themes/badaround-child/front-page.php'),'utf8');
+ const start=home.indexOf("<?php if ( 'car'");const block=home.slice(start,home.indexOf('<?php endif; ?>',start));
+ const homeIcons=[...block.matchAll(/<svg[^>]*>(.*?)<\/svg>/g)].map(m=>m[1]);assert.equal(homeIcons.length,6);
+ const h=create();const keys=['vehicle','property','hazard','public_space','animal','item_document'];
+ const colors=['#1677E8','#C9153D','#F57C00','#0AA184','#7040C8','#E3A415'];
+ keys.forEach((key,i)=>{
+  const radio=h.doc.querySelector(`.ba-native-category-grid input[value="${key}"]`),card=radio.closest('label'),svg=card.querySelector('svg');
+  const expected=[...homeIcons[i].matchAll(/d="([^"]+)"/g)].map(m=>m[1]);
+  assert.deepEqual([...svg.querySelectorAll('path')].map(p=>p.getAttribute('d')),expected,key);
+  assert.equal(svg.getAttribute('fill'),key==='animal'?'currentColor':'none');assert.equal(svg.getAttribute('stroke'),key==='animal'?'none':'currentColor');
+  assert.equal(card.style.getPropertyValue('--ba-card-accent'),colors[i]);assert.equal(radio.value,key);
+ });h.close();
+});

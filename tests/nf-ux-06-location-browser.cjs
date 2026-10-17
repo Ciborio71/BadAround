@@ -41,7 +41,7 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
   await page.locator('test-google-autocomplete button').click();await page.locator('[data-smart-map-panel]').waitFor({state:'visible'});
   assert.equal(await page.locator('[name="location.municipality"]').inputValue(),'Pomezia');assert.equal(await page.evaluate(()=>gpsCalls),0);
   await page.locator('[data-smart-geolocate]').click();await page.waitForFunction(()=>document.querySelector('[name="location.exact_lat"]').value==='41.665');
-  assert.equal(await page.evaluate(()=>gpsCalls),1);assert.equal(await page.evaluate(()=>testMarker.content.style.backgroundColor),'rgb(22, 119, 232)');assert(await page.evaluate(()=>Boolean(testMarker.content.querySelector('svg'))));
+  assert.equal(await page.evaluate(()=>gpsCalls),1);assert.equal(await page.evaluate(()=>testMarker.content.style.backgroundColor),'rgb(22, 119, 232)');assert(await page.evaluate(()=>testMarker.content.querySelector('svg').outerHTML===document.querySelector('.ba-native-category-grid input:checked').closest('label').querySelector('svg').outerHTML));
   await page.evaluate(()=>{testMarker.position={lat:41.667,lng:12.437};testMarker.dispatchEvent(new Event('gmp-dragend'));});await page.waitForFunction(()=>document.querySelector('[name="location.exact_lat"]').value==='41.667');
   assert(!(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1)));assert.deepEqual(failures,[]);
   await page.locator('[data-native-next]').click();assert(await page.locator('[data-native-step="time"]').isVisible());
