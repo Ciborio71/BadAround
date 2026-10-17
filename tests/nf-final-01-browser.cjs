@@ -20,6 +20,21 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   });
   page.setDefaultTimeout(8000);
   await page.goto('https://localhost/',{waitUntil:'domcontentloaded',timeout:15000});
+  // Reproduce real first-time selection: do not prefill canonical values here.
+  await page.locator('.ba-native-category-grid label').filter({hasText:'Veicoli'}).click();
+  await page.waitForTimeout(30);
+  assert.equal(await page.locator('.ba-native-category-grid label:visible').count(),1);
+  assert(await page.locator('[data-native-field="event.subtype"] input:focus').count()===1);
+  await page.locator('[data-native-field="event.subtype"] label').filter({hasText:'Veicolo rubato'}).click();
+  await page.waitForTimeout(30);
+  assert.equal(await page.locator('[data-native-field="event.subtype"] .ba-native-card-grid label:visible').count(),1);
+  assert(await page.locator('[data-native-field="reporter.relationship"] input:focus').count()===1);
+  await page.locator('[data-native-field="reporter.relationship"] label').filter({hasText:'Sono coinvolto direttamente'}).click();
+  await page.waitForTimeout(30);
+  assert(await page.locator('[data-native-next]').evaluate(e=>document.activeElement===e));
+  assert.equal(await page.locator('[data-native-step="event"]:visible').count(),1);
+  // Start a fresh page for the independent validation/keyboard smoke.
+  await page.reload({waitUntil:'domcontentloaded'});
   await page.getByRole('button',{name:'Continua',exact:true}).click();
   assert(await page.locator('[data-native-errors]').evaluate(e=>document.activeElement===e));
   await page.locator('[data-native-errors] button').first().click();
@@ -48,7 +63,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
      assert.equal(await group.locator('label:visible').count(),1);
      const edit=group.locator('..').getByRole('button',{name:/Modifica:/});
      await edit.click();
-     assert(!(await group.evaluate(e=>e.classList.contains('is-collapsed'))));
+     assert(!(await group.evaluate(e=>e.classList.contains('is-collapsed'))),await group.evaluate(e=>e.closest('[data-native-field]').dataset.nativeField));
      await group.locator('label:has(input:checked)').click();
     }
    }

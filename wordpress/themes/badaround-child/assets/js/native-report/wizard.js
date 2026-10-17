@@ -108,7 +108,31 @@
     function expandCards(wrapper) {
       const select = wrapper.querySelector('select[data-native-input]');
       const entry = cardGroups.get(select);
-      if (entry) { entry.collapsedValue = null; syncCards(wrapper,config.fields[wrapper.dataset.nativeField]); }
+      if (entry) { clearTimeout(entry.commitTimer); entry.collapsedValue = null; syncCards(wrapper,config.fields[wrapper.dataset.nativeField]); }
+    }
+    function nextQuestion(wrapper) {
+      const section = wrapper.closest('[data-native-step]');
+      if (!section || section.hidden || model.busy || model.snapshot || model.completed) return;
+      const fields = Array.from(section.querySelectorAll('[data-native-field]'));
+      const nextField = fields.slice(fields.indexOf(wrapper)+1).find(field => {
+        if (field.hidden || field.closest('[hidden]')) return false;
+        const path = field.dataset.nativeField, select = field.querySelector('select[data-native-input]');
+        const cards = cardGroups.get(select);
+        if (cards) return !cards.collapsedValue;
+        const value = model.effective(path);
+        return value === undefined || value === '' || value === false;
+      });
+      const target = nextField
+        ? (nextField.querySelector('.ba-native-card-grid input:checked:not(:disabled)') || nextField.querySelector('.ba-native-card-grid input:not(:disabled)') || nextField.querySelector('[data-native-input]:not(:disabled):not([hidden])'))
+        : form.querySelector('[data-native-next]:not([hidden])');
+      if (!target || target.disabled) return;
+      target.focus({preventScroll:true});
+      const anchor = nextField || target, rect = anchor.getBoundingClientRect();
+      const headerBottom = document.querySelector('.ba-site-header')?.getBoundingClientRect().bottom || 0;
+      const safeTop = Math.max(16,headerBottom+16), bottom = target.getBoundingClientRect().bottom;
+      if (rect.top >= safeTop && bottom <= (window.innerHeight || 800)-88) return;
+      const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({top:Math.max(0,(window.scrollY || 0)+rect.top-safeTop),behavior:reduce?'auto':'smooth'});
     }
     function syncCards(wrapper, field) {
       const select = wrapper.querySelector('select[data-native-input]');
@@ -132,7 +156,7 @@
         group.id = select.id + '-choices'; edit.setAttribute('aria-controls',group.id);
         const row = document.createElement('div'); row.className = 'ba-native-choice-row';
         group.before(row); row.append(group,edit);
-        entry = {group, edit, signature:null, collapsedValue:null, arrowNavigation:false}; cardGroups.set(select, entry);
+        entry = {group, edit, signature:null, collapsedValue:null, arrowNavigation:false, commitTimer:null}; cardGroups.set(select, entry);
         edit.addEventListener('click', () => {
           if (select.disabled) return;
           expandCards(wrapper);
@@ -143,12 +167,7 @@
           if (event.key === 'Enter' && event.target.matches('input[type=radio]')) { event.preventDefault(); event.target.click(); }
         });
         group.addEventListener('keyup', () => { entry.arrowNavigation = false; });
-        const compact = () => {
-          if (!disposed && !select.disabled && select.value && !group.contains(document.activeElement)) {
-            entry.collapsedValue = select.value; syncCards(wrapper,field);
-          }
-        };
-        group.addEventListener('focusout', event => { if (event.relatedTarget && !group.contains(event.relatedTarget)) queueMicrotask(compact); });
+
       }
       const signature = JSON.stringify(options.map(option => [option.value,option.textContent]));
       if (entry.signature !== signature) {
@@ -169,22 +188,28 @@
             card.append(icon);
           }
           card.append(radio,copy); entry.group.append(card);
+          const commitChoice = () => {
+            if (entry.arrowNavigation) return;
+            clearTimeout(entry.commitTimer);
+            // A task (not a microtask) runs after the browser's radio default action
+            // has dispatched input/change and the canonical select is up to date.
+            entry.commitTimer = setTimeout(() => {
+              if (disposed || select.disabled || entry.arrowNavigation || select.value !== radio.value || wrapper.closest('[data-native-step]').hidden) return;
+              entry.collapsedValue = select.value; syncCards(wrapper,field);
+              nextQuestion(wrapper);
+            },0);
+          };
           const chooseCard = event => {
             event.stopPropagation();
             if (select.disabled) return;
             select.value = radio.value;
             select.dispatchEvent(new Event(event.type,{bubbles:true}));
             syncCards(wrapper, field); // Reconcile a rejected change with the canonical control.
+            if (event.type === 'change') commitChoice();
           };
           radio.addEventListener('input',chooseCard);
           radio.addEventListener('change',chooseCard);
-          radio.addEventListener('click', () => {
-            if (entry.arrowNavigation) return;
-            queueMicrotask(() => {
-              if (disposed || select.disabled || select.value !== radio.value) return;
-              entry.collapsedValue = select.value; syncCards(wrapper,field);
-            });
-          });
+          radio.addEventListener('click',commitChoice);
         });
       }
       if (!select.value || entry.collapsedValue !== select.value) entry.collapsedValue = null;
@@ -346,7 +371,7 @@
     });
     listen(container.querySelector('[data-native-new]'),'click', () => {
       mediaView?.dispose();
-      cardGroups.forEach(entry => { entry.collapsedValue = null; });
+      cardGroups.forEach(entry => { clearTimeout(entry.commitTimer); entry.collapsedValue = null; });
       form.reset(); model.reset(); model.blocked = false; model.lastError = null;
        smartAddress?.reset?.();
       wrappers.forEach(wrapper => {

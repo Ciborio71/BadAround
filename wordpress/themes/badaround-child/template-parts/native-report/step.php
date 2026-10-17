@@ -1,7 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 if ( 'event' === $key ) : ?>
-	<p>Scegli la categoria e il tipo di evento. Ti chiederemo solo i dettagli pertinenti. I campi obbligatori sono indicati.</p>
+	<p>Scegli la categoria e il tipo di evento. Ti chiederemo solo i dettagli pertinenti. I campi obbligatori sono indicati. Dopo ogni scelta le alternative si richiudono e ti portiamo alla domanda successiva. Puoi riaprirle con «Modifica».</p>
 <?php elseif ( 'details' === $key ) : ?>
 	<p>Descrivi i fatti e aggiungi le informazioni utili a chi si trova nella zona. Puoi lasciare vuoti i campi facoltativi.</p>
 <?php elseif ( 'location' === $key ) : ?>
