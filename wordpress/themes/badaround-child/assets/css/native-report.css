@@ -473,7 +473,7 @@
   background:#fff;box-shadow:0 7px 18px rgba(7,26,56,.035);cursor:pointer;
   transition:border-color .16s ease,box-shadow .16s ease,background-color .16s ease;
 }
-.ba-native .ba-native-category-grid .ba-native-option-card{display:grid;grid-template-columns:48px minmax(0,1fr);min-height:142px;padding:20px 16px}
+.ba-native .ba-native-category-grid .ba-native-option-card{display:grid;grid-template-columns:32px minmax(0,1fr);min-height:142px;padding:20px 16px}
 .ba-native .ba-native-card-grid input[type=radio]{
   position:absolute;width:1px;height:1px;min-height:0;padding:0;margin:0;opacity:0;
 }
@@ -487,12 +487,12 @@
 .ba-native .ba-native-card-copy{display:block;min-width:0}
 .ba-native .ba-native-card-copy strong{display:block;font-size:1rem;line-height:1.3;color:var(--ba-navy-950);font-weight:800}
 .ba-native .ba-native-card-copy small{display:block;margin-top:6px;font-size:.8rem;font-weight:500;line-height:1.4;color:#53677c}
-.ba-native .ba-native-card-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;background:color-mix(in srgb,var(--ba-card-accent) 12%,white);color:var(--ba-card-accent)}
-.ba-native .ba-native-card-icon svg{display:block;width:28px;height:28px}
+.ba-native .ba-native-card-icon{position:relative;display:grid;place-items:center;width:32px;height:32px;margin-left:0;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 4px 10px rgba(7,26,56,.20);background:var(--ba-card-accent);color:#fff}
+.ba-native .ba-native-card-icon svg{display:block;width:17px;height:17px;transform:rotate(45deg);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 @media(max-width:900px){.ba-native .ba-native-field .ba-native-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){
  .ba-native .ba-native-field .ba-native-card-grid{grid-template-columns:1fr;gap:10px}
- .ba-native .ba-native-category-grid .ba-native-option-card{grid-template-columns:46px minmax(0,1fr);min-height:104px;padding:16px}
+ .ba-native .ba-native-category-grid .ba-native-option-card{grid-template-columns:32px minmax(0,1fr);min-height:104px;padding:16px}
  .ba-native .ba-native-card-copy strong{font-size:1rem}
 }
 @media(prefers-reduced-motion:reduce){.ba-native .ba-native-option-card{transition:none}}
@@ -504,8 +504,8 @@
 .ba-native .ba-native-field .ba-native-card-grid.is-collapsed{display:block;min-height:60px}
 .ba-native .ba-native-card-grid.is-collapsed .ba-native-option-card{display:flex;min-height:60px;padding:12px 14px;gap:12px;cursor:default;box-shadow:none}
 .ba-native .ba-native-card-grid.is-collapsed .ba-native-option-card::after{position:static;margin-left:auto;flex-shrink:0}
-.ba-native .ba-native-card-grid.is-collapsed .ba-native-card-icon{width:32px;height:32px;flex:0 0 32px;border-radius:10px}
-.ba-native .ba-native-card-grid.is-collapsed .ba-native-card-icon svg{width:21px;height:21px}
+.ba-native .ba-native-card-grid.is-collapsed .ba-native-card-icon{width:32px;height:32px;flex:0 0 32px;border-radius:50% 50% 50% 0}
+.ba-native .ba-native-card-grid.is-collapsed .ba-native-card-icon svg{width:17px;height:17px}
 .ba-native .ba-native-card-grid.is-collapsed .ba-native-card-copy small{display:none}
 .ba-native .ba-native-edit-choice{padding:10px 14px;min-height:44px;border:1px solid var(--ba-teal-700);border-radius:10px;background:#fff;color:var(--ba-teal-700);font-weight:700;font-size:.9rem}
 .ba-native .ba-native-field-pair{min-width:0}
