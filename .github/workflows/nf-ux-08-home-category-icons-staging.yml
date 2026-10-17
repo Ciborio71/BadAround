@@ -1,0 +1,178 @@
+name: NF-UX-08 — Home category icon consistency staging deploy
+on:
+  push:
+    branches:
+      - deploy/nf-ux-08-home-category-icons
+permissions:
+  contents: read
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify authorized application and workflow-only delta
+        run: |
+          set -euo pipefail
+          git diff --quiet e686b04fbaa703805479d80749d6e395ed10470f HEAD -- wordpress tests
+          test "$(git diff --name-only e686b04fbaa703805479d80749d6e395ed10470f HEAD)" = '.github/workflows/nf-ux-08-home-category-icons-staging.yml'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Native PHP and JS syntax
+        run: |
+          set -euo pipefail
+          find wordpress/plugins/badaround-core wordpress/themes/badaround-child -name '*.php' -type f -print0 | xargs -0 -n1 php -l >/dev/null
+          for p in model wizard api smart-address location-map media media-view errors; do
+            node --check "wordpress/themes/badaround-child/assets/js/native-report/$p.js"
+          done
+      - name: Native Form end-to-end synthetic UX, privacy, smart address and media DOM
+        run: |
+          set -euo pipefail
+          npm ci --prefix tests
+          node --test \
+            tests/native-report-f16.cjs \
+            tests/native-report-f16-dom.cjs \
+            tests/native-report-f19-ux.cjs \
+            tests/nf-final-01-ux.cjs \
+            tests/nf-visual-02-cards.cjs \
+            tests/nf-ux-03-compact.cjs \
+            tests/nf-ux-08-home-category-icons.cjs \
+            tests/f1-15b-r5-smart-address.cjs \
+            tests/sf8-national-territory.cjs \
+            tests/sf9-public-privacy-boundary.cjs \
+            tests/native-media-f17d-dom.cjs \
+            tests/native-media-f17d-extra.cjs
+      - name: Native backend, publication, territory, and media synthetic constraints
+        run: |
+          set -euo pipefail
+          for file in \
+            tests/native-report-f16.php \
+            tests/native-report-f13.php \
+            tests/native-report-f14.php \
+            tests/native-report-f15.php \
+            tests/f1-15a3-territory.php \
+            tests/f1-14r-publication-contract.php \
+            tests/f1-14r-consumers.php \
+            tests/map-02r-priv-01.php
+          do php "$file" >/dev/null; done
+      - name: Local browser smoke (all requests intercepted, no WordPress writes)
+        run: |
+          npm install --prefix /tmp/nf-browser-runner --no-save playwright@1.62.1
+          node /tmp/nf-browser-runner/node_modules/playwright/cli.js install --with-deps chromium
+          BA_PLAYWRIGHT_MODULE=/tmp/nf-browser-runner/node_modules/playwright node tests/nf-final-01-browser.cjs
+          BA_PLAYWRIGHT_MODULE=/tmp/nf-browser-runner/node_modules/playwright node tests/nf-ux-06-location-browser.cjs
+      - name: Protect frozen backend and data contracts
+        run: |
+          set -euo pipefail
+          git diff --check 9a94937 HEAD
+          test -z "$(git diff --name-only 8b73163 HEAD -- wordpress/plugins tests/fixtures)"
+          git show abaf1218141f8c35f6df1258ae6437a8351423f5:wordpress/themes/badaround-child/assets/js/native-report/smart-address.js > /tmp/nf-certified-smart-address.js
+          node -e 'const fs=require("node:fs");const prefix=p=>fs.readFileSync(p,"utf8").split("  let loaderPromise;")[0];if(prefix("/tmp/nf-certified-smart-address.js")!==prefix("wordpress/themes/badaround-child/assets/js/native-report/smart-address.js"))throw new Error("Certified resolver changed");'
+  deploy:
+    needs: native
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Prepare only one authorized UI file and verified baseline rollback
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/deploy/nf-ux-08-home-category-icons'
+          git diff --quiet e686b04fbaa703805479d80749d6e395ed10470f HEAD -- wordpress tests
+          for path in assets/js/native-report/wizard.js; do
+            mkdir -p "nf-new/$(dirname "$path")" "nf-rollback/$(dirname "$path")"
+            cp "wordpress/themes/badaround-child/$path" "nf-new/$path"
+            git show "abaf1218141f8c35f6df1258ae6437a8351423f5:wordpress/themes/badaround-child/$path" > "nf-rollback/$path"
+          done
+          test "$(find nf-new -type f | wc -l)" -eq 1
+          test "$(find nf-rollback -type f | wc -l)" -eq 1
+          find nf-new nf-rollback -type f -exec sha256sum {} + > nf-manifest.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nf-ux-08-predeploy-rollback
+          path: |
+            nf-rollback/
+            nf-manifest.txt
+          retention-days: 14
+          if-no-files-found: error
+      - name: Upload one Native UI file to staging only
+        id: upload
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./nf-new/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .nf-ux-08-state.json
+          log-level: minimal
+      - name: Retry transient FTPS failure (attempt 2)
+        if: steps.upload.outcome == 'failure'
+        id: retry2
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./nf-new/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .nf-ux-08-state.json
+          log-level: minimal
+      - name: Retry transient FTPS failure (attempt 3)
+        if: steps.upload.outcome == 'failure' && steps.retry2.outcome == 'failure'
+        id: retry3
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./nf-new/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .nf-ux-08-state.json
+          log-level: minimal
+      - name: Restore verified baseline if upload fails
+        if: steps.upload.outcome == 'failure' && steps.retry2.outcome == 'failure' && steps.retry3.outcome == 'failure'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./nf-rollback/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .nf-ux-08-rollback-state.json
+          log-level: minimal
+      - name: Confirm upload outcome
+        run: |
+          if [ '${{ steps.upload.outcome }}' = success ] || [ '${{ steps.retry2.outcome }}' = success ] || [ '${{ steps.retry3.outcome }}' = success ]; then
+            echo 'Authorized one-file staging upload succeeded.'
+          else
+            exit 1
+          fi
+      - name: Record upload completion and external verification requirement
+        run: |
+          echo 'One-file staging upload completed. Authenticated active-theme source comparison is required before certification; runner HTTP smoke is unavailable (known 403).'
