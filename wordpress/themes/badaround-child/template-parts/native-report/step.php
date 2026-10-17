@@ -10,8 +10,15 @@ if ( 'event' === $key ) : ?>
   <label for="ba-smart-search">Posizione dell'evento</label>
   <input id="ba-smart-search" data-smart-start type="text" readonly autocomplete="off" placeholder="Cerca indirizzo o località" aria-describedby="ba-smart-status">
   <div data-smart-widget></div>
+  <button data-smart-geolocate type="button" class="ba-button ba-button--outline">Usa la mia posizione</button>
+  <p class="ba-native-help">Seleziona un suggerimento Google, anche usando le frecce e Invio. La posizione del dispositivo viene richiesta solo premendo il pulsante.</p>
   <p id="ba-smart-status" data-smart-status role="status" aria-live="polite">Seleziona il campo per cercare un luogo.</p>
   <div data-smart-confirmation hidden><strong>Posizione riconosciuta</strong><p data-smart-address-label></p><small>L'indirizzo preciso non sarà pubblicato automaticamente.</small></div>
+  <div data-smart-map-panel hidden>
+    <div data-smart-map class="ba-native-location-map" role="region" aria-label="Mappa della posizione riservata dell’evento" aria-describedby="ba-smart-map-help"></div>
+    <p id="ba-smart-map-help" class="ba-native-help">Puoi spostare il segnaposto per correggere il punto: l’indirizzo viene verificato di nuovo. Da tastiera, seleziona il segnaposto e premi Alt e Invio (Option e Invio su Mac) per spostarlo con le frecce, poi Invio per confermare. Questo punto è riservato e non indica la precisione della futura mappa pubblica.</p>
+  </div>
+  <p data-smart-map-status role="status" aria-live="polite"></p>
   <button data-smart-manual type="button" class="ba-button" hidden>Inserisci manualmente</button>
   </div>
 <?php elseif ( 'time' === $key ) : ?>

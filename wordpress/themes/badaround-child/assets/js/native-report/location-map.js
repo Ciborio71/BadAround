@@ -1,0 +1,81 @@
+(function(root){
+ 'use strict';
+ const ns=root.BadAroundNative=root.BadAroundNative||{};
+ // Optional presentation adapter. Only SmartAddress may write canonical fields.
+ function mount(container,config,model,bridge){
+  const ui=container.querySelector('[data-native-smart-address]');
+  const panel=ui?.querySelector('[data-smart-map-panel]'),canvas=ui?.querySelector('[data-smart-map]');
+  const geo=ui?.querySelector('[data-smart-geolocate]'),status=ui?.querySelector('[data-smart-map-status]');
+  if(!panel||!canvas||!geo)return {hide(){},show(){},sync(){},dispose(){}};
+  let disposed=false,map,marker,dragListener,busy=false;
+  const locked=()=>Boolean(disposed||model.busy||model.snapshot||model.completed);
+  const say=text=>{if(!disposed&&status)status.textContent=text;};
+  function sync(){geo.disabled=locked()||busy||!config.smartAddress?.key;if(marker)marker.gmpDraggable=!locked()&&!busy;}
+  function glyph(){
+   const category=model.values['event.category'];
+   const colors={vehicle:'#1677E8',property:'#C9153D',hazard:'#F57C00',public_space:'#0AA184',animal:'#7040C8',item_document:'#E3A415'};
+   const pin=container.ownerDocument.createElement('span');pin.className='ba-native-location-pin';pin.style.backgroundColor=colors[category]||'#087f8c';
+   const radio=Array.from(container.querySelectorAll('.ba-native-category-grid input')).find(el=>el.value===category);
+   const icon=radio?.closest('label')?.querySelector('svg');
+   if(icon)pin.append(icon.cloneNode(true));
+   pin.setAttribute('aria-hidden','true');return pin;
+  }
+  async function show(position){
+   if(disposed)return;
+   const ticket=bridge.ticket();
+   try{
+    await bridge.load();
+    const [{Map:GoogleMap},{AdvancedMarkerElement}]=await Promise.all([root.google.maps.importLibrary('maps'),root.google.maps.importLibrary('marker')]);
+    if(disposed||!bridge.current(ticket))return;
+    panel.hidden=false;
+    if(!map){
+     map=new GoogleMap(canvas,{center:position,zoom:17,mapId:config.smartAddress?.mapId||'DEMO_MAP_ID',mapTypeControl:false,streetViewControl:false,fullscreenControl:false,gestureHandling:'cooperative',clickableIcons:false});
+     marker=new AdvancedMarkerElement({map,position,title:'Posizione riservata dell’evento. Sposta per correggere.',gmpDraggable:true});
+     marker.replaceChildren(glyph());
+     dragListener=()=>{const p=marker.position;reverse({lat:typeof p.lat==='function'?p.lat():p.lat,lng:typeof p.lng==='function'?p.lng():p.lng});};
+     marker.addEventListener('gmp-dragend',dragListener);
+    }else{marker.map=map;marker.position=position;marker.replaceChildren(glyph());map.setCenter(position);}
+    sync();say('Il segnaposto indica la posizione riservata dell’evento. Puoi correggerla spostandolo.');
+   }catch(_){if(!disposed&&bridge.current(ticket))say('Mappa non disponibile. Puoi continuare con l’indirizzo Google confermato.');}
+  }
+  async function resolve(position,ticket){
+   try{
+    if(!Number.isFinite(position.lat)||!Number.isFinite(position.lng)||Math.abs(position.lat)>90||Math.abs(position.lng)>180)throw new Error('invalid_position');
+    await bridge.load();
+    if(!bridge.current(ticket)||disposed)return;
+    const [{Geocoder},{Place}]=await Promise.all([root.google.maps.importLibrary('geocoding'),root.google.maps.importLibrary('places')]);
+    if(!bridge.current(ticket)||disposed)return;
+    const response=await new Geocoder().geocode({location:position,language:'it'});
+    if(!bridge.current(ticket)||disposed)return;
+    const result=response.results?.[0];
+    if(!result?.place_id)throw new Error('no_address');
+    // Resolve an actual Google Place, then use the unchanged canonical resolver.
+    const ok=await bridge.accept(new Place({id:result.place_id}),position,ticket);
+    if(ok)say('Punto e indirizzo verificati. Controlla che corrispondano al luogo dell’evento.');
+    else if(bridge.current(ticket))say('Punto non riconosciuto. Cerca e seleziona un indirizzo Google.');
+   }catch(_){if(!disposed&&bridge.current(ticket))say('Non è stato possibile verificare il punto. Cerca e seleziona un indirizzo Google.');}
+   finally{if(!disposed){busy=false;geo.textContent='Usa la mia posizione';sync();}}
+  }
+  function reverse(position){
+   if(locked()||busy)return;
+   const ticket=bridge.begin();busy=true;sync();say('Verifica del punto e dell’indirizzo in corso…');
+   return resolve(position,ticket);
+  }
+  function geolocate(){
+   if(locked()||busy)return;
+   if(!root.navigator.geolocation){say('La geolocalizzazione non è disponibile. Cerca un indirizzo.');return;}
+   const ticket=bridge.begin();busy=true;sync();geo.textContent='Ricerca della posizione…';say('Attendi la posizione del dispositivo e controlla che sia il luogo dell’evento.');
+   root.navigator.geolocation.getCurrentPosition(p=>{
+    if(disposed||!bridge.current(ticket)){busy=false;geo.textContent='Usa la mia posizione';sync();return;}
+    resolve({lat:p.coords.latitude,lng:p.coords.longitude},ticket);
+   },error=>{
+    if(disposed)return;busy=false;geo.textContent='Usa la mia posizione';sync();
+    if(bridge.current(ticket))say(error.code===1?'Permesso alla posizione negato. Puoi cercare un indirizzo.':'Posizione non disponibile. Riprova oppure cerca un indirizzo.');
+   },{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+  }
+  function categoryChanged(event){if(event.target?.name==='event.category'&&marker)marker.replaceChildren(glyph());}
+  geo.addEventListener('click',geolocate);container.addEventListener('input',categoryChanged);sync();
+  return {show,sync,hide(){panel.hidden=true;if(marker)marker.map=null;},dispose(){disposed=true;if(marker&&dragListener)marker.removeEventListener('gmp-dragend',dragListener);if(marker)marker.map=null;geo.removeEventListener('click',geolocate);container.removeEventListener('input',categoryChanged);}};
+ }
+ ns.LocationMap={mount};
+})(typeof window!=='undefined'?window:globalThis);

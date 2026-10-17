@@ -91,6 +91,12 @@ function badaround_native_report_step( $path ) {
 	return 'details';
 }
 
+/** Italian sentence case for taxonomy display only; canonical terms stay unchanged. */
+function badaround_native_report_display_label( $label ) {
+	$label = strtr( strtolower( $label ), array( 'À' => 'à', 'È' => 'è', 'É' => 'é', 'Ì' => 'ì', 'Ò' => 'ò', 'Ù' => 'ù' ) );
+	return ucfirst( $label );
+}
+
 function badaround_native_report_config() {
 	$labels = badaround_native_report_labels();
 	$map = new BadAround_Event_Taxonomy_Map();
@@ -102,9 +108,9 @@ function badaround_native_report_config() {
 		foreach ( $subtypes as $subtype ) {
 			$child = $map->resolve_subtype( $subtype, $term );
 			if ( ! $child ) { return null; }
-			$items[ $subtype ] = $child->name;
+			$items[ $subtype ] = badaround_native_report_display_label( $child->name );
 		}
-		$categories[ $key ] = array( 'label' => $term->name, 'subtypes' => $items );
+		$categories[ $key ] = array( 'label' => badaround_native_report_display_label( $term->name ), 'subtypes' => $items );
 	}
 	// Presentation order of the six approved groups; membership still comes from the contract.
 	$order = array_flip( array( 'vehicle', 'property', 'hazard', 'public_space', 'animal', 'item_document' ) );

@@ -31,12 +31,16 @@ test('country guard, omissions and homonymous ambiguous terms are fail-closed',(
   const duplicate=[...territory,{id:99,parent:2,name:'Roma'}];
   assert.equal(resolveTerritory([...italy,ac('administrative_area_level_2','Roma','RM')],duplicate).error,'unresolved_province');
 });
-function setup(){
+function setup(withMap=false){
   const dom=new JSDOM(`<!doctype html><html><head></head><body><section data-native-report>
   <div data-native-smart-address><input data-smart-start type="text" readonly><div data-smart-widget></div><p data-smart-status></p><div data-smart-confirmation hidden><p data-smart-address-label></p></div><button data-smart-manual hidden type="button">Inserisci manualmente</button></div><div data-native-location-fields hidden>
   <input data-native-input name="location.region"><input data-native-input name="location.province"><input data-native-input name="location.municipality"><input data-native-input name="location.locality">
   <input data-native-input name="location.exact_address"><input data-native-input name="location.exact_lat"><input data-native-input name="location.exact_lng"></div>
   </section></body></html>`,{url:'https://staging.badaround.it/segnala-un-evento/',runScripts:'outside-only'});
+  if(withMap){
+    dom.window.document.querySelector('[data-native-smart-address]').insertAdjacentHTML('beforeend','<button data-smart-geolocate type="button">Usa la mia posizione</button><div data-smart-map-panel hidden><div data-smart-map></div></div><p data-smart-map-status></p>');
+    dom.window.eval(fs.readFileSync(path.join(__dirname,'../wordpress/themes/badaround-child/assets/js/native-report/location-map.js'),'utf8'));
+  }
   dom.window.eval(source);
   const win=dom.window,container=win.document.querySelector('[data-native-report]');
   const model={values:{},set(k,v){this.values[k]=v;}};
@@ -83,8 +87,8 @@ function deferred(){
   const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});
   return {promise,resolve,reject};
 }
-async function liveWidget(registry=territory){
-  const h=setup(),requests=[];
+async function liveWidget(registry=territory,withMap=false){
+  const h=setup(withMap),requests=[];
   class Widget extends h.win.HTMLElement {}
   h.win.customElements.define('fake-r6-place-widget',Widget);
   const adapter=h.win.BadAroundNative.SmartAddress;
@@ -529,4 +533,54 @@ test('SF10: browser PHP territory registry is compact, canonical and not include
   assert(php.includes('compact ordered registry tuple'));
   assert(php.includes("array( (int) $term->term_id, (int) $term->parent, $term->name )"));
   assert(!source.includes('location.territories'));
+});
+
+
+test('UX06: Enter cannot confirm free text; editing during Place Details rejects the stale response',async()=>{
+ const h=await liveWidget();
+ const enter=new h.win.KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true});h.widget.dispatchEvent(enter);
+ assert(enter.defaultPrevented);assert.equal(h.controller.canAdvance(),false);
+ const pending=h.select();h.widget.dispatchEvent(new h.win.Event('input',{bubbles:true}));pending.resolve();await new Promise(r=>setImmediate(r));
+ assert.equal(h.controller.canAdvance(),false);assert.equal(h.input('location.exact_address').value,'');assert.equal(h.input('location.exact_lat').value,'');
+ const valid=h.select();valid.resolve();await new Promise(r=>setImmediate(r));assert.equal(h.controller.canAdvance(),true);h.close();
+});
+async function mapHarness(){
+ const h=await liveWidget(territory,true),maps=[],markers=[],geocodes=[],placeReads=[];let gps,components;
+ const libraries=[];
+ const base=[ac('country','Italia','IT'),ac('administrative_area_level_1','Lazio','Lazio'),ac('administrative_area_level_2','Roma','RM'),ac('locality','Pomezia','Pomezia')];
+ h.win.google.maps.importLibrary=async library=>{
+  libraries.push(library);
+  if(library==='maps')return {Map:class{constructor(canvas,options){this.center=options.center;maps.push(this);}setCenter(position){this.center=position;}}};
+  if(library==='marker')return {AdvancedMarkerElement:class extends h.win.EventTarget{constructor(options){super();Object.assign(this,options);markers.push(this);}replaceChildren(node){this.content=node;}removeEventListener(...args){super.removeEventListener(...args);this.removed=true;}}};
+  if(library==='geocoding')return {Geocoder:class{async geocode(request){geocodes.push(request);return {results:[{place_id:'test-google-id'}]};}}};
+  return {Place:class{constructor(options){this.id=options.id;this.addressComponents=components||base;this.formattedAddress='Via verificata, Pomezia RM, Italia';}async fetchFields(options){placeReads.push(options.fields);}}};
+ };
+ Object.defineProperty(h.win.navigator,'geolocation',{value:{getCurrentPosition(ok,fail,options){gps={ok,fail,options};}}});
+ return {...h,maps,markers,geocodes,placeReads,libraries,gps:()=>gps,setComponents:value=>{components=value;},drag(position){markers[0].position=position;markers[0].dispatchEvent(new h.win.Event('gmp-dragend'));},geo:h.container.querySelector('[data-smart-geolocate]'),panel:h.container.querySelector('[data-smart-map-panel]')};
+}
+const settleMap=()=>new Promise(r=>setTimeout(r,15));
+test('UX06: map loads only after verified selection and hides on free text edits',async()=>{
+ const h=await mapHarness();assert.equal(h.maps.length,0);assert(!h.gps());
+ const p=h.select();p.resolve();await settleMap();assert.equal(h.maps.length,1);assert(!h.panel.hidden);assert.equal(h.markers[0].position.lat,41.66);
+ h.widget.dispatchEvent(new h.win.Event('input',{bubbles:true}));assert(h.panel.hidden);assert.equal(h.controller.canAdvance(),false);h.close();assert(h.markers[0].removed);
+});
+test('UX06: explicit geolocation resolves a Google Place through canonical territory and stores private selected point only',async()=>{
+ const h=await mapHarness();assert(!h.gps());h.geo.click();assert(h.gps());assert(h.geo.disabled);assert.equal(h.controller.canAdvance(),false);
+ h.gps().ok({coords:{latitude:41.66123,longitude:12.43123}});await settleMap();
+ assert.equal(h.geocodes.length,1);assert.equal(h.placeReads.length,1);assert.equal(h.input('location.municipality').value,'Pomezia');assert.equal(h.input('location.exact_lat').value,'41.66123');assert.equal(h.controller.canAdvance(),true);assert(!h.panel.hidden);
+ assert(!JSON.stringify(h.model.values).includes('test-google-id'));assert(!h.geo.disabled);h.close();
+});
+test('UX06: permission denial leaves search available; stale GPS cannot overwrite a later search',async()=>{
+ const h=await mapHarness();h.geo.click();h.gps().fail({code:1});assert(!h.geo.disabled);assert.match(h.container.querySelector('[data-smart-map-status]').textContent,/negato/);
+ h.geo.click();h.widget.dispatchEvent(new h.win.Event('input',{bubbles:true}));h.gps().ok({coords:{latitude:41.66,longitude:12.43}});await settleMap();assert.equal(h.geocodes.length,0);assert.equal(h.controller.canAdvance(),false);h.close();
+});
+test('UX06: dragging revalidates address and territory; an outside-Italy point cannot advance',async()=>{
+ const h=await mapHarness();const p=h.select();p.resolve();await settleMap();
+ h.drag({lat:41.665,lng:12.435});await settleMap();assert.equal(h.input('location.exact_lat').value,'41.665');assert.equal(h.controller.canAdvance(),true);
+ h.setComponents([ac('country','France','FR')]);h.drag({lat:48.85,lng:2.35});await settleMap();assert.equal(h.controller.canAdvance(),false);assert.equal(h.input('location.exact_lat').value,'');assert.equal(h.input('location.municipality').value,'');assert(h.panel.hidden);h.close();
+});
+test('UX06: submission lock blocks GPS and marker changes',async()=>{
+ const h=await mapHarness();const p=h.select();p.resolve();await settleMap();const before=JSON.stringify(h.model.values);
+ h.model.snapshot={};h.controller.syncVisibility();assert(h.geo.disabled);assert.equal(h.markers[0].gmpDraggable,false);
+ h.geo.click();h.drag({lat:42,lng:13});await settleMap();assert.equal(JSON.stringify(h.model.values),before);assert.equal(h.geocodes.length,0);h.close();
 });

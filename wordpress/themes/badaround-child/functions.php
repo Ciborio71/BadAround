@@ -255,7 +255,7 @@ function badaround_child_enqueue_assets() {
 		);
 		wp_enqueue_style( 'badaround-native-report', $uri . '/assets/css/native-report.css', array( 'badaround-report' ), (string) filemtime( $dir . '/assets/css/native-report.css' ) );
 		$previous = array();
-		foreach ( array( 'model', 'api', 'errors', 'media', 'media-view', 'smart-address', 'wizard' ) as $module ) {
+		foreach ( array( 'model', 'api', 'errors', 'media', 'media-view', 'location-map', 'smart-address', 'wizard' ) as $module ) {
 			$handle = 'badaround-native-' . $module;
 			wp_enqueue_script( $handle, $uri . '/assets/js/native-report/' . $module . '.js', $previous, (string) filemtime( $dir . '/assets/js/native-report/' . $module . '.js' ), true );
 			wp_script_add_data( $handle, 'strategy', 'defer' );

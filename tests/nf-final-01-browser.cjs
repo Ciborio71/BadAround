@@ -63,13 +63,14 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
     const selected=group.locator('label:has(input:checked)');
     if(await selected.count()){
      await selected.click();
-     await page.waitForTimeout(10);
+     await page.waitForFunction(el=>el.classList.contains('is-collapsed'),await group.elementHandle());
      assert(await group.evaluate(e=>e.classList.contains('is-collapsed')));
      assert.equal(await group.locator('label:visible').count(),1);
      const edit=group.locator('..').getByRole('button',{name:/Modifica:/});
      await edit.click();
      assert(!(await group.evaluate(e=>e.classList.contains('is-collapsed'))),await group.evaluate(e=>e.closest('[data-native-field]').dataset.nativeField));
      await group.locator('label:has(input:checked)').click();
+     await page.waitForFunction(el=>el.classList.contains('is-collapsed'),await group.elementHandle());
     }
    }
    if(step===5){

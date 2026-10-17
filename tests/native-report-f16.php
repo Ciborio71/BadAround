@@ -46,6 +46,7 @@ if ( in_array( '--html', $argv, true ) ) {
 	echo '</body></html>'; exit;
 }
 function f16_assert( $ok, $message ) { if ( ! $ok ) { fwrite( STDERR, "FAIL: $message\n" ); exit( 1 ); } echo "PASS: $message\n"; }
+f16_assert( 'Danno o incidente durante la sosta' === badaround_native_report_display_label( 'Danno O Incidente Durante La Sosta' ), 'Italian taxonomy labels use sentence case without changing canonical values' );
 $_SERVER['HTTP_HOST'] = 'staging.badaround.it';
 $_GET['native_report'] = '1';
 f16_assert( badaround_native_report_qa_enabled(), 'staging administrator QA gate' );
@@ -57,6 +58,7 @@ unset( $_SERVER['HTTP_HOST'] );
 f16_assert( ! badaround_native_report_qa_enabled(), 'missing request host fails closed' );
 $_SERVER['HTTP_HOST'] = 'staging.badaround.it:443';
 f16_assert( badaround_native_report_qa_enabled(), 'explicit HTTPS port accepted' );
+f16_assert( 'Danno o incidente durante la sosta' === badaround_native_report_display_label( 'Danno O Incidente Durante La Sosta' ), 'Italian taxonomy labels use sentence case without changing canonical values' );
 $_SERVER['HTTP_HOST'] = 'staging.badaround.it';
 foreach ( array( '01', 'true', 1, array( '1' ), '' ) as $query ) {
 	$_GET['native_report'] = $query;
@@ -92,7 +94,7 @@ f16_assert( strpos( $html, 'wpforms' ) === false && strpos( $html, 'type="file"'
 $GLOBALS['missing_taxonomy'] = true;
 f16_assert( null === badaround_native_report_config(), 'missing taxonomy fails closed without mutations' );
 ob_start(); require $base . 'themes/badaround-child/template-parts/native-report/shell.php'; $unavailable = ob_get_clean();
-f16_assert( strpos( $unavailable, 'href="https://staging.badaround.it/segnala-un-evento/"' ) !== false && strpos( $unavailable, 'data-native-report' ) === false, 'missing taxonomy supplies actionable legacy fallback without wizard' );
+f16_assert( strpos( $unavailable, 'role="alert"' ) !== false && strpos( $unavailable, 'data-native-report' ) === false, 'missing taxonomy supplies an accessible unavailable state without wizard' );
 $GLOBALS['missing_taxonomy'] = false;
 // Exercise the actual page decision and enqueue function, not copied gate logic.
 function add_filter() {}
@@ -123,13 +125,13 @@ foreach ( array( 'native', 'normal', 'anonymous', 'non-staging' ) as $scenario )
 	$_SERVER['HTTP_HOST'] = 'non-staging' === $scenario ? 'www.badaround.it' : 'staging.badaround.it';
 	$GLOBALS['test_assets'] = array(); badaround_child_enqueue_assets();
 	ob_start(); require get_stylesheet_directory() . '/page-segnala-evento.php'; $page = ob_get_clean();
-	$native = 'non-staging' !== $scenario; // F1.14 staging defaults to Native; F1.6 diagnostic remains admin-only.
+	$native = true; // Native-only reporting route; diagnostic gate remains independently restricted.
 	f16_assert( $native === ( strpos( $page, 'data-native-report' ) !== false ), 'actual page native exposure: ' . $scenario );
 	f16_assert( ! $native === ( strpos( $page, 'data-test-wpforms="6"' ) !== false ), 'actual page WPForms fallback: ' . $scenario );
 	f16_assert( $native === isset( $GLOBALS['test_assets']['badaround-native-wizard'] ), 'native JS conditional enqueue: ' . $scenario );
-	f16_assert( ! $native === isset( $GLOBALS['test_assets']['badaround-report-ui'], $GLOBALS['test_assets']['badaround-wpforms'] ), 'legacy assets preserved/isolated: ' . $scenario );
+	f16_assert( ! isset( $GLOBALS['test_assets']['badaround-report-ui'], $GLOBALS['test_assets']['badaround-wpforms'] ), 'no legacy builder assets: ' . $scenario );
 	if ( $native ) {
-		f16_assert( $GLOBALS['test_assets']['badaround-native-model'] === array() && $GLOBALS['test_assets']['badaround-native-wizard'] === array( 'badaround-native-media-view' ) && $GLOBALS['test_assets']['badaround-native-media'] === array( 'badaround-native-errors' ), 'native production dependency chain has no builder dependency' );
+		f16_assert( $GLOBALS['test_assets']['badaround-native-model'] === array() && $GLOBALS['test_assets']['badaround-native-wizard'] === array( 'badaround-native-smart-address' ) && $GLOBALS['test_assets']['badaround-native-smart-address'] === array( 'badaround-native-location-map' ) && $GLOBALS['test_assets']['badaround-native-location-map'] === array( 'badaround-native-media-view' ) && $GLOBALS['test_assets']['badaround-native-media'] === array( 'badaround-native-errors' ), 'native production dependency chain has no builder dependency' );
 	}
 }
 $GLOBALS['test_screen'] = 'other-page.php'; $GLOBALS['test_assets'] = array();

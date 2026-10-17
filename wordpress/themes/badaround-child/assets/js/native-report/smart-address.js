@@ -185,11 +185,26 @@
     const manualButton=ui.querySelector('[data-smart-manual]');
     const manualFields=container.querySelector('[data-native-location-fields]');
     let manual=false;
-    function syncVisibility(){if(manualFields)manualFields.hidden=!manual;}
+    function syncVisibility(){if(manualFields)manualFields.hidden=!manual;mapView?.sync();}
     function offerManual(message){if(config.locationManualEntry===false){say('La ricerca del luogo non è disponibile per questo indirizzo. Riprova la ricerca o riprova più tardi.');if(confirmation)confirmation.hidden=true;return;}say(message+' Puoi utilizzare i campi manuali.');if(manualButton)manualButton.hidden=false;if(confirmation)confirmation.hidden=true;}
     const paths = LEVELS.map(v => 'location.' + v);
     const privatePaths = ['location.exact_address','location.exact_lat','location.exact_lng'];
     let disposed=false, selected=false, widget, requestId=0, applying=false;
+    const mapView=ns.LocationMap?.mount(container,config,model,{
+      load:()=>loadPlaces(config.smartAddress?.key),ticket:()=>requestId,
+      current:id=>!disposed&&id===requestId&&!model.busy&&!model.snapshot&&!model.completed,
+      begin(){invalidate('Verifica della posizione in corso…');clearLocation(true);return requestId;},
+      async accept(place,position,id){
+        if(disposed||id!==requestId||model.busy||model.snapshot||model.completed)return false;
+        // The point was reverse-geocoded by Google. Address/territory are still
+        // resolved from Place Details; no coordinates infer a territory locally.
+        const verified={fetchFields:options=>place.fetchFields(options),
+          get addressComponents(){return place.addressComponents;},get formattedAddress(){return place.formattedAddress;},
+          location:{lat:()=>position.lat,lng:()=>position.lng}};
+        await choose({placePrediction:{toPlace:()=>verified}});
+        return selected;
+      }
+    });
     const say = msg => {if(!disposed)status.textContent=msg;};
     const field = path => container.querySelector('[name="' + path + '"]');
     function assign(path,value) {
@@ -210,6 +225,7 @@
     function invalidate(reason,territoryChanged=false) {
       requestId++;
       selected=false;
+      mapView?.hide();
       if(confirmation)confirmation.hidden=true;
       // If a manually edited territory could disagree with the selected
       // street address, require the user to confirm/re-enter exact address.
@@ -228,9 +244,10 @@
     }
     container.addEventListener('input',changed);
     async function choose(event) {
-      if (disposed) return;
+      if (disposed || model.busy || model.snapshot || model.completed) return;
       const id=++requestId;
       selected=false;
+      mapView?.hide();
       if(confirmation)confirmation.hidden=true;
       // Do not submit an old territory or exact coordinate while resolving a new Place.
       clearLocation(true);
@@ -286,7 +303,7 @@
         if(selected){manual=false;syncVisibility();if(confirmationLabel)confirmationLabel.textContent=fullAddress;if(confirmation)confirmation.hidden=false;}
         else offerManual('Indirizzo incompleto. Inserisci la posizione manualmente.');
         if(!mapped.location)offerManual('Territorio non riconosciuto. Inserisci manualmente.');
-        else if(selected)say('Posizione riconosciuta.');
+        else if(selected){say('Posizione riconosciuta.');if(Number.isFinite(lat)&&Number.isFinite(lng))mapView?.show({lat,lng});}
       } catch (_) {
         if (!disposed && id===requestId) offerManual('Google non disponibile. Inserisci la posizione manualmente.');
       }
@@ -335,16 +352,20 @@
     function reset(){
       requestId++;selected=false;manual=false;
       if(confirmation)confirmation.hidden=true;
+      mapView?.hide();
       if(confirmationLabel)confirmationLabel.textContent='';
       if(manualButton)manualButton.hidden=config.locationManualEntry===false || Boolean(config.smartAddress?.key);
       syncVisibility();
       say('Seleziona il campo per cercare un luogo.');
     }
     function changedGoogle(event){
-      if(!selected)return;
       if(event.type==='gmp-select')return;
       invalidate('Indirizzo modificato: seleziona di nuovo un suggerimento.',true);
     }
+    // Allow the widget's own keyboard selection, but cancel implicit form submit.
+    // Free text never becomes a confirmed place: only gmp-select + fetchFields do.
+    function searchKeydown(event){if(event.key==='Enter')event.preventDefault();}
+    holder.addEventListener('keydown',searchKeydown);
     holder.addEventListener('input',changedGoogle);
     holder.addEventListener('change',changedGoogle);
     start.addEventListener('focus',activate);
@@ -352,7 +373,7 @@
     manualButton?.addEventListener('click',openManual);
     if(!config.smartAddress?.key)offerManual('Google non configurato. Inserisci la posizione manualmente.');
     syncVisibility();
-    return {canAdvance,syncVisibility,reset,dispose(){disposed=true;requestId++;start.removeEventListener('focus',activate);start.removeEventListener('click',activate);manualButton?.removeEventListener('click',openManual);container.removeEventListener('input',changed);holder.removeEventListener('input',changedGoogle);holder.removeEventListener('change',changedGoogle);widget?.removeEventListener('gmp-select',choose);}};
+    return {canAdvance,syncVisibility,reset,dispose(){disposed=true;requestId++;mapView?.dispose();holder.removeEventListener('keydown',searchKeydown);start.removeEventListener('focus',activate);start.removeEventListener('click',activate);manualButton?.removeEventListener('click',openManual);container.removeEventListener('input',changed);holder.removeEventListener('input',changedGoogle);holder.removeEventListener('change',changedGoogle);widget?.removeEventListener('gmp-select',choose);}};
   }
   ns.SmartAddress = {resolveTerritory,loadPlaces,mount};
   if (typeof module !== 'undefined' && module.exports) module.exports = {resolveTerritory};
