@@ -1,6 +1,10 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
-if ( 'location' === $key ) : ?>
+if ( 'event' === $key ) : ?>
+	<p>Scegli la categoria e il tipo di evento. Ti chiederemo solo i dettagli pertinenti. I campi obbligatori sono indicati.</p>
+<?php elseif ( 'details' === $key ) : ?>
+	<p>Descrivi i fatti e aggiungi le informazioni utili a chi si trova nella zona. Puoi lasciare vuoti i campi facoltativi.</p>
+<?php elseif ( 'location' === $key ) : ?>
 	<p>Cerca una via, piazza o località in Italia. L'indirizzo esatto resta riservato.</p>
 <div class="ba-native-smart-address" data-native-smart-address>
   <label for="ba-smart-search">Posizione dell'evento</label>
@@ -11,7 +15,7 @@ if ( 'location' === $key ) : ?>
   <button data-smart-manual type="button" class="ba-button" hidden>Inserisci manualmente</button>
   </div>
 <?php elseif ( 'time' === $key ) : ?>
-	<p>Gli orari si riferiscono al fuso <?php echo esc_html( $config['timezone'] ); ?>.</p>
+	<p>Indica quando è successo, anche in modo approssimativo. Se non lo sai, puoi indicarlo. Gli orari si riferiscono al fuso <?php echo esc_html( $config['timezone'] ); ?>.</p>
 <?php elseif ( 'media' === $key ) : ?>
 	<p>Le immagini sono facoltative. Gli originali restano riservati per verifica e moderazione: l’invio non li rende automaticamente pubblici. Solo versioni approvate possono diventare pubbliche. Evita dati personali non necessari di terzi.</p>
 <?php elseif ( 'contact' === $key ) : ?>

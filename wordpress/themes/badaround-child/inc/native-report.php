@@ -41,7 +41,7 @@ function badaround_native_report_labels() {
 		'media.availability' => 'Disponi di immagini?',
 		'reward.status' => 'Vuoi offrire una ricompensa?', 'reward.amount' => 'Importo in euro', 'reward.conditions' => 'Condizioni della ricompensa', 'reward.expires_on' => 'Scadenza',
 		'reward.confirmed' => 'Confermo l’impegno relativo alla ricompensa indicata',
-		'reporter.first_name' => 'Nome', 'reporter.last_name' => 'Cognome', 'reporter.email' => 'Email', 'reporter.phone' => 'Telefono (facoltativo)',
+		'reporter.first_name' => 'Nome', 'reporter.last_name' => 'Cognome', 'reporter.email' => 'Email', 'reporter.phone' => 'Telefono',
 		'reporter.public_identity_mode' => 'Come vuoi essere indicato pubblicamente?', 'reporter.pseudonym' => 'Pseudonimo pubblico', 'reporter.contact_preference' => 'Preferenza di contatto',
 		'consents.truthfulness' => 'Confermo che le informazioni sono veritiere per quanto a mia conoscenza',
 		'consents.media_rights' => 'Confermo di avere i diritti su eventuali contenuti forniti',
@@ -159,6 +159,7 @@ function badaround_native_report_config() {
 		'markerHeader' => BadAround_Native_Report_REST_Controller::REQUEST_HEADER,
 		'markerValue' => BadAround_Native_Report_REST_Controller::REQUEST_HEADER_VALUE,
 		'media' => array( 'endpoint' => rest_url( 'badaround/v1/report-media-sessions' ) ),
+		'locationManualEntry' => false, // MVP presentation: only the address search is visible.
 		'timezone' => wp_timezone_string(), 'fields' => $fields, 'categories' => $categories,
 		'steps' => array( 'event' => 'Cosa è successo', 'location' => 'Dove', 'time' => 'Quando', 'details' => 'Dettagli', 'media' => 'Immagini', 'contact' => 'Contatto e privacy', 'review' => 'Riepilogo e invio' ),
 	);
@@ -172,12 +173,12 @@ function badaround_native_report_field( $path, $field ) {
 	?>
 	<div class="ba-native-field" data-native-field="<?php echo esc_attr( $path ); ?>">
 	<?php if ( 'array' === $type ) : ?>
-		<fieldset id="<?php echo esc_attr( $id ); ?>" tabindex="-1" aria-describedby="<?php echo esc_attr( $description ); ?>"><legend><?php echo esc_html( $field['label'] ); ?></legend>
+		<fieldset id="<?php echo esc_attr( $id ); ?>" tabindex="-1" aria-describedby="<?php echo esc_attr( $description ); ?>"><legend><?php echo esc_html( $field['label'] ); ?><span data-native-required></span></legend>
 		<?php foreach ( $field['options'] as $value => $label ) : ?>
 		<label class="ba-native-choice"><input type="checkbox" name="<?php echo esc_attr( $path ); ?>" value="<?php echo esc_attr( $value ); ?>" data-native-input><?php echo esc_html( $label ); ?></label>
 		<?php endforeach; ?></fieldset>
 	<?php elseif ( 'bool' === $type ) : ?>
-		<label class="ba-native-choice" for="<?php echo esc_attr( $id ); ?>"><input id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $path ); ?>" type="checkbox" data-native-input aria-describedby="<?php echo esc_attr( $description ); ?>"><?php echo esc_html( $field['label'] ); ?></label>
+		<label class="ba-native-choice" for="<?php echo esc_attr( $id ); ?>"><input id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $path ); ?>" type="checkbox" data-native-input aria-describedby="<?php echo esc_attr( $description ); ?>"><span><?php echo esc_html( $field['label'] ); ?><span data-native-required></span></span></label>
 	<?php else : ?>
 		<label for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $field['label'] ); ?><span data-native-required><?php echo $field['required'] ? ' (obbligatorio quando applicabile)' : ''; ?></span></label>
 		<?php if ( 'enum' === $type ) : ?>

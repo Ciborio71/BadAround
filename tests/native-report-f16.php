@@ -19,6 +19,7 @@ class WP_Term { public $name; public $slug; public $parent; public $term_id; }
 class BadAround_Event_Post_Type { const EVENT_TYPE_TAX = 'ba_tipo_evento'; }
 function get_terms( $query ) {
 	if ( ! empty( $GLOBALS['missing_taxonomy'] ) ) { return array(); }
+	if ( 'ba_territorio' === ( $query['taxonomy'] ?? '' ) ) { return array(); } // No live territory DB in this schema/SSR fixture.
 	$map = BadAround_Event_Taxonomy_Map::mapping();
 	$key = $query['meta_value']; $term = new WP_Term();
 	$keys = array_merge( array_keys( $map['categories'] ), array_keys( $map['subtypes'] ) );

@@ -19,7 +19,7 @@
     invalid_email:'Inserisci un indirizzo email valido.', invalid_phone:'Controlla il numero di telefono.', invalid_plate:'Usa lettere, numeri e ? per i caratteri sconosciuti.',
     invalid_enum:'Seleziona una delle opzioni disponibili.', invalid_category_subtype:'Seleziona un tipo di evento compatibile con la categoria.',
     invalid_date_time:'Controlla data e orari: non possono essere futuri e la fascia deve essere in ordine.',
-    invalid_location:'Controlla la posizione: latitudine e longitudine devono essere indicate insieme.', invalid_number:'Inserisci un numero entro i limiti indicati.',
+    invalid_location:'Torna a Dove e seleziona di nuovo un luogo dai suggerimenti.', invalid_number:'Inserisci un numero entro i limiti indicati.',
     value_too_long:'Il testo supera la lunghezza consentita.', too_many_items:'Hai selezionato troppi elementi.',
     duplicate_submission:'Questo invio risulta già associato a dati differenti. Non inviare una nuova segnalazione per gli stessi fatti: contatta BadAround per verificare l’esito.',
     submission_in_progress:'L’invio è ancora in elaborazione. Attendi e riprova con gli stessi dati.',
@@ -46,9 +46,10 @@
     errors.forEach(error => {
       const field = config.fields[error.field];
       const item = document.createElement('li');
-      const text = (field ? field.label + ': ' : '') + ns.errorMessage(error);
+      const locationError = field?.step === 'location';
+      const text = (locationError ? 'Posizione dell’evento: ' : field ? field.label + ': ' : '') + (locationError ? 'Torna a Dove e seleziona di nuovo un luogo dai suggerimenti.' : ns.errorMessage(error));
       const wrapper = Array.from(container.querySelectorAll('[data-native-field]')).find(w => w.dataset.nativeField === error.field);
-      if (wrapper && !wrapper.hidden) {
+      if (wrapper && !wrapper.hidden && !wrapper.closest('[data-native-location-fields][hidden]')) {
         const message = wrapper.querySelector('.ba-native-error'); message.textContent = ns.errorMessage(error); message.hidden = false;
         wrapper.querySelectorAll('[data-native-input], fieldset').forEach(input => input.setAttribute('aria-invalid','true'));
         const button = document.createElement('button'); button.type = 'button'; button.textContent = text;
@@ -56,6 +57,9 @@
           if (focusField) focusField(error.field,error.file);
           else wrapper.querySelector('input,select,textarea,fieldset').focus();
         }); item.append(button);
+      } else if (locationError && focusField) {
+        const button = document.createElement('button'); button.type = 'button'; button.textContent = text;
+        button.addEventListener('click', () => focusField(error.field)); item.append(button);
       } else item.textContent = text;
       list.append(item);
     });

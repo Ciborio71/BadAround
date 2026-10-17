@@ -30,6 +30,8 @@
       const sections = new Map();
       Object.entries(config.fields).forEach(([path, field]) => {
         if (!model.active(path)) return;
+        // The review is user-facing: never print canonical territory metadata or coordinates.
+        if (field.step === 'location' && path !== 'location.exact_address') return;
         const value = model.effective(path); if (value === undefined || value === '') return;
         const stepKey = field.step || 'review';
         let section = sections.get(stepKey);
@@ -60,6 +62,8 @@
         }
         list.append(term, detail);
       });
+      // Follow the seven-step sequence even when schema fields are ordered differently.
+      steps.forEach(key => { if (sections.has(key)) region.append(sections.get(key)); });
       if (mediaView && mediaView.media.count) {
         const mediaSection = document.createElement('section');
         mediaSection.className = 'ba-native-review-section';
@@ -95,7 +99,7 @@
           const group = wrapper.querySelector('fieldset');
           if (group) group.setAttribute('aria-required', String(active && field.required));
         });
-        const flag = wrapper.querySelector('[data-native-required]'); if (flag) flag.textContent = active && field.required ? ' (obbligatorio)' : '';
+        const flag = wrapper.querySelector('[data-native-required]'); if (flag) flag.textContent = active && field.required ? ' (obbligatorio)' : ' (facoltativo)';
       });
       form.querySelectorAll('[data-native-step]').forEach(step => { step.hidden = step.dataset.nativeStep !== current; });
       container.querySelectorAll('[data-native-progress]').forEach((li,index) => {
@@ -103,6 +107,11 @@
         li.classList.toggle('is-complete', index < model.step);
         if (index === model.step) li.setAttribute('aria-current','step'); else li.removeAttribute('aria-current');
       });
+      const position = container.querySelector('[data-native-position]');
+      if (position) {
+        const text = `Passaggio ${model.step + 1} di ${steps.length}: ${config.steps[current]}`;
+        if (position.textContent !== text) position.textContent = text;
+      }
       back.disabled = model.step === 0 || model.busy || !!model.snapshot;
       next.hidden = current === 'review'; next.disabled = model.busy || !!model.snapshot;
       submit.hidden = current !== 'review'; submit.disabled = model.busy || model.completed || !!model.blocked;
@@ -136,6 +145,13 @@
       if (first) model.step = steps.indexOf(config.fields[first.field].step);
       render(); ns.presentErrors(container, errors, config, (path, file) => {
         model.step = steps.indexOf(config.fields[path].step); render();
+        if (config.fields[path].step === 'location') {
+          focusStep('location');
+          const start = container.querySelector('[data-smart-start]');
+          const search = start && !start.hidden ? start : container.querySelector('[data-smart-widget]')?.firstElementChild;
+          if (search && !search.disabled) search.focus();
+          return;
+        }
         if (file && mediaView) return mediaView.focus(file);
         const wrapper = wrappers.find(w => w.dataset.nativeField === path);
         wrapper.querySelector('input,select,textarea,fieldset').focus();
@@ -158,7 +174,7 @@
     // Some select/checkbox assistive technology emits change without input.
     listen(form,'change', event => {
       const wrapper = event.target.closest('[data-native-field]'); if (!wrapper) return;
-      model.set(wrapper.dataset.nativeField, read(wrapper)); render();
+      model.set(wrapper.dataset.nativeField, read(wrapper)); ns.presentErrors(container, [], config); render();
     });
     listen(next,'click', () => {
       if(model.busy || model.snapshot || model.completed || model.step>=steps.length-1)return;
@@ -226,7 +242,7 @@
   }
   document.querySelectorAll('[data-native-report]').forEach(container => {
     try { boot(container); } catch (_) {
-      container.querySelector('[data-native-boot]').textContent = 'Il modulo non può essere avviato. Torna al modulo di riferimento.';
+      container.querySelector('[data-native-boot]').textContent = 'Il modulo non può essere avviato. Ricarica la pagina o riprova più tardi.';
     }
   });
 })();

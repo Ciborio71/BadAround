@@ -10,7 +10,7 @@ if ( ! $config ) {
 	<p class="ba-native-notice">La tua segnalazione sarà esaminata prima di un’eventuale pubblicazione. Dati personali e informazioni riservate non sono pubblicati automaticamente.</p>
 	<noscript><p>Per usare il wizard e inviare la segnalazione attiva JavaScript. I campi sono riportati di seguito per consultazione.</p></noscript>
 	<p data-native-boot role="status">Preparazione del modulo…</p>
-	<nav aria-label="Avanzamento della segnalazione"><ol class="ba-native-progress">
+	<nav aria-label="Avanzamento della segnalazione"><p class="ba-native-position" data-native-position role="status" aria-live="polite" aria-atomic="true"></p><ol class="ba-native-progress">
 	<?php foreach ( $config['steps'] as $key => $title ) : ?><li data-native-progress="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $title ); ?></li><?php endforeach; ?>
 	</ol></nav>
 	<div class="ba-native-summary" data-native-errors tabindex="-1" role="alert" hidden></div>

@@ -440,3 +440,22 @@
 .ba-native [data-smart-confirmation]{padding:14px;border:1px solid #b9dde0;border-radius:12px;background:#f2fbf9}
 .ba-native [data-smart-confirmation] p{margin:4px 0;overflow-wrap:anywhere}
 .ba-native [data-smart-confirmation] small{color:var(--ba-muted)}
+
+/* NF-FINAL-01: Native layout rules migrated from the report experience. */
+.ba-native,.ba-native *{box-sizing:border-box}
+.ba-native .ba-native-position{margin:18px 0 0;color:var(--ba-navy-950);font-weight:700}
+.ba-native .ba-native-field .ba-native-choice{display:flex;align-items:flex-start;padding:12px 14px}
+.ba-native .ba-native-choice input{margin-block:2px 0}
+.ba-native .ba-native-progress li{min-width:0;flex-wrap:wrap;gap:4px}
+.ba-native :where(input,select,textarea,button,a){scroll-margin-block:120px}
+.ba-native [data-native-form][aria-busy=true] [data-native-submit]{cursor:wait}
+.ba-native [data-native-step]>h2:focus,.ba-native [data-native-success]>h2:focus{outline:3px solid var(--ba-teal-700);outline-offset:4px}
+@media(max-width:600px){
+  .ba-native .ba-native-actions{flex-wrap:wrap}
+  .ba-native .ba-native-actions .ba-button{flex-basis:40%}
+  .ba-native .ba-native-position{font-size:.9rem}
+}
+/* Keep normal-size CTA text above 4.5:1 against its background. */
+.ba-native .ba-button{background:var(--ba-teal-700);border-color:var(--ba-teal-700);color:#fff}
+.ba-native .ba-button--outline{background:#fff;color:var(--ba-teal-700)}
+.ba-native .ba-button:hover{background:var(--ba-navy-950);color:#fff}

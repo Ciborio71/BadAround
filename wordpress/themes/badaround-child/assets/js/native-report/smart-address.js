@@ -186,7 +186,7 @@
     const manualFields=container.querySelector('[data-native-location-fields]');
     let manual=false;
     function syncVisibility(){if(manualFields)manualFields.hidden=!manual;}
-    function offerManual(message){say(message+' Puoi utilizzare i campi manuali.');if(manualButton)manualButton.hidden=false;if(confirmation)confirmation.hidden=true;}
+    function offerManual(message){if(config.locationManualEntry===false){say('La ricerca del luogo non è disponibile per questo indirizzo. Riprova la ricerca o riprova più tardi.');if(confirmation)confirmation.hidden=true;return;}say(message+' Puoi utilizzare i campi manuali.');if(manualButton)manualButton.hidden=false;if(confirmation)confirmation.hidden=true;}
     const paths = LEVELS.map(v => 'location.' + v);
     const privatePaths = ['location.exact_address','location.exact_lat','location.exact_lng'];
     let disposed=false, selected=false, widget, requestId=0, applying=false;
@@ -302,6 +302,8 @@
         if (!Element) throw new Error('widget_unavailable');
         widget=new Element({includedRegionCodes:['it']});
         widget.includedRegionCodes=['it'];
+        widget.setAttribute('aria-label', 'Posizione dell’evento');
+        widget.setAttribute('aria-describedby', 'ba-smart-status');
         widget.addEventListener('gmp-select',choose);
         holder.replaceChildren(widget);
         start.hidden=true;
@@ -312,6 +314,7 @@
       }
     }
     function openManual(){
+      if(config.locationManualEntry===false)return;
       requestId++;selected=false;manual=true;if(confirmation)confirmation.hidden=true;clearLocation(true);syncVisibility();
       say('Compila Regione, Provincia, Comune e indirizzo preciso. La località è facoltativa.');
       field('location.region')?.focus?.();
@@ -333,7 +336,7 @@
       requestId++;selected=false;manual=false;
       if(confirmation)confirmation.hidden=true;
       if(confirmationLabel)confirmationLabel.textContent='';
-      if(manualButton)manualButton.hidden=Boolean(config.smartAddress?.key);
+      if(manualButton)manualButton.hidden=config.locationManualEntry===false || Boolean(config.smartAddress?.key);
       syncVisibility();
       say('Seleziona il campo per cercare un luogo.');
     }

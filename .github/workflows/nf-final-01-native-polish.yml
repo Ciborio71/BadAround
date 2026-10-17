@@ -1,0 +1,63 @@
+name: NF-FINAL-01 — Native UI and regression gate
+on:
+  push:
+    branches:
+      - feature/nf-final-01-native-polish
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Native PHP and JS syntax
+        run: |
+          set -euo pipefail
+          find wordpress/plugins/badaround-core wordpress/themes/badaround-child -name '*.php' -type f -print0 | xargs -0 -n1 php -l >/dev/null
+          for p in model wizard api smart-address media media-view errors; do
+            node --check "wordpress/themes/badaround-child/assets/js/native-report/$p.js"
+          done
+      - name: Native Form end-to-end synthetic UX, privacy, smart address and media DOM
+        run: |
+          set -euo pipefail
+          npm ci --prefix tests
+          node --test \
+            tests/native-report-f16.cjs \
+            tests/native-report-f16-dom.cjs \
+            tests/native-report-f19-ux.cjs \
+            tests/nf-final-01-ux.cjs \
+            tests/f1-15b-r5-smart-address.cjs \
+            tests/sf8-national-territory.cjs \
+            tests/sf9-public-privacy-boundary.cjs \
+            tests/native-media-f17d-dom.cjs \
+            tests/native-media-f17d-extra.cjs
+      - name: Native backend, publication, territory, and media synthetic constraints
+        run: |
+          set -euo pipefail
+          for file in \
+            tests/native-report-f13.php \
+            tests/native-report-f14.php \
+            tests/native-report-f15.php \
+            tests/f1-15a3-territory.php \
+            tests/f1-14r-publication-contract.php \
+            tests/f1-14r-consumers.php \
+            tests/map-02r-priv-01.php
+          do php "$file" >/dev/null; done
+      - name: Local browser smoke (all requests intercepted, no WordPress writes)
+        run: |
+          npm install --prefix /tmp/nf-browser-runner --no-save playwright@1.62.1
+          node /tmp/nf-browser-runner/node_modules/playwright/cli.js install --with-deps chromium
+          BA_PLAYWRIGHT_MODULE=/tmp/nf-browser-runner/node_modules/playwright node tests/nf-final-01-browser.cjs
+      - name: Protect frozen backend and data contracts
+        run: |
+          set -euo pipefail
+          git diff --check 9a94937 HEAD
+          test -z "$(git diff --name-only 9a94937 HEAD -- wordpress/plugins tests/fixtures)"
