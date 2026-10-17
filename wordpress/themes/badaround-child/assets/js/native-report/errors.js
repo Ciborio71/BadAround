@@ -37,7 +37,7 @@
     const summary = container.querySelector('[data-native-errors]');
     summary.replaceChildren();
     container.querySelectorAll('[data-native-field]').forEach(wrapper => {
-      wrapper.querySelectorAll('[data-native-input], fieldset').forEach(input => input.setAttribute('aria-invalid','false'));
+      wrapper.querySelectorAll('[data-native-input], .ba-native-card-grid input, fieldset').forEach(input => input.setAttribute('aria-invalid','false'));
       const message = wrapper.querySelector('.ba-native-error'); message.hidden = true; message.textContent = '';
     });
     if (!errors.length) { summary.hidden = true; return; }
@@ -51,11 +51,11 @@
       const wrapper = Array.from(container.querySelectorAll('[data-native-field]')).find(w => w.dataset.nativeField === error.field);
       if (wrapper && !wrapper.hidden && !wrapper.closest('[data-native-location-fields][hidden]')) {
         const message = wrapper.querySelector('.ba-native-error'); message.textContent = ns.errorMessage(error); message.hidden = false;
-        wrapper.querySelectorAll('[data-native-input], fieldset').forEach(input => input.setAttribute('aria-invalid','true'));
+        wrapper.querySelectorAll('[data-native-input], .ba-native-card-grid input, fieldset').forEach(input => input.setAttribute('aria-invalid','true'));
         const button = document.createElement('button'); button.type = 'button'; button.textContent = text;
         button.addEventListener('click', () => {
           if (focusField) focusField(error.field,error.file);
-          else wrapper.querySelector('input,select,textarea,fieldset').focus();
+          else (wrapper.querySelector('.ba-native-card-grid input:not(:disabled)') || wrapper.querySelector('input,select,textarea,fieldset')).focus();
         }); item.append(button);
       } else if (locationError && focusField) {
         const button = document.createElement('button'); button.type = 'button'; button.textContent = text;

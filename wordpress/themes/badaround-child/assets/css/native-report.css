@@ -459,3 +459,39 @@
 .ba-native .ba-button{background:var(--ba-teal-700);border-color:var(--ba-teal-700);color:#fff}
 .ba-native .ba-button--outline{background:#fff;color:var(--ba-teal-700)}
 .ba-native .ba-button:hover{background:var(--ba-navy-950);color:#fff}
+
+/* NF-VISUAL-02 — recognizable Report Experience cards, independent of WPForms. */
+.ba-native .ba-native-field .ba-native-card-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;
+  padding:0;margin:12px 0 0;border:0;min-width:0;
+}
+.ba-native .ba-native-field .ba-native-category-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.ba-native .ba-native-card-grid .ba-native-option-card{
+  --ba-card-accent:var(--ba-teal-700);position:relative;display:flex;align-items:center;gap:12px;
+  margin:0;padding:17px 16px;min-width:0;min-height:64px;border:1px solid #dce5ed;border-radius:16px;
+  background:#fff;box-shadow:0 7px 18px rgba(7,26,56,.035);cursor:pointer;
+  transition:border-color .16s ease,box-shadow .16s ease,background-color .16s ease;
+}
+.ba-native .ba-native-category-grid .ba-native-option-card{display:grid;grid-template-columns:48px minmax(0,1fr);min-height:142px;padding:20px 16px}
+.ba-native .ba-native-card-grid input[type=radio]{
+  position:absolute;width:1px;height:1px;min-height:0;padding:0;margin:0;opacity:0;
+}
+.ba-native .ba-native-option-card::after{content:'';flex:0 0 auto;width:19px;height:19px;border:1px solid #a7bac9;border-radius:50%;margin-left:auto}
+.ba-native .ba-native-category-grid .ba-native-option-card::after{position:absolute;right:10px;top:10px;width:18px;height:18px}
+.ba-native .ba-native-option-card:has(input:checked){border-color:var(--ba-card-accent);background:color-mix(in srgb,var(--ba-card-accent) 6%,white);box-shadow:0 0 0 1px var(--ba-card-accent),0 10px 26px rgba(7,26,56,.06)}
+.ba-native .ba-native-option-card:has(input:checked)::after{content:'✓';display:grid;place-items:center;background:var(--ba-card-accent);border-color:var(--ba-card-accent);color:white;font-size:12px;font-weight:900}
+.ba-native .ba-native-option-card:has(input:focus-visible){outline:3px solid var(--ba-teal-700);outline-offset:4px}
+.ba-native .ba-native-option-card:hover{border-color:var(--ba-card-accent);box-shadow:0 12px 26px rgba(7,26,56,.075)}
+.ba-native .ba-native-option-card:has(input:disabled){opacity:.6;cursor:not-allowed}
+.ba-native .ba-native-card-copy{display:block;min-width:0}
+.ba-native .ba-native-card-copy strong{display:block;font-size:1rem;line-height:1.3;color:var(--ba-navy-950);font-weight:800}
+.ba-native .ba-native-card-copy small{display:block;margin-top:6px;font-size:.8rem;font-weight:500;line-height:1.4;color:#53677c}
+.ba-native .ba-native-card-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;background:color-mix(in srgb,var(--ba-card-accent) 12%,white);color:var(--ba-card-accent)}
+.ba-native .ba-native-card-icon svg{display:block;width:28px;height:28px}
+@media(max-width:900px){.ba-native .ba-native-field .ba-native-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){
+ .ba-native .ba-native-field .ba-native-card-grid{grid-template-columns:1fr;gap:10px}
+ .ba-native .ba-native-category-grid .ba-native-option-card{grid-template-columns:46px minmax(0,1fr);min-height:104px;padding:16px}
+ .ba-native .ba-native-card-copy strong{font-size:1rem}
+}
+@media(prefers-reduced-motion:reduce){.ba-native .ba-native-option-card{transition:none}}

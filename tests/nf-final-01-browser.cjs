@@ -23,9 +23,11 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   await page.getByRole('button',{name:'Continua',exact:true}).click();
   assert(await page.locator('[data-native-errors]').evaluate(e=>document.activeElement===e));
   await page.locator('[data-native-errors] button').first().click();
-  assert(await page.locator('[name="event.category"]').evaluate(e=>document.activeElement===e));
+  assert(await page.locator('[data-native-field="event.category"] .ba-native-card-grid input').first().evaluate(e=>document.activeElement===e));
+  await page.keyboard.press('ArrowRight');
+  assert(await page.locator('[data-native-field="event.category"] .ba-native-card-grid input:checked').count()===1);
   await page.keyboard.press('Tab');
-  assert(await page.locator('[name="event.subtype"]').evaluate(e=>document.activeElement===e));
+  assert(await page.locator('[data-native-field="event.subtype"] .ba-native-card-grid input').first().evaluate(e=>document.activeElement===e));
   await page.evaluate(()=>{
    const root=document.querySelector('[data-native-report]');
    const data={'event.category':'hazard','event.subtype':'hazard_road_obstruction','reporter.relationship':'territory_observer','location.region':'Lazio','location.province':'Roma','location.municipality':'Pomezia','location.exact_address':'Via Test 1, Pomezia','location.place_type':'road_sidewalk','location.immediate_danger':'no','time.mode':'unknown','content.description':'Un ostacolo sulla strada da verificare.','damage.status':'no','authority.status':'no','media.availability':'no','reporter.first_name':'QA','reporter.last_name':'Synthetic','reporter.email':'qa@example.invalid','reporter.contact_preference':'none','consents.truthfulness':true,'consents.media_rights':true,'consents.publication_rules':true,'consents.terms':true,'consents.privacy':true};

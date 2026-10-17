@@ -63,7 +63,7 @@ test('invalid step cannot advance; accessible error summary and error focus',()=
   const summary=h.doc.querySelector('[data-native-errors]');assert(!summary.hidden);assert.equal(h.doc.activeElement,summary);
   const category=h.doc.querySelector('[name="event.category"]');assert.equal(category.getAttribute('aria-invalid'),'true');
   assert(category.getAttribute('aria-describedby').includes('ba-native-event-category-error'));
-  summary.querySelector('button').click();assert.equal(h.doc.activeElement,category);h.dom.window.close();
+  summary.querySelector('button').click();assert.equal(h.doc.activeElement,h.doc.querySelector('[data-native-field="event.category"] .ba-native-card-grid input'));h.dom.window.close();
 });
 test('successful submit, double-click guard, UUID reset only after distinct report',async()=>{
   let finish;const h=create(payload=>new Promise(resolve=>{finish=()=>resolve(completed(payload));}));populate(h);

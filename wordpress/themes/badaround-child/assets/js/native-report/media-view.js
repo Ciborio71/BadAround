@@ -42,7 +42,7 @@
         node.querySelectorAll('button').forEach(button=>{button.disabled=disabled || busy;});
       });
       if (lostFocus) {
-        const target=list.querySelector('button:not([disabled]):not([hidden])') || (!picker.disabled ? picker : container.querySelector('[name="media.availability"]'));
+        const target=list.querySelector('button:not([disabled]):not([hidden])') || (!picker.disabled ? picker : (Array.from(container.querySelectorAll('[data-native-field="media.availability"] .ba-native-card-grid input')).find(input=>input.value===model.effective('media.availability')) || container.querySelector('[name="media.availability"]')));
         target.focus();
       }
     }

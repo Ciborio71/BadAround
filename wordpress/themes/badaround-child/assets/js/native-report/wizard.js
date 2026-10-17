@@ -80,6 +80,79 @@
         region.append(mediaSection);
       }
     }
+    // Native presentation only: selects remain the sole canonical model inputs.
+    const categoryCards = {
+      vehicle: {title:'Veicoli', desc:'Auto, moto e altri mezzi', icon:'vehicle', color:'#1688e8'},
+      property: {title:'Case e attività', desc:'Abitazioni, negozi e uffici', icon:'property', color:'#9c3152'},
+      hazard: {title:'Pericoli', desc:'Rischi e situazioni pericolose', icon:'hazard', color:'#e36b21'},
+      public_space: {title:'Spazi pubblici', desc:'Strade, aree pubbliche e decoro', icon:'public', color:'#087f8c'},
+      animal: {title:'Animali', desc:'Smarrimenti e segnalazioni', icon:'animal', color:'#7e3db6'},
+      item_document: {title:'Oggetti e documenti', desc:'Oggetti smarriti o ritrovati', icon:'object', color:'#a26f14'}
+    };
+    const cardIcons = {
+		vehicle:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 14h15l-1.8-5.2a2 2 0 0 0-1.9-1.3H8.2a2 2 0 0 0-1.9 1.3L4.5 14Z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 14v4m14-4v4M7.5 18h9M7.2 12h.01M16.8 12h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+		property:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-7 9 7M6 9.5V20h12V9.5M9 20v-6h6v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+		hazard:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 3.5 20h17L12 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 9v5m0 3h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+		public:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9l8-5 8 5v11M2 20h20M8 13h8M9 17h6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>',
+		animal:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12c-2 0-3.5 1.4-3.5 3.2C4.5 18 7.6 20 12 20s7.5-2 7.5-4.8C19.5 13.4 18 12 16 12m-8 0c.7-2.1 2.1-3.3 4-3.3s3.3 1.2 4 3.3M6.5 8.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm11 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM12 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
+		object:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h8l2 3v9H6v-9l2-3Zm1 0V5h6v2M9 12h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>'
+    };
+    const cardGroups = new Map();
+    function syncCards(wrapper, field) {
+      const select = wrapper.querySelector('select[data-native-input]');
+      if (!select || field.step === 'location') return;
+      const options = Array.from(select.options).filter(option => option.value);
+      const category = wrapper.dataset.nativeField === 'event.category';
+      const subtype = wrapper.dataset.nativeField === 'event.subtype';
+      if (!category && !subtype && options.length > 6) return;
+      let entry = cardGroups.get(select);
+      if (!entry) {
+        const label = wrapper.querySelector('label');
+        label.id = select.id + '-label';
+        const group = document.createElement('fieldset');
+        group.className = 'ba-native-card-grid' + (category ? ' ba-native-category-grid' : '');
+        group.setAttribute('aria-labelledby', label.id);
+        group.setAttribute('aria-describedby', select.getAttribute('aria-describedby'));
+        select.after(group); select.hidden = true;
+        entry = {group, signature:null}; cardGroups.set(select, entry);
+      }
+      const signature = JSON.stringify(options.map(option => [option.value,option.textContent]));
+      if (entry.signature !== signature) {
+        entry.group.replaceChildren(); entry.signature = signature;
+        options.forEach(option => {
+          const card = document.createElement('label'); card.className = 'ba-native-option-card';
+          const radio = document.createElement('input');
+          radio.type = 'radio'; radio.name = 'ba-card-' + select.name; radio.value = option.value;
+          radio.setAttribute('aria-describedby', select.getAttribute('aria-describedby'));
+          const copy = document.createElement('span'); copy.className = 'ba-native-card-copy';
+          const meta = category ? categoryCards[option.value] : null;
+          const title = document.createElement('strong'); title.textContent = meta?.title || option.textContent; copy.append(title);
+          if (meta) {
+            card.style.setProperty('--ba-card-accent',meta.color);
+            const icon = document.createElement('span'); icon.className = 'ba-native-card-icon';
+            icon.setAttribute('aria-hidden','true'); icon.innerHTML = cardIcons[meta.icon];
+            const description = document.createElement('small'); description.textContent = meta.desc; copy.append(description);
+            card.append(icon);
+          }
+          card.append(radio,copy); entry.group.append(card);
+          const chooseCard = event => {
+            event.stopPropagation();
+            if (select.disabled) return;
+            select.value = radio.value;
+            select.dispatchEvent(new Event(event.type,{bubbles:true}));
+            syncCards(wrapper, field); // Reconcile a rejected change with the canonical control.
+          };
+          radio.addEventListener('input',chooseCard);
+          radio.addEventListener('change',chooseCard);
+        });
+      }
+      entry.group.disabled = select.disabled;
+      entry.group.querySelectorAll('input').forEach(radio => {
+        radio.checked = radio.value === select.value;
+        radio.disabled = select.disabled; radio.required = select.required;
+        radio.setAttribute('aria-invalid', select.getAttribute('aria-invalid') || 'false');
+      });
+    }
     function render(focus = false) {
       if(disposed)return;
       const current = steps[model.step];
@@ -90,16 +163,18 @@
       subtype.value = previous;
       wrappers.forEach(wrapper => {
         const path = wrapper.dataset.nativeField, field = config.fields[path], active = model.active(path);
-        wrapper.hidden = !active;
+        const deferred = (path === 'event.subtype' && !model.values['event.category']) || (path === 'reporter.relationship' && !model.effective('event.subtype'));
+        wrapper.hidden = !active || deferred;
         const inputs = wrapper.querySelectorAll('[data-native-input]');
         inputs.forEach(input => {
-          input.disabled = !active || model.busy || !!model.snapshot || model.completed;
+          input.disabled = !active || deferred || model.busy || !!model.snapshot || model.completed;
           input.required = active && field.required && field.type !== 'array';
           input.setAttribute('aria-required', String(active && field.required && field.type !== 'array'));
           const group = wrapper.querySelector('fieldset');
           if (group) group.setAttribute('aria-required', String(active && field.required));
         });
         const flag = wrapper.querySelector('[data-native-required]'); if (flag) flag.textContent = active && field.required ? ' (obbligatorio)' : ' (facoltativo)';
+        syncCards(wrapper, field);
       });
       form.querySelectorAll('[data-native-step]').forEach(step => { step.hidden = step.dataset.nativeStep !== current; });
       container.querySelectorAll('[data-native-progress]').forEach((li,index) => {
@@ -154,7 +229,7 @@
         }
         if (file && mediaView) return mediaView.focus(file);
         const wrapper = wrappers.find(w => w.dataset.nativeField === path);
-        wrapper.querySelector('input,select,textarea,fieldset').focus();
+        (wrapper.querySelector('.ba-native-card-grid input:not(:disabled)') || wrapper.querySelector('input,select,textarea,fieldset')).focus();
       });
     }
     wrappers.forEach(wrapper => {
