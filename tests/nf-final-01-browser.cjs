@@ -39,6 +39,25 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   });
   for(let step=0;step<7;step++){
    assert.equal(await page.locator('[data-native-step]:visible').count(),1);
+   for(const group of await page.locator('[data-native-step]:visible .ba-native-card-grid').all()){
+    const selected=group.locator('label:has(input:checked)');
+    if(await selected.count()){
+     await selected.click();
+     await page.waitForTimeout(10);
+     assert(await group.evaluate(e=>e.classList.contains('is-collapsed')));
+     assert.equal(await group.locator('label:visible').count(),1);
+     const edit=group.locator('..').getByRole('button',{name:/Modifica:/});
+     await edit.click();
+     assert(!(await group.evaluate(e=>e.classList.contains('is-collapsed'))));
+     await group.locator('label:has(input:checked)').click();
+    }
+   }
+   if(step===5){
+    const first=await page.locator('[data-native-field="reporter.first_name"]').boundingBox();
+    const last=await page.locator('[data-native-field="reporter.last_name"]').boundingBox();
+    if(width>=768)assert(Math.abs(first.y-last.y)<2,'paired desktop names must share row');
+    else assert(last.y>=first.y+first.height-1,'mobile names must stack');
+   }
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1);
    assert(!overflow,`horizontal overflow width ${width} step ${step+1}`);
    const controls=await page.locator('[data-native-navigation] button:visible').all();

@@ -495,3 +495,26 @@
  .ba-native .ba-native-card-copy strong{font-size:1rem}
 }
 @media(prefers-reduced-motion:reduce){.ba-native .ba-native-option-card{transition:none}}
+
+/* NF-UX-03: completed single choices stay visible, editable and compact. */
+.ba-native .ba-native-choice-row{margin-top:12px;min-width:0}
+.ba-native .ba-native-choice-row>.ba-native-card-grid{margin:0}
+.ba-native .ba-native-choice-row:has(>.is-collapsed){display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}
+.ba-native .ba-native-field .ba-native-card-grid.is-collapsed{display:block;min-height:60px}
+.ba-native .ba-native-card-grid.is-collapsed .ba-native-option-card{display:flex;min-height:60px;padding:12px 14px;gap:12px;cursor:default;box-shadow:none}
+.ba-native .ba-native-card-grid.is-collapsed .ba-native-option-card::after{position:static;margin-left:auto;flex-shrink:0}
+.ba-native .ba-native-card-grid.is-collapsed .ba-native-card-icon{width:32px;height:32px;flex:0 0 32px;border-radius:10px}
+.ba-native .ba-native-card-grid.is-collapsed .ba-native-card-icon svg{width:21px;height:21px}
+.ba-native .ba-native-card-grid.is-collapsed .ba-native-card-copy small{display:none}
+.ba-native .ba-native-edit-choice{padding:10px 14px;min-height:44px;border:1px solid var(--ba-teal-700);border-radius:10px;background:#fff;color:var(--ba-teal-700);font-weight:700;font-size:.9rem}
+.ba-native .ba-native-field-pair{min-width:0}
+@media(min-width:768px){
+ .ba-native .ba-native-field-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;align-items:start}
+ .ba-native .ba-native-field-pair:has(>[hidden])>:not([hidden]){grid-column:1/-1}
+}
+@media(max-width:480px){
+ .ba-native .ba-native-choice-row:has(>.is-collapsed){grid-template-columns:minmax(0,1fr);gap:6px}
+ .ba-native .ba-native-edit-choice{padding-inline:10px;justify-self:end}
+}
+.ba-native .ba-native-field input[type=tel]{max-width:24rem}
+.ba-native .ba-native-field input[type=number],.ba-native [data-native-field="vehicle.plate_raw"] input{max-width:18rem}

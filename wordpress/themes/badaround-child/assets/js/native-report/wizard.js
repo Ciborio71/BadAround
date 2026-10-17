@@ -98,6 +98,18 @@
 		object:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h8l2 3v9H6v-9l2-3Zm1 0V5h6v2M9 12h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>'
     };
     const cardGroups = new Map();
+    // Pair only closely related fields; DOM and keyboard order remain left-to-right.
+    for (const pair of [['reporter.first_name','reporter.last_name'],['vehicle.make','vehicle.model'],['time.range_start','time.range_end']]) {
+      const fields = pair.map(path => wrappers.find(wrapper => wrapper.dataset.nativeField === path));
+      if (fields.some(field => !field) || fields[0].parentElement !== fields[1].parentElement) continue;
+      const row = document.createElement('div'); row.className = 'ba-native-field-pair';
+      fields[0].before(row); fields.forEach(field => row.append(field));
+    }
+    function expandCards(wrapper) {
+      const select = wrapper.querySelector('select[data-native-input]');
+      const entry = cardGroups.get(select);
+      if (entry) { entry.collapsedValue = null; syncCards(wrapper,config.fields[wrapper.dataset.nativeField]); }
+    }
     function syncCards(wrapper, field) {
       const select = wrapper.querySelector('select[data-native-input]');
       if (!select || field.step === 'location') return;
@@ -114,7 +126,29 @@
         group.setAttribute('aria-labelledby', label.id);
         group.setAttribute('aria-describedby', select.getAttribute('aria-describedby'));
         select.after(group); select.hidden = true;
-        entry = {group, signature:null}; cardGroups.set(select, entry);
+        const edit = document.createElement('button'); edit.type = 'button';
+        edit.className = 'ba-native-edit-choice'; edit.textContent = 'Modifica';
+        edit.setAttribute('aria-label','Modifica: ' + field.label);
+        group.id = select.id + '-choices'; edit.setAttribute('aria-controls',group.id);
+        const row = document.createElement('div'); row.className = 'ba-native-choice-row';
+        group.before(row); row.append(group,edit);
+        entry = {group, edit, signature:null, collapsedValue:null, arrowNavigation:false}; cardGroups.set(select, entry);
+        edit.addEventListener('click', () => {
+          if (select.disabled) return;
+          expandCards(wrapper);
+          (group.querySelector('input:checked') || group.querySelector('input'))?.focus();
+        });
+        group.addEventListener('keydown', event => {
+          if (event.key.startsWith('Arrow')) entry.arrowNavigation = true;
+          if (event.key === 'Enter' && event.target.matches('input[type=radio]')) { event.preventDefault(); event.target.click(); }
+        });
+        group.addEventListener('keyup', () => { entry.arrowNavigation = false; });
+        const compact = () => {
+          if (!disposed && !select.disabled && select.value && !group.contains(document.activeElement)) {
+            entry.collapsedValue = select.value; syncCards(wrapper,field);
+          }
+        };
+        group.addEventListener('focusout', event => { if (event.relatedTarget && !group.contains(event.relatedTarget)) queueMicrotask(compact); });
       }
       const signature = JSON.stringify(options.map(option => [option.value,option.textContent]));
       if (entry.signature !== signature) {
@@ -144,12 +178,25 @@
           };
           radio.addEventListener('input',chooseCard);
           radio.addEventListener('change',chooseCard);
+          radio.addEventListener('click', () => {
+            if (entry.arrowNavigation) return;
+            queueMicrotask(() => {
+              if (disposed || select.disabled || select.value !== radio.value) return;
+              entry.collapsedValue = select.value; syncCards(wrapper,field);
+            });
+          });
         });
       }
+      if (!select.value || entry.collapsedValue !== select.value) entry.collapsedValue = null;
+      const collapsed = Boolean(entry.collapsedValue);
+      entry.group.classList.toggle('is-collapsed',collapsed);
+      entry.edit.hidden = !collapsed; entry.edit.disabled = select.disabled;
+      entry.edit.setAttribute('aria-expanded',String(!collapsed));
       entry.group.disabled = select.disabled;
       entry.group.querySelectorAll('input').forEach(radio => {
         radio.checked = radio.value === select.value;
-        radio.disabled = select.disabled; radio.required = select.required;
+        radio.closest('label').hidden = collapsed && !radio.checked;
+        radio.disabled = select.disabled || (collapsed && !radio.checked); radio.required = select.required;
         radio.setAttribute('aria-invalid', select.getAttribute('aria-invalid') || 'false');
       });
     }
@@ -229,7 +276,8 @@
         }
         if (file && mediaView) return mediaView.focus(file);
         const wrapper = wrappers.find(w => w.dataset.nativeField === path);
-        (wrapper.querySelector('.ba-native-card-grid input:not(:disabled)') || wrapper.querySelector('input,select,textarea,fieldset')).focus();
+        expandCards(wrapper);
+        (wrapper.querySelector('.ba-native-card-grid input:checked') || wrapper.querySelector('.ba-native-card-grid input:not(:disabled)') || wrapper.querySelector('input,select,textarea,fieldset')).focus();
       });
     }
     wrappers.forEach(wrapper => {
@@ -298,6 +346,7 @@
     });
     listen(container.querySelector('[data-native-new]'),'click', () => {
       mediaView?.dispose();
+      cardGroups.forEach(entry => { entry.collapsedValue = null; });
       form.reset(); model.reset(); model.blocked = false; model.lastError = null;
        smartAddress?.reset?.();
       wrappers.forEach(wrapper => {
