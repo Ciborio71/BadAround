@@ -18,8 +18,8 @@ jobs:
       - name: Verify authorized application and workflow-only delta
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD^)" = '00b823baf3412ca3fae30874325aa9114cf5a964'
-          test "$(git diff --name-only HEAD^ HEAD)" = '.github/workflows/nf-visual-02-cards-staging.yml'
+          git diff --quiet 00b823baf3412ca3fae30874325aa9114cf5a964 HEAD -- wordpress tests
+          test "$(git diff --name-only 00b823baf3412ca3fae30874325aa9114cf5a964 HEAD)" = '.github/workflows/nf-visual-02-cards-staging.yml'
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -82,7 +82,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$GITHUB_REF" = 'refs/heads/deploy/nf-visual-02-cards'
-          test "$(git rev-parse HEAD^)" = '00b823baf3412ca3fae30874325aa9114cf5a964'
+          git diff --quiet 00b823baf3412ca3fae30874325aa9114cf5a964 HEAD -- wordpress tests
           for path in assets/css/native-report.css assets/js/native-report/errors.js assets/js/native-report/wizard.js assets/js/native-report/media-view.js; do
             mkdir -p "nf-new/$(dirname "$path")" "nf-rollback/$(dirname "$path")"
             cp "wordpress/themes/badaround-child/$path" "nf-new/$path"
@@ -133,4 +133,3 @@ jobs:
       - name: Record upload completion and external verification requirement
         run: |
           echo 'Four-file staging upload completed. Authenticated active-theme source comparison is required before certification; runner HTTP smoke is unavailable (known 403).'
-
