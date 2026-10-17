@@ -62,24 +62,26 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
    for(const group of await page.locator('[data-native-step]:visible .ba-native-card-grid').all()){
     const selected=group.locator('label:has(input:checked)');
     if(await selected.count()){
-     await selected.click();
+     await selected.locator('input').focus();await page.keyboard.press('Enter');
      await page.waitForFunction(el=>el.classList.contains('is-collapsed'),await group.elementHandle());
      assert(await group.evaluate(e=>e.classList.contains('is-collapsed')));
      assert.equal(await group.locator('label:visible').count(),1);
      const edit=group.locator('..').getByRole('button',{name:/Modifica:/});
      await edit.click();
      assert(!(await group.evaluate(e=>e.classList.contains('is-collapsed'))),await group.evaluate(e=>e.closest('[data-native-field]').dataset.nativeField));
-     await group.locator('label:has(input:checked)').click();
+     await group.locator('input:checked').focus();await page.keyboard.press('Enter');
      await page.waitForFunction(el=>el.classList.contains('is-collapsed'),await group.elementHandle());
     }
    }
    if(step===5){
-    const email=await page.locator('[data-native-field="reporter.email"]').boundingBox();
-    const phone=await page.locator('[data-native-field="reporter.phone"]').boundingBox();
+    // Measure paired fields atomically so intentional question scrolling cannot
+    // mix viewport positions from different animation frames.
+    const {email,phone,first,last}=await page.evaluate(()=>{
+     const box=path=>{const r=document.querySelector(`[data-native-field="${path}"]`).getBoundingClientRect();return {y:r.y,height:r.height};};
+     return {email:box('reporter.email'),phone:box('reporter.phone'),first:box('reporter.first_name'),last:box('reporter.last_name')};
+    });
     if(width>=768)assert(Math.abs(email.y-phone.y)<2,'desktop email and phone share row');
     else assert(phone.y>=email.y+email.height-1,'mobile contacts stack');
-    const first=await page.locator('[data-native-field="reporter.first_name"]').boundingBox();
-    const last=await page.locator('[data-native-field="reporter.last_name"]').boundingBox();
     if(width>=768)assert(Math.abs(first.y-last.y)<2,'paired desktop names must share row');
     else assert(last.y>=first.y+first.height-1,'mobile names must stack');
    }
