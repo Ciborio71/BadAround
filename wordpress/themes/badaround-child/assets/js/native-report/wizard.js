@@ -3,9 +3,9 @@
   const ns = window.BadAroundNative;
   function boot(container) {
     if (container.nativeReport) return; // Reinitialization must retain the current logical wizard.
-    let disposed=false; const listeners=[];
+    let disposed=false; const listeners=[]; let submitWaitTimer=null;
     function listen(target,type,handler) { target.addEventListener(type,handler);listeners.push(()=>target.removeEventListener(type,handler)); }
-    function teardown() { if(disposed)return; disposed=true;listeners.forEach(remove=>remove());mediaView?.dispose();smartAddress?.dispose(); }
+    function teardown() { if(disposed)return; disposed=true;clearTimeout(submitWaitTimer);submissionFeedback.hidden=true;listeners.forEach(remove=>remove());mediaView?.dispose();smartAddress?.dispose(); }
     const config = JSON.parse(container.querySelector('[data-native-config]').textContent);
     const model = new ns.Model(config);
     const form = container.querySelector('[data-native-form]');
@@ -13,6 +13,28 @@
     const wrappers = Array.from(form.querySelectorAll('[data-native-field]'));
     const next = form.querySelector('[data-native-next]'), back = form.querySelector('[data-native-back]'), submit = form.querySelector('[data-native-submit]');
     const success = container.querySelector('[data-native-success]');
+    // Outside the busy form so assistive technology can announce progress.
+    const submissionFeedback=document.createElement('div');
+    submissionFeedback.className='ba-native-submit-feedback';submissionFeedback.hidden=true;
+    submissionFeedback.dataset.nativeSubmitFeedback='';
+    submissionFeedback.setAttribute('role','status');submissionFeedback.setAttribute('aria-live','polite');submissionFeedback.setAttribute('aria-atomic','true');
+    form.after(submissionFeedback);
+    function syncSubmissionFeedback(){
+      submit.classList.toggle('is-loading',model.busy);
+      if(model.busy){
+        if(submissionFeedback.hidden){
+          submissionFeedback.textContent='Invio in corso… Attendi la conferma prima di chiudere la pagina.';
+          submissionFeedback.hidden=false;
+          submissionFeedback.scrollIntoView?.({block:'nearest',behavior:'instant'});
+          submitWaitTimer=setTimeout(()=>{
+            if(!disposed&&model.busy)submissionFeedback.textContent='Stiamo elaborando la segnalazione. Attendi la conferma: non occorre premere di nuovo Invia.';
+          },6000);
+        }
+      }else{
+        clearTimeout(submitWaitTimer);submitWaitTimer=null;submissionFeedback.hidden=true;
+      }
+    }
+
     let mediaView = null;
     const smartAddress = ns.SmartAddress?.mount(container, config, model);
     function mountMedia() {
@@ -272,6 +294,7 @@
       submit.hidden = current !== 'review'; submit.disabled = model.busy || model.completed || !!model.blocked;
       submit.textContent = model.busy ? 'Invio in corso…' : model.snapshot ? 'Riprova invio' : 'Invia segnalazione';
       form.setAttribute('aria-busy', String(model.busy));
+      syncSubmissionFeedback();
       smartAddress?.syncVisibility?.();
       if (mediaView) mediaView.render();
       if (current === 'review') review();
@@ -357,6 +380,7 @@
       if (result.ok) {
         model.busy = false;
         model.completed = true; model.lastError = null;
+        form.setAttribute('aria-busy','false');syncSubmissionFeedback();
         mediaView?.dispose();
         form.hidden = true; container.querySelector('nav').hidden = true; success.hidden = false;
         success.querySelector('h2').focus();
