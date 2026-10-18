@@ -7,7 +7,11 @@
   const panel=ui?.querySelector('[data-smart-map-panel]'),canvas=ui?.querySelector('[data-smart-map]');
   const geo=ui?.querySelector('[data-smart-geolocate]'),status=ui?.querySelector('[data-smart-map-status]');
   if(!panel||!canvas||!geo)return {hide(){},show(){},sync(){},dispose(){}};
+  const confirmation=ui.querySelector('[data-smart-confirmation]');
+  // Keep the verified address next to the result, without changing its data source.
+  if(confirmation){panel.after(confirmation);confirmation.tabIndex=-1;}
   let disposed=false,map,marker,dragListener,busy=false;
+  let mapTask=Promise.resolve();
   const locked=()=>Boolean(disposed||model.busy||model.snapshot||model.completed);
   const say=text=>{if(!disposed&&status)status.textContent=text;};
   function sync(){geo.disabled=locked()||busy||!config.smartAddress?.key;if(marker)marker.gmpDraggable=!locked()&&!busy;}
@@ -20,7 +24,8 @@
    if(icon)pin.append(icon.cloneNode(true));
    pin.setAttribute('aria-hidden','true');return pin;
   }
-  async function show(position){
+  function show(position){return mapTask=renderMap(position);}
+  async function renderMap(position){
    if(disposed)return;
    const ticket=bridge.ticket();
    try{
@@ -38,7 +43,19 @@
     sync();say('Il segnaposto indica la posizione riservata dell’evento. Puoi correggerla spostandolo.');
    }catch(_){if(!disposed&&bridge.current(ticket))say('Mappa non disponibile. Puoi continuare con l’indirizzo Google confermato.');}
   }
-  async function resolve(position,ticket){
+  function revealAddress(ticket){
+   const reveal=()=>{
+    if(locked()||!bridge.current(ticket)||!confirmation||confirmation.hidden||ui.closest('[data-native-step]')?.hidden)return;
+    try{confirmation.focus({preventScroll:true});}catch(_){confirmation.focus();}
+    const header=container.ownerDocument.querySelector('.ba-site-header');
+    const safeTop=Math.max(16,(header?.getBoundingClientRect().bottom||0)+16);
+    const top=Math.max(0,(root.scrollY||0)+confirmation.getBoundingClientRect().top-safeTop);
+    const reduced=root.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    root.scrollTo?.({top,behavior:reduced?'instant':'smooth'});
+   };
+   if(root.requestAnimationFrame)root.requestAnimationFrame(reveal);else reveal();
+  }
+  async function resolve(position,ticket,reveal=false){
    try{
     if(!Number.isFinite(position.lat)||!Number.isFinite(position.lng)||Math.abs(position.lat)>90||Math.abs(position.lng)>180)throw new Error('invalid_position');
     await bridge.load();
@@ -50,8 +67,16 @@
     const result=response.results?.[0];
     if(!result?.place_id)throw new Error('no_address');
     // Resolve an actual Google Place, then use the unchanged canonical resolver.
-    const ok=await bridge.accept(new Place({id:result.place_id}),position,ticket);
-    if(ok)say('Punto e indirizzo verificati. Controlla che corrispondano al luogo dell’evento.');
+    const acceptance=bridge.accept(new Place({id:result.place_id}),position,ticket);
+    // Accepting starts a fresh Place Details request; retain that request's ticket.
+    const acceptedTicket=bridge.ticket();
+    const ok=await acceptance;
+    if(ok){
+     if(reveal)await mapTask;
+     if(disposed||!bridge.current(acceptedTicket))return;
+     say('Punto e indirizzo verificati. Controlla che corrispondano al luogo dell’evento.');
+     if(reveal)revealAddress(acceptedTicket);
+    }
     else if(bridge.current(ticket))say('Punto non riconosciuto. Cerca e seleziona un indirizzo Google.');
    }catch(_){if(!disposed&&bridge.current(ticket))say('Non è stato possibile verificare il punto. Cerca e seleziona un indirizzo Google.');}
    finally{if(!disposed){busy=false;geo.textContent='Usa la mia posizione';sync();}}
@@ -67,7 +92,7 @@
    const ticket=bridge.begin();busy=true;sync();geo.textContent='Ricerca della posizione…';say('Attendi la posizione del dispositivo e controlla che sia il luogo dell’evento.');
    root.navigator.geolocation.getCurrentPosition(p=>{
     if(disposed||!bridge.current(ticket)){busy=false;geo.textContent='Usa la mia posizione';sync();return;}
-    resolve({lat:p.coords.latitude,lng:p.coords.longitude},ticket);
+    resolve({lat:p.coords.latitude,lng:p.coords.longitude},ticket,true);
    },error=>{
     if(disposed)return;busy=false;geo.textContent='Usa la mia posizione';sync();
     if(bridge.current(ticket))say(error.code===1?'Permesso alla posizione negato. Puoi cercare un indirizzo.':'Posizione non disponibile. Riprova oppure cerca un indirizzo.');
