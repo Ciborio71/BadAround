@@ -1,0 +1,134 @@
+name: Native property category copy staging deploy
+on:
+  push:
+    branches:
+      - deploy/nf-copy-property
+permissions:
+  contents: read
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify isolated copy-only application and workflow
+        run: |
+          set -euo pipefail
+          git diff --quiet 4cf5e70e764d19906a54dc2843739b66b9c4316a HEAD -- wordpress tests
+          test "$(git diff --name-only 4cf5e70e764d19906a54dc2843739b66b9c4316a HEAD)" = '.github/workflows/nf-copy-property-staging.yml'
+          test "$(git diff --name-only e0ffdfcb223d7c4b96450eaa94b3e6ddc6c3b603 4cf5e70e764d19906a54dc2843739b66b9c4316a)" = 'wordpress/themes/badaround-child/assets/js/native-report/wizard.js'
+          node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
+          git show e0ffdfcb223d7c4b96450eaa94b3e6ddc6c3b603:wordpress/themes/badaround-child/assets/js/native-report/wizard.js > /tmp/property-before.js
+          node - <<'JS'
+          const fs=require('node:fs'),assert=require('node:assert/strict');
+          const before=fs.readFileSync('/tmp/property-before.js','utf8');
+          const after=fs.readFileSync('wordpress/themes/badaround-child/assets/js/native-report/wizard.js','utf8');
+          assert.equal(after,before.replace('Furti, tentati furti, danneggiamenti e altri eventi che riguardano abitazioni, negozi e uffici.','Furti, tentati furti e altri eventi che riguardano abitazioni, negozi e uffici.'));
+          JS
+  deploy:
+    needs: native
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Prepare only one authorized UI files and verified baseline rollback
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/deploy/nf-copy-property'
+          git diff --quiet 4cf5e70e764d19906a54dc2843739b66b9c4316a HEAD -- wordpress tests
+          for path in assets/js/native-report/wizard.js; do
+            mkdir -p "nf-new/$(dirname "$path")" "nf-rollback/$(dirname "$path")"
+            cp "wordpress/themes/badaround-child/$path" "nf-new/$path"
+            git show "e0ffdfcb223d7c4b96450eaa94b3e6ddc6c3b603:wordpress/themes/badaround-child/$path" > "nf-rollback/$path"
+          done
+          test "$(find nf-new -type f | wc -l)" -eq 1
+          test "$(find nf-rollback -type f | wc -l)" -eq 1
+          find nf-new nf-rollback -type f -exec sha256sum {} + > nf-manifest.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nf-copy-property-predeploy-rollback
+          path: |
+            nf-rollback/
+            nf-manifest.txt
+          retention-days: 14
+          if-no-files-found: error
+      - name: Upload one Native UI files to staging only
+        id: upload
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./nf-new/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .nf-copy-property-state.json
+          log-level: minimal
+      - name: Retry transient FTPS failure (attempt 2)
+        if: steps.upload.outcome == 'failure'
+        id: retry2
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./nf-new/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .nf-copy-property-state.json
+          log-level: minimal
+      - name: Retry transient FTPS failure (attempt 3)
+        if: steps.upload.outcome == 'failure' && steps.retry2.outcome == 'failure'
+        id: retry3
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./nf-new/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .nf-copy-property-state.json
+          log-level: minimal
+      - name: Restore verified baseline if upload fails
+        if: steps.upload.outcome == 'failure' && steps.retry2.outcome == 'failure' && steps.retry3.outcome == 'failure'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./nf-rollback/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .nf-copy-property-rollback-state.json
+          log-level: minimal
+      - name: Confirm upload outcome
+        run: |
+          if [ '${{ steps.upload.outcome }}' = success ] || [ '${{ steps.retry2.outcome }}' = success ] || [ '${{ steps.retry3.outcome }}' = success ]; then
+            echo 'Authorized one-file staging upload succeeded.'
+          else
+            exit 1
+          fi
+      - name: Record upload completion and external verification requirement
+        run: |
+          echo 'One-file staging upload completed. Authenticated active-theme source comparison is required before certification; runner HTTP smoke is unavailable (known 403).'
