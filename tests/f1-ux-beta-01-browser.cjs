@@ -25,13 +25,14 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
    }}};
    Object.defineProperty(navigator,'geolocation',{value:{getCurrentPosition(ok){gpsCalls++;ok({coords:{latitude:41.665,longitude:12.435}});}}});
   });
-  await page.route('**/*',route=>{
+  await page.context().route('**/*',route=>{
    const url=new URL(route.request().url());
    if(route.request().method()==='POST'){
     const payload=route.request().postDataJSON();requests.push(payload);
     return route.fulfill({status:201,contentType:'application/json',body:JSON.stringify({status:'success',submission_id:payload.submission_id,schema_version:payload.schema_version,next_state:'moderation_pending',duplicate:false})});
    }
    if(url.pathname==='/')return route.fulfill({contentType:'text/html',body:html.replaceAll('staging.badaround.it','localhost')});
+   if(['/regole-di-pubblicazione/','/termini-e-condizioni/','/privacy-policy/','/cookie-policy/'].includes(url.pathname))return route.fulfill({contentType:'text/html',body:'<h1>Documento di prova</h1>'});
    const file=path.join(__dirname,'..',url.pathname);if(fs.existsSync(file))return route.fulfill({contentType:file.endsWith('.css')?'text/css':'application/javascript',body:fs.readFileSync(file)});return route.abort();
   });
   await page.goto('https://localhost/');
@@ -69,6 +70,13 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
    assert.deepEqual(state.hiddenRequired,[]);assert(!state.overflow);assert.deepEqual(state.numbers,state.numbers.map((_,i)=>state.numbers[0]+i));
    if(step===3){const fits=await page.locator('[data-native-field="location.place_type"] select').evaluate(el=>{const s=getComputedStyle(el);return el.clientHeight-parseFloat(s.paddingTop)-parseFloat(s.paddingBottom)>=parseFloat(s.fontSize)*1.4;});assert(fits,'select has enough vertical text space');}
    if(step===5){assert.equal(await page.locator('.ba-native-final-statements input[type=checkbox]:visible').count(),1);assert.equal(await page.locator('[data-beta-confirm]').isChecked(),true);assert.equal(await page.locator('[data-beta-declarations] [data-native-question-number]').count(),0);const full=await page.locator('#ba-native-declarations-detail').evaluate(el=>{const r=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect();return Math.abs(r.width-p.width)<2&&getComputedStyle(el).textAlign==='justify';});assert(full);}
+   if(step===5&&scenario==='vehicle_112_anonymous'){
+    const before=await page.evaluate(()=>JSON.stringify(document.querySelector('[data-native-report]').nativeReport.model.payload()));
+    for(const link of await page.locator('.ba-native-final-statements a').all()){
+     const [popup]=await Promise.all([page.waitForEvent('popup'),link.click()]);await popup.waitForLoadState();assert.equal(await popup.evaluate(()=>window.opener),null);await popup.close();
+     assert.equal(await page.evaluate(()=>JSON.stringify(document.querySelector('[data-native-report]').nativeReport.model.payload())),before);assert(await page.locator('[data-beta-confirm]').isChecked());
+    }
+   }
    if(step===0){const bg=await page.locator('.ba-native-category-grid label:has(input:checked)').evaluate(el=>getComputedStyle(el).backgroundColor);assert.equal(bg,'rgb(243, 251, 252)');}
    if(process.env.BA_SCREENSHOT_DIR&&[0,3,5,6].includes(step)&&scenario==='vehicle_112_anonymous')await page.screenshot({path:path.join(process.env.BA_SCREENSHOT_DIR,`beta-${width}-${scenario}-${step}.png`),fullPage:true});
    if(step<6){await page.locator('[data-native-next]').click();assert.equal(await page.evaluate(()=>document.querySelector('[data-native-report]').nativeReport.model.step),step+1,scenario+' step '+step+' '+await page.evaluate(()=>{const r=document.querySelector('[data-native-report]');return JSON.stringify(r.nativeReport.model.validate(Object.keys(r.nativeReport.config.steps)[r.nativeReport.model.step]));}));}

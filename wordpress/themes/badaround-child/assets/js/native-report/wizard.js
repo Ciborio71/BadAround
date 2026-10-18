@@ -133,13 +133,20 @@
     const declarationInput=document.createElement('input');declarationInput.type='checkbox';declarationInput.id='ba-native-declarations';declarationInput.dataset.betaConfirm='';
     const declarationCopy=document.createElement('span');
     const declarationTitle=document.createElement('strong');declarationTitle.textContent='Confermo di aver fornito informazioni in buona fede.';declarationCopy.append(declarationTitle);
-    const declarationDetail=document.createElement('p');declarationDetail.id='ba-native-declarations-detail';declarationDetail.className='ba-native-declaration-detail';declarationDetail.textContent='Dichiaro di avere il diritto di condividere eventuali contenuti allegati, di aver letto e accettato le regole di pubblicazione e i termini e le condizioni di BadAround e di aver preso visione dell’informativa privacy.';
+    function policyLink(label,path){
+      const link=document.createElement('a');link.textContent=label;link.href=path;
+      link.target='_blank';link.rel='noopener noreferrer';link.style.textDecoration='underline';
+      link.setAttribute('aria-label',label+' (si apre in una nuova scheda)');return link;
+    }
+    const declarationDetail=document.createElement('p');declarationDetail.id='ba-native-declarations-detail';declarationDetail.className='ba-native-declaration-detail';
+    declarationDetail.append('Dichiaro di avere il diritto di condividere eventuali contenuti allegati, di aver letto e accettato le ',policyLink('regole di pubblicazione','/regole-di-pubblicazione/'),' e i ',policyLink('termini e le condizioni','/termini-e-condizioni/'),' di BadAround e di aver preso visione dell’',policyLink('informativa privacy','/privacy-policy/'),'.');
     const declarationRequired=document.createElement('span');declarationRequired.dataset.nativeRequired='';declarationRequired.textContent=' (obbligatorio)';declarationCopy.append(declarationRequired);
     declarationLabel.append(declarationInput,declarationCopy);declaration.append(declarationLabel,declarationDetail);
     const declarationError=document.createElement('p');declarationError.id='ba-native-declarations-error';declarationError.className='ba-native-error';declarationError.hidden=true;
     declarationInput.setAttribute('aria-describedby','ba-native-declarations-detail ba-native-declarations-help '+declarationError.id);declaration.append(declarationError);finalBox.append(declaration);
     declarationFields.forEach(w=>{w.dataset.betaBundled='';finalBox.append(w);});
     const finalHelp=document.createElement('p');finalHelp.id='ba-native-declarations-help';finalHelp.className='ba-native-help';finalHelp.textContent='La segnalazione sarà sottoposta a moderazione prima della pubblicazione. BadAround può modificare, limitare o non pubblicare contenuti che non rispettano le regole o che potrebbero esporre dati riservati.';finalBox.append(finalHelp);
+    const cookieHelp=document.createElement('p');cookieHelp.className='ba-native-help';cookieHelp.append('Consulta anche la ',policyLink('Cookie Policy','/cookie-policy/'),'.');finalBox.append(cookieHelp);
     listen(declarationInput,'change',()=>{
       if(model.busy||model.snapshot||model.completed)return;
       declarationPaths.forEach(path=>{model.set(path,declarationInput.checked);wrappers.find(w=>w.dataset.nativeField===path).querySelector('input').checked=declarationInput.checked;});
