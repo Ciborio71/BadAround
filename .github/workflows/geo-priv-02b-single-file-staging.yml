@@ -1,0 +1,55 @@
+name: GEO-PRIV-02B — Single File Staging Deploy
+on:
+  push:
+    branches:
+      - deploy/geo-priv-02b-staging
+permissions:
+  contents: read
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout frozen tested patch
+        uses: actions/checkout@v4
+        with:
+          ref: a7bdbc04b7edd69ae17364bbd45d01190b495b7f
+          fetch-depth: 2
+      - name: Verify permitted one-file patch and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 'a7bdbc04b7edd69ae17364bbd45d01190b495b7f'
+          test "$(git diff --name-only 25b9ff5ad9d747b10cef7c2f3981fab15fbe4ed3 HEAD)" = 'wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php'
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+          php tests/f1-14r-publication-contract.php
+          php tests/f1-14r-consumers.php
+      - name: Verify previous source, deploy one file, check download and rollback on error
+        shell: bash
+        env:
+          FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+          FTP_USERNAME: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$FTP_HOST" && test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
+          ROOT='wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php'
+          URL="ftp://${FTP_HOST}/staging.badaround.it/wp-content/plugins/badaround-core/includes/class-badaround-publication-service.php"
+          curlftps() { curl --fail --silent --show-error --ssl-reqd --connect-timeout 20 --max-time 180 --user "$FTP_USERNAME:$FTP_PASSWORD" "$@"; }
+          git show 25b9ff5ad9d747b10cef7c2f3981fab15fbe4ed3:"$ROOT" > /tmp/geo-priv-previous-reference.php
+          curlftps "$URL" -o /tmp/geo-priv-staging-backup.php
+          cmp /tmp/geo-priv-staging-backup.php /tmp/geo-priv-previous-reference.php
+          echo "Original file matches certified staging baseline"
+          rollback() {
+            echo "::error::FTPS upload verification failed; attempting single-file restore"
+            curlftps --upload-file /tmp/geo-priv-staging-backup.php "$URL" || true
+          }
+          trap rollback ERR
+          curlftps --upload-file "$ROOT" "$URL"
+          curlftps "$URL" -o /tmp/geo-priv-verify.php
+          cmp /tmp/geo-priv-verify.php "$ROOT"
+          trap - ERR
+          echo "Exact patch deployed and byte-verified: a7bdbc04b7edd69ae17364bbd45d01190b495b7f"
