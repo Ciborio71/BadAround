@@ -7,7 +7,7 @@ test('NF-FINAL: all seven steps expose progress and focus, preserve payload and 
   const before=JSON.stringify(h.model.payload());
   for(let i=0;i<7;i++){
     assert.equal(h.model.step,i);
-    assert(h.doc.querySelector('[data-native-position]').textContent.includes(`Passaggio ${i+1} di 7`));
+    assert(h.doc.querySelector('[data-native-position]').textContent.includes(`Sei in: ${h.root.nativeReport.config.steps[Object.keys(h.root.nativeReport.config.steps)[i]]}`));
     assert.equal(h.doc.querySelectorAll('[data-native-step]:not([hidden])').length,1);
     assert.equal(h.doc.querySelectorAll('[aria-current="step"]').length,1);
     if(i>0)assert.equal(h.doc.activeElement,h.doc.querySelector('[data-native-step]:not([hidden]) h2'));
@@ -16,7 +16,7 @@ test('NF-FINAL: all seven steps expose progress and focus, preserve payload and 
   const labels=[...h.doc.querySelectorAll('[data-native-review] dt')].map(n=>n.textContent);
   for(const path of ['location.region','location.province','location.municipality','location.locality','location.exact_lat','location.exact_lng'])assert(!labels.includes(h.root.nativeReport.config.fields[path].label));
   assert(labels.includes('Indirizzo preciso, compreso il civico'));
-  assert.deepEqual([...h.doc.querySelectorAll('[data-native-review] h3')].map(n=>n.textContent),['Cosa è successo','Dove','Quando','Dettagli','Immagini','Contatto e privacy']);
+  assert.deepEqual([...h.doc.querySelectorAll('[data-native-review] h3')].map(n=>n.textContent),['Cosa è successo','Dove','Quando','Dettagli','Immagini','Informazioni di contatto']);
   assert.equal(JSON.stringify(h.model.payload()),before);
   h.close();
 });

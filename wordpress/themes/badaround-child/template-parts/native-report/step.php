@@ -1,14 +1,15 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 if ( 'event' === $key ) : ?>
-	<p>Scegli la categoria e il tipo di evento. Ti chiederemo solo i dettagli pertinenti. I campi obbligatori sono indicati. Dopo ogni scelta le alternative si richiudono e ti portiamo alla domanda successiva. Puoi riaprirle con «Modifica».</p>
+	<p>Ti guidiamo una domanda alla volta. Scegli la categoria e il tipo di evento: vedrai solo i dettagli pertinenti. Puoi cambiare una risposta con «Modifica».</p>
 <?php elseif ( 'details' === $key ) : ?>
 	<p>Descrivi i fatti e aggiungi le informazioni utili a chi si trova nella zona. Puoi lasciare vuoti i campi facoltativi.</p>
 <?php elseif ( 'location' === $key ) : ?>
 	<p>Cerca una via, piazza o località in Italia. L'indirizzo esatto resta riservato.</p>
 <div class="ba-native-smart-address" data-native-smart-address>
-  <label for="ba-smart-search">Posizione dell'evento</label>
-  <input id="ba-smart-search" data-smart-start type="text" readonly autocomplete="off" placeholder="Cerca indirizzo o località" aria-describedby="ba-smart-status">
+  <label for="ba-smart-search">Dove è successo?</label>
+  <input id="ba-smart-search" data-smart-start type="text" readonly autocomplete="off" placeholder="Cerca indirizzo o località" aria-describedby="ba-smart-privacy ba-smart-status">
+  <p id="ba-smart-privacy" class="ba-native-help"><strong>L’indirizzo preciso e il numero civico restano riservati. La posizione pubblica può essere approssimata per proteggere la privacy.</strong></p>
   <div data-smart-widget></div>
   <button data-smart-geolocate type="button" class="ba-button ba-button--outline">Usa la mia posizione</button>
   <p class="ba-native-help">Seleziona un suggerimento Google, anche usando le frecce e Invio. La posizione del dispositivo viene richiesta solo premendo il pulsante.</p>
@@ -26,7 +27,7 @@ if ( 'event' === $key ) : ?>
 <?php elseif ( 'media' === $key ) : ?>
 	<p>Le immagini sono facoltative. Gli originali restano riservati per verifica e moderazione: l’invio non li rende automaticamente pubblici. Solo versioni approvate possono diventare pubbliche. Evita dati personali non necessari di terzi.</p>
 <?php elseif ( 'contact' === $key ) : ?>
-	<p>Email, telefono e dati di contatto sono riservati. Scegli separatamente l’identità da mostrare al pubblico.</p>
+	<p>I tuoi recapiti restano riservati e servono a BadAround per gestire la segnalazione e, se lo desideri, per inoltrarti eventuali informazioni utili ricevute dalla community.</p>
 	<?php $privacy_url = get_privacy_policy_url(); if ( $privacy_url ) : ?><p><a href="<?php echo esc_url( $privacy_url ); ?>" target="_blank" rel="noopener">Leggi l’informativa privacy</a></p><?php endif; ?>
 <?php elseif ( 'review' === $key ) : ?>
 	<p>Controlla i dati prima dell’invio. I dati indicati come riservati saranno usati internamente.</p>

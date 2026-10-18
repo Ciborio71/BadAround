@@ -37,7 +37,7 @@ test('card changes invalidate incompatible subtype and errors focus visible cont
 test('presentation cards preserve exactly the payload produced by canonical controls',()=>{
  const h=create();h.fill();const payload=JSON.stringify(h.model.payload());
  choose(h,'event.category','hazard');choose(h,'event.subtype','hazard_road_obstruction');
- choose(h,'time.mode','exact');choose(h,'time.knowledge','unknown');
+ h.click('next');h.click('next');choose(h,'time.mode','exact');choose(h,'time.knowledge','unknown');
  assert.equal(JSON.stringify(h.model.payload()),payload);
  h.goReview();h.model.busy=true;h.set('reporter.email','qa@example.invalid');
  assert([...h.doc.querySelectorAll('.ba-native-card-grid input')].every(r=>r.disabled));

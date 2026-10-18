@@ -38,8 +38,8 @@ test('submission lock disables editing and legal confirmations never collapse',a
  assert(!wrapper(h,'consents.privacy').querySelector('.is-collapsed'));h.close();
 });
 
-test('theft damage wording clarifies additional damage without hiding required canonical field',()=>{
- const h=create();h.set('event.category','vehicle');h.set('event.subtype','vehicle_stolen');
- const w=wrapper(h,'damage.status');assert.match(w.querySelector('label').textContent,/danni aggiuntivi/);assert.match(w.querySelector('.ba-native-help').textContent,/Da verificare/);assert(!w.hidden);assert(w.querySelector('select').required);
+test('theft damage wording stays contract-required and follows progressive details',()=>{
+ const h=create();h.fill();h.set('event.category','vehicle');h.set('event.subtype','vehicle_stolen');h.set('vehicle.role','involved');h.set('vehicle.type','car');h.set('vehicle.plate_knowledge','unknown');h.set('witness.status','none');for(let i=0;i<3;i++)h.click('next');
+ const w=wrapper(h,'damage.status');assert.match(w.querySelector('label').textContent,/danni aggiuntivi/);assert.match(w.querySelector('.ba-native-help').textContent,/Da verificare/);assert(!w.hidden);assert(h.root.nativeReport.config.fields['damage.status'].required);assert.equal(w.querySelector('fieldset').getAttribute('aria-required'),'true');
  h.set('event.category','hazard');h.set('event.subtype','hazard_road_obstruction');assert.match(w.querySelector('label').textContent,/Sono presenti danni/);assert(!w.querySelector('.ba-native-help').textContent.includes('oltre al furto'));h.close();
 });

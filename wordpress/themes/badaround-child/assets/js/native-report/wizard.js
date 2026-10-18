@@ -51,7 +51,7 @@
       const region = form.querySelector('[data-native-review]'); region.replaceChildren();
       const sections = new Map();
       Object.entries(config.fields).forEach(([path, field]) => {
-        if (!model.active(path)) return;
+        if (!model.active(path) || path==='consents.media_rights') return;
         // The review is user-facing: never print canonical territory metadata or coordinates.
         if (field.step === 'location' && path !== 'location.exact_address') return;
         const value = model.effective(path); if (value === undefined || value === '') return;
@@ -68,7 +68,7 @@
           region.append(section);
         }
         const list = section.querySelector('dl');
-        const term = document.createElement('dt'); term.textContent = field.label;
+        const term = document.createElement('dt'); term.textContent = path==='consents.truthfulness'?'Dichiarazioni in buona fede e diritti sui contenuti':field.label;
         const detail = document.createElement('dd');
         const label = v => field.options[v] || String(v);
         const valueText = typeof value === 'boolean'
@@ -76,7 +76,7 @@
           : Array.isArray(value) ? value.map(label).join(', ') : label(value);
         const valueNode = document.createElement('span'); valueNode.textContent = valueText;
         detail.append(valueNode);
-        if (field.help) {
+        if (field.help && !['Dato riservato: non viene pubblicato integralmente.','La pubblicazione avviene solo dopo moderazione.'].includes(field.help)) {
           const help = document.createElement('small');
           help.className = 'ba-native-review-help';
           help.textContent = field.help;
@@ -121,6 +121,107 @@
       object:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14v12H5V7Zm3-3h8v3H8V4Zm1 7h6m-6 4h4"/></svg>'
     };
     const cardGroups = new Map();
+    // Presentation adapters preserve every canonical value and validation rule.
+    const declarationPaths=['consents.truthfulness','consents.media_rights'];
+    const declarationFields=declarationPaths.map(path=>wrappers.find(w=>w.dataset.nativeField===path));
+    const finalBox=document.createElement('fieldset');finalBox.className='ba-native-final-statements';
+    const finalLegend=document.createElement('legend');finalLegend.textContent='Prima di inviare';finalBox.append(finalLegend);
+    declarationFields[0].before(finalBox);
+    const declaration=document.createElement('div');declaration.className='ba-native-field';declaration.dataset.betaDeclarations='';
+    const declarationLabel=document.createElement('label');declarationLabel.className='ba-native-choice';declarationLabel.htmlFor='ba-native-declarations';
+    const declarationInput=document.createElement('input');declarationInput.type='checkbox';declarationInput.id='ba-native-declarations';declarationInput.dataset.betaConfirm='';
+    const declarationCopy=document.createElement('span');declarationCopy.textContent='Confermo di aver fornito informazioni in buona fede e di avere il diritto di condividere eventuali contenuti allegati.';
+    const declarationRequired=document.createElement('span');declarationRequired.dataset.nativeRequired='';declarationRequired.textContent=' (obbligatorio)';declarationCopy.append(declarationRequired);
+    declarationLabel.append(declarationInput,declarationCopy);declaration.append(declarationLabel);
+    const declarationError=document.createElement('p');declarationError.id='ba-native-declarations-error';declarationError.className='ba-native-error';declarationError.hidden=true;
+    declarationInput.setAttribute('aria-describedby',declarationError.id);declaration.append(declarationError);finalBox.append(declaration);
+    declarationFields.forEach(w=>{w.dataset.betaBundled='';finalBox.append(w);});
+    for(const path of ['consents.publication_rules','consents.terms','consents.privacy'])finalBox.append(wrappers.find(w=>w.dataset.nativeField===path));
+    const finalHelp=document.createElement('p');finalHelp.className='ba-native-help';finalHelp.textContent='La segnalazione sarà sottoposta a moderazione prima della pubblicazione. BadAround può modificare, limitare o non pubblicare contenuti che non rispettano le regole o che potrebbero esporre dati riservati.';finalBox.append(finalHelp);
+    listen(declarationInput,'change',()=>{
+      if(model.busy||model.snapshot||model.completed)return;
+      declarationPaths.forEach(path=>{model.set(path,declarationInput.checked);wrappers.find(w=>w.dataset.nativeField===path).querySelector('input').checked=declarationInput.checked;});
+      declarationError.hidden=true;declarationInput.removeAttribute('aria-invalid');render();
+    });
+    const authorityWrapper=wrappers.find(w=>w.dataset.nativeField==='authority.status');
+    const authorityCanonical=authorityWrapper.querySelector('[data-native-input]');authorityCanonical.hidden=true;
+    const authorityChoice=document.createElement('select');authorityChoice.id='ba-native-authority-choice';authorityChoice.dataset.betaAuthority='';
+    authorityChoice.setAttribute('aria-describedby',authorityCanonical.getAttribute('aria-describedby'));
+    const authorityOptions={'':'Seleziona…','yes:public_service':'Numero Unico di Emergenza 112','yes:police':'Polizia di Stato','yes:carabinieri':'Carabinieri','yes:local_police':'Polizia Locale','yes:fire_service':'Vigili del Fuoco','yes:other':'Altra autorità o servizio','no':'No','not_yet':'Non ancora','not_applicable':'Non applicabile','prefer_not':'Preferisco non indicarlo','yes:':'Sì, non so quale servizio'};
+    Object.entries(authorityOptions).forEach(([value,label])=>authorityChoice.add(new Option(label,value)));
+    // Preserve already supported service values when restoring an in-memory answer.
+    for(const [value,label] of Object.entries(config.fields['authority.type'].options))if(!authorityOptions['yes:'+value])authorityChoice.add(new Option(label,'yes:'+value));
+    authorityCanonical.after(authorityChoice);const authorityLabel=authorityWrapper.querySelector('label');const canonicalAuthorityLabel=authorityLabel.cloneNode(true);canonicalAuthorityLabel.hidden=true;authorityCanonical.before(canonicalAuthorityLabel);authorityLabel.htmlFor=authorityChoice.id;
+    listen(authorityChoice,'input',event=>event.stopPropagation());
+    listen(authorityChoice,'change',event=>{
+      event.stopPropagation();
+      if(model.busy||model.snapshot||model.completed)return;
+      const [status,type]=authorityChoice.value.split(':');model.set('authority.status',status);authorityCanonical.value=status;
+      if(status==='yes'){model.set('authority.type',type||undefined);wrappers.find(w=>w.dataset.nativeField==='authority.type').querySelector('select').value=type||'';}
+      authorityChoice.removeAttribute('aria-invalid');render();nextQuestion(authorityWrapper);
+    });
+    function unanswered(path){
+      const value=model.effective(path);return value===undefined||value===null||value===''||value===false||(Array.isArray(value)&&!value.length);
+    }
+    function questionTarget(wrapper){
+      if(wrapper===authorityWrapper)return authorityChoice;
+      if(wrapper===declaration)return declarationInput;
+      return wrapper.querySelector('.ba-native-card-grid input:checked:not(:disabled)')||wrapper.querySelector('.ba-native-card-grid input:not(:disabled)')||wrapper.querySelector('[data-native-input]:not([disabled]):not([hidden])');
+    }
+    function syncFlow(){
+      const locked=model.busy||!!model.snapshot||model.completed;
+      declarationInput.checked=declarationPaths.every(path=>model.effective(path)===true);
+      const status=model.effective('authority.status')||'',type=model.effective('authority.type')||'';
+      authorityChoice.value=status==='yes'?'yes:'+type:status;
+      let number=0;
+      for(const section of form.querySelectorAll('[data-native-step]')){
+        let blocked=false,pairBlocked=false;
+        const units=[...section.querySelectorAll('[data-native-field],[data-beta-declarations]')];
+        if(section.dataset.nativeStep==='location'){
+          numberLabel(section.querySelector('[data-native-smart-address]>label'),++number);continue;
+        }
+        for(const unit of units){
+          const path=unit.dataset.nativeField,field=config.fields[path],bundled=unit.hasAttribute('data-beta-bundled'),authorityType=path==='authority.type';
+          if(bundled||authorityType){unit.hidden=true;unit.querySelectorAll('input,select,textarea').forEach(el=>{el.disabled=true;el.required=false;el.setAttribute('aria-required','false');});continue;}
+          if(unit===declaration)unit.hidden=false;
+          const applicable=!unit.hidden;
+          if(applicable&&blocked)unit.hidden=true;
+          const visible=!unit.hidden;
+          if(visible){
+            const label=unit.querySelector('legend')||unit.querySelector('label');numberLabel(label,++number);
+            const missing=unit===declaration?!declarationInput.checked:field.required&&unanswered(path);
+            const pair=unit.closest('.ba-native-field-pair');
+            if(pair){pairBlocked=pairBlocked||missing;if(unit===pair.lastElementChild){blocked=blocked||pairBlocked;pairBlocked=false;}}
+            else if(missing)blocked=true;
+          }else unit.querySelectorAll('[data-native-question-number]').forEach(el=>el.remove());
+          if(!visible)unit.querySelectorAll('input,select,textarea').forEach(el=>{el.disabled=true;el.required=false;el.setAttribute('aria-required','false');});
+          if(unit===authorityWrapper){authorityCanonical.disabled=true;authorityCanonical.required=false;authorityCanonical.setAttribute('aria-required','false');authorityChoice.disabled=!visible||locked;authorityChoice.required=visible;authorityChoice.setAttribute('aria-required',String(visible));}
+          if(unit===declaration){declarationInput.disabled=!visible||locked;declarationInput.required=visible;declarationInput.setAttribute('aria-required',String(visible));}
+        }
+        if(section.dataset.nativeStep==='media'){
+          const mediaPanel=section.querySelector('[data-native-media]');
+          if(mediaPanel){mediaPanel.hidden=model.effective('media.availability')!=='yes'&&!mediaPanel.querySelector('[data-media-list]')?.children.length;if(!mediaPanel.hidden)numberLabel(mediaPanel.querySelector('label'),++number);}
+        }
+      }
+      for(const group of form.querySelectorAll('fieldset[aria-required]'))if(group.closest('[hidden]'))group.setAttribute('aria-required','false');
+      finalBox.hidden=[...finalBox.querySelectorAll('[data-native-field],[data-beta-declarations]')].every(w=>w.hidden);
+      for(const section of form.querySelectorAll('[data-native-step]')){
+        const inactive=section.dataset.nativeStep!==steps[model.step];
+        for(const el of section.querySelectorAll('[data-native-input],.ba-native-card-grid input,[data-beta-confirm],[data-beta-authority]')){
+          if(el.hidden||el.disabled||el.closest('[hidden]')){el.required=false;el.setAttribute('aria-required','false');}
+          if(inactive){el.disabled=true;el.required=false;el.setAttribute('aria-required','false');}
+          else if(el.closest('[data-native-location-fields]')){el.required=false;el.setAttribute('aria-required','false');}
+        }
+      }
+    }
+    function numberLabel(label,number){
+      if(!label)return;
+      const target=label.classList.contains('ba-native-choice')?label.querySelector(':scope>span'):label;
+      if(!target)return;
+      let badge=target.querySelector('[data-native-question-number]');
+      if(!badge){badge=document.createElement('span');badge.dataset.nativeQuestionNumber='';badge.setAttribute('aria-hidden','true');target.prepend(badge);}
+      badge.textContent=number+'. ';
+    }
     // Pair only closely related fields; DOM and keyboard order remain left-to-right.
     for (const pair of [['reporter.email','reporter.phone'],['reporter.first_name','reporter.last_name'],['vehicle.make','vehicle.model'],['time.range_start','time.range_end']]) {
       const fields = pair.map(path => wrappers.find(wrapper => wrapper.dataset.nativeField === path));
@@ -136,18 +237,17 @@
     function nextQuestion(wrapper) {
       const section = wrapper.closest('[data-native-step]');
       if (!section || section.hidden || model.busy || model.snapshot || model.completed) return;
-      const fields = Array.from(section.querySelectorAll('[data-native-field]'));
+      const fields = Array.from(section.querySelectorAll('[data-native-field],[data-beta-declarations]'));
       const nextField = fields.slice(fields.indexOf(wrapper)+1).find(field => {
         if (field.hidden || field.closest('[hidden]')) return false;
+        if(field===declaration)return !declarationInput.checked;
         const path = field.dataset.nativeField, select = field.querySelector('select[data-native-input]');
         const cards = cardGroups.get(select);
         if (cards) return !cards.collapsedValue;
         const value = model.effective(path);
         return value === undefined || value === '' || value === false;
       });
-      const target = nextField
-        ? (nextField.querySelector('.ba-native-card-grid input:checked:not(:disabled)') || nextField.querySelector('.ba-native-card-grid input:not(:disabled)') || nextField.querySelector('[data-native-input]:not(:disabled):not([hidden])'))
-        : form.querySelector('[data-native-next]:not([hidden])');
+      const target = nextField ? questionTarget(nextField) : form.querySelector('[data-native-next]:not([hidden])');
       if (!target || target.disabled) return;
       target.focus({preventScroll:true});
       const anchor = nextField || target, rect = anchor.getBoundingClientRect();
@@ -159,7 +259,7 @@
     }
     function syncCards(wrapper, field) {
       const select = wrapper.querySelector('select[data-native-input]');
-      if (!select || field.step === 'location') return;
+      if (!select || field.step === 'location' || wrapper===authorityWrapper || wrapper.dataset.nativeField==='authority.type') return;
       const options = Array.from(select.options).filter(option => option.value);
       const category = wrapper.dataset.nativeField === 'event.category';
       const subtype = wrapper.dataset.nativeField === 'event.subtype';
@@ -244,7 +344,7 @@
       entry.group.querySelectorAll('input').forEach(radio => {
         radio.checked = radio.value === select.value;
         radio.closest('label').hidden = collapsed && !radio.checked;
-        radio.disabled = select.disabled || (collapsed && !radio.checked); radio.required = select.required;
+        radio.disabled = select.disabled || (collapsed && !radio.checked); radio.required = select.required && !radio.disabled;
         radio.setAttribute('aria-invalid', select.getAttribute('aria-invalid') || 'false');
       });
     }
@@ -261,7 +361,8 @@
         if (path === 'damage.status') {
           const theft = model.effective('event.subtype') === 'vehicle_stolen';
           const label = wrapper.querySelector('label');
-          if (label?.firstChild?.nodeType === 3) label.firstChild.textContent = theft ? 'Ci sono danni aggiuntivi legati al furto?' : field.label;
+          const copyNode=[...label.childNodes].find(node=>node.nodeType===3);
+          if (copyNode) copyNode.textContent = theft ? 'Ci sono danni aggiuntivi legati al furto?' : field.label;
           wrapper.querySelector('.ba-native-help').textContent = theft
             ? 'Indica eventuali danni materiali oltre al furto, per esempio a serrature o vetri. Se il mezzo non è stato ritrovato e non puoi verificarli, scegli «Da verificare».'
             : field.help;
@@ -287,7 +388,7 @@
       });
       const position = container.querySelector('[data-native-position]');
       if (position) {
-        const text = `Passaggio ${model.step + 1} di ${steps.length}: ${config.steps[current]}`;
+        const text = `Sei in: ${config.steps[current]}.${model.step<steps.length-1?' Dopo: '+config.steps[steps[model.step+1]]+'.':' Controlla e invia la segnalazione.'}`;
         if (position.textContent !== text) position.textContent = text;
       }
       back.disabled = model.step === 0 || model.busy || !!model.snapshot;
@@ -298,6 +399,7 @@
       syncSubmissionFeedback();
       smartAddress?.syncVisibility?.();
       if (mediaView) mediaView.render();
+      syncFlow();
       if (current === 'review') review();
       if (focus) focusStep(current);
     }
@@ -322,7 +424,12 @@
     function displayErrors(errors) {
       const first = errors.find(error => config.fields[error.field] && model.active(error.field));
       if (first) model.step = steps.indexOf(config.fields[first.field].step);
-      render(); ns.presentErrors(container, errors, config, (path, file) => {
+      render();
+      const declarationMissing=errors.some(error=>declarationPaths.includes(error.field));
+      declarationError.hidden=!declarationMissing;declarationError.textContent=declarationMissing?'Conferma le dichiarazioni prima di proseguire.':'';
+      declarationInput.setAttribute('aria-invalid',String(declarationMissing));
+      authorityChoice.setAttribute('aria-invalid',String(errors.some(error=>error.field==='authority.status')));
+      ns.presentErrors(container, errors, config, (path, file) => {
         model.step = steps.indexOf(config.fields[path].step); render();
         if (config.fields[path].step === 'location') {
           focusStep('location');
@@ -333,6 +440,8 @@
         }
         if (file && mediaView) return mediaView.focus(file);
         const wrapper = wrappers.find(w => w.dataset.nativeField === path);
+        if(declarationPaths.includes(path)){declarationInput.focus();return;}
+        if(path==='authority.status'){authorityChoice.focus();return;}
         expandCards(wrapper);
         (wrapper.querySelector('.ba-native-card-grid input:checked') || wrapper.querySelector('.ba-native-card-grid input:not(:disabled)') || wrapper.querySelector('input,select,textarea,fieldset')).focus();
       });

@@ -7,11 +7,11 @@ if ( ! $config ) {
 }
 ?>
 <div class="ba-native" data-native-report>
-	<p class="ba-native-notice">La tua segnalazione sarà esaminata prima di un’eventuale pubblicazione. Dati personali e informazioni riservate non sono pubblicati automaticamente.</p>
+	<p class="ba-native-notice">La tua segnalazione sarà esaminata prima di un’eventuale pubblicazione. I dati personali e le informazioni riservate non saranno pubblicati automaticamente.</p>
 	<noscript><p>Per usare il wizard e inviare la segnalazione attiva JavaScript. I campi sono riportati di seguito per consultazione.</p></noscript>
 	<p data-native-boot role="status">Preparazione del modulo…</p>
 	<nav aria-label="Avanzamento della segnalazione"><p class="ba-native-position" data-native-position role="status" aria-live="polite" aria-atomic="true"></p><ol class="ba-native-progress">
-	<?php foreach ( $config['steps'] as $key => $title ) : ?><li data-native-progress="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $title ); ?></li><?php endforeach; ?>
+	<?php $timeline = array( 'event' => 'Evento', 'location' => 'Dove', 'time' => 'Quando', 'details' => 'Dettagli', 'media' => 'Media', 'contact' => 'Contatti', 'review' => 'Riepilogo' ); foreach ( $config['steps'] as $key => $title ) : ?><li data-native-progress="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $timeline[ $key ] ); ?></li><?php endforeach; ?>
 	</ol></nav>
 	<div class="ba-native-summary" data-native-errors tabindex="-1" role="alert" hidden></div>
 	<form data-native-form novalidate>

@@ -73,7 +73,7 @@ $GLOBALS['test_origin'] = 'https://staging.badaround.it'; unset( $_GET['native_r
 f16_assert( ! badaround_native_report_qa_enabled(), 'ordinary administrator URL preserves legacy form' );
 f16_assert( 'badaround-report/v1' === $config['schemaVersion'], 'schema version from frozen F1.2' );
 $schema = BadAround_Report_Schema::fields();
-$excluded = array( 'schema_version', 'submission_id', 'consents.version', 'media.items', 'location.place_id' );
+$excluded = array( 'schema_version', 'submission_id', 'consents.version', 'media.items', 'location.place_id', 'authority.reference' );
 f16_assert( count( $config['fields'] ) === count( $schema ) - count( $excluded ), 'all user fields covered except deferred upload/Places and generated envelope' );
 foreach ( $config['fields'] as $path => $field ) {
 	f16_assert( isset( $schema[ $path ] ) && $field['required'] === $schema[ $path ]['required'] && $field['conditions'] === $schema[ $path ]['conditions'] && $field['constraints'] === $schema[ $path ]['constraints'], 'contract-derived ' . $path );

@@ -413,8 +413,7 @@
 .ba-native .ba-native-field:is(
   [data-native-field="location.exact_address"],
   [data-native-field="vehicle.plate_raw"],
-  [data-native-field="object.owner_verification_detail"],
-  [data-native-field="authority.reference"]
+  [data-native-field="object.owner_verification_detail"]
 ){
   padding:16px;
   border:1px solid #f1dfaf;
@@ -425,8 +424,7 @@
   .ba-native .ba-native-field:is(
     [data-native-field="location.exact_address"],
     [data-native-field="vehicle.plate_raw"],
-    [data-native-field="object.owner_verification_detail"],
-    [data-native-field="authority.reference"]
+    [data-native-field="object.owner_verification_detail"]
   ){padding:12px}
 }
 
@@ -557,3 +555,17 @@
 .ba-native [data-native-submit].is-loading{opacity:1;cursor:wait}
 @keyframes ba-native-submit-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.ba-native .ba-native-submit-feedback::before,.ba-native [data-native-submit].is-loading::before{animation:none}}
+
+/* F1-UX-BETA-01: neutral selection, numbered visible questions, calmer declarations. */
+.ba-native .ba-native-category-grid .ba-native-option-card:has(input:checked){border-color:var(--ba-teal-700);background:#f3fbfc;box-shadow:0 0 0 1px var(--ba-teal-700),0 10px 26px rgba(7,26,56,.06)}
+.ba-native .ba-native-category-grid .ba-native-option-card:has(input:checked)::after{background:var(--ba-teal-700);border-color:var(--ba-teal-700)}
+.ba-native .ba-native-category-grid .ba-native-option-card:hover{border-color:var(--ba-teal-700)}
+.ba-native .ba-native-progress li::before{content:''}
+.ba-native .ba-native-progress .is-complete::before{content:'✓'}
+.ba-native [data-native-question-number]{color:var(--ba-teal-700);font-weight:800;margin-right:.2em}
+.ba-native .ba-native-final-statements{min-width:0;margin:24px 0;padding:20px;border:1px solid #dce5ed;border-radius:14px;background:#f8fcfc}
+.ba-native .ba-native-final-statements>legend{font-weight:800;color:var(--ba-navy-950);padding-inline:6px}
+.ba-native .ba-native-final-statements .ba-native-field:last-of-type{margin-bottom:12px}
+@media(max-width:600px){.ba-native .ba-native-final-statements{padding:14px}}
+
+.ba-native .ba-native-help:empty{display:none}

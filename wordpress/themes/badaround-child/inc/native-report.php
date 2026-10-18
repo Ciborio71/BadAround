@@ -37,12 +37,12 @@ function badaround_native_report_labels() {
 		'object.description' => 'Descrizione dell’oggetto', 'object.status' => 'Oggetto smarrito o trovato?', 'object.owner_verification_detail' => 'Dettaglio riservato per verificare il proprietario',
 		'property.tampered_entry_point' => 'Punto di accesso manomesso', 'property.stolen_item_categories' => 'Che cosa è stato rubato?', 'property.access_method' => 'Modalità di accesso', 'property.alarm_status' => 'Stato generale dell’allarme',
 		'content.description' => 'Racconta che cosa è successo', 'damage.status' => 'Sono presenti danni?', 'damage.description' => 'Descrivi i danni', 'witness.status' => 'Ci sono testimoni?',
-		'authority.status' => 'Hai informato un’autorità o un servizio?', 'authority.type' => 'Quale autorità o servizio?', 'authority.reference' => 'Riferimento della segnalazione (riservato)',
+		'authority.status' => 'Hai contattato un servizio di emergenza o un’autorità?', 'authority.type' => 'Quale autorità o servizio?',
 		'media.availability' => 'Disponi di immagini?',
-		'reward.status' => 'Vuoi offrire una ricompensa?', 'reward.amount' => 'Importo in euro', 'reward.conditions' => 'Condizioni della ricompensa', 'reward.expires_on' => 'Scadenza',
+		'reward.status' => 'Vuoi offrire una ricompensa per informazioni utili?', 'reward.amount' => 'Importo in euro', 'reward.conditions' => 'Condizioni della ricompensa', 'reward.expires_on' => 'Scadenza',
 		'reward.confirmed' => 'Confermo l’impegno relativo alla ricompensa indicata',
 		'reporter.first_name' => 'Nome', 'reporter.last_name' => 'Cognome', 'reporter.email' => 'Email', 'reporter.phone' => 'Telefono',
-		'reporter.public_identity_mode' => 'Come vuoi essere indicato pubblicamente?', 'reporter.pseudonym' => 'Pseudonimo pubblico', 'reporter.contact_preference' => 'Preferenza di contatto',
+		'reporter.public_identity_mode' => 'Come vuoi comparire pubblicamente?', 'reporter.pseudonym' => 'Pseudonimo pubblico', 'reporter.contact_preference' => 'Quali informazioni desideri ricevere da BadAround?',
 		'consents.truthfulness' => 'Confermo che le informazioni sono veritiere per quanto a mia conoscenza',
 		'consents.media_rights' => 'Confermo di avere i diritti su eventuali contenuti forniti',
 		'consents.publication_rules' => 'Accetto le regole di pubblicazione e moderazione', 'consents.terms' => 'Accetto i termini e le condizioni',
@@ -52,12 +52,14 @@ function badaround_native_report_labels() {
 
 function badaround_native_report_option_label( $path, $value ) {
 	$context = array(
+		'authority.type' => array( 'public_service' => 'Numero Unico di Emergenza 112', 'police' => 'Polizia di Stato', 'local_police' => 'Polizia Locale', 'fire_service' => 'Vigili del Fuoco', 'other' => 'Altra autorità o servizio' ),
 		'time.mode' => array( 'exact' => 'Conosco la data', 'approximate' => 'Periodo approssimativo', 'ongoing' => 'È ancora in corso', 'repeated' => 'Si ripete nel tempo', 'unknown' => 'Non lo so' ),
 		'time.knowledge' => array( 'exact' => 'Orario preciso', 'range' => 'Fascia oraria', 'unknown' => 'Non conosco l’orario' ),
 		'vehicle.plate_knowledge' => array( 'full' => 'Targa completa', 'partial' => 'Solo una parte', 'unknown' => 'Non la conosco', 'none' => 'Il veicolo non ha targa' ),
 		'location.public_precision' => array( 'point' => 'Punto approssimato', 'street' => 'Via, senza civico', 'area' => 'Area o quartiere', 'municipality' => 'Solo il Comune' ),
 		'reward.status' => array( 'none' => 'Nessuna ricompensa', 'fixed' => 'Importo definito', 'negotiable' => 'Da concordare' ),
-		'reporter.contact_preference' => array( 'community' => 'Ricevere informazioni dalla community tramite BadAround', 'badaround_only' => 'Solo contatti da BadAround', 'none' => 'Nessun contatto' ),
+		'reporter.contact_preference' => array( 'community' => 'Informazioni dalla community tramite BadAround', 'badaround_only' => 'Solo comunicazioni dai gestori BadAround', 'none' => 'Non desidero comunicazioni facoltative' ),
+		'reporter.public_identity_mode' => array( 'anonymous' => 'In forma anonima', 'pseudonym' => 'Con uno pseudonimo', 'first_name' => 'Con il mio nome', 'name_initial' => 'Nome e iniziale del cognome' ),
 		'media.availability' => array( 'yes' => 'Sì', 'no' => 'No', 'possible' => 'Potrei procurarle', 'surveillance' => 'Possibili riprese di videosorveglianza' ),
 	);
 	if ( isset( $context[ $path ][ $value ] ) ) { return $context[ $path ][ $value ]; }
@@ -117,7 +119,7 @@ function badaround_native_report_config() {
 	uksort( $categories, function ( $a, $b ) use ( $order ) { return ( $order[ $a ] ?? 99 ) <=> ( $order[ $b ] ?? 99 ); } );
 	$fields = array();
 	foreach ( BadAround_Report_Schema::fields() as $path => $definition ) {
-		if ( in_array( $path, array( 'schema_version', 'submission_id', 'consents.version', 'media.items', 'location.place_id' ), true ) ) { continue; }
+		if ( in_array( $path, array( 'schema_version', 'submission_id', 'consents.version', 'media.items', 'location.place_id', 'authority.reference' ), true ) ) { continue; }
 		$options = array();
 		foreach ( $definition['constraints']['enum'] ?? $definition['constraints']['item_enum'] ?? array() as $value ) {
 			$options[ $value ] = badaround_native_report_option_label( $path, $value );
@@ -128,11 +130,15 @@ function badaround_native_report_config() {
 			$options = array();
 			foreach ( $categories as $category ) { $options = array_merge( $options, $category['subtypes'] ); }
 		}
+		if ( 'reporter.public_identity_mode' === $path ) {
+			$identity_order = array_flip( array( 'anonymous', 'pseudonym', 'first_name', 'name_initial' ) );
+			uksort( $options, function ( $a, $b ) use ( $identity_order ) { return $identity_order[ $a ] <=> $identity_order[ $b ]; } );
+		}
 		$fields[ $path ] = array(
 			'type' => $definition['type'], 'required' => $definition['required'], 'conditions' => $definition['conditions'],
 			'constraints' => $definition['constraints'], 'label' => $labels[ $path ] ?? $path, 'options' => $options,
 			'step' => badaround_native_report_step( $path ),
-			'help' => 'private' === $definition['privacy'] ? 'Dato riservato: non viene pubblicato integralmente.' : 'La pubblicazione avviene solo dopo moderazione.',
+			'help' => '', // Generic privacy/moderation guidance is stated once; specific help follows below.
 		);
 	}
 	// Keep the territorial hierarchy ahead of the precise private address.
@@ -144,7 +150,16 @@ function badaround_native_report_config() {
 	} );
 	$fields['location.exact_address']['help'] = 'Indirizzo e civico restano riservati. La posizione pubblica sarà approssimata.';
 	$fields['vehicle.plate_raw']['help'] = 'La targa completa resta riservata. L’eventuale versione pubblica sarà mascherata.';
-	$fields['reporter.public_identity_mode']['help'] = 'Nome e cognome restano nei dati riservati; la modalità scelta autorizza solo l’identità pubblica indicata. Email e telefono non sono pubblicati.';
+	$fields['reporter.public_identity_mode']['help'] = 'Scegli come preferisci essere indicato. BadAround non pubblica automaticamente i tuoi dati personali. La tua preferenza resta soggetta alla moderazione e alle regole di pubblicazione.';
+	$fields['reporter.contact_preference']['help'] = 'Gli altri utenti non vedono i tuoi recapiti e non possono contattarti direttamente.';
+	$fields['reward.status']['help'] = 'La ricompensa è destinata esclusivamente a chi fornisce informazioni utili al ritrovamento o alla risoluzione della segnalazione.';
+	// Identity preference first; canonical conditions and values are unchanged.
+	$contact_order = array_flip( array( 'reporter.public_identity_mode', 'reporter.pseudonym', 'reporter.first_name', 'reporter.last_name', 'reporter.email', 'reporter.phone', 'reporter.contact_preference' ) );
+	$order_before_contact = array_flip( array_keys( $fields ) );
+	uksort( $fields, function ( $a, $b ) use ( $contact_order, $order_before_contact ) {
+		if ( isset( $contact_order[ $a ], $contact_order[ $b ] ) ) { return $contact_order[ $a ] <=> $contact_order[ $b ]; }
+		return $order_before_contact[ $a ] <=> $order_before_contact[ $b ];
+	} );
 	$fields['content.description']['help'] = 'Riporta i fatti. Evita nomi, recapiti, accuse e dati personali non necessari. Il testo sarà moderato.';
 	// Public canonical taxonomy names only; the server remains authoritative via resolve_path().
 	$territories = array();
@@ -167,7 +182,7 @@ function badaround_native_report_config() {
 		'media' => array( 'endpoint' => rest_url( 'badaround/v1/report-media-sessions' ) ),
 		'locationManualEntry' => false, // MVP presentation: only the address search is visible.
 		'timezone' => wp_timezone_string(), 'fields' => $fields, 'categories' => $categories,
-		'steps' => array( 'event' => 'Cosa è successo', 'location' => 'Dove', 'time' => 'Quando', 'details' => 'Dettagli', 'media' => 'Immagini', 'contact' => 'Contatto e privacy', 'review' => 'Riepilogo e invio' ),
+		'steps' => array( 'event' => 'Cosa è successo', 'location' => 'Dove', 'time' => 'Quando', 'details' => 'Dettagli', 'media' => 'Immagini', 'contact' => 'Informazioni di contatto', 'review' => 'Riepilogo e invio' ),
 	);
 }
 
@@ -202,6 +217,12 @@ function badaround_native_report_field( $path, $field ) {
 		<?php if ( 'email' === $input_type ) : ?> autocomplete="email"<?php elseif ( 'tel' === $input_type ) : ?> autocomplete="tel"<?php elseif ( 'reporter.first_name' === $path ) : ?> autocomplete="given-name"<?php elseif ( 'reporter.last_name' === $path ) : ?> autocomplete="family-name"<?php endif; ?>>
 		<?php endif; ?>
 	<?php endif; ?>
+		<?php if ( 'reporter.contact_preference' === $path ) : ?>
+		<div class="ba-native-contact-explainer">
+			<p><strong>Informazioni dalla community tramite BadAround</strong><br>BadAround può inoltrarti informazioni pertinenti senza mostrare il tuo indirizzo email agli altri utenti.</p>
+			<p><strong>Comunicazioni dai gestori BadAround</strong><br>Per moderazione, chiarimenti o aggiornamenti sulla tua segnalazione.</p>
+		</div>
+		<?php endif; ?>
 		<p id="<?php echo esc_attr( $id ); ?>-help" class="ba-native-help"><?php echo esc_html( $field['help'] ); ?></p>
 		<p id="<?php echo esc_attr( $id ); ?>-error" class="ba-native-error" hidden></p>
 	</div>

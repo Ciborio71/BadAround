@@ -45,7 +45,7 @@ test('category selection, subtype filtering and conditional visibility',()=>{
   const opts=Array.from(h.doc.querySelector('[name="event.subtype"]').options).map(o=>o.value).filter(Boolean);
   assert.equal(opts.length,6);assert(opts.every(x=>x.startsWith('vehicle_')));
   h.set('event.subtype','vehicle_stolen');h.set('vehicle.plate_knowledge','full');
-  const plate=h.doc.querySelector('[data-native-field="vehicle.plate_raw"]');assert(!plate.hidden);
+  const plate=h.doc.querySelector('[data-native-field="vehicle.plate_raw"]');assert(h.model.active('vehicle.plate_raw')); // Progressive flow may defer it until earlier details are answered.
   h.set('vehicle.plate_raw','AB123CD');h.set('event.category','animal');h.set('event.subtype','animal_missing');
   assert(plate.hidden);assert(h.doc.querySelector('[name="vehicle.plate_raw"]').disabled);assert(!h.model.payload().vehicle);
   h.dom.window.close();
