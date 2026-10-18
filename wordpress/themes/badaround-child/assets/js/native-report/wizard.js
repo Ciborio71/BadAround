@@ -101,7 +101,7 @@
         });
         mediaSection.append(heading,title,previews);
         const unresolved=mediaView.media.items.filter(row=>row.state!=='accepted' || row.error).length;
-        if(unresolved){const pending=document.createElement('p');pending.className='ba-native-error';pending.textContent=`${unresolved} immagini da completare o rimuovere nello Step 5 prima dell’invio.`;mediaSection.append(pending);}
+        if(unresolved){const pending=document.createElement('p');pending.className='ba-native-error';pending.textContent=`${unresolved} immagini da completare o rimuovere nella sezione Immagini prima dell’invio.`;mediaSection.append(pending);}
         region.append(mediaSection);
       }
     }
