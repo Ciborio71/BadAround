@@ -26,7 +26,7 @@ test('NF-FINAL: select change clears stale error and checkbox required indicatio
   h.set('event.category','hazard','change');
   assert(h.doc.querySelector('[data-native-errors]').hidden);
   h.fill();h.goReview();h.click('back');
-  const box=h.doc.querySelector('[name="consents.privacy"]');
+  const box=h.doc.querySelector('[data-beta-confirm]');
   assert(box.closest('label').textContent.includes('obbligatorio'));
   assert(box.getAttribute('aria-describedby').includes(`${box.id}-error`));
   box.focus();assert.equal(h.doc.activeElement,box);

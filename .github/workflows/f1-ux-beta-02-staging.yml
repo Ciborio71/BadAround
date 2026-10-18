@@ -18,8 +18,8 @@ jobs:
       - name: Verify authorized application and workflow-only delta
         run: |
           set -euo pipefail
-          git diff --quiet 098dbb3a6d43850aa6c4b602d8aba4109804cb0e HEAD -- wordpress tests
-          test "$(git diff --name-only 098dbb3a6d43850aa6c4b602d8aba4109804cb0e HEAD)" = '.github/workflows/f1-ux-beta-02-staging.yml'
+          git diff --quiet 7635731d8d68aa3e30425298f2229c555a049eb7 HEAD -- wordpress tests
+          test "$(git diff --name-only 7635731d8d68aa3e30425298f2229c555a049eb7 HEAD)" = '.github/workflows/f1-ux-beta-02-staging.yml'
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -92,7 +92,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$GITHUB_REF" = 'refs/heads/deploy/f1-ux-beta-02'
-          git diff --quiet 098dbb3a6d43850aa6c4b602d8aba4109804cb0e HEAD -- wordpress tests
+          git diff --quiet 7635731d8d68aa3e30425298f2229c555a049eb7 HEAD -- wordpress tests
           for path in assets/css/native-report.css assets/js/native-report/wizard.js; do
             mkdir -p "nf-new/$(dirname "$path")" "nf-rollback/$(dirname "$path")"
             cp "wordpress/themes/badaround-child/$path" "nf-new/$path"
