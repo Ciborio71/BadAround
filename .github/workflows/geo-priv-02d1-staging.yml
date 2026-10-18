@@ -1,0 +1,112 @@
+name: GEO-PRIV-02D.1 — Staging Single File Deploy
+on:
+  push:
+    branches: [deploy/geo-priv-02d1-staging]
+permissions:
+  contents: read
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+jobs:
+  isolated:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: e040a313f6e16f500cff6723ae8a9ce48d07d0c7
+          fetch-depth: 4
+      - name: Verify exact approved application delta
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 'e040a313f6e16f500cff6723ae8a9ce48d07d0c7'
+          test "$(git diff --name-only a7bdbc04b7edd69ae17364bbd45d01190b495b7f HEAD)" = 'wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php'
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+          php tests/f1-14r-publication-contract.php
+          php tests/f1-14r-consumers.php
+      - name: One-file payload and backup
+        run: |
+          set -euo pipefail
+          mkdir -p geo2-new geo2-rollback
+          cp wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php geo2-new/class-badaround-publication-service.php
+          git show a7bdbc04b7edd69ae17364bbd45d01190b495b7f:wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php > geo2-rollback/class-badaround-publication-service.php
+          test "$(find geo2-new -type f | wc -l)" -eq 1
+          test "$(find geo2-rollback -type f | wc -l)" -eq 1
+          sha256sum geo2-new/* geo2-rollback/* > geo2-manifest.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: geo-priv-02d1-rollback
+          path: |
+            geo2-rollback/
+            geo2-manifest.txt
+          retention-days: 14
+      - name: FTPS single-file upload 1
+        id: upload1
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./geo2-new/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/includes/
+          dangerous-clean-slate: false
+          state-name: .geo-priv-02d1-state.json
+          log-level: minimal
+      - name: FTPS single-file upload 2
+        id: upload2
+        if: steps.upload1.outcome == 'failure'
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./geo2-new/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/includes/
+          dangerous-clean-slate: false
+          state-name: .geo-priv-02d1-state.json
+          log-level: minimal
+      - name: FTPS single-file upload 3
+        id: upload3
+        if: steps.upload1.outcome == 'failure' && steps.upload2.outcome == 'failure'
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./geo2-new/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/includes/
+          dangerous-clean-slate: false
+          state-name: .geo-priv-02d1-state.json
+          log-level: minimal
+      - name: Attempt rollback if all transfers fail
+        if: steps.upload1.outcome == 'failure' && steps.upload2.outcome == 'failure' && steps.upload3.outcome == 'failure'
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./geo2-rollback/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/includes/
+          dangerous-clean-slate: false
+          state-name: .geo-priv-02d1-rollback.json
+          log-level: minimal
+      - name: Gate subsequent staging recovery
+        run: |
+          if [ '${{ steps.upload1.outcome }}' = success ] || [ '${{ steps.upload2.outcome }}' = success ] || [ '${{ steps.upload3.outcome }}' = success ]; then
+            echo 'FTPS transfer succeeded, independent WPVibe live-file verification required.'
+          else
+            echo 'FTPS failed. Event 290 recovery MUST NOT run.'
+            exit 1
+          fi
