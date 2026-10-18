@@ -23,7 +23,8 @@ new_hooks="""function add_filter($name,$cb,$priority=10,$args=1){if($name==='bad
 function remove_filter($name,$cb,$priority=10){if($name==='badaround_allow_event_publish'){$GLOBALS['publish_guards']=array_values(array_filter($GLOBALS['publish_guards']??[],static fn($x)=>$x!==$cb));} }
 function do_action(){}"""
 assert setup.count(old_hooks)==1
-setup=setup.replace(old_hooks,new_hooks)\nsetup=setup.replace('function get_var($q){return 0;}','function get_var($q){return str_contains($q,\"ba_audit_log\") ? ($GLOBALS[\"audit_proof\"]??0) : 0;}')
+setup=setup.replace(old_hooks,new_hooks)
+setup=setup.replace('function get_var($q){return 0;}','function get_var($q){return str_contains($q,\"ba_audit_log\") ? ($GLOBALS[\"audit_proof\"]??0) : 0;}')
 checks=r"""
 $svc=new BadAround_Publication_Service();
 function gp_check($ok,$name) { if(!$ok){fwrite(STDERR,"FAIL $name\\n");exit(1);} echo "PASS $name\\n"; }
