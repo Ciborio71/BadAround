@@ -28,5 +28,5 @@ jobs:
         run: python3 tests/geo-priv-02d1-build.py
       - name: Publication status security A-I
         run: |
-          php -l /tmp/geo-priv-02d1-regression.php
-          php /tmp/geo-priv-02d1-regression.php
+          php -l tests/.geo-priv-02d1-generated.php
+          php tests/.geo-priv-02d1-generated.php
