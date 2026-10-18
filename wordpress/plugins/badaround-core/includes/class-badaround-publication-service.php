@@ -361,13 +361,11 @@ class BadAround_Publication_Service {
 			return true;
 		}
 
-		/* Native territory-only projection: never derive a point from private report coordinates. */
-		if ( $this->municipality_term( $territory ) ) {
-			delete_post_meta( $event_id, '_ba_public_lat' );
-			delete_post_meta( $event_id, '_ba_public_lng' );
-			delete_post_meta( $event_id, '_ba_public_radius_m' );
-			return true;
-		}
+		/*
+		 * F1.14R territory-only is a fallback when no valid private coordinates
+		 * exist, not a default for point/street/area. Municipality is handled
+		 * above and must never derive from private coordinates.
+		 */
 
 		$report = $wpdb->get_row(
 			$wpdb->prepare(
@@ -378,8 +376,19 @@ class BadAround_Publication_Service {
 			)
 		);
 
-		if ( ! $report || ! is_numeric( $report->exact_lat ) || ! is_numeric( $report->exact_lng ) ) {
-			return new WP_Error( 'ba_publication_location_missing', __( 'Non sono disponibili coordinate sufficienti per creare una posizione pubblica approssimata.', 'badaround-core' ) );
+		$valid_private_coords = $report
+			&& is_numeric( $report->exact_lat ) && is_numeric( $report->exact_lng )
+			&& is_finite( (float) $report->exact_lat ) && is_finite( (float) $report->exact_lng )
+			&& (float) $report->exact_lat >= -90 && (float) $report->exact_lat <= 90
+			&& (float) $report->exact_lng >= -180 && (float) $report->exact_lng <= 180;
+		if ( ! $valid_private_coords ) {
+			if ( ! $this->municipality_term( $territory ) ) {
+				return new WP_Error( 'ba_publication_location_missing', __( 'Non sono disponibili coordinate sufficienti per creare una posizione pubblica approssimata.', 'badaround-core' ) );
+			}
+			delete_post_meta( $event_id, '_ba_public_lat' );
+			delete_post_meta( $event_id, '_ba_public_lng' );
+			delete_post_meta( $event_id, '_ba_public_radius_m' );
+			return true;
 		}
 
 		$precision = sanitize_key( (string) get_post_meta( $event_id, '_ba_public_location_precision', true ) );
