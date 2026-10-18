@@ -1,0 +1,220 @@
+name: Native social preference capture — staging only
+on:
+  push:
+    branches: [deploy/native-social-preference]
+permissions:
+  contents: read
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Verify exact reviewed application and authorized additive scope
+        run: |
+          set -euo pipefail
+          git diff --quiet 7fb46ba212ab5ed1673d01bec9193c0d6e520637 HEAD -- wordpress tests docs
+          test "$(git diff --name-only 7fb46ba212ab5ed1673d01bec9193c0d6e520637 HEAD)" = '.github/workflows/native-social-preference-staging.yml'
+          git diff --quiet 3a133c75310095c16920679140e342a801ddf183 HEAD -- tests/fixtures
+          git diff --name-only 3a133c75310095c16920679140e342a801ddf183 HEAD -- wordpress > /tmp/social-runtime
+          test "$(wc -l < /tmp/social-runtime)" -eq 4
+          while IFS= read -r path; do
+            case "$path" in
+              wordpress/plugins/badaround-core/includes/class-badaround-report-schema.php|wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php|wordpress/themes/badaround-child/inc/native-report.php|wordpress/themes/badaround-child/assets/js/native-report/model.js) ;;
+              *) exit 1 ;;
+            esac
+          done < /tmp/social-runtime
+          git diff --check 3a133c75310095c16920679140e342a801ddf183 HEAD
+          find wordpress/plugins/badaround-core wordpress/themes/badaround-child -name '*.php' -type f -print0 | xargs -0 -n1 php -l >/dev/null
+          find wordpress/themes/badaround-child/assets/js/native-report -name '*.js' -type f -print0 | xargs -0 -n1 node --check
+      - name: Native, social evidence, privacy and Smart Address regression
+        run: |
+          set -euo pipefail
+          npm ci --prefix tests
+          node --test --test-concurrency=2 tests/native-report-f16.cjs tests/native-report-f16-dom.cjs tests/native-report-f19-ux.cjs tests/nf-final-01-ux.cjs tests/nf-visual-02-cards.cjs tests/nf-ux-03-compact.cjs tests/nf-ux-07-submit-feedback.cjs tests/f1-ux-beta-01.cjs tests/f1-15b-r5-smart-address.cjs tests/sf8-national-territory.cjs tests/sf9-public-privacy-boundary.cjs tests/native-media-f17d-dom.cjs tests/native-media-f17d-extra.cjs tests/native-social-preference.cjs
+          for file in tests/native-report-f16.php tests/native-report-f13.php tests/native-report-f14.php tests/native-report-f15.php tests/f1-15a3-territory.php tests/f1-14r-publication-contract.php tests/f1-14r-consumers.php tests/map-02r-priv-01.php tests/native-social-preference.php; do php "$file" >/dev/null; done
+      - name: Desktop, mobile, keyboard and GPS on Chromium and WebKit
+        run: |
+          set -euo pipefail
+          npm install --prefix /tmp/nf-browser-runner --no-save playwright@1.62.1
+          node /tmp/nf-browser-runner/node_modules/playwright/cli.js install --with-deps chromium webkit
+          export BA_PLAYWRIGHT_MODULE=/tmp/nf-browser-runner/node_modules/playwright
+          node tests/nf-final-01-browser.cjs
+          node tests/nf-ux-06-location-browser.cjs
+          node tests/nf-ux-09-icon-style-browser.cjs
+          node tests/f1-ux-beta-01-browser.cjs
+          BA_BROWSER_ENGINE=webkit node tests/f1-ux-beta-01-browser.cjs
+  deploy:
+    needs: native
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Prepare four authorized runtime files and verified rollback
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/deploy/native-social-preference'
+          git diff --quiet 7fb46ba212ab5ed1673d01bec9193c0d6e520637 HEAD -- wordpress tests docs
+          for path in includes/class-badaround-report-schema.php includes/class-badaround-moderation-admin.php; do
+            mkdir -p "social-core/$(dirname "$path")" "rollback-core/$(dirname "$path")"
+            cp "wordpress/plugins/badaround-core/$path" "social-core/$path"
+            git show "3a133c75310095c16920679140e342a801ddf183:wordpress/plugins/badaround-core/$path" > "rollback-core/$path"
+          done
+          for path in inc/native-report.php assets/js/native-report/model.js; do
+            mkdir -p "social-theme/$(dirname "$path")" "rollback-theme/$(dirname "$path")"
+            cp "wordpress/themes/badaround-child/$path" "social-theme/$path"
+            git show "3a133c75310095c16920679140e342a801ddf183:wordpress/themes/badaround-child/$path" > "rollback-theme/$path"
+          done
+          test "$(find social-core social-theme -type f | wc -l)" -eq 4
+          test "$(find rollback-core rollback-theme -type f | wc -l)" -eq 4
+          find social-core social-theme rollback-core rollback-theme -type f -exec sha256sum {} + > social-manifest.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-social-preference-rollback
+          path: |
+            rollback-core/
+            rollback-theme/
+            social-manifest.txt
+          retention-days: 14
+          if-no-files-found: error
+      - name: Upload two Core files before frontend
+        id: core
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./social-core/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/
+          dangerous-clean-slate: false
+          state-name: .native-social-preference-social-core-state.json
+          log-level: minimal
+      - name: Retry Core FTPS attempt 2
+        if: steps.core.outcome == 'failure'
+        id: core2
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./social-core/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/
+          dangerous-clean-slate: false
+          state-name: .native-social-preference-social-core-state.json
+          log-level: minimal
+      - name: Retry Core FTPS attempt 3
+        if: steps.core.outcome == 'failure' && steps.core2.outcome == 'failure'
+        id: core3
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./social-core/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/
+          dangerous-clean-slate: false
+          state-name: .native-social-preference-social-core-state.json
+          log-level: minimal
+      - name: Upload two Native frontend files
+        if: (steps.core.outcome == 'success' || steps.core2.outcome == 'success' || steps.core3.outcome == 'success')
+        id: theme
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./social-theme/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .native-social-preference-social-theme-state.json
+          log-level: minimal
+      - name: Retry frontend FTPS attempt 2
+        if: steps.theme.outcome == 'failure'
+        id: theme2
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./social-theme/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .native-social-preference-social-theme-state.json
+          log-level: minimal
+      - name: Retry frontend FTPS attempt 3
+        if: steps.theme.outcome == 'failure' && steps.theme2.outcome == 'failure'
+        id: theme3
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./social-theme/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .native-social-preference-social-theme-state.json
+          log-level: minimal
+      - name: Restore frontend baseline if all frontend attempts fail
+        if: always() && (steps.theme.outcome == 'failure' && steps.theme2.outcome == 'failure' && steps.theme3.outcome == 'failure')
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./rollback-theme/
+          server-dir: /staging.badaround.it/wp-content/themes/badaround-child/
+          dangerous-clean-slate: false
+          state-name: .native-social-preference-rollback-theme-state.json
+          log-level: minimal
+      - name: Restore Core baseline if upload sequence fails
+        if: always() && ((steps.core.outcome == 'failure' && steps.core2.outcome == 'failure' && steps.core3.outcome == 'failure') || (steps.theme.outcome == 'failure' && steps.theme2.outcome == 'failure' && steps.theme3.outcome == 'failure'))
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./rollback-core/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/
+          dangerous-clean-slate: false
+          state-name: .native-social-preference-rollback-core-state.json
+          log-level: minimal
+      - name: Require successful Core and frontend uploads
+        if: always()
+        run: |
+          if [ '${{ steps.core.outcome }}' != success ] && [ '${{ steps.core2.outcome }}' != success ] && [ '${{ steps.core3.outcome }}' != success ]; then exit 1; fi
+          if [ '${{ steps.theme.outcome }}' != success ] && [ '${{ steps.theme2.outcome }}' != success ] && [ '${{ steps.theme3.outcome }}' != success ]; then exit 1; fi
+          echo 'Four-file staging upload succeeded; active source verification required.'
