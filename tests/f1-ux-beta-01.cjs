@@ -31,8 +31,8 @@ test('BETA02: one explicit checkbox records all mandatory acknowledgements, neve
  const h=create();h.fill();at(h,5);
  const paths=['consents.truthfulness','consents.media_rights','consents.publication_rules','consents.terms','consents.privacy'];
  for(const p of paths)h.set(p,false);
- const bundle=h.doc.querySelector('[data-beta-confirm]');assert(!bundle.checked);
- const copy=bundle.closest('label').textContent;for(const text of ['buona fede','diritto di condividere','regole di pubblicazione','termini e le condizioni','informativa privacy'])assert(copy.includes(text),text);
+ const bundle=h.doc.querySelector('[data-beta-confirm]');assert(!bundle.checked);assert(!bundle.closest('label').querySelector('[data-native-question-number]'));assert.equal(h.doc.querySelector('#ba-native-declarations-detail').parentElement,bundle.closest('[data-beta-declarations]'));
+ const copy=bundle.closest('[data-beta-declarations]').textContent;for(const text of ['buona fede','diritto di condividere','regole di pubblicazione','termini e le condizioni','informativa privacy'])assert(copy.includes(text),text);
  assert.equal(h.doc.querySelectorAll('.ba-native-final-statements input[type=checkbox]:not(:disabled)').length,1);
  h.click('next');assert.equal(h.doc.querySelectorAll('[data-native-errors] li').length,1);h.doc.querySelector('[data-native-errors] button').click();assert.equal(h.doc.activeElement,bundle);assert.equal(bundle.getAttribute('aria-invalid'),'true');
  bundle.click();assert(h.doc.querySelector('[data-native-errors]').hidden);for(const p of paths)assert.equal(h.model.effective(p),true,p);

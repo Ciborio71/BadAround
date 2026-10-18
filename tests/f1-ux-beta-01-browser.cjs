@@ -1,11 +1,11 @@
 'use strict';
-const {chromium}=require(process.env.BA_PLAYWRIGHT_MODULE||'playwright');
+const {chromium,webkit}=require(process.env.BA_PLAYWRIGHT_MODULE||'playwright');
 const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 (async()=>{
  let html=execFileSync(process.env.BA_PHP||'php',[path.join(__dirname,'native-report-f16.php'),'--html'],{encoding:'utf8'});
  const prefix='/wordpress/themes/badaround-child/assets/js/native-report/';
  html=html.replace(`<script src="${prefix}wizard.js">`,`<script src="${prefix}location-map.js"></script><script src="${prefix}smart-address.js"></script><script src="${prefix}wizard.js">`).replace('"smartAddress":null','"smartAddress":{"key":"TEST","territories":[[2,0,"Lazio"],[3,2,"Roma"],[4,3,"Pomezia"]]}');
- const browser=await chromium.launch({headless:true,...(process.env.BA_CHROMIUM?{executablePath:process.env.BA_CHROMIUM}:{}),args:['--no-sandbox','--disable-dev-shm-usage']});
+ const browser=process.env.BA_BROWSER_ENGINE==='webkit'?await webkit.launch({headless:true}):await chromium.launch({headless:true,...(process.env.BA_CHROMIUM?{executablePath:process.env.BA_CHROMIUM}:{}),args:['--no-sandbox','--disable-dev-shm-usage']});
  try{for(const width of [390,1440])for(const scenario of ['vehicle_112_anonymous','vehicle_pseudonym','property_theft']){
   const page=await browser.newPage({viewport:{width,height:900},reducedMotion:'reduce'});page.setDefaultTimeout(10000);const errors=[],requests=[];page.on('pageerror',e=>errors.push(e.message));
   await page.addInitScript(()=>{
@@ -35,6 +35,7 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
    const file=path.join(__dirname,'..',url.pathname);if(fs.existsSync(file))return route.fulfill({contentType:file.endsWith('.css')?'text/css':'application/javascript',body:fs.readFileSync(file)});return route.abort();
   });
   await page.goto('https://localhost/');
+  await page.evaluate(()=>{const h=document.createElement('header');h.className='ba-site-header';h.style.cssText='position:fixed;top:0;left:0;right:0;height:88px;background:white;z-index:999';document.body.append(h);});
   const answers={'event.category':scenario==='property_theft'?'property':'vehicle','event.subtype':scenario==='property_theft'?'property_theft':'vehicle_stolen','reporter.relationship':'directly_involved','time.mode':'unknown','location.place_type':'road_sidewalk','location.immediate_danger':'no','vehicle.role':'involved','vehicle.type':'car','vehicle.plate_knowledge':'unknown','property.stolen_item_categories':['documents'],'property.access_method':'door_forced','content.description':'Test QA sintetico di compilazione, nessun evento reale.','damage.status':'no','witness.status':'none','authority.status':scenario==='vehicle_112_anonymous'?'yes':'no','media.availability':'no','reporter.public_identity_mode':scenario==='vehicle_pseudonym'?'pseudonym':'anonymous','reporter.pseudonym':'Sentinella QA','reporter.first_name':'QA','reporter.last_name':'BadAround','reporter.email':'qa@example.invalid','reporter.contact_preference':'none','consents.publication_rules':true,'consents.terms':true,'consents.privacy':true};
   for(let step=0;step<7;step++){
    assert.equal(await page.locator('[data-native-step]:visible').count(),1);
@@ -66,12 +67,17 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
     return {hiddenRequired:[...document.querySelectorAll('input[required],select[required],textarea[required]')].filter(el=>el.hidden||el.closest('[hidden]')).map(el=>el.name||el.id),numbers:[...section.querySelectorAll('[data-native-question-number]')].filter(el=>!el.closest('[hidden]')).map(el=>Number(el.textContent.replace('.',''))),overflow:document.documentElement.scrollWidth>innerWidth+1};
    });
    assert.deepEqual(state.hiddenRequired,[]);assert(!state.overflow);assert.deepEqual(state.numbers,state.numbers.map((_,i)=>state.numbers[0]+i));
-   if(step===5){assert.equal(await page.locator('.ba-native-final-statements input[type=checkbox]:visible').count(),1);assert.equal(await page.locator('[data-beta-confirm]').isChecked(),true);}
+   if(step===3){const fits=await page.locator('[data-native-field="location.place_type"] select').evaluate(el=>{const s=getComputedStyle(el);return el.clientHeight-parseFloat(s.paddingTop)-parseFloat(s.paddingBottom)>=parseFloat(s.fontSize)*1.4;});assert(fits,'select has enough vertical text space');}
+   if(step===5){assert.equal(await page.locator('.ba-native-final-statements input[type=checkbox]:visible').count(),1);assert.equal(await page.locator('[data-beta-confirm]').isChecked(),true);assert.equal(await page.locator('[data-beta-declarations] [data-native-question-number]').count(),0);const full=await page.locator('#ba-native-declarations-detail').evaluate(el=>{const r=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect();return Math.abs(r.width-p.width)<2&&getComputedStyle(el).textAlign==='justify';});assert(full);}
    if(step===0){const bg=await page.locator('.ba-native-category-grid label:has(input:checked)').evaluate(el=>getComputedStyle(el).backgroundColor);assert.equal(bg,'rgb(243, 251, 252)');}
    if(process.env.BA_SCREENSHOT_DIR&&[0,3,5,6].includes(step)&&scenario==='vehicle_112_anonymous')await page.screenshot({path:path.join(process.env.BA_SCREENSHOT_DIR,`beta-${width}-${scenario}-${step}.png`),fullPage:true});
    if(step<6){await page.locator('[data-native-next]').click();assert.equal(await page.evaluate(()=>document.querySelector('[data-native-report]').nativeReport.model.step),step+1,scenario+' step '+step+' '+await page.evaluate(()=>{const r=document.querySelector('[data-native-report]');return JSON.stringify(r.nativeReport.model.validate(Object.keys(r.nativeReport.config.steps)[r.nativeReport.model.step]));}));}
   }
   await page.locator('[data-native-submit]').click();await page.locator('[data-native-success]').waitFor({state:'visible'});assert.equal(requests.length,1);assert.equal(requests[0].authority.reference,undefined);assert.equal(requests[0].reporter.public_identity_mode,scenario==='vehicle_pseudonym'?'pseudonym':'anonymous');
+  const confirmation=page.locator('[data-native-success] h2');
+  await page.waitForFunction(()=>{const h=document.querySelector('[data-native-success] h2'),r=h.getBoundingClientRect();return document.activeElement===h&&r.top>=88&&r.bottom<innerHeight;});
+  assert.equal(await confirmation.textContent(),'Segnalazione inviata');assert(Number(await confirmation.evaluate(el=>getComputedStyle(el).fontWeight))>=700);
+  if(process.env.BA_SCREENSHOT_DIR&&scenario==='vehicle_112_anonymous')await page.screenshot({path:path.join(process.env.BA_SCREENSHOT_DIR,`success-${width}.png`)});
   for(const key of ['truthfulness','media_rights','publication_rules','terms','privacy'])assert.equal(requests[0].consents[key],true,key);
   if(scenario==='vehicle_112_anonymous')assert.equal(requests[0].authority.type,'public_service');
   if(process.env.BA_PAYLOAD_DIR)fs.writeFileSync(path.join(process.env.BA_PAYLOAD_DIR,`beta-${width}-${scenario}.json`),JSON.stringify(requests[0],null,2));

@@ -42,7 +42,7 @@ function badaround_native_report_labels() {
 		'reward.status' => 'Vuoi offrire una ricompensa per informazioni utili?', 'reward.amount' => 'Importo in euro', 'reward.conditions' => 'Condizioni della ricompensa', 'reward.expires_on' => 'Scadenza',
 		'reward.confirmed' => 'Confermo l’impegno relativo alla ricompensa indicata',
 		'reporter.first_name' => 'Nome', 'reporter.last_name' => 'Cognome', 'reporter.email' => 'Email', 'reporter.phone' => 'Telefono',
-		'reporter.public_identity_mode' => 'Come vuoi comparire pubblicamente?', 'reporter.pseudonym' => 'Pseudonimo pubblico', 'reporter.contact_preference' => 'Quali informazioni desideri ricevere da BadAround?',
+		'reporter.public_identity_mode' => 'Come vuoi comparire pubblicamente?', 'reporter.pseudonym' => 'Pseudonimo pubblico', 'reporter.contact_preference' => 'Vuoi ricevere aggiornamenti sulla tua segnalazione?',
 		'consents.truthfulness' => 'Confermo che le informazioni sono veritiere per quanto a mia conoscenza',
 		'consents.media_rights' => 'Confermo di avere i diritti su eventuali contenuti forniti',
 		'consents.publication_rules' => 'Accetto le regole di pubblicazione e moderazione', 'consents.terms' => 'Accetto i termini e le condizioni',
@@ -58,7 +58,7 @@ function badaround_native_report_option_label( $path, $value ) {
 		'vehicle.plate_knowledge' => array( 'full' => 'Targa completa', 'partial' => 'Solo una parte', 'unknown' => 'Non la conosco', 'none' => 'Il veicolo non ha targa' ),
 		'location.public_precision' => array( 'point' => 'Punto approssimato', 'street' => 'Via, senza civico', 'area' => 'Area o quartiere', 'municipality' => 'Solo il Comune' ),
 		'reward.status' => array( 'none' => 'Nessuna ricompensa', 'fixed' => 'Importo definito', 'negotiable' => 'Da concordare' ),
-		'reporter.contact_preference' => array( 'community' => 'Informazioni dalla community tramite BadAround', 'badaround_only' => 'Solo comunicazioni dai gestori BadAround', 'none' => 'Non desidero comunicazioni facoltative' ),
+		'reporter.contact_preference' => array( 'community' => 'Informazioni dalla community e aggiornamenti di BadAround', 'badaround_only' => 'Solo aggiornamenti di BadAround', 'none' => 'Nessun aggiornamento facoltativo' ),
 		'reporter.public_identity_mode' => array( 'anonymous' => 'In forma anonima', 'pseudonym' => 'Con uno pseudonimo', 'first_name' => 'Con il mio nome', 'name_initial' => 'Nome e iniziale del cognome' ),
 		'media.availability' => array( 'yes' => 'Sì', 'no' => 'No', 'possible' => 'Potrei procurarle', 'surveillance' => 'Possibili riprese di videosorveglianza' ),
 	);
@@ -219,8 +219,7 @@ function badaround_native_report_field( $path, $field ) {
 	<?php endif; ?>
 		<?php if ( 'reporter.contact_preference' === $path ) : ?>
 		<div class="ba-native-contact-explainer">
-			<p><strong>Informazioni dalla community tramite BadAround</strong><br>BadAround può inoltrarti informazioni pertinenti senza mostrare il tuo indirizzo email agli altri utenti.</p>
-			<p><strong>Comunicazioni dai gestori BadAround</strong><br>Per moderazione, chiarimenti o aggiornamenti sulla tua segnalazione.</p>
+			<p>Le eventuali informazioni della community ti vengono inoltrate da BadAround. Anche scegliendo nessun aggiornamento facoltativo, BadAround potrà scriverti per chiarimenti necessari alla gestione della segnalazione.</p>
 		</div>
 		<?php endif; ?>
 		<p id="<?php echo esc_attr( $id ); ?>-help" class="ba-native-help"><?php echo esc_html( $field['help'] ); ?></p>

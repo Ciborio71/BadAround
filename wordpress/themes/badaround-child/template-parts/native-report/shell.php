@@ -28,7 +28,7 @@ if ( ! $config ) {
 		</div>
 	</form>
 	<section data-native-success hidden aria-labelledby="ba-native-received">
-		<h2 id="ba-native-received" tabindex="-1">Segnalazione ricevuta</h2>
+		<h2 id="ba-native-received" tabindex="-1"><strong>Segnalazione inviata</strong></h2>
 		<p>La segnalazione sarà sottoposta a moderazione. Non è ancora pubblica: l’invio non equivale ad approvazione.</p>
 		<button type="button" class="ba-button" data-native-new>Inizia una nuova segnalazione</button>
 	</section>

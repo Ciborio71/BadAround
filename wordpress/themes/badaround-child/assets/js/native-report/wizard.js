@@ -133,11 +133,11 @@
     const declarationInput=document.createElement('input');declarationInput.type='checkbox';declarationInput.id='ba-native-declarations';declarationInput.dataset.betaConfirm='';
     const declarationCopy=document.createElement('span');
     const declarationTitle=document.createElement('strong');declarationTitle.textContent='Confermo di aver fornito informazioni in buona fede.';declarationCopy.append(declarationTitle);
-    const declarationDetail=document.createElement('span');declarationDetail.className='ba-native-declaration-detail';declarationDetail.textContent='Dichiaro di avere il diritto di condividere eventuali contenuti allegati, di aver letto e accettato le regole di pubblicazione e i termini e le condizioni di BadAround e di aver preso visione dell’informativa privacy.';declarationCopy.append(declarationDetail);
+    const declarationDetail=document.createElement('p');declarationDetail.id='ba-native-declarations-detail';declarationDetail.className='ba-native-declaration-detail';declarationDetail.textContent='Dichiaro di avere il diritto di condividere eventuali contenuti allegati, di aver letto e accettato le regole di pubblicazione e i termini e le condizioni di BadAround e di aver preso visione dell’informativa privacy.';
     const declarationRequired=document.createElement('span');declarationRequired.dataset.nativeRequired='';declarationRequired.textContent=' (obbligatorio)';declarationCopy.append(declarationRequired);
-    declarationLabel.append(declarationInput,declarationCopy);declaration.append(declarationLabel);
+    declarationLabel.append(declarationInput,declarationCopy);declaration.append(declarationLabel,declarationDetail);
     const declarationError=document.createElement('p');declarationError.id='ba-native-declarations-error';declarationError.className='ba-native-error';declarationError.hidden=true;
-    declarationInput.setAttribute('aria-describedby','ba-native-declarations-help '+declarationError.id);declaration.append(declarationError);finalBox.append(declaration);
+    declarationInput.setAttribute('aria-describedby','ba-native-declarations-detail ba-native-declarations-help '+declarationError.id);declaration.append(declarationError);finalBox.append(declaration);
     declarationFields.forEach(w=>{w.dataset.betaBundled='';finalBox.append(w);});
     const finalHelp=document.createElement('p');finalHelp.id='ba-native-declarations-help';finalHelp.className='ba-native-help';finalHelp.textContent='La segnalazione sarà sottoposta a moderazione prima della pubblicazione. BadAround può modificare, limitare o non pubblicare contenuti che non rispettano le regole o che potrebbero esporre dati riservati.';finalBox.append(finalHelp);
     listen(declarationInput,'change',()=>{
@@ -190,7 +190,7 @@
           if(applicable&&blocked)unit.hidden=true;
           const visible=!unit.hidden;
           if(visible){
-            const label=unit.querySelector('legend')||unit.querySelector('label');numberLabel(label,++number);
+            const label=unit.querySelector('legend')||unit.querySelector('label');if(unit!==declaration)numberLabel(label,++number);
             const missing=unit===declaration?!declarationInput.checked:field.required&&unanswered(path);
             const pair=unit.closest('.ba-native-field-pair');
             if(pair){pairBlocked=pairBlocked||missing;if(unit===pair.lastElementChild){blocked=blocked||pairBlocked;pairBlocked=false;}}
@@ -504,7 +504,17 @@
         form.setAttribute('aria-busy','false');syncSubmissionFeedback();
         mediaView?.dispose();
         form.hidden = true; container.querySelector('nav').hidden = true; success.hidden = false;
-        success.querySelector('h2').focus();
+        const heading=success.querySelector('h2');
+        try{heading.focus({preventScroll:true});}catch(_){heading.focus();}
+        const revealConfirmation=()=>{
+          if(disposed||!model.completed)return;
+          const header=document.querySelector('.ba-site-header');
+          const safeTop=Math.max(24,(header?.getBoundingClientRect().bottom||0)+24);
+          const top=Math.max(0,(window.scrollY||0)+success.getBoundingClientRect().top-safeTop);
+          window.scrollTo({top,behavior:'instant'});
+        };
+        revealConfirmation();
+        window.requestAnimationFrame?.(revealConfirmation);
       } else {
         model.lastError = result.error; // Code retained for troubleshooting, no payload/PII logging.
         const validationRejection = result.error.httpStatus === 422 && !result.error.retryable
