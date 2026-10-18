@@ -117,14 +117,36 @@ class BadAround_Publication_Service {
 			$content = implode( ' ', $parts );
 		}
 
-		$updated = wp_update_post(
-			array(
-				'ID'           => $event_id,
-				'post_title'   => sanitize_text_field( $title ),
-				'post_content' => wp_kses_post( $content ),
-			),
-			true
-		);
+		/*
+		 * B2 publish guards must remain in force for all new publications.
+		 * Only a previously published event with a matching frozen moderation
+		 * state may preserve its current publish status during projection edits.
+		 */
+		$preserve_published = 'publish' === $post->post_status
+			&& self::STATUS_PUBLISHED === sanitize_key( (string) get_post_meta( $event_id, '_ba_moderation_status', true ) );
+		$allow_projection_update = static function ( $allowed, $candidate_id ) use ( $event_id ) {
+			return absint( $candidate_id ) === $event_id ? true : $allowed;
+		};
+		if ( $preserve_published ) {
+			add_filter( 'badaround_allow_event_publish', $allow_projection_update, 999, 2 );
+		}
+		try {
+			$updated = wp_update_post(
+				array(
+					'ID'           => $event_id,
+					'post_title'   => sanitize_text_field( $title ),
+					'post_content' => wp_kses_post( $content ),
+				),
+				true
+			);
+		} finally {
+			if ( $preserve_published ) {
+				remove_filter( 'badaround_allow_event_publish', $allow_projection_update, 999 );
+			}
+		}
+		if ( $preserve_published && ! is_wp_error( $updated ) && 'publish' !== get_post_status( $event_id ) ) {
+			return new WP_Error( 'ba_publication_projection_status_changed', __( 'La proiezione pubblica ha modificato lo stato di pubblicazione.', 'badaround-core' ) );
+		}
 
 		if ( is_wp_error( $updated ) ) {
 			return $updated;
