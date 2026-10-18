@@ -158,12 +158,30 @@ class BadAround_Moderation_Admin {
 			__( 'Coordinate precise', 'badaround-core' ) => ( null !== $report->exact_lat && null !== $report->exact_lng ) ? $report->exact_lat . ', ' . $report->exact_lng : '—',
 			__( 'Targa completa', 'badaround-core' )  => $report->full_plate ?: '—',
 			__( 'Testo originale', 'badaround-core' ) => $original_text ?: '—',
+			__( 'Preferenza diffusione social', 'badaround-core' ) => $this->social_preference_description( $payload ),
+			__( 'Data acquisizione (UTC)', 'badaround-core' ) => $report->consented_at ?? '—',
 		);
 		echo '<div style="border-left:4px solid #d63638;padding-left:12px"><p><strong>' . esc_html__( 'RISERVATO — non copiare nei dati pubblici', 'badaround-core' ) . '</strong></p><table class="widefat striped"><tbody>';
 		foreach ( $rows as $label => $value ) {
 			echo '<tr><th style="width:180px">' . esc_html( $label ) . '</th><td>' . esc_html( (string) $value ) . '</td></tr>';
 		}
 		echo '</tbody></table></div>';
+	}
+
+	/** Read-only private intake evidence; not a publication decision or entitlement. */
+	public function social_preference_description( $payload ) {
+		$choice = $payload['canonical']['reporter']['social_visibility'] ?? null;
+		$version = $payload['canonical']['consents']['social_visibility_version'] ?? null;
+		if ( BadAround_Report_Schema::SOCIAL_PREFERENCE_VERSION !== $version ) {
+			return __( 'Non acquisita: nessuna richiesta di diffusione social.', 'badaround-core' );
+		}
+		if ( 'declined' === $choice ) {
+			return __( 'No: diffusione social non richiesta.', 'badaround-core' ) . ' [' . $version . ']';
+		}
+		if ( 'requested' !== $choice ) {
+			return __( 'Non acquisita: nessuna richiesta di diffusione social.', 'badaround-core' );
+		}
+		return __( 'Richiesta da valutare dalla moderazione: Facebook, Instagram, X, Google Business Profile e TikTok, se attivati. Solo contenuti pubblici approvati; nessuna pubblicazione automatica.', 'badaround-core' ) . ' [' . $version . ']';
 	}
 
 	public function render_media_box( $post ) {
@@ -519,7 +537,7 @@ class BadAround_Moderation_Admin {
 		global $wpdb;
 		return $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT id, author_name, author_surname, author_email, author_phone, exact_address, exact_lat, exact_lng, full_plate, content_original FROM {$wpdb->prefix}ba_reports WHERE event_id = %d AND deleted_at IS NULL ORDER BY id ASC LIMIT 1",
+				"SELECT id, author_name, author_surname, author_email, author_phone, exact_address, exact_lat, exact_lng, full_plate, content_original, consented_at FROM {$wpdb->prefix}ba_reports WHERE event_id = %d AND deleted_at IS NULL ORDER BY id ASC LIMIT 1",
 				absint( $event_id )
 			)
 		);

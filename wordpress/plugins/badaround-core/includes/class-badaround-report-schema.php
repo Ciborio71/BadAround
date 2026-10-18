@@ -12,6 +12,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class BadAround_Report_Schema {
 	const VERSION = 'badaround-report/v1';
+	// Additive optional extension. This immutable statement version fixes the scope
+	// to Facebook, Instagram, X, Google Business Profile and TikTok, if activated.
+	// It records a request for moderation, never permission to post automatically.
+	const SOCIAL_PREFERENCE_VERSION = 'social-preference-v1';
 
 	const PRIVACY_PUBLIC          = 'public';
 	const PRIVACY_PRIVATE         = 'private';
@@ -483,6 +487,16 @@ class BadAround_Report_Schema {
 				'ba_reports.contact_preference',
 				'never',
 				array( 'enum' => array( 'community', 'badaround_only', 'none' ) )
+			),
+
+			'reporter.social_visibility' => self::field(
+				'enum', false, self::PRIVACY_PRIVATE, 'ba_reports.content_original', 'never',
+				array( 'enum' => array( 'requested', 'declined' ) )
+			),
+			'consents.social_visibility_version' => self::field(
+				'enum', true, self::PRIVACY_PRIVATE, 'ba_reports.content_original', 'never',
+				array( 'enum' => array( self::SOCIAL_PREFERENCE_VERSION ) ),
+				array( array( array( 'path' => 'reporter.social_visibility', 'op' => 'in', 'value' => array( 'requested', 'declined' ) ) ) )
 			),
 
 			'consents.truthfulness' => self::field( 'bool', true, self::PRIVACY_PRIVATE, 'ba_reports.content_original', 'never' ),

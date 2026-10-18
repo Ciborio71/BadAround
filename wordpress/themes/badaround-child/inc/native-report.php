@@ -43,6 +43,7 @@ function badaround_native_report_labels() {
 		'reward.confirmed' => 'Confermo l’impegno relativo alla ricompensa indicata',
 		'reporter.first_name' => 'Nome', 'reporter.last_name' => 'Cognome', 'reporter.email' => 'Email', 'reporter.phone' => 'Telefono',
 		'reporter.public_identity_mode' => 'Come vuoi comparire pubblicamente?', 'reporter.pseudonym' => 'Pseudonimo pubblico', 'reporter.contact_preference' => 'Vuoi ricevere aggiornamenti e informazioni su questo evento?',
+		'reporter.social_visibility' => 'Vuoi dare visibilità a questo evento sui canali social di BadAround?',
 		'consents.truthfulness' => 'Confermo che le informazioni sono veritiere per quanto a mia conoscenza',
 		'consents.media_rights' => 'Confermo di avere i diritti su eventuali contenuti forniti',
 		'consents.publication_rules' => 'Accetto le regole di pubblicazione e moderazione', 'consents.terms' => 'Accetto i termini e le condizioni',
@@ -52,6 +53,7 @@ function badaround_native_report_labels() {
 
 function badaround_native_report_option_label( $path, $value ) {
 	$context = array(
+		'reporter.social_visibility' => array( 'requested' => 'Sì, desidero che BadAround valuti la condivisione sui propri canali social.', 'declined' => 'No, preferisco la pubblicazione sul sito BadAround.' ),
 		'authority.type' => array( 'public_service' => 'Numero Unico di Emergenza 112', 'police' => 'Polizia di Stato', 'local_police' => 'Polizia Locale', 'fire_service' => 'Vigili del Fuoco', 'other' => 'Altra autorità o servizio' ),
 		'time.mode' => array( 'exact' => 'Conosco la data', 'approximate' => 'Periodo approssimativo', 'ongoing' => 'È ancora in corso', 'repeated' => 'Si ripete nel tempo', 'unknown' => 'Non lo so' ),
 		'time.knowledge' => array( 'exact' => 'Orario preciso', 'range' => 'Fascia oraria', 'unknown' => 'Non conosco l’orario' ),
@@ -119,7 +121,7 @@ function badaround_native_report_config() {
 	uksort( $categories, function ( $a, $b ) use ( $order ) { return ( $order[ $a ] ?? 99 ) <=> ( $order[ $b ] ?? 99 ); } );
 	$fields = array();
 	foreach ( BadAround_Report_Schema::fields() as $path => $definition ) {
-		if ( in_array( $path, array( 'schema_version', 'submission_id', 'consents.version', 'media.items', 'location.place_id', 'authority.reference' ), true ) ) { continue; }
+		if ( in_array( $path, array( 'schema_version', 'submission_id', 'consents.version', 'consents.social_visibility_version', 'media.items', 'location.place_id', 'authority.reference' ), true ) ) { continue; }
 		$options = array();
 		foreach ( $definition['constraints']['enum'] ?? $definition['constraints']['item_enum'] ?? array() as $value ) {
 			$options[ $value ] = badaround_native_report_option_label( $path, $value );
@@ -152,6 +154,7 @@ function badaround_native_report_config() {
 	$fields['vehicle.plate_raw']['help'] = 'La targa completa resta riservata. L’eventuale versione pubblica sarà mascherata.';
 	$fields['reporter.public_identity_mode']['help'] = 'Scegli come preferisci essere indicato. BadAround non pubblica automaticamente i tuoi dati personali. La tua preferenza resta soggetta alla moderazione e alle regole di pubblicazione.';
 	$fields['reporter.contact_preference']['help'] = 'Gli altri utenti non vedono i tuoi recapiti e non possono contattarti direttamente.';
+	$fields['reporter.social_visibility']['help'] = 'La tua scelta sarà valutata dalla moderazione. Potranno essere condivisi solo contenuti approvati e destinati alla pubblicazione; i tuoi recapiti e le informazioni riservate resteranno esclusi. Se non rispondi, non richiedi la diffusione social. La richiesta riguarda Facebook, Instagram, X, Google Business Profile (Google Maps) e TikTok, secondo i canali attivati da BadAround.';
 	$fields['reward.status']['help'] = 'La ricompensa è destinata esclusivamente a chi fornisce informazioni utili al ritrovamento o alla risoluzione della segnalazione.';
 	// Identity preference first; canonical conditions and values are unchanged.
 	$contact_order = array_flip( array( 'reporter.public_identity_mode', 'reporter.pseudonym', 'reporter.first_name', 'reporter.last_name', 'reporter.email', 'reporter.phone', 'reporter.contact_preference' ) );
@@ -176,6 +179,7 @@ function badaround_native_report_config() {
 		'smartAddress' => $smart_key ? array( 'key' => $smart_key, 'territories' => $territories, 'country' => 'IT' ) : null,
 		'schemaVersion' => BadAround_Report_Schema::VERSION,
 		'consentVersion' => 'native-f16-v1', // Version of this QA presentation, not a claim of finalized legal policies.
+		'socialPreferenceVersion' => BadAround_Report_Schema::SOCIAL_PREFERENCE_VERSION,
 		'endpoint' => rest_url( BadAround_Native_Report_REST_Controller::REST_NAMESPACE . BadAround_Native_Report_REST_Controller::REST_ROUTE ),
 		'markerHeader' => BadAround_Native_Report_REST_Controller::REQUEST_HEADER,
 		'markerValue' => BadAround_Native_Report_REST_Controller::REQUEST_HEADER_VALUE,

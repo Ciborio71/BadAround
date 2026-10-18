@@ -58,6 +58,10 @@
         setPath(out, path, value);
       });
       setPath(out, 'consents.version', this.config.consentVersion);
+      // Optional request, independent of the mandatory declaration and contact choices.
+      if (['requested','declined'].includes(out.reporter?.social_visibility)) {
+        setPath(out, 'consents.social_visibility_version', this.config.socialPreferenceVersion);
+      }
       return out;
     }
     validate(step = null) {

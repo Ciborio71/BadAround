@@ -41,6 +41,8 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
   const category=scenario==='property_theft'?'property':scenario==='animal_missing'?'animal':scenario==='object_lost'?'item_document':'vehicle';
   const subtype=scenario==='property_theft'?'property_theft':scenario==='animal_missing'?'animal_missing':scenario==='object_lost'?'wallet_docs':'vehicle_stolen';
   const answers={'event.category':category,'event.subtype':subtype,'animal.type':'dog','animal.breed':'Meticcio','animal.name':'Fido','object.description':'Documento di prova sintetico','object.status':'lost','reporter.relationship':'directly_involved','time.mode':'unknown','location.place_type':'road_sidewalk','location.immediate_danger':'no','vehicle.role':'involved','vehicle.type':'car','vehicle.plate_knowledge':'unknown','property.stolen_item_categories':['documents'],'property.access_method':'door_forced','content.description':'Test QA sintetico di compilazione, nessun evento reale.','damage.status':'no','witness.status':'none','authority.status':scenario==='vehicle_112_anonymous'?'yes':'no','media.availability':'no','reporter.public_identity_mode':scenario==='vehicle_pseudonym'?'pseudonym':'anonymous','reporter.pseudonym':'Sentinella QA','reporter.first_name':'QA','reporter.last_name':'BadAround','reporter.email':'qa@example.invalid','reward.status':'none','reporter.contact_preference':'none','consents.publication_rules':true,'consents.terms':true,'consents.privacy':true};
+  const socialChoice=scenario==='vehicle_112_anonymous'?'requested':scenario==='vehicle_pseudonym'?'declined':undefined;
+  if(socialChoice)answers['reporter.social_visibility']=socialChoice;
   for(let step=0;step<6;step++){
    assert.equal(await page.locator('[data-native-step]:visible').count(),1);
    if(step===1){await page.locator('[data-smart-start]').click();await page.locator('test-google-autocomplete button').click();await page.locator('[data-smart-confirmation]').waitFor({state:'visible'});}
@@ -89,6 +91,8 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
    if(step<5){await page.locator('[data-native-next]').click();assert.equal(await page.evaluate(()=>document.querySelector('[data-native-report]').nativeReport.model.step),step+1,scenario+' step '+step+' '+await page.evaluate(()=>{const r=document.querySelector('[data-native-report]');return JSON.stringify(r.nativeReport.model.validate(Object.keys(r.nativeReport.config.steps)[r.nativeReport.model.step]));}));}
   }
   await page.locator('[data-native-submit]').click();await page.locator('[data-native-success]').waitFor({state:'visible'});assert.equal(requests.length,1);assert.equal(requests[0].authority.reference,undefined);assert.equal(requests[0].reporter.public_identity_mode,scenario==='vehicle_pseudonym'?'pseudonym':'anonymous');
+  assert.equal(requests[0].reporter.social_visibility,socialChoice);
+  assert.equal(requests[0].consents.social_visibility_version,socialChoice?'social-preference-v1':undefined);
   const confirmation=page.locator('[data-native-success] h2');
   await page.waitForFunction(()=>{const h=document.querySelector('[data-native-success] h2'),r=h.getBoundingClientRect();return document.activeElement===h&&r.top>=88&&r.bottom<innerHeight;});
   assert.equal(await confirmation.textContent(),'Segnalazione inviata');assert(Number(await confirmation.evaluate(el=>getComputedStyle(el).fontWeight))>=700);
