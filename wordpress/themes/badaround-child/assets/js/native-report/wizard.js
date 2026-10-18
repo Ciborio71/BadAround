@@ -51,7 +51,7 @@
       const region = form.querySelector('[data-native-review]'); region.replaceChildren();
       const sections = new Map();
       Object.entries(config.fields).forEach(([path, field]) => {
-        if (!model.active(path) || path==='consents.media_rights') return;
+        if (!model.active(path) || (declarationPaths.includes(path) && path!=='consents.truthfulness')) return;
         // The review is user-facing: never print canonical territory metadata or coordinates.
         if (field.step === 'location' && path !== 'location.exact_address') return;
         const value = model.effective(path); if (value === undefined || value === '') return;
@@ -68,7 +68,7 @@
           region.append(section);
         }
         const list = section.querySelector('dl');
-        const term = document.createElement('dt'); term.textContent = path==='consents.truthfulness'?'Dichiarazioni in buona fede e diritti sui contenuti':field.label;
+        const term = document.createElement('dt'); term.textContent = path==='consents.truthfulness'?'Dichiarazioni, regole e presa visione della privacy':field.label;
         const detail = document.createElement('dd');
         const label = v => field.options[v] || String(v);
         const valueText = typeof value === 'boolean'
@@ -104,12 +104,12 @@
     }
     // Native presentation only: selects remain the sole canonical model inputs.
     const categoryCards = {
-      vehicle: {title:'Veicoli', desc:'Auto, moto e altri mezzi', icon:'vehicle', color:'#1677E8'},
-      property: {title:'Case e attività', desc:'Abitazioni, negozi e uffici', icon:'property', color:'#C9153D'},
-      hazard: {title:'Pericoli', desc:'Rischi e situazioni pericolose', icon:'hazard', color:'#F57C00'},
-      public_space: {title:'Spazi pubblici', desc:'Strade, aree pubbliche e decoro', icon:'public', color:'#0AA184'},
-      animal: {title:'Animali', desc:'Smarrimenti e segnalazioni', icon:'animal', color:'#7040C8'},
-      item_document: {title:'Oggetti e documenti', desc:'Oggetti smarriti o ritrovati', icon:'object', color:'#E3A415'}
+      vehicle: {title:'Veicoli', desc:'Auto, moto e altri mezzi: furti, danneggiamenti e situazioni da segnalare.', icon:'vehicle', color:'#1677E8'},
+      property: {title:'Case e attività', desc:'Furti, tentati furti, danneggiamenti e altri eventi che riguardano abitazioni, negozi e uffici.', icon:'property', color:'#C9153D'},
+      hazard: {title:'Pericoli', desc:'Ostacoli, rischi stradali o ambientali e situazioni che richiedono attenzione.', icon:'hazard', color:'#F57C00'},
+      public_space: {title:'Spazi pubblici', desc:'Vandalismi, degrado e altre situazioni che interessano aree comuni.', icon:'public', color:'#0AA184'},
+      animal: {title:'Animali', desc:'Animali smarriti, avvistati o in difficoltà.', icon:'animal', color:'#7040C8'},
+      item_document: {title:'Oggetti e documenti', desc:'Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.', icon:'object', color:'#E3A415'}
     };
     // Same SVG geometry and stroke/fill treatment as the home category pins.
     const cardIcons = {
@@ -122,7 +122,8 @@
     };
     const cardGroups = new Map();
     // Presentation adapters preserve every canonical value and validation rule.
-    const declarationPaths=['consents.truthfulness','consents.media_rights'];
+    // One explicit action for required declarations only; optional contact preferences stay independent.
+    const declarationPaths=['consents.truthfulness','consents.media_rights','consents.publication_rules','consents.terms','consents.privacy'];
     const declarationFields=declarationPaths.map(path=>wrappers.find(w=>w.dataset.nativeField===path));
     const finalBox=document.createElement('fieldset');finalBox.className='ba-native-final-statements';
     const finalLegend=document.createElement('legend');finalLegend.textContent='Prima di inviare';finalBox.append(finalLegend);
@@ -130,14 +131,15 @@
     const declaration=document.createElement('div');declaration.className='ba-native-field';declaration.dataset.betaDeclarations='';
     const declarationLabel=document.createElement('label');declarationLabel.className='ba-native-choice';declarationLabel.htmlFor='ba-native-declarations';
     const declarationInput=document.createElement('input');declarationInput.type='checkbox';declarationInput.id='ba-native-declarations';declarationInput.dataset.betaConfirm='';
-    const declarationCopy=document.createElement('span');declarationCopy.textContent='Confermo di aver fornito informazioni in buona fede e di avere il diritto di condividere eventuali contenuti allegati.';
+    const declarationCopy=document.createElement('span');
+    const declarationTitle=document.createElement('strong');declarationTitle.textContent='Confermo di aver fornito informazioni in buona fede.';declarationCopy.append(declarationTitle);
+    const declarationDetail=document.createElement('span');declarationDetail.className='ba-native-declaration-detail';declarationDetail.textContent='Dichiaro di avere il diritto di condividere eventuali contenuti allegati, di aver letto e accettato le regole di pubblicazione e i termini e le condizioni di BadAround e di aver preso visione dell’informativa privacy.';declarationCopy.append(declarationDetail);
     const declarationRequired=document.createElement('span');declarationRequired.dataset.nativeRequired='';declarationRequired.textContent=' (obbligatorio)';declarationCopy.append(declarationRequired);
     declarationLabel.append(declarationInput,declarationCopy);declaration.append(declarationLabel);
     const declarationError=document.createElement('p');declarationError.id='ba-native-declarations-error';declarationError.className='ba-native-error';declarationError.hidden=true;
-    declarationInput.setAttribute('aria-describedby',declarationError.id);declaration.append(declarationError);finalBox.append(declaration);
+    declarationInput.setAttribute('aria-describedby','ba-native-declarations-help '+declarationError.id);declaration.append(declarationError);finalBox.append(declaration);
     declarationFields.forEach(w=>{w.dataset.betaBundled='';finalBox.append(w);});
-    for(const path of ['consents.publication_rules','consents.terms','consents.privacy'])finalBox.append(wrappers.find(w=>w.dataset.nativeField===path));
-    const finalHelp=document.createElement('p');finalHelp.className='ba-native-help';finalHelp.textContent='La segnalazione sarà sottoposta a moderazione prima della pubblicazione. BadAround può modificare, limitare o non pubblicare contenuti che non rispettano le regole o che potrebbero esporre dati riservati.';finalBox.append(finalHelp);
+    const finalHelp=document.createElement('p');finalHelp.id='ba-native-declarations-help';finalHelp.className='ba-native-help';finalHelp.textContent='La segnalazione sarà sottoposta a moderazione prima della pubblicazione. BadAround può modificare, limitare o non pubblicare contenuti che non rispettano le regole o che potrebbero esporre dati riservati.';finalBox.append(finalHelp);
     listen(declarationInput,'change',()=>{
       if(model.busy||model.snapshot||model.completed)return;
       declarationPaths.forEach(path=>{model.set(path,declarationInput.checked);wrappers.find(w=>w.dataset.nativeField===path).querySelector('input').checked=declarationInput.checked;});

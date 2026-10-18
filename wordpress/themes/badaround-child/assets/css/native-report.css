@@ -569,3 +569,7 @@
 @media(max-width:600px){.ba-native .ba-native-final-statements{padding:14px}}
 
 .ba-native .ba-native-help:empty{display:none}
+
+/* One readable confirmation, with full explicit declarations and optional preferences separate. */
+.ba-native .ba-native-declaration-detail{display:block;margin-top:8px;font-weight:400;line-height:1.6}
+.ba-native [data-beta-declarations] .ba-native-choice strong{font-size:1.05em}

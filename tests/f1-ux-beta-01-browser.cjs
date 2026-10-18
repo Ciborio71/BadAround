@@ -66,11 +66,13 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
     return {hiddenRequired:[...document.querySelectorAll('input[required],select[required],textarea[required]')].filter(el=>el.hidden||el.closest('[hidden]')).map(el=>el.name||el.id),numbers:[...section.querySelectorAll('[data-native-question-number]')].filter(el=>!el.closest('[hidden]')).map(el=>Number(el.textContent.replace('.',''))),overflow:document.documentElement.scrollWidth>innerWidth+1};
    });
    assert.deepEqual(state.hiddenRequired,[]);assert(!state.overflow);assert.deepEqual(state.numbers,state.numbers.map((_,i)=>state.numbers[0]+i));
+   if(step===5){assert.equal(await page.locator('.ba-native-final-statements input[type=checkbox]:visible').count(),1);assert.equal(await page.locator('[data-beta-confirm]').isChecked(),true);}
    if(step===0){const bg=await page.locator('.ba-native-category-grid label:has(input:checked)').evaluate(el=>getComputedStyle(el).backgroundColor);assert.equal(bg,'rgb(243, 251, 252)');}
    if(process.env.BA_SCREENSHOT_DIR&&[0,3,5,6].includes(step)&&scenario==='vehicle_112_anonymous')await page.screenshot({path:path.join(process.env.BA_SCREENSHOT_DIR,`beta-${width}-${scenario}-${step}.png`),fullPage:true});
    if(step<6){await page.locator('[data-native-next]').click();assert.equal(await page.evaluate(()=>document.querySelector('[data-native-report]').nativeReport.model.step),step+1,scenario+' step '+step+' '+await page.evaluate(()=>{const r=document.querySelector('[data-native-report]');return JSON.stringify(r.nativeReport.model.validate(Object.keys(r.nativeReport.config.steps)[r.nativeReport.model.step]));}));}
   }
   await page.locator('[data-native-submit]').click();await page.locator('[data-native-success]').waitFor({state:'visible'});assert.equal(requests.length,1);assert.equal(requests[0].authority.reference,undefined);assert.equal(requests[0].reporter.public_identity_mode,scenario==='vehicle_pseudonym'?'pseudonym':'anonymous');
+  for(const key of ['truthfulness','media_rights','publication_rules','terms','privacy'])assert.equal(requests[0].consents[key],true,key);
   if(scenario==='vehicle_112_anonymous')assert.equal(requests[0].authority.type,'public_service');
   if(process.env.BA_PAYLOAD_DIR)fs.writeFileSync(path.join(process.env.BA_PAYLOAD_DIR,`beta-${width}-${scenario}.json`),JSON.stringify(requests[0],null,2));
   assert.deepEqual(errors,[]);console.log(`PASS ${width}px ${scenario}: visible flow, numbering, keyboard, conditional fields, anonymous/pseudonym, no media, synthetic 201`);await page.close();
