@@ -21,3 +21,14 @@ Focused DOM checks cover explicit copy, one usable checkbox, all five canonical 
 Source-backed Chromium exercises six full paths at 390/1440px: vehicle + 112 + anonymous, vehicle + pseudonym, property theft with conditionals; one visible checkbox and all five true values in the intercepted submission. Mobile and desktop screenshots inspected. Google and submission are mocked in these browser tests. No new real report or database mutation is necessary for this presentation-only patch.
 
 The staging workflow gates deployment on full Native/Smart Address/media DOM regression, PHP/JS syntax, backend/privacy/territory suites, four browser suites and frozen-file guards. Only the two runtime files are uploaded; rollback is taken from verified 8f30a57. Production, F1.2, Smart Address, media backend, publication and SEO remain unchanged.
+
+## Staging verification — 2026-10-18
+
+Application SHA: `110e82084572b2accfa185bbf0e3025bd75c3def`.
+Deployed SHA: `e0ffdfcb223d7c4b96450eaa94b3e6ddc6c3b603`.
+Workflow run: https://github.com/Ciborio71/BadAround/actions/runs/39119406011
+Native job 117651753190 SUCCESS; deployment job 117652405553 SUCCESS.
+
+PASS: 154 JS/DOM tests with zero failures; PHP/JS syntax; 8 PHP suites; four source-backed Chromium browser suites (320/390/768/1440px, plus six dedicated desktop/mobile flows); frozen contract/provider/backend guards. Focus checks target the visible aggregate checkbox. A missing confirmation yields one actionable summary error; acceptance immediately clears it.
+
+Authenticated read-only comparison of both active staging files after upload: matches reviewed local source (ignoring terminal whitespace). No production deployment, real report submission, database mutation or media upload was performed for this patch.
