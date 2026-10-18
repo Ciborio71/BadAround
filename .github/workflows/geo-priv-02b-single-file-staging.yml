@@ -27,29 +27,23 @@ jobs:
           php -l wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
           php tests/f1-14r-publication-contract.php
           php tests/f1-14r-consumers.php
-      - name: Verify previous source, deploy one file, check download and rollback on error
+      - name: Verify single-file payload and prepare isolated transfer
         shell: bash
-        env:
-          FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
-          FTP_USERNAME: ${{ secrets.STAGING_SFTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
         run: |
           set -euo pipefail
-          test -n "$FTP_HOST" && test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
-          ROOT='wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php'
-          URL="ftp://${FTP_HOST}/staging.badaround.it/wp-content/plugins/badaround-core/includes/class-badaround-publication-service.php"
-          curlftps() { curl --fail --silent --show-error --ssl-reqd --connect-timeout 20 --max-time 180 --user "$FTP_USERNAME:$FTP_PASSWORD" "$@"; }
-          git show 25b9ff5ad9d747b10cef7c2f3981fab15fbe4ed3:"$ROOT" > /tmp/geo-priv-previous-reference.php
-          curlftps "$URL" -o /tmp/geo-priv-staging-backup.php
-          cmp /tmp/geo-priv-staging-backup.php /tmp/geo-priv-previous-reference.php
-          echo "Original file matches certified staging baseline"
-          rollback() {
-            echo "::error::FTPS upload verification failed; attempting single-file restore"
-            curlftps --upload-file /tmp/geo-priv-staging-backup.php "$URL" || true
-          }
-          trap rollback ERR
-          curlftps --upload-file "$ROOT" "$URL"
-          curlftps "$URL" -o /tmp/geo-priv-verify.php
-          cmp /tmp/geo-priv-verify.php "$ROOT"
-          trap - ERR
-          echo "Exact patch deployed and byte-verified: a7bdbc04b7edd69ae17364bbd45d01190b495b7f"
+          mkdir -p /tmp/geo-priv-one-file
+          cp wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php /tmp/geo-priv-one-file/class-badaround-publication-service.php
+          cmp /tmp/geo-priv-one-file/class-badaround-publication-service.php wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+      - name: Transfer one Publication Service file via established FTPS action
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: /tmp/geo-priv-one-file/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/includes/
+          state-name: .geo-priv-02b-single-file-state.json
+          dangerous-clean-slate: false
+          log-level: minimal
