@@ -90,7 +90,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
    const controls=await page.locator('[data-native-navigation] button:visible').all();
    for(const control of controls){const rect=await control.boundingBox();assert(rect.height>=44&&rect.width>=44);}
    if(step===5){
-    const checkbox=page.locator('[name="consents.privacy"]');await checkbox.focus();
+    const checkbox=page.locator('[data-beta-confirm]');await checkbox.focus();
     await page.keyboard.press('Space');assert.equal(await checkbox.isChecked(),false);
     await page.keyboard.press('Space');assert.equal(await checkbox.isChecked(),true);
    }
