@@ -1,0 +1,32 @@
+name: GEO-PRIV-02D.1 — Publication Status Isolated QA
+on:
+  push:
+    branches: [qa/geo-priv-02d1-recovery]
+permissions:
+  contents: read
+jobs:
+  safety:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Restrict application diff to Publication Service
+        run: |
+          set -euo pipefail
+          test "$(git diff --name-only a7bdbc04b7edd69ae17364bbd45d01190b495b7f e040a313f6e16f500cff6723ae8a9ce48d07d0c7)" = 'wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php'
+          test "$(git diff --name-only e040a313f6e16f500cff6723ae8a9ce48d07d0c7 HEAD -- wordpress | wc -l)" -eq 0
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+      - name: Existing F1.14R test suite
+        run: php tests/f1-14r-publication-contract.php
+      - name: Existing F1.14R consumer suite
+        run: php tests/f1-14r-consumers.php
+      - name: Build synthetic WordPress lifecycle test
+        run: python3 tests/geo-priv-02d1-build.py
+      - name: Publication status security A-I
+        run: |
+          php -l tests/.geo-priv-02d1-generated.php
+          php tests/.geo-priv-02d1-generated.php
