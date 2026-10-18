@@ -12,7 +12,7 @@ This supersedes BETA-01's conservative presentation choice of independent requir
 
 The five existing canonical booleans remain separate, with unchanged backend validation and storage. Explicit check sets all five; uncheck revokes all five. Partial states render unchecked. Hidden originals are disabled and not HTML-required; custom validation errors focus the visible control. Review shows one confirmation row.
 
-Runtime files: assets/js/native-report/wizard.js and assets/css/native-report.css under wordpress/themes/badaround-child. Tests: tests/f1-ux-beta-01.cjs and tests/f1-ux-beta-01-browser.cjs.
+Runtime files: assets/js/native-report/wizard.js and assets/css/native-report.css under wordpress/themes/badaround-child. Tests: tests/f1-ux-beta-01.cjs, tests/f1-ux-beta-01-browser.cjs, tests/nf-final-01-ux.cjs and tests/nf-final-01-browser.cjs. Existing focus/keyboard checks now target the single visible control instead of its hidden canonical privacy input.
 
 ## QA boundaries
 

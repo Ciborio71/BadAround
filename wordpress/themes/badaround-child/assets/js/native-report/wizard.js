@@ -143,7 +143,7 @@
     listen(declarationInput,'change',()=>{
       if(model.busy||model.snapshot||model.completed)return;
       declarationPaths.forEach(path=>{model.set(path,declarationInput.checked);wrappers.find(w=>w.dataset.nativeField===path).querySelector('input').checked=declarationInput.checked;});
-      declarationError.hidden=true;declarationInput.removeAttribute('aria-invalid');render();
+      declarationError.hidden=true;declarationInput.removeAttribute('aria-invalid');ns.presentErrors(container,[],config);render();
     });
     const authorityWrapper=wrappers.find(w=>w.dataset.nativeField==='authority.status');
     const authorityCanonical=authorityWrapper.querySelector('[data-native-input]');authorityCanonical.hidden=true;
@@ -431,7 +431,10 @@
       declarationError.hidden=!declarationMissing;declarationError.textContent=declarationMissing?'Conferma le dichiarazioni prima di proseguire.':'';
       declarationInput.setAttribute('aria-invalid',String(declarationMissing));
       authorityChoice.setAttribute('aria-invalid',String(errors.some(error=>error.field==='authority.status')));
-      ns.presentErrors(container, errors, config, (path, file) => {
+      // One visible confirmation needs one actionable error, while canonical validation stays separate.
+      const declarationErrorIndex=errors.findIndex(error=>declarationPaths.includes(error.field));
+      const visibleErrors=errors.filter((error,index)=>!declarationPaths.includes(error.field)||index===declarationErrorIndex);
+      ns.presentErrors(container, visibleErrors, config, (path, file) => {
         model.step = steps.indexOf(config.fields[path].step); render();
         if (config.fields[path].step === 'location') {
           focusStep('location');
@@ -447,6 +450,12 @@
         expandCards(wrapper);
         (wrapper.querySelector('.ba-native-card-grid input:checked') || wrapper.querySelector('.ba-native-card-grid input:not(:disabled)') || wrapper.querySelector('input,select,textarea,fieldset')).focus();
       });
+      if(declarationMissing){
+        const index=visibleErrors.findIndex(error=>declarationPaths.includes(error.field));
+        const item=container.querySelectorAll('[data-native-errors] li')[index];
+        const button=document.createElement('button');button.type='button';button.textContent='Prima di inviare: conferma le dichiarazioni per proseguire.';
+        button.addEventListener('click',()=>{model.step=steps.indexOf('contact');render();declarationInput.focus();});item.replaceChildren(button);
+      }
     }
     wrappers.forEach(wrapper => {
       const path = wrapper.dataset.nativeField;
