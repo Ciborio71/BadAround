@@ -1,0 +1,34 @@
+name: GEO-PRIV-02B — Isolated Regression QA
+on:
+  push:
+    branches:
+      - qa/geo-priv-02b-regression
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Scope patch against approved application baseline
+        run: |
+          set -euo pipefail
+          git diff --check 25b9ff5ad9d747b10cef7c2f3981fab15fbe4ed3 HEAD
+          changed="$(git diff --name-only 25b9ff5ad9d747b10cef7c2f3981fab15fbe4ed3 a7bdbc04b7edd69ae17364bbd45d01190b495b7f)"
+          test "$changed" = 'wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php'
+          test "$(git diff --name-only a7bdbc04b7edd69ae17364bbd45d01190b495b7f HEAD -- wordpress/ | wc -l)" -eq 0
+      - name: PHP syntax and publication freeze
+        run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+          php -l tests/geo-priv-02b-public-location.php
+      - name: Frozen F1.14R publication functional tests
+        run: php tests/f1-14r-publication-contract.php
+      - name: Geometry and fallback cases A-G
+        run: php tests/geo-priv-02b-public-location.php
+      - name: Frozen consumers regression
+        run: php tests/f1-14r-consumers.php
