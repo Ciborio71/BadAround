@@ -34,7 +34,8 @@ test('BETA02: one explicit checkbox records all mandatory acknowledgements, neve
  const bundle=h.doc.querySelector('[data-beta-confirm]');assert(!bundle.checked);
  const copy=bundle.closest('label').textContent;for(const text of ['buona fede','diritto di condividere','regole di pubblicazione','termini e le condizioni','informativa privacy'])assert(copy.includes(text),text);
  assert.equal(h.doc.querySelectorAll('.ba-native-final-statements input[type=checkbox]:not(:disabled)').length,1);
- bundle.click();for(const p of paths)assert.equal(h.model.effective(p),true,p);
+ h.click('next');assert.equal(h.doc.querySelectorAll('[data-native-errors] li').length,1);h.doc.querySelector('[data-native-errors] button').click();assert.equal(h.doc.activeElement,bundle);assert.equal(bundle.getAttribute('aria-invalid'),'true');
+ bundle.click();assert(h.doc.querySelector('[data-native-errors]').hidden);for(const p of paths)assert.equal(h.model.effective(p),true,p);
  assert.equal(h.model.effective('reporter.contact_preference'),'none');assert(!h.model.validate().some(e=>paths.includes(e.field)));
  bundle.click();for(const p of paths)assert.equal(h.model.effective(p),false,p);
  assert(h.model.validate().some(e=>e.field==='consents.privacy'));
