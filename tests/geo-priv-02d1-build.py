@@ -85,4 +85,4 @@ gp_check(true===$svc->prepare_public_projection(260),'I existing fixture 260 pre
 gp_check(get_post_status(260)==='publish' && $fixture===[get_post_meta(260,'_ba_public_lat'),get_post_meta(260,'_ba_public_lng'),get_post_meta(260,'_ba_public_radius_m')],'I fixture 260 unchanged');
 echo "GEO_PRIV_02D1_REGRESSION=PASS\\n";
 """
-Path('/tmp/geo-priv-02d1-regression.php').write_text(setup+checks)
+Path('tests/.geo-priv-02d1-generated.php').write_text(setup+checks)
