@@ -46,7 +46,7 @@
     errors.forEach(error => {
       const field = config.fields[error.field];
       const item = document.createElement('li');
-      const locationError = field?.step === 'location';
+      const locationError = field?.step === 'location' && error.field.startsWith('location.');
       const text = (locationError ? 'Posizione dell’evento: ' : field ? field.label + ': ' : '') + (locationError ? 'Torna a Dove e seleziona di nuovo un luogo dai suggerimenti.' : ns.errorMessage(error));
       const wrapper = Array.from(container.querySelectorAll('[data-native-field]')).find(w => w.dataset.nativeField === error.field);
       if (wrapper && !wrapper.hidden && !wrapper.closest('[data-native-location-fields][hidden]')) {

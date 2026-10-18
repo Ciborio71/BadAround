@@ -4,7 +4,7 @@ const {execFileSync}=require('node:child_process'),{JSDOM}=require('jsdom');
 const html=execFileSync(process.env.BA_PHP || 'php',[path.join(__dirname,'native-report-f16.php'),'--html'],{encoding:'utf8'});
 const base=path.join(__dirname,'../wordpress/themes/badaround-child/assets/js/native-report');
 const cap='A'.repeat(43),sid='11111111-1111-4111-8111-111111111111',mediaId='22222222-2222-4222-8222-222222222222';
-const data={'event.category':'hazard','event.subtype':'hazard_road_obstruction','reporter.relationship':'territory_observer','location.region':'Lazio','location.province':'Roma','location.municipality':'Pomezia','location.locality':'Torvaianica','location.exact_address':'Via Test 1, Pomezia','location.place_type':'road_sidewalk','location.immediate_danger':'no','time.mode':'exact','time.date':'2026-10-01','time.knowledge':'unknown','content.description':'Segnalazione sintetica F1.6.','damage.status':'no','authority.status':'no','media.availability':'no','reporter.first_name':'QA','reporter.last_name':'Synthetic','reporter.email':'qa@example.invalid','reporter.contact_preference':'none','consents.truthfulness':true,'consents.media_rights':true,'consents.publication_rules':true,'consents.terms':true,'consents.privacy':true};
+const data={'event.category':'hazard','event.subtype':'hazard_road_obstruction','reporter.relationship':'territory_observer','location.region':'Lazio','location.province':'Roma','location.municipality':'Pomezia','location.locality':'Torvaianica','location.exact_address':'Via Test 1, Pomezia','location.place_type':'road_sidewalk','location.immediate_danger':'no','time.mode':'exact','time.date':'2026-10-01','time.knowledge':'unknown','content.description':'Segnalazione sintetica F1.6.','damage.status':'no','authority.status':'no','media.availability':'no','reporter.first_name':'QA','reporter.last_name':'Synthetic','reporter.email':'qa@example.invalid','reward.status':'none','reporter.public_identity_mode':'anonymous','reporter.contact_preference':'none','consents.truthfulness':true,'consents.media_rights':true,'consents.publication_rules':true,'consents.terms':true,'consents.privacy':true};
 const tick=()=>new Promise(r=>setImmediate(r));
 function create(options={}) {
  const dom=new JSDOM(html,{url:'https://staging.badaround.it/segnala-un-evento/?native_report=1',runScripts:'outside-only'}),w=dom.window,requests=[],uploads=[],revoked=[];
@@ -35,7 +35,7 @@ function create(options={}) {
  const click=key=>doc.querySelector(`[data-native-${key}]`).click();
  const submit=()=>doc.querySelector('form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));
  const fill=()=>Object.entries(data).forEach(([k,v])=>set(k,v));
- const goReview=()=>{while(model.step<6){const previous=model.step;click('next');assert(model.step>previous);}assert.equal(model.step,6);};
+ const goReview=()=>{while(model.step<Object.keys(root.nativeReport.config.steps).length-1){const previous=model.step;click('next');assert(model.step>previous);}assert.equal(model.step,Object.keys(root.nativeReport.config.steps).length-1);};
  const close=()=>{root.nativeReport.teardown?.();dom.window.close();};
  return {w,dom,doc,root,model,requests,uploads,revoked,set,select,click,submit,fill,goReview,close};
 }

@@ -57,7 +57,8 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
   assert.equal(await page.locator('[data-smart-confirmation]').isVisible(),false);assert.notEqual(await page.evaluate(()=>document.activeElement?.hasAttribute('data-smart-confirmation')),true);
   await page.evaluate(()=>{window.denyGPS=false;});await page.locator('[data-smart-geolocate]').click();await page.waitForFunction(()=>document.querySelector('[name="location.exact_lat"]').value==='41.665');
   assert(!(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1)));assert.deepEqual(failures,[]);
-  await page.locator('[data-native-next]').click();assert(await page.locator('[data-native-step="time"]').isVisible());
+  await page.evaluate(()=>{const el=document.querySelector('[name="time.mode"]');el.value='unknown';el.dispatchEvent(new Event('input',{bubbles:true}));});
+  await page.locator('[data-native-next]').click();assert(await page.locator('[data-native-step="details"]').isVisible());
   console.log(`PASS ${width}px: selection-only address, private map, explicit GPS, category marker, drag reconciliation`);await page.close();
  }}finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

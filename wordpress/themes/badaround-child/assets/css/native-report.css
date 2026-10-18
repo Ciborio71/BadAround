@@ -508,7 +508,7 @@
 .ba-native .ba-native-edit-choice{padding:10px 14px;min-height:44px;border:1px solid var(--ba-teal-700);border-radius:10px;background:#fff;color:var(--ba-teal-700);font-weight:700;font-size:.9rem}
 .ba-native .ba-native-field-pair{min-width:0}
 @media(min-width:768px){
- .ba-native .ba-native-field-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;align-items:start}
+ .ba-native .ba-native-field-pair{display:grid;grid-template-columns:repeat(var(--ba-field-columns,2),minmax(0,1fr));column-gap:20px;align-items:start}
  .ba-native .ba-native-field-pair:has(>[hidden])>:not([hidden]){grid-column:1/-1}
 }
 @media(max-width:480px){
@@ -585,3 +585,5 @@
 .ba-native [data-native-success] p{color:var(--ba-navy-950)}
 .ba-native [data-native-success] button{white-space:normal;max-width:100%}
 @media(max-width:420px){.ba-native [data-native-success]{padding:18px}}
+.ba-native .ba-native-progress{grid-template-columns:repeat(6,minmax(0,1fr))}
+.ba-native .ba-native-field-pair input:not([type=checkbox]):not([type=radio]){min-height:56px}

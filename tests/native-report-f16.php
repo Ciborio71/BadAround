@@ -86,7 +86,7 @@ f16_assert( array_keys( $config['categories'] ) === array( 'vehicle', 'property'
 foreach ( $config['categories'] as $key => $category ) { f16_assert( array_keys( $category['subtypes'] ) === BadAround_Report_Schema::category_subtypes()[ $key ], 'canonical subtype membership ' . $key ); }
 f16_assert( strpos( json_encode( $config ), 'ba_reports.' ) === false, 'no internal storage metadata exposed' );
 ob_start(); require $base . 'themes/badaround-child/template-parts/native-report/shell.php'; $html = ob_get_clean();
-f16_assert( 7 === substr_count( $html, '<section data-native-step=' ), 'seven steps server rendered' );
+f16_assert( 6 === substr_count( $html, '<section data-native-step=' ), 'six steps server rendered' );
 f16_assert( count( $config['fields'] ) === substr_count( $html, 'data-native-field=' ), 'server-rendered field structure' );
 f16_assert( strpos( $html, '<noscript>' ) !== false && strpos( $html, 'data-native-submit disabled hidden' ) !== false, 'no-JS consultation and disabled submit' );
 f16_assert( strpos( $html, 'aria-describedby=' ) !== false && strpos( $html, '<fieldset' ) !== false && strpos( $html, 'role="alert"' ) !== false, 'accessible labels/groups/error summary' );

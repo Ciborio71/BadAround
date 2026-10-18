@@ -8,6 +8,9 @@
     function teardown() { if(disposed)return; disposed=true;clearTimeout(submitWaitTimer);submissionFeedback.hidden=true;listeners.forEach(remove=>remove());mediaView?.dispose();smartAddress?.dispose(); }
     const config = JSON.parse(container.querySelector('[data-native-config]').textContent);
     const model = new ns.Model(config);
+    // These are explicit reporter choices in the UI; canonical fallback defaults stay frozen.
+    function clearReporterChoices(){for(const path of ['reward.status','reporter.public_identity_mode'])model.set(path,undefined);}
+    clearReporterChoices();
     const form = container.querySelector('[data-native-form]');
     const steps = Object.keys(config.steps);
     const wrappers = Array.from(form.querySelectorAll('[data-native-field]'));
@@ -53,7 +56,7 @@
       Object.entries(config.fields).forEach(([path, field]) => {
         if (!model.active(path) || (declarationPaths.includes(path) && path!=='consents.truthfulness')) return;
         // The review is user-facing: never print canonical territory metadata or coordinates.
-        if (field.step === 'location' && path !== 'location.exact_address') return;
+        if (path.startsWith('location.') && path !== 'location.exact_address') return;
         const value = model.effective(path); if (value === undefined || value === '') return;
         const stepKey = field.step || 'review';
         let section = sections.get(stepKey);
@@ -185,9 +188,12 @@
       let number=0;
       for(const section of form.querySelectorAll('[data-native-step]')){
         let blocked=false,pairBlocked=false;
-        const units=[...section.querySelectorAll('[data-native-field],[data-beta-declarations]')];
+        let units=[...section.querySelectorAll('[data-native-field],[data-beta-declarations]')];
         if(section.dataset.nativeStep==='location'){
-          numberLabel(section.querySelector('[data-native-smart-address]>label'),++number);continue;
+          numberLabel(section.querySelector('[data-native-smart-address]>label'),++number);
+          units=units.filter(unit=>unit.dataset.nativeField?.startsWith('time.'));
+          blocked=!model.effective('location.exact_address');
+          section.querySelector('[data-native-time-fields]').hidden=blocked;
         }
         for(const unit of units){
           const path=unit.dataset.nativeField,field=config.fields[path],bundled=unit.hasAttribute('data-beta-bundled'),authorityType=path==='authority.type';
@@ -232,10 +238,11 @@
       badge.textContent=number+'. ';
     }
     // Pair only closely related fields; DOM and keyboard order remain left-to-right.
-    for (const pair of [['reporter.email','reporter.phone'],['reporter.first_name','reporter.last_name'],['vehicle.make','vehicle.model'],['time.range_start','time.range_end']]) {
+    for (const pair of [['reporter.email','reporter.phone'],['reporter.first_name','reporter.last_name'],['vehicle.make','vehicle.model','vehicle.color'],['animal.breed','animal.name'],['time.date','time.knowledge'],['time.range_start','time.range_end'],['property.access_method','property.alarm_status']]) {
       const fields = pair.map(path => wrappers.find(wrapper => wrapper.dataset.nativeField === path));
-      if (fields.some(field => !field) || fields[0].parentElement !== fields[1].parentElement) continue;
+      if (fields.some(field => !field) || fields.some(field=>field.parentElement!==fields[0].parentElement)) continue;
       const row = document.createElement('div'); row.className = 'ba-native-field-pair';
+      row.style.setProperty('--ba-field-columns',String(fields.length));
       fields[0].before(row); fields.forEach(field => row.append(field));
     }
     function expandCards(wrapper) {
@@ -268,7 +275,7 @@
     }
     function syncCards(wrapper, field) {
       const select = wrapper.querySelector('select[data-native-input]');
-      if (!select || field.step === 'location' || wrapper===authorityWrapper || wrapper.dataset.nativeField==='authority.type') return;
+      if (!select || (field.step === 'location' && wrapper.dataset.nativeField.startsWith('location.')) || wrapper===authorityWrapper || wrapper.dataset.nativeField==='authority.type') return;
       const options = Array.from(select.options).filter(option => option.value);
       const category = wrapper.dataset.nativeField === 'event.category';
       const subtype = wrapper.dataset.nativeField === 'event.subtype';
@@ -443,7 +450,7 @@
       const visibleErrors=errors.filter((error,index)=>!declarationPaths.includes(error.field)||index===declarationErrorIndex);
       ns.presentErrors(container, visibleErrors, config, (path, file) => {
         model.step = steps.indexOf(config.fields[path].step); render();
-        if (config.fields[path].step === 'location') {
+        if (config.fields[path].step === 'location' && path.startsWith('location.')) {
           focusStep('location');
           const start = container.querySelector('[data-smart-start]');
           const search = start && !start.hidden ? start : container.querySelector('[data-smart-widget]')?.firstElementChild;
@@ -542,7 +549,7 @@
     listen(container.querySelector('[data-native-new]'),'click', () => {
       mediaView?.dispose();
       cardGroups.forEach(entry => { clearTimeout(entry.commitTimer); entry.collapsedValue = null; });
-      form.reset(); model.reset(); model.blocked = false; model.lastError = null;
+      form.reset(); model.reset();clearReporterChoices(); model.blocked = false; model.lastError = null;
        smartAddress?.reset?.();
       wrappers.forEach(wrapper => {
         const value = model.values[wrapper.dataset.nativeField];

@@ -6,6 +6,17 @@ const refresh=h=>h.set('reporter.email',h.model.values['reporter.email']||'');
 function at(h,step){h.model.step=step;refresh(h);}
 function visibleNumbers(h){return [...h.doc.querySelectorAll('[data-native-step]:not([hidden]) [data-native-question-number]')].filter(el=>!el.closest('[hidden]')).map(el=>Number(el.textContent.replace('.','')));}
 function sequential(h){const n=visibleNumbers(h);assert(n.length);assert.deepEqual(n,n.map((_,i)=>n[0]+i));}
+test('FLOW04: reward and public identity need explicit choices on boot and new report',async()=>{
+ const h=create();for(const p of ['reward.status','reporter.public_identity_mode']){assert.equal(h.model.effective(p),undefined);assert.equal(field(h,p).querySelectorAll('input:checked').length,0);assert(h.model.validate().some(e=>e.field===p));}
+ h.fill();h.goReview();h.submit();await tick();await tick();assert(h.model.completed);h.click('new');
+ for(const p of ['reward.status','reporter.public_identity_mode'])assert.equal(h.model.effective(p),undefined);h.close();
+});
+test('FLOW04: combined location/time validates and focuses temporal errors without losing location',()=>{
+ const h=create();h.fill();at(h,1);assert.equal(Object.keys(h.root.nativeReport.config.steps).length,6);assert.equal(h.root.nativeReport.config.steps.location,'Dove e quando');
+ assert(!field(h,'time.mode').closest('[data-native-location-fields]'));const address=h.model.effective('location.exact_address');
+ h.set('time.date','');h.click('next');assert.equal(h.model.step,1);const summary=h.doc.querySelector('[data-native-errors]');assert(!summary.textContent.includes('Posizione dell’evento'));summary.querySelector('button').click();assert.equal(h.doc.activeElement.name,'time.date');
+ h.set('time.mode','unknown');h.click('next');assert.equal(h.model.step,2);assert.equal(h.model.payload().location.exact_address,address);assert.equal(h.model.payload().time.mode,'unknown');assert.equal(h.model.payload().time.date,undefined);h.close();
+});
 test('BETA01: reference removed only from presentation, identity comes first, exact-location privacy is immediate',()=>{
  const h=create();assert(!h.root.nativeReport.config.fields['authority.reference']);assert(!h.doc.querySelector('[name="authority.reference"]'));
  const contact=h.doc.querySelector('[data-native-step="contact"]');assert.equal(contact.querySelector('[data-native-field]').dataset.nativeField,'reporter.public_identity_mode');
@@ -14,21 +25,21 @@ test('BETA01: reference removed only from presentation, identity comes first, ex
 });
 test('BETA01: questions disclose progressively without required hidden inputs; numbering has no gaps',()=>{
  const h=create();assert.match(h.doc.querySelector('.ba-native-category-grid').textContent,/Furti, tentati furti/);sequential(h);h.set('event.category','vehicle');sequential(h);h.set('event.subtype','vehicle_stolen');sequential(h);
- h.fill();for(let i=0;i<7;i++){at(h,i);if(i!==6)sequential(h);
+ h.fill();for(let i=0;i<6;i++){at(h,i);if(i!==5)sequential(h);
   for(const input of h.doc.querySelectorAll('input[required],select[required],textarea[required]'))assert(!input.closest('[hidden]'),input.name||input.id);
  }
- at(h,3);h.set('damage.status','yes');assert(!field(h,'damage.description').hidden);sequential(h);h.set('damage.status','no');assert(field(h,'damage.description').hidden);sequential(h);
+ at(h,2);h.set('damage.status','yes');assert(!field(h,'damage.description').hidden);sequential(h);h.set('damage.status','no');assert(field(h,'damage.description').hidden);sequential(h);
  h.set('reward.status','none');assert(field(h,'reward.amount').hidden);assert(field(h,'reward.conditions').hidden);
- at(h,4);h.set('media.availability','no');assert(h.doc.querySelector('[data-native-media]').hidden);h.close();
+ at(h,3);h.set('media.availability','no');assert(h.doc.querySelector('[data-native-media]').hidden);h.close();
 });
 test('BETA01: 112 is an explicit UI choice classified as existing public_service; no police inference or extra force required',()=>{
- const h=create();h.fill();at(h,3);const choice=h.doc.querySelector('[data-beta-authority]');
+ const h=create();h.fill();at(h,2);const choice=h.doc.querySelector('[data-beta-authority]');
  choice.value='yes:public_service';choice.dispatchEvent(new h.w.Event('change',{bubbles:true}));
  assert.equal(h.model.payload().authority.status,'yes');assert.equal(h.model.payload().authority.type,'public_service');assert(field(h,'authority.type').hidden);assert(!field(h,'authority.type').querySelector('select').required);
  choice.value='no';choice.dispatchEvent(new h.w.Event('change',{bubbles:true}));assert.equal(h.model.payload().authority.type,undefined);assert(!h.model.validate().some(e=>e.field.startsWith('authority.')));h.close();
 });
 test('BETA02: one explicit checkbox records all mandatory acknowledgements, never optional contact preferences',()=>{
- const h=create();h.fill();at(h,5);
+ const h=create();h.fill();at(h,4);
  const paths=['consents.truthfulness','consents.media_rights','consents.publication_rules','consents.terms','consents.privacy'];
  for(const p of paths)h.set(p,false);
  const bundle=h.doc.querySelector('[data-beta-confirm]');assert(!bundle.checked);assert(!bundle.closest('label').querySelector('[data-native-question-number]'));assert.equal(h.doc.querySelector('#ba-native-declarations-detail').parentElement,bundle.closest('[data-beta-declarations]'));
@@ -44,7 +55,7 @@ test('BETA02: one explicit checkbox records all mandatory acknowledgements, neve
  h.set('consents.truthfulness',true);assert(!bundle.checked);h.close();
 });
 test('BETA01: anonymous and pseudonym flows preserve private fields, branch answers and canonical submission identity',async()=>{
- const h=create();h.fill();const id=h.model.submissionId;at(h,5);
+ const h=create();h.fill();const id=h.model.submissionId;at(h,4);
  h.set('reporter.public_identity_mode','pseudonym');assert(!field(h,'reporter.pseudonym').hidden);h.set('reporter.pseudonym','Sentinella QA');
  assert.equal(h.model.payload().reporter.pseudonym,'Sentinella QA');h.set('reporter.public_identity_mode','anonymous');assert(field(h,'reporter.pseudonym').hidden);assert.equal(h.model.payload().reporter.pseudonym,undefined);
  h.set('reporter.public_identity_mode','pseudonym');assert.equal(h.model.effective('reporter.pseudonym'),'Sentinella QA');assert.equal(h.model.submissionId,id);

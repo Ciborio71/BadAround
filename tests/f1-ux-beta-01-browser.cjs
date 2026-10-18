@@ -6,7 +6,7 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
  const prefix='/wordpress/themes/badaround-child/assets/js/native-report/';
  html=html.replace(`<script src="${prefix}wizard.js">`,`<script src="${prefix}location-map.js"></script><script src="${prefix}smart-address.js"></script><script src="${prefix}wizard.js">`).replace('"smartAddress":null','"smartAddress":{"key":"TEST","territories":[[2,0,"Lazio"],[3,2,"Roma"],[4,3,"Pomezia"]]}');
  const browser=process.env.BA_BROWSER_ENGINE==='webkit'?await webkit.launch({headless:true}):await chromium.launch({headless:true,...(process.env.BA_CHROMIUM?{executablePath:process.env.BA_CHROMIUM}:{}),args:['--no-sandbox','--disable-dev-shm-usage']});
- try{for(const width of [390,1440])for(const scenario of ['vehicle_112_anonymous','vehicle_pseudonym','property_theft']){
+ try{for(const width of [390,1440])for(const scenario of ['vehicle_112_anonymous','vehicle_pseudonym','property_theft','animal_missing','object_lost']){
   const page=await browser.newPage({viewport:{width,height:900},reducedMotion:'reduce'});page.setDefaultTimeout(10000);const errors=[],requests=[];page.on('pageerror',e=>errors.push(e.message));
   await page.addInitScript(()=>{
    window.providerCalls=[];window.gpsCalls=0;
@@ -36,12 +36,15 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
    const file=path.join(__dirname,'..',url.pathname);if(fs.existsSync(file))return route.fulfill({contentType:file.endsWith('.css')?'text/css':'application/javascript',body:fs.readFileSync(file)});return route.abort();
   });
   await page.goto('https://localhost/');
+  assert.deepEqual(await page.evaluate(()=>['reward.status','reporter.public_identity_mode'].map(p=>document.querySelector('[data-native-report]').nativeReport.model.effective(p)||null)),[null,null]);
   await page.evaluate(()=>{const h=document.createElement('header');h.className='ba-site-header';h.style.cssText='position:fixed;top:0;left:0;right:0;height:88px;background:white;z-index:999';document.body.append(h);});
-  const answers={'event.category':scenario==='property_theft'?'property':'vehicle','event.subtype':scenario==='property_theft'?'property_theft':'vehicle_stolen','reporter.relationship':'directly_involved','time.mode':'unknown','location.place_type':'road_sidewalk','location.immediate_danger':'no','vehicle.role':'involved','vehicle.type':'car','vehicle.plate_knowledge':'unknown','property.stolen_item_categories':['documents'],'property.access_method':'door_forced','content.description':'Test QA sintetico di compilazione, nessun evento reale.','damage.status':'no','witness.status':'none','authority.status':scenario==='vehicle_112_anonymous'?'yes':'no','media.availability':'no','reporter.public_identity_mode':scenario==='vehicle_pseudonym'?'pseudonym':'anonymous','reporter.pseudonym':'Sentinella QA','reporter.first_name':'QA','reporter.last_name':'BadAround','reporter.email':'qa@example.invalid','reporter.contact_preference':'none','consents.publication_rules':true,'consents.terms':true,'consents.privacy':true};
-  for(let step=0;step<7;step++){
+  const category=scenario==='property_theft'?'property':scenario==='animal_missing'?'animal':scenario==='object_lost'?'item_document':'vehicle';
+  const subtype=scenario==='property_theft'?'property_theft':scenario==='animal_missing'?'animal_missing':scenario==='object_lost'?'wallet_docs':'vehicle_stolen';
+  const answers={'event.category':category,'event.subtype':subtype,'animal.type':'dog','animal.breed':'Meticcio','animal.name':'Fido','object.description':'Documento di prova sintetico','object.status':'lost','reporter.relationship':'directly_involved','time.mode':'unknown','location.place_type':'road_sidewalk','location.immediate_danger':'no','vehicle.role':'involved','vehicle.type':'car','vehicle.plate_knowledge':'unknown','property.stolen_item_categories':['documents'],'property.access_method':'door_forced','content.description':'Test QA sintetico di compilazione, nessun evento reale.','damage.status':'no','witness.status':'none','authority.status':scenario==='vehicle_112_anonymous'?'yes':'no','media.availability':'no','reporter.public_identity_mode':scenario==='vehicle_pseudonym'?'pseudonym':'anonymous','reporter.pseudonym':'Sentinella QA','reporter.first_name':'QA','reporter.last_name':'BadAround','reporter.email':'qa@example.invalid','reward.status':'none','reporter.contact_preference':'none','consents.publication_rules':true,'consents.terms':true,'consents.privacy':true};
+  for(let step=0;step<6;step++){
    assert.equal(await page.locator('[data-native-step]:visible').count(),1);
    if(step===1){await page.locator('[data-smart-start]').click();await page.locator('test-google-autocomplete button').click();await page.locator('[data-smart-confirmation]').waitFor({state:'visible'});}
-   else if(step<6){
+   if(step<5){
     for(let guard=0;guard<50;guard++){
      const next=await page.evaluate(answers=>{
       const root=document.querySelector('[data-native-report]'),model=root.nativeReport.model,section=root.querySelector('[data-native-step]:not([hidden])');
@@ -68,9 +71,13 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
     return {hiddenRequired:[...document.querySelectorAll('input[required],select[required],textarea[required]')].filter(el=>el.hidden||el.closest('[hidden]')).map(el=>el.name||el.id),numbers:[...section.querySelectorAll('[data-native-question-number]')].filter(el=>!el.closest('[hidden]')).map(el=>Number(el.textContent.replace('.',''))),overflow:document.documentElement.scrollWidth>innerWidth+1};
    });
    assert.deepEqual(state.hiddenRequired,[]);assert(!state.overflow);assert.deepEqual(state.numbers,state.numbers.map((_,i)=>state.numbers[0]+i));
-   if(step===3){const fits=await page.locator('[data-native-field="location.place_type"] select').evaluate(el=>{const s=getComputedStyle(el);return el.clientHeight-parseFloat(s.paddingTop)-parseFloat(s.paddingBottom)>=parseFloat(s.fontSize)*1.4;});assert(fits,'select has enough vertical text space');}
-   if(step===5){assert.equal(await page.locator('.ba-native-final-statements input[type=checkbox]:visible').count(),1);assert.equal(await page.locator('[data-beta-confirm]').isChecked(),true);assert.equal(await page.locator('[data-beta-declarations] [data-native-question-number]').count(),0);const full=await page.locator('#ba-native-declarations-detail').evaluate(el=>{const r=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect();return Math.abs(r.width-p.width)<2&&getComputedStyle(el).textAlign==='justify';});assert(full);}
-   if(step===5&&scenario==='vehicle_112_anonymous'){
+   if(step===2){const fits=await page.locator('[data-native-field="location.place_type"] select').evaluate(el=>{const s=getComputedStyle(el);return el.clientHeight-parseFloat(s.paddingTop)-parseFloat(s.paddingBottom)>=parseFloat(s.fontSize)*1.4;});assert(fits,'select has enough vertical text space');
+    const names=scenario==='property_theft'?['property.access_method','property.alarm_status']:scenario==='animal_missing'?['animal.breed','animal.name']:scenario==='object_lost'?['object.description']:['vehicle.make','vehicle.model','vehicle.color'];
+    const boxes=await page.evaluate(names=>names.map(p=>{const r=document.querySelector(`[data-native-field="${p}"]`).getBoundingClientRect();return {y:r.y,height:r.height,width:r.width};}),names);
+    if(width>=768)assert(boxes.every(r=>Math.abs(r.y-boxes[0].y)<2),'related desktop fields share row');else for(let i=1;i<boxes.length;i++)assert(boxes[i].y>=boxes[i-1].y+boxes[i-1].height-1,'mobile fields stack');
+   }
+   if(step===4){assert.equal(await page.locator('.ba-native-final-statements input[type=checkbox]:visible').count(),1);assert.equal(await page.locator('[data-beta-confirm]').isChecked(),true);assert.equal(await page.locator('[data-beta-declarations] [data-native-question-number]').count(),0);const full=await page.locator('#ba-native-declarations-detail').evaluate(el=>{const r=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect();return Math.abs(r.width-p.width)<2&&getComputedStyle(el).textAlign==='justify';});assert(full);}
+   if(step===4&&scenario==='vehicle_112_anonymous'){
     const before=await page.evaluate(()=>JSON.stringify(document.querySelector('[data-native-report]').nativeReport.model.payload()));
     for(const link of await page.locator('.ba-native-final-statements a').all()){
      const [popup]=await Promise.all([page.waitForEvent('popup'),link.click()]);await popup.waitForLoadState();assert.equal(await popup.evaluate(()=>window.opener),null);await popup.close();
@@ -78,8 +85,8 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
     }
    }
    if(step===0){const bg=await page.locator('.ba-native-category-grid label:has(input:checked)').evaluate(el=>getComputedStyle(el).backgroundColor);assert.equal(bg,'rgb(243, 251, 252)');}
-   if(process.env.BA_SCREENSHOT_DIR&&[0,3,5,6].includes(step)&&scenario==='vehicle_112_anonymous')await page.screenshot({path:path.join(process.env.BA_SCREENSHOT_DIR,`beta-${width}-${scenario}-${step}.png`),fullPage:true});
-   if(step<6){await page.locator('[data-native-next]').click();assert.equal(await page.evaluate(()=>document.querySelector('[data-native-report]').nativeReport.model.step),step+1,scenario+' step '+step+' '+await page.evaluate(()=>{const r=document.querySelector('[data-native-report]');return JSON.stringify(r.nativeReport.model.validate(Object.keys(r.nativeReport.config.steps)[r.nativeReport.model.step]));}));}
+   if(process.env.BA_SCREENSHOT_DIR&&[0,1,2,4,5].includes(step)&&scenario==='vehicle_112_anonymous')await page.screenshot({path:path.join(process.env.BA_SCREENSHOT_DIR,`beta-${width}-${scenario}-${step}.png`),fullPage:true});
+   if(step<5){await page.locator('[data-native-next]').click();assert.equal(await page.evaluate(()=>document.querySelector('[data-native-report]').nativeReport.model.step),step+1,scenario+' step '+step+' '+await page.evaluate(()=>{const r=document.querySelector('[data-native-report]');return JSON.stringify(r.nativeReport.model.validate(Object.keys(r.nativeReport.config.steps)[r.nativeReport.model.step]));}));}
   }
   await page.locator('[data-native-submit]').click();await page.locator('[data-native-success]').waitFor({state:'visible'});assert.equal(requests.length,1);assert.equal(requests[0].authority.reference,undefined);assert.equal(requests[0].reporter.public_identity_mode,scenario==='vehicle_pseudonym'?'pseudonym':'anonymous');
   const confirmation=page.locator('[data-native-success] h2');

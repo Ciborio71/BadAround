@@ -45,16 +45,16 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   assert(await page.locator('[data-native-field="event.subtype"] .ba-native-card-grid input').first().evaluate(e=>document.activeElement===e));
   await page.evaluate(()=>{
    const root=document.querySelector('[data-native-report]');
-   const data={'event.category':'hazard','event.subtype':'hazard_road_obstruction','reporter.relationship':'territory_observer','location.region':'Lazio','location.province':'Roma','location.municipality':'Pomezia','location.exact_address':'Via Test 1, Pomezia','location.place_type':'road_sidewalk','location.immediate_danger':'no','time.mode':'unknown','content.description':'Un ostacolo sulla strada da verificare.','damage.status':'no','authority.status':'no','media.availability':'no','reporter.first_name':'QA','reporter.last_name':'Synthetic','reporter.email':'qa@example.invalid','reporter.contact_preference':'none','consents.truthfulness':true,'consents.media_rights':true,'consents.publication_rules':true,'consents.terms':true,'consents.privacy':true};
+   const data={'event.category':'hazard','event.subtype':'hazard_road_obstruction','reporter.relationship':'territory_observer','location.region':'Lazio','location.province':'Roma','location.municipality':'Pomezia','location.exact_address':'Via Test 1, Pomezia','location.place_type':'road_sidewalk','location.immediate_danger':'no','time.mode':'unknown','content.description':'Un ostacolo sulla strada da verificare.','damage.status':'no','authority.status':'no','media.availability':'no','reporter.first_name':'QA','reporter.last_name':'Synthetic','reporter.email':'qa@example.invalid','reward.status':'none','reporter.public_identity_mode':'anonymous','reporter.contact_preference':'none','consents.truthfulness':true,'consents.media_rights':true,'consents.publication_rules':true,'consents.terms':true,'consents.privacy':true};
    for(const [key,value] of Object.entries(data)){
     const input=root.querySelector(`[name="${key}"]`);
     if(input.type==='checkbox')input.checked=value;else input.value=value;
     input.dispatchEvent(new Event('input',{bubbles:true}));
    }
   });
-  for(let step=0;step<7;step++){
+  for(let step=0;step<6;step++){
    assert.equal(await page.locator('[data-native-step]:visible').count(),1);
-   if(step===3 && width>=600){
+   if(step===2 && width>=600){
     const cards=await page.locator('[data-native-field="location.immediate_danger"] .ba-native-card-grid label').all();
     const boxes=await Promise.all(cards.map(c=>c.boundingBox()));
     assert.equal(boxes.length,3);assert(boxes.every(b=>Math.abs(b.y-boxes[0].y)<2),'danger choices share one row');
@@ -73,7 +73,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
      await page.waitForFunction(el=>el.classList.contains('is-collapsed'),await group.elementHandle());
     }
    }
-   if(step===5){
+   if(step===4){
     // Measure paired fields atomically so intentional question scrolling cannot
     // mix viewport positions from different animation frames.
     const {email,phone,first,last}=await page.evaluate(()=>{
@@ -89,18 +89,18 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
    assert(!overflow,`horizontal overflow width ${width} step ${step+1}`);
    const controls=await page.locator('[data-native-navigation] button:visible').all();
    for(const control of controls){const rect=await control.boundingBox();assert(rect.height>=44&&rect.width>=44);}
-   if(step===5){
+   if(step===4){
     const checkbox=page.locator('[data-beta-confirm]');await checkbox.focus();
     await page.keyboard.press('Space');assert.equal(await checkbox.isChecked(),false);
     await page.keyboard.press('Space');assert.equal(await checkbox.isChecked(),true);
    }
    if(process.env.BA_SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.BA_SCREENSHOT_DIR,`nf-${width}-${step+1}.png`),fullPage:true});
-   if(step<6){
+   if(step<5){
     await page.getByRole('button',{name:'Continua',exact:true}).click();
     assert(await page.locator('[data-native-step]:visible h2').evaluate(e=>document.activeElement===e));
    }
   }
-  await page.close();console.log(`PASS ${width}px: 7 steps, overflow, touch targets, keyboard, focus, validation`);
+  await page.close();console.log(`PASS ${width}px: 6 steps, overflow, touch targets, keyboard, focus, validation`);
  }
  }finally{await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

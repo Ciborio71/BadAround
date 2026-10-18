@@ -25,7 +25,7 @@ test('changing parent invalidates old compact subtype and preserves original can
 });
 test('paired fields preserve semantic order, descriptions and payload',()=>{
  const h=create();h.fill();const before=JSON.stringify(h.model.payload());
- for(const names of [['reporter.email','reporter.phone'],['reporter.first_name','reporter.last_name'],['vehicle.make','vehicle.model'],['time.range_start','time.range_end']]){
+ for(const names of [['reporter.email','reporter.phone'],['reporter.first_name','reporter.last_name'],['vehicle.make','vehicle.model','vehicle.color'],['time.range_start','time.range_end']]){
   const row=wrapper(h,names[0]).parentElement;assert(row.classList.contains('ba-native-field-pair'));assert.deepEqual([...row.children].map(n=>n.dataset.nativeField),names);
  }
  assert.equal(JSON.stringify(h.model.payload()),before);assert(!h.doc.querySelector('[data-native-location-fields] .ba-native-field-pair'));h.close();
@@ -39,7 +39,7 @@ test('submission lock disables editing and legal confirmations never collapse',a
 });
 
 test('theft damage wording stays contract-required and follows progressive details',()=>{
- const h=create();h.fill();h.set('event.category','vehicle');h.set('event.subtype','vehicle_stolen');h.set('vehicle.role','involved');h.set('vehicle.type','car');h.set('vehicle.plate_knowledge','unknown');h.set('witness.status','none');for(let i=0;i<3;i++)h.click('next');
+ const h=create();h.fill();h.set('event.category','vehicle');h.set('event.subtype','vehicle_stolen');h.set('vehicle.role','involved');h.set('vehicle.type','car');h.set('vehicle.plate_knowledge','unknown');h.set('witness.status','none');for(let i=0;i<2;i++)h.click('next');
  const w=wrapper(h,'damage.status');assert.match(w.querySelector('label').textContent,/danni aggiuntivi/);assert.match(w.querySelector('.ba-native-help').textContent,/Da verificare/);assert(!w.hidden);assert(h.root.nativeReport.config.fields['damage.status'].required);assert.equal(w.querySelector('fieldset').getAttribute('aria-required'),'true');
  h.set('event.category','hazard');h.set('event.subtype','hazard_road_obstruction');assert.match(w.querySelector('label').textContent,/Sono presenti danni/);assert(!w.querySelector('.ba-native-help').textContent.includes('oltre al furto'));h.close();
 });

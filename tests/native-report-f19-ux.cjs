@@ -120,7 +120,7 @@ test('F1.9 navigation controls keep coherent touch targets and non-overflow resp
 test('F1.9 choice controls remain native labels with keyboard-focusable inputs',()=>{
   const h=create();
   h.fill();
-  while(h.model.step<5) h.click('next');
+  while(h.model.step<4) h.click('next');
   const choice=Array.from(h.doc.querySelectorAll('.ba-native-choice')).find(label=>{
     const step=label.closest('[data-native-step]');
     const input=label.querySelector('input');
@@ -153,7 +153,7 @@ test('F1.9 media unavailable is presented as controlled error and no-media path 
   noMedia.fill();
   noMedia.set('media.availability','no');
   noMedia.goReview();
-  assert.equal(noMedia.model.step,6);
+  assert.equal(noMedia.model.step,5);
   assert.equal(noMedia.uploads.length,0);
   noMedia.close();
 });

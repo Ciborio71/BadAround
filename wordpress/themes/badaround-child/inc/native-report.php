@@ -42,7 +42,7 @@ function badaround_native_report_labels() {
 		'reward.status' => 'Vuoi offrire una ricompensa per informazioni utili?', 'reward.amount' => 'Importo in euro', 'reward.conditions' => 'Condizioni della ricompensa', 'reward.expires_on' => 'Scadenza',
 		'reward.confirmed' => 'Confermo l’impegno relativo alla ricompensa indicata',
 		'reporter.first_name' => 'Nome', 'reporter.last_name' => 'Cognome', 'reporter.email' => 'Email', 'reporter.phone' => 'Telefono',
-		'reporter.public_identity_mode' => 'Come vuoi comparire pubblicamente?', 'reporter.pseudonym' => 'Pseudonimo pubblico', 'reporter.contact_preference' => 'Vuoi ricevere aggiornamenti sulla tua segnalazione?',
+		'reporter.public_identity_mode' => 'Come vuoi comparire pubblicamente?', 'reporter.pseudonym' => 'Pseudonimo pubblico', 'reporter.contact_preference' => 'Vuoi ricevere aggiornamenti e informazioni su questo evento?',
 		'consents.truthfulness' => 'Confermo che le informazioni sono veritiere per quanto a mia conoscenza',
 		'consents.media_rights' => 'Confermo di avere i diritti su eventuali contenuti forniti',
 		'consents.publication_rules' => 'Accetto le regole di pubblicazione e moderazione', 'consents.terms' => 'Accetto i termini e le condizioni',
@@ -58,7 +58,7 @@ function badaround_native_report_option_label( $path, $value ) {
 		'vehicle.plate_knowledge' => array( 'full' => 'Targa completa', 'partial' => 'Solo una parte', 'unknown' => 'Non la conosco', 'none' => 'Il veicolo non ha targa' ),
 		'location.public_precision' => array( 'point' => 'Punto approssimato', 'street' => 'Via, senza civico', 'area' => 'Area o quartiere', 'municipality' => 'Solo il Comune' ),
 		'reward.status' => array( 'none' => 'Nessuna ricompensa', 'fixed' => 'Importo definito', 'negotiable' => 'Da concordare' ),
-		'reporter.contact_preference' => array( 'community' => 'Informazioni dalla community e aggiornamenti di BadAround', 'badaround_only' => 'Solo aggiornamenti di BadAround', 'none' => 'Nessun aggiornamento facoltativo' ),
+		'reporter.contact_preference' => array( 'community' => 'Sì, vorrei ricevere informazioni e aggiornamenti dalla community di BadAround', 'badaround_only' => 'Sì, ma solo aggiornamenti di BadAround', 'none' => 'No, non desidero aggiornamenti facoltativi' ),
 		'reporter.public_identity_mode' => array( 'anonymous' => 'In forma anonima', 'pseudonym' => 'Con uno pseudonimo', 'first_name' => 'Con il mio nome', 'name_initial' => 'Nome e iniziale del cognome' ),
 		'media.availability' => array( 'yes' => 'Sì', 'no' => 'No', 'possible' => 'Potrei procurarle', 'surveillance' => 'Possibili riprese di videosorveglianza' ),
 	);
@@ -87,7 +87,7 @@ function badaround_native_report_step( $path ) {
 	if ( 0 === strpos( $path, 'event.' ) || 'reporter.relationship' === $path ) { return 'event'; }
 	if ( in_array( $path, array( 'location.place_type', 'location.immediate_danger' ), true ) ) { return 'details'; }
 	if ( 0 === strpos( $path, 'location.' ) ) { return 'location'; }
-	if ( 0 === strpos( $path, 'time.' ) ) { return 'time'; }
+	if ( 0 === strpos( $path, 'time.' ) ) { return 'location'; }
 	if ( 0 === strpos( $path, 'media.' ) ) { return 'media'; }
 	if ( 0 === strpos( $path, 'reporter.' ) || 0 === strpos( $path, 'consents.' ) ) { return 'contact'; }
 	return 'details';
@@ -182,7 +182,7 @@ function badaround_native_report_config() {
 		'media' => array( 'endpoint' => rest_url( 'badaround/v1/report-media-sessions' ) ),
 		'locationManualEntry' => false, // MVP presentation: only the address search is visible.
 		'timezone' => wp_timezone_string(), 'fields' => $fields, 'categories' => $categories,
-		'steps' => array( 'event' => 'Cosa è successo', 'location' => 'Dove', 'time' => 'Quando', 'details' => 'Dettagli', 'media' => 'Immagini', 'contact' => 'Informazioni di contatto', 'review' => 'Riepilogo e invio' ),
+		'steps' => array( 'event' => 'Cosa è successo', 'location' => 'Dove e quando', 'details' => 'Dettagli', 'media' => 'Immagini', 'contact' => 'Informazioni di contatto', 'review' => 'Riepilogo e invio' ),
 	);
 }
 
@@ -219,7 +219,7 @@ function badaround_native_report_field( $path, $field ) {
 	<?php endif; ?>
 		<?php if ( 'reporter.contact_preference' === $path ) : ?>
 		<div class="ba-native-contact-explainer">
-			<p>Le eventuali informazioni della community ti vengono inoltrate da BadAround. Anche scegliendo nessun aggiornamento facoltativo, BadAround potrà scriverti per chiarimenti necessari alla gestione della segnalazione.</p>
+			<p>La community di BadAround può aiutarti con avvistamenti, testimonianze e altre informazioni utili su questo evento. BadAround può inoltrarti questi contributi senza mostrare i tuoi recapiti. Anche scegliendo nessun aggiornamento facoltativo, BadAround potrà scriverti per chiarimenti necessari alla gestione della segnalazione.</p>
 		</div>
 		<?php endif; ?>
 		<p id="<?php echo esc_attr( $id ); ?>-help" class="ba-native-help"><?php echo esc_html( $field['help'] ); ?></p>

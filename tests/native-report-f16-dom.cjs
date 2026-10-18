@@ -29,7 +29,7 @@ function populate(h) {
     'location.exact_address':'Via Test 1, Pomezia','location.place_type':'road_sidewalk','location.immediate_danger':'no',
     'time.mode':'exact','time.date':'2026-10-01','time.knowledge':'unknown','content.description':'Segnalazione sintetica F1.6.',
     'damage.status':'no','authority.status':'no','media.availability':'no','reporter.first_name':'QA','reporter.last_name':'Synthetic',
-    'reporter.email':'qa@example.invalid','reporter.contact_preference':'none','consents.truthfulness':true,'consents.media_rights':true,
+    'reporter.email':'qa@example.invalid','reward.status':'none','reporter.public_identity_mode':'anonymous','reporter.contact_preference':'none','consents.truthfulness':true,'consents.media_rights':true,
     'consents.publication_rules':true,'consents.terms':true,'consents.privacy':true};
   Object.entries(data).forEach(([key,value])=>h.set(key,value));
 }
@@ -67,7 +67,7 @@ test('invalid step cannot advance; accessible error summary and error focus',()=
 });
 test('successful submit, double-click guard, UUID reset only after distinct report',async()=>{
   let finish;const h=create(payload=>new Promise(resolve=>{finish=()=>resolve(completed(payload));}));populate(h);
-  for(let i=0;i<6;i++)h.click('next');assert.equal(h.model.step,6);
+  for(let i=0;i<5;i++)h.click('next');assert.equal(h.model.step,5);
   const id=h.model.submissionId;h.submit();h.submit();assert.equal(h.requests.length,1);
   assert(h.doc.querySelector('[data-native-submit]').disabled);assert.equal(h.doc.querySelector('form').getAttribute('aria-busy'),'true');
   finish();await tick();assert(!h.doc.querySelector('[data-native-success]').hidden);assert(h.doc.querySelector('form').hidden);
@@ -76,7 +76,7 @@ test('successful submit, double-click guard, UUID reset only after distinct repo
 });
 test('network uncertainty freezes fields, retry same payload, completed duplicate shows success',async()=>{
   const h=create((payload,count)=>{if(count===1)throw Error('network timeout');return {...completed(payload),status:200,json:async()=>({status:'success',submission_id:payload.submission_id,schema_version:payload.schema_version,next_state:'moderation_pending',duplicate:true})};});
-  populate(h);for(let i=0;i<6;i++)h.click('next');h.submit();await tick();
+  populate(h);for(let i=0;i<5;i++)h.click('next');h.submit();await tick();
   assert(h.model.snapshot);assert(h.doc.querySelector('[data-native-back]').disabled);assert(h.doc.querySelector('[name="content.description"]').disabled);
   assert.equal(h.model.lastError.code,'network_error');assert(!h.doc.querySelector('[data-native-errors]').textContent.includes('network_error'));
   h.submit();await tick();assert.equal(h.requests.length,2);assert.equal(h.requests[0].options.body,h.requests[1].options.body);
@@ -84,28 +84,28 @@ test('network uncertainty freezes fields, retry same payload, completed duplicat
 });
 test('structured server field error routes to matching step; edits keep UUID',async()=>{
   const h=create(()=>({ok:false,status:422,json:async()=>({status:'error',error:{code:'invalid_email',field:'reporter.email',retryable:false}})}));
-  populate(h);for(let i=0;i<6;i++)h.click('next');const id=h.model.submissionId;h.submit();await tick();
-  assert.equal(h.model.step,5);assert.equal(h.model.snapshot,null);assert.equal(h.doc.querySelector('[name="reporter.email"]').getAttribute('aria-invalid'),'true');
+  populate(h);for(let i=0;i<5;i++)h.click('next');const id=h.model.submissionId;h.submit();await tick();
+  assert.equal(h.model.step,4);assert.equal(h.model.snapshot,null);assert.equal(h.doc.querySelector('[name="reporter.email"]').getAttribute('aria-invalid'),'true');
   h.set('reporter.email','changed@example.invalid');assert.equal(h.model.submissionId,id);assert.equal(h.model.values['reporter.email'],'changed@example.invalid');h.dom.window.close();
 });
 test('non-validation 422 preserves snapshot and blocks unsafe editing or resubmission',async()=>{
   for(const code of ['insert_failed','persistence_invalid_intake','unrecognized_error']) {
     const h=create(()=>({ok:false,status:422,json:async()=>({status:'error',error:{code,field:null,retryable:false}})}));
-    populate(h);for(let i=0;i<6;i++)h.click('next');const id=h.model.submissionId;h.submit();await tick();
-    assert(h.model.snapshot);assert.equal(h.model.submissionId,id);assert.equal(h.model.step,6);
+    populate(h);for(let i=0;i<5;i++)h.click('next');const id=h.model.submissionId;h.submit();await tick();
+    assert(h.model.snapshot);assert.equal(h.model.submissionId,id);assert.equal(h.model.step,5);
     assert(h.doc.querySelector('[name="content.description"]').disabled);assert(h.doc.querySelector('[data-native-back]').disabled);
     assert(h.doc.querySelector('[data-native-submit]').disabled);h.submit();assert.equal(h.requests.length,1);h.dom.window.close();
   }
 });
 test('retryable 422 retains exact snapshot and retries even if it names a user field',async()=>{
   const h=create((payload,count)=>count===1?{ok:false,status:422,json:async()=>({status:'error',error:{code:'invalid_email',field:'reporter.email',retryable:true}})}:completed(payload));
-  populate(h);for(let i=0;i<6;i++)h.click('next');h.submit();await tick();
-  assert(h.model.snapshot);assert.equal(h.model.step,6);h.submit();await tick();
+  populate(h);for(let i=0;i<5;i++)h.click('next');h.submit();await tick();
+  assert(h.model.snapshot);assert.equal(h.model.step,5);h.submit();await tick();
   assert.equal(h.requests.length,2);assert.equal(h.requests[0].options.body,h.requests[1].options.body);
   assert(!h.doc.querySelector('[data-native-success]').hidden);h.dom.window.close();
 });
 test('all control descriptions resolve, labels associated and no executable user HTML',()=>{
-  const h=create(completed);populate(h);h.set('content.description','<img src=x onerror=alert(1)>');for(let i=0;i<6;i++)h.click('next');
+  const h=create(completed);populate(h);h.set('content.description','<img src=x onerror=alert(1)>');for(let i=0;i<5;i++)h.click('next');
   assert(!h.doc.querySelector('[data-native-review] img'));assert(h.doc.querySelector('[data-native-review]').textContent.includes('<img'));
   h.doc.querySelectorAll('[aria-describedby]').forEach(input=>input.getAttribute('aria-describedby').split(' ').forEach(id=>assert(h.doc.getElementById(id))));
   h.doc.querySelectorAll('input,select,textarea').forEach(input=>assert(input.closest('label')||h.doc.querySelector(`label[for="${input.id}"]`)));

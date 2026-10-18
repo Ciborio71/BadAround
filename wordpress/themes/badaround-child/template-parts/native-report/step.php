@@ -35,9 +35,14 @@ if ( 'event' === $key ) : ?>
 <?php endif;
 if ( 'location' === $key ) : ?><div data-native-location-fields hidden><?php endif;
 foreach ( $config['fields'] as $path => $field ) {
-	if ( $field['step'] === $key ) { badaround_native_report_field( $path, $field ); }
+	if ( $field['step'] === $key && ( 'location' !== $key || 0 !== strpos( $path, 'time.' ) ) ) { badaround_native_report_field( $path, $field ); }
 }
-if ( 'location' === $key ) : ?></div><?php endif;
+if ( 'location' === $key ) : ?></div>
+	<div data-native-time-fields>
+	<p>Indica anche quando è successo. Puoi scegliere una data, un periodo approssimativo oppure «Non lo so». Gli orari si riferiscono al fuso <?php echo esc_html( $config['timezone'] ); ?>.</p>
+	<?php foreach ( $config['fields'] as $path => $field ) { if ( 0 === strpos( $path, 'time.' ) ) { badaround_native_report_field( $path, $field ); } } ?>
+	</div>
+<?php endif;
 if ( 'media' === $key ) : ?>
 	<div class="ba-native-media" data-native-media>
 		<label for="ba-native-media-files">Scegli immagini (facoltativo)</label>

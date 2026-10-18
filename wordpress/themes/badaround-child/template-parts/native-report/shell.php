@@ -11,7 +11,7 @@ if ( ! $config ) {
 	<noscript><p>Per usare il wizard e inviare la segnalazione attiva JavaScript. I campi sono riportati di seguito per consultazione.</p></noscript>
 	<p data-native-boot role="status">Preparazione del modulo…</p>
 	<nav aria-label="Avanzamento della segnalazione"><p class="ba-native-position" data-native-position role="status" aria-live="polite" aria-atomic="true"></p><ol class="ba-native-progress">
-	<?php $timeline = array( 'event' => 'Evento', 'location' => 'Dove', 'time' => 'Quando', 'details' => 'Dettagli', 'media' => 'Media', 'contact' => 'Contatti', 'review' => 'Riepilogo' ); foreach ( $config['steps'] as $key => $title ) : ?><li data-native-progress="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $timeline[ $key ] ); ?></li><?php endforeach; ?>
+	<?php $timeline = array( 'event' => 'Evento', 'location' => 'Dove e quando', 'details' => 'Dettagli', 'media' => 'Media', 'contact' => 'Contatti', 'review' => 'Riepilogo' ); foreach ( $config['steps'] as $key => $title ) : ?><li data-native-progress="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $timeline[ $key ] ); ?></li><?php endforeach; ?>
 	</ol></nav>
 	<div class="ba-native-summary" data-native-errors tabindex="-1" role="alert" hidden></div>
 	<form data-native-form novalidate>
