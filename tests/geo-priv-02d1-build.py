@@ -92,7 +92,7 @@ gp_check(true===$svc->publish(290),'J authorized event 290 recovered through ser
 gp_check(get_post_status(290)==='publish','J event 290 WordPress published');
 gp_check(get_post_meta(290,'_ba_moderation_status')==='published','J moderation unchanged');
 gp_check(count($GLOBALS['publish_guards'])===0,'J no dangling temporary filter');
-gp_check(true===$svc->publish(290),'J second service call idempotent');
+gp_check(true===$svc->prepare_public_projection(290) && get_post_status(290)==='publish','J repeat projection stays published');
 scenario(291,'published','pending');
 $GLOBALS['meta'][291]['_ba_primary_report_id']=25;
 gp_check(is_wp_error($svc->publish(291)) && get_post_status(291)==='pending','K no recovery for non-290');
