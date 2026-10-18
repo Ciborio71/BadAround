@@ -105,7 +105,7 @@
     // Native presentation only: selects remain the sole canonical model inputs.
     const categoryCards = {
       vehicle: {title:'Veicoli', desc:'Auto, moto e altri mezzi: furti, danneggiamenti e situazioni da segnalare.', icon:'vehicle', color:'#1677E8'},
-      property: {title:'Case e attività', desc:'Furti, tentati furti, danneggiamenti e altri eventi che riguardano abitazioni, negozi e uffici.', icon:'property', color:'#C9153D'},
+      property: {title:'Case e attività', desc:'Furti, tentati furti e altri eventi che riguardano abitazioni, negozi e uffici.', icon:'property', color:'#C9153D'},
       hazard: {title:'Pericoli', desc:'Ostacoli, rischi stradali o ambientali e situazioni che richiedono attenzione.', icon:'hazard', color:'#F57C00'},
       public_space: {title:'Spazi pubblici', desc:'Vandalismi, degrado e altre situazioni che interessano aree comuni.', icon:'public', color:'#0AA184'},
       animal: {title:'Animali', desc:'Animali smarriti, avvistati o in difficoltà.', icon:'animal', color:'#7040C8'},
