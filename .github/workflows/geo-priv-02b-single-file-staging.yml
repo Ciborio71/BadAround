@@ -27,14 +27,28 @@ jobs:
           php -l wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
           php tests/f1-14r-publication-contract.php
           php tests/f1-14r-consumers.php
-      - name: Verify single-file payload and prepare isolated transfer
+      - name: Prepare one-file payload and verified baseline rollback
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p /tmp/geo-priv-one-file
-          cp wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php /tmp/geo-priv-one-file/class-badaround-publication-service.php
-          cmp /tmp/geo-priv-one-file/class-badaround-publication-service.php wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
-      - name: Transfer one Publication Service file via established FTPS action
+          mkdir -p geo-new geo-rollback
+          FILE=wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+          cp "$FILE" geo-new/class-badaround-publication-service.php
+          git show 25b9ff5ad9d747b10cef7c2f3981fab15fbe4ed3:"$FILE" > geo-rollback/class-badaround-publication-service.php
+          test "$(find geo-new -type f | wc -l)" -eq 1
+          test "$(find geo-rollback -type f | wc -l)" -eq 1
+          cmp "$FILE" geo-new/class-badaround-publication-service.php
+          sha256sum geo-new/* geo-rollback/* > geo-manifest.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: geo-priv-02b-baseline-rollback
+          path: |
+            geo-rollback/
+            geo-manifest.txt
+          retention-days: 14
+      - name: Deploy isolated PHP file (attempt 1)
+        id: upload
+        continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.STAGING_SFTP_HOST }}
@@ -42,8 +56,62 @@ jobs:
           password: ${{ secrets.STAGING_SFTP_PASSWORD }}
           protocol: ftps
           port: 21
-          local-dir: /tmp/geo-priv-one-file/
+          local-dir: ./geo-new/
           server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/includes/
           state-name: .geo-priv-02b-single-file-state.json
           dangerous-clean-slate: false
           log-level: minimal
+      - name: Retry transient FTPS failure (attempt 2)
+        id: retry2
+        if: steps.upload.outcome == 'failure'
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./geo-new/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/includes/
+          state-name: .geo-priv-02b-single-file-state.json
+          dangerous-clean-slate: false
+          log-level: minimal
+      - name: Retry transient FTPS failure (attempt 3)
+        id: retry3
+        if: steps.upload.outcome == 'failure' && steps.retry2.outcome == 'failure'
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./geo-new/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/includes/
+          state-name: .geo-priv-02b-single-file-state.json
+          dangerous-clean-slate: false
+          log-level: minimal
+      - name: Restore known baseline after all upload attempts fail
+        if: steps.upload.outcome == 'failure' && steps.retry2.outcome == 'failure' && steps.retry3.outcome == 'failure'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./geo-rollback/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/includes/
+          state-name: .geo-priv-02b-rollback-state.json
+          dangerous-clean-slate: false
+          log-level: minimal
+      - name: Confirm transfer before external live-file verification
+        run: |
+          if [ '${{ steps.upload.outcome }}' = success ] || [ '${{ steps.retry2.outcome }}' = success ] || [ '${{ steps.retry3.outcome }}' = success ]; then
+            echo 'One-file transfer reported success; external byte-for-byte check required.'
+          else
+            echo 'All attempts failed; do not perform event recovery.'
+            exit 1
+          fi
