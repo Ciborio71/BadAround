@@ -1,0 +1,33 @@
+name: GEO-PRIV-03A isolated review QA
+on:
+  pull_request:
+    branches: [deploy/native-social-preference]
+    paths:
+      - 'wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php'
+      - 'wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php'
+      - 'tests/geo-priv-03a-published-save.php'
+      - '.github/workflows/geo-priv-03a-review-qa.yml'
+permissions:
+  contents: read
+jobs:
+  publication:
+    name: Moderator save, Social and GEO-PRIV-02 regression
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Syntax of both scoped Core classes and regression harness
+        run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+          php -l tests/geo-priv-03a-published-save.php
+      - name: State-aware moderation save regression (mock WP lifecycle)
+        run: php tests/geo-priv-03a-published-save.php
+      - name: GEO-PRIV-02 publication and consumer gates
+        run: |
+          php tests/f1-14r-publication-contract.php
+          php tests/f1-14r-consumers.php
+      - name: Social preference regression
+        run: php tests/native-social-preference.php
