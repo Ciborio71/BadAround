@@ -78,6 +78,10 @@ verify(get_post_status(90)==='pending','REST contradictory published/approved fa
 scenario('publish','published',false,false);
 wp_update_post(['ID'=>90,'post_title'=>'Unauthorized REST']);
 verify(get_post_status(90)!=='publish','REST insufficient moderation capability does not preserve publish');
+scenario('publish','published',true,true);
+$_POST['ba_public_fields_nonce']='invalid-token';
+wp_update_post(['ID'=>90,'post_title'=>'Invalid classic token in REST']);
+verify(get_post_status(90)!=='publish','invalid supplied metabox token cannot activate REST published-save exception');
 scenario('publish','published',false,true);
 $GLOBALS['authenticated_user']=0;
 wp_update_post(['ID'=>90,'post_title'=>'Unauthenticated REST']);
