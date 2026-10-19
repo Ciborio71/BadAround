@@ -1,0 +1,31 @@
+name: GEO-PRIV-03A.4 lifecycle review (no deploy)
+on:
+  push:
+    branches:
+      - fix/geo-priv-03a4-rest-save-lifecycle
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: PHP lint
+        run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php
+          php -l tests/geo-priv-03a-published-save.php
+          php -l tests/geo-priv-03a4-rest-lifecycle.php
+      - name: Original classic lifecycle QA
+        run: php tests/geo-priv-03a-published-save.php
+      - name: REST lifecycle QA
+        run: php tests/geo-priv-03a4-rest-lifecycle.php
+      - name: GEO-PRIV-02 and publication consumer regressions
+        run: |
+          php tests/f1-14r-publication-contract.php
+          php tests/f1-14r-consumers.php
+      - name: Social regression
+        run: php tests/native-social-preference.php
