@@ -476,7 +476,14 @@ class BadAround_Moderation_Admin {
 		if ( BadAround_Event_Post_Type::POST_TYPE !== $post_type || empty( $data['post_status'] ) || 'publish' !== $data['post_status'] ) {
 			return $data;
 		}
-		if (class_exists('BadAround_Native_Media_Fence') && is_wp_error(BadAround_Native_Media_Fence::check($post_id))) { $data['post_status']='pending';return $data; }
+		if ( class_exists( 'BadAround_Native_Media_Fence' ) && is_wp_error( BadAround_Native_Media_Fence::check( $post_id ) ) ) {
+			$data['post_status'] = 'pending';
+			return $data;
+		}
+		if ( $post_id && 'publish' === get_post_status( $post_id )
+			&& BadAround_Publication_Service::STATUS_PUBLISHED !== sanitize_key( (string) get_post_meta( $post_id, '_ba_moderation_status', true ) ) ) {
+			BadAround_Audit_Log::record( 'event', $post_id, 'moderation_public_save_status_conflict', 'moderation' );
+		}
 		if ( $this->may_preserve_published_status( $post_id ) || apply_filters( 'badaround_allow_event_publish', false, $post_id ) ) {
 			return $data;
 		}
