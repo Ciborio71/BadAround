@@ -478,6 +478,7 @@ class BadAround_Moderation_Admin {
 				 * publication from pending/approved or contradictory state.
 				 */
 				|| ( defined( 'REST_REQUEST' ) && REST_REQUEST
+					&& ! isset( $_POST['ba_public_fields_nonce'] )
 					&& ! ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
 					&& get_current_user_id() > 0 )
 			);
