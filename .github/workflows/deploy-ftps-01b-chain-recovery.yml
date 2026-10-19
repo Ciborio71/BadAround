@@ -11,6 +11,7 @@ jobs:
     timeout-minutes: 5
     env:
       FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
     steps:
       - name: Verify public root trust and fetch official intermediate chain
         shell: bash
@@ -44,8 +45,8 @@ jobs:
           echo 'Connecting to FTPS port 21 with strict hostname and chain validation.'
           set +e
           timeout 30s openssl s_client -starttls ftp \
-            -connect "${FTP_HOST}:21" -servername "$FTP_HOST" \
-            -verify_hostname "$FTP_HOST" -verify_return_error \
+            -connect "${FTP_HOST}:21" -servername "$FTP_TLS_NAME" \
+            -verify_hostname "$FTP_TLS_NAME" -verify_return_error \
             -CAfile "$work/curl-chain.pem" -showcerts \
             < /dev/null > "$work/ftps-handshake.log" 2>&1
           rc=$?
@@ -61,7 +62,7 @@ jobs:
           echo "OpenSSL verified handshake exit code: $rc"
           test "$rc" -eq 0 || { echo 'STOP - FTPS CHAIN OR HOSTNAME VERIFICATION FAILED'; exit 1; }
           grep -q 'Verify return code: 0 (ok)' "$work/ftps-handshake.log" || { echo 'STOP - CHAIN NOT VERIFIED'; exit 1; }
-          openssl verify -purpose sslserver -verify_hostname "$FTP_HOST" \
+          openssl verify -purpose sslserver -verify_hostname "$FTP_TLS_NAME" \
             -CAfile /etc/ssl/certs/ca-certificates.crt -untrusted "$work/untrusted.pem" \
             "$work/remote-leaf.pem"
           echo 'PASS - server certificate verified to runner trust roots via official untrusted intermediates.'
@@ -75,8 +76,9 @@ jobs:
           set +e
           curl --verbose --ssl-reqd --cacert "$work/curl-chain.pem" \
             --user 'tls-diagnostic-invalid:invalid' \
+            --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" \
             --connect-timeout 10 --max-time 20 \
-            "ftp://${FTP_HOST}:21/" -o /dev/null > "$work/curl-stdout.log" 2> "$work/curl-tls.log"
+            "ftp://${FTP_TLS_NAME}:21/" -o /dev/null > "$work/curl-stdout.log" 2> "$work/curl-tls.log"
           code=$?
           set -e
           if grep -q 'SSL certificate verify ok' "$work/curl-tls.log" && \
