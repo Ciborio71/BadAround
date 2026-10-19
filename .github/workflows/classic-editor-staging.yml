@@ -1,0 +1,112 @@
+name: BA Classic Editor - staging one-file release
+on:
+  push:
+    branches: [feature/admin-classic-editor-staging]
+permissions:
+  contents: read
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+jobs:
+  classic-editor:
+    runs-on: ubuntu-latest
+    environment: staging
+    timeout-minutes: 12
+    env:
+      HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      CERT_HOST: hostmld17.aziendeitalia.com
+      SRC: wordpress/themes/badaround-child/functions.php
+      BASEREF: 16b4c67180f6b768b1bc2fedfe4efbd9dad223a2
+      APPREF: 4622bec87e051f2000884abc0095b258fe2bfcb5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 4622bec87e051f2000884abc0095b258fe2bfcb5
+          fetch-depth: 0
+      - name: Verify exact one-file application delta and PHP syntax
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$APPREF"
+          test "$(git diff --name-only "$BASEREF" HEAD)" = "$SRC"
+          php -l "$SRC"
+          git diff --check "$BASEREF" HEAD
+      - name: Build expected files and verified CA intermediates
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p old new actual tls verify
+          git show "$BASEREF:$SRC" > old/functions.php
+          cp "$SRC" new/functions.php
+          test -s old/functions.php && test -s new/functions.php
+          curl --fail --silent --show-error --location --proto '=https' --max-time 25 https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl --fail --silent --show-error --location --proto '=https' --max-time 25 https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          test "$(openssl x509 -in tls/yr2.pem -noout -subject)" = "subject=C = US, O = Let's Encrypt, CN = YR2"
+          openssl verify -CAfile /etc/ssl/certs/ca-certificates.crt -untrusted tls/yr-by-x1.pem tls/yr2.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/bundle.pem
+          timeout 30s openssl s_client -starttls ftp -connect "${HOST}:21" -servername "$CERT_HOST" -verify_hostname "$CERT_HOST" -verify_return_error -CAfile tls/bundle.pem < /dev/null > tls/handshake.txt 2>&1
+          grep -q 'Verify return code: 0 (ok)' tls/handshake.txt
+      - name: Capture and validate actual staging file before modification
+        run: |
+          set -euo pipefail
+          url="ftp://${CERT_HOST}:21/staging.badaround.it/wp-content/themes/badaround-child/functions.php"
+          curl --fail --silent --show-error --ssl-reqd --cacert tls/bundle.pem --connect-to "${CERT_HOST}:21:${HOST}:21" --user "$USER:$PASS" --max-time 120 "$url" -o actual/functions.php
+          test -s actual/functions.php
+          sha256sum actual/functions.php old/functions.php new/functions.php
+          if cmp -s actual/functions.php new/functions.php; then
+            echo 'already=true' >> "$GITHUB_ENV"
+            echo 'CLASSIC_EDITOR_PREDEPLOY: already installed, upload not needed.'
+          elif cmp -s actual/functions.php old/functions.php; then
+            echo 'already=false' >> "$GITHUB_ENV"
+            echo 'CLASSIC_EDITOR_PREDEPLOY: certified source; upload permitted.'
+          else
+            echo 'STOP: live child functions.php differs from repository baseline and candidate. No upload.'; exit 1
+          fi
+      - name: Store real server file for rollback before any write
+        uses: actions/upload-artifact@v4
+        with:
+          name: classic-editor-staging-original-functions-php
+          path: actual/functions.php
+          retention-days: 30
+          if-no-files-found: error
+      - name: Upload only functions.php if needed
+        id: upload
+        if: env.already == 'false'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          url="ftp://${CERT_HOST}:21/staging.badaround.it/wp-content/themes/badaround-child/functions.php"
+          curl --fail --silent --show-error --ssl-reqd --cacert tls/bundle.pem --connect-to "${CERT_HOST}:21:${HOST}:21" --user "$USER:$PASS" --max-time 120 --upload-file new/functions.php "$url"
+      - name: Independently re-download and verify exact bytes
+        id: verify
+        if: env.already == 'true' || steps.upload.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          url="ftp://${CERT_HOST}:21/staging.badaround.it/wp-content/themes/badaround-child/functions.php"
+          curl --fail --silent --show-error --ssl-reqd --cacert tls/bundle.pem --connect-to "${CERT_HOST}:21:${HOST}:21" --user "$USER:$PASS" --max-time 120 "$url" -o verify/functions.php
+          cmp -s verify/functions.php new/functions.php
+          sha256sum verify/functions.php
+          echo 'CLASSIC_EDITOR_STAGING_SHA_PASS.'
+      - name: Restore captured live file if transfer or verification fails
+        id: rollback
+        if: always() && env.already == 'false' && (steps.upload.outcome == 'failure' || (steps.upload.outcome == 'success' && steps.verify.outcome != 'success'))
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          test -s actual/functions.php
+          url="ftp://${CERT_HOST}:21/staging.badaround.it/wp-content/themes/badaround-child/functions.php"
+          curl --fail --silent --show-error --ssl-reqd --cacert tls/bundle.pem --connect-to "${CERT_HOST}:21:${HOST}:21" --user "$USER:$PASS" --max-time 120 --upload-file actual/functions.php "$url"
+          curl --fail --silent --show-error --ssl-reqd --cacert tls/bundle.pem --connect-to "${CERT_HOST}:21:${HOST}:21" --user "$USER:$PASS" --max-time 120 "$url" -o verify/restored.php
+          cmp -s verify/restored.php actual/functions.php
+          echo 'CLASSIC_EDITOR_ROLLBACK_SHA_PASS.'
+      - name: Final gate
+        if: always()
+        run: |
+          set -euo pipefail
+          test '${{ steps.verify.outcome }}' = 'success' || { echo 'STOP - staging file not verified'; exit 1; }
+          if [ "$already" = 'false' ]; then
+            test '${{ steps.upload.outcome }}' = 'success' || exit 1
+          fi
+          echo 'CLASSIC_EDITOR_STAGING_ONE_FILE_PASS. Browser QA required.'
