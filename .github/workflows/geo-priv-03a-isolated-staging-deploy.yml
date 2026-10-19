@@ -78,8 +78,16 @@ jobs:
             "$remote" --output "rollback/$DEPLOY_FILE"
           test -s "rollback/$DEPLOY_FILE"
           sha256sum "rollback/$DEPLOY_FILE"
-          cmp -s "rollback/$DEPLOY_FILE" "old/$DEPLOY_FILE" || { echo 'STOP: live staging bytes differ from certified old version; NO UPLOAD'; exit 1; }
-          echo 'REMOTE BACKUP GATE PASS: captured live original matches certified baseline byte-for-byte.'
+          if cmp -s "rollback/$DEPLOY_FILE" "new/$DEPLOY_FILE"; then
+            echo 'already_installed=true' >> "$GITHUB_ENV"
+            echo 'REMOTE PREDEPLOY PASS: candidate already installed byte-for-byte. No upload necessary.'
+          elif cmp -s "rollback/$DEPLOY_FILE" "old/$DEPLOY_FILE"; then
+            echo 'already_installed=false' >> "$GITHUB_ENV"
+            echo 'REMOTE BACKUP GATE PASS: certified old baseline captured for one-file upload.'
+          else
+            echo 'STOP: staging bytes match neither approved candidate nor certified baseline. NO UPLOAD.'
+            exit 1
+          fi
       - name: Preserve actual remote rollback bytes BEFORE upload
         uses: actions/upload-artifact@v4
         with:
@@ -91,6 +99,7 @@ jobs:
           if-no-files-found: error
       - name: Upload exactly one PHP file with verified TLS
         id: upload
+        if: env.already_installed == 'false'
         continue-on-error: true
         shell: bash
         run: |
@@ -103,7 +112,7 @@ jobs:
           echo 'Single-file upload request completed.'
       - name: Re-download remote bytes and verify candidate SHA
         id: verify
-        if: steps.upload.outcome == 'success'
+        if: env.already_installed == 'true' || steps.upload.outcome == 'success'
         continue-on-error: true
         shell: bash
         run: |
@@ -118,7 +127,7 @@ jobs:
           echo 'REMOTE SINGLE-FILE SHA VERIFIED.'
       - name: Restore exact live backup if upload or remote verification failed
         id: rollback
-        if: always() && (steps.upload.outcome == 'failure' || (steps.upload.outcome == 'success' && steps.verify.outcome != 'success'))
+        if: always() && env.already_installed == 'false' && (steps.upload.outcome == 'failure' || (steps.upload.outcome == 'success' && steps.verify.outcome != 'success'))
         continue-on-error: true
         shell: bash
         run: |
@@ -140,7 +149,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [ '${{ steps.upload.outcome }}' != 'success' ] || [ '${{ steps.verify.outcome }}' != 'success' ]; then
+          if [ '${{ steps.verify.outcome }}' != 'success' ] || { [ "$already_installed" != 'true' ] && [ '${{ steps.upload.outcome }}' != 'success' ]; }; then
             echo 'STOP: deployment not verified; inspect rollback step and remote bytes.'; exit 1
           fi
           echo 'GEO-PRIV-03A STAGING ISOLATED FILE DEPLOY PASS - REAL WP QA STILL REQUIRED.'
