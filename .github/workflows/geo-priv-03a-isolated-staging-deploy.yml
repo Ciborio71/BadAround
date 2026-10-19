@@ -93,7 +93,7 @@ jobs:
           echo 'Exact remote candidate bytes confirmed.'
       - name: Restore exact captured remote file if upload or verification failed
         id: restore
-        if: always() && steps.upload.outcome != 'success' || always() && steps.verify.outcome != 'success'
+        if: always() && (steps.upload.outcome == 'failure' || (steps.upload.outcome == 'success' && steps.verify.outcome != 'success'))
         continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
