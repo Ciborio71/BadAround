@@ -1,0 +1,116 @@
+name: GEO-PRIV-03A — Isolated Staging Deploy with Remote Rollback Gate
+on:
+  push:
+    branches: [deploy/geo-priv-03a-staging]
+permissions:
+  contents: read
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+jobs:
+  isolated:
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      DEPLOY_FILE: class-badaround-moderation-admin.php
+      EXPECTED_CANDIDATE: 65e04fc32ce912693869e3e08b2ad1e03e02f13c
+      SOCIAL_BASE: 16b4c67180f6b768b1bc2fedfe4efbd9dad223a2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 65e04fc32ce912693869e3e08b2ad1e03e02f13c
+          fetch-depth: 0
+      - name: Fail closed on unexpected candidate or scope
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_CANDIDATE"
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+          php tests/geo-priv-03a-published-save.php
+          php tests/f1-14r-publication-contract.php
+          php tests/f1-14r-consumers.php
+          php tests/native-social-preference.php
+      - name: Prepare one-file payload, certified expected old file and hashes
+        run: |
+          set -euo pipefail
+          mkdir -p new old rollback
+          cp wordpress/plugins/badaround-core/includes/"$DEPLOY_FILE" new/"$DEPLOY_FILE"
+          git show "$SOCIAL_BASE":wordpress/plugins/badaround-core/includes/"$DEPLOY_FILE" > old/"$DEPLOY_FILE"
+          test "$(find new -type f | wc -l)" -eq 1
+          test "$(find old -type f | wc -l)" -eq 1
+          sha256sum new/"$DEPLOY_FILE" old/"$DEPLOY_FILE" > candidate-manifest.txt
+      - name: Capture ACTUAL remote bytes, fail if different from certified pre-deploy file
+        env:
+          REMOTE: ftp://${{ secrets.STAGING_SFTP_HOST }}/staging.badaround.it/wp-content/plugins/badaround-core/includes/class-badaround-moderation-admin.php
+        run: |
+          set -euo pipefail
+          test -n "$FTP_HOST" && test -n "$FTP_USER" && test -n "$FTP_PASS"
+          curl --fail --show-error --silent --retry 3 --retry-all-errors --ssl-reqd --user "$FTP_USER:$FTP_PASS" "$REMOTE" -o rollback/"$DEPLOY_FILE"
+          test -s rollback/"$DEPLOY_FILE"
+          sha256sum rollback/"$DEPLOY_FILE" >> candidate-manifest.txt
+          cmp -s rollback/"$DEPLOY_FILE" old/"$DEPLOY_FILE" || {
+            echo 'STOP: staging bytes diverge from the certified Social file. NO DEPLOY.'; exit 1;
+          }
+          echo 'Remote byte-exact rollback capture VERIFIED.'
+      - name: Preserve remote rollback artifact before any upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: geo-priv-03a-remote-rollback
+          path: |
+            rollback/
+            candidate-manifest.txt
+          retention-days: 30
+          if-no-files-found: error
+      - name: Upload one authorized staging file
+        id: upload
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./new/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/includes/
+          dangerous-clean-slate: false
+          state-name: .geo-priv-03a-staging-state.json
+          log-level: minimal
+      - name: Verify actual remote candidate or flag rollback
+        id: verify
+        if: always() && steps.upload.outcome == 'success'
+        continue-on-error: true
+        env:
+          REMOTE: ftp://${{ secrets.STAGING_SFTP_HOST }}/staging.badaround.it/wp-content/plugins/badaround-core/includes/class-badaround-moderation-admin.php
+        run: |
+          set -euo pipefail
+          curl --fail --show-error --silent --retry 3 --retry-all-errors --ssl-reqd --user "$FTP_USER:$FTP_PASS" "$REMOTE" -o remote-verified.php
+          cmp -s remote-verified.php new/"$DEPLOY_FILE"
+          sha256sum remote-verified.php
+          echo 'Exact remote candidate bytes confirmed.'
+      - name: Restore exact captured remote file if upload or verification failed
+        id: restore
+        if: always() && steps.upload.outcome != 'success' || always() && steps.verify.outcome != 'success'
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.STAGING_SFTP_HOST }}
+          username: ${{ secrets.STAGING_SFTP_USERNAME }}
+          password: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./rollback/
+          server-dir: /staging.badaround.it/wp-content/plugins/badaround-core/includes/
+          dangerous-clean-slate: false
+          state-name: .geo-priv-03a-rollback-state.json
+          log-level: minimal
+      - name: Final gate
+        if: always()
+        run: |
+          if [ '${{ steps.upload.outcome }}' != 'success' ] || [ '${{ steps.verify.outcome }}' != 'success' ]; then
+            echo 'STOP: deploy unverified; rollback attempted. Inspect remote bytes.'; exit 1
+          fi
+          echo 'STAGING FILE DEPLOYED AND REMOTE BYTE VERIFIED. Independent app QA still required.'
