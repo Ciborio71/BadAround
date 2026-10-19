@@ -1,0 +1,91 @@
+name: DEPLOY-FTPS-01B - Recover missing LE intermediates securely (diagnostic only)
+on:
+  push:
+    branches: [diagnostic/deploy-ftps-01b-chain]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chain-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+    steps:
+      - name: Verify public root trust and fetch official intermediate chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p /tmp/ftps-chain
+          ca=/etc/ssl/certs/ca-certificates.crt
+          test -s "$ca"
+          test -n "$FTP_HOST"
+          echo 'System root trust available. Fetching chain intermediates over verified HTTPS.'
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 --max-time 25 \
+            https://letsencrypt.org/certs/gen-y/int-yr2.pem -o /tmp/ftps-chain/yr2.pem
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 --max-time 25 \
+            https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o /tmp/ftps-chain/yr-by-x1.pem
+          openssl x509 -in /tmp/ftps-chain/yr2.pem -noout -subject -issuer -dates
+          openssl x509 -in /tmp/ftps-chain/yr-by-x1.pem -noout -subject -issuer -dates
+          test "$(openssl x509 -in /tmp/ftps-chain/yr2.pem -noout -subject)" = "subject=C = US, O = Let's Encrypt, CN = YR2"
+          test "$(openssl x509 -in /tmp/ftps-chain/yr-by-x1.pem -noout -subject)" = "subject=C = US, O = ISRG, CN = Root YR"
+          cat /tmp/ftps-chain/yr2.pem /tmp/ftps-chain/yr-by-x1.pem > /tmp/ftps-chain/untrusted.pem
+          # This is explicitly NOT a trust bundle: only intermediates are here.
+          echo 'Verify intermediate-to-trusted-root path, without trusting YR as a root.'
+          openssl verify -CAfile "$ca" -untrusted /tmp/ftps-chain/yr-by-x1.pem /tmp/ftps-chain/yr2.pem
+          # CA file for curl/OpenSSL: existing root trust plus public intermediate certificates.
+          cat "$ca" /tmp/ftps-chain/untrusted.pem > /tmp/ftps-chain/curl-chain.pem
+      - name: Validate remote FTPS server leaf against existing system trust
+        shell: bash
+        run: |
+          set -euo pipefail
+          work=/tmp/ftps-chain
+          echo 'Connecting to FTPS port 21 with strict hostname and chain validation.'
+          set +e
+          timeout 30s openssl s_client -starttls ftp \
+            -connect "${FTP_HOST}:21" -servername "$FTP_HOST" \
+            -verify_hostname "$FTP_HOST" -verify_return_error \
+            -CAfile "$work/curl-chain.pem" -showcerts \
+            < /dev/null > "$work/ftps-handshake.log" 2>&1
+          rc=$?
+          set -e
+          sed -nE '/^(depth=|verify error:|Verification error:|Verify return code:|CONNECTED|Certificate chain| *[0-9]+ s:)/p' "$work/ftps-handshake.log" | head -n 35 || true
+          awk -v file="$work/remote-leaf.pem" '
+            /-----BEGIN CERTIFICATE-----/ { capture=1 }
+            capture { print > file }
+            /-----END CERTIFICATE-----/ { exit }
+          ' "$work/ftps-handshake.log"
+          test -s "$work/remote-leaf.pem" || { echo 'STOP - SERVER CERTIFICATE NOT RECEIVED'; exit 1; }
+          openssl x509 -in "$work/remote-leaf.pem" -noout -subject -issuer -dates -ext subjectAltName
+          echo "OpenSSL verified handshake exit code: $rc"
+          test "$rc" -eq 0 || { echo 'STOP - FTPS CHAIN OR HOSTNAME VERIFICATION FAILED'; exit 1; }
+          grep -q 'Verify return code: 0 (ok)' "$work/ftps-handshake.log" || { echo 'STOP - CHAIN NOT VERIFIED'; exit 1; }
+          openssl verify -purpose sslserver -verify_hostname "$FTP_HOST" \
+            -CAfile /etc/ssl/certs/ca-certificates.crt -untrusted "$work/untrusted.pem" \
+            "$work/remote-leaf.pem"
+          echo 'PASS - server certificate verified to runner trust roots via official untrusted intermediates.'
+      - name: Check curl FTPS strict TLS verification without deploying
+        shell: bash
+        run: |
+          set -euo pipefail
+          work=/tmp/ftps-chain
+          # Deliberately invalid credentials: no upload, no content access, no production actions.
+          # Only the TLS verification result is evaluated; FTP authentication failure is expected.
+          set +e
+          curl --verbose --ssl-reqd --cacert "$work/curl-chain.pem" \
+            --user 'tls-diagnostic-invalid:invalid' \
+            --connect-timeout 10 --max-time 20 \
+            "ftp://${FTP_HOST}:21/" -o /dev/null > "$work/curl-stdout.log" 2> "$work/curl-tls.log"
+          code=$?
+          set -e
+          if grep -q 'SSL certificate verify ok' "$work/curl-tls.log" && \
+             grep -q 'subjectAltName: host' "$work/curl-tls.log"; then
+            echo 'CURL FTPS STRICT TLS VERIFICATION PASS (authentication deliberately invalid).'
+            echo "Curl transfer exit code (auth failure allowed): $code"
+          else
+            grep -E 'SSL certificate problem|certificate verify|subjectAltName|curl: ' "$work/curl-tls.log" | head -n 12 || true
+            echo 'STOP - CURL FTPS TLS VERIFICATION DID NOT PASS.'
+            exit 1
+          fi
+          echo 'DEPLOY-FTPS-01B TLS CHAIN RECOVERY PASS - DIAGNOSTIC ONLY, NO DEPLOY.'
