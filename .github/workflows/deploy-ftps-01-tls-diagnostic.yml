@@ -1,0 +1,66 @@
+name: DEPLOY-FTPS-01 - TLS certificate chain diagnostic (read-only)
+on:
+  push:
+    branches:
+      - diagnostic/deploy-ftps-01-tls
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tls-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+    steps:
+      - name: Inspect runner trust store (no credentials)
+        shell: bash
+        run: |
+          set -euo pipefail
+          openssl version
+          curl --version | head -n 2
+          openssl version -d
+          for bundle in /etc/ssl/certs/ca-certificates.crt /etc/pki/tls/certs/ca-bundle.crt; do
+            if [ -s "$bundle" ]; then
+              echo "System CA bundle available: $bundle"
+            fi
+          done
+          test -n "$FTP_HOST" || { echo 'STOP: STAGING_SFTP_HOST secret missing'; exit 1; }
+          echo 'FTPS hostname supplied from existing GitHub secret; value not printed.'
+      - name: Inspect FTPS certificate and validate public CA chain + hostname
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          workdir="$(mktemp -d)"
+          trap 'rm -rf "$workdir"' EXIT
+          echo 'Starting explicit FTPS TLS handshake against secret-configured hostname on port 21.'
+          set +e
+          timeout 35s openssl s_client -starttls ftp -connect "${FTP_HOST}:21" \
+            -servername "$FTP_HOST" -verify_hostname "$FTP_HOST" \
+            -verify_return_error -showcerts < /dev/null > "$workdir/handshake.txt" 2>&1
+          rc=$?
+          set -e
+          sed -nE '/^(depth=|verify error:|Verification error:|Verify return code:|CONNECTED|no peer certificate|SSL handshake has read|Certificate chain| *[0-9]+ s:| *i:)/p' "$workdir/handshake.txt" | head -n 35
+          awk -v directory="$workdir" '
+            /-----BEGIN CERTIFICATE-----/ { n++; outfile=sprintf("%s/cert-%02d.pem",directory,n); writing=1 }
+            writing { print > outfile }
+            /-----END CERTIFICATE-----/ { close(outfile); writing=0 }
+            END { printf("Presented certificate count: %d\n",n) }
+          ' "$workdir/handshake.txt"
+          if [ -f "$workdir/cert-01.pem" ]; then
+            echo 'Leaf certificate metadata (public X.509 fields):'
+            openssl x509 -in "$workdir/cert-01.pem" -noout -subject -issuer -dates -fingerprint -sha256 -ext subjectAltName
+          else
+            echo 'STOP: No X.509 leaf certificate received.'
+          fi
+          echo "Verified handshake exit code: $rc"
+          if [ "$rc" -ne 0 ]; then
+            echo 'STOP: FTPS TLS VERIFICATION FAILED; DO NOT DEPLOY.'
+            exit 1
+          fi
+          grep -q 'Verify return code: 0 (ok)' "$workdir/handshake.txt" || {
+            echo 'STOP: Verify return code was not 0 (ok); DO NOT DEPLOY.'
+            exit 1
+          }
+          echo 'FTPS TLS VERIFICATION PASS - certificate chain and hostname validated with runner trust store.'
