@@ -463,10 +463,24 @@ class BadAround_Moderation_Admin {
 		return $event_id
 			&& 'publish' === get_post_status( $event_id )
 			&& BadAround_Publication_Service::STATUS_PUBLISHED === sanitize_key( (string) get_post_meta( $event_id, '_ba_moderation_status', true ) )
-			&& isset( $_POST['ba_public_fields_nonce'] )
-			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['ba_public_fields_nonce'] ) ), 'ba_save_public_fields_' . $event_id )
 			&& current_user_can( 'ba_moderate_events' )
-			&& current_user_can( 'edit_post', $event_id );
+			&& current_user_can( 'edit_post', $event_id )
+			&& (
+				/* Classic Editor: nonce is bound to the specific event. */
+				( isset( $_POST['ba_public_fields_nonce'] )
+					&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['ba_public_fields_nonce'] ) ), 'ba_save_public_fields_' . $event_id ) )
+				/*
+				 * REST: WP REST authentication and endpoint permissions have already
+				 * been enforced before wp_insert_post_data. The classic meta-box
+				 * nonce is not included in a Gutenberg/REST post update.
+				 * This exception only preserves a previously persisted publish +
+				 * published event for an authenticated moderator; it never creates
+				 * publication from pending/approved or contradictory state.
+				 */
+				|| ( defined( 'REST_REQUEST' ) && REST_REQUEST
+					&& ! ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
+					&& get_current_user_id() > 0 )
+			);
 	}
 
 	public function prevent_b2_publish( $data, $postarr ) {
