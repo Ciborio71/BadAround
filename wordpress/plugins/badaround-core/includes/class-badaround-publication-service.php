@@ -117,14 +117,36 @@ class BadAround_Publication_Service {
 			$content = implode( ' ', $parts );
 		}
 
-		$updated = wp_update_post(
-			array(
-				'ID'           => $event_id,
-				'post_title'   => sanitize_text_field( $title ),
-				'post_content' => wp_kses_post( $content ),
-			),
-			true
-		);
+		/*
+		 * B2 publish guards must remain in force for all new publications.
+		 * Only a previously published event with a matching frozen moderation
+		 * state may preserve its current publish status during projection edits.
+		 */
+		$preserve_published = 'publish' === $post->post_status
+			&& self::STATUS_PUBLISHED === sanitize_key( (string) get_post_meta( $event_id, '_ba_moderation_status', true ) );
+		$allow_projection_update = static function ( $allowed, $candidate_id ) use ( $event_id ) {
+			return absint( $candidate_id ) === $event_id ? true : $allowed;
+		};
+		if ( $preserve_published ) {
+			add_filter( 'badaround_allow_event_publish', $allow_projection_update, 999, 2 );
+		}
+		try {
+			$updated = wp_update_post(
+				array(
+					'ID'           => $event_id,
+					'post_title'   => sanitize_text_field( $title ),
+					'post_content' => wp_kses_post( $content ),
+				),
+				true
+			);
+		} finally {
+			if ( $preserve_published ) {
+				remove_filter( 'badaround_allow_event_publish', $allow_projection_update, 999 );
+			}
+		}
+		if ( $preserve_published && ! is_wp_error( $updated ) && 'publish' !== get_post_status( $event_id ) ) {
+			return new WP_Error( 'ba_publication_projection_status_changed', __( 'La proiezione pubblica ha modificato lo stato di pubblicazione.', 'badaround-core' ) );
+		}
 
 		if ( is_wp_error( $updated ) ) {
 			return $updated;
@@ -134,7 +156,7 @@ class BadAround_Publication_Service {
 		return true;
 	}
 
-	public function validate_public_projection( $event_id ) {
+	public function validate_public_projection( $event_id, $allow_published_recovery = false ) {
 		global $wpdb;
 
 		$event_id = absint( $event_id );
@@ -144,7 +166,7 @@ class BadAround_Publication_Service {
 		}
 
 		$moderation_status = sanitize_key( (string) get_post_meta( $event_id, '_ba_moderation_status', true ) );
-		if ( BadAround_Moderation_Service::STATUS_APPROVED !== $moderation_status ) {
+		if ( BadAround_Moderation_Service::STATUS_APPROVED !== $moderation_status && ! ( $allow_published_recovery && self::STATUS_PUBLISHED === $moderation_status ) ) {
 			return new WP_Error( 'ba_publication_not_approved', __( 'Solo un evento approvato può essere pubblicato.', 'badaround-core' ) );
 		}
 
@@ -361,13 +383,11 @@ class BadAround_Publication_Service {
 			return true;
 		}
 
-		/* Native territory-only projection: never derive a point from private report coordinates. */
-		if ( $this->municipality_term( $territory ) ) {
-			delete_post_meta( $event_id, '_ba_public_lat' );
-			delete_post_meta( $event_id, '_ba_public_lng' );
-			delete_post_meta( $event_id, '_ba_public_radius_m' );
-			return true;
-		}
+		/*
+		 * F1.14R territory-only is a fallback when no valid private coordinates
+		 * exist, not a default for point/street/area. Municipality is handled
+		 * above and must never derive from private coordinates.
+		 */
 
 		$report = $wpdb->get_row(
 			$wpdb->prepare(
@@ -378,8 +398,19 @@ class BadAround_Publication_Service {
 			)
 		);
 
-		if ( ! $report || ! is_numeric( $report->exact_lat ) || ! is_numeric( $report->exact_lng ) ) {
-			return new WP_Error( 'ba_publication_location_missing', __( 'Non sono disponibili coordinate sufficienti per creare una posizione pubblica approssimata.', 'badaround-core' ) );
+		$valid_private_coords = $report
+			&& is_numeric( $report->exact_lat ) && is_numeric( $report->exact_lng )
+			&& is_finite( (float) $report->exact_lat ) && is_finite( (float) $report->exact_lng )
+			&& (float) $report->exact_lat >= -90 && (float) $report->exact_lat <= 90
+			&& (float) $report->exact_lng >= -180 && (float) $report->exact_lng <= 180;
+		if ( ! $valid_private_coords ) {
+			if ( ! $this->municipality_term( $territory ) ) {
+				return new WP_Error( 'ba_publication_location_missing', __( 'Non sono disponibili coordinate sufficienti per creare una posizione pubblica approssimata.', 'badaround-core' ) );
+			}
+			delete_post_meta( $event_id, '_ba_public_lat' );
+			delete_post_meta( $event_id, '_ba_public_lng' );
+			delete_post_meta( $event_id, '_ba_public_radius_m' );
+			return true;
 		}
 
 		$precision = sanitize_key( (string) get_post_meta( $event_id, '_ba_public_location_precision', true ) );
@@ -487,6 +518,52 @@ class BadAround_Publication_Service {
 		}
 
 		$current = sanitize_key( (string) get_post_meta( $event_id, '_ba_moderation_status', true ) );
+
+		/*
+		 * GEO-PRIV-02D.1: one-time recovery for event #290 only.  The event
+		 * was previously published via B3 and became pending during projection
+		 * regeneration.  No other pending event can use this exceptional path.
+		 * The existing nonce-protected admin action and publish capabilities
+		 * are checked before reaching this branch.
+		 */
+		if ( 290 === $event_id && self::STATUS_PUBLISHED === $current && 'pending' === get_post_status( $event_id ) ) {
+			global $wpdb;
+			$primary_report = absint( get_post_meta( $event_id, '_ba_primary_report_id', true ) );
+			if ( 25 !== $primary_report ) {
+				return new WP_Error( 'ba_geo_recovery_report_mismatch', __( 'Il report associato non coincide con il recupero autorizzato.', 'badaround-core' ) );
+			}
+			$has_publication_proof = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$wpdb->prefix}ba_audit_log WHERE object_type = %s AND object_id = %d AND action = %s",
+					'event', $event_id, 'event_published'
+				)
+			);
+			if ( ! $has_publication_proof || ! empty( $wpdb->last_error ) ) {
+				return new WP_Error( 'ba_geo_recovery_missing_audit', __( 'Non è dimostrabile la precedente pubblicazione.', 'badaround-core' ) );
+			}
+			$valid = $this->validate_public_projection( $event_id, true );
+			if ( is_wp_error( $valid ) ) {
+				return $valid;
+			}
+			$allow = static function ( $allowed, $candidate_id ) use ( $event_id ) {
+				return absint( $candidate_id ) === $event_id ? true : $allowed;
+			};
+			add_filter( 'badaround_allow_event_publish', $allow, 999, 2 );
+			try {
+				$updated = wp_update_post( array( 'ID' => $event_id, 'post_status' => 'publish' ), true );
+			} finally {
+				remove_filter( 'badaround_allow_event_publish', $allow, 999 );
+			}
+			if ( is_wp_error( $updated ) ) {
+				return $updated;
+			}
+			if ( 'publish' !== get_post_status( $event_id ) ) {
+				return new WP_Error( 'ba_geo_recovery_publish_failed', __( 'Lo stato pubblico non è stato ripristinato.', 'badaround-core' ) );
+			}
+			BadAround_Audit_Log::record( 'event', $event_id, 'geo_priv_02d_publication_recovered', 'publication' );
+			return true;
+		}
+
 		if ( self::STATUS_PUBLISHED === $current && 'publish' === get_post_status( $event_id ) ) {
 			$prepared = $this->prepare_public_projection( $event_id );
 			if ( is_wp_error( $prepared ) ) {
