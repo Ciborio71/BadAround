@@ -303,13 +303,40 @@ class BadAround_Moderation_Admin {
 			return;
 		}
 
+		/*
+		 * Never reconcile contradictory publication states in the editor.
+		 * Only B3/Publication Service may repair or establish publication.
+		 */
+		$wp_status = get_post_status( $post_id );
+		$moderation_status = sanitize_key( (string) get_post_meta( $post_id, '_ba_moderation_status', true ) );
+		$was_published = 'publish' === $wp_status && BadAround_Publication_Service::STATUS_PUBLISHED === $moderation_status;
+		if ( ( 'publish' === $wp_status ) !== ( BadAround_Publication_Service::STATUS_PUBLISHED === $moderation_status ) ) {
+			BadAround_Audit_Log::record( 'event', $post_id, 'moderation_public_save_status_conflict', 'moderation' );
+			return;
+		}
+
 		$before_hash = hash( 'sha256', wp_json_encode( array( $post->post_title, $post->post_content, get_post_meta( $post_id ), wp_get_post_terms( $post_id, BadAround_Event_Post_Type::TERRITORY_TAX, array( 'fields' => 'ids' ) ) ) ) );
 
 		remove_action( 'save_post_' . BadAround_Event_Post_Type::POST_TYPE, array( $this, 'save_public_fields' ), 10 );
 		$title   = isset( $_POST['ba_public_title'] ) ? sanitize_text_field( wp_unslash( $_POST['ba_public_title'] ) ) : $post->post_title;
 		$content = isset( $_POST['ba_public_content'] ) ? wp_kses_post( wp_unslash( $_POST['ba_public_content'] ) ) : $post->post_content;
-		wp_update_post( array( 'ID' => $post_id, 'post_title' => $title, 'post_content' => $content, 'post_status' => 'pending' ) );
-		add_action( 'save_post_' . BadAround_Event_Post_Type::POST_TYPE, array( $this, 'save_public_fields' ), 10, 2 );
+		try {
+			$updated = wp_update_post(
+				array(
+					'ID'           => $post_id,
+					'post_title'   => $title,
+					'post_content' => $content,
+					'post_status'  => $was_published ? 'publish' : 'pending',
+				),
+				true
+			);
+		} finally {
+			add_action( 'save_post_' . BadAround_Event_Post_Type::POST_TYPE, array( $this, 'save_public_fields' ), 10, 2 );
+		}
+		if ( is_wp_error( $updated ) || get_post_status( $post_id ) !== ( $was_published ? 'publish' : 'pending' ) ) {
+			BadAround_Audit_Log::record( 'event', $post_id, 'moderation_public_save_status_failed', 'moderation' );
+			return;
+		}
 
 		$allowed = array(
 			'_ba_occurred_date',
@@ -426,6 +453,22 @@ class BadAround_Moderation_Admin {
 		exit;
 	}
 
+	/**
+	 * Allow an authorized moderation edit to retain an already-public status.
+	 * This is not a new B3 publishing permission: both persisted states must
+	 * already be published, and the edit-specific nonce must be verified.
+	 */
+	private function may_preserve_published_status( $event_id ) {
+		$event_id = absint( $event_id );
+		return $event_id
+			&& 'publish' === get_post_status( $event_id )
+			&& BadAround_Publication_Service::STATUS_PUBLISHED === sanitize_key( (string) get_post_meta( $event_id, '_ba_moderation_status', true ) )
+			&& isset( $_POST['ba_public_fields_nonce'] )
+			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['ba_public_fields_nonce'] ) ), 'ba_save_public_fields_' . $event_id )
+			&& current_user_can( 'ba_moderate_events' )
+			&& current_user_can( 'edit_post', $event_id );
+	}
+
 	public function prevent_b2_publish( $data, $postarr ) {
 		$post_id   = isset( $postarr['ID'] ) ? absint( $postarr['ID'] ) : 0;
 		$post_type = ! empty( $data['post_type'] ) ? $data['post_type'] : ( $post_id ? get_post_type( $post_id ) : '' );
@@ -433,8 +476,15 @@ class BadAround_Moderation_Admin {
 		if ( BadAround_Event_Post_Type::POST_TYPE !== $post_type || empty( $data['post_status'] ) || 'publish' !== $data['post_status'] ) {
 			return $data;
 		}
-		if (class_exists('BadAround_Native_Media_Fence') && is_wp_error(BadAround_Native_Media_Fence::check($post_id))) { $data['post_status']='pending';return $data; }
-		if ( apply_filters( 'badaround_allow_event_publish', false, $post_id ) ) {
+		if ( class_exists( 'BadAround_Native_Media_Fence' ) && is_wp_error( BadAround_Native_Media_Fence::check( $post_id ) ) ) {
+			$data['post_status'] = 'pending';
+			return $data;
+		}
+		if ( $post_id && 'publish' === get_post_status( $post_id )
+			&& BadAround_Publication_Service::STATUS_PUBLISHED !== sanitize_key( (string) get_post_meta( $post_id, '_ba_moderation_status', true ) ) ) {
+			BadAround_Audit_Log::record( 'event', $post_id, 'moderation_public_save_status_conflict', 'moderation' );
+		}
+		if ( $this->may_preserve_published_status( $post_id ) || apply_filters( 'badaround_allow_event_publish', false, $post_id ) ) {
 			return $data;
 		}
 		$data['post_status'] = 'pending';
@@ -445,7 +495,8 @@ class BadAround_Moderation_Admin {
 		if ( ! $post || BadAround_Event_Post_Type::POST_TYPE !== $post->post_type || 'publish' !== $new_status ) {
 			return;
 		}
-		if ( apply_filters( 'badaround_allow_event_publish', false, $post->ID ) && (!class_exists('BadAround_Native_Media_Fence') || !is_wp_error(BadAround_Native_Media_Fence::check($post->ID))) ) {
+		if ( ( 'publish' === $old_status && $this->may_preserve_published_status( $post->ID ) )
+			|| ( apply_filters( 'badaround_allow_event_publish', false, $post->ID ) && ( ! class_exists( 'BadAround_Native_Media_Fence' ) || ! is_wp_error( BadAround_Native_Media_Fence::check( $post->ID ) ) ) ) ) {
 			return;
 		}
 
