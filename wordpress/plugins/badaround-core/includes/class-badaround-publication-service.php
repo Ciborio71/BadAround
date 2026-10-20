@@ -38,8 +38,8 @@ class BadAround_Publication_Service {
 
 	/**
 	 * Builds a conservative public projection from already classified,
-	 * structured data. Private free text, exact coordinates and full plates
-	 * are intentionally excluded.
+	 * structured data. Private free text and full plates are excluded.
+	 * Versioned coordinates are created only inside the controlled B3 transaction.
 	 */
 	public function prepare_public_projection( $event_id ) {
 		$event_id = absint( $event_id );

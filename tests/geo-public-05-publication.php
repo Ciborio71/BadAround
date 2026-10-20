@@ -22,8 +22,8 @@ function get_ancestors($id,$tax,$type='taxonomy'){ $out=[];while(($t=get_term($i
 function get_term_meta($id,$key,$single=true){return $GLOBALS['term_meta'][$id][$key]??'';}
 function get_post($id){return $GLOBALS['posts'][$id]??null;}
 function get_post_meta($id,$key,$single=true){return $GLOBALS['meta'][$id][$key]??'';}
-function update_post_meta($id,$key,$val){$GLOBALS['meta'][$id][$key]=$val;return true;}
-function delete_post_meta($id,$key){unset($GLOBALS['meta'][$id][$key]);return true;}
+function update_post_meta($id,$key,$val){$gate=apply_filters('update_post_metadata',null,$id,$key,$val,null);if($gate!==null)return $gate;$GLOBALS['meta'][$id][$key]=$val;return true;}
+function delete_post_meta($id,$key){$gate=apply_filters('delete_post_metadata',null,$id,$key,null,null);if($gate!==null)return $gate;unset($GLOBALS['meta'][$id][$key]);return true;}
 function wp_get_post_terms($id,$tax){return array_map(fn($i)=>get_term($i,$tax),$GLOBALS['object_terms'][$id][$tax]??[]);}
 function wp_set_object_terms($id,$ids,$tax,$append=false){$GLOBALS['object_terms'][$id][$tax]=$ids;return $ids;}
 function wp_update_post($x,$error=false){foreach($x as $k=>$v){if($k!=='ID')$GLOBALS['posts'][$x['ID']]->$k=$v;}return $x['ID'];}
@@ -55,6 +55,7 @@ class Geo05DB extends DB {
 }
 $wpdb=new Geo05DB();$GLOBALS['geo_audits']=[];$GLOBALS['audit_fail']=false;$GLOBALS['actions']=[];
 $svc=new BadAround_Publication_Service();
+BadAround_Publication_Service::register_geo_guards();
 function g5seed($id,$request='exact_point',$mode='exact_point'){
  seed($id);$GLOBALS['meta'][$id]['_ba_primary_report_id']=$id+1000;
  $GLOBALS['meta'][$id]['_ba_public_location_precision']='f32-c6';
@@ -97,7 +98,7 @@ foreach(['missing_decision','approx_upgrade','invalid_mode','invalid_policy','mi
  $GLOBALS['audit_fail']=false;$GLOBALS['commit_fail']=false;$GLOBALS['denied']=[];if(isset($veto)){remove_filter('badaround_public_geo_exact_allowed',$veto,999);unset($veto);}
 }
 foreach(['territory_only','municipality'] as $mode){g5seed(520,'exact_point',$mode);check($svc->publish(520)===true&&''===get_post_meta(520,'_ba_public_lat')&&null===BadAround_Public_Geo_Projection::public_view(520),'coordinate-free '.$mode.' with no centroid');}
-g5seed(521,'approximate_area','approximate_area');check(BadAround_Publication_Service::guard_geo_write(null,521,'_ba_public_lat',41.8991622)===false,'moderation/intake/REST cannot write versioned mirrors');check(BadAround_Publication_Service::guard_geo_write(null,521,'_ba_public_geo',[])===false,'only B3 owns versioned projection writes');
+g5seed(521,'approximate_area','approximate_area');check(BadAround_Publication_Service::guard_geo_write(null,521,'_ba_public_lat',41.8991622)===false,'moderation/intake/REST cannot write versioned mirrors');check(BadAround_Publication_Service::guard_geo_write(null,521,'_ba_public_geo',[])===false,'only B3 owns versioned projection writes');check(update_post_meta(521,'_ba_public_lat',41.8991622)===false&&g5none(521),'registered metadata hook blocks actual unauthorized write');
 foreach(['f32-c4'=>150,'f32-c5'=>300,'f32-c6'=>1000,'f32-c7'=>3000,'unknown'=>750] as $precision=>$radius){$l=['exact_lat'=>89.9999,'exact_lng'=>179.9999];$d=['mode'=>'approximate_area'];$p=BadAround_Public_Geo_Projection::build(530,$l,$d,$precision);check($p['radius_meters']===$radius&&BadAround_Public_Geo_Projection::pair($p['lat'],$p['lng']),'versioned radius and valid spherical jitter '.$precision);}
 unset($GLOBALS['private_fixture']);seed(540);check($svc->prepare_public_projection(540)===true&&$svc->validate_public_projection(540)===true,'legacy territory-only unchanged');
 $discovery=file_get_contents(dirname(__DIR__).'/wordpress/plugins/badaround-core/includes/class-badaround-discovery-query.php');$segment=explode('private function public_geo( $event_id ) {',$discovery)[1];$segment=explode('private function deepest_term',$segment)[0];check(!str_contains($segment,'exact_lat')&&!str_contains($segment,'ba_reports'),'Discovery never reads private coordinates');

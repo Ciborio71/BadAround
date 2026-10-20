@@ -2,6 +2,7 @@
 // Existing real publication/geo regression first, then new contract activation gate.
 require __DIR__ . '/f1-14r-publication-contract.php';
 class GeoGateDB extends DB {
+ public $posts="wp_posts", $term_relationships="wp_term_relationships", $last_error="";
  public function get_var( $query ) {
   if ( false !== strpos( $query, 'JSON_CONTAINS_PATH' ) ) {
    $stored = json_decode( $GLOBALS['private_fixture']['content_original'] ?? '', true );
