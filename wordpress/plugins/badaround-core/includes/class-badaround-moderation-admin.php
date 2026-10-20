@@ -21,6 +21,7 @@ class BadAround_Moderation_Admin {
 		add_filter( 'wp_insert_post_data', array( $this, 'prevent_b2_publish' ), 20, 2 );
 		add_action( 'transition_post_status', array( $this, 'enforce_b2_pending_status' ), 20, 3 );
 		add_action( 'admin_footer-post.php', array( $this, 'customize_native_publish_controls' ) );
+		add_action( 'admin_footer-post.php', array( $this, 'render_independent_rejection_form' ) );
 	}
 
 	public function add_moderation_queue_view( $views ) {
@@ -288,11 +289,40 @@ class BadAround_Moderation_Admin {
 			$url = wp_nonce_url( $base . '&target=' . $target, 'ba_moderate_event_' . $post->ID );
 			echo '<p><a class="button button-secondary" style="width:100%;text-align:center" href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a></p>';
 		}
-		echo '<hr><form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-		echo '<input type="hidden" name="action" value="ba_moderate_event"><input type="hidden" name="event_id" value="' . absint( $post->ID ) . '"><input type="hidden" name="target" value="' . esc_attr( BadAround_Moderation_Service::STATUS_REJECTED ) . '">';
-		wp_nonce_field( 'ba_moderate_event_' . $post->ID );
-		echo '<p><label><strong>' . esc_html__( 'Motivo del rifiuto', 'badaround-core' ) . '</strong><textarea class="widefat" rows="3" name="reason" required></textarea></label></p>';
-		echo '<p><button class="button" type="submit">' . esc_html__( 'Rifiuta / scarta', 'badaround-core' ) . '</button></p></form>';
+		/*
+		 * Classic Editor already wraps all meta boxes in #post. HTML forms
+		 * cannot be nested; associate these controls with the independent
+		 * reject-only form rendered in the admin footer instead.
+		 */
+		echo '<hr><p><label for="ba-rejection-reason"><strong>' . esc_html__( 'Motivo del rifiuto', 'badaround-core' ) . '</strong></label>';
+		echo '<textarea id="ba-rejection-reason" class="widefat" rows="3" name="reason" form="ba-reject-event-form" required></textarea></p>';
+		echo '<p><button class="button" type="submit" form="ba-reject-event-form">' . esc_html__( 'Rifiuta / scarta', 'badaround-core' ) . '</button></p>';
+	}
+
+	/**
+	 * This form is outside the Classic Editor's #post form.
+	 * The reason field and rejection button in the meta box explicitly belong
+	 * to this form via their form attribute.
+	 */
+	public function render_independent_rejection_form() {
+		$screen = get_current_screen();
+		if ( ! $screen || BadAround_Event_Post_Type::POST_TYPE !== $screen->post_type || ! current_user_can( 'ba_moderate_events' ) ) {
+			return;
+		}
+		$event_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! $event_id || ! current_user_can( 'edit_post', $event_id ) ) {
+			return;
+		}
+		$status = sanitize_key( (string) get_post_meta( $event_id, '_ba_moderation_status', true ) );
+		if ( in_array( $status, array( BadAround_Publication_Service::STATUS_PUBLISHED, BadAround_Moderation_Service::STATUS_APPROVED, BadAround_Moderation_Service::STATUS_REJECTED ), true ) ) {
+			return;
+		}
+		echo '<form id="ba-reject-event-form" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+		echo '<input type="hidden" name="action" value="ba_moderate_event">';
+		echo '<input type="hidden" name="event_id" value="' . absint( $event_id ) . '">';
+		echo '<input type="hidden" name="target" value="' . esc_attr( BadAround_Moderation_Service::STATUS_REJECTED ) . '">';
+		wp_nonce_field( 'ba_moderate_event_' . $event_id );
+		echo '</form>';
 	}
 
 	public function save_public_fields( $post_id, $post ) {
