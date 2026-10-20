@@ -19,7 +19,7 @@
     }
     reset() {
       this.submissionId = uuid(this.crypto);
-      this.values = {}; this.step = 0; this.busy = false; this.completed = false; this.snapshot = null;
+      this.values = {}; this.publicLocationRequest = this.config.publicLocationRequest?.default === 'approximate_area' ? 'approximate_area' : 'exact_point'; this.step = 0; this.busy = false; this.completed = false; this.snapshot = null;
       const defaults = {'location.public_precision':'area', 'reporter.public_identity_mode':'anonymous', 'reward.status':'none'};
       Object.entries(defaults).forEach(([path, value]) => {
         if (this.config.fields[path]?.constraints.enum?.includes(value)) this.values[path] = value;
@@ -46,6 +46,9 @@
     set(path, value) {
       if (!this.busy && !this.snapshot && !this.completed && this.config.fields[path]) this.values[path] = value;
     }
+    setPublicLocationRequest(value) {
+      if (!this.busy && !this.snapshot && !this.completed && this.config.publicLocationRequest && ['exact_point', 'approximate_area'].includes(value)) this.publicLocationRequest = value;
+    }
     payload() {
       const out = {schema_version:this.config.schemaVersion, submission_id:this.submissionId};
       Object.entries(this.config.fields).forEach(([path, field]) => {
@@ -60,7 +63,7 @@
       setPath(out, 'consents.version', this.config.consentVersion);
       // Versioned request only. Approval and public coordinates remain server-owned.
       if (this.config.publicLocationRequest) {
-        setPath(out, 'location.public_location_request', this.config.publicLocationRequest.default);
+        setPath(out, 'location.public_location_request', this.publicLocationRequest);
         setPath(out, 'location.public_location_request_version', this.config.publicLocationRequest.version);
       }
       // Optional request, independent of the mandatory declaration and contact choices.
