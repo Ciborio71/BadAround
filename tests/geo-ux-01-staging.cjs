@@ -36,7 +36,9 @@ const origin='https://staging.badaround.it';
    result.publicGeoUntouched=await page.evaluate(()=>!Object.keys(document.querySelector('[data-native-report]').nativeReport.model.values).some(k=>/public_lat|public_lng/.test(k)));assert(result.publicGeoUntouched);
    if(process.env.BA_POSTDEPLOY==='1'){
     const verified=await page.evaluate(()=>JSON.stringify(document.querySelector('[data-native-report]').nativeReport.model.values));
-    await context.clearPermissions();await page.getByRole('button',{name:'Usa la mia posizione',exact:true}).click();
+    const permissionSession=await context.newCDPSession(page);
+    await permissionSession.send('Browser.setPermission',{permission:{name:'geolocation'},setting:'denied',origin});
+    await page.getByRole('button',{name:'Usa la mia posizione',exact:true}).click();
     await page.waitForFunction(()=>document.querySelector('[data-smart-map-status]').textContent.includes('negato'));
     assert.equal(await page.evaluate(()=>JSON.stringify(document.querySelector('[data-native-report]').nativeReport.model.values)),verified);
     assert(await page.locator('[data-smart-map-panel]').isVisible());result.deniedPreservesPosition='PASS';

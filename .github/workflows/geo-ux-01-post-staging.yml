@@ -1,0 +1,31 @@
+name: GEO-UX-01 real staging QA and one synthetic submission
+on:
+  push:
+    branches: [qa/geo-ux-01-staging]
+permissions:
+  contents: read
+jobs:
+  staging:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Prepare browser
+        run: |
+          npm install --prefix /tmp/geo-browser --no-save playwright@1.62.1
+          node /tmp/geo-browser/node_modules/playwright/cli.js install --with-deps chromium
+      - name: Real GPS, moved pin, denied permission preservation and synthetic persistence
+        env:
+          BA_PLAYWRIGHT_MODULE: /tmp/geo-browser/node_modules/playwright
+          BA_POSTDEPLOY: '1'
+        run: node tests/geo-ux-01-staging.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: geo-ux-01-post-staging-evidence
+          path: geo-ux-evidence/
+          retention-days: 30
+          if-no-files-found: ignore
