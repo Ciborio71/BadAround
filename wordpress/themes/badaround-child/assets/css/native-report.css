@@ -587,3 +587,18 @@
 @media(max-width:420px){.ba-native [data-native-success]{padding:18px}}
 .ba-native .ba-native-progress{grid-template-columns:repeat(6,minmax(0,1fr))}
 .ba-native .ba-native-field-pair input:not([type=checkbox]):not([type=radio]){min-height:56px}
+
+/* GEO-PUBLIC-03: public request is a moderated preference, never the private pinpoint. */
+.ba-native .ba-native-public-location-choice{margin:24px 0;padding:18px;border:1px solid var(--ba-border);border-radius:12px;min-width:0}
+.ba-native .ba-native-public-location-choice>legend{padding:0 6px;font-weight:750;font-size:1.04rem}
+.ba-native .ba-native-public-location-option{display:flex;align-items:flex-start;gap:12px;padding:15px;margin:10px 0;border:1px solid var(--ba-border);border-radius:12px;cursor:pointer;background:var(--ba-surface,#fff);min-width:0}
+.ba-native .ba-native-public-location-option:has(input:checked){border-color:var(--ba-teal-700);background:var(--ba-teal-100)}
+.ba-native .ba-native-public-location-option:focus-within{outline:3px solid var(--ba-teal-700);outline-offset:2px}
+.ba-native .ba-native-public-location-option input{flex:0 0 auto;width:22px;height:22px;margin:2px 0;accent-color:var(--ba-teal-700)}
+.ba-native .ba-native-public-location-option span{display:flex;flex-direction:column;gap:5px;min-width:0}
+.ba-native .ba-native-public-location-option small{font-size:.9rem;font-weight:400;line-height:1.45}
+.ba-native [data-smart-geolocate].ba-native-gps-button{background:var(--ba-teal-700);color:#fff;border:1px solid var(--ba-teal-700);font-weight:700;opacity:1}
+.ba-native [data-smart-geolocate].ba-native-gps-button:hover{background:var(--ba-teal-700);color:#fff;filter:brightness(.91)}
+.ba-native [data-smart-geolocate].ba-native-gps-button:focus-visible{outline:3px solid var(--ba-teal-700);outline-offset:3px}
+.ba-native [data-smart-geolocate].ba-native-gps-button:disabled{background:var(--ba-teal-700);color:#fff;opacity:.58;cursor:not-allowed}
+@media(max-width:390px){.ba-native .ba-native-public-location-choice{padding:12px}.ba-native .ba-native-public-location-option{padding:12px;gap:10px}}
