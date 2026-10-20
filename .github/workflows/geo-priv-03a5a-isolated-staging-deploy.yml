@@ -1,0 +1,158 @@
+name: GEO-PRIV-03A.5A - Classic Moderation Form Single File Staging Deploy
+on:
+  push:
+    branches: [deploy/geo-priv-03a5a-staging]
+permissions:
+  contents: read
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+jobs:
+  isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
+      DEPLOY_FILE: class-badaround-moderation-admin.php
+      EXPECTED_CANDIDATE: e401cc28a6f7ee35638f3b9d8f2a903ffbeff727
+      SOCIAL_BASE: 5fe961e9c48693524d4003a4aa5f446e95d50c9c
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: e401cc28a6f7ee35638f3b9d8f2a903ffbeff727
+          fetch-depth: 0
+      - name: Verify exact candidate and focused regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_CANDIDATE"
+          git diff --check "$SOCIAL_BASE" HEAD
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+          php tests/geo-priv-03a-published-save.php
+          php tests/geo-priv-03a4-rest-lifecycle.php
+          php tests/geo-priv-03a5a-classic-form.php
+          php tests/f1-14r-publication-contract.php
+          php tests/f1-14r-consumers.php
+          php tests/native-social-preference.php
+      - name: Prepare expected baseline and one-file approved payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p new old rollback verified tls
+          cp "wordpress/plugins/badaround-core/includes/$DEPLOY_FILE" "new/$DEPLOY_FILE"
+          git show "$SOCIAL_BASE:wordpress/plugins/badaround-core/includes/$DEPLOY_FILE" > "old/$DEPLOY_FILE"
+          test "$(find new -type f | wc -l)" -eq 1
+          test "$(find old -type f | wc -l)" -eq 1
+          test -s "new/$DEPLOY_FILE"
+          test -s "old/$DEPLOY_FILE"
+          sha256sum "new/$DEPLOY_FILE" "old/$DEPLOY_FILE"
+          echo "a5714668b603a09b42c9fcb5c66d888dcdd71f814308b50b262d6a0cf8049e73  old/$DEPLOY_FILE" | sha256sum --check --status
+      - name: Provision officially signed chain and verify against runner root trust
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$FTP_HOST" && test -n "$FTP_USER" && test -n "$FTP_PASS"
+          ca=/etc/ssl/certs/ca-certificates.crt
+          test -s "$ca"
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 --max-time 25 https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 --max-time 25 https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          test "$(openssl x509 -in tls/yr2.pem -noout -subject)" = "subject=C = US, O = Let's Encrypt, CN = YR2"
+          test "$(openssl x509 -in tls/yr-by-x1.pem -noout -subject)" = "subject=C = US, O = ISRG, CN = Root YR"
+          openssl verify -CAfile "$ca" -untrusted tls/yr-by-x1.pem tls/yr2.pem
+          cat tls/yr2.pem tls/yr-by-x1.pem > tls/untrusted.pem
+          cat "$ca" tls/untrusted.pem > tls/curl-chain.pem
+          timeout 30s openssl s_client -starttls ftp -connect "${FTP_HOST}:21" -servername "$FTP_TLS_NAME" -verify_hostname "$FTP_TLS_NAME" -verify_return_error -CAfile tls/curl-chain.pem < /dev/null > tls/handshake.log 2>&1
+          grep -q 'Verify return code: 0 (ok)' tls/handshake.log
+          echo 'FTPS server identity and chain VERIFIED; strict TLS remains enabled.'
+      - name: Capture real remote bytes with strict TLS and compare to certified baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote="ftp://${FTP_TLS_NAME}:21/staging.badaround.it/wp-content/plugins/badaround-core/includes/$DEPLOY_FILE"
+          curl --fail --show-error --silent --ssl-reqd --cacert tls/curl-chain.pem \
+            --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" \
+            --user "$FTP_USER:$FTP_PASS" --connect-timeout 12 --max-time 120 \
+            "$remote" --output "rollback/$DEPLOY_FILE"
+          test -s "rollback/$DEPLOY_FILE"
+          sha256sum "rollback/$DEPLOY_FILE"
+          if cmp -s "rollback/$DEPLOY_FILE" "new/$DEPLOY_FILE"; then
+            echo 'already_installed=true' >> "$GITHUB_ENV"
+            echo 'REMOTE PREDEPLOY PASS: candidate already installed byte-for-byte. No upload necessary.'
+          elif cmp -s "rollback/$DEPLOY_FILE" "old/$DEPLOY_FILE"; then
+            echo 'already_installed=false' >> "$GITHUB_ENV"
+            echo 'REMOTE BACKUP GATE PASS: certified old baseline captured for one-file upload.'
+          else
+            echo 'STOP: staging bytes match neither approved candidate nor certified baseline. NO UPLOAD.'
+            exit 1
+          fi
+      - name: Preserve actual remote rollback bytes BEFORE upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: geo-priv-03a5a-byte-exact-rollback
+          path: |
+            rollback/class-badaround-moderation-admin.php
+            old/class-badaround-moderation-admin.php
+          retention-days: 30
+          if-no-files-found: error
+      - name: Upload exactly one PHP file with verified TLS
+        id: upload
+        if: env.already_installed == 'false'
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote="ftp://${FTP_TLS_NAME}:21/staging.badaround.it/wp-content/plugins/badaround-core/includes/$DEPLOY_FILE"
+          curl --fail --show-error --silent --ssl-reqd --cacert tls/curl-chain.pem \
+            --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" \
+            --user "$FTP_USER:$FTP_PASS" --connect-timeout 12 --max-time 120 \
+            --upload-file "new/$DEPLOY_FILE" "$remote"
+          echo 'Single-file upload request completed.'
+      - name: Re-download remote bytes and verify candidate SHA
+        id: verify
+        if: env.already_installed == 'true' || steps.upload.outcome == 'success'
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote="ftp://${FTP_TLS_NAME}:21/staging.badaround.it/wp-content/plugins/badaround-core/includes/$DEPLOY_FILE"
+          curl --fail --show-error --silent --ssl-reqd --cacert tls/curl-chain.pem \
+            --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" \
+            --user "$FTP_USER:$FTP_PASS" --connect-timeout 12 --max-time 120 \
+            "$remote" --output "verified/$DEPLOY_FILE"
+          cmp -s "verified/$DEPLOY_FILE" "new/$DEPLOY_FILE" || { echo 'STOP: remote candidate SHA does not match'; exit 1; }
+          sha256sum "verified/$DEPLOY_FILE"
+          echo 'REMOTE SINGLE-FILE SHA VERIFIED.'
+      - name: Restore exact live backup if upload or remote verification failed
+        id: rollback
+        if: always() && env.already_installed == 'false' && (steps.upload.outcome == 'failure' || (steps.upload.outcome == 'success' && steps.verify.outcome != 'success'))
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "rollback/$DEPLOY_FILE"
+          remote="ftp://${FTP_TLS_NAME}:21/staging.badaround.it/wp-content/plugins/badaround-core/includes/$DEPLOY_FILE"
+          curl --fail --show-error --silent --ssl-reqd --cacert tls/curl-chain.pem \
+            --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" \
+            --user "$FTP_USER:$FTP_PASS" --connect-timeout 12 --max-time 120 \
+            --upload-file "rollback/$DEPLOY_FILE" "$remote"
+          curl --fail --show-error --silent --ssl-reqd --cacert tls/curl-chain.pem \
+            --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" \
+            --user "$FTP_USER:$FTP_PASS" --connect-timeout 12 --max-time 120 \
+            "$remote" --output verified/restored.php
+          cmp -s verified/restored.php "rollback/$DEPLOY_FILE"
+          echo 'ROLLBACK VERIFIED: original remote bytes restored.'
+      - name: Explicit final release gate
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ '${{ steps.verify.outcome }}' != 'success' ] || { [ "$already_installed" != 'true' ] && [ '${{ steps.upload.outcome }}' != 'success' ]; }; then
+            echo 'STOP: deployment not verified; inspect rollback step and remote bytes.'; exit 1
+          fi
+          echo 'GEO-PRIV-03A.5A STAGING ISOLATED FILE DEPLOY PASS - REAL WP QA STILL REQUIRED.'
