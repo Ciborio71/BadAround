@@ -72,7 +72,7 @@ test('display location choice is between private pinpoint and time details',()=>
 });
 test('wizard keeps source of truth in model, renders review without coordinates',()=>{
  assert(wizard.includes('model.setPublicLocationRequest(event.target.value)'));
- assert(wizard.includes("model.publicLocationRequest==='approximate_area'?'Area approssimata':'Punto esatto'"));
+ assert(wizard.includes("model.publicLocationRequest==='approximate_area'?'Area approssimativa':'Punto esatto'"));
  assert(wizard.includes('Posizione pubblica richiesta'));
  assert(!wizard.includes('config.publicLocationRequest.default);'));
  assert(wizard.includes('model.snapshot=payload;'));

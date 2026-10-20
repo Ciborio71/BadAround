@@ -96,7 +96,7 @@
           locationSection.append(heading,document.createElement('dl'));sections.set('location',locationSection);region.append(locationSection);
         }
         const term=document.createElement('dt');term.textContent='Posizione pubblica richiesta';
-        const detail=document.createElement('dd');detail.textContent=model.publicLocationRequest==='approximate_area'?'Area approssimata':'Punto esatto';
+        const detail=document.createElement('dd');detail.textContent=model.publicLocationRequest==='approximate_area'?'Area approssimativa':'Punto esatto';
         locationSection.querySelector('dl').append(term,detail);
       }
       // Follow the seven-step sequence even when schema fields are ordered differently.

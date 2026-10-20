@@ -34,6 +34,27 @@ function populate(h) {
   Object.entries(data).forEach(([key,value])=>h.set(key,value));
 }
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
+for (const [mode,label] of [['exact_point','Punto esatto'],['approximate_area','Area approssimativa']]) {
+  test(`GEO-PUBLIC-08A: ${mode} review preserves request and promises moderation only`,()=>{
+    const h=create(completed);populate(h);
+    const choice=h.doc.querySelector(`[data-native-public-location-choice] input[value="${mode}"]`);
+    choice.checked=true;choice.dispatchEvent(new h.window.Event('change',{bubbles:true}));
+    const values=JSON.stringify(h.model.values),before=JSON.stringify(h.model.payload());
+    for(let i=0;i<5;i++)h.click('next');
+    assert.equal(h.model.step,5);
+    const review=h.doc.querySelector('[data-native-review]');
+    const request=[...review.querySelectorAll('dt')].find(node=>node.textContent==='Posizione pubblica richiesta');
+    assert(request);assert.equal(request.nextElementSibling.textContent,label);
+    assert(review.textContent.includes('Indirizzo e civico restano riservati. La rappresentazione pubblica della posizione sarà valutata dalla moderazione.'));
+    assert(!/La posizione pubblica sarà approssimata|La posizione sarà pubblicata esattamente/i.test(review.textContent));
+    assert.equal(h.model.publicLocationRequest,mode);
+    assert.equal(h.model.payload().location.public_location_request,mode);
+    assert.equal(h.model.payload().location.public_location_request_version,'public-location-request-v1');
+    assert.equal(JSON.stringify(h.model.values),values);
+    assert.equal(JSON.stringify(h.model.payload()),before);
+    assert.equal(h.requests.length,0);h.dom.window.close();
+  });
+}
 test('boot uses actual SSR, no request before explicit final submit',()=>{
   const h=create(completed);assert(h.root.nativeReport);assert.equal(h.requests.length,0);
   assert.equal(h.doc.querySelector('[data-native-step="event"]').hidden,false);

@@ -150,7 +150,7 @@ function badaround_native_report_config() {
 		if ( isset( $location_order[ $a ], $location_order[ $b ] ) ) { return $location_order[ $a ] <=> $location_order[ $b ]; }
 		return $original_order[ $a ] <=> $original_order[ $b ];
 	} );
-	$fields['location.exact_address']['help'] = 'Indirizzo e civico restano riservati. La posizione pubblica sarà approssimata.';
+	$fields['location.exact_address']['help'] = 'Indirizzo e civico restano riservati. La rappresentazione pubblica della posizione sarà valutata dalla moderazione.';
 	$fields['vehicle.plate_raw']['help'] = 'La targa completa resta riservata. L’eventuale versione pubblica sarà mascherata.';
 	$fields['reporter.public_identity_mode']['help'] = 'Scegli come preferisci essere indicato. BadAround non pubblica automaticamente i tuoi dati personali. La tua preferenza resta soggetta alla moderazione e alle regole di pubblicazione.';
 	$fields['reporter.contact_preference']['help'] = 'Gli altri utenti non vedono i tuoi recapiti e non possono contattarti direttamente.';

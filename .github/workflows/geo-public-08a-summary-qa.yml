@@ -1,0 +1,27 @@
+name: GEO-PUBLIC-08A Native Summary QA
+on:
+  push:
+    branches: [fix/geo-public-08a-native-summary]
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - name: Syntax and targeted Native, Smart Address and geo regressions
+        run: |
+          set -euo pipefail
+          git diff --check
+          php -l wordpress/themes/badaround-child/inc/native-report.php
+          node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
+          npm ci --prefix tests
+          node --test tests/geo-public-02-native.cjs tests/geo-public-03-choice.cjs tests/native-report-f16.cjs tests/native-report-f16-dom.cjs tests/f1-15b-r5-smart-address.cjs tests/sf8-national-territory.cjs tests/sf9-public-privacy-boundary.cjs
+          php tests/native-report-f16.php
