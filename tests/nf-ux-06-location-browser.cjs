@@ -43,6 +43,16 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
   await page.getByLabel('Ricerca Google simulata').fill('testo non selezionato');await page.getByLabel('Ricerca Google simulata').press('Enter');
   await page.locator('[data-native-next]').click();assert(await page.locator('[data-native-step="location"]').isVisible());assert.equal(await page.locator('[name="location.exact_address"]').inputValue(),'');
   await page.locator('test-google-autocomplete button').click();await page.locator('[data-smart-map-panel]').waitFor({state:'visible'});
+  // GEO-PUBLIC-03: one authoritative choice, keyboard-operable, independent of private point.
+  const choice=page.locator('[data-native-public-location-choice]');
+  assert(await choice.isVisible());
+  assert(await choice.getByRole('radio',{name:/Punto esatto/}).isChecked());
+  await choice.getByRole('radio',{name:/Area approssimata/}).focus();
+  await page.keyboard.press('Space');
+  assert(await choice.getByRole('radio',{name:/Area approssimata/}).isChecked());
+  assert.equal(await page.evaluate(()=>document.querySelector('[data-native-public-location-choice] input:checked').value),'approximate_area');
+  assert.equal(await page.evaluate(()=>document.querySelector('[data-native-config]').textContent.includes('public-location-request-v1')),true);
+  assert(!(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1)));
   assert.equal(await page.locator('[name="location.municipality"]').inputValue(),'Pomezia');assert.equal(await page.evaluate(()=>gpsCalls),0);
   await page.locator('[data-smart-geolocate]').click();await page.waitForFunction(()=>document.querySelector('[name="location.exact_lat"]').value==='41.665');
   await page.waitForFunction(()=>{
@@ -50,16 +60,24 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
    return document.activeElement===address&&map.nextElementSibling===address&&rect.top>=88&&rect.bottom<innerHeight;
   });
   assert.match(await page.locator('[data-smart-address-label]').textContent(),/Via verificata/);
+  assert(await choice.getByRole('radio',{name:/Area approssimata/}).isChecked());
   assert.equal(await page.evaluate(()=>gpsCalls),1);assert.equal(await page.evaluate(()=>testMarker.content.style.backgroundColor),'rgb(22, 119, 232)');assert(await page.evaluate(()=>testMarker.content.querySelector('svg').outerHTML===document.querySelector('.ba-native-category-grid input:checked').closest('label').querySelector('svg').outerHTML));
   await page.evaluate(()=>{testMarker.position={lat:41.667,lng:12.437};testMarker.dispatchEvent(new Event('gmp-dragend'));});await page.waitForFunction(()=>document.querySelector('[name="location.exact_lat"]').value==='41.667');
   const verifiedBeforeDenial=await page.locator('[name="location.exact_lat"]').inputValue();
   await page.evaluate(()=>{window.denyGPS=true;});await page.locator('[data-smart-geolocate]').click();
   await page.waitForFunction(()=>document.querySelector('[data-smart-map-status]').textContent.includes('negato'));
+  assert(await choice.getByRole('radio',{name:/Area approssimata/}).isChecked());
   assert.equal(await page.locator('[data-smart-confirmation]').isVisible(),true);assert.equal(await page.locator('[name="location.exact_lat"]').inputValue(),verifiedBeforeDenial);assert(await page.locator('[data-smart-map-panel]').isVisible());
   await page.evaluate(()=>{window.denyGPS=false;});await page.locator('[data-smart-geolocate]').click();await page.waitForFunction(()=>document.querySelector('[name="location.exact_lat"]').value==='41.665');
   assert(!(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1)));assert.deepEqual(failures,[]);
   await page.evaluate(()=>{const el=document.querySelector('[name="time.mode"]');el.value='unknown';el.dispatchEvent(new Event('input',{bubbles:true}));});
   await page.locator('[data-native-next]').click();assert(await page.locator('[data-native-step="details"]').isVisible());
+  await page.locator('[data-native-back]').click();assert(await choice.isVisible());
+  assert(await choice.getByRole('radio',{name:/Area approssimata/}).isChecked());
+  await choice.getByRole('radio',{name:/Punto esatto/}).check();
+  assert(await choice.getByRole('radio',{name:/Punto esatto/}).isChecked());
+  await choice.getByRole('radio',{name:/Area approssimata/}).check();
+  assert(await choice.getByRole('radio',{name:/Area approssimata/}).isChecked());
   console.log(`PASS ${width}px: selection-only address, private map, explicit GPS, category marker, drag reconciliation`);await page.close();
  }}finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
