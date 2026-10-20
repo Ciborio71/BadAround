@@ -1,0 +1,30 @@
+name: GEO-PRIV-03A.5A isolated moderation form QA
+on:
+  push:
+    branches: [fix/geo-priv-03a5a-classic-rejection-form]
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: PHP syntax
+        run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php
+          php -l tests/geo-priv-03a5a-classic-form.php
+      - name: Classic editor form structure
+        run: php tests/geo-priv-03a5a-classic-form.php
+      - name: Moderation lifecycle
+        run: |
+          php tests/geo-priv-03a-published-save.php
+          php tests/geo-priv-03a4-rest-lifecycle.php
+      - name: GEO-PRIV-02 and publication
+        run: |
+          php tests/f1-14r-publication-contract.php
+          php tests/f1-14r-consumers.php
+      - name: Social
+        run: php tests/native-social-preference.php
