@@ -6,6 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class BadAround_Core {
 	public function run() {
+		BadAround_Publication_Service::register_geo_guards();
 		$installer = new BadAround_Installer();
 		$installer->register_hooks();
 

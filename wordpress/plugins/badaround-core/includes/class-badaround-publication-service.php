@@ -5,12 +5,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once __DIR__ . '/class-badaround-public-geo-contract.php';
+require_once __DIR__ . '/class-badaround-public-geo-projection.php';
 
 /**
  * Owns the controlled B3 transition from approved moderation to public WordPress content.
  */
 class BadAround_Publication_Service {
 	const STATUS_PUBLISHED = 'published';
+	private $b3_event = 0;
+	private static $geo_writer = 0;
+
+	public static function register_geo_guards() {
+		foreach ( array( 'add_post_metadata', 'update_post_metadata', 'delete_post_metadata' ) as $hook ) {
+			add_filter( $hook, array( __CLASS__, 'guard_geo_write' ), 999, 5 );
+		}
+	}
+
+	public static function guard_geo_write( $check, $event_id, $key, $value = null, $extra = null ) {
+		if ( ! in_array( $key, array( '_ba_public_geo', '_ba_public_geo_proof', '_ba_public_lat', '_ba_public_lng', '_ba_public_radius_m' ), true ) ) { return $check; }
+		if ( (int) $event_id === self::$geo_writer ) { return $check; }
+		if ( in_array( $key, array( '_ba_public_geo', '_ba_public_geo_proof' ), true ) || self::uses_versioned_geo( $event_id ) ) { return false; }
+		return $check; // Legacy editor behavior is unchanged.
+	}
+
+	public static function uses_versioned_geo( $event_id ) {
+		global $wpdb;
+		if ( '' !== get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true )
+			|| '' !== get_post_meta( $event_id, BadAround_Public_Geo_Contract::PROJECTION_META, true ) ) { return true; }
+		$has = $wpdb->get_var( $wpdb->prepare( "SELECT CASE WHEN JSON_VALID(content_original) THEN JSON_CONTAINS_PATH(content_original, 'one', '$.canonical.location.public_location_request', '$.canonical.location.public_location_request_version') ELSE 0 END FROM {$wpdb->prefix}ba_reports WHERE event_id = %d AND deleted_at IS NULL ORDER BY id ASC LIMIT 1", $event_id ) );
+		return ! empty( $wpdb->last_error ) || (int) $has > 0;
+	}
 
 	/**
 	 * Builds a conservative public projection from already classified,
@@ -262,7 +286,8 @@ class BadAround_Publication_Service {
 		if ( '' === $place_name && ! $has_public_coords ) {
 			return new WP_Error( 'ba_publication_location_missing', __( 'È necessaria una posizione pubblica o approssimata.', 'badaround-core' ) );
 		}
-		if ( $has_public_coords && $radius < 100 ) {
+		$explicit_exact = $this->b3_event === $event_id && 'exact_point' === ( get_post_meta( $event_id, BadAround_Public_Geo_Contract::PROJECTION_META, true )['mode'] ?? '' );
+		if ( $has_public_coords && $radius < 100 && ! $explicit_exact ) {
 			return new WP_Error( 'ba_publication_location_too_precise', __( 'Le coordinate pubbliche devono avere un raggio di approssimazione adeguato.', 'badaround-core' ) );
 		}
 
@@ -295,7 +320,11 @@ class BadAround_Publication_Service {
 			}
 		}
 
-		if ( $has_public_coords && null !== $report->exact_lat && null !== $report->exact_lng ) {
+		if ( $explicit_exact ) {
+			$verified = BadAround_Public_Geo_Projection::verified( $event_id );
+			if ( is_wp_error( $verified ) ) { return $verified; }
+		}
+		if ( ! $explicit_exact && $has_public_coords && null !== $report->exact_lat && null !== $report->exact_lng ) {
 			if ( abs( (float) $public_lat - (float) $report->exact_lat ) < 0.00001 && abs( (float) $public_lng - (float) $report->exact_lng ) < 0.00001 ) {
 				return new WP_Error( 'ba_publication_exact_coordinates_detected', __( 'Le coordinate precise non possono essere pubblicate.', 'badaround-core' ) );
 			}
@@ -367,8 +396,7 @@ class BadAround_Publication_Service {
 		if ( (int) $has_request > 0
 			|| '' !== get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true )
 			|| '' !== get_post_meta( $event_id, BadAround_Public_Geo_Contract::PROJECTION_META, true ) ) {
-			// Contract first. GEO-PUBLIC-05 must implement the authorized B3 writer
-			// before this gate can be replaced. No private-to-public copying here.
+			if ( $this->b3_event === (int) $event_id ) { return true; }
 			return new WP_Error( 'ba_publication_geo_contract_not_active', __( 'La nuova richiesta geografica richiede il percorso di pubblicazione versionato, non ancora attivo.', 'badaround-core' ) );
 		}
 		return true;
@@ -376,6 +404,7 @@ class BadAround_Publication_Service {
 
 	private function ensure_public_location( $event_id, $territory = null ) {
 		global $wpdb;
+		if ( $this->b3_event === (int) $event_id ) { return $this->create_versioned_geo( $event_id ); }
 
 		$precision = sanitize_key( (string) get_post_meta( $event_id, '_ba_public_location_precision', true ) );
 		$public_lat = get_post_meta( $event_id, '_ba_public_lat', true );
@@ -541,6 +570,7 @@ class BadAround_Publication_Service {
 		if ( ! $event_id || ! current_user_can( 'ba_moderate_events' ) || ! current_user_can( 'publish_ba_eventi' ) || ! current_user_can( 'edit_post', $event_id ) ) {
 			return new WP_Error( 'ba_publication_forbidden', __( 'Non sei autorizzato a pubblicare questo evento.', 'badaround-core' ) );
 		}
+		if ( $this->b3_event !== $event_id && self::uses_versioned_geo( $event_id ) ) { return $this->publish_versioned( $event_id ); }
 
 		if (class_exists('BadAround_Native_Media_Fence')) {
 			$fence=BadAround_Native_Media_Fence::check($event_id);
@@ -678,8 +708,122 @@ class BadAround_Publication_Service {
 		 * D2 starts only after B3 is fully committed. Listeners must remain
 		 * asynchronous and must never make publication depend on delivery.
 		 */
-		do_action( 'badaround_event_published', $event_id );
+		if ( $this->b3_event !== $event_id ) { do_action( 'badaround_event_published', $event_id ); }
 
 		return true;
 	}
+
+	/** Private source is loaded only inside controlled, capability-checked B3. */
+	private function versioned_context( $event_id ) {
+		global $wpdb;
+		$primary = absint( get_post_meta( $event_id, '_ba_primary_report_id', true ) );
+		if ( ! $primary ) { return $this->geo_error( 'report_missing' ); }
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT id, exact_lat, exact_lng, content_original FROM {$wpdb->prefix}ba_reports WHERE id = %d AND event_id = %d AND deleted_at IS NULL FOR UPDATE", $primary, $event_id ) );
+		if ( ! $row || ! empty( $wpdb->last_error ) ) { return $this->geo_error( 'report_missing' ); }
+		$stored = json_decode( $row->content_original, true );
+		$location = $stored['canonical']['location'] ?? null;
+		$decision = get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true );
+		$valid = BadAround_Public_Geo_Contract::validate_decision( $location, $decision );
+		if ( is_wp_error( $valid ) ) { return $valid; }
+		// Never source coordinates from an untrusted alternate JSON representation.
+		if ( isset( $location['exact_lat'], $location['exact_lng'] ) &&
+			( ! BadAround_Public_Geo_Projection::pair( $row->exact_lat, $row->exact_lng ) ||
+			abs( (float) $location['exact_lat'] - (float) $row->exact_lat ) > 0.0000001 ||
+			abs( (float) $location['exact_lng'] - (float) $row->exact_lng ) > 0.0000001 ) ) { return $this->geo_error( 'source_mismatch' ); }
+		$location['exact_lat'] = $row->exact_lat; $location['exact_lng'] = $row->exact_lng;
+		$precision = (string) get_post_meta( $event_id, '_ba_public_location_precision', true );
+		$source = hash_hmac( 'sha256', wp_json_encode( array( $primary, $location, $precision ) ), wp_salt( 'auth' ) );
+		return array( 'report_id' => $primary, 'location' => $location, 'decision' => $decision, 'precision' => $precision, 'source' => $source );
+	}
+
+	private function exact_review( $event_id, $context ) {
+		$d = $context['decision'];
+		// Explicit GEO-PUBLIC-04 confirmation is the positive server review.
+		// The existing hook remains a veto/override review point, never an authority bypass.
+		$review = static function ( $allowed ) use ( $context, $d ) {
+			return true === $allowed || ( 'exact_point' === ( $context['location']['public_location_request'] ?? null ) && true === ( $d['exact_confirmed'] ?? false ) );
+		};
+		add_filter( 'badaround_public_geo_exact_allowed', $review, -999, 1 );
+		try { return BadAround_Public_Geo_Contract::exact_safety_allowed( $event_id, $context['report_id'], $d ); }
+		finally { remove_filter( 'badaround_public_geo_exact_allowed', $review, -999 ); }
+	}
+
+	private function create_versioned_geo( $event_id ) {
+		if ( $this->b3_event !== (int) $event_id ) { return $this->geo_error( 'b3_required' ); }
+		$c = $this->versioned_context( $event_id );
+		if ( is_wp_error( $c ) ) { return $c; }
+		$existing = get_post_meta( $event_id, BadAround_Public_Geo_Contract::PROJECTION_META, true );
+		if ( '' !== $existing ) {
+			$p = BadAround_Public_Geo_Projection::verified( $event_id );
+			$proof = get_post_meta( $event_id, BadAround_Public_Geo_Projection::PROOF_META, true );
+			if ( is_wp_error( $p ) || ! hash_equals( $c['source'], $proof['source'] ?? '' ) ) { return $this->geo_error( 'reprojection_forbidden' ); }
+		} else {
+			if ( 'publish' === get_post_status( $event_id ) || 'published' === get_post_meta( $event_id, '_ba_moderation_status', true ) ) { return $this->geo_error( 'reprojection_forbidden' ); }
+			$p = BadAround_Public_Geo_Projection::build( $event_id, $c['location'], $c['decision'], $c['precision'] );
+			if ( is_wp_error( $p ) ) { return $p; }
+		}
+		$exact_allowed = 'exact_point' === $c['decision']['mode'] ? $this->exact_review( $event_id, $c ) : false;
+		$valid = BadAround_Public_Geo_Contract::validate_projection( $c['location'], $c['decision'], $p, 'b3', $exact_allowed );
+		if ( is_wp_error( $valid ) ) { return $valid; }
+		if ( '' !== $existing ) { return true; }
+		self::$geo_writer = (int) $event_id;
+		try {
+			foreach ( array( '_ba_public_lat' => 'lat', '_ba_public_lng' => 'lng', '_ba_public_radius_m' => 'radius_meters' ) as $key => $field ) {
+				if ( array_key_exists( $field, $p ) ) { update_post_meta( $event_id, $key, $p[ $field ] ); }
+				else { delete_post_meta( $event_id, $key ); }
+			}
+			update_post_meta( $event_id, BadAround_Public_Geo_Contract::PROJECTION_META, $p );
+			update_post_meta( $event_id, BadAround_Public_Geo_Projection::PROOF_META, array( 'source' => $c['source'], 'seal' => BadAround_Public_Geo_Projection::signature( $event_id, $p, $c['decision'], $c['source'] ) ) );
+		} finally { self::$geo_writer = 0; }
+		return is_wp_error( BadAround_Public_Geo_Projection::verified( $event_id ) ) ? $this->geo_error( 'storage_failed' ) : true;
+	}
+
+	/** Geometry, publication state and audit commit together; no public coordinates on failure. */
+	private function publish_versioned( $event_id ) {
+		global $wpdb;
+		if ( ! current_user_can( 'ba_view_private_reports' ) ) { return $this->geo_error( 'forbidden' ); }
+		$tables = array( $wpdb->posts, $wpdb->postmeta, $wpdb->prefix . 'ba_audit_log', $wpdb->prefix . 'ba_reports', $wpdb->term_relationships );
+		foreach ( $tables as $table ) {
+			if ( 'InnoDB' !== $wpdb->get_var( $wpdb->prepare( 'SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=%s', $table ) ) ) { return $this->geo_error( 'transaction_unavailable' ); }
+		}
+		if ( false === $wpdb->query( 'START TRANSACTION' ) ) { return $this->geo_error( 'transaction_unavailable' ); }
+		$committed = false; $was_published = false;
+		try {
+			$row = $wpdb->get_row( $wpdb->prepare( "SELECT ID,post_type,post_status FROM {$wpdb->posts} WHERE ID=%d FOR UPDATE", $event_id ) );
+			clean_post_cache( $event_id );
+			if ( ! $row || 'ba_evento' !== $row->post_type ) { return $this->geo_error( 'invalid_event' ); }
+			$current = get_post_meta( $event_id, '_ba_moderation_status', true );
+			$was_published = 'publish' === $row->post_status && 'published' === $current;
+			if ( ! $was_published && ( ! in_array( $row->post_status, array( 'pending', 'draft' ), true ) || 'approved' !== $current ) ) { return $this->geo_error( 'transition_not_allowed' ); }
+			if ( class_exists( 'BadAround_Native_Media_Fence' ) ) {
+				$fence = BadAround_Native_Media_Fence::check( $event_id ); if ( is_wp_error( $fence ) ) { return $fence; }
+			}
+			$this->b3_event = $event_id;
+			if ( $was_published ) {
+				$result = $this->create_versioned_geo( $event_id );
+				if ( ! is_wp_error( $result ) ) { $result = $this->validate_public_projection( $event_id, true ); }
+			} else {
+				$result = $this->prepare_public_projection( $event_id );
+				if ( ! is_wp_error( $result ) ) { $result = $this->publish( $event_id ); }
+				if ( ! is_wp_error( $result ) ) {
+					$c = $this->versioned_context( $event_id );
+					$p = BadAround_Public_Geo_Projection::verified( $event_id );
+					if ( is_wp_error( $c ) || is_wp_error( $p ) || ! BadAround_Audit_Log::geographic_publication( $event_id, $c, $p ) ) { return $this->geo_error( 'audit_failed' ); }
+				}
+			}
+			if ( is_wp_error( $result ) ) { return $result; }
+			if ( 'publish' !== get_post_status( $event_id ) || 'published' !== get_post_meta( $event_id, '_ba_moderation_status', true ) ) { return $this->geo_error( 'state_failed' ); }
+			if ( false === $wpdb->query( 'COMMIT' ) ) { return $this->geo_error( 'storage_failed' ); }
+			$committed = true;
+		} catch ( Throwable $error ) { return $this->geo_error( 'storage_failed' ); }
+		finally {
+			$this->b3_event = 0; self::$geo_writer = 0;
+			if ( ! $committed ) { $wpdb->query( 'ROLLBACK' ); }
+			clean_post_cache( $event_id );
+		}
+		if ( ! $was_published ) { do_action( 'badaround_event_published', $event_id ); }
+		return true;
+	}
+
+	private function geo_error( $code ) { return new WP_Error( 'ba_publication_geo_' . $code, __( 'Pubblicazione geografica non autorizzata o non verificabile.', 'badaround-core' ) ); }
 }

@@ -20,7 +20,7 @@ foreach ( array( 'exact_point', 'approximate_area' ) as $request ) {
  $before = serialize( array( $GLOBALS['meta'], $GLOBALS['posts'], $GLOBALS['object_terms'] ) );
  error_is( $svc->prepare_public_projection( 301 ), 'ba_publication_geo_contract_not_active', 'new ' . $request . ' cannot use legacy preparation' );
  error_is( $svc->validate_public_projection( 301 ), 'ba_publication_geo_contract_not_active', 'new ' . $request . ' cannot use legacy validation' );
- error_is( $svc->publish( 301 ), 'ba_publication_geo_contract_not_active', 'new ' . $request . ' cannot publish before authorized writer exists' );
+ check( is_wp_error( $svc->publish( 301 ) ), 'new ' . $request . ' cannot publish without a valid decision and controlled writer preconditions' );
  check( $before === serialize( array( $GLOBALS['meta'], $GLOBALS['posts'], $GLOBALS['object_terms'] ) ), 'blocked publication causes no public or private mutation' );
 }
 unset( $GLOBALS['private_fixture'] );

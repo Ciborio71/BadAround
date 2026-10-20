@@ -3,6 +3,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+require_once __DIR__ . '/class-badaround-public-geo-projection.php';
 
 /**
  * Canonical public discovery query for maps, search, filters and future sentinels.
@@ -392,6 +393,10 @@ class BadAround_Discovery_Query {
 	}
 
 	private function public_geo( $event_id ) {
+		if ( '' !== get_post_meta( $event_id, BadAround_Public_Geo_Contract::PROJECTION_META, true )
+			|| '' !== get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true ) ) {
+			return BadAround_Public_Geo_Projection::public_view( $event_id );
+		}
 		$lat    = get_post_meta( $event_id, '_ba_public_lat', true );
 		$lng    = get_post_meta( $event_id, '_ba_public_lng', true );
 		$radius = absint( get_post_meta( $event_id, '_ba_public_radius_m', true ) );

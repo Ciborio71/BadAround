@@ -508,7 +508,7 @@ class BadAround_Moderation_Admin {
 
 		if ( ! is_wp_error( $result ) && BadAround_Moderation_Service::STATUS_APPROVED === $target ) {
 			$publication = new BadAround_Publication_Service();
-			$prepared    = $publication->prepare_public_projection( $event_id );
+			$prepared    = BadAround_Publication_Service::uses_versioned_geo( $event_id ) ? true : $publication->prepare_public_projection( $event_id );
 			$result      = is_wp_error( $prepared ) ? $prepared : $publication->publish( $event_id );
 
 			$args = is_wp_error( $result )
@@ -528,7 +528,7 @@ class BadAround_Moderation_Admin {
 		$event_id = isset( $_REQUEST['event_id'] ) ? absint( $_REQUEST['event_id'] ) : 0;
 		check_admin_referer( 'ba_publish_event_' . $event_id );
 		$publication = new BadAround_Publication_Service();
-		$prepared    = $publication->prepare_public_projection( $event_id );
+		$prepared    = BadAround_Publication_Service::uses_versioned_geo( $event_id ) ? true : $publication->prepare_public_projection( $event_id );
 		$result      = is_wp_error( $prepared ) ? $prepared : $publication->publish( $event_id );
 		$args = is_wp_error( $result )
 			? array( 'ba_publication_error' => $result->get_error_code() )

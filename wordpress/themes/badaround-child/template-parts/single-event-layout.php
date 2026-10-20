@@ -74,6 +74,13 @@ $detail_image = function_exists( 'badaround_child_event_image_url' ) ? badaround
 $public_lat   = get_post_meta( $post_id, '_ba_public_lat', true );
 $public_lng   = get_post_meta( $post_id, '_ba_public_lng', true );
 $public_radius = get_post_meta( $post_id, '_ba_public_radius_m', true );
+// Versioned geometry comes exclusively from the approved, sealed public projection.
+if ( class_exists( 'BadAround_Public_Geo_Projection' ) && '' !== get_post_meta( $post_id, '_ba_public_location_decision', true ) ) {
+	$approved_geo = BadAround_Public_Geo_Projection::public_view( $post_id );
+	$public_lat = $approved_geo['lat'] ?? '';
+	$public_lng = $approved_geo['lng'] ?? '';
+	$public_radius = $approved_geo['radius_meters'] ?? '';
+}
 
 $public_specific = array();
 $vehicle_make    = sanitize_text_field( (string) get_post_meta( $post_id, '_ba_vehicle_make', true ) );

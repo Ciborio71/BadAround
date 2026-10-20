@@ -84,6 +84,20 @@ class BadAround_Audit_Log {
 		), array( '%d', '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' ) );
 	}
 
+	/** B3 projection publication, without private or public coordinate duplication. */
+	public static function geographic_publication( $event_id, $context, $projection ) {
+		global $wpdb;
+		$value = array( 'user_request' => $context['location']['public_location_request'] ?? 'legacy_unspecified',
+			'moderator_decision' => $context['decision']['mode'], 'public_projection_mode' => $projection['mode'],
+			'radius_meters' => $projection['radius_meters'] ?? null, 'policy_version' => $projection['version'], 'publication_event' => 'event_published' );
+		return $wpdb->insert( $wpdb->prefix . 'ba_audit_log', array(
+			'actor_user_id' => get_current_user_id(), 'object_type' => 'event', 'object_id' => absint( $event_id ),
+			'action' => 'public_geo_projection_published', 'context' => 'publication',
+			'new_value' => wp_json_encode( $value ), 'request_id' => wp_generate_uuid4(),
+			'ip_hash' => self::request_ip_hash(), 'created_at' => current_time( 'mysql', true ),
+		), array( '%d', '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s' ) );
+	}
+
 	public static function technical_error( $object_type, $object_id, $action, $code, $request_id = null ) {
 		$code = sanitize_key( $code );
 		self::record( $object_type, $object_id, $action, 'wpforms', $code, $request_id );
