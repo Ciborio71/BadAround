@@ -353,16 +353,18 @@ class BadAround_Publication_Service {
 	/** Never route a new request/decision through the legacy public projection. */
 	private function versioned_geo_gate( $event_id ) {
 		global $wpdb;
-		$report = $wpdb->get_row( $wpdb->prepare(
-			"SELECT content_original FROM {$wpdb->prefix}ba_reports WHERE event_id = %d AND deleted_at IS NULL ORDER BY id ASC LIMIT 1",
+		// Read only a presence flag, never load private coordinates/address for
+		// this gate (especially on the municipality-only projection path).
+		$has_request = $wpdb->get_var( $wpdb->prepare(
+			"SELECT CASE WHEN JSON_VALID(content_original) THEN JSON_CONTAINS_PATH(content_original, 'one',
+			 '$.canonical.location.public_location_request', '$.canonical.location.public_location_request_version') ELSE 0 END
+			 FROM {$wpdb->prefix}ba_reports WHERE event_id = %d AND deleted_at IS NULL ORDER BY id ASC LIMIT 1",
 			$event_id
 		) );
 		if ( ! empty( $wpdb->last_error ) ) {
 			return new WP_Error( 'ba_publication_geo_report_unavailable', __( 'Il report geografico riservato non è verificabile.', 'badaround-core' ) );
 		}
-		$stored = $report && isset( $report->content_original ) ? json_decode( $report->content_original, true ) : null;
-		$location = isset( $stored['canonical']['location'] ) && is_array( $stored['canonical']['location'] ) ? $stored['canonical']['location'] : array();
-		if ( array_key_exists( 'public_location_request', $location ) || array_key_exists( 'public_location_request_version', $location )
+		if ( (int) $has_request > 0
 			|| '' !== get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true )
 			|| '' !== get_post_meta( $event_id, BadAround_Public_Geo_Contract::PROJECTION_META, true ) ) {
 			// Contract first. GEO-PUBLIC-05 must implement the authorized B3 writer

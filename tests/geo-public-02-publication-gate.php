@@ -1,6 +1,17 @@
 <?php
 // Existing real publication/geo regression first, then new contract activation gate.
 require __DIR__ . '/f1-14r-publication-contract.php';
+class GeoGateDB extends DB {
+ public function get_var( $query ) {
+  if ( false !== strpos( $query, 'JSON_CONTAINS_PATH' ) ) {
+   $stored = json_decode( $GLOBALS['private_fixture']['content_original'] ?? '', true );
+   $location = $stored['canonical']['location'] ?? array();
+   return (int) ( array_key_exists( 'public_location_request', $location ) || array_key_exists( 'public_location_request_version', $location ) );
+  }
+  return parent::get_var( $query );
+ }
+}
+$wpdb = new GeoGateDB();
 foreach ( array( 'exact_point', 'approximate_area' ) as $request ) {
  seed( 301 );
  $GLOBALS['private_fixture'] = array( 'content_original' => json_encode( array( 'canonical' => array( 'location' => array(
