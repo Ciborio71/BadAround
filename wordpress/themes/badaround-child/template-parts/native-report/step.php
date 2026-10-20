@@ -5,23 +5,37 @@ if ( 'event' === $key ) : ?>
 <?php elseif ( 'details' === $key ) : ?>
 	<p>Descrivi i fatti e aggiungi le informazioni utili a chi si trova nella zona. Puoi lasciare vuoti i campi facoltativi.</p>
 <?php elseif ( 'location' === $key ) : ?>
-	<p>Indica il punto più preciso possibile. Questa posizione resterà riservata e ci aiuterà a capire meglio dove si verificano gli eventi. La posizione mostrata pubblicamente potrà essere approssimata per tutelare la privacy.</p>
+	<p>Indica il luogo più preciso possibile: il segnaposto finale viene acquisito privatamente. Potrai richiedere come mostrarlo al pubblico, ma la scelta richiederà sempre la moderazione.</p>
 <div class="ba-native-smart-address" data-native-smart-address>
   <label for="ba-smart-search">Dove è successo?</label>
   <input id="ba-smart-search" data-smart-start type="text" readonly autocomplete="off" placeholder="Cerca indirizzo o località" aria-describedby="ba-smart-privacy ba-smart-status">
-  <p id="ba-smart-privacy" class="ba-native-help"><strong>L’indirizzo preciso e il numero civico restano riservati. La posizione pubblica può essere approssimata per proteggere la privacy.</strong></p>
+  <p id="ba-smart-privacy" class="ba-native-help"><strong>L’indirizzo completo e il numero civico non vengono pubblicati automaticamente. La posizione pubblica richiesta sarà valutata dalla moderazione.</strong></p>
   <div data-smart-widget></div>
-  <button data-smart-geolocate type="button" class="ba-button ba-button--outline">Usa la mia posizione</button>
+  <button data-smart-geolocate type="button" class="ba-button ba-native-gps-button">Usa la mia posizione</button>
   <p class="ba-native-help">Seleziona un suggerimento Google, anche usando le frecce e Invio. La posizione del dispositivo viene richiesta solo premendo il pulsante.</p>
   <p id="ba-smart-status" data-smart-status role="status" aria-live="polite">Seleziona il campo per cercare un luogo.</p>
   <div data-smart-confirmation hidden><strong>Posizione riconosciuta</strong><p data-smart-address-label></p><small>L'indirizzo preciso non sarà pubblicato automaticamente.</small></div>
   <div data-smart-map-panel hidden>
     <div data-smart-map class="ba-native-location-map" role="region" aria-label="Mappa della posizione riservata dell’evento" aria-describedby="ba-smart-map-help"></div>
-    <p id="ba-smart-map-help" class="ba-native-help">Il punto che stai indicando è riservato. Se necessario, sposta il segnaposto nel punto esatto in cui è avvenuto l'evento. L’indirizzo viene verificato di nuovo. Da tastiera, seleziona il segnaposto e premi Alt e Invio (Option e Invio su Mac) per spostarlo con le frecce, poi Invio per confermare.</p>
+    <p id="ba-smart-map-help" class="ba-native-help">Questo segnaposto definisce il punto privato canonico, anche se chiedi un’area approssimata. Se necessario, spostalo nel punto esatto in cui è avvenuto l'evento. L’indirizzo viene verificato di nuovo. Da tastiera, seleziona il segnaposto e premi Alt e Invio (Option e Invio su Mac) per spostarlo con le frecce, poi Invio per confermare.</p>
   </div>
   <p data-smart-map-status role="status" aria-live="polite"></p>
   <button data-smart-manual type="button" class="ba-button" hidden>Inserisci manualmente</button>
   </div>
+  <?php if ( ! empty( $config['publicLocationRequest'] ) ) : ?>
+  <fieldset class="ba-native-public-location-choice" data-native-public-location-choice aria-describedby="ba-native-public-location-help">
+    <legend>Come vuoi che venga mostrata pubblicamente la posizione?</legend>
+    <label class="ba-native-public-location-option">
+      <input type="radio" name="ba-public-location-choice" value="exact_point" checked>
+      <span><strong>Punto esatto</strong><small>Richiedi di mostrare sulla mappa il punto che hai indicato.</small></span>
+    </label>
+    <label class="ba-native-public-location-option">
+      <input type="radio" name="ba-public-location-choice" value="approximate_area">
+      <span><strong>Area approssimata</strong><small>Richiedi di mostrare una zona approssimata intorno al luogo dell’evento.</small></span>
+    </label>
+    <p id="ba-native-public-location-help" class="ba-native-help">La tua scelta sarà valutata dalla moderazione, che potrà ridurre la precisione per tutelare la privacy. Indirizzo completo e numero civico non vengono pubblicati automaticamente.</p>
+  </fieldset>
+  <?php endif; ?>
 <?php elseif ( 'time' === $key ) : ?>
 	<p>Indica quando è successo, anche in modo approssimativo. Se non lo sai, puoi indicarlo. Gli orari si riferiscono al fuso <?php echo esc_html( $config['timezone'] ); ?>.</p>
 <?php elseif ( 'media' === $key ) : ?>
