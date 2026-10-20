@@ -54,6 +54,7 @@ class BadAround_Publication_Service {
 		$territory = $this->deepest_term( $event_id, BadAround_Event_Post_Type::TERRITORY_TAX );
 		$subtype   = $this->deepest_term( $event_id, BadAround_Event_Post_Type::EVENT_TYPE_TAX );
 		$precision = sanitize_key( (string) get_post_meta( $event_id, '_ba_public_location_precision', true ) );
+		if ( $this->b3_event === $event_id && 'municipality' === ( get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true )['mode'] ?? '' ) ) { $precision = 'f32-c7'; }
 
 		/*
 		 * Municipality precision is a semantic boundary, not merely a larger
@@ -254,6 +255,7 @@ class BadAround_Publication_Service {
 			return new WP_Error( 'ba_publication_incomplete_public_coordinates', __( 'Le coordinate pubbliche devono essere complete oppure assenti.', 'badaround-core' ) );
 		}
 		$precision = sanitize_key( (string) get_post_meta( $event_id, '_ba_public_location_precision', true ) );
+		if ( $this->b3_event === $event_id && 'municipality' === ( get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true )['mode'] ?? '' ) ) { $precision = 'f32-c7'; }
 
 		if ( 'f32-c7' === $precision ) {
 			$territory = $this->deepest_term( $event_id, BadAround_Event_Post_Type::TERRITORY_TAX );
@@ -291,11 +293,12 @@ class BadAround_Publication_Service {
 			return new WP_Error( 'ba_publication_location_too_precise', __( 'Le coordinate pubbliche devono avere un raggio di approssimazione adeguato.', 'badaround-core' ) );
 		}
 
+		$primary_sql = $this->b3_event === $event_id ? $wpdb->prepare( ' AND id = %d', absint( get_post_meta( $event_id, '_ba_primary_report_id', true ) ) ) : '';
 		$report = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT author_name, author_surname, author_email, author_phone, exact_address, exact_lat, exact_lng, full_plate, content_original
 				 FROM {$wpdb->prefix}ba_reports
-				 WHERE event_id = %d AND deleted_at IS NULL
+				 WHERE event_id = %d AND deleted_at IS NULL {$primary_sql}
 				 ORDER BY id ASC LIMIT 1",
 				$event_id
 			)
@@ -695,7 +698,7 @@ class BadAround_Publication_Service {
 			update_post_meta( $event_id, '_ba_event_status', 'open' );
 		}
 
-		BadAround_Audit_Log::transition(
+		$publication_audit = BadAround_Audit_Log::transition(
 			'event',
 			$event_id,
 			'event_published',
@@ -703,6 +706,7 @@ class BadAround_Publication_Service {
 			self::STATUS_PUBLISHED,
 			'publication'
 		);
+		if ( $this->b3_event === $event_id && ! $publication_audit ) { return $this->geo_error( 'audit_failed' ); }
 
 		/*
 		 * D2 starts only after B3 is fully committed. Listeners must remain
@@ -752,6 +756,7 @@ class BadAround_Publication_Service {
 		if ( $this->b3_event !== (int) $event_id ) { return $this->geo_error( 'b3_required' ); }
 		$c = $this->versioned_context( $event_id );
 		if ( is_wp_error( $c ) ) { return $c; }
+		if ( 'exact_point' === $c['decision']['mode'] && true !== ( $c['decision']['exact_confirmed'] ?? false ) ) { return $this->geo_error( 'exact_confirmation_required' ); }
 		$existing = get_post_meta( $event_id, BadAround_Public_Geo_Contract::PROJECTION_META, true );
 		if ( '' !== $existing ) {
 			$p = BadAround_Public_Geo_Projection::verified( $event_id );
