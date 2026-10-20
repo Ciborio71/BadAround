@@ -1,0 +1,133 @@
+name: GEO-PUBLIC-03 verified four-file staging deploy
+on:
+  push:
+    branches: [deploy/geo-public-03-staging]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
+      EXPECTED_CANDIDATE: 55a6b3594d1ef1be01f3e583bfd83f09e347b5b3
+      BASELINE: 3c9235ab80b82bebbc35cbc76cff6cfcc664a643
+      CI_RUN: 39439381613
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 55a6b3594d1ef1be01f3e583bfd83f09e347b5b3
+          fetch-depth: 0
+      - name: Enforce exact candidate CI success and four runtime file scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/deploy/geo-public-03-staging
+          test "$(git rev-parse HEAD)" = "$EXPECTED_CANDIDATE"
+          python - <<'CI_CHECK'
+          import json, os, urllib.request
+          req=urllib.request.Request('https://api.github.com/repos/Ciborio71/BadAround/actions/runs/'+os.environ['CI_RUN'],headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
+          with urllib.request.urlopen(req,timeout=30) as handle: run=json.load(handle)
+          assert run['head_sha']==os.environ['EXPECTED_CANDIDATE']
+          assert run['conclusion']=='success'
+          assert run['path']=='.github/workflows/geo-public-03-native-choice-qa.yml'
+          print('GEO-PUBLIC-03 exact candidate CI success verified')
+          CI_CHECK
+          cat > files.txt <<'FILES'
+          themes/badaround-child/assets/js/native-report/model.js
+          themes/badaround-child/assets/js/native-report/wizard.js
+          themes/badaround-child/template-parts/native-report/step.php
+          themes/badaround-child/assets/css/native-report.css
+          FILES
+          git diff --name-only "$BASELINE" HEAD -- wordpress | sort > affected.txt
+          sed 's|^|wordpress/|' files.txt | sort > expected.txt
+          cmp affected.txt expected.txt
+          git diff --check "$BASELINE" HEAD
+          mkdir -p new old rollback verified tls
+          while IFS= read -r file; do
+            mkdir -p "new/$(dirname "$file")" "old/$(dirname "$file")" "rollback/$(dirname "$file")" "verified/$(dirname "$file")"
+            cp "wordpress/$file" "new/$file"
+            git show "$BASELINE:wordpress/$file" > "old/$file"
+            test -s "old/$file"
+          done < files.txt
+          php -l new/themes/badaround-child/template-parts/native-report/step.php
+          node --check new/themes/badaround-child/assets/js/native-report/model.js
+          node --check new/themes/badaround-child/assets/js/native-report/wizard.js
+      - name: Provision validated Let's Encrypt TLS chain
+        run: |
+          set -euo pipefail
+          test -n "$FTP_HOST" && test -n "$FTP_USER" && test -n "$FTP_PASS"
+          ca=/etc/ssl/certs/ca-certificates.crt
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 --max-time 25 https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 --max-time 25 https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          test "$(openssl x509 -in tls/yr2.pem -noout -subject)" = "subject=C = US, O = Let's Encrypt, CN = YR2"
+          test "$(openssl x509 -in tls/yr-by-x1.pem -noout -subject)" = "subject=C = US, O = ISRG, CN = Root YR"
+          openssl verify -CAfile "$ca" -untrusted tls/yr-by-x1.pem tls/yr2.pem
+          cat "$ca" tls/yr2.pem tls/yr-by-x1.pem > tls/curl-chain.pem
+          timeout 30s openssl s_client -starttls ftp -connect "${FTP_HOST}:21" -servername "$FTP_TLS_NAME" -verify_hostname "$FTP_TLS_NAME" -verify_return_error -CAfile tls/curl-chain.pem < /dev/null > tls/handshake.log 2>&1
+          grep -q 'Verify return code: 0 (ok)' tls/handshake.log
+      - name: Capture remote bytes and enforce certified baseline
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            remote="ftp://${FTP_TLS_NAME}:21/staging.badaround.it/wp-content/$file"
+            curl --fail --silent --show-error --ssl-reqd --cacert tls/curl-chain.pem --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" --user "$FTP_USER:$FTP_PASS" --connect-timeout 12 --max-time 90 "$remote" -o "rollback/$file"
+            cmp "rollback/$file" "old/$file"
+            sha256sum "rollback/$file" "new/$file"
+          done < files.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: geo-public-03-byte-exact-rollback
+          path: rollback/
+          retention-days: 30
+          if-no-files-found: error
+      - name: Upload only four approved Native Form runtime files
+        id: upload
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            remote="ftp://${FTP_TLS_NAME}:21/staging.badaround.it/wp-content/$file"
+            curl --fail --silent --show-error --ssl-reqd --cacert tls/curl-chain.pem --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" --user "$FTP_USER:$FTP_PASS" --connect-timeout 12 --max-time 90 --upload-file "new/$file" "$remote"
+          done < files.txt
+      - name: Independently re-download candidate and verify byte-exact
+        id: verify
+        if: steps.upload.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            remote="ftp://${FTP_TLS_NAME}:21/staging.badaround.it/wp-content/$file"
+            curl --fail --silent --show-error --ssl-reqd --cacert tls/curl-chain.pem --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" --user "$FTP_USER:$FTP_PASS" --connect-timeout 12 --max-time 90 "$remote" -o "verified/$file"
+            cmp "verified/$file" "new/$file"
+            sha256sum "verified/$file"
+          done < files.txt
+          echo 'GEO_PUBLIC_03_REMOTE_SHA_PASS'
+      - name: Restore exact original state after failed upload or verification
+        id: rollback
+        if: always() && (steps.upload.outcome == 'failure' || (steps.upload.outcome == 'success' && steps.verify.outcome != 'success'))
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            test -s "rollback/$file"
+            remote="ftp://${FTP_TLS_NAME}:21/staging.badaround.it/wp-content/$file"
+            curl --fail --silent --show-error --ssl-reqd --cacert tls/curl-chain.pem --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" --user "$FTP_USER:$FTP_PASS" --connect-timeout 12 --max-time 90 --upload-file "rollback/$file" "$remote"
+            curl --fail --silent --show-error --ssl-reqd --cacert tls/curl-chain.pem --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" --user "$FTP_USER:$FTP_PASS" --connect-timeout 12 --max-time 90 "$remote" -o "verified/$file"
+            cmp "verified/$file" "rollback/$file"
+          done < files.txt
+          echo 'GEO_PUBLIC_03_ROLLBACK_SHA_PASS'
+      - name: Final deployment gate
+        if: always()
+        run: |
+          test '${{ steps.verify.outcome }}' = 'success'
+          test '${{ steps.upload.outcome }}' = 'success'
+          echo 'GEO_PUBLIC_03_STAGING_DEPLOY_PASS'
