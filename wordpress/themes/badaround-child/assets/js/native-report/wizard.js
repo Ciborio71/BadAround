@@ -12,6 +12,7 @@
     function clearReporterChoices(){for(const path of ['reward.status','reporter.public_identity_mode'])model.set(path,undefined);}
     clearReporterChoices();
     const form = container.querySelector('[data-native-form]');
+    const publicLocationChoice = form.querySelector('[data-native-public-location-choice]');
     const steps = Object.keys(config.steps);
     const wrappers = Array.from(form.querySelectorAll('[data-native-field]'));
     const next = form.querySelector('[data-native-next]'), back = form.querySelector('[data-native-back]'), submit = form.querySelector('[data-native-submit]');
@@ -87,6 +88,17 @@
         }
         list.append(term, detail);
       });
+      if (publicLocationChoice && config.publicLocationRequest) {
+        let locationSection = sections.get('location');
+        if (!locationSection) {
+          locationSection = document.createElement('section');locationSection.className='ba-native-review-section';
+          const heading=document.createElement('h3');heading.textContent=config.steps.location || 'Dove e quando';
+          locationSection.append(heading,document.createElement('dl'));sections.set('location',locationSection);region.append(locationSection);
+        }
+        const term=document.createElement('dt');term.textContent='Posizione pubblica richiesta';
+        const detail=document.createElement('dd');detail.textContent=model.publicLocationRequest==='approximate_area'?'Area approssimata':'Punto esatto';
+        locationSection.querySelector('dl').append(term,detail);
+      }
       // Follow the seven-step sequence even when schema fields are ordered differently.
       steps.forEach(key => { if (sections.has(key)) region.append(sections.get(key)); });
       if (mediaView && mediaView.media.count) {
@@ -367,6 +379,12 @@
     function render(focus = false) {
       if(disposed)return;
       const current = steps[model.step];
+      if (publicLocationChoice) {
+        publicLocationChoice.querySelectorAll('input[type="radio"]').forEach(input=>{
+          input.checked=input.value===model.publicLocationRequest;
+          input.disabled=model.busy || !!model.snapshot || model.completed;
+        });
+      }
       const subtype = form.querySelector('[name="event.subtype"]');
       const previous = model.effective('event.subtype') || '';
       subtype.replaceChildren(new Option('Seleziona…',''));
@@ -480,6 +498,13 @@
       });
     });
     mountMedia();
+    if (publicLocationChoice) {
+      listen(publicLocationChoice,'change',event=>{
+        if (!event.target.matches('input[type="radio"]')) return;
+        model.setPublicLocationRequest(event.target.value);
+        render();
+      });
+    }
     listen(form,'input', event => {
       const wrapper = event.target.closest('[data-native-field]'); if (!wrapper) return;
       model.set(wrapper.dataset.nativeField, read(wrapper));
