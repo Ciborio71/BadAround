@@ -73,13 +73,20 @@ $has_thumb    = has_post_thumbnail( $post_id );
 $detail_image = function_exists( 'badaround_child_event_image_url' ) ? badaround_child_event_image_url( $post_id, 'detail' ) : ( $has_thumb ? get_the_post_thumbnail_url( $post_id, 'large' ) : '' );
 $public_lat   = get_post_meta( $post_id, '_ba_public_lat', true );
 $public_lng   = get_post_meta( $post_id, '_ba_public_lng', true );
+$public_mode = '';
 $public_radius = get_post_meta( $post_id, '_ba_public_radius_m', true );
 // Versioned geometry comes exclusively from the approved, sealed public projection.
 if ( class_exists( 'BadAround_Public_Geo_Projection' ) && '' !== get_post_meta( $post_id, '_ba_public_location_decision', true ) ) {
 	$approved_geo = BadAround_Public_Geo_Projection::public_view( $post_id );
+	$public_mode = $approved_geo['mode'] ?? '';
 	$public_lat = $approved_geo['lat'] ?? '';
 	$public_lng = $approved_geo['lng'] ?? '';
 	$public_radius = $approved_geo['radius_meters'] ?? '';
+}
+
+$location_label = 'exact_point' === $public_mode ? 'Posizione esatta' : 'Posizione approssimativa';
+if ( ! is_numeric( $public_lat ) || ! is_numeric( $public_lng ) ) {
+	$location_label = 'Zona territoriale';
 }
 
 $public_specific = array();
@@ -204,14 +211,14 @@ if ( $status ) {
 						<?php endif; ?>
 
 						<?php if ( is_numeric( $public_lat ) && is_numeric( $public_lng ) ) : ?>
-							<div class="ba-event-location-map" id="ba-event-google-map" data-ba-map data-ba-map-context="detail" data-ba-event-lat="<?php echo esc_attr( $public_lat ); ?>" data-ba-event-lng="<?php echo esc_attr( $public_lng ); ?>" data-ba-event-radius="<?php echo esc_attr( $public_radius ); ?>" data-ba-event-id="<?php echo esc_attr( $post_id ); ?>" aria-label="Mappa della posizione pubblica approssimata"></div>
+							<div class="ba-event-location-map" id="ba-event-google-map" data-ba-map data-ba-map-context="detail" data-ba-event-lat="<?php echo esc_attr( $public_lat ); ?>" data-ba-event-lng="<?php echo esc_attr( $public_lng ); ?>" data-ba-event-radius="<?php echo esc_attr( $public_radius ); ?>" data-ba-event-id="<?php echo esc_attr( $post_id ); ?>" data-ba-event-mode="<?php echo esc_attr( $public_mode ); ?>" data-ba-event-category="<?php echo esc_attr( $category_term ? $category_term->slug : '' ); ?>" data-ba-event-status="<?php echo esc_attr( $event_status ); ?>" aria-label="<?php echo esc_attr( 'Mappa: ' . $location_label ); ?>"></div>
 						<?php endif; ?>
 
 						<?php if ( $public_location ) : ?>
 							<div class="ba-public-location">
 								<span aria-hidden="true">◎</span>
 								<div>
-									<small>Posizione pubblica approssimata</small>
+									<small><?php echo esc_html( $location_label ); ?></small>
 									<strong><?php echo esc_html( $public_location ); ?></strong>
 								</div>
 							</div>

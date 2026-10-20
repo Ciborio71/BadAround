@@ -142,6 +142,89 @@
 
 	const isResolved = (item) => ['resolved', 'risolto', 'closed'].includes(String(item?.event_status || '').toLowerCase());
 
+	// Only an explicit approved mode conveys exactness. Legacy geometry keeps its renderer.
+	const publicGeometry = (geo) => {
+		if (!geo || geo.lat === null || geo.lng === null || geo.lat === '' || geo.lng === '') return null;
+		const lat = Number(geo.lat), lng = Number(geo.lng);
+		if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+		const mode = geo.mode || 'legacy';
+		if (!['exact_point', 'approximate_area', 'legacy', 'point', 'street', 'area', 'municipality'].includes(mode)) return null;
+		const radius = Number(geo.radius_meters ?? geo.radius_m);
+		if (mode === 'approximate_area' && (!Number.isFinite(radius) || radius <= 0)) return null;
+		return { position: { lat, lng }, mode, radius };
+	};
+
+	const projectionIcon = (entry, active = false) => {
+		const { category, resolved, mode } = entry;
+		if (mode !== 'exact_point' && mode !== 'approximate_area') return pinSvg(category, active, resolved);
+		const palette = resolved ? neutral : (categories[category] || neutral);
+		const icon = iconMarkup(resolved ? 'check' : palette.icon);
+		let svg, width, height, anchor;
+		if (mode === 'exact_point') {
+			width = 56; height = 68;
+			// The path terminates at (28,64); halo and state changes never move that tip.
+			svg = (active ? '<circle cx="28" cy="26" r="25" fill="' + palette.color + '" fill-opacity=".16"/>' : '')
+				+ '<path d="M28 64C23 57 9 43 9 27a19 19 0 1 1 38 0c0 16-14 30-19 37Z" fill="' + palette.color + '" stroke="' + palette.dark + '" stroke-width="1.5"/>'
+				+ '<circle cx="28" cy="27" r="13" fill="' + palette.dark + '" stroke="white" stroke-width="1.5"/>'
+				+ '<g transform="translate(16 15)">' + icon + '</g>';
+			anchor = new google.maps.Point(28, 64);
+		} else {
+			width = 48; height = 48;
+			svg = (active ? '<circle cx="24" cy="24" r="23" fill="' + palette.color + '" fill-opacity=".18"/>' : '')
+				+ '<circle cx="24" cy="24" r="18" fill="' + palette.color + '" stroke="white" stroke-width="3"/>'
+				+ '<circle cx="24" cy="24" r="14" fill="' + palette.dark + '"/>'
+				+ '<g transform="translate(12 12)">' + icon + '</g>';
+			anchor = new google.maps.Point(24, 24);
+		}
+		return {
+			url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + ' ' + height + '">' + svg + '</svg>'),
+			scaledSize: new google.maps.Size(width, height), anchor,
+		};
+	};
+
+	const groundShadow = () => ({
+		url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="12" viewBox="0 0 24 12"><defs><filter id="blur"><feGaussianBlur stdDeviation="1"/></filter></defs><ellipse cx="12" cy="6" rx="8" ry="3" fill="#071a38" opacity=".35" filter="url(#blur)"/></svg>'),
+		scaledSize: new google.maps.Size(24, 12), anchor: new google.maps.Point(12, 6),
+	});
+
+	const createProjection = (map, item, geo, category, active = false) => {
+		const geometry = publicGeometry(geo);
+		if (!geometry) return null;
+		const entry = { ...geometry, item, category, resolved: isResolved(item), layers: [] };
+		const label = geometry.mode === 'exact_point' ? "Posizione esatta dell'evento"
+			: geometry.mode === 'approximate_area' ? "Area approssimativa dell'evento: raggio " + geometry.radius + ' metri'
+			: "Posizione pubblica approssimata dell'evento";
+		entry.marker = new google.maps.Marker({
+			map, position: entry.position, title: label + ': ' + (item.title || 'BadAround'),
+			icon: projectionIcon(entry, active), zIndex: active ? 300 : 100,
+			optimized: false,
+		});
+		if (entry.mode === 'exact_point') {
+			entry.shadow = new google.maps.Marker({
+				map, position: entry.position, icon: groundShadow(), clickable: false,
+				zIndex: 90, optimized: false,
+			});
+			entry.layers.push(entry.shadow);
+		} else if (Number.isFinite(entry.radius) && (entry.mode === 'approximate_area' || entry.radius >= 100)) {
+			const palette = entry.resolved ? neutral : (categories[category] || neutral);
+			entry.circle = new google.maps.Circle({
+				map, center: entry.position, radius: entry.radius,
+				clickable: entry.mode === 'approximate_area',
+				strokeColor: palette.color, strokeOpacity: .65, strokeWeight: 1.5,
+				fillColor: palette.color, fillOpacity: .1, zIndex: 10,
+			});
+			entry.layers.push(entry.circle);
+		}
+		entry.marker.addListener('mouseover', () => entry.marker.setIcon(projectionIcon(entry, true)));
+		entry.marker.addListener('mouseout', () => entry.marker.setIcon(projectionIcon(entry, Boolean(entry.selected))));
+		return entry;
+	};
+
+	const showProjection = (entry, map) => {
+		entry.marker.setMap(map);
+		entry.layers.forEach((layer) => layer.setMap(map));
+	};
+
 	const buildPreviewContent = (item) => {
 		const wrap = document.createElement('div');
 		wrap.className = 'ba-map-preview-card';
@@ -306,44 +389,35 @@
 			return;
 		}
 
-		const map = new google.maps.Map(node, {
-			center: { lat: 41.9028, lng: 12.4964 },
-			zoom: 7,
-			mapTypeControl: false,
-			streetViewControl: false,
-			fullscreenControl: context !== 'home',
-			gestureHandling: context === 'home' ? 'cooperative' : 'greedy',
-			styles: baseMapStyles,
-		});
-
-		const bounds = new google.maps.LatLngBounds();
-
 		if (context === 'detail') {
-			const lat = Number(node.dataset.baEventLat);
-			const lng = Number(node.dataset.baEventLng);
-			if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-				setStatus('Posizione pubblica non disponibile.');
-				return;
-			}
-			const item = items.find((candidate) => String(candidate.id) === String(node.dataset.baEventId));
-			const category = item ? categoryFor(item) : '';
-			const resolved = item ? isResolved(item) : false;
-			const position = { lat, lng };
-			const detailMap = new google.maps.Map(node, {
-				center: position, zoom: 14, mapTypeControl: false, streetViewControl: false,
-				fullscreenControl: false, gestureHandling: 'cooperative', styles: baseMapStyles,
+			const geo = {
+				lat: node.dataset.baEventLat, lng: node.dataset.baEventLng,
+				mode: node.dataset.baEventMode, radius_meters: node.dataset.baEventRadius,
+			};
+			const geometry = publicGeometry(geo);
+			if (!geometry) { setStatus('Posizione pubblica non disponibile.'); return; }
+			const item = items.find((candidate) => String(candidate.id) === String(node.dataset.baEventId))
+				|| { title: document.querySelector('h1')?.textContent || 'BadAround', event_status: node.dataset.baEventStatus };
+			const category = categoryFor(item) || node.dataset.baEventCategory || '';
+			const map = new google.maps.Map(node, {
+				center: geometry.position, zoom: geometry.mode === 'exact_point' ? 16 : 14,
+				mapTypeControl: false, streetViewControl: false, fullscreenControl: false,
+				gestureHandling: 'cooperative', styles: baseMapStyles,
 			});
-			new google.maps.Marker({ map: detailMap, position, title: item?.title || 'Segnalazione BadAround', icon: pinSvg(category, true, resolved), zIndex: 100 });
-			const radius = Number(node.dataset.baEventRadius);
-			if (Number.isFinite(radius) && radius >= 100) {
-				const palette = categories[category] || neutral;
-				new google.maps.Circle({ map: detailMap, center: position, radius, clickable: false, strokeColor: palette.color, strokeOpacity:.5, strokeWeight:1.5, fillColor:palette.color, fillOpacity:.1 });
-			}
+			const entry = createProjection(map, item, geo, category, true);
+			entry.selected = true;
+			if (entry.circle) map.fitBounds(entry.circle.getBounds(), 32);
 			return;
 		}
+		const map = new google.maps.Map(node, {
+			center: { lat: 41.9028, lng: 12.4964 }, zoom: 7,
+			mapTypeControl: false, streetViewControl: false, fullscreenControl: context !== 'home',
+			gestureHandling: context === 'home' ? 'cooperative' : 'greedy', styles: baseMapStyles,
+		});
+		const bounds = new google.maps.LatLngBounds();
+
 		const infoWindow = new google.maps.InfoWindow();
 		const eventMarkers = [];
-		const circles = [];
 		let clusterMarkers = [];
 		let selected = null;
 		let userMarker = null;
@@ -362,11 +436,13 @@
 
 		const setSelected = (entry) => {
 			if (selected && selected !== entry) {
-				selected.marker.setIcon(pinSvg(selected.category, false, selected.resolved));
+				selected.selected = false;
+				selected.marker.setIcon(projectionIcon(selected, false));
 				selected.marker.setZIndex(100);
 			}
 			selected = entry;
-			entry.marker.setIcon(pinSvg(entry.category, true, entry.resolved));
+			entry.selected = true;
+			entry.marker.setIcon(projectionIcon(entry, true));
 			entry.marker.setZIndex(300);
 
 			if (preview && previewContent) {
@@ -382,7 +458,8 @@
 
 		const clearSelected = () => {
 			if (selected) {
-				selected.marker.setIcon(pinSvg(selected.category, false, selected.resolved));
+				selected.selected = false;
+				selected.marker.setIcon(projectionIcon(selected, false));
 				selected.marker.setZIndex(100);
 				selected = null;
 			}
@@ -397,27 +474,15 @@
 
 		items.forEach((item) => {
 			const geo = item.public_geo;
-			if (!geo || !Number.isFinite(Number(geo.lat)) || !Number.isFinite(Number(geo.lng))) return;
+			if (!publicGeometry(geo)) return;
 			const category = categoryFor(item);
 			if (!category) {
 				console.warn('BadAround map: categoria marker non risolta per evento', item.id);
 				return;
 			}
-
-			const position = { lat: Number(geo.lat), lng: Number(geo.lng) };
-			const resolved = isResolved(item);
-			const marker = new google.maps.Marker({
-				map,
-				position,
-				title: item.title || 'Evento BadAround',
-				icon: pinSvg(category, false, resolved),
-				zIndex: 100,
-				optimized: true,
-			});
-			const entry = { item, marker, position, category, resolved };
+			const entry = createProjection(map, item, geo, category);
 			eventMarkers.push(entry);
-
-			marker.addListener('click', () => {
+			const select = () => {
 				setSelected(entry);
 				const listCard = document.querySelector('[data-ba-event-id="' + String(item.id) + '"]');
 				if (listCard && context === 'full') {
@@ -425,27 +490,10 @@
 					listCard.classList.add('is-selected');
 					listCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 				}
-			});
-
-			const radius = Number(geo.radius_m);
-			if (Number.isFinite(radius) && radius >= 100) {
-				const palette = categories[category];
-				const circle = new google.maps.Circle({
-					map,
-					center: position,
-					radius,
-					clickable: false,
-					strokeColor: palette.color,
-					strokeOpacity: 0.5,
-					strokeWeight: 1.5,
-					fillColor: palette.color,
-					fillOpacity: 0.1,
-					zIndex: 10,
-				});
-				circles.push(circle);
-			}
-
-			bounds.extend(position);
+			};
+			entry.marker.addListener('click', select);
+			entry.circle?.addListener('click', select);
+			bounds.extend(entry.position);
 		});
 
 		const removeClusters = () => {
@@ -459,7 +507,7 @@
 			if (!projection) return;
 
 			removeClusters();
-			eventMarkers.forEach((entry) => entry.marker.setMap(map));
+			eventMarkers.forEach((entry) => showProjection(entry, map));
 
 			if (map.getZoom() >= 17) return;
 
@@ -475,7 +523,7 @@
 
 			groups.forEach((group) => {
 				if (group.length < 2) return;
-				group.forEach((entry) => entry.marker.setMap(null));
+				group.forEach((entry) => showProjection(entry, null));
 				const center = group.reduce((acc, entry) => ({
 					lat: acc.lat + entry.position.lat / group.length,
 					lng: acc.lng + entry.position.lng / group.length,
