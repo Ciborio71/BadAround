@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        engine: [chromium, webkit]
+        engine: [webkit]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

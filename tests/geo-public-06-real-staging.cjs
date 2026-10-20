@@ -76,7 +76,10 @@ const results=[];
  async function zoomTo(id,zoom){
   const g=event(id).public_geo;
   await page.evaluate(({g,zoom})=>{const map=window.__baQA.maps[0].instance;map.setCenter({lat:g.lat,lng:g.lng});map.setZoom(zoom);},{g,zoom});
-  await page.waitForTimeout(900);
+  await page.waitForFunction(({zoom})=>{
+   const q=window.__baQA;
+   return q.maps[0].instance.getZoom()===zoom && ['Posizione esatta','Area approssimativa'].every(prefix=>q.markers.some(m=>m.instance.getMap() && (m.instance.getTitle()||'').startsWith(prefix)));
+  },{zoom},{timeout:15000});
  }
  function validate(state,detail){
   const pin=state.markers.find(m=>m.title.startsWith('Posizione esatta'));
@@ -97,7 +100,7 @@ const results=[];
   await page.setViewportSize({width,height:900});
   for(const path of ['/','/mappa/']){
    await visit(path);await zoomTo(303,17);
-   const s=await mapState();console.log('OBSERVED '+path+' '+width+' '+JSON.stringify(s));fs.writeFileSync(out+'/observed-'+(path==='/'?'home':'main')+'-'+width+'.json',JSON.stringify(s,null,2));await snapshot('observed-'+(path==='/'?'home':'main')+'-'+width);validate(s);
+   const s=await mapState();console.log('OBSERVED '+path+' '+width+' zoom='+s.zoom+' active markers='+s.markers.length);fs.writeFileSync(out+'/observed-'+(path==='/'?'home':'main')+'-'+width+'.json',JSON.stringify(s,null,2));await snapshot('observed-'+(path==='/'?'home':'main')+'-'+width);validate(s);
    const box=await page.locator('[data-ba-map]').boundingBox();
    assert.ok(box.width>0&&box.x>=-1&&box.x+box.width<=width+1,'map within viewport');
    await snapshot((path==='/'?'home':'main')+'-'+width+'-exact');
