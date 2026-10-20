@@ -3,7 +3,6 @@ define( 'ABSPATH', __DIR__ . '/' );
 
 require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-report-schema.php';
 require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-event-taxonomy-map.php';
-require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-wpforms-contract-map.php';
 
 function f12_assert( $condition, $message ) {
 	if ( ! $condition ) {
@@ -56,25 +55,17 @@ $json = json_encode( $schema );
 f12_assert( is_string( $json ) && '' !== $json, 'contract serializes without WPForms runtime' );
 f12_assert( false === stripos( $json, 'wpforms' ), 'canonical schema contains no WPForms runtime identity' );
 
-$wp = BadAround_WPForms_Contract_Map::fields();
-$counts = BadAround_WPForms_Contract_Map::counts();
-f12_assert( 80 === count( $wp ), 'live WPForms #6 inventory contains 80 field objects' );
-f12_assert( 67 === $counts[ BadAround_WPForms_Contract_Map::CANONICAL ], '67 WPForms fields map to canonical domain data' );
-f12_assert( 13 === $counts[ BadAround_WPForms_Contract_Map::PRESENTATION_ONLY ], '13 WPForms fields are presentation-only' );
-f12_assert( 0 === $counts[ BadAround_WPForms_Contract_Map::LEGACY_ONLY ], 'no live field is legacy-only' );
-f12_assert( 0 === $counts[ BadAround_WPForms_Contract_Map::DERIVED ], 'no live user field is classified derived' );
-f12_assert( 0 === $counts[ BadAround_WPForms_Contract_Map::INTERNAL ], 'no live user field is classified internal' );
-foreach ( $wp as $field_id => $item ) {
-	if ( BadAround_WPForms_Contract_Map::CANONICAL !== $item['classification'] ) {
-		continue;
-	}
-	$targets = is_array( $item['canonical'] ) ? $item['canonical'] : array( $item['canonical'] );
-	foreach ( $targets as $target ) {
-		f12_assert( isset( $fields[ $target ] ), 'WPForms field ' . $field_id . ' maps to canonical field ' . $target );
-	}
+// The WPForms adapter was already deleted by LEG-RETIRE-01 in the certified
+// baseline. Its historical field-inventory assertions cannot load a removed
+// runtime. Keep this suite focused on the canonical contract and compatibility.
+f12_assert( array( 'point', 'street', 'area', 'municipality' ) === $fields['location.public_precision']['constraints']['enum'], 'legacy precision meanings unchanged' );
+foreach ( array( 'location.exact_address', 'location.exact_lat', 'location.exact_lng', 'location.public_location_request', 'location.public_location_request_version' ) as $path ) {
+	f12_assert( 'private' === $fields[ $path ]['exposure'] && 'never' === $fields[ $path ]['public_projection'], 'private canonical field never automatically projects: ' . $path );
 }
+f12_assert( 'public-location-request-v1' === $schema['extensions']['public_location_request'], 'new extension has an explicit independent version' );
 
 echo 'F1.2_FIELD_COUNT=' . count( $fields ) . "\n";
 echo 'F1.2_ENUM_GROUPS=' . count( BadAround_Report_Schema::enum_groups() ) . "\n";
 echo 'F1.2_CONDITIONAL_RULES=' . $condition_count . "\n";
 echo "F1.2 Canonical Report Contract tests complete.\n";
+
