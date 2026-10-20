@@ -88,15 +88,18 @@
   }
   function geolocate(){
    if(locked()||busy)return;
-   if(!root.navigator.geolocation){say('La geolocalizzazione non è disponibile. Cerca un indirizzo.');return;}
-   const ticket=bridge.begin();busy=true;sync();geo.textContent='Ricerca della posizione…';say('Attendi la posizione del dispositivo e controlla che sia il luogo dell’evento.');
-   root.navigator.geolocation.getCurrentPosition(p=>{
+   if(root.isSecureContext===false||!root.navigator?.geolocation){say('La posizione del dispositivo non è disponibile in questo browser. Puoi cercare un indirizzo.');return;}
+   const ticket=bridge.reserve();busy=true;sync();geo.textContent='Ricerca della posizione…';say('Attendi la posizione del dispositivo e controlla che sia il luogo dell’evento.');
+   const failed=error=>{
+    if(disposed)return;busy=false;geo.textContent='Usa la mia posizione';sync();
+    if(!bridge.current(ticket))return;
+    const messages={1:'Permesso alla posizione negato. Consenti l’accesso alla posizione nelle impostazioni del browser oppure cerca un indirizzo.',2:'Non è stato possibile rilevare la posizione del dispositivo. Riprova oppure cerca un indirizzo.',3:'La ricerca della posizione ha richiesto troppo tempo. Riprova oppure cerca un indirizzo.'};
+    say(messages[error?.code]||'La posizione del dispositivo non è disponibile. Puoi cercare un indirizzo.');
+   };
+   try{root.navigator.geolocation.getCurrentPosition(p=>{
     if(disposed||!bridge.current(ticket)){busy=false;geo.textContent='Usa la mia posizione';sync();return;}
     resolve({lat:p.coords.latitude,lng:p.coords.longitude},ticket,true);
-   },error=>{
-    if(disposed)return;busy=false;geo.textContent='Usa la mia posizione';sync();
-    if(bridge.current(ticket))say(error.code===1?'Permesso alla posizione negato. Puoi cercare un indirizzo.':'Posizione non disponibile. Riprova oppure cerca un indirizzo.');
-   },{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+   },failed,{enableHighAccuracy:true,timeout:12000,maximumAge:0});}catch(_){failed();}
   }
   function categoryChanged(event){if(event.target?.name==='event.category'&&marker)marker.replaceChildren(glyph());}
   geo.addEventListener('click',geolocate);container.addEventListener('input',categoryChanged);sync();
@@ -104,3 +107,4 @@
  }
  ns.LocationMap={mount};
 })(typeof window!=='undefined'?window:globalThis);
+

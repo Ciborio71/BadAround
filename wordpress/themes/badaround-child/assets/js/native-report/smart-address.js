@@ -193,6 +193,9 @@
     const mapView=ns.LocationMap?.mount(container,config,model,{
       load:()=>loadPlaces(config.smartAddress?.key),ticket:()=>requestId,
       current:id=>!disposed&&id===requestId&&!model.busy&&!model.snapshot&&!model.completed,
+      // Acquiring a device position is speculative. Keep the last verified
+      // address/pin until the browser actually returns a usable position.
+      reserve(){return ++requestId;},
       begin(){invalidate('Verifica della posizione in corso…');clearLocation(true);return requestId;},
       async accept(place,position,id){
         if(disposed||id!==requestId||model.busy||model.snapshot||model.completed)return false;
@@ -378,3 +381,4 @@
   ns.SmartAddress = {resolveTerritory,loadPlaces,mount};
   if (typeof module !== 'undefined' && module.exports) module.exports = {resolveTerritory};
 })(typeof window !== 'undefined' ? window : globalThis);
+

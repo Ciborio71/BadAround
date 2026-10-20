@@ -43,6 +43,7 @@ function setup(withMap=false){
   }
   dom.window.eval(source);
   const win=dom.window,container=win.document.querySelector('[data-native-report]');
+  win.scrollTo=()=>{};
   const model={values:{},set(k,v){this.values[k]=v;}};
   container.addEventListener('input',e=>model.set(e.target.name,e.target.value));
   return {dom,win,container,model,button:container.querySelector('[data-smart-start]')};
@@ -555,7 +556,7 @@ async function mapHarness(){
   if(library==='geocoding')return {Geocoder:class{async geocode(request){geocodes.push(request);return {results:[{place_id:'test-google-id'}]};}}};
   return {Place:class{constructor(options){this.id=options.id;this.addressComponents=components||base;this.formattedAddress='Via verificata, Pomezia RM, Italia';}async fetchFields(options){placeReads.push(options.fields);}}};
  };
- Object.defineProperty(h.win.navigator,'geolocation',{value:{getCurrentPosition(ok,fail,options){gps={ok,fail,options};}}});
+ Object.defineProperty(h.win.navigator,'geolocation',{configurable:true,value:{getCurrentPosition(ok,fail,options){gps={ok,fail,options};}}});
  return {...h,maps,markers,geocodes,placeReads,libraries,gps:()=>gps,setComponents:value=>{components=value;},drag(position){markers[0].position=position;markers[0].dispatchEvent(new h.win.Event('gmp-dragend'));},geo:h.container.querySelector('[data-smart-geolocate]'),panel:h.container.querySelector('[data-smart-map-panel]')};
 }
 const settleMap=()=>new Promise(r=>setTimeout(r,15));
@@ -584,3 +585,44 @@ test('UX06: submission lock blocks GPS and marker changes',async()=>{
  h.model.snapshot={};h.controller.syncVisibility();assert(h.geo.disabled);assert.equal(h.markers[0].gmpDraggable,false);
  h.geo.click();h.drag({lat:42,lng:13});await settleMap();assert.equal(JSON.stringify(h.model.values),before);assert.equal(h.geocodes.length,0);h.close();
 });
+
+for(const [code,message] of [[1,/negato/],[2,/rilevare/],[3,/troppo tempo/]]){
+ test(`GEO-UX-01: browser error ${code} preserves the verified address, private pin and search`,async()=>{
+  const h=await mapHarness(),selection=h.select();selection.resolve();await settleMap();
+  const before=JSON.stringify(h.model.values),point={...h.markers[0].position};
+  h.geo.click();assert(h.gps());assert.equal(JSON.stringify(h.model.values),before);
+  h.gps().fail({code});await settleMap();
+  assert.equal(JSON.stringify(h.model.values),before);assert.equal(JSON.stringify(h.markers[0].position),JSON.stringify(point));
+  assert(!h.panel.hidden);assert(h.controller.canAdvance());assert(!h.geo.disabled);
+  assert.match(h.container.querySelector('[data-smart-map-status]').textContent,message);
+  h.close();
+ });
+}
+test('GEO-UX-01: unsupported/insecure context and synchronous browser failure preserve a valid location',async()=>{
+ for(const mode of ['unsupported','insecure','throw']){
+  const h=await mapHarness(),selection=h.select();selection.resolve();await settleMap();
+  const before=JSON.stringify(h.model.values);
+  if(mode==='unsupported')Object.defineProperty(h.win.navigator,'geolocation',{value:undefined});
+  if(mode==='insecure')Object.defineProperty(h.win,'isSecureContext',{value:false});
+  if(mode==='throw')h.win.navigator.geolocation.getCurrentPosition=()=>{throw new Error('technical secret');};
+  h.geo.click();await settleMap();assert.equal(JSON.stringify(h.model.values),before);
+  assert(h.controller.canAdvance());assert(!h.geo.disabled);assert(!h.panel.hidden);
+  assert.match(h.container.querySelector('[data-smart-map-status]').textContent,/disponibile/);
+  assert(!h.container.textContent.includes('technical secret'));h.close();
+ }
+});
+test('GEO-UX-01: device first, moved pin, address, moved pin, then device; latest private pair wins',async()=>{
+ const h=await mapHarness();h.model.values['location.public_precision']='area';
+ h.geo.click();h.gps().ok({coords:{latitude:41.6612345,longitude:12.4312345}});await settleMap();
+ assert.equal(h.model.values['location.exact_lat'],'41.6612345');assert.equal(h.maps[0].center.lat,41.6612345);
+ h.drag({lat:41.6623456,lng:12.4323456});await settleMap();
+ assert.equal(h.model.values['location.exact_lat'],'41.6623456');assert.equal(h.model.values['location.exact_lng'],'12.4323456');
+ const address=h.select();address.resolve();await settleMap();assert.equal(h.model.values['location.exact_lat'],'41.66');
+ h.drag({lat:41.6634567,lng:12.4334567});await settleMap();assert.equal(h.model.values['location.exact_lat'],'41.6634567');
+ h.geo.click();h.gps().ok({coords:{latitude:41.6645678,longitude:12.4345678}});await settleMap();
+ assert.equal(h.model.values['location.exact_lat'],'41.6645678');assert.equal(h.markers[0].position.lng,12.4345678);
+ assert.equal(h.model.values['location.public_precision'],'area');
+ assert(!Object.keys(h.model.values).some(k=>/public_lat|public_lng|place_id/.test(k)));
+ assert(h.container.querySelector('[data-native-location-fields]').hidden);h.close();
+});
+

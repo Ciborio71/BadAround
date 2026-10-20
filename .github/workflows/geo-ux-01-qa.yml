@@ -1,0 +1,44 @@
+name: GEO-UX-01 targeted QA and read-only staging diagnosis
+on:
+  push:
+    branches: [fix/geo-ux-01-device-geolocation]
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - name: Unit and invariant regression
+        run: |
+          set -euo pipefail
+          npm ci --prefix tests
+          node --test tests/f1-15b-r5-smart-address.cjs tests/sf8-national-territory.cjs tests/sf9-public-privacy-boundary.cjs tests/native-report-f16.cjs
+          for file in tests/geo-priv-03a-published-save.php tests/geo-priv-03a4-rest-lifecycle.php tests/geo-priv-03a5a-classic-form.php tests/f1-14r-publication-contract.php tests/f1-14r-consumers.php tests/native-social-preference.php; do php "$file"; done
+          php -l wordpress/themes/badaround-child/template-parts/native-report/step.php
+      - name: Controlled browser regression
+        run: |
+          set -euo pipefail
+          npm install --prefix /tmp/geo-browser --no-save playwright@1.62.1
+          node /tmp/geo-browser/node_modules/playwright/cli.js install --with-deps chromium webkit
+          export BA_PLAYWRIGHT_MODULE=/tmp/geo-browser/node_modules/playwright
+          node tests/nf-ux-06-location-browser.cjs
+          BA_BROWSER_ENGINE=webkit node tests/nf-ux-06-location-browser.cjs
+      - name: Read-only real staging diagnosis with native browser geolocation
+        env:
+          BA_PLAYWRIGHT_MODULE: /tmp/geo-browser/node_modules/playwright
+        run: node tests/geo-ux-01-staging.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: geo-ux-01-browser-evidence
+          path: geo-ux-evidence/
+          retention-days: 30
+          if-no-files-found: ignore

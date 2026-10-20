@@ -52,9 +52,10 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
   assert.match(await page.locator('[data-smart-address-label]').textContent(),/Via verificata/);
   assert.equal(await page.evaluate(()=>gpsCalls),1);assert.equal(await page.evaluate(()=>testMarker.content.style.backgroundColor),'rgb(22, 119, 232)');assert(await page.evaluate(()=>testMarker.content.querySelector('svg').outerHTML===document.querySelector('.ba-native-category-grid input:checked').closest('label').querySelector('svg').outerHTML));
   await page.evaluate(()=>{testMarker.position={lat:41.667,lng:12.437};testMarker.dispatchEvent(new Event('gmp-dragend'));});await page.waitForFunction(()=>document.querySelector('[name="location.exact_lat"]').value==='41.667');
+  const verifiedBeforeDenial=await page.locator('[name="location.exact_lat"]').inputValue();
   await page.evaluate(()=>{window.denyGPS=true;});await page.locator('[data-smart-geolocate]').click();
   await page.waitForFunction(()=>document.querySelector('[data-smart-map-status]').textContent.includes('negato'));
-  assert.equal(await page.locator('[data-smart-confirmation]').isVisible(),false);assert.notEqual(await page.evaluate(()=>document.activeElement?.hasAttribute('data-smart-confirmation')),true);
+  assert.equal(await page.locator('[data-smart-confirmation]').isVisible(),true);assert.equal(await page.locator('[name="location.exact_lat"]').inputValue(),verifiedBeforeDenial);assert(await page.locator('[data-smart-map-panel]').isVisible());
   await page.evaluate(()=>{window.denyGPS=false;});await page.locator('[data-smart-geolocate]').click();await page.waitForFunction(()=>document.querySelector('[name="location.exact_lat"]').value==='41.665');
   assert(!(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1)));assert.deepEqual(failures,[]);
   await page.evaluate(()=>{const el=document.querySelector('[name="time.mode"]');el.value='unknown';el.dispatchEvent(new Event('input',{bubbles:true}));});
@@ -62,3 +63,4 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
   console.log(`PASS ${width}px: selection-only address, private map, explicit GPS, category marker, drag reconciliation`);await page.close();
  }}finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
+
