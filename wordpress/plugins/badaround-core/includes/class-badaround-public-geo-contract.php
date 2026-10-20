@@ -57,8 +57,13 @@ class BadAround_Public_Geo_Contract {
 		$valid = self::validate_request( $location );
 		if ( is_wp_error( $valid ) ) { return $valid; }
 		$keys = array( 'version', 'mode', 'reason', 'policy_version', 'decided_at', 'decided_by' );
-		if ( ! is_array( $decision ) || array_diff( $keys, array_keys( $decision ) ) || array_diff( array_keys( $decision ), $keys ) ) {
+		$allowed = array_merge( $keys, array( 'reason_code', 'exact_confirmed' ) );
+		if ( ! is_array( $decision ) || array_diff( $keys, array_keys( $decision ) ) || array_diff( array_keys( $decision ), $allowed ) ) {
 			return self::error( 'decision_invalid' );
+		}
+		if ( ( array_key_exists( 'reason_code', $decision ) && ( ! is_string( $decision['reason_code'] ) || ( '' !== $decision['reason_code'] && ! array_key_exists( $decision['reason_code'], self::reason_codes() ) ) ) )
+			|| ( array_key_exists( 'exact_confirmed', $decision ) && ! is_bool( $decision['exact_confirmed'] ) ) ) {
+			return self::error( 'decision_audit_invalid' );
 		}
 		$request = isset( $location['public_location_request'] ) ? $location['public_location_request'] : null;
 		if ( self::VERSION !== $decision['version'] || self::VERSION !== $decision['policy_version']
@@ -132,7 +137,16 @@ class BadAround_Public_Geo_Contract {
 			'request' => $request, 'request_version' => isset( $location['public_location_request_version'] ) ? $location['public_location_request_version'] : null,
 			'decision' => $decision['mode'], 'precision_reduced' => 'legacy_unspecified' !== $request && $request !== $decision['mode'],
 			'reason' => $decision['reason'], 'policy_version' => $decision['policy_version'],
+			'reason_code' => $decision['reason_code'] ?? '', 'exact_confirmed' => $decision['exact_confirmed'] ?? false,
 			'decided_at' => $decision['decided_at'], 'decided_by' => $decision['decided_by'],
+		);
+	}
+
+	public static function reason_codes() {
+		return array(
+			'privacy' => 'Tutela della privacy', 'private_home' => 'Abitazione privata',
+			'sensitive_place' => 'Luogo sensibile', 'vulnerable_person' => 'Tutela di persona vulnerabile',
+			'unreliable_coordinates' => 'Coordinate non sufficientemente affidabili', 'other' => 'Altro',
 		);
 	}
 

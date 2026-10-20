@@ -4,6 +4,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/class-badaround-geo-moderation-service.php';
+
 /** Minimal, capability-gated B2 moderation UI for ba_evento. */
 class BadAround_Moderation_Admin {
 	public function register_hooks() {
@@ -11,6 +13,7 @@ class BadAround_Moderation_Admin {
 		add_action( 'add_meta_boxes_' . BadAround_Event_Post_Type::POST_TYPE, array( $this, 'register_meta_boxes' ) );
 		add_action( 'save_post_' . BadAround_Event_Post_Type::POST_TYPE, array( $this, 'save_public_fields' ), 10, 2 );
 		add_action( 'admin_post_ba_moderate_event', array( $this, 'handle_moderation_action' ) );
+		add_action( 'admin_post_ba_save_geo_decision', array( $this, 'handle_geo_decision_action' ) );
 		add_action( 'admin_post_ba_publish_event', array( $this, 'handle_publish_action' ) );
 		add_action( 'admin_post_ba_approve_public_media', array( $this, 'handle_public_media_action' ) );
 		add_action( 'admin_post_ba_private_media', array( $this, 'serve_private_media' ) );
@@ -22,6 +25,7 @@ class BadAround_Moderation_Admin {
 		add_action( 'transition_post_status', array( $this, 'enforce_b2_pending_status' ), 20, 3 );
 		add_action( 'admin_footer-post.php', array( $this, 'customize_native_publish_controls' ) );
 		add_action( 'admin_footer-post.php', array( $this, 'render_independent_rejection_form' ) );
+		add_action( 'admin_footer-post.php', array( $this, 'render_geo_decision_form' ) );
 	}
 
 	public function add_moderation_queue_view( $views ) {
@@ -88,6 +92,7 @@ class BadAround_Moderation_Admin {
 
 		add_meta_box( 'ba_public_data', __( 'PUBBLICABILE — Dati canonici', 'badaround-core' ), array( $this, 'render_public_box' ), BadAround_Event_Post_Type::POST_TYPE, 'normal', 'high' );
 		add_meta_box( 'ba_private_report', __( 'RISERVATO / NON PUBBLICABILE', 'badaround-core' ), array( $this, 'render_private_box' ), BadAround_Event_Post_Type::POST_TYPE, 'normal', 'high' );
+		add_meta_box( 'ba_geo_decision', __( 'Localizzazione — decisione di moderazione', 'badaround-core' ), array( $this, 'render_geo_decision_box' ), BadAround_Event_Post_Type::POST_TYPE, 'normal', 'high' );
 		add_meta_box( 'ba_private_media', __( 'Media originali privati', 'badaround-core' ), array( $this, 'render_media_box' ), BadAround_Event_Post_Type::POST_TYPE, 'normal', 'default' );
 		add_meta_box( 'ba_audit', __( 'Audit essenziale', 'badaround-core' ), array( $this, 'render_audit_box' ), BadAround_Event_Post_Type::POST_TYPE, 'normal', 'default' );
 		add_meta_box( 'ba_moderation_actions', __( 'Moderazione', 'badaround-core' ), array( $this, 'render_actions_box' ), BadAround_Event_Post_Type::POST_TYPE, 'side', 'high' );
@@ -185,6 +190,82 @@ class BadAround_Moderation_Admin {
 		return __( 'Richiesta da valutare dalla moderazione: Facebook, Instagram, X, Google Business Profile e TikTok, se attivati. Solo contenuti pubblici approvati; nessuna pubblicazione automatica.', 'badaround-core' ) . ' [' . $version . ']';
 	}
 
+	public function render_geo_decision_box( $post ) {
+		$service = new BadAround_Geo_Moderation_Service();
+		$context = $service->request_context( $post->ID );
+		if ( is_wp_error( $context ) ) {
+			echo '<p>' . esc_html__( 'Richiesta geografica non verificabile o accesso non autorizzato.', 'badaround-core' ) . '</p>';
+			return;
+		}
+		$labels = BadAround_Geo_Moderation_Service::labels();
+		$request_label = $context['request'] ? $labels[ $context['request'] ] : __( 'non disponibile / criterio legacy', 'badaround-core' );
+		$stored = get_post_meta( $post->ID, BadAround_Public_Geo_Contract::DECISION_META, true );
+		$valid_stored = is_array( $stored ) && ! is_wp_error( BadAround_Public_Geo_Contract::validate_decision( $context['location'], $stored ) );
+		$mode = $valid_stored ? $stored['mode'] : '';
+		echo '<p><strong>' . esc_html__( 'Localizzazione richiesta dall’utente', 'badaround-core' ) . '</strong><br>';
+		echo esc_html( __( 'Richiesta utente: ', 'badaround-core' ) . $request_label ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Questa decisione non pubblica l’evento e non crea coordinate pubbliche. La nuova pubblicazione geografica non è ancora attiva.', 'badaround-core' ) . '</p>';
+		if ( BadAround_Geo_Moderation_Service::read_only( $post->ID ) ) {
+			echo '<p><strong>' . esc_html__( 'Precisione pubblica approvata:', 'badaround-core' ) . '</strong> ' . esc_html( $mode ? $labels[ $mode ] : __( 'Da valutare', 'badaround-core' ) ) . '</p>';
+			echo '<p>' . esc_html__( 'Decisione in sola lettura: la modifica di eventi già pubblicati o con stato incompatibile richiede un percorso separato.', 'badaround-core' ) . '</p>';
+			return;
+		}
+		echo '<p><label for="ba-geo-mode"><strong>' . esc_html__( 'Precisione pubblica approvata', 'badaround-core' ) . '</strong></label><br>';
+		echo '<select id="ba-geo-mode" name="mode" form="ba-geo-decision-form" required data-user-request="' . esc_attr( $context['request'] ?? '' ) . '">';
+		echo '<option value="">' . esc_html__( 'Da valutare — seleziona una decisione', 'badaround-core' ) . '</option>';
+		foreach ( $context['allowed'] as $value ) {
+			echo '<option value="' . esc_attr( $value ) . '" ' . selected( $mode, $value, false ) . '>' . esc_html( $labels[ $value ] ) . '</option>';
+		}
+		echo '</select></p>';
+		echo '<p id="ba-geo-reason-wrap"><label for="ba-geo-reason"><strong>' . esc_html__( 'Motivo della riduzione', 'badaround-core' ) . '</strong></label><br>';
+		echo '<select id="ba-geo-reason" name="reason_code" form="ba-geo-decision-form"><option value="">' . esc_html__( 'Seleziona il motivo', 'badaround-core' ) . '</option>';
+		foreach ( BadAround_Public_Geo_Contract::reason_codes() as $code => $label ) {
+			echo '<option value="' . esc_attr( $code ) . '" ' . selected( $stored['reason_code'] ?? '', $code, false ) . '>' . esc_html( $label ) . '</option>';
+		}
+		echo '</select></p>';
+		echo '<div id="ba-geo-exact-wrap"><p><strong>' . esc_html__( 'Il punto esatto potrà rendere pubblicamente identificabile il luogo indicato. Conferma solo se la pubblicazione precisa è appropriata per questo evento.', 'badaround-core' ) . '</strong></p>';
+		echo '<p><label><input id="ba-geo-exact-confirm" type="checkbox" name="exact_confirmed" value="1" form="ba-geo-decision-form"> ' . esc_html__( 'Confermo la valutazione per il punto esatto. Questa conferma non pubblica l’evento.', 'badaround-core' ) . '</label></p></div>';
+		echo '<noscript><p>' . esc_html__( 'Per una riduzione scegli il motivo. Per il punto esatto seleziona la conferma esplicita.', 'badaround-core' ) . '</p></noscript>';
+		echo '<p><button type="submit" class="button button-secondary" form="ba-geo-decision-form">' . esc_html__( 'Salva decisione geografica', 'badaround-core' ) . '</button></p>';
+		echo '<p class="description">' . esc_html__( 'Questo comando salva solo la decisione geografica. Per gli altri campi dell’evento usa il normale salvataggio delle modifiche.', 'badaround-core' ) . '</p>';
+	}
+
+	/** External form: no nesting and no validation interference with #post/reject. */
+	public function render_geo_decision_form() {
+		$screen = get_current_screen();
+		$event_id = isset( $_GET['post'] ) && is_scalar( $_GET['post'] ) ? absint( $_GET['post'] ) : 0;
+		if ( ! $screen || 'ba_evento' !== $screen->post_type || ! $event_id
+			|| ! BadAround_Geo_Moderation_Service::can_edit( $event_id ) || BadAround_Geo_Moderation_Service::read_only( $event_id ) ) { return; }
+		$context = ( new BadAround_Geo_Moderation_Service() )->request_context( $event_id );
+		if ( is_wp_error( $context ) ) { return; }
+		echo '<form id="ba-geo-decision-form" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+		echo '<input type="hidden" name="action" value="ba_save_geo_decision"><input type="hidden" name="event_id" value="' . absint( $event_id ) . '">';
+		echo '<input type="hidden" name="revision" value="' . esc_attr( BadAround_Geo_Moderation_Service::revision( get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true ) ) ) . '">';
+		wp_nonce_field( 'ba_save_geo_decision_' . $event_id, 'ba_geo_nonce' );
+		echo '</form>';
+		echo '<script>(function(){var s=document.getElementById("ba-geo-mode"),r=document.getElementById("ba-geo-reason"),c=document.getElementById("ba-geo-exact-confirm");if(!s||!r||!c)return;function sync(){var reduced=!!s.value&&!!s.dataset.userRequest&&s.value!==s.dataset.userRequest,exact=s.value==="exact_point";document.getElementById("ba-geo-reason-wrap").hidden=!reduced;r.required=reduced;r.disabled=!reduced;document.getElementById("ba-geo-exact-wrap").hidden=!exact;c.required=exact;c.disabled=!exact;if(!exact)c.checked=false;}s.addEventListener("change",sync);sync();})();</script>';
+	}
+
+	public function process_geo_decision_request( $event_id, $input, $nonce, $method ) {
+		if ( 'POST' !== $method || ! BadAround_Geo_Moderation_Service::can_edit( $event_id ) || ! is_string( $nonce )
+			|| ! wp_verify_nonce( $nonce, 'ba_save_geo_decision_' . $event_id ) ) {
+			return new WP_Error( 'ba_geo_decision_forbidden', __( 'Accesso non autorizzato.', 'badaround-core' ) );
+		}
+		return ( new BadAround_Geo_Moderation_Service() )->save( $event_id, $input );
+	}
+
+	public function handle_geo_decision_action() {
+		$event_id = isset( $_POST['event_id'] ) && is_scalar( $_POST['event_id'] ) ? absint( $_POST['event_id'] ) : 0;
+		$input = array_intersect_key( wp_unslash( $_POST ), array_flip( array( 'mode', 'reason_code', 'exact_confirmed', 'revision' ) ) );
+		$result = $this->process_geo_decision_request( $event_id, $input, isset( $_POST['ba_geo_nonce'] ) ? wp_unslash( $_POST['ba_geo_nonce'] ) : '', $_SERVER['REQUEST_METHOD'] ?? '' );
+		if ( is_wp_error( $result ) && 'ba_geo_decision_forbidden' === $result->get_error_code() ) {
+			wp_die( esc_html__( 'Accesso non autorizzato.', 'badaround-core' ), '', array( 'response' => 403 ) );
+		}
+		$args = is_wp_error( $result ) ? array( 'ba_geo_error' => $result->get_error_code() ) : array( 'ba_geo_saved' => $result );
+		wp_safe_redirect( add_query_arg( $args, get_edit_post_link( $event_id, 'url' ) ) );
+		exit;
+	}
+
 	public function render_media_box( $post ) {
 		if ( ! current_user_can( 'ba_view_private_media' ) ) {
 			echo '<p>' . esc_html__( 'Accesso non autorizzato.', 'badaround-core' ) . '</p>';
@@ -242,9 +323,22 @@ class BadAround_Moderation_Admin {
 		}
 		echo '<table class="widefat striped"><thead><tr><th>' . esc_html__( 'Quando', 'badaround-core' ) . '</th><th>' . esc_html__( 'Azione', 'badaround-core' ) . '</th><th>' . esc_html__( 'Operatore', 'badaround-core' ) . '</th><th>' . esc_html__( 'Motivo', 'badaround-core' ) . '</th></tr></thead><tbody>';
 		foreach ( $rows as $row ) {
-			echo '<tr><td>' . esc_html( $row->created_at ) . '</td><td>' . esc_html( $row->action ) . '</td><td>' . esc_html( $row->actor_user_id ?: 'system' ) . '</td><td>' . esc_html( $row->reason ?: '—' ) . '</td></tr>';
+			$action_label = 'geo_location_decision_changed' === $row->action ? $this->geo_audit_summary( $row ) : $row->action;
+			echo '<tr><td>' . esc_html( $row->created_at ) . '</td><td>' . esc_html( $action_label ) . '</td><td>' . esc_html( $row->actor_user_id ?: 'system' ) . '</td><td>' . esc_html( $row->reason ?: '—' ) . '</td></tr>';
 		}
 		echo '</tbody></table>';
+	}
+
+	public function geo_audit_summary( $row ) {
+		$old = json_decode( (string) $row->old_value, true );
+		$new = json_decode( (string) $row->new_value, true );
+		$labels = BadAround_Geo_Moderation_Service::labels();
+		$before = $labels[ $old['mode'] ?? '' ] ?? __( 'Da valutare', 'badaround-core' );
+		$after = $labels[ $new['decision'] ?? '' ] ?? __( 'Da verificare', 'badaround-core' );
+		$request = $labels[ $new['request'] ?? '' ] ?? __( 'criterio legacy', 'badaround-core' );
+		$reason = BadAround_Public_Geo_Contract::reason_codes()[ $new['reason_code'] ?? '' ] ?? '';
+		return sprintf( __( 'Decisione geografica: %1$s → %2$s. Richiesta: %3$s.', 'badaround-core' ), $before, $after, $request )
+			. ( $reason ? ' ' . $reason . '.' : '' ) . ' [' . BadAround_Public_Geo_Contract::VERSION . ']';
 	}
 
 	public function render_actions_box( $post ) {
@@ -563,6 +657,19 @@ class BadAround_Moderation_Admin {
 	public function render_admin_notices() {
 		if ( ! current_user_can( 'ba_moderate_events' ) ) {
 			return;
+		}
+		if ( isset( $_GET['ba_geo_saved'] ) ) {
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Decisione geografica salvata. L’evento non è stato pubblicato.', 'badaround-core' ) . '</p></div>';
+		}
+		if ( isset( $_GET['ba_geo_error'] ) && is_string( $_GET['ba_geo_error'] ) ) {
+			$messages = array(
+				'ba_geo_decision_reason_required' => 'Seleziona il motivo della riduzione di precisione.',
+				'ba_geo_decision_exact_confirmation_required' => 'Per il punto esatto è necessaria la conferma esplicita.',
+				'ba_geo_decision_precision_forbidden' => 'La decisione non può aumentare la precisione oltre la richiesta dell’utente.',
+				'ba_geo_decision_stale' => 'La decisione è stata modificata in un’altra scheda. Ricarica l’evento prima di riprovare.',
+				'ba_geo_decision_read_only' => 'La decisione di questo evento è in sola lettura.',
+			);
+			echo '<div class="notice notice-error"><p>' . esc_html( $messages[ $_GET['ba_geo_error'] ] ?? 'Decisione geografica non salvata. Verifica la richiesta o riprova.' ) . '</p></div>';
 		}
 
 		if ( ! empty( $_GET['ba_publication_updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended

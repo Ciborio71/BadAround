@@ -64,6 +64,26 @@ class BadAround_Audit_Log {
 		return $result;
 	}
 
+	/** Coordinate-free history; committed together with the protected metadata. */
+	public static function geographic_decision( $event_id, $location, $before, $after ) {
+		global $wpdb;
+		$new_value = BadAround_Public_Geo_Contract::audit_descriptor( $location, $after );
+		if ( is_wp_error( $new_value ) ) { return false; }
+		$previous = null;
+		if ( is_array( $before ) ) {
+			$previous = is_wp_error( BadAround_Public_Geo_Contract::validate_decision( $location, $before ) )
+				? array( 'invalid_previous_decision' => true )
+				: array_intersect_key( $before, array_flip( array( 'version', 'mode', 'reason_code', 'policy_version', 'decided_at', 'decided_by', 'exact_confirmed' ) ) );
+		}
+		return $wpdb->insert( $wpdb->prefix . 'ba_audit_log', array(
+			'actor_user_id' => get_current_user_id(), 'object_type' => 'event', 'object_id' => absint( $event_id ),
+			'action' => 'geo_location_decision_changed', 'context' => 'geo_moderation',
+			'old_value' => wp_json_encode( $previous ), 'new_value' => wp_json_encode( $new_value ),
+			'reason' => $after['reason_code'] ?: null, 'request_id' => wp_generate_uuid4(),
+			'ip_hash' => self::request_ip_hash(), 'created_at' => current_time( 'mysql', true ),
+		), array( '%d', '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' ) );
+	}
+
 	public static function technical_error( $object_type, $object_id, $action, $code, $request_id = null ) {
 		$code = sanitize_key( $code );
 		self::record( $object_type, $object_id, $action, 'wpforms', $code, $request_id );
