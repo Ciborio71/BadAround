@@ -1,0 +1,44 @@
+name: GEO-PUBLIC-03 Native Location Choice QA
+on:
+  push:
+    branches: [feature/geo-public-03-native-location-choice]
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - name: Scoped diff and syntax check
+        run: |
+          set -euo pipefail
+          git diff --check
+          php -l wordpress/themes/badaround-child/template-parts/native-report/step.php
+          php -l wordpress/themes/badaround-child/inc/native-report.php
+          node --check wordpress/themes/badaround-child/assets/js/native-report/model.js
+          node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
+      - name: GEO-PUBLIC-02 and GEO-PUBLIC-03 contract regressions
+        run: |
+          set -euo pipefail
+          node --test tests/geo-public-02-native.cjs tests/geo-public-03-choice.cjs
+          for f in tests/geo-public-02-contract.php tests/geo-public-02-publication-gate.php tests/native-report-f12.php tests/native-report-f13.php tests/native-report-f14.php tests/native-report-f15.php tests/native-report-f16.php tests/native-social-preference.php tests/geo-priv-03a-published-save.php tests/geo-priv-03a4-rest-lifecycle.php tests/geo-priv-03a5a-classic-form.php tests/map-02r-priv-01.php tests/f1-14r-publication-contract.php tests/f1-14r-consumers.php; do php "$f"; done
+      - name: Native, GPS, Smart Address and Social automated regressions
+        run: |
+          set -euo pipefail
+          npm ci --prefix tests
+          node --test tests/f1-15b-r5-smart-address.cjs tests/sf8-national-territory.cjs tests/sf9-public-privacy-boundary.cjs tests/native-report-f16.cjs tests/native-report-f16-dom.cjs tests/native-social-preference.cjs
+      - name: Browser regression Chromium + WebKit desktop mobile
+        run: |
+          set -euo pipefail
+          npm install --prefix /tmp/geo-public-browser --no-save playwright@1.62.1
+          node /tmp/geo-public-browser/node_modules/playwright/cli.js install --with-deps chromium webkit
+          export BA_PLAYWRIGHT_MODULE=/tmp/geo-public-browser/node_modules/playwright
+          node tests/nf-ux-06-location-browser.cjs
+          BA_BROWSER_ENGINE=webkit node tests/nf-ux-06-location-browser.cjs
