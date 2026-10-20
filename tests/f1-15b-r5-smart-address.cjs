@@ -625,4 +625,3 @@ test('GEO-UX-01: device first, moved pin, address, moved pin, then device; lates
  assert(!Object.keys(h.model.values).some(k=>/public_lat|public_lng|place_id/.test(k)));
  assert(h.container.querySelector('[data-native-location-fields]').hidden);h.close();
 });
-
