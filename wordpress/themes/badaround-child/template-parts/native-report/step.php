@@ -55,4 +55,3 @@ if ( 'media' === $key ) : ?>
 		<ul class="ba-native-media-list" data-media-list aria-label="Immagini selezionate"></ul>
 	</div>
 <?php endif;
-

@@ -381,4 +381,3 @@
   ns.SmartAddress = {resolveTerritory,loadPlaces,mount};
   if (typeof module !== 'undefined' && module.exports) module.exports = {resolveTerritory};
 })(typeof window !== 'undefined' ? window : globalThis);
-

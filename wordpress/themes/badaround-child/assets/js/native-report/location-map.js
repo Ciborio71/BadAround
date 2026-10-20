@@ -107,4 +107,3 @@
  }
  ns.LocationMap={mount};
 })(typeof window!=='undefined'?window:globalThis);
-

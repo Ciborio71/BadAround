@@ -63,4 +63,3 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
   console.log(`PASS ${width}px: selection-only address, private map, explicit GPS, category marker, drag reconciliation`);await page.close();
  }}finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
-
