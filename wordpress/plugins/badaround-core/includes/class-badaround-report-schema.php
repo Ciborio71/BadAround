@@ -584,4 +584,3 @@ class BadAround_Report_Schema {
 		);
 	}
 }
-

@@ -138,4 +138,3 @@ $GLOBALS['test_screen'] = 'other-page.php'; $GLOBALS['test_assets'] = array();
 badaround_child_enqueue_assets();
 f16_assert( ! $GLOBALS['test_assets'], 'unrelated page does not enqueue native or report assets' );
 echo "F1.6 PHP/SSR tests complete.\n";
-

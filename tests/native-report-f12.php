@@ -68,4 +68,3 @@ echo 'F1.2_FIELD_COUNT=' . count( $fields ) . "\n";
 echo 'F1.2_ENUM_GROUPS=' . count( BadAround_Report_Schema::enum_groups() ) . "\n";
 echo 'F1.2_CONDITIONAL_RULES=' . $condition_count . "\n";
 echo "F1.2 Canonical Report Contract tests complete.\n";
-

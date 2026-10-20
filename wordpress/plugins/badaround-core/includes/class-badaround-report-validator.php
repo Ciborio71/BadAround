@@ -545,4 +545,3 @@ class BadAround_Report_Validator {
 		return new WP_Error( $code, $message, array( 'field' => $path ) );
 	}
 }
-
