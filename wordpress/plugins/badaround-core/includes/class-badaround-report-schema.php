@@ -16,6 +16,8 @@ class BadAround_Report_Schema {
 	// to Facebook, Instagram, X, Google Business Profile and TikTok, if activated.
 	// It records a request for moderation, never permission to post automatically.
 	const SOCIAL_PREFERENCE_VERSION = 'social-preference-v1';
+	// Optional, versioned request. This never authorizes publication by itself.
+	const PUBLIC_LOCATION_REQUEST_VERSION = 'public-location-request-v1';
 
 	const PRIVACY_PUBLIC          = 'public';
 	const PRIVACY_PRIVATE         = 'private';
@@ -26,6 +28,7 @@ class BadAround_Report_Schema {
 	public static function definition() {
 		return array(
 			'version' => self::VERSION,
+			'extensions' => array( 'public_location_request' => self::PUBLIC_LOCATION_REQUEST_VERSION ),
 			'category_subtypes' => self::category_subtypes(),
 			'temporal_semantics' => array(
 				'date_format' => 'Y-m-d',
@@ -94,6 +97,8 @@ class BadAround_Report_Schema {
 			'location.exact_address' => self::field( 'string', true, self::PRIVACY_PRIVATE, 'ba_reports.exact_address', 'never', array( 'max_length' => 500 ) ),
 			'location.exact_lat' => self::field( 'decimal', false, self::PRIVACY_PRIVATE, 'ba_reports.exact_lat', 'never', array( 'min' => -90, 'max' => 90 ) ),
 			'location.exact_lng' => self::field( 'decimal', false, self::PRIVACY_PRIVATE, 'ba_reports.exact_lng', 'never', array( 'min' => -180, 'max' => 180 ) ),
+			'location.public_location_request' => self::field( 'enum', false, self::PRIVACY_PRIVATE, 'ba_reports.content_original', 'never', array( 'enum' => array( 'exact_point', 'approximate_area' ) ) ),
+			'location.public_location_request_version' => self::field( 'string', false, self::PRIVACY_PRIVATE, 'ba_reports.content_original', 'never', array( 'enum' => array( self::PUBLIC_LOCATION_REQUEST_VERSION ), 'max_length' => 64 ) ),
 			'location.place_id' => self::field( 'string', false, self::PRIVACY_PRIVATE, 'ba_reports.content_original', 'never', array( 'max_length' => 255, 'identity' => 'external-reference-only' ) ),
 			'location.area_label' => self::field( 'string', false, self::PRIVACY_PUBLIC, '_ba_public_place_name', 'direct-after-moderation', array( 'max_length' => 191 ) ),
 			'location.region' => self::field( 'string', false, self::PRIVACY_PUBLIC, 'ba_territorio', 'derived-after-territory-resolution', array( 'max_length' => 191 ) ),
@@ -579,3 +584,4 @@ class BadAround_Report_Schema {
 		);
 	}
 }
+

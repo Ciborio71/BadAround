@@ -4,6 +4,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/class-badaround-public-geo-contract.php';
+
 /**
  * Owns the controlled B3 transition from approved moderation to public WordPress content.
  */
@@ -22,6 +24,8 @@ class BadAround_Publication_Service {
 		if ( ! $post || BadAround_Event_Post_Type::POST_TYPE !== $post->post_type ) {
 			return new WP_Error( 'ba_publication_invalid_event', __( 'Evento non valido.', 'badaround-core' ) );
 		}
+		$geo_gate = $this->versioned_geo_gate( $event_id );
+		if ( is_wp_error( $geo_gate ) ) { return $geo_gate; }
 
 		$territory = $this->deepest_term( $event_id, BadAround_Event_Post_Type::TERRITORY_TAX );
 		$subtype   = $this->deepest_term( $event_id, BadAround_Event_Post_Type::EVENT_TYPE_TAX );
@@ -164,6 +168,8 @@ class BadAround_Publication_Service {
 		if ( ! $post || BadAround_Event_Post_Type::POST_TYPE !== $post->post_type ) {
 			return new WP_Error( 'ba_publication_invalid_event', __( 'Evento non valido.', 'badaround-core' ) );
 		}
+		$geo_gate = $this->versioned_geo_gate( $event_id );
+		if ( is_wp_error( $geo_gate ) ) { return $geo_gate; }
 
 		$moderation_status = sanitize_key( (string) get_post_meta( $event_id, '_ba_moderation_status', true ) );
 		if ( BadAround_Moderation_Service::STATUS_APPROVED !== $moderation_status && ! ( $allow_published_recovery && self::STATUS_PUBLISHED === $moderation_status ) ) {
@@ -341,6 +347,28 @@ class BadAround_Publication_Service {
 			}
 		}
 
+		return true;
+	}
+
+	/** Never route a new request/decision through the legacy public projection. */
+	private function versioned_geo_gate( $event_id ) {
+		global $wpdb;
+		$report = $wpdb->get_row( $wpdb->prepare(
+			"SELECT content_original FROM {$wpdb->prefix}ba_reports WHERE event_id = %d AND deleted_at IS NULL ORDER BY id ASC LIMIT 1",
+			$event_id
+		) );
+		if ( ! empty( $wpdb->last_error ) ) {
+			return new WP_Error( 'ba_publication_geo_report_unavailable', __( 'Il report geografico riservato non è verificabile.', 'badaround-core' ) );
+		}
+		$stored = $report && isset( $report->content_original ) ? json_decode( $report->content_original, true ) : null;
+		$location = isset( $stored['canonical']['location'] ) && is_array( $stored['canonical']['location'] ) ? $stored['canonical']['location'] : array();
+		if ( array_key_exists( 'public_location_request', $location ) || array_key_exists( 'public_location_request_version', $location )
+			|| '' !== get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true )
+			|| '' !== get_post_meta( $event_id, BadAround_Public_Geo_Contract::PROJECTION_META, true ) ) {
+			// Contract first. GEO-PUBLIC-05 must implement the authorized B3 writer
+			// before this gate can be replaced. No private-to-public copying here.
+			return new WP_Error( 'ba_publication_geo_contract_not_active', __( 'La nuova richiesta geografica richiede il percorso di pubblicazione versionato, non ancora attivo.', 'badaround-core' ) );
+		}
 		return true;
 	}
 
@@ -653,3 +681,4 @@ class BadAround_Publication_Service {
 		return true;
 	}
 }
+

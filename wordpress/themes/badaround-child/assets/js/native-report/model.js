@@ -58,6 +58,11 @@
         setPath(out, path, value);
       });
       setPath(out, 'consents.version', this.config.consentVersion);
+      // Versioned request only. Approval and public coordinates remain server-owned.
+      if (this.config.publicLocationRequest) {
+        setPath(out, 'location.public_location_request', this.config.publicLocationRequest.default);
+        setPath(out, 'location.public_location_request_version', this.config.publicLocationRequest.version);
+      }
       // Optional request, independent of the mandatory declaration and contact choices.
       if (['requested','declined'].includes(out.reporter?.social_visibility)) {
         setPath(out, 'consents.social_visibility_version', this.config.socialPreferenceVersion);

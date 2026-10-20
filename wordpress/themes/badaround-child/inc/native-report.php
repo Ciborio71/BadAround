@@ -121,7 +121,7 @@ function badaround_native_report_config() {
 	uksort( $categories, function ( $a, $b ) use ( $order ) { return ( $order[ $a ] ?? 99 ) <=> ( $order[ $b ] ?? 99 ); } );
 	$fields = array();
 	foreach ( BadAround_Report_Schema::fields() as $path => $definition ) {
-		if ( in_array( $path, array( 'schema_version', 'submission_id', 'consents.version', 'consents.social_visibility_version', 'media.items', 'location.place_id', 'authority.reference' ), true ) ) { continue; }
+		if ( in_array( $path, array( 'schema_version', 'submission_id', 'consents.version', 'consents.social_visibility_version', 'media.items', 'location.place_id', 'authority.reference', 'location.public_location_request', 'location.public_location_request_version' ), true ) ) { continue; }
 		$options = array();
 		foreach ( $definition['constraints']['enum'] ?? $definition['constraints']['item_enum'] ?? array() as $value ) {
 			$options[ $value ] = badaround_native_report_option_label( $path, $value );
@@ -178,6 +178,8 @@ function badaround_native_report_config() {
 	return array(
 		'smartAddress' => $smart_key ? array( 'key' => $smart_key, 'territories' => $territories, 'country' => 'IT' ) : null,
 		'schemaVersion' => BadAround_Report_Schema::VERSION,
+		// Contract scaffolding only: no new visible control before GEO-PUBLIC-03.
+		'publicLocationRequest' => array( 'default' => 'exact_point', 'version' => BadAround_Report_Schema::PUBLIC_LOCATION_REQUEST_VERSION ),
 		'consentVersion' => 'native-f16-v1', // Version of this QA presentation, not a claim of finalized legal policies.
 		'socialPreferenceVersion' => BadAround_Report_Schema::SOCIAL_PREFERENCE_VERSION,
 		'endpoint' => rest_url( BadAround_Native_Report_REST_Controller::REST_NAMESPACE . BadAround_Native_Report_REST_Controller::REST_ROUTE ),

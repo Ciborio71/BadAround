@@ -14,6 +14,8 @@ class BadAround_Report_Validator {
 		}
 		// Compatibility entry point used by the certified legacy adapter.
 		// Strict unknown-field/type preflight belongs to the native F1.3 intake.
+		$request_error = $this->validate_public_location_request( $report );
+		if ( is_wp_error( $request_error ) ) { return $request_error; }
 		$report = $this->normalize( $report );
 		$error  = $this->validate( $report );
 		return is_wp_error( $error ) ? $error : $report;
@@ -27,6 +29,8 @@ class BadAround_Report_Validator {
 		if ( ! is_array( $report ) ) {
 			return new WP_Error( 'ba_report_invalid_payload', __( 'La segnalazione non è valida.', 'badaround-core' ) );
 		}
+		$request_error = $this->validate_public_location_request( $report );
+		if ( is_wp_error( $request_error ) ) { return $request_error; }
 
 		$allowed = BadAround_Report_Schema::fields();
 		$unknown = $this->unknown_paths( $report, $allowed );
@@ -57,6 +61,8 @@ class BadAround_Report_Validator {
 		if ( ! is_array( $report ) ) {
 			return new WP_Error( 'ba_report_invalid_payload', __( 'La segnalazione non è valida.', 'badaround-core' ) );
 		}
+		$request_error = $this->validate_public_location_request( $report );
+		if ( is_wp_error( $request_error ) ) { return $request_error; }
 
 		$rules  = BadAround_Report_Schema::validation_rules();
 		$fields = BadAround_Report_Schema::fields();
@@ -166,6 +172,19 @@ class BadAround_Report_Validator {
 			}
 		}
 
+		return true;
+	}
+
+	private function validate_public_location_request( $report ) {
+		$location = isset( $report['location'] ) && is_array( $report['location'] ) ? $report['location'] : array();
+		$has_request = array_key_exists( 'public_location_request', $location );
+		$has_version = array_key_exists( 'public_location_request_version', $location );
+		if ( ! $has_request && ! $has_version ) { return true; } // Legacy is never upgraded on read.
+		if ( ! $has_request || ! $has_version
+			|| ! in_array( $location['public_location_request'], array( 'exact_point', 'approximate_area' ), true )
+			|| BadAround_Report_Schema::PUBLIC_LOCATION_REQUEST_VERSION !== $location['public_location_request_version'] ) {
+			return $this->field_error( 'ba_report_public_location_request_invalid', 'location.public_location_request', __( 'La richiesta di rappresentazione pubblica non è valida o non è versionata.', 'badaround-core' ) );
+		}
 		return true;
 	}
 
@@ -526,3 +545,4 @@ class BadAround_Report_Validator {
 		return new WP_Error( $code, $message, array( 'field' => $path ) );
 	}
 }
+
