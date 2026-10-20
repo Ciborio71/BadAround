@@ -23,10 +23,13 @@ test('legacy client config does not invent a request or change retry payload',()
  assert.equal(m.payload().location.public_location_request,undefined);
  assert.equal(JSON.stringify(m.payload()),a);
 });
-test('contract-only extension adds no visible native control or technical field',()=>{
+test('request remains outside the frozen F1.2 schema and no technical version control is exposed',()=>{
  const html=execFileSync(php,['tests/native-report-f16.php','--html'],{encoding:'utf8'});
  assert(!config.fields['location.public_location_request']);
  assert(!config.fields['location.public_location_request_version']);
- assert(!html.includes('data-native-field="location.public_location_request"'));
+ assert(html.includes('data-native-public-location-choice'));
+ assert(html.includes('value="exact_point"'));
+ assert(html.includes('value="approximate_area"'));
+ assert(!html.includes('name="location.public_location_request"'));
  assert(!html.includes('data-native-field="location.public_location_request_version"'));
 });
