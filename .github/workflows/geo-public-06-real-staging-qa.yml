@@ -1,0 +1,37 @@
+name: GEO-PUBLIC-06 real read-only staging browser QA
+on:
+  push:
+    branches: [qa/geo-public-06-real-staging]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install browser runtime
+        run: |
+          npm install --prefix /tmp/geo-public-browser --no-save playwright@1.62.1
+          node /tmp/geo-public-browser/node_modules/playwright/cli.js install --with-deps chromium webkit
+      - name: Real staging maps, detail, Discovery and responsive privacy checks
+        env:
+          BA_PLAYWRIGHT_MODULE: /tmp/geo-public-browser/node_modules/playwright
+          BA_BROWSER_ENGINE: ${{ matrix.engine }}
+        run: |
+          node --check tests/geo-public-06-real-staging.cjs
+          node tests/geo-public-06-real-staging.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: geo-public-06-real-staging-${{ matrix.engine }}
+          path: qa-artifacts/geo-public-06/
+          retention-days: 30
+          if-no-files-found: error
