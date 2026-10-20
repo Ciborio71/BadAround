@@ -63,6 +63,8 @@ const results=[];
    const icon=m=>decodeURIComponent(m.instance.getIcon().url.split(',').slice(1).join(','));
    return {
     maps:q.maps.length,
+    zoom:q.maps[0]?.instance.getZoom(),
+    allMarkers:q.markers.map(m=>({title:m.instance.getTitle(),visible:Boolean(m.instance.getMap()),position:m.instance.getPosition()?.toJSON()})),
     markers:q.markers.filter(m=>m.instance.getMap()).map(m=>{
      const i=m.instance.getIcon(),p=m.instance.getPosition();
      return {title:m.instance.getTitle()||'',lat:p.lat(),lng:p.lng(),anchor:{x:i.anchor.x,y:i.anchor.y},svg:icon(m)};
@@ -95,7 +97,7 @@ const results=[];
   await page.setViewportSize({width,height:900});
   for(const path of ['/','/mappa/']){
    await visit(path);await zoomTo(303,17);
-   const s=await mapState();validate(s);
+   const s=await mapState();console.log('OBSERVED '+path+' '+width+' '+JSON.stringify(s));fs.writeFileSync(out+'/observed-'+(path==='/'?'home':'main')+'-'+width+'.json',JSON.stringify(s,null,2));await snapshot('observed-'+(path==='/'?'home':'main')+'-'+width);validate(s);
    const box=await page.locator('[data-ba-map]').boundingBox();
    assert.ok(box.width>0&&box.x>=-1&&box.x+box.width<=width+1,'map within viewport');
    await snapshot((path==='/'?'home':'main')+'-'+width+'-exact');
