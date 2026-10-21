@@ -58,9 +58,9 @@ else:
   for e in entries:
    touched.append(e);p=e['path'];write('wp-content/'+p,git('show',CAND+':wordpress/'+p));assert sha(read('wp-content/'+p))==e['after']
   hashes={e['path']:sha(read('wp-content/'+e['path'])) for e in entries};(state/'remote-sha256.json').write_text(json.dumps(hashes,indent=2))
-  token=secrets.token_hex(32);harness='nf02b-'+secrets.token_hex(16)+'.php'
+  token=secrets.token_hex(32);harness='wp-content/mu-plugins/nf02b-'+secrets.token_hex(16)+'.php'
   body=pathlib.Path('ops/nf02b-qa.php').read_text().replace('__TOKEN__',token).encode();write(harness,body)
-  req=urllib.request.Request('https://staging.badaround.it/'+harness,data=b'',headers={'X-NF-QA':token},method='POST')
+  req=urllib.request.Request('https://staging.badaround.it/wp-json/nf02b-qa/v1/run',data=b'',headers={'X-NF-QA':token},method='POST')
   try:
    with urllib.request.urlopen(req,timeout=120) as r:raw=r.read()
   except urllib.error.HTTPError as e:raw=e.read()
