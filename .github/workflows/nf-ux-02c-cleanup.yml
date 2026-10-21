@@ -40,8 +40,16 @@ jobs:
           f.connect(os.environ['FTP_HOST'],21);f.host=os.environ['FTP_TLS_NAME'];f.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);f.prot_p()
           root='/staging.badaround.it/wp-content/mu-plugins/'
           found=[]
+          def rm(path):
+           for child,meta in list(f.mlsd(path)):
+            if child in ('.','..'): continue
+            if meta.get('type')=='dir': rm(path+'/'+child)
+            else: f.delete(path+'/'+child)
+           f.rmd(path)
           for name,meta in list(f.mlsd(root)):
-           if name.startswith('nf-final-') and name != 'nf-final-edc19d4bc576cbf7cade087149831a2f.php' and name.endswith('.php') and meta.get('type')=='file':
-            f.delete(root+name);found.append(name)
+           if name.startswith('nf-final-'):
+            if meta.get('type')=='dir': rm(root+name)
+            elif meta.get('type')=='file': f.delete(root+name)
+            found.append(name)
           print('TEMPORARY_FINAL_HARNESS_REMOVED',len(found));f.quit()
           PYTHON
