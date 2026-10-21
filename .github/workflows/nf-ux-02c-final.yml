@@ -1,7 +1,7 @@
 name: NF-UX-02C final residual resilience
 on:
   push:
-    branches: [qa/nf-ux-02c-final-disabled]
+    branches: [qa/nf-ux-02c-final-resilience]
 permissions:
   contents: read
 concurrency:
