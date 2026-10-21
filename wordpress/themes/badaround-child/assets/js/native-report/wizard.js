@@ -301,7 +301,10 @@
       const target = nextField ? questionTarget(nextField) : form.querySelector('[data-native-next]:not([hidden])');
       if (!target || target.disabled) return;
       target.focus({preventScroll:true});
-      const anchor = nextField || target, rect = anchor.getBoundingClientRect();
+      // Keep the contextual notice in view when the existing auto-focus advances.
+      const anchor = !emergencyNotice.hidden && wrapper.nextElementSibling===emergencyNotice
+        ? emergencyNotice : nextField || target;
+      const rect = anchor.getBoundingClientRect();
       const headerBottom = document.querySelector('.ba-site-header')?.getBoundingClientRect().bottom || 0;
       const safeTop = Math.max(16,headerBottom+16), bottom = target.getBoundingClientRect().bottom;
       if (rect.top >= safeTop && bottom <= (window.innerHeight || 800)-88) return;

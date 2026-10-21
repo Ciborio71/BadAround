@@ -16,6 +16,10 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   const set=async data=>page.evaluate(data=>{for(const [key,value] of Object.entries(data)){const el=document.querySelector(`[name="${key}"]`);if(el.type==='checkbox')el.checked=value;else el.value=value;el.dispatchEvent(new Event('change',{bubbles:true}));}},data);
   assert(!(await notice.isVisible()));
   for(const row of auto){await set({'event.category':row.category,'event.subtype':row.subtype,'location.immediate_danger':'no'});assert(await notice.isVisible(),row.subtype);assert.equal(await notice.count(),1);}
+  await set({'event.category':'vehicle','event.subtype':'vehicle_stolen','location.immediate_danger':'no'});
+  await page.locator('[data-native-field="event.subtype"] input[type=radio][value=vehicle_hit_and_run]').focus();await page.keyboard.press('Space');
+  await page.waitForFunction(()=>document.activeElement?.name==='ba-card-reporter.relationship');
+  const liveRect=await notice.boundingBox();assert(liveRect.y>=0&&liveRect.y+liveRect.height<=900,'auto-focus keeps emergency notice in view');
   await notice.scrollIntoViewIfNeeded();
   assert.equal(await notice.getAttribute('role'),'status');
   const metrics=await notice.evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return {left:r.left,right:r.right,width:innerWidth,color:s.color,bg:s.backgroundColor,overflow:document.documentElement.scrollWidth>innerWidth+1};});
