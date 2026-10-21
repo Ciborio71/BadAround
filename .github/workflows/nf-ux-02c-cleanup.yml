@@ -4,6 +4,9 @@ on:
     branches: [qa/nf-ux-02c-final-resilience]
 permissions:
   contents: read
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: true
 jobs:
   cleanup:
     runs-on: ubuntu-latest
