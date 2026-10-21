@@ -136,5 +136,10 @@ add_action('rest_api_init',function(){
  }catch(Throwable $e){$error=['pass'=>false,'action'=>$action,'case'=>$name??null,'error'=>$e->getMessage(),'checks'=>$nff_checks];nff_save(__DIR__.'/__RESULT_FILE__',$error);return new WP_REST_Response($error,500);}
  }]);
 });
+add_action('admin_menu',function(){add_management_page('NF final QA','NF final QA','manage_options','nf-final-qa',function(){
+ echo '<div class="wrap"><h1>NF-UX-02C final QA</h1><button id="nf-run" class="button button-primary">Run controlled final QA</button><pre id="nf-output">Ready</pre></div>';
+ $nonce=wp_create_nonce('wp_rest');
+ echo '<script>const nfNonce='.wp_json_encode($nonce).';document.getElementById("nf-run").onclick=async function(){this.disabled=true;const out=document.getElementById("nf-output");async function call(action,data={}){const r=await fetch("/wp-json/nf-final-qa/v1/"+action,{method:"POST",headers:{"Content-Type":"application/json","X-WP-Nonce":nfNonce},body:JSON.stringify(data)});const v=await r.json();if(!r.ok||v.pass===false)throw Error(JSON.stringify(v));return v;}try{out.textContent="Starting";await call("start");for(const name of ["v1_same","v1_different","v2_same","v2_different","v2_stale","cross_version","different_uuid","event_race_v1","event_race_v2"]){out.textContent+="\\n"+name+" running";await call("init",{case:name});await Promise.all([0,1].map(worker=>call("worker",{case:name,worker})));const r=await call("finish",{case:name});out.textContent+=" PASS "+JSON.stringify(r.fixtures);}out.textContent+="\\nFINAL "+JSON.stringify(await call("final"));}catch(e){out.textContent+="\\nSTOP "+e.message;}};</script>';
+});});
 
 }, 99);
