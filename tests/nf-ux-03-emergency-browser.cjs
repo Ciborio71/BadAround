@@ -10,8 +10,8 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
  const browser=await chromium.launch({headless:true});
  try{for(const width of [320,390,1440]){
   const page=await browser.newPage({viewport:{width,height:900},reducedMotion:'reduce'});const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.route('**/*',async route=>{const u=new URL(route.request().url());if(u.pathname==='/')return route.fulfill({contentType:'text/html',body:html});const file=path.join(__dirname,'..',u.pathname);if(fs.existsSync(file)&&fs.statSync(file).isFile())return route.fulfill({contentType:file.endsWith('.css')?'text/css':'application/javascript',body:fs.readFileSync(file)});return route.abort();});
-  await page.goto('https://localhost/');
+  await page.route('**/*',async route=>{const u=new URL(route.request().url());if(u.pathname==='/')return route.fulfill({contentType:'text/html',body:html.replaceAll('staging.badaround.it','localhost')});const file=path.join(__dirname,'..',u.pathname);if(fs.existsSync(file)&&fs.statSync(file).isFile())return route.fulfill({contentType:file.endsWith('.css')?'text/css':'application/javascript',body:fs.readFileSync(file)});return route.abort();});
+  await page.goto('https://localhost/');assert(await page.evaluate(()=>!!document.querySelector('[data-native-report]').nativeReport),'local fixture boots with same-origin endpoints');
   const notice=page.locator('[data-native-emergency-notice]');
   const set=async data=>page.evaluate(data=>{for(const [key,value] of Object.entries(data)){const el=document.querySelector(`[name="${key}"]`);if(el.type==='checkbox')el.checked=value;else el.value=value;el.dispatchEvent(new Event('change',{bubbles:true}));}},data);
   assert(!(await notice.isVisible()));
