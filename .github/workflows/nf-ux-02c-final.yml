@@ -1,4 +1,4 @@
-name: NF-UX-02C final runtime custody
+name: NF-UX-02C final residual resilience
 on:
   push:
     branches: [qa/nf-ux-02c-final-resilience]
@@ -48,5 +48,67 @@ jobs:
         if: always()
         with:
           name: nf02c-final-runtime-custody
+          path: evidence/
+          retention-days: 90
+  resilience:
+    needs: custody
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      database:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: synthetic-nf-final
+          MARIADB_DATABASE: nf_final
+        ports: [3306:3306]
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      BA_TEST_DSN: mysql:host=127.0.0.1;port=3306;dbname=nf_final
+      BA_TEST_DB_USER: root
+      BA_TEST_DB_PASSWORD: synthetic-nf-final
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gd, posix, fileinfo, pdo_mysql, mysqli, pdo_sqlite, mbstring
+      - name: Quick immutable gate and final targeted compatibility
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          git diff --exit-code 0d1db0d7fab7f2facbe6b07ccff002b9e884cade HEAD -- wordpress
+          for test in nf-ux-02c-immutability nf-ux-02b-v1-differential nf-ux-02c1-v1-differential native-media-no-media-differential nf-ux-02b-media geo-public-02-contract geo-public-04-moderation native-social-preference; do
+            php "tests/$test.php" | tee "evidence/$test.log"
+          done
+      - name: Provision isolated WordPress matching staging (no staging writes)
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /tmp/nf-final-wp-cli.phar
+          php /tmp/nf-final-wp-cli.phar core download --version=7.1.3 --path=/tmp/nf-final-wordpress
+          php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress core verify-checksums --version=7.1.3
+          php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress config create --dbname=nf_final --dbuser=root --dbpass=synthetic-nf-final --dbhost=127.0.0.1:3306
+          php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress config set DISABLE_WP_CRON true --raw
+          php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress config set AUTOMATIC_UPDATER_DISABLED true --raw
+          php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress core install --url=http://nf-final.invalid --title='NF-UX-02C isolated QA' --admin_user=nfqa --admin_password=synthetic-ci-only --admin_email=nf-final@example.invalid --skip-email
+          mkdir -p /tmp/nf-final-wordpress/wp-content/mu-plugins
+          echo "<?php add_filter('pre_wp_mail','__return_false');" > /tmp/nf-final-wordpress/wp-content/mu-plugins/no-external-mail.php
+          ln -s "$GITHUB_WORKSPACE/wordpress/plugins/badaround-core" /tmp/nf-final-wordpress/wp-content/plugins/badaround-core
+          php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress plugin activate badaround-core
+      - name: Genuine independent WordPress/PHP/MySQL concurrency, reservation and crash retry
+        env:
+          NF_FINAL_WPCLI: /tmp/nf-final-wp-cli.phar
+          NF_FINAL_FILE: ${{ github.workspace }}/tests/nf-ux-02c-final-wordpress.php
+          NF_FINAL_DIR: ${{ github.workspace }}/evidence/concurrency
+        run: |
+          set -euo pipefail
+          php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress --quiet eval-file tests/nf-ux-02c-final-wordpress.php | tee evidence/concurrency.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nf02c-final-resilience
           path: evidence/
           retention-days: 90
