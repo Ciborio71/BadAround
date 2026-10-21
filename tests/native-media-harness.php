@@ -17,9 +17,13 @@ function get_post_status($id){return $GLOBALS['posts'][$id]['post_status']??fals
 function get_post($id){return isset($GLOBALS['posts'][$id]) ? (object)$GLOBALS['posts'][$id] : null;}
 function has_post_thumbnail($id){return false;} function set_post_thumbnail($id,$attachment){return true;}
 function get_post_meta($id,$key,$single=true){return $GLOBALS['posts'][$id]['meta_input'][$key]??'';}
-function wp_insert_post($a,$error=false){$id=1000+count($GLOBALS['posts']);$a['ID']=$id;$GLOBALS['posts'][$id]=$a;return $id;}
+function wp_insert_post($a,$error=false){$id=1000+count($GLOBALS['posts']);$a['ID']=$id;if(isset($GLOBALS['test_before_insert']))($GLOBALS['test_before_insert'])();$GLOBALS['posts'][$id]=$a;if(isset($GLOBALS['test_after_insert']))($GLOBALS['test_after_insert'])($id);return $id;}
 function wp_delete_post($id,$force=true){unset($GLOBALS['posts'][$id]);return true;}
-function wp_set_object_terms($id,$terms,$taxonomy,$append=false){return $terms;}
+function wp_set_object_terms($id,$terms,$taxonomy,$append=false){$GLOBALS['test_term_writes']=($GLOBALS['test_term_writes']??0)+1;$old=$GLOBALS['posts'][$id]['terms'][$taxonomy]??[];$GLOBALS['posts'][$id]['terms'][$taxonomy]=array_values(array_unique(array_merge($append?$old:[],array_map('intval',$terms))));if(isset($GLOBALS['test_after_terms']))($GLOBALS['test_after_terms'])($id,$taxonomy);return $terms;}
+function wp_get_object_terms($id,$taxonomy,$args=[]){return $GLOBALS['posts'][$id]['terms'][$taxonomy]??[];}
+function metadata_exists($type,$id,$key){return array_key_exists($key,$GLOBALS['posts'][$id]['meta_input']??[]);}
+function add_post_meta($id,$key,$value,$unique=false){if($unique&&metadata_exists('post',$id,$key))return false;$GLOBALS['test_meta_writes']=($GLOBALS['test_meta_writes']??0)+1;$GLOBALS['posts'][$id]['meta_input'][$key]=$value;return true;}
+function term_exists($id,$tax=''){return in_array((int)$id,[2,3,4,5],true)?['term_id'=>(int)$id]:null;}
 function get_posts($args){$ids=[];$report=$args['meta_value']??$args['meta_query'][0]['value']??0;foreach($GLOBALS['posts'] as $id=>$p){if((int)($p['meta_input']['_ba_primary_report_id']??0)===(int)$report)$ids[]=$id;}return $ids;}
 class WP_REST_Server {const CREATABLE='POST';}
 class WP_REST_Request implements ArrayAccess {
@@ -33,7 +37,7 @@ class WP_REST_Request implements ArrayAccess {
 }
 class WP_REST_Response {public $data,$status,$headers=[];function __construct($d,$s){$this->data=$d;$this->status=$s;}function header($k,$v){$this->headers[$k]=$v;}}
 class BadAround_Event_Post_Type {const POST_TYPE='ba_evento';const EVENT_TYPE_TAX='ba_tipo_evento';const TERRITORY_TAX='ba_territorio';}
-class TestTax {function assign($e,$c){return true;}}
+class TestTax {function resolve_category($key){return (object)['term_id'=>13];}function resolve_subtype($key,$category=null){return (object)['term_id'=>45];}function assign($e,$c){wp_set_object_terms($e,[13,45],'ba_tipo_evento');return ['category_term_id'=>13,'subtype_term_id'=>45];}}
 class TestTerritory {function resolve(){return 4;}}
 class TestProjection {function prepare_public_projection(){throw new Exception('No native projection');}}
 

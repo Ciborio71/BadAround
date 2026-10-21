@@ -16,12 +16,19 @@ class BadAround_Audit_Log{public static $r=[]; static function record(){self::$r
 $GLOBALS['f14_posts']=[];$GLOBALS['f14_terms']=[];$GLOBALS['f14_deleted']=[];$GLOBALS['f14_fail_insert']=false;
 function wp_insert_post($a,$err=false){ if($GLOBALS['f14_fail_insert']) return new WP_Error('insert_failed'); $id=900+count($GLOBALS['f14_posts']);$a['ID']=$id;$GLOBALS['f14_posts'][$id]=$a;return $id;}
 function wp_delete_post($id,$force=false){$GLOBALS['f14_deleted'][]=$id;unset($GLOBALS['f14_posts'][$id]);return true;}
-function wp_set_object_terms($id,$terms,$tax,$append=false){$GLOBALS['f14_terms'][$id][$tax]=$terms;return $terms;}
+function wp_set_object_terms($id,$terms,$tax,$append=false){$old=$GLOBALS['f14_terms'][$id][$tax]??[];$GLOBALS['f14_terms'][$id][$tax]=array_values(array_unique(array_merge($append?$old:[],$terms)));return $terms;}
+function wp_get_object_terms($id,$tax,$args=[]){return $GLOBALS['f14_terms'][$id][$tax]??[];}
+function get_post($id){return isset($GLOBALS['f14_posts'][$id])?(object)$GLOBALS['f14_posts'][$id]:null;}
+function get_post_meta($id,$key,$single=true){return $GLOBALS['f14_posts'][$id]['meta_input'][$key]??'';}
+function metadata_exists($type,$id,$key){return array_key_exists($key,$GLOBALS['f14_posts'][$id]['meta_input']??[]);}
+function add_post_meta($id,$key,$value,$unique=false){if($unique&&metadata_exists('post',$id,$key))return false;$GLOBALS['f14_posts'][$id]['meta_input'][$key]=$value;return true;}
+function term_exists($id,$tax=''){return $id===4?['term_id'=>4]:null;}
 function get_posts($args){$ids=[];foreach($GLOBALS['f14_posts'] as $id=>$p){if(isset($p['meta_input']['_ba_primary_report_id']) && (int)$p['meta_input']['_ba_primary_report_id']===(int)$args['meta_query'][0]['value'])$ids[]=$id;}return $ids;}
 
 class BadAround_Report_Schema{public static function category_subtypes(){return ['hazard'=>['hazard_road_obstruction']];}}
 class F14Repo{
  public $event=0,$linked=0,$status='validated',$locked=false;
+ function native_payload_matches_report($r,$p){return true;}
  function event_id_for_report($r){return $this->event;}
  function link_event($r,$e){$this->event=$e;$this->linked++;return true;}
  function acquire_native_lock($s,$t=0){if($this->locked)return false;$this->locked=true;return true;}
@@ -30,6 +37,8 @@ class F14Repo{
 }
 class F14Tax{
  public $fail=false; public $legacy=false;
+ function resolve_category($key){return new WP_Term(13,0,"pericoli");}
+ function resolve_subtype($key,$category=null){return new WP_Term(45,13,"ostacolo");}
  function assign($id,$r){if($this->fail)return new WP_Error('tax_fail');$GLOBALS['f14_terms'][$id]['ba_tipo_evento']=[13,45];return ['category_term_id'=>13,'subtype_term_id'=>45];}
 }
 class F14Territory{public $id=4;function resolve($a,$b){return $this->id;}}

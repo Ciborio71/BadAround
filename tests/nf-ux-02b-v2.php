@@ -127,7 +127,7 @@ foreach ( array( 'INSERT INTO test_ba_reports ', 'UPDATE test_ba_reports SET aut
 	$opposite = f13_fixture(); $opposite['submission_id'] = $p['submission_id']; v2check( v2code( $gold->submit( $opposite ) ) === 'duplicate_submission', 'version remains bound after failure' );
 	$recovered = $gold->submit( $p ); v2check( v2code( $recovered ) === 'success' && $gold->submit( $p )['event_id'] === $recovered['event_id'], 'same snapshot recovery has no duplicate event' );
 }
-class V2FaultTax extends TestTax { public $fail = true; public function assign( $event, $report ) { if ( $this->fail ) { $this->fail = false; return new WP_Error( 'injected_taxonomy_failure' ); } return true; } }
+class V2FaultTax extends TestTax { public $fail = true; public function assign( $event, $report ) { if ( $this->fail ) { $this->fail = false; return new WP_Error( 'injected_taxonomy_failure' ); } return parent::assign($event,$report); } }
 $tax = new V2FaultTax(); $faultgold = v2gold( null, $tax ); $p = v2fixture(); $before = count( $GLOBALS['posts'] );
 v2check( v2code( $faultgold->submit( $p ) ) !== 'success' && count( $GLOBALS['posts'] ) === $before, 'event creation partial failure compensated' );
 $out = $faultgold->submit( $p ); v2check( v2code( $out ) === 'success' && count( $GLOBALS['posts'] ) === $before + 1, 'event recovery exactly once' );

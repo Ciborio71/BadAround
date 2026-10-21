@@ -35,12 +35,20 @@ class BadAround_Report_Persistence_Service {
 
 		$existing_event = $this->repository->event_id_for_report( $report_id );
 		if ( $existing_event ) {
+			if ( 'native' === ( $source['type'] ?? '' ) ) {
+				$complete = $this->complete_native_event( $report_id, $existing_event, $canonical_report, $source, $options );
+				if ( is_wp_error( $complete ) ) { return $complete; }
+			}
 			return array( 'report_id' => $report_id, 'event_id' => absint( $existing_event ), 'duplicate' => true, 'recovered' => false );
 		}
 
-		$recovered_event = $this->find_recoverable_event( $report_id );
+		$recovered_event = $this->find_recoverable_event( $report_id, 'native' === ( $source['type'] ?? '' ) );
+		if ( is_wp_error( $recovered_event ) ) { return $recovered_event; }
 		if ( $recovered_event ) {
-			if ( ! $this->repository->link_event( $report_id, $recovered_event ) ) {
+			if ( 'native' === ( $source['type'] ?? '' ) ) {
+				$complete = $this->complete_native_event( $report_id, $recovered_event, $canonical_report, $source, $options );
+				if ( is_wp_error( $complete ) ) { return $complete; }
+			} elseif ( ! $this->repository->link_event( $report_id, $recovered_event ) ) {
 				return new WP_Error( 'ba_persistence_recovery_link_failed', __( 'Impossibile ripristinare il collegamento report-evento.', 'badaround-core' ) );
 			}
 			BadAround_Audit_Log::record( 'report', $report_id, 'persistence_completed', 'native', 'recovered_existing_event' );
@@ -114,6 +122,11 @@ class BadAround_Report_Persistence_Service {
 			return $this->rollback_event( $report_id, $event_id, 'report_event_link_failed', 'report_update_failed', $request_id, new WP_Error( 'ba_persistence_report_link_failed', __( 'Impossibile collegare report ed evento.', 'badaround-core' ) ), true );
 		}
 
+		if ( 'native' === ( $source['type'] ?? '' ) ) {
+			$complete = $this->complete_native_event( $report_id, $event_id, $canonical_report, $source, $options, false );
+			if ( is_wp_error( $complete ) ) { return $complete; }
+		}
+
 		if ( ! empty( $options['prepare_public_projection'] ) ) {
 			$projection = $this->publication_service->prepare_public_projection( $event_id );
 			if ( is_wp_error( $projection ) ) {
@@ -182,7 +195,112 @@ class BadAround_Report_Persistence_Service {
 		return 0;
 	}
 
-	private function find_recoverable_event( $report_id ) {
+	/** Reconcile initialization only; never persist canonical data or publish. */
+	private function complete_native_event( $report_id, $event_id, $report, $source, $options, $repair = true ) {
+		if ( true !== $this->repository->native_payload_matches_report( $report_id, $report ) ) {
+			return $this->completion_error( 'canonical' );
+		}
+		$event_id = absint( $event_id );
+		$post = get_post( $event_id );
+		if ( ! $post || BadAround_Event_Post_Type::POST_TYPE !== $post->post_type ) {
+			return $this->completion_error( 'event' );
+		}
+		$link = absint( $this->repository->event_id_for_report( $report_id ) );
+		if ( $link && $link !== $event_id ) { return $this->completion_error( 'linkage' ); }
+		$owner = get_post_meta( $event_id, '_ba_primary_report_id', true );
+		if ( metadata_exists( 'post', $event_id, '_ba_primary_report_id' ) && ( ! is_scalar( $owner ) || (string) $report_id !== (string) $owner ) ) {
+			return $this->completion_error( 'linkage' );
+		}
+		// Completed events may have entered moderation/publication since intake.
+		// Preserve that historical retry path; never initialize or reset them.
+		$moderation = get_post_meta( $event_id, '_ba_moderation_status', true );
+		$initial = 'pending' === $post->post_status && ( '' === $moderation || 'new' === $moderation );
+		if ( ! $initial ) {
+			return $link === $event_id && (string) $owner === (string) $report_id
+				&& in_array( $post->post_status, array( 'pending', 'draft', 'private', 'publish' ), true )
+				&& in_array( $moderation, array( 'in_review', 'needs_information', 'approved', 'rejected', 'escalated', 'published' ), true )
+				? true : $this->completion_error( 'state' );
+		}
+
+		$category = $this->taxonomy_map->resolve_category( $report['event']['category'] ?? '' );
+		$subtype = $this->taxonomy_map->resolve_subtype( $report['event']['subtype'] ?? '', $category );
+		if ( ! $category || ! $subtype ) { return $this->completion_error( 'mapping' ); }
+		$location = $report['location'] ?? array();
+		$territory = array_key_exists( 'territory_term_id', $options )
+			? absint( $options['territory_term_id'] ) : $this->resolve_territory( $location );
+		if ( ! $territory || ! term_exists( $territory, BadAround_Event_Post_Type::TERRITORY_TAX ) ) {
+			return $this->completion_error( 'mapping' );
+		}
+		$expected = array(
+			BadAround_Event_Post_Type::EVENT_TYPE_TAX => array( (int) $category->term_id, (int) $subtype->term_id ),
+			BadAround_Event_Post_Type::TERRITORY_TAX => array( $territory ),
+		);
+		$missing_terms = array();
+		// Preflight every domain before repairing any missing value.
+		foreach ( $expected as $taxonomy => $ids ) {
+			$actual = $this->event_term_ids( $event_id, $taxonomy );
+			if ( is_wp_error( $actual ) ) { return $actual; }
+			if ( array_diff( $actual, $ids ) ) { return $this->completion_error( 'taxonomy' ); }
+			$missing_terms[ $taxonomy ] = array_values( array_diff( $ids, $actual ) );
+		}
+		$meta = array_merge( $this->source_post_meta( $source, $report_id ), $this->event_meta( $report ) );
+		$missing_meta = array();
+		foreach ( $meta as $key => $value ) {
+			if ( ! metadata_exists( 'post', $event_id, $key ) ) { $missing_meta[ $key ] = $value; continue; }
+			$actual = get_post_meta( $event_id, $key, true );
+			if ( ! is_scalar( $actual ) || ( '_ba_imported_at' === $key ? '' === (string) $actual : (string) $actual !== (string) $value ) ) {
+				return $this->completion_error( 'metadata' );
+			}
+		}
+		if ( ! $repair && ( array_filter( $missing_terms ) || $missing_meta ) ) {
+			return $this->completion_error( 'incomplete' );
+		}
+		foreach ( $missing_terms as $taxonomy => $ids ) {
+			if ( ! $ids ) { continue; }
+			// The original assigner is safe only for an inspected empty type set.
+			// A partial correct set is completed by appending missing IDs only.
+			if ( BadAround_Event_Post_Type::EVENT_TYPE_TAX === $taxonomy && count( $ids ) === count( $expected[ $taxonomy ] ) ) {
+				$result = $this->taxonomy_map->assign( $event_id, $report );
+			} else {
+				$result = wp_set_object_terms( $event_id, $ids, $taxonomy, true );
+			}
+			if ( is_wp_error( $result ) ) { return $this->completion_error( 'write' ); }
+		}
+		foreach ( $missing_meta as $key => $value ) {
+			// Unique add: never replace a competing writer's existing metadata.
+			add_post_meta( $event_id, $key, $value, true );
+		}
+		foreach ( $expected as $taxonomy => $ids ) {
+			$actual = $this->event_term_ids( $event_id, $taxonomy );
+			if ( is_wp_error( $actual ) || array_diff( $actual, $ids ) || array_diff( $ids, $actual ) ) {
+				return $this->completion_error( 'incomplete' );
+			}
+		}
+		foreach ( $meta as $key => $value ) {
+			$actual = get_post_meta( $event_id, $key, true );
+			if ( ! metadata_exists( 'post', $event_id, $key ) || ! is_scalar( $actual ) || ( '_ba_imported_at' === $key ? '' === (string) $actual : (string) $actual !== (string) $value ) ) {
+				return $this->completion_error( 'metadata' );
+			}
+		}
+		$post = get_post( $event_id );
+		if ( ! $post || 'pending' !== $post->post_status ) { return $this->completion_error( 'state' ); }
+		$link = absint( $this->repository->event_id_for_report( $report_id ) );
+		if ( $link && $link !== $event_id ) { return $this->completion_error( 'linkage' ); }
+		if ( ! $link && ! $this->repository->link_event( $report_id, $event_id ) ) { return $this->completion_error( 'linkage' ); }
+		return absint( $this->repository->event_id_for_report( $report_id ) ) === $event_id
+			? true : $this->completion_error( 'linkage' );
+	}
+
+	private function event_term_ids( $event_id, $taxonomy ) {
+		$ids = wp_get_object_terms( $event_id, $taxonomy, array( 'fields' => 'ids' ) );
+		return is_wp_error( $ids ) ? $this->completion_error( 'taxonomy_read' ) : array_values( array_unique( array_map( 'intval', $ids ) ) );
+	}
+
+	private function completion_error( $reason ) {
+		return new WP_Error( 'ba_persistence_event_completion_' . $reason, __( 'Inizializzazione evento non completata.', 'badaround-core' ) );
+	}
+
+	private function find_recoverable_event( $report_id, $strict = false ) {
 		$posts = get_posts(
 			array(
 				'post_type'      => BadAround_Event_Post_Type::POST_TYPE,
@@ -194,6 +312,7 @@ class BadAround_Report_Persistence_Service {
 				),
 			)
 		);
+		if ( $strict && count( $posts ) > 1 ) { return $this->completion_error( 'ambiguous_event' ); }
 		return 1 === count( $posts ) ? absint( $posts[0] ) : 0;
 	}
 
