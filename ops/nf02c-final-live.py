@@ -30,7 +30,7 @@ finally:
  # Only temporary harness/config/results; never remove QA reports/events or runtime files.
  cleanup=True
  try:
-  for base,dirs,files in f.mlsd(ROOT+workpath):
+  for base,dirs in list(f.mlsd(ROOT+workpath)):
    if base in ['.','..']:continue
    if dirs.get('type')=='dir':f.rmd(ROOT+workpath+'/'+base)
    else:f.delete(ROOT+workpath+'/'+base)
