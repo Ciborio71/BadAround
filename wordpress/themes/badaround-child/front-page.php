@@ -41,7 +41,7 @@ $home_categories = array(
 			</form>
 
 			<button class="ba-button ba-button--outline ba-home-position" type="button" data-ba-geolocate aria-describedby="ba-home-geo-status">Usa la mia posizione</button>
-			<p class="ba-home-privacy">La posizione pubblica degli eventi è sempre approssimata. La tua posizione non viene salvata.</p>
+			<p class="ba-home-privacy">La posizione pubblica degli eventi può essere approssimata in base alla richiesta dell’utente e alla moderazione. La tua posizione non viene salvata.</p>
 			<p id="ba-home-geo-status" class="ba-home-geo-status" data-ba-geolocation-status role="status" aria-live="polite"></p>
 		</div>
 

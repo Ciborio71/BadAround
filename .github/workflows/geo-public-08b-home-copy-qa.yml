@@ -1,0 +1,27 @@
+name: GEO-PUBLIC-08B Home copy QA
+on:
+  push:
+    branches: [fix/geo-public-08b-home-copy]
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - name: Home-only scope, copy and existing exact/area rendering regressions
+        run: |
+          set -euo pipefail
+          git diff --check 2a5fc54811b08acc644e7cde2c327a2afe3d6f99 HEAD
+          php -l wordpress/themes/badaround-child/front-page.php
+          npm ci --prefix tests
+          node --test tests/geo-public-08b-home-copy.cjs tests/geo-public-06-rendering.cjs
