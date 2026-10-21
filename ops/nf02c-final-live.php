@@ -1,5 +1,6 @@
 <?php
 if(!defined('ABSPATH'))exit;
+add_action('plugins_loaded', function(){
 function nff_fixture() {
 	return array(
 		'schema_version'=>'badaround-report/v1',
@@ -135,3 +136,5 @@ add_action('rest_api_init',function(){
  }catch(Throwable $e){$error=['pass'=>false,'action'=>$action,'case'=>$name??null,'error'=>$e->getMessage(),'checks'=>$nff_checks];nff_save(__DIR__.'/__RESULT_FILE__',$error);return new WP_REST_Response($error,500);}
  }]);
 });
+
+}, 99);
