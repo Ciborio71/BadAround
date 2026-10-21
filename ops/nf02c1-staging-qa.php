@@ -3,9 +3,10 @@ if(!defined('ABSPATH'))exit;
 if(function_exists('opcache_invalidate')) opcache_invalidate(WP_CONTENT_DIR.'/plugins/badaround-core/includes/class-badaround-report-repository.php',true);
 
 add_action('rest_api_init',function(){
+ register_rest_route('nf02c1-qa/v1','/ready',['methods'=>'GET','permission_callback'=>function(){return current_user_can('manage_options');},'callback'=>function(){return new WP_REST_Response(['ready'=>true,'candidate'=>'38c82e3472fc4adb0ab80f8fd1281373aa1ab1e0'],200);}]);
  register_rest_route('nf02c1-qa/v1','/run',[
   'methods'=>'POST',
-  'permission_callback'=>function($request){return ($_SERVER['HTTP_HOST']??'')==='staging.badaround.it' && hash_equals('__TOKEN__',(string)$request->get_header('x-nf-qa'));},
+  'permission_callback'=>function($request){return ($_SERVER['HTTP_HOST']??'')==='staging.badaround.it' && current_user_can('manage_options');},
   'callback'=>function(){
    if(!add_option('nf02c1_qa_once_'.hash('sha256','__TOKEN__'),time(),'',false))return new WP_REST_Response(['pass'=>false,'error'=>'Harness already executed'],409);
    global $wpdb,$results,$fixtures;
@@ -129,6 +130,7 @@ try {
 
    $raw=ob_get_clean();$result=json_decode($raw,true);
    if(!is_array($result))$result=['pass'=>false,'error'=>'non-JSON harness output'];
+   $result_path=__DIR__.'/__RESULT_FILE__';if(false===file_put_contents($result_path,wp_json_encode($result),LOCK_EX))return new WP_REST_Response(['pass'=>false,'error'=>'Cannot preserve QA result'],500);chmod($result_path,0600);
    delete_option('nf02c1_qa_once_'.hash('sha256','__TOKEN__'));
    return new WP_REST_Response($result,!empty($result['pass'])?200:500);
   }
