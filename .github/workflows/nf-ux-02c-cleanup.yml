@@ -1,7 +1,7 @@
 name: NF-UX-02C final residual resilience
 on:
   push:
-    branches: [qa/nf-ux-02c-cleanup-disabled]
+    branches: [qa/nf-ux-02c-final-resilience]
 permissions:
   contents: read
 jobs:
@@ -41,7 +41,7 @@ jobs:
           root='/staging.badaround.it/wp-content/mu-plugins/'
           found=[]
           for name,meta in list(f.mlsd(root)):
-           if name.startswith('nf-final-') and name.endswith('.php') and meta.get('type')=='file':
+           if name.startswith('nf-final-') and name != 'nf-final-edc19d4bc576cbf7cade087149831a2f.php' and name.endswith('.php') and meta.get('type')=='file':
             f.delete(root+name);found.append(name)
           print('TEMPORARY_FINAL_HARNESS_REMOVED',len(found));f.quit()
           PYTHON
