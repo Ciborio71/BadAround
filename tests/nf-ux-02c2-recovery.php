@@ -3,13 +3,13 @@ require __DIR__.'/native-media-harness.php';
 require_once $inc.'class-badaround-report-v2-validator.php';
 $checks=0;
 function rc($ok,$message){global $checks;++$checks;if(!$ok)throw new RuntimeException($message);}
-function rp($version){$p=f13_fixture();$p['schema_version']=$version;$p['submission_id']=wp_generate_uuid4();return $p;}
+function rp($version){$p=f13_fixture();$p['schema_version']=$version;$p['submission_id']=BadAround_Native_Media_Config::new_uuid();return $p;}
 function rgold($repo,$tax=null,$service=null){return new BadAround_Native_Report_Golden_Path_Service(new BadAround_Native_Report_Intake_Service(null,null,$repo),$service?:new BadAround_Report_Persistence_Service($repo,$tax?:new TestTax(),new TestTerritory(),new BadAround_Media_Repository(),new TestProjection()),$repo);}
 function rrow($id){global $db;return $db->get_row($db->prepare('SELECT * FROM test_ba_reports WHERE id=%d',$id),ARRAY_A);}
 function rsource($r){return $r['error']['details']['source_code']??'';}
 function rcount($repo,$p,$rid,$event){global $db;$identity=$repo->native_source_identity($p['submission_id']);rc((int)$db->get_var($db->prepare("SELECT COUNT(*) FROM test_ba_reports WHERE source_type='native' AND source_form_id=%d AND source_entry_id=%d",$identity['form_id'],$identity['entry_id']))===1,'one UUID/report');rc(get_posts(['meta_value'=>$rid])===[$event],'one stable event');}
 function rcomplete($rid,$event){$types=wp_get_object_terms($event,'ba_tipo_evento');sort($types);rc($types===[13,45],'category and subtype complete');rc(wp_get_object_terms($event,'ba_territorio')===[5],'deepest canonical territory only');rc(get_post_status($event)==='pending'&&get_post_meta($event,'_ba_moderation_status',true)==='new','pending/new only');rc((int)get_post_meta($event,'_ba_primary_report_id',true)===$rid,'event owner stable');}
-function rinterrupt($callback){try{$callback();throw new LogicException('Fault not reached');}catch(RuntimeException $e){rc($e->getMessage()==='NF02C2_INTERRUPT','controlled interruption reached');}finally{unset($GLOBALS['test_before_insert'],$GLOBALS['test_after_insert'],$GLOBALS['test_after_terms']);}}
+function rinterrupt($callback){try{$result=$callback();throw new LogicException('Fault not reached: '.($result['error']['code']??$result['status']??'unknown'));}catch(RuntimeException $e){rc($e->getMessage()==='NF02C2_INTERRUPT','controlled interruption reached');}finally{unset($GLOBALS['test_before_insert'],$GLOBALS['test_after_insert'],$GLOBALS['test_after_terms']);}}
 class RLinkRepo extends BadAround_Report_Repository {public $stage='';public function link_event($rid,$eid){if($this->stage==='before'){$this->stage='';throw new RuntimeException('NF02C2_INTERRUPT');}$r=parent::link_event($rid,$eid);if($this->stage==='after'){$this->stage='';throw new RuntimeException('NF02C2_INTERRUPT');}return $r;}}
 foreach(['badaround-report/v1','badaround-report/v2'] as $version){
  foreach(['before_insert','after_insert','after_subtype','after_territory','before_link','after_link','response_loss'] as $stage){
