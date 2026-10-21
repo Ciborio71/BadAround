@@ -15,6 +15,29 @@
     const publicLocationChoice = form.querySelector('[data-native-public-location-choice]');
     const steps = Object.keys(config.steps);
     const wrappers = Array.from(form.querySelectorAll('[data-native-field]'));
+    // One contextual, non-blocking notice. No model value or payload field is added.
+    const emergencyNotice=document.createElement('div');
+    emergencyNotice.className='ba-native-emergency-notice';
+    emergencyNotice.dataset.nativeEmergencyNotice='';
+    emergencyNotice.hidden=true;
+    emergencyNotice.setAttribute('role','status');
+    emergencyNotice.setAttribute('aria-live','polite');
+    emergencyNotice.setAttribute('aria-atomic','true');
+    const emergencyCopy='Se c’è un pericolo immediato o un’emergenza, contatta subito il 112. BadAround non sostituisce i servizi di emergenza.';
+    function syncEmergencyNotice(current){
+      const rules=config.emergencyNotice;
+      const triggered=!!rules && (rules.subtypes.includes(model.effective('event.subtype')) ||
+        (model.active('location.immediate_danger') && rules.dangerValues.includes(model.effective('location.immediate_danger'))));
+      const anchor=current===config.fields['event.subtype'].step
+        ? wrappers.find(w=>w.dataset.nativeField==='event.subtype')
+        : current===config.fields['location.immediate_danger'].step
+          ? wrappers.find(w=>w.dataset.nativeField==='location.immediate_danger')
+          : form.querySelector(`[data-native-step="${current}"] h2`);
+      if(anchor && anchor.nextElementSibling!==emergencyNotice)anchor.after(emergencyNotice);
+      emergencyNotice.hidden=!triggered;
+      const text=triggered?emergencyCopy:'';
+      if(emergencyNotice.textContent!==text)emergencyNotice.textContent=text;
+    }
     const next = form.querySelector('[data-native-next]'), back = form.querySelector('[data-native-back]'), submit = form.querySelector('[data-native-submit]');
     const success = container.querySelector('[data-native-success]');
     // Outside the busy form so assistive technology can announce progress.
@@ -434,6 +457,7 @@
       smartAddress?.syncVisibility?.();
       if (mediaView) mediaView.render();
       syncFlow();
+      syncEmergencyNotice(current);
       if (current === 'review') review();
       if (focus) focusStep(current);
     }

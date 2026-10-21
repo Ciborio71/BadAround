@@ -1,6 +1,7 @@
 /* Native reporting design system. Scoped to the native wizard; independent of WPForms markup. */
 .ba-native{max-width:880px;margin-inline:auto;color:var(--ba-text);overflow-wrap:anywhere}
 .ba-native [hidden]{display:none!important}
+.ba-native .ba-native-emergency-notice{box-sizing:border-box;max-width:100%;min-width:0;margin:12px 0 24px;padding:16px;border:1px solid #946000;border-inline-start-width:4px;border-radius:10px;background:#fff6df;color:#493400;font-size:1rem;line-height:1.5;overflow-wrap:anywhere}
 .ba-native h2{margin:24px 0 20px;font-size:clamp(1.3rem,4vw,1.9rem)}
 .ba-native .ba-native-notice{padding:16px;border-radius:var(--ba-radius-sm);background:var(--ba-teal-100)}
 .ba-native .ba-native-progress{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;list-style:none;margin:24px 0;padding:0;counter-reset:step}

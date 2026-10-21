@@ -1,0 +1,45 @@
+name: NF-UX-03 contextual emergency notice
+on:
+  push:
+    branches: [feature/nf-ux-03-contextual-emergency-notice]
+permissions:
+  contents: read
+jobs:
+  ux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - name: Scope and syntax
+        run: |
+          set -euo pipefail
+          mkdir -p evidence/screenshots
+          git diff --check 0d1db0d7fab7f2facbe6b07ccff002b9e884cade HEAD
+          git diff --exit-code 0d1db0d7fab7f2facbe6b07ccff002b9e884cade HEAD -- wordpress/plugins
+          php -l wordpress/themes/badaround-child/inc/native-report.php
+          node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
+      - name: Emergency matrix and targeted Native v1 regressions
+        run: |
+          set -euo pipefail
+          npm ci --prefix tests
+          node --test tests/nf-ux-03-emergency.cjs tests/native-report-f16.cjs tests/native-report-f16-dom.cjs tests/nf-final-01-ux.cjs tests/native-social-preference.cjs tests/geo-public-03-choice.cjs tests/native-media-f17d-dom.cjs 2>&1 | tee evidence/dom.log
+      - name: Browser desktop mobile keyboard and contrast
+        run: |
+          set -euo pipefail
+          npm install --prefix /tmp/nf03-browser --no-save playwright@1.62.1
+          node /tmp/nf03-browser/node_modules/playwright/cli.js install --with-deps chromium
+          BA_PLAYWRIGHT_MODULE=/tmp/nf03-browser/node_modules/playwright BA_SCREENSHOT_DIR=evidence/screenshots node tests/nf-ux-03-emergency-browser.cjs 2>&1 | tee evidence/browser.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nf03-emergency-evidence
+          path: evidence/
+          retention-days: 90

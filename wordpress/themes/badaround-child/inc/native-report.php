@@ -175,7 +175,18 @@ function badaround_native_report_config() {
 	}
 	$wpforms_settings = function_exists( 'get_option' ) ? get_option( 'wpforms_settings', array() ) : array();
 	$smart_key = is_array( $wpforms_settings ) ? (string) ( $wpforms_settings['geolocation-google-places-api-key'] ?? '' ) : '';
+	// Read-only presentation projection; never apply v2 field rules to the v1 form.
+	$emergency_subtypes = array();
+	$danger_values = array();
+	foreach ( BadAround_Report_Conditional_Contract::definition()['matrix'] as $row ) {
+		if ( $row['emergency']['automatic_subtype_notice'] ) {
+			$emergency_subtypes[] = $row['subtype'];
+		} elseif ( 'location.immediate_danger' === ( $row['emergency']['condition']['field'] ?? '' ) ) {
+			$danger_values = array_merge( $danger_values, $row['emergency']['condition']['values'] );
+		}
+	}
 	return array(
+		'emergencyNotice' => array( 'subtypes' => $emergency_subtypes, 'dangerValues' => array_values( array_unique( $danger_values ) ) ),
 		'smartAddress' => $smart_key ? array( 'key' => $smart_key, 'territories' => $territories, 'country' => 'IT' ) : null,
 		'schemaVersion' => BadAround_Report_Schema::VERSION,
 		// Contract scaffolding only: no new visible control before GEO-PUBLIC-03.
