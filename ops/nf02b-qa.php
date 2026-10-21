@@ -55,7 +55,7 @@ function nf02b_fixture() {
 	);
 }
 function nf02b_code($r) { return is_wp_error($r)?$r->get_error_code():($r['error']['code']??'success'); }
-function nf02b_snapshot() { global $wpdb; return ['fixture'=>hash('sha256',(string)$wpdb->get_var("SELECT content_original FROM {$wpdb->prefix}ba_reports WHERE id=35")), 'event312'=>get_post_status(312),'terms'=>hash('sha256',wp_json_encode($wpdb->get_results("SELECT term_id,name,slug FROM {$wpdb->terms} ORDER BY term_id",ARRAY_A))), 'schema'=>hash('sha256',wp_json_encode($wpdb->get_results("SHOW CREATE TABLE {$wpdb->prefix}ba_reports",ARRAY_N)))]; }
+function nf02b_snapshot() { global $wpdb; return ['fixture'=>hash('sha256',(string)$wpdb->get_var("SELECT content_original FROM {$wpdb->prefix}ba_reports WHERE id=35")), 'event312'=>get_post_status(312),'terms'=>hash('sha256',wp_json_encode($wpdb->get_results("SELECT term_id,name,slug FROM {$wpdb->terms} ORDER BY term_id",ARRAY_A))), 'schema'=>hash('sha256',preg_replace('/AUTO_INCREMENT=[0-9]+/','AUTO_INCREMENT=COUNTER',wp_json_encode($wpdb->get_results("SHOW CREATE TABLE {$wpdb->prefix}ba_reports",ARRAY_N))))]; }
 try {
  $before=nf02b_snapshot(); nf02b_ck($before['fixture']==='ba4672ec075306b23eb2b6f9c1f68f15676d8c613d8884d87e1aa01db9a72197' && $before['event312']==='pending','historical_fixture_before');
  nf02b_ck(BadAround_Report_Schema::VERSION==='badaround-report/v1','native_version_stays_v1');
@@ -77,7 +77,7 @@ try {
   nf02b_ck($stored['canonical']['reporter']['social_visibility']==='declined',$version.'_social');
   nf02b_ck(empty($stored['canonical']['media']['items']) && true===BadAround_Native_Media_Fence::check($r['event_id']),$version.'_no_media_fence');
   $view=(new BadAround_Moderation_Admin())->canonical_report_view($stored); nf02b_ck(is_array($view),$version.'_admin_read');
-  if($version==='badaround-report/v2') { $stale=$p; $stale['vehicle']=['plate'=>'STALE']; nf02b_ck(nf02b_code($gold->submit($stale))==='success','v2_stale_retry'); $bad=$p; $bad['unknown']=true; nf02b_ck(nf02b_code($gold->submit($bad))==='unknown_field','v2_unknown_rejected'); }
+  if($version==='badaround-report/v2') { $stale=$p; $stale['vehicle']=['type'=>'car']; nf02b_ck(nf02b_code($gold->submit($stale))==='success','v2_stale_retry'); $bad=$p; $bad['unknown']=true; nf02b_ck(nf02b_code($gold->submit($bad))==='unknown_field','v2_unknown_rejected'); }
  }
  // Exercise all frozen subtype oracles against the deployed validator without persisting them.
  $contract=json_decode(file_get_contents(WP_PLUGIN_DIR.'/badaround-core/contracts/nf-conditional-v1.0.json'),true);
