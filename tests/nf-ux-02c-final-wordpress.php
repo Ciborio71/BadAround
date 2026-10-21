@@ -60,6 +60,7 @@ if(getenv('NF_FINAL_JOB')){
  }catch(Throwable $e){$out['exception']=$e->getMessage();nff_save($path.'.result',$out);throw $e;}
  return;
 }
+global $checks,$cases,$dir;
 $checks=0;$cases=[];
 function nff_ck($ok,$why){global $checks;++$checks;if(!$ok)throw new RuntimeException($why);}
 $dir=getenv('NF_FINAL_DIR');if(!$dir)throw new RuntimeException('Missing evidence directory');wp_mkdir_p($dir);
