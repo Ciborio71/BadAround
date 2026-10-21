@@ -1,6 +1,7 @@
 <?php
 /** Optional extension tested against real validation, intake and private repository. No live DB. */
 require __DIR__ . '/native-report-f13.php';
+if ( ! defined( 'ARRAY_A' ) ) { define( 'ARRAY_A', 'ARRAY_A' ); }
 require dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-report-repository.php';
 require dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php';
 
@@ -31,10 +32,11 @@ foreach ( array( null, 'requested', 'declined' ) as $choice ) {
 	}
 	$GLOBALS['wpdb'] = new class {
 		public $prefix = 'wp_'; public $row;
-		public function update( $table, $data, $where ) { $this->row = $data; return 1; }
+		public function __construct() { $parts = (new BadAround_Report_Repository())->native_source_identity(f13_fixture()['submission_id']); $this->row = array('source_type'=>'native','source_form_id'=>$parts['form_id'],'source_entry_id'=>$parts['entry_id'],'content_original'=>null,'payload_hash'=>null); }
+		public function update( $table, $data, $where ) { $this->row = array_merge($this->row,$data); return 1; }
 		public function prepare( $sql, ...$args ) { return $sql; }
-		public function get_var( $sql ) { return $this->row['content_original']; }
-		public function get_row( $sql ) { return (object) array_merge( $this->row, array( 'id' => 77 ) ); }
+		public function get_var( $sql ) { return strpos($sql,'options') !== false ? null : $this->row['content_original']; }
+		public function get_row( $sql, $mode = null ) { $row = array_merge($this->row,array('id'=>77)); return $mode === ARRAY_A ? $row : (object)$row; }
 	};
 	$repository = new BadAround_Report_Repository();
 	f13_assert( true === $repository->persist_canonical_private_data( 77, $normalized ), 'real private repository persists optional evidence' );

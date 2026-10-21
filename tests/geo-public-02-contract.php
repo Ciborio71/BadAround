@@ -1,6 +1,7 @@
 <?php
 // Real normalization/intake/repository, synthetic in-memory fixtures only.
 require __DIR__ . '/native-report-f13.php';
+if ( ! defined( 'ARRAY_A' ) ) { define( 'ARRAY_A', 'ARRAY_A' ); }
 require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-report-repository.php';
 require_once dirname( __DIR__ ) . '/wordpress/plugins/badaround-core/includes/class-badaround-public-geo-contract.php';
 function apply_filters( $name, $value ) { return $GLOBALS['geo_exact_review'] ?? $value; }
@@ -32,9 +33,11 @@ foreach ( array( 'exact_point', 'approximate_area' ) as $mode ) {
  geo_assert( 'success' !== $service->intake( $changed )['status'], 'same UUID cannot change request' );
  $GLOBALS['wpdb'] = new class {
   public $prefix = 'wp_', $row;
-  public function update( $table, $row ) { $this->row = $row; return 1; }
+  public function __construct() { $parts = (new BadAround_Report_Repository())->native_source_identity(f13_fixture()['submission_id']); $this->row = array('source_type'=>'native','source_form_id'=>$parts['form_id'],'source_entry_id'=>$parts['entry_id'],'content_original'=>null,'payload_hash'=>null); }
+  public function get_row( $sql, $mode = null ) { return $mode === ARRAY_A ? $this->row : (object)$this->row; }
+  public function update( $table, $row ) { $this->row = array_merge($this->row,$row); return 1; }
   public function prepare( $sql ) { return $sql; }
-  public function get_var( $sql ) { return $this->row['content_original']; }
+  public function get_var( $sql ) { return strpos($sql,'options') !== false ? null : $this->row['content_original']; }
  };
  $repository = new BadAround_Report_Repository();
  geo_assert( true === $repository->persist_canonical_private_data( 77, $canonical ), 'private repository accepts ' . $mode );

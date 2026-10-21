@@ -17,7 +17,7 @@ class BadAround_Report_Repository {
 		$key = 'ba_report_version_' . hash( 'sha256', $uuid ); $table = $wpdb->prefix . 'options';
 		$stored = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$table} WHERE option_name = %s LIMIT 1", $key ) );
 		if ( ! empty( $wpdb->last_error ) ) { return new WP_Error( 'ba_report_intake_failed', 'Version binding unavailable.' ); }
-		$hash = hash( 'sha256', wp_json_encode( $canonical, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+		$hash = $this->canonical_snapshot_hash( $canonical );
 		if ( null !== $stored && false !== $stored ) {
 			$binding = json_decode( $stored, true );
 			if ( ! is_array( $binding ) || ! isset( $binding['schema_version'], $binding['submission_id'] ) ) { return new WP_Error( 'ba_report_intake_failed', 'Invalid version binding.' ); }
@@ -127,6 +127,34 @@ class BadAround_Report_Repository {
 		global $wpdb;
 
 		$canonical = is_array( $canonical ) ? $canonical : array();
+		$table = $wpdb->prefix . 'ba_reports';
+		$slot = $wpdb->get_row( $wpdb->prepare( "SELECT source_type, source_form_id, source_entry_id, content_original, payload_hash FROM {$table} WHERE id = %d LIMIT 1", absint( $report_id ) ), ARRAY_A );
+		if ( ! empty( $wpdb->last_error ) || ! is_array( $slot ) ) { return false; }
+		$native = 'native' === $slot['source_type'];
+		$where = array( 'id' => absint( $report_id ) );
+		if ( $native ) {
+			// A bare historical native reservation belongs to v1. V2 reserves its
+			// canonical snapshot atomically, before private columns are materialized.
+			$version = $canonical['schema_version'] ?? null;
+			if ( ! in_array( $version, array( 'badaround-report/v1', 'badaround-report/v2' ), true ) ) { return false; }
+			if ( 'badaround-report/v2' === $version ) {
+				require_once __DIR__ . '/class-badaround-report-version-registry.php';
+				$canonical = BadAround_Report_Version_Registry::prepare( $canonical );
+				if ( is_wp_error( $canonical ) ) { return false; }
+			}
+			$parts = $this->native_source_parts( $canonical['submission_id'] ?? '' );
+			if ( is_wp_error( $parts ) || (string) $slot['source_form_id'] !== (string) $parts['form_id'] || (string) $slot['source_entry_id'] !== (string) $parts['entry_id'] ) { return false; }
+			if ( is_wp_error( $this->guard_native_version( $canonical, false ) ) ) { return false; }
+			if ( null !== $content_payload && ( ! is_array( $content_payload ) || ( $content_payload['schema_version'] ?? null ) !== $version || ( $content_payload['submission_id'] ?? null ) !== $canonical['submission_id'] || ! isset( $content_payload['canonical'] ) || $this->canonical_snapshot_hash( $content_payload['canonical'] ) !== $this->canonical_snapshot_hash( $canonical ) ) ) { return false; }
+			if ( null !== $slot['content_original'] && '' !== $slot['content_original'] ) {
+				$stored = json_decode( $slot['content_original'], true );
+				if ( ! is_array( $stored ) || ( $stored['schema_version'] ?? null ) !== $version || ( $stored['submission_id'] ?? null ) !== $canonical['submission_id'] || ( $stored['canonical']['schema_version'] ?? null ) !== $version || ! $this->native_payload_matches_report( $report_id, $canonical ) ) { return false; }
+			} elseif ( 'badaround-report/v1' !== $version ) { return false; }
+			// Compare-and-set the observed storage slot, including NULL first-write
+			// values. A direct caller need not rely on the intake's UUID lock.
+			$where['content_original'] = $slot['content_original'];
+			$where['payload_hash'] = $slot['payload_hash'];
+		}
 		$reporter  = isset( $canonical['reporter'] ) && is_array( $canonical['reporter'] ) ? $canonical['reporter'] : array();
 		$location  = isset( $canonical['location'] ) && is_array( $canonical['location'] ) ? $canonical['location'] : array();
 		$vehicle   = isset( $canonical['vehicle'] ) && is_array( $canonical['vehicle'] ) ? $canonical['vehicle'] : array();
@@ -136,7 +164,8 @@ class BadAround_Report_Repository {
 			$content_payload = $this->canonical_storage_envelope( $canonical );
 		}
 
-		$payload = wp_json_encode( $content_payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+		$payload = $native && null !== $slot['content_original'] && '' !== $slot['content_original']
+			? $slot['content_original'] : wp_json_encode( $content_payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
 		$contact = isset( $reporter['contact_preference'] ) ? sanitize_key( $reporter['contact_preference'] ) : 'none';
 
 		$data = array(
@@ -160,11 +189,13 @@ class BadAround_Report_Repository {
 			'updated_at'           => current_time( 'mysql', true ),
 		);
 
-		return false !== $wpdb->update(
-			$wpdb->prefix . 'ba_reports',
-			$data,
-			array( 'id' => absint( $report_id ) )
-		);
+		$updated = $wpdb->update( $table, $data, $where );
+		if ( false === $updated ) { return false; }
+		if ( $native && 0 === $updated ) {
+			// Zero rows can mean an identical retry or a lost first-write race.
+			return $this->native_report_version_matches( $report_id, $canonical ) && $this->native_payload_matches_report( $report_id, $canonical );
+		}
+		return true;
 	}
 
 	public function link_event( $report_id, $event_id ) {
@@ -252,8 +283,8 @@ class BadAround_Report_Repository {
 			return false;
 		}
 
-		$stored_hash = hash( 'sha256', wp_json_encode( $decoded['canonical'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
-		$input_hash  = hash( 'sha256', wp_json_encode( $canonical, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+		$stored_hash = $this->canonical_snapshot_hash( $decoded['canonical'] );
+		$input_hash  = $this->canonical_snapshot_hash( $canonical );
 		return hash_equals( $stored_hash, $input_hash );
 	}
 
@@ -322,6 +353,11 @@ class BadAround_Report_Repository {
 		global $wpdb;
 		$key = 'ba:' . hash( 'sha256', (string) $identity );
 		$wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $key ) );
+	}
+
+	/** Same normalized canonical fingerprint used by native retry equality. */
+	private function canonical_snapshot_hash( $canonical ) {
+		return hash( 'sha256', wp_json_encode( $canonical, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
 	}
 
 	private function canonical_storage_envelope( $canonical ) {
