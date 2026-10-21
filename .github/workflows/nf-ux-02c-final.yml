@@ -1,0 +1,52 @@
+name: NF-UX-02C final runtime custody
+on:
+  push:
+    branches: [qa/nf-ux-02c-final-resilience]
+permissions:
+  contents: read
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+jobs:
+  custody:
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Assert no application changes
+        run: |
+          set -euo pipefail
+          mkdir -p tls
+          git diff --exit-code 0d1db0d7fab7f2facbe6b07ccff002b9e884cade HEAD -- wordpress
+      - name: Provision officially signed chain and verify against runner root trust
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$FTP_HOST" && test -n "$FTP_USER" && test -n "$FTP_PASS"
+          ca=/etc/ssl/certs/ca-certificates.crt
+          test -s "$ca"
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 --max-time 25 https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 --max-time 25 https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          test "$(openssl x509 -in tls/yr2.pem -noout -subject)" = "subject=C = US, O = Let's Encrypt, CN = YR2"
+          test "$(openssl x509 -in tls/yr-by-x1.pem -noout -subject)" = "subject=C = US, O = ISRG, CN = Root YR"
+          openssl verify -CAfile "$ca" -untrusted tls/yr-by-x1.pem tls/yr2.pem
+          cat tls/yr2.pem tls/yr-by-x1.pem > tls/untrusted.pem
+          cat "$ca" tls/untrusted.pem > tls/curl-chain.pem
+          timeout 30s openssl s_client -starttls ftp -connect "${FTP_HOST}:21" -servername "$FTP_TLS_NAME" -verify_hostname "$FTP_TLS_NAME" -verify_return_error -CAfile tls/curl-chain.pem < /dev/null > tls/handshake.log 2>&1
+          grep -q 'Verify return code: 0 (ok)' tls/handshake.log
+          echo 'FTPS server identity and chain VERIFIED; strict TLS remains enabled.'
+      - name: Read-only staging runtime hash verification
+        run: python ops/nf02c-final-custody.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nf02c-final-runtime-custody
+          path: evidence/
+          retention-days: 90
