@@ -27,7 +27,7 @@ function create(options={}) {
   return {ok:true,status:200,json:async()=>response};
  };
  for(const p of options.frozen?['model','api','errors','wizard']:['model','api','errors','media','media-view','wizard']){
-  const source=options.frozen?execFileSync('git',['show',`bcc2c74ca3391f1d16f9b1eb9719650ea4d27952:wordpress/themes/badaround-child/assets/js/native-report/${p}.js`],{encoding:'utf8'}):fs.readFileSync(path.join(base,p+'.js'),'utf8');w.eval(source);
+  const source=options.runtimeRef?execFileSync('git',['show',`${options.runtimeRef}:wordpress/themes/badaround-child/assets/js/native-report/${p}.js`],{encoding:'utf8'}):options.frozen?execFileSync('git',['show',`bcc2c74ca3391f1d16f9b1eb9719650ea4d27952:wordpress/themes/badaround-child/assets/js/native-report/${p}.js`],{encoding:'utf8'}):fs.readFileSync(path.join(base,p+'.js'),'utf8');w.eval(source);
  }
  const doc=w.document,root=doc.querySelector('[data-native-report]'),model=root.nativeReport.model;
  const set=(key,value,event='input')=>{const input=doc.querySelector(`[name="${key}"]`);if(input.type==='checkbox')input.checked=value;else input.value=value;input.dispatchEvent(new w.Event(event,{bubbles:true}));};

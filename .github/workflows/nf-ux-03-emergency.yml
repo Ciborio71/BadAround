@@ -30,7 +30,7 @@ jobs:
         run: |
           set -euo pipefail
           npm ci --prefix tests
-          node --test tests/nf-ux-03-emergency.cjs tests/native-report-f16.cjs tests/native-report-f16-dom.cjs tests/nf-final-01-ux.cjs tests/native-social-preference.cjs tests/geo-public-03-choice.cjs tests/native-media-f17d-dom.cjs 2>&1 | tee evidence/dom.log
+          node --test tests/nf-ux-03-emergency.cjs tests/native-report-f16.cjs tests/native-report-f16-dom.cjs tests/nf-final-01-ux.cjs tests/native-social-preference.cjs tests/geo-public-03-choice.cjs tests/nf-ux-03-no-media.cjs 2>&1 | tee evidence/dom.log
       - name: Browser desktop mobile keyboard and contrast
         run: |
           set -euo pipefail
