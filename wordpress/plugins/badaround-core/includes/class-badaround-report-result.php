@@ -12,13 +12,13 @@ class BadAround_Report_Result {
 		return array(
 			'status' => 'success',
 			'submission_id' => (string) $submission_id,
-			'schema_version' => BadAround_Report_Schema::VERSION,
+			'schema_version' => isset( $normalized['schema_version'] ) ? $normalized['schema_version'] : BadAround_Report_Schema::VERSION,
 			'report_id' => absint( $report_id ),
 			'normalized_payload' => $normalized,
 			'validation' => array( 'valid' => true ),
 			'idempotency_state' => $idempotency_state,
 			'duplicate' => (bool) $duplicate,
-			'privacy' => self::privacy_map(),
+			'privacy' => self::privacy_map( $normalized ),
 		);
 	}
 
@@ -69,7 +69,7 @@ class BadAround_Report_Result {
 		}
 		if ( 'ba_report_required_field' === $source && $field ) {
 			$fields = BadAround_Report_Schema::fields();
-			if ( ! empty( $fields[ $field ]['conditions'] ) ) {
+			if ( isset( $data['conditional'] ) ? $data['conditional'] : ! empty( $fields[ $field ]['conditions'] ) ) {
 				$code = 'conditional_field_required';
 			}
 		}
@@ -77,9 +77,10 @@ class BadAround_Report_Result {
 		return self::error( $code, $field, $data );
 	}
 
-	private static function privacy_map() {
+	private static function privacy_map( $normalized = array() ) {
 		$out = array();
-		foreach ( BadAround_Report_Schema::fields() as $path => $definition ) {
+		$fields = isset( $normalized['schema_version'] ) && 'badaround-report/v2' === $normalized['schema_version'] ? BadAround_Report_Conditional_Contract::fields() : BadAround_Report_Schema::fields();
+		foreach ( $fields as $path => $definition ) {
 			$out[ $path ] = array(
 				'privacy' => $definition['privacy'],
 				'exposure' => $definition['exposure'],

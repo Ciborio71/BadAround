@@ -11,6 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * create ba_evento, assign taxonomies, resolve territory, prepare publication,
  * notify Sentinelle, or trigger any downstream workflow.
  */
+require_once __DIR__ . '/class-badaround-report-version-registry.php';
+
 class BadAround_Native_Report_Intake_Service {
 	private $normalizer;
 	private $validator;
@@ -28,14 +30,16 @@ class BadAround_Native_Report_Intake_Service {
 		$request_id = wp_generate_uuid4();
 		BadAround_Audit_Log::record( 'report', 0, 'intake_started', 'native', null, $request_id );
 
-		$raw_error = $this->validator->validate_raw_contract( $raw_payload );
+		$normalizer = $this->normalizer; $validator = $this->validator;
+		if ( BadAround_Report_Version_Registry::V2 === BadAround_Report_Version_Registry::version( $raw_payload ) ) { list( $normalizer, $validator ) = BadAround_Report_Version_Registry::components( $raw_payload ); }
+		$raw_error = $validator->validate_raw_contract( $raw_payload );
 		if ( is_wp_error( $raw_error ) ) {
 			BadAround_Audit_Log::technical_error( 'report', 0, 'validation_failed', $raw_error->get_error_code(), $request_id );
 			return BadAround_Report_Result::from_wp_error( $raw_error );
 		}
 
-		$normalized = $this->normalizer->normalize( $raw_payload );
-		$valid = $this->validator->validate( $normalized );
+		$normalized = $normalizer->normalize( $raw_payload );
+		$valid = $validator->validate( $normalized );
 		if ( is_wp_error( $valid ) ) {
 			BadAround_Audit_Log::technical_error( 'report', 0, 'validation_failed', $valid->get_error_code(), $request_id );
 			return BadAround_Report_Result::from_wp_error( $valid );
@@ -52,7 +56,7 @@ class BadAround_Native_Report_Intake_Service {
 		}
 
 		$submission_id = isset( $normalized['submission_id'] ) ? $normalized['submission_id'] : '';
-		$reservation = $this->idempotency->reserve( $submission_id );
+		$reservation = $this->idempotency->reserve( $submission_id, $normalized );
 		if ( is_wp_error( $reservation ) ) {
 			BadAround_Audit_Log::technical_error( 'report', 0, 'intake_failed', $reservation->get_error_code(), $request_id );
 			return BadAround_Report_Result::from_wp_error( $reservation );

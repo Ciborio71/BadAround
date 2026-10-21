@@ -175,7 +175,7 @@ class BadAround_Report_Validator {
 		return true;
 	}
 
-	private function validate_public_location_request( $report ) {
+	protected function validate_public_location_request( $report ) {
 		$location = isset( $report['location'] ) && is_array( $report['location'] ) ? $report['location'] : array();
 		$has_request = array_key_exists( 'public_location_request', $location );
 		$has_version = array_key_exists( 'public_location_request_version', $location );
@@ -188,7 +188,7 @@ class BadAround_Report_Validator {
 		return true;
 	}
 
-	private function validate_field( $path, $value, $definition ) {
+	protected function validate_field( $path, $value, $definition ) {
 		$type        = $definition['type'];
 		$constraints = isset( $definition['constraints'] ) ? $definition['constraints'] : array();
 
@@ -302,7 +302,7 @@ class BadAround_Report_Validator {
 		return true;
 	}
 
-	private function validate_time_rules( $report, $rules ) {
+	protected function validate_time_rules( $report, $rules ) {
 		$date = $this->get_path( $report, 'time.date' );
 		if ( $date && $this->valid_date( $date ) ) {
 			$today = wp_date( 'Y-m-d', current_time( 'timestamp' ) );
@@ -332,7 +332,7 @@ class BadAround_Report_Validator {
 		return true;
 	}
 
-	private function validate_reward_rules( $report ) {
+	protected function validate_reward_rules( $report ) {
 		$status = $this->get_path( $report, 'reward.status' );
 		if ( 'fixed' === $status ) {
 			$amount = $this->get_path( $report, 'reward.amount' );
@@ -381,7 +381,7 @@ class BadAround_Report_Validator {
 		return false;
 	}
 
-	private function has_meaningful_value( $report, $path ) {
+	protected function has_meaningful_value( $report, $path ) {
 		if ( ! $this->has_path( $report, $path ) ) {
 			return false;
 		}
@@ -395,7 +395,7 @@ class BadAround_Report_Validator {
 		return '' !== trim( (string) $value );
 	}
 
-	private function get_path( $array, $path ) {
+	protected function get_path( $array, $path ) {
 		$current = $array;
 		foreach ( explode( '.', $path ) as $segment ) {
 			if ( ! is_array( $current ) || ! array_key_exists( $segment, $current ) ) {
@@ -406,7 +406,7 @@ class BadAround_Report_Validator {
 		return $current;
 	}
 
-	private function has_path( $array, $path ) {
+	protected function has_path( $array, $path ) {
 		$current = $array;
 		foreach ( explode( '.', $path ) as $segment ) {
 			if ( ! is_array( $current ) || ! array_key_exists( $segment, $current ) ) {
@@ -493,7 +493,7 @@ class BadAround_Report_Validator {
 		return $date && $date->format( 'Y-m-d' ) === $value;
 	}
 
-	private function unknown_paths( $payload, $fields ) {
+	protected function unknown_paths( $payload, $fields ) {
 		$known = array_keys( $fields );
 		$unknown = array();
 		$walk = function ( $value, $prefix = '' ) use ( &$walk, &$unknown, $known, $fields ) {
@@ -523,7 +523,7 @@ class BadAround_Report_Validator {
 		return array_values( array_unique( $unknown ) );
 	}
 
-	private function raw_type_matches( $value, $type ) {
+	protected function raw_type_matches( $value, $type ) {
 		switch ( $type ) {
 			case 'array': return is_array( $value );
 			case 'bool': return is_bool( $value ) || in_array( $value, array( 0, 1, '0', '1', 'true', 'false', 'yes', 'no', 'on', 'off' ), true );
@@ -541,7 +541,7 @@ class BadAround_Report_Validator {
 		return true;
 	}
 
-	private function field_error( $code, $path, $message ) {
+	protected function field_error( $code, $path, $message ) {
 		return new WP_Error( $code, $message, array( 'field' => $path ) );
 	}
 }

@@ -1,0 +1,56 @@
+name: NF-UX-02B dual-stack backend
+
+on:
+  push:
+    branches: [implementation/nf-ux-02b-report-v2-dual-stack]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    services:
+      database:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: synthetic-nf02b
+          MARIADB_DATABASE: nf02b
+        ports: [3306:3306]
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      BA_TEST_DSN: mysql:host=127.0.0.1;port=3306;dbname=nf02b
+      BA_TEST_DB_USER: root
+      BA_TEST_DB_PASSWORD: synthetic-nf02b
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gd, posix, fileinfo, pdo_mysql, pdo_sqlite, mbstring
+      - name: Syntax and immutable boundary
+        run: |
+          set -euo pipefail
+          find wordpress/plugins/badaround-core wordpress/themes/badaround-child -name '*.php' -print0 | xargs -0 -n1 php -l > /tmp/nf02b-lint.log
+          git diff --exit-code 08f96d6f4dbd8ce8294e219857002f975351acf4 HEAD -- wordpress/themes/badaround-child wordpress/plugins/badaround-core/includes/class-badaround-installer.php wordpress/plugins/badaround-core/includes/class-badaround-report-schema.php wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php wordpress/plugins/badaround-core/includes/class-badaround-geo-moderation-service.php wordpress/plugins/badaround-core/includes/class-badaround-public-geo-contract.php wordpress/plugins/badaround-core/includes/class-badaround-public-geo-projection.php wordpress/plugins/badaround-core/includes/class-badaround-event-taxonomy-map.php
+          git diff --check
+      - name: V1, V2, cross-version and consumer regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p test-results
+          tests=(native-report-f12 native-report-f13 native-report-f14 native-report-f15 native-report-f16 f1-14r-publication-contract geo-public-02-contract geo-public-02-publication-gate geo-public-04-moderation geo-public-05-publication geo-public-05-audit native-social-preference native-media-no-media-differential native-media-f17b native-media-f17c nf-ux-02b-v1-differential nf-ux-02b-v2 nf-ux-02b-media)
+          for test in "${tests[@]}"; do
+            php "tests/${test}.php" | tee "test-results/${test}.log"
+          done
+      - name: Preserve CI evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nf-ux-02b-test-results
+          path: test-results

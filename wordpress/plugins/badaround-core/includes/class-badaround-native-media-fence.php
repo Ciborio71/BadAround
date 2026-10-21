@@ -22,10 +22,11 @@ class BadAround_Native_Media_Fence {
 		foreach ($reports as $row) {
 			if ((int)$row['id']===$report) { $primary=$row; }
 			$data=json_decode($row['content_original'],true);
-			$nativeEnvelope=is_array($data) && isset($data['schema_version']) && $data['schema_version']===BadAround_Report_Schema::VERSION;
+			$nativeEnvelope=is_array($data) && isset($data['schema_version']) && in_array($data['schema_version'],array('badaround-report/v1','badaround-report/v2'),true);
 			if ($row['source_type']==='native' || $nativeEnvelope) {
 				if ($row['source_type']!=='native') { return self::blocked($event); }
 				if (!isset($data['canonical']) || !is_array($data['canonical'])) { return self::blocked($event); }
+				if (($data['schema_version']??null)==='badaround-report/v2' && ($data['canonical']['schema_version']??null)!=='badaround-report/v2') { return self::blocked($event); }
 				if (array_key_exists('media',$data['canonical']) && (!is_array($data['canonical']['media']) || (array_key_exists('items',$data['canonical']['media']) && !is_array($data['canonical']['media']['items'])))) { return self::blocked($event); }
 				if (!empty($data['canonical']['media']['items'])) { return self::blocked($event); }
 			}

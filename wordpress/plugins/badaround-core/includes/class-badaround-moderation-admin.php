@@ -142,6 +142,13 @@ class BadAround_Moderation_Admin {
 		}
 		return '';
 	}
+	/** Read stored semantics, never re-normalize or migrate a historical report. */
+	public function canonical_report_view( $payload ) {
+		if ( ! is_array( $payload ) || ! isset( $payload['canonical'] ) || ! is_array( $payload['canonical'] ) ) { return null; }
+		$version = $payload['schema_version'] ?? null;
+		if ( ! in_array( $version, array( 'badaround-report/v1', 'badaround-report/v2' ), true ) || $version !== ( $payload['canonical']['schema_version'] ?? null ) ) { return null; }
+		return array( 'schema_version' => $version, 'canonical' => $payload['canonical'] );
+	}
 
 	public function render_private_box( $post ) {
 		if ( ! current_user_can( 'ba_view_private_reports' ) ) {
@@ -167,6 +174,16 @@ class BadAround_Moderation_Admin {
 			__( 'Preferenza diffusione social', 'badaround-core' ) => $this->social_preference_description( $payload ),
 			__( 'Data acquisizione (UTC)', 'badaround-core' ) => $report->consented_at ?? '—',
 		);
+		$view = $this->canonical_report_view( $payload );
+		if ( $view && 'badaround-report/v2' === $view['schema_version'] ) {
+			$rows['Versione report'] = $view['schema_version'];
+			$details = array( 'location.place_type_other_detail' => 'Tipo di luogo', 'vehicle.type_other_detail' => 'Tipo di veicolo', 'vehicle.color_other_detail' => 'Colore veicolo', 'animal.type_other_detail' => 'Tipo animale', 'property.tampered_entry_point_other_detail' => 'Accesso manomesso', 'property.stolen_item_categories_other_detail' => 'Altri beni sottratti', 'property.access_method_other_detail' => 'Modalità accesso', 'authority.type_other_detail' => 'Autorità o servizio' );
+			foreach ( $details as $path => $label ) {
+				list( $domain, $field ) = explode( '.', $path );
+				$value = $view['canonical'][ $domain ][ $field ] ?? null;
+				if ( is_string( $value ) && '' !== $value ) { $rows[ $label . ' — Specifica (riservato)' ] = $value; }
+			}
+		}
 		echo '<div style="border-left:4px solid #d63638;padding-left:12px"><p><strong>' . esc_html__( 'RISERVATO — non copiare nei dati pubblici', 'badaround-core' ) . '</strong></p><table class="widefat striped"><tbody>';
 		foreach ( $rows as $label => $value ) {
 			echo '<tr><th style="width:180px">' . esc_html( $label ) . '</th><td>' . esc_html( (string) $value ) . '</td></tr>';

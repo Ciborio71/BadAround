@@ -35,7 +35,7 @@ class BadAround_Report_Normalizer {
 		return $normalized;
 	}
 
-	private function normalize_value( $path, $value, $definition ) {
+	protected function normalize_value( $path, $value, $definition ) {
 		$type = isset( $definition['type'] ) ? $definition['type'] : 'string';
 
 		if ( 'media.items' === $path ) {
@@ -143,7 +143,7 @@ class BadAround_Report_Normalizer {
 		return false;
 	}
 
-	private function get_path( $array, $path ) {
+	protected function get_path( $array, $path ) {
 		$current = $array;
 		foreach ( explode( '.', $path ) as $segment ) {
 			if ( ! is_array( $current ) || ! array_key_exists( $segment, $current ) ) return null;
@@ -151,7 +151,7 @@ class BadAround_Report_Normalizer {
 		}
 		return $current;
 	}
-	private function has_path( $array, $path ) {
+	protected function has_path( $array, $path ) {
 		$current = $array;
 		foreach ( explode( '.', $path ) as $segment ) {
 			if ( ! is_array( $current ) || ! array_key_exists( $segment, $current ) ) return false;
@@ -159,7 +159,7 @@ class BadAround_Report_Normalizer {
 		}
 		return true;
 	}
-	private function set_path( &$array, $path, $value ) {
+	protected function set_path( &$array, $path, $value ) {
 		$current =& $array;
 		$segments = explode( '.', $path );
 		foreach ( $segments as $i => $segment ) {

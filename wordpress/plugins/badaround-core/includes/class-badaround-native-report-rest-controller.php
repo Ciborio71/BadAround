@@ -9,6 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Domain behavior remains in the frozen F1.3/F1.4 services.
  */
+require_once __DIR__ . '/class-badaround-report-version-registry.php';
+
 class BadAround_Native_Report_REST_Controller {
 	const REST_NAMESPACE       = 'badaround/v1';
 	const REST_ROUTE           = '/reports';
@@ -109,10 +111,10 @@ class BadAround_Native_Report_REST_Controller {
 			// Empty/absent media delegates directly; no media construction or lookup.
 			$items = isset($payload['media']['items']) ? $payload['media']['items'] : null;
 			if (is_array($items) && count($items)>0) {
-				$validator = new BadAround_Report_Validator();
+				list( $normalizer, $validator ) = BadAround_Report_Version_Registry::components( $payload );
 				$valid = $validator->validate_raw_contract($payload);
 				if (!is_wp_error($valid)) {
-					$canonical = (new BadAround_Report_Normalizer())->normalize($payload);
+					$canonical = $normalizer->normalize($payload);
 					$valid = $validator->validate($canonical);
 				}
 				if (is_wp_error($valid)) {
@@ -156,7 +158,7 @@ class BadAround_Native_Report_REST_Controller {
 		$response  = array(
 			'status'          => 'success',
 			'submission_id'   => isset( $result['submission_id'] ) ? (string) $result['submission_id'] : $submission_id,
-			'schema_version'  => BadAround_Report_Schema::VERSION,
+			'schema_version'  => isset( $result['schema_version'] ) ? $result['schema_version'] : ( isset( $payload['schema_version'] ) ? trim( $payload['schema_version'] ) : BadAround_Report_Schema::VERSION ),
 			'intake_state'    => 'received_for_moderation',
 			'event_id'        => $event_id ?: null,
 			'duplicate'       => (bool) $duplicate,

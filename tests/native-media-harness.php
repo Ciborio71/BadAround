@@ -42,7 +42,12 @@ class MediaTestDB {
 	public $pdo;private $locks=[];
 	function __construct($pdo=null){$this->pdo=$pdo ?: new PDO(getenv('BA_TEST_DSN') ?: 'sqlite::memory:',getenv('BA_TEST_DB_USER') ?: 'root',getenv('BA_TEST_DB_PASSWORD') ?: '');$this->pdo->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);}
 	function prepare($q,...$args){if(count($args)===1 && is_array($args[0]))$args=$args[0];foreach($args as $a){$q=preg_replace_callback('/%[sdf]/',function($m)use($a){return $m[0]==='%s' ? $this->pdo->quote((string)$a) : (string)(int)$a;},$q,1);}return $q;}
-	function statement($q){$this->queries[]=$q;$this->last_error='';try {if($this->fail && call_user_func($this->fail,$q)){ $this->fail=null;throw new Exception('injected failure'); }return $this->pdo->query($q);}catch(Throwable $e){$this->last_error=$e->getMessage();return false;}}
+	function statement($q){$this->queries[]=$q;
+		// SQLite test adapter for the certified GEO-PUBLIC JSON existence probe.
+		if($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME)==='sqlite') {
+			$q=str_replace("JSON_CONTAINS_PATH(content_original, 'one', '$.canonical.location.public_location_request', '$.canonical.location.public_location_request_version')","(json_type(content_original, '$.canonical.location.public_location_request') IS NOT NULL OR json_type(content_original, '$.canonical.location.public_location_request_version') IS NOT NULL)",$q);
+		}
+$this->last_error='';try {if($this->fail && call_user_func($this->fail,$q)){ $this->fail=null;throw new Exception('injected failure'); }return $this->pdo->query($q);}catch(Throwable $e){$this->last_error=$e->getMessage();return false;}}
 	function get_var($q){
 		if(strpos($q,'GET_LOCK(')!==false || strpos($q,'RELEASE_LOCK(')!==false){
 			if($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME)==='mysql'){ $s=$this->statement($q);return $s ? $s->fetchColumn() : null; }
@@ -68,6 +73,8 @@ class MediaTestDB {
 	}
 }
 $GLOBALS['wpdb']=$db=new MediaTestDB();$GLOBALS['posts']=[];$GLOBALS['transients']=[];
+// Existing WordPress infrastructure table, not an application schema migration.
+$db->pdo->exec('CREATE TABLE IF NOT EXISTS test_options (option_name varchar(191) PRIMARY KEY, option_value text, autoload varchar(20))');
 $inc=dirname(__DIR__).'/wordpress/plugins/badaround-core/includes/';
 foreach(['report-repository','media-repository','moderation-service','publication-service','report-persistence-service','native-report-golden-path-service','native-report-rest-controller','native-media-config','native-media-capability','native-media-ledger','native-media-storage','native-media-validator','native-media-service','native-media-persistence','native-media-fence','native-media-cleanup','native-media-rest-controller'] as $name)require_once $inc.'class-badaround-'.$name.'.php';
 $installer=file_get_contents($inc.'class-badaround-installer.php');

@@ -5,6 +5,50 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class BadAround_Report_Repository {
+	/** Infrastructure binding only: no PII, no report migration, never autoloaded.
+	 * wp_options already exists in WordPress. This preserves the certified media
+	 * pin-before-report boundary and keeps no-media independent of the media ledger.
+	 * Caller holds the shared native UUID lock (also taken by media pin).
+	 */
+	public function guard_native_version( $canonical, $bind = false ) {
+		global $wpdb;
+		$uuid = $canonical['submission_id']; $version = $canonical['schema_version'];
+		if ( ! in_array( $version, array( 'badaround-report/v1', 'badaround-report/v2' ), true ) ) { return new WP_Error( 'ba_report_invalid_enum', 'Invalid schema version.', array( 'field' => 'schema_version' ) ); }
+		$key = 'ba_report_version_' . hash( 'sha256', $uuid ); $table = $wpdb->prefix . 'options';
+		$stored = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$table} WHERE option_name = %s LIMIT 1", $key ) );
+		if ( ! empty( $wpdb->last_error ) ) { return new WP_Error( 'ba_report_intake_failed', 'Version binding unavailable.' ); }
+		$hash = hash( 'sha256', wp_json_encode( $canonical, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+		if ( null !== $stored && false !== $stored ) {
+			$binding = json_decode( $stored, true );
+			if ( ! is_array( $binding ) || ! isset( $binding['schema_version'], $binding['submission_id'] ) ) { return new WP_Error( 'ba_report_intake_failed', 'Invalid version binding.' ); }
+			if ( $binding['submission_id'] !== $uuid || $binding['schema_version'] !== $version || ( 'badaround-report/v2' === $version && ( ! isset( $binding['canonical_hash'] ) || ! hash_equals( $binding['canonical_hash'], $hash ) ) ) ) { return new WP_Error( 'ba_report_duplicate_submission', 'Submission identity conflict.', array( 'field' => 'submission_id' ) ); }
+			return true;
+		}
+		if ( ! $bind ) { return true; }
+		$binding = array( 'schema_version' => $version, 'submission_id' => $uuid );
+		if ( 'badaround-report/v2' === $version ) { $binding['canonical_hash'] = $hash; }
+		if ( false === $wpdb->insert( $table, array( 'option_name' => $key, 'option_value' => wp_json_encode( $binding ), 'autoload' => 'no' ) ) ) { return new WP_Error( 'ba_report_intake_failed', 'Version binding unavailable.' ); }
+		return true;
+	}
+	public function native_report_version_matches( $report_id, $canonical ) {
+		global $wpdb;
+		$raw = $wpdb->get_var( $wpdb->prepare( "SELECT content_original FROM {$wpdb->prefix}ba_reports WHERE id = %d LIMIT 1", absint( $report_id ) ) );
+		if ( ! empty( $wpdb->last_error ) ) { return false; }
+		// Bare legacy reservations are exclusively recoverable by the frozen v1 flow.
+		if ( null === $raw || '' === $raw ) { return 'badaround-report/v1' === $canonical['schema_version']; }
+		$data = json_decode( $raw, true );
+		return is_array( $data ) && isset( $data['schema_version'], $data['canonical']['schema_version'], $data['canonical']['submission_id'] )
+			&& $data['schema_version'] === $data['canonical']['schema_version'] && $data['schema_version'] === $canonical['schema_version'] && $data['canonical']['submission_id'] === $canonical['submission_id'];
+	}
+	/** Atomically create a v2 reservation with its immutable canonical snapshot. */
+	public function create_versioned_native_intake_record( $canonical ) {
+		global $wpdb;
+		$parts = $this->native_source_parts( $canonical['submission_id'] ); if ( is_wp_error( $parts ) ) { return $parts; }
+		$payload = wp_json_encode( $this->canonical_storage_envelope( $canonical ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+		$now = current_time( 'mysql', true );
+		$result = $wpdb->insert( $wpdb->prefix . 'ba_reports', array( 'report_type' => 'initial', 'source_type' => 'native', 'source_form_id' => $parts['form_id'], 'source_entry_id' => $parts['entry_id'], 'user_id' => get_current_user_id() ?: null, 'status' => 'received', 'created_at' => $now, 'updated_at' => $now, 'content_original' => $payload, 'payload_hash' => hash( 'sha256', $payload ) ) );
+		return false === $result ? new WP_Error( 'ba_report_insert_failed', 'Unable to reserve report.' ) : (int) $wpdb->insert_id;
+	}
 	public function create_intake_record( $form_id, $entry_id ) {
 		return $this->create_source_record( 'wpforms', absint( $form_id ), absint( $entry_id ) );
 	}
@@ -287,7 +331,7 @@ class BadAround_Report_Repository {
 		}
 
 		return array(
-			'schema_version' => BadAround_Report_Schema::VERSION,
+			'schema_version' => isset( $canonical['schema_version'] ) ? $canonical['schema_version'] : BadAround_Report_Schema::VERSION,
 			'submission_id'  => isset( $canonical['submission_id'] ) ? $canonical['submission_id'] : '',
 			'canonical'      => $canonical,
 			/*

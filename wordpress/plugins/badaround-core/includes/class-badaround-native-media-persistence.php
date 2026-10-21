@@ -103,8 +103,12 @@ class BadAround_Native_Media_Report_Adapter {
 			new BadAround_Native_Report_Intake_Service(null,null,$this->repository),new BadAround_Native_Media_Persistence($this->service,$this->repository),$this->repository);
 	}
 	public function submit($raw,$bearer) {
-		$v=new BadAround_Report_Validator();$valid=$v->validate_raw_contract($raw);if(is_wp_error($valid)) { return BadAround_Report_Result::from_wp_error($valid); }
-		$canonical=(new BadAround_Report_Normalizer())->normalize($raw);$valid=$v->validate($canonical);if(is_wp_error($valid)) { return BadAround_Report_Result::from_wp_error($valid); }
+		list($normalizer,$v)=BadAround_Report_Version_Registry::components($raw);$valid=$v->validate_raw_contract($raw);if(is_wp_error($valid)) { return BadAround_Report_Result::from_wp_error($valid); }
+		$canonical=$normalizer->normalize($raw);$valid=$v->validate($canonical);if(is_wp_error($valid)) { return BadAround_Report_Result::from_wp_error($valid); }
+		if (BadAround_Report_Version_Registry::V2===BadAround_Report_Version_Registry::version($canonical)) {
+			$territory=(new BadAround_Territory_Resolver())->resolve_path($canonical['location']);
+			if(is_wp_error($territory)) { return BadAround_Report_Result::from_wp_error($territory); }
+		}
 		$pin=$this->service->pin($canonical,$bearer,$this->repository);if(is_wp_error($pin)) { return BadAround_Report_Result::from_wp_error($pin); }
 		if($pin['state']==='committed') { return $this->completed($pin,$canonical); }
 		$result=$this->golden->submit($raw);
@@ -133,6 +137,6 @@ class BadAround_Native_Media_Report_Adapter {
 		$actual=array_map('intval',array_column($rows,'id'));sort($actual);sort($ids);
 		if($ids!==$actual || $ids!==$receipt['media_rows']) { return BadAround_Report_Result::error('media_binding_invariant_failed'); }
 		// No filesystem reads, report writes, TTL renewal or moderation changes.
-		return array('status'=>'success','submission_id'=>$canonical['submission_id'],'report_id'=>$receipt['report_id'],'event_id'=>$receipt['event_id'],'duplicate'=>true);
+		return array('status'=>'success','schema_version'=>$canonical['schema_version'],'submission_id'=>$canonical['submission_id'],'report_id'=>$receipt['report_id'],'event_id'=>$receipt['event_id'],'duplicate'=>true);
 	}
 }

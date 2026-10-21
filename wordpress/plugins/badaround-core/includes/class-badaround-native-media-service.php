@@ -266,6 +266,16 @@ class BadAround_Native_Media_Service {
 				}
 				$usage=$this->ledger->usage();
 				if(!$usage || (int)$usage['archive_reserved']>(int)$this->config->get('archive_budget')-$bytes) { return $this->error('media_service_unavailable'); }
+				// Version binding is infrastructure, not report reservation: preserve pin-before-report.
+				$id=$canonical['submission_id'];
+				$binding_repo=$repository ?: new BadAround_Report_Repository();
+				if (!$binding_repo->acquire_native_lock($id,0)) { return $this->error('submission_in_progress','submission_id'); }
+				try {
+					$existing=$binding_repo->find_by_native_submission($id);
+					if ($existing && !$binding_repo->native_report_version_matches($existing,$canonical)) { return $this->error('duplicate_submission','submission_id'); }
+					$binding=$binding_repo->guard_native_version($canonical,true);
+					if (is_wp_error($binding)) { return $this->error($binding->get_error_code()==='ba_report_duplicate_submission' ? 'duplicate_submission' : 'media_service_unavailable','submission_id'); }
+				} finally { $binding_repo->release_native_lock($id); }
 				$changes=array('state'=>'pinned','canonical_hash'=>$hash,'manifest_hash'=>$mh,'manifest_json'=>self::json($manifest),'intent_json'=>$json,'archive_reserved'=>$bytes,'lease_expires_at'=>$this->now()+(int)$this->config->get('lease_ttl'));
 				if(!$this->ledger->update_session($row,$changes)) { return $this->error('media_service_unavailable'); }
 				BadAround_Native_Media_Config::audit('manifest_pinned');return $this->ledger->session($row['session_id']);

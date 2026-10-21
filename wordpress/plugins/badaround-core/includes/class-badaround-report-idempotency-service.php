@@ -22,7 +22,7 @@ class BadAround_Report_Idempotency_Service {
 		$this->repository = $repository ?: new BadAround_Report_Repository();
 	}
 
-	public function reserve( $submission_id ) {
+	public function reserve( $submission_id, $canonical = null ) {
 		$submission_id = strtolower( trim( (string) $submission_id ) );
 		if ( ! $this->repository->acquire_native_lock( $submission_id, 0 ) ) {
 			return array(
@@ -33,6 +33,14 @@ class BadAround_Report_Idempotency_Service {
 		}
 
 		$existing = absint( $this->repository->find_by_native_submission( $submission_id ) );
+		if ( is_array( $canonical ) && method_exists( $this->repository, 'guard_native_version' ) ) {
+			if ( $existing && ! $this->repository->native_report_version_matches( $existing, $canonical ) ) {
+				$this->repository->release_native_lock( $submission_id );
+				return new WP_Error( 'ba_report_duplicate_submission', 'Submission version conflict.', array( 'field' => 'submission_id' ) );
+			}
+			$binding = $this->repository->guard_native_version( $canonical, true );
+			if ( is_wp_error( $binding ) ) { $this->repository->release_native_lock( $submission_id ); return $binding; }
+		}
 		if ( $existing ) {
 			$status = $this->repository->intake_status( $existing );
 			return array(
@@ -43,7 +51,8 @@ class BadAround_Report_Idempotency_Service {
 			);
 		}
 
-		$report_id = $this->repository->create_native_intake_record( $submission_id );
+		$report_id = is_array( $canonical ) && 'badaround-report/v2' === ( $canonical['schema_version'] ?? '' )
+			? $this->repository->create_versioned_native_intake_record( $canonical ) : $this->repository->create_native_intake_record( $submission_id );
 		if ( is_wp_error( $report_id ) ) {
 			$this->repository->release_native_lock( $submission_id );
 			return $report_id;
