@@ -54,12 +54,20 @@ jobs:
           timeout 30s openssl s_client -starttls ftp -connect "${FTP_HOST}:21" -servername "$FTP_TLS_NAME" -verify_hostname "$FTP_TLS_NAME" -verify_return_error -CAfile tls/curl-chain.pem < /dev/null > tls/handshake.log 2>&1
           grep -q 'Verify return code: 0 (ok)' tls/handshake.log
           echo 'FTPS server identity and chain VERIFIED; strict TLS remains enabled.'
-      - name: Immediate verified rollback and harness cleanup
-        run: python ops/nf02b-deploy.py recover
+      - name: Snapshot exact remote rollback and enforce baseline
+        run: python ops/nf02b-deploy.py prepare
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nf02b-byte-exact-rollback
+          path: evidence/
+          retention-days: 90
+          if-no-files-found: error
+      - name: Deploy runtime, verify remote hashes, controlled backend QA, rollback on failure
+        run: python ops/nf02b-deploy.py deploy
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: nf02b-recovery-evidence
+          name: nf02b-staging-certification-evidence
           path: evidence/
           retention-days: 90
           if-no-files-found: error

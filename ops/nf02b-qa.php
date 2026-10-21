@@ -73,10 +73,34 @@ try {
   $view=(new BadAround_Moderation_Admin())->canonical_report_view($stored); ck(is_array($view),$version.'_admin_read');
   if($version==='badaround-report/v2') { $stale=$p; $stale['vehicle']=['plate'=>'STALE']; ck(code($gold->submit($stale))==='success','v2_stale_retry'); $bad=$p; $bad['unknown']=true; ck(code($gold->submit($bad))==='unknown_field','v2_unknown_rejected'); }
  }
+ // Exercise all frozen subtype oracles against the deployed validator without persisting them.
+ $contract=json_decode(file_get_contents(WP_PLUGIN_DIR.'/badaround-core/contracts/nf-conditional-v1.0.json'),true);
+ foreach($contract['regression_oracle'] as $oracle) {
+  $o=['schema_version'=>'badaround-report/v2','submission_id'=>wp_generate_uuid4(),'consents'=>['version'=>'native-v1']];
+  foreach($oracle['minimal_user_values'] as $path=>$value) { $parts=explode('.',$path); $ptr=&$o; foreach($parts as $part) { if(!isset($ptr[$part]))$ptr[$part]=[]; $ptr=&$ptr[$part]; } $ptr=$value;unset($ptr); }
+  ck(!is_wp_error(BadAround_Report_Version_Registry::prepare($o)),'oracle_'.$oracle['subtype']);
+  if($oracle['subtype']==='animal_missing') { $o['damage']=['status'=>'not_applicable'];$n=BadAround_Report_Version_Registry::prepare($o);ck(!is_wp_error($n) && !isset($n['damage']),'lost_animal_damage_hidden'); }
+ }
  // Read-only media adapter admission: invalid capability cannot create/pin/bind anything.
  $service=new BadAround_Native_Media_Service();
  foreach(['badaround-report/v1','badaround-report/v2'] as $v) { $p=fixture();$p['schema_version']=$v;$p['submission_id']=wp_generate_uuid4(); $p['media']=['availability'=>'yes','items'=>[['media_id'=>wp_generate_uuid4(),'mime_type'=>'image/png','file_size'=>100,'extension'=>'png']]];
   $r=(new BadAround_Native_Media_Report_Adapter())->submit($p,'invalid'); ck(code($r)!=='success' && !$repo->find_by_native_submission($p['submission_id']),$v.'_media_admission_fails_closed');
+ }
+ if($service->ready()) {
+  foreach(['badaround-report/v1','badaround-report/v2'] as $v) {
+   $p=fixture();$p['schema_version']=$v;$p['submission_id']=wp_generate_uuid4();$p['content']['description']='NF-UX-02B synthetic media backend QA — do not publish.';$p['reporter']['email']='nf02b-qa@example.invalid';
+   $session=$service->create($p['submission_id'],BadAround_Native_Media_Capability::encode(random_bytes(32)),hash('sha256','NF02B-QA'));ck(!is_wp_error($session),$v.'_media_session');
+   $im=imagecreatetruecolor(2,2);ob_start();imagepng($im);$bytes=ob_get_clean();imagedestroy($im);$stream=fopen('php://temp','w+b');fwrite($stream,$bytes);rewind($stream);
+   try {$up=$service->upload($session['media_session_id'],wp_generate_uuid4(),$session['capability'],$stream,'synthetic.png',hash('sha256','NF02B-QA'));} finally {fclose($stream);}
+   ck(!is_wp_error($up),$v.'_media_upload');$p['media']=['availability'=>'yes','items'=>[$up['descriptor']]];
+   $canonical=BadAround_Report_Version_Registry::prepare($p);ck(!is_wp_error($canonical),$v.'_media_canonical');
+   ck(!is_wp_error($service->pin($canonical,$session['capability'],$repo)),$v.'_media_pin');ck(!$repo->find_by_native_submission($p['submission_id']),$v.'_pin_before_report');
+   $cross=fixture();$cross['submission_id']=$p['submission_id'];$cross['schema_version']=$v==='badaround-report/v1'?'badaround-report/v2':'badaround-report/v1';ck(code($gold->submit($cross))==='duplicate_submission',$v.'_media_pre_report_cross_conflict');
+   $adapter=new BadAround_Native_Media_Report_Adapter();$r=$adapter->submit($p,$session['capability']);ck(code($r)==='success',$v.'_media_binding_'.code($r));
+   $fixtures[]=['schema_version'=>$v,'submission_id'=>$p['submission_id'],'report_id'=>$r['report_id'],'event_id'=>$r['event_id'],'media_session_id'=>$session['media_session_id']];
+   ck(get_post_status($r['event_id'])==='pending' && is_wp_error(BadAround_Native_Media_Fence::check($r['event_id'])),$v.'_media_fence');
+   $retry=$adapter->submit($p,$session['capability']);ck(code($retry)==='success' && $retry['duplicate'] && $retry['event_id']===$r['event_id'],$v.'_media_retry');
+  }
  }
  $historical=json_decode($wpdb->get_var("SELECT content_original FROM {$wpdb->prefix}ba_reports WHERE id=35"),true); ck(is_array((new BadAround_Moderation_Admin())->canonical_report_view($historical)),'historical_admin_read');
  $after=snapshot(); ck($before===$after,'historical_taxonomy_schema_unchanged');
