@@ -90,7 +90,7 @@ add_action('rest_api_init',function(){
   if(in_array($action,['init','worker','finish'])&&!in_array($name,$names,true))throw new RuntimeException('Unknown QA case');
   if($action==='init'){
    if(is_file($dir.'/'.$name.'.json'))return ['ready'=>true,'existing'=>true];
-   $v=str_contains($name,'v1')?'badaround-report/v1':'badaround-report/v2';$a=nff_payload($v);$a['content']['description'].=' staging '+$name;$b=$a;
+   $v=str_contains($name,'v1')?'badaround-report/v1':'badaround-report/v2';$a=nff_payload($v);$a['content']['description'].=' staging '.$name;$b=$a;
    if(str_ends_with($name,'different'))$b['content']['description'].=' different active value';
    if($name==='v2_stale')$b['vehicle']=['type'=>'car'];
    if($name==='cross_version')$b['schema_version']='badaround-report/v1';
