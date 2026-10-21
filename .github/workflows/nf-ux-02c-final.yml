@@ -88,7 +88,9 @@ jobs:
         run: |
           set -euo pipefail
           curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /tmp/nf-final-wp-cli.phar
-          php /tmp/nf-final-wp-cli.phar core download --version=7.1.3 --path=/tmp/nf-final-wordpress
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 https://wordpress.org/wordpress-7.1.3.zip -o /tmp/nf-final-wordpress.zip
+          unzip -q /tmp/nf-final-wordpress.zip -d /tmp/nf-final-extract
+          mv /tmp/nf-final-extract/wordpress /tmp/nf-final-wordpress
           php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress core verify-checksums --version=7.1.3
           php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress config create --dbname=nf_final --dbuser=root --dbpass=synthetic-nf-final --dbhost=127.0.0.1:3306
           php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress config set DISABLE_WP_CRON true --raw
