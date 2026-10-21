@@ -11,13 +11,29 @@ ftp=ftplib.FTP_TLS(context=ctx,timeout=60);ftp.connect(os.environ['FTP_HOST'],21
 def read(p):
  b=io.BytesIO();ftp.retrbinary('RETR '+ROOT+p,b.write);return b.getvalue()
 def write(p,data):
- parent=ROOT+p.rsplit('/',1)[0]
+ parent=ROOT+str(pathlib.PurePosixPath(p).parent)
  try:ftp.mkd(parent)
  except ftplib.error_perm as e:
   if not str(e).startswith('550'):raise
  tmp=ROOT+p+'.nf02b-tmp';ftp.storbinary('STOR '+tmp,io.BytesIO(data));ftp.rename(tmp,ROOT+p)
 def delete(p):ftp.delete(ROOT+p)
 def sha(b):return hashlib.sha256(b).hexdigest()
+if sys.argv[1]=='recover':
+ hashes={}
+ for p in files:
+  try:old=git('show',BASE+':wordpress/'+p)
+  except subprocess.CalledProcessError:old=None
+  if old is not None:
+   write('wp-content/'+p,old);assert read('wp-content/'+p)==old;hashes[p]=sha(old)
+  else:
+   delete('wp-content/'+p)
+ for p in ['nf02b-03c9f97be0beb9e7ffc18e20dfd3bb5f.php.nf02b-tmp']:
+  delete(p)
+ ftp.rmd(ROOT+'nf02b-03c9f97be0beb9e7ffc18e20dfd3bb5f.php')
+ (state/'recovery-hashes.json').write_text(json.dumps(hashes,indent=2))
+ (state/'rollback-executed.txt').write_text('RESTORED_AND_VERIFIED')
+ print('BASELINE_BYTE_EXACT_RESTORED; TEMPORARY_HARNESS_ARTIFACTS_REMOVED')
+ ftp.quit();sys.exit(0)
 if sys.argv[1]=='prepare':
  entries=[]
  for p in files:
@@ -57,7 +73,7 @@ else:
  except BaseException:
   if harness:
    try:delete(harness)
-   except Exception:print('CRITICAL harness cleanup failed');raise
+   except Exception:print('Harness cleanup failed; runtime rollback continues')
   for e in reversed(touched):
    p='wp-content/'+e['path']
    if e['existed']:
