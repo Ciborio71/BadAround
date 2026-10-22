@@ -1,0 +1,87 @@
+{
+  "candidate": "a4ef16aa067afc94a96cacd55a46a62d1248ed93",
+  "run": 39859999432,
+  "environment": "authorized cloud Chromium real deployed staging",
+  "viewport": {
+    "cssInnerWidth": 1363,
+    "screenshotWidth": 1348,
+    "height": 936
+  },
+  "home": true,
+  "cards": 6,
+  "copy": "candidate exact",
+  "icons": "SVG byte-identical before/after",
+  "links": [
+    {
+      "url": "https://staging.badaround.it/segnalazioni/?categoria=veicoli",
+      "realClick": "PASS",
+      "destinationHeading": "Segnalazioni pubblicate"
+    },
+    {
+      "url": "https://staging.badaround.it/segnalazioni/?categoria=case-e-attivita",
+      "realClick": "PASS",
+      "destinationHeading": "Segnalazioni pubblicate"
+    },
+    {
+      "url": "https://staging.badaround.it/segnalazioni/?categoria=pericoli",
+      "realClick": "PASS",
+      "destinationHeading": "Segnalazioni pubblicate"
+    },
+    {
+      "url": "https://staging.badaround.it/segnalazioni/?categoria=spazi-pubblici",
+      "realClick": "PASS",
+      "destinationHeading": "Segnalazioni pubblicate"
+    },
+    {
+      "url": "https://staging.badaround.it/segnalazioni/?categoria=animali",
+      "realClick": "PASS",
+      "destinationHeading": "Segnalazioni pubblicate"
+    },
+    {
+      "url": "https://staging.badaround.it/segnalazioni/?categoria=oggetti-e-documenti",
+      "realClick": "PASS",
+      "destinationHeading": "Segnalazioni pubblicate"
+    }
+  ],
+  "nativeSchema": "badaround-report/v2",
+  "nativePreselectionAdded": false,
+  "keyboard": {
+    "allSixReachable": true,
+    "outline": "rgb(8, 127, 140) solid 3px",
+    "headerBottom": 77,
+    "lastCardTop": 449.71875,
+    "lastCardBottom": 581.71875
+  },
+  "map": {
+    "rendered": true,
+    "domDescendants": 336,
+    "buttonCount": 16,
+    "publicApproximateAreasVisible": true
+  },
+  "legend": {
+    "baselineIdentical": true,
+    "toggleClose": true,
+    "toggleOpen": true
+  },
+  "geo": {
+    "existingControlEnabled": true,
+    "mapPublicPositionsPreserved": true,
+    "deviceLocationNotRequested": true,
+    "scope": "targeted no-change regression; no GEO contract reopening"
+  },
+  "console": {
+    "applicationErrors": [],
+    "existingGoogleMarkerDeprecation": true,
+    "preexistingBrowserExtensionErrors": true
+  },
+  "performance": {
+    "newHeavyDependencies": false,
+    "phpDeltaBytes": 189,
+    "cssDeltaBytes": 193,
+    "observedRegression": "NONE",
+    "liveLCP": "not exposed by authorized browser API"
+  },
+  "db": "no DB writes issued; no schema/application change; no new submission",
+  "taxonomy": "no taxonomy writes or code changes",
+  "submissions": 0
+}

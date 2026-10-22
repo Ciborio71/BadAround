@@ -1,0 +1,3007 @@
+{
+  "results": [
+    {
+      "width": 1440,
+      "columns": 3,
+      "result": "PASS",
+      "cards": [
+        {
+          "label": "Veicoli",
+          "description": "Furti, danni e veicoli sospetti o abbandonati.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=veicoli",
+          "rect": {
+            "x": 16,
+            "y": 846.703125,
+            "width": 458.65625,
+            "height": 132,
+            "top": 846.703125,
+            "right": 474.65625,
+            "bottom": 978.703125,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M5 14h14l-1.5-5h-11L5 14Zm1 0v3m12-3v3M8 17h8M8 9l1-3h6l1 3\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 30.372583389282227,
+            "y": 861.07568359375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 861.07568359375,
+            "right": 75.62742042541504,
+            "bottom": 906.33056640625,
+            "left": 30.372583389282227
+          }
+        },
+        {
+          "label": "Case e attività",
+          "description": "Furti, tentativi di intrusione e danni ad abitazioni, negozi e uffici.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=case-e-attivita",
+          "rect": {
+            "x": 490.65625,
+            "y": 846.703125,
+            "width": 458.671875,
+            "height": 132,
+            "top": 846.703125,
+            "right": 949.328125,
+            "bottom": 978.703125,
+            "left": 490.65625
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M4 11 12 4l8 7v9h-6v-6h-4v6H4v-9Z\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 505.0288391113281,
+            "y": 861.07568359375,
+            "width": 45.254852294921875,
+            "height": 45.2548828125,
+            "top": 861.07568359375,
+            "right": 550.28369140625,
+            "bottom": 906.33056640625,
+            "left": 505.0288391113281
+          }
+        },
+        {
+          "label": "Pericoli",
+          "description": "Ostacoli, rischi stradali e situazioni di pericolo ambientale.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=pericoli",
+          "rect": {
+            "x": 965.328125,
+            "y": 846.703125,
+            "width": 458.65625,
+            "height": 132,
+            "top": 846.703125,
+            "right": 1423.984375,
+            "bottom": 978.703125,
+            "left": 965.328125
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M12 4 3.5 20h17L12 4Z\"></path><path d=\"M12 9v5m0 3h.01\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 979.70068359375,
+            "y": 861.07568359375,
+            "width": 45.2548828125,
+            "height": 45.2548828125,
+            "top": 861.07568359375,
+            "right": 1024.95556640625,
+            "bottom": 906.33056640625,
+            "left": 979.70068359375
+          }
+        },
+        {
+          "label": "Spazi pubblici",
+          "description": "Rifiuti abbandonati, guasti e danni a strade e aree comuni.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=spazi-pubblici",
+          "rect": {
+            "x": 16,
+            "y": 994.703125,
+            "width": 458.65625,
+            "height": 132,
+            "top": 994.703125,
+            "right": 474.65625,
+            "bottom": 1126.703125,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M4 18h16M6 18V9h12v9M8 9V6h8v3M9 13h2m2 0h2\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 30.372583389282227,
+            "y": 1009.07568359375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 1009.07568359375,
+            "right": 75.62742042541504,
+            "bottom": 1054.33056640625,
+            "left": 30.372583389282227
+          }
+        },
+        {
+          "label": "Animali",
+          "description": "Animali smarriti, ritrovati, feriti o in pericolo.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=animali",
+          "rect": {
+            "x": 490.65625,
+            "y": 994.703125,
+            "width": 458.671875,
+            "height": 132,
+            "top": 994.703125,
+            "right": 949.328125,
+            "bottom": 1126.703125,
+            "left": 490.65625
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M8 11c-1.3 0-2.3-1.3-2.3-2.8S6.5 5.5 7.8 5.5s2.2 1.2 2.2 2.7S9.3 11 8 11Zm8 0c-1.3 0-2-1.3-2-2.8s.9-2.7 2.2-2.7 2.1 1.2 2.1 2.7S17.3 11 16 11Zm-4 9c-3.2 0-5.4-1.7-5.4-3.8 0-1.8 1.4-3 3-3.9.8-.5 1.2-1.5 2.4-1.5s1.6 1 2.4 1.5c1.6.9 3 2.1 3 3.9 0 2.1-2.2 3.8-5.4 3.8Z\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 505.0288391113281,
+            "y": 1009.07568359375,
+            "width": 45.254852294921875,
+            "height": 45.2548828125,
+            "top": 1009.07568359375,
+            "right": 550.28369140625,
+            "bottom": 1054.33056640625,
+            "left": 505.0288391113281
+          }
+        },
+        {
+          "label": "Oggetti e documenti",
+          "description": "Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=oggetti-e-documenti",
+          "rect": {
+            "x": 965.328125,
+            "y": 994.703125,
+            "width": 458.65625,
+            "height": 132,
+            "top": 994.703125,
+            "right": 1423.984375,
+            "bottom": 1126.703125,
+            "left": 965.328125
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M5 7h14v12H5V7Zm3-3h8v3H8V4Zm1 7h6m-6 4h4\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 979.70068359375,
+            "y": 1009.07568359375,
+            "width": 45.2548828125,
+            "height": 45.2548828125,
+            "top": 1009.07568359375,
+            "right": 1024.95556640625,
+            "bottom": 1054.33056640625,
+            "left": 979.70068359375
+          }
+        }
+      ],
+      "overflow": {
+        "width": 1440,
+        "document": 1440,
+        "cards": 1408
+      },
+      "keyboard": true,
+      "focus": true,
+      "legend": true,
+      "mobileNavigation": "not applicable"
+    },
+    {
+      "width": 1280,
+      "columns": 3,
+      "result": "PASS",
+      "cards": [
+        {
+          "label": "Veicoli",
+          "description": "Furti, danni e veicoli sospetti o abbandonati.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=veicoli",
+          "rect": {
+            "x": 16,
+            "y": 833.6875,
+            "width": 405.328125,
+            "height": 132,
+            "top": 833.6875,
+            "right": 421.328125,
+            "bottom": 965.6875,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M5 14h14l-1.5-5h-11L5 14Zm1 0v3m12-3v3M8 17h8M8 9l1-3h6l1 3\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 30.372583389282227,
+            "y": 848.06005859375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 848.06005859375,
+            "right": 75.62742042541504,
+            "bottom": 893.31494140625,
+            "left": 30.372583389282227
+          }
+        },
+        {
+          "label": "Case e attività",
+          "description": "Furti, tentativi di intrusione e danni ad abitazioni, negozi e uffici.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=case-e-attivita",
+          "rect": {
+            "x": 437.328125,
+            "y": 833.6875,
+            "width": 405.328125,
+            "height": 132,
+            "top": 833.6875,
+            "right": 842.65625,
+            "bottom": 965.6875,
+            "left": 437.328125
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M4 11 12 4l8 7v9h-6v-6h-4v6H4v-9Z\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 451.7007141113281,
+            "y": 848.06005859375,
+            "width": 45.25482177734375,
+            "height": 45.2548828125,
+            "top": 848.06005859375,
+            "right": 496.9555358886719,
+            "bottom": 893.31494140625,
+            "left": 451.7007141113281
+          }
+        },
+        {
+          "label": "Pericoli",
+          "description": "Ostacoli, rischi stradali e situazioni di pericolo ambientale.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=pericoli",
+          "rect": {
+            "x": 858.65625,
+            "y": 833.6875,
+            "width": 405.34375,
+            "height": 132,
+            "top": 833.6875,
+            "right": 1264,
+            "bottom": 965.6875,
+            "left": 858.65625
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M12 4 3.5 20h17L12 4Z\"></path><path d=\"M12 9v5m0 3h.01\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 873.02880859375,
+            "y": 848.06005859375,
+            "width": 45.2548828125,
+            "height": 45.2548828125,
+            "top": 848.06005859375,
+            "right": 918.28369140625,
+            "bottom": 893.31494140625,
+            "left": 873.02880859375
+          }
+        },
+        {
+          "label": "Spazi pubblici",
+          "description": "Rifiuti abbandonati, guasti e danni a strade e aree comuni.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=spazi-pubblici",
+          "rect": {
+            "x": 16,
+            "y": 981.6875,
+            "width": 405.328125,
+            "height": 132,
+            "top": 981.6875,
+            "right": 421.328125,
+            "bottom": 1113.6875,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M4 18h16M6 18V9h12v9M8 9V6h8v3M9 13h2m2 0h2\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 30.372583389282227,
+            "y": 996.06005859375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 996.06005859375,
+            "right": 75.62742042541504,
+            "bottom": 1041.31494140625,
+            "left": 30.372583389282227
+          }
+        },
+        {
+          "label": "Animali",
+          "description": "Animali smarriti, ritrovati, feriti o in pericolo.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=animali",
+          "rect": {
+            "x": 437.328125,
+            "y": 981.6875,
+            "width": 405.328125,
+            "height": 132,
+            "top": 981.6875,
+            "right": 842.65625,
+            "bottom": 1113.6875,
+            "left": 437.328125
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M8 11c-1.3 0-2.3-1.3-2.3-2.8S6.5 5.5 7.8 5.5s2.2 1.2 2.2 2.7S9.3 11 8 11Zm8 0c-1.3 0-2-1.3-2-2.8s.9-2.7 2.2-2.7 2.1 1.2 2.1 2.7S17.3 11 16 11Zm-4 9c-3.2 0-5.4-1.7-5.4-3.8 0-1.8 1.4-3 3-3.9.8-.5 1.2-1.5 2.4-1.5s1.6 1 2.4 1.5c1.6.9 3 2.1 3 3.9 0 2.1-2.2 3.8-5.4 3.8Z\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 451.7007141113281,
+            "y": 996.06005859375,
+            "width": 45.25482177734375,
+            "height": 45.2548828125,
+            "top": 996.06005859375,
+            "right": 496.9555358886719,
+            "bottom": 1041.31494140625,
+            "left": 451.7007141113281
+          }
+        },
+        {
+          "label": "Oggetti e documenti",
+          "description": "Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=oggetti-e-documenti",
+          "rect": {
+            "x": 858.65625,
+            "y": 981.6875,
+            "width": 405.34375,
+            "height": 132,
+            "top": 981.6875,
+            "right": 1264,
+            "bottom": 1113.6875,
+            "left": 858.65625
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M5 7h14v12H5V7Zm3-3h8v3H8V4Zm1 7h6m-6 4h4\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 873.02880859375,
+            "y": 996.06005859375,
+            "width": 45.2548828125,
+            "height": 45.2548828125,
+            "top": 996.06005859375,
+            "right": 918.28369140625,
+            "bottom": 1041.31494140625,
+            "left": 873.02880859375
+          }
+        }
+      ],
+      "overflow": {
+        "width": 1280,
+        "document": 1280,
+        "cards": 1248
+      },
+      "keyboard": true,
+      "focus": true,
+      "legend": true,
+      "mobileNavigation": "not applicable"
+    },
+    {
+      "width": 1024,
+      "columns": 3,
+      "result": "PASS",
+      "cards": [
+        {
+          "label": "Veicoli",
+          "description": "Furti, danni e veicoli sospetti o abbandonati.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=veicoli",
+          "rect": {
+            "x": 16,
+            "y": 778.609375,
+            "width": 320,
+            "height": 132,
+            "top": 778.609375,
+            "right": 336,
+            "bottom": 910.609375,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M5 14h14l-1.5-5h-11L5 14Zm1 0v3m12-3v3M8 17h8M8 9l1-3h6l1 3\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 30.372583389282227,
+            "y": 792.98193359375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 792.98193359375,
+            "right": 75.62742042541504,
+            "bottom": 838.23681640625,
+            "left": 30.372583389282227
+          }
+        },
+        {
+          "label": "Case e attività",
+          "description": "Furti, tentativi di intrusione e danni ad abitazioni, negozi e uffici.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=case-e-attivita",
+          "rect": {
+            "x": 352,
+            "y": 778.609375,
+            "width": 320,
+            "height": 132,
+            "top": 778.609375,
+            "right": 672,
+            "bottom": 910.609375,
+            "left": 352
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M4 11 12 4l8 7v9h-6v-6h-4v6H4v-9Z\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 366.3725891113281,
+            "y": 792.98193359375,
+            "width": 45.25482177734375,
+            "height": 45.2548828125,
+            "top": 792.98193359375,
+            "right": 411.6274108886719,
+            "bottom": 838.23681640625,
+            "left": 366.3725891113281
+          }
+        },
+        {
+          "label": "Pericoli",
+          "description": "Ostacoli, rischi stradali e situazioni di pericolo ambientale.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=pericoli",
+          "rect": {
+            "x": 688,
+            "y": 778.609375,
+            "width": 320,
+            "height": 132,
+            "top": 778.609375,
+            "right": 1008,
+            "bottom": 910.609375,
+            "left": 688
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M12 4 3.5 20h17L12 4Z\"></path><path d=\"M12 9v5m0 3h.01\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 702.37255859375,
+            "y": 792.98193359375,
+            "width": 45.2548828125,
+            "height": 45.2548828125,
+            "top": 792.98193359375,
+            "right": 747.62744140625,
+            "bottom": 838.23681640625,
+            "left": 702.37255859375
+          }
+        },
+        {
+          "label": "Spazi pubblici",
+          "description": "Rifiuti abbandonati, guasti e danni a strade e aree comuni.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=spazi-pubblici",
+          "rect": {
+            "x": 16,
+            "y": 926.609375,
+            "width": 320,
+            "height": 132,
+            "top": 926.609375,
+            "right": 336,
+            "bottom": 1058.609375,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M4 18h16M6 18V9h12v9M8 9V6h8v3M9 13h2m2 0h2\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 30.372583389282227,
+            "y": 940.98193359375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 940.98193359375,
+            "right": 75.62742042541504,
+            "bottom": 986.23681640625,
+            "left": 30.372583389282227
+          }
+        },
+        {
+          "label": "Animali",
+          "description": "Animali smarriti, ritrovati, feriti o in pericolo.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=animali",
+          "rect": {
+            "x": 352,
+            "y": 926.609375,
+            "width": 320,
+            "height": 132,
+            "top": 926.609375,
+            "right": 672,
+            "bottom": 1058.609375,
+            "left": 352
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M8 11c-1.3 0-2.3-1.3-2.3-2.8S6.5 5.5 7.8 5.5s2.2 1.2 2.2 2.7S9.3 11 8 11Zm8 0c-1.3 0-2-1.3-2-2.8s.9-2.7 2.2-2.7 2.1 1.2 2.1 2.7S17.3 11 16 11Zm-4 9c-3.2 0-5.4-1.7-5.4-3.8 0-1.8 1.4-3 3-3.9.8-.5 1.2-1.5 2.4-1.5s1.6 1 2.4 1.5c1.6.9 3 2.1 3 3.9 0 2.1-2.2 3.8-5.4 3.8Z\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 366.3725891113281,
+            "y": 940.98193359375,
+            "width": 45.25482177734375,
+            "height": 45.2548828125,
+            "top": 940.98193359375,
+            "right": 411.6274108886719,
+            "bottom": 986.23681640625,
+            "left": 366.3725891113281
+          }
+        },
+        {
+          "label": "Oggetti e documenti",
+          "description": "Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=oggetti-e-documenti",
+          "rect": {
+            "x": 688,
+            "y": 926.609375,
+            "width": 320,
+            "height": 132,
+            "top": 926.609375,
+            "right": 1008,
+            "bottom": 1058.609375,
+            "left": 688
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M5 7h14v12H5V7Zm3-3h8v3H8V4Zm1 7h6m-6 4h4\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 702.37255859375,
+            "y": 940.98193359375,
+            "width": 45.2548828125,
+            "height": 45.2548828125,
+            "top": 940.98193359375,
+            "right": 747.62744140625,
+            "bottom": 986.23681640625,
+            "left": 702.37255859375
+          }
+        }
+      ],
+      "overflow": {
+        "width": 1024,
+        "document": 1024,
+        "cards": 992
+      },
+      "keyboard": true,
+      "focus": true,
+      "legend": true,
+      "mobileNavigation": "not applicable"
+    },
+    {
+      "width": 768,
+      "columns": 2,
+      "result": "PASS",
+      "cards": [
+        {
+          "label": "Veicoli",
+          "description": "Furti, danni e veicoli sospetti o abbandonati.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=veicoli",
+          "rect": {
+            "x": 16,
+            "y": 1176.390625,
+            "width": 360,
+            "height": 132,
+            "top": 1176.390625,
+            "right": 376,
+            "bottom": 1308.390625,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M5 14h14l-1.5-5h-11L5 14Zm1 0v3m12-3v3M8 17h8M8 9l1-3h6l1 3\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 30.372583389282227,
+            "y": 1190.76318359375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 1190.76318359375,
+            "right": 75.62742042541504,
+            "bottom": 1236.01806640625,
+            "left": 30.372583389282227
+          }
+        },
+        {
+          "label": "Case e attività",
+          "description": "Furti, tentativi di intrusione e danni ad abitazioni, negozi e uffici.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=case-e-attivita",
+          "rect": {
+            "x": 392,
+            "y": 1176.390625,
+            "width": 360,
+            "height": 132,
+            "top": 1176.390625,
+            "right": 752,
+            "bottom": 1308.390625,
+            "left": 392
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M4 11 12 4l8 7v9h-6v-6h-4v6H4v-9Z\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 406.3725891113281,
+            "y": 1190.76318359375,
+            "width": 45.25482177734375,
+            "height": 45.2548828125,
+            "top": 1190.76318359375,
+            "right": 451.6274108886719,
+            "bottom": 1236.01806640625,
+            "left": 406.3725891113281
+          }
+        },
+        {
+          "label": "Pericoli",
+          "description": "Ostacoli, rischi stradali e situazioni di pericolo ambientale.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=pericoli",
+          "rect": {
+            "x": 16,
+            "y": 1324.390625,
+            "width": 360,
+            "height": 132,
+            "top": 1324.390625,
+            "right": 376,
+            "bottom": 1456.390625,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M12 4 3.5 20h17L12 4Z\"></path><path d=\"M12 9v5m0 3h.01\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 30.372583389282227,
+            "y": 1338.76318359375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 1338.76318359375,
+            "right": 75.62742042541504,
+            "bottom": 1384.01806640625,
+            "left": 30.372583389282227
+          }
+        },
+        {
+          "label": "Spazi pubblici",
+          "description": "Rifiuti abbandonati, guasti e danni a strade e aree comuni.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=spazi-pubblici",
+          "rect": {
+            "x": 392,
+            "y": 1324.390625,
+            "width": 360,
+            "height": 132,
+            "top": 1324.390625,
+            "right": 752,
+            "bottom": 1456.390625,
+            "left": 392
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M4 18h16M6 18V9h12v9M8 9V6h8v3M9 13h2m2 0h2\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 406.3725891113281,
+            "y": 1338.76318359375,
+            "width": 45.25482177734375,
+            "height": 45.2548828125,
+            "top": 1338.76318359375,
+            "right": 451.6274108886719,
+            "bottom": 1384.01806640625,
+            "left": 406.3725891113281
+          }
+        },
+        {
+          "label": "Animali",
+          "description": "Animali smarriti, ritrovati, feriti o in pericolo.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=animali",
+          "rect": {
+            "x": 16,
+            "y": 1472.390625,
+            "width": 360,
+            "height": 132,
+            "top": 1472.390625,
+            "right": 376,
+            "bottom": 1604.390625,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M8 11c-1.3 0-2.3-1.3-2.3-2.8S6.5 5.5 7.8 5.5s2.2 1.2 2.2 2.7S9.3 11 8 11Zm8 0c-1.3 0-2-1.3-2-2.8s.9-2.7 2.2-2.7 2.1 1.2 2.1 2.7S17.3 11 16 11Zm-4 9c-3.2 0-5.4-1.7-5.4-3.8 0-1.8 1.4-3 3-3.9.8-.5 1.2-1.5 2.4-1.5s1.6 1 2.4 1.5c1.6.9 3 2.1 3 3.9 0 2.1-2.2 3.8-5.4 3.8Z\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 30.372583389282227,
+            "y": 1486.76318359375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 1486.76318359375,
+            "right": 75.62742042541504,
+            "bottom": 1532.01806640625,
+            "left": 30.372583389282227
+          }
+        },
+        {
+          "label": "Oggetti e documenti",
+          "description": "Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=oggetti-e-documenti",
+          "rect": {
+            "x": 392,
+            "y": 1472.390625,
+            "width": 360,
+            "height": 132,
+            "top": 1472.390625,
+            "right": 752,
+            "bottom": 1604.390625,
+            "left": 392
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M5 7h14v12H5V7Zm3-3h8v3H8V4Zm1 7h6m-6 4h4\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 406.3725891113281,
+            "y": 1486.76318359375,
+            "width": 45.25482177734375,
+            "height": 45.2548828125,
+            "top": 1486.76318359375,
+            "right": 451.6274108886719,
+            "bottom": 1532.01806640625,
+            "left": 406.3725891113281
+          }
+        }
+      ],
+      "overflow": {
+        "width": 768,
+        "document": 768,
+        "cards": 736
+      },
+      "keyboard": true,
+      "focus": true,
+      "legend": true,
+      "mobileNavigation": "PASS"
+    },
+    {
+      "width": 390,
+      "columns": 1,
+      "result": "PASS",
+      "cards": [
+        {
+          "label": "Veicoli",
+          "description": "Furti, danni e veicoli sospetti o abbandonati.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=veicoli",
+          "rect": {
+            "x": 16,
+            "y": 1285.625,
+            "width": 358,
+            "height": 120,
+            "top": 1285.625,
+            "right": 374,
+            "bottom": 1405.625,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M5 14h14l-1.5-5h-11L5 14Zm1 0v3m12-3v3M8 17h8M8 9l1-3h6l1 3\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 28.372583389282227,
+            "y": 1297.99755859375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 1297.99755859375,
+            "right": 73.62742042541504,
+            "bottom": 1343.25244140625,
+            "left": 28.372583389282227
+          }
+        },
+        {
+          "label": "Case e attività",
+          "description": "Furti, tentativi di intrusione e danni ad abitazioni, negozi e uffici.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=case-e-attivita",
+          "rect": {
+            "x": 16,
+            "y": 1421.625,
+            "width": 358,
+            "height": 120,
+            "top": 1421.625,
+            "right": 374,
+            "bottom": 1541.625,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M4 11 12 4l8 7v9h-6v-6h-4v6H4v-9Z\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 28.372583389282227,
+            "y": 1433.99755859375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 1433.99755859375,
+            "right": 73.62742042541504,
+            "bottom": 1479.25244140625,
+            "left": 28.372583389282227
+          }
+        },
+        {
+          "label": "Pericoli",
+          "description": "Ostacoli, rischi stradali e situazioni di pericolo ambientale.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=pericoli",
+          "rect": {
+            "x": 16,
+            "y": 1557.625,
+            "width": 358,
+            "height": 120,
+            "top": 1557.625,
+            "right": 374,
+            "bottom": 1677.625,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M12 4 3.5 20h17L12 4Z\"></path><path d=\"M12 9v5m0 3h.01\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 28.372583389282227,
+            "y": 1569.99755859375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 1569.99755859375,
+            "right": 73.62742042541504,
+            "bottom": 1615.25244140625,
+            "left": 28.372583389282227
+          }
+        },
+        {
+          "label": "Spazi pubblici",
+          "description": "Rifiuti abbandonati, guasti e danni a strade e aree comuni.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=spazi-pubblici",
+          "rect": {
+            "x": 16,
+            "y": 1693.625,
+            "width": 358,
+            "height": 120,
+            "top": 1693.625,
+            "right": 374,
+            "bottom": 1813.625,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M4 18h16M6 18V9h12v9M8 9V6h8v3M9 13h2m2 0h2\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 28.372583389282227,
+            "y": 1705.99755859375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 1705.99755859375,
+            "right": 73.62742042541504,
+            "bottom": 1751.25244140625,
+            "left": 28.372583389282227
+          }
+        },
+        {
+          "label": "Animali",
+          "description": "Animali smarriti, ritrovati, feriti o in pericolo.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=animali",
+          "rect": {
+            "x": 16,
+            "y": 1829.625,
+            "width": 358,
+            "height": 120,
+            "top": 1829.625,
+            "right": 374,
+            "bottom": 1949.625,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M8 11c-1.3 0-2.3-1.3-2.3-2.8S6.5 5.5 7.8 5.5s2.2 1.2 2.2 2.7S9.3 11 8 11Zm8 0c-1.3 0-2-1.3-2-2.8s.9-2.7 2.2-2.7 2.1 1.2 2.1 2.7S17.3 11 16 11Zm-4 9c-3.2 0-5.4-1.7-5.4-3.8 0-1.8 1.4-3 3-3.9.8-.5 1.2-1.5 2.4-1.5s1.6 1 2.4 1.5c1.6.9 3 2.1 3 3.9 0 2.1-2.2 3.8-5.4 3.8Z\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 28.372583389282227,
+            "y": 1841.99755859375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 1841.99755859375,
+            "right": 73.62742042541504,
+            "bottom": 1887.25244140625,
+            "left": 28.372583389282227
+          }
+        },
+        {
+          "label": "Oggetti e documenti",
+          "description": "Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=oggetti-e-documenti",
+          "rect": {
+            "x": 16,
+            "y": 1965.625,
+            "width": 358,
+            "height": 120,
+            "top": 1965.625,
+            "right": 374,
+            "bottom": 2085.625,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M5 7h14v12H5V7Zm3-3h8v3H8V4Zm1 7h6m-6 4h4\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 28.372583389282227,
+            "y": 1977.99755859375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 1977.99755859375,
+            "right": 73.62742042541504,
+            "bottom": 2023.25244140625,
+            "left": 28.372583389282227
+          }
+        }
+      ],
+      "overflow": {
+        "width": 390,
+        "document": 390,
+        "cards": 358
+      },
+      "keyboard": true,
+      "focus": true,
+      "legend": true,
+      "mobileNavigation": "PASS"
+    },
+    {
+      "width": 320,
+      "columns": 1,
+      "result": "PASS",
+      "cards": [
+        {
+          "label": "Veicoli",
+          "description": "Furti, danni e veicoli sospetti o abbandonati.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=veicoli",
+          "rect": {
+            "x": 16,
+            "y": 1379.59375,
+            "width": 288,
+            "height": 120,
+            "top": 1379.59375,
+            "right": 304,
+            "bottom": 1499.59375,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M5 14h14l-1.5-5h-11L5 14Zm1 0v3m12-3v3M8 17h8M8 9l1-3h6l1 3\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 28.372583389282227,
+            "y": 1391.96630859375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 1391.96630859375,
+            "right": 73.62742042541504,
+            "bottom": 1437.22119140625,
+            "left": 28.372583389282227
+          }
+        },
+        {
+          "label": "Case e attività",
+          "description": "Furti, tentativi di intrusione e danni ad abitazioni, negozi e uffici.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=case-e-attivita",
+          "rect": {
+            "x": 16,
+            "y": 1515.59375,
+            "width": 288,
+            "height": 120,
+            "top": 1515.59375,
+            "right": 304,
+            "bottom": 1635.59375,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M4 11 12 4l8 7v9h-6v-6h-4v6H4v-9Z\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 28.372583389282227,
+            "y": 1527.96630859375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 1527.96630859375,
+            "right": 73.62742042541504,
+            "bottom": 1573.22119140625,
+            "left": 28.372583389282227
+          }
+        },
+        {
+          "label": "Pericoli",
+          "description": "Ostacoli, rischi stradali e situazioni di pericolo ambientale.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=pericoli",
+          "rect": {
+            "x": 16,
+            "y": 1651.59375,
+            "width": 288,
+            "height": 120,
+            "top": 1651.59375,
+            "right": 304,
+            "bottom": 1771.59375,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M12 4 3.5 20h17L12 4Z\"></path><path d=\"M12 9v5m0 3h.01\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 28.372583389282227,
+            "y": 1663.96630859375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 1663.96630859375,
+            "right": 73.62742042541504,
+            "bottom": 1709.22119140625,
+            "left": 28.372583389282227
+          }
+        },
+        {
+          "label": "Spazi pubblici",
+          "description": "Rifiuti abbandonati, guasti e danni a strade e aree comuni.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=spazi-pubblici",
+          "rect": {
+            "x": 16,
+            "y": 1787.59375,
+            "width": 288,
+            "height": 120,
+            "top": 1787.59375,
+            "right": 304,
+            "bottom": 1907.59375,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M4 18h16M6 18V9h12v9M8 9V6h8v3M9 13h2m2 0h2\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 28.372583389282227,
+            "y": 1799.96630859375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 1799.96630859375,
+            "right": 73.62742042541504,
+            "bottom": 1845.22119140625,
+            "left": 28.372583389282227
+          }
+        },
+        {
+          "label": "Animali",
+          "description": "Animali smarriti, ritrovati, feriti o in pericolo.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=animali",
+          "rect": {
+            "x": 16,
+            "y": 1923.59375,
+            "width": 288,
+            "height": 120,
+            "top": 1923.59375,
+            "right": 304,
+            "bottom": 2043.59375,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M8 11c-1.3 0-2.3-1.3-2.3-2.8S6.5 5.5 7.8 5.5s2.2 1.2 2.2 2.7S9.3 11 8 11Zm8 0c-1.3 0-2-1.3-2-2.8s.9-2.7 2.2-2.7 2.1 1.2 2.1 2.7S17.3 11 16 11Zm-4 9c-3.2 0-5.4-1.7-5.4-3.8 0-1.8 1.4-3 3-3.9.8-.5 1.2-1.5 2.4-1.5s1.6 1 2.4 1.5c1.6.9 3 2.1 3 3.9 0 2.1-2.2 3.8-5.4 3.8Z\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 28.372583389282227,
+            "y": 1935.96630859375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 1935.96630859375,
+            "right": 73.62742042541504,
+            "bottom": 1981.22119140625,
+            "left": 28.372583389282227
+          }
+        },
+        {
+          "label": "Oggetti e documenti",
+          "description": "Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.",
+          "href": "https://staging.badaround.it/segnalazioni/?categoria=oggetti-e-documenti",
+          "rect": {
+            "x": 16,
+            "y": 2059.59375,
+            "width": 288,
+            "height": 120,
+            "top": 2059.59375,
+            "right": 304,
+            "bottom": 2179.59375,
+            "left": 16
+          },
+          "svg": "<svg viewBox=\"0 0 24 24\"><path d=\"M5 7h14v12H5V7Zm3-3h8v3H8V4Zm1 7h6m-6 4h4\"></path></svg>",
+          "nested": 0,
+          "titleColor": "rgb(7, 26, 56)",
+          "copyColor": "rgb(82, 101, 121)",
+          "background": "rgb(255, 255, 255)",
+          "iconRect": {
+            "x": 28.372583389282227,
+            "y": 2071.96630859375,
+            "width": 45.25483703613281,
+            "height": 45.2548828125,
+            "top": 2071.96630859375,
+            "right": 73.62742042541504,
+            "bottom": 2117.22119140625,
+            "left": 28.372583389282227
+          }
+        }
+      ],
+      "overflow": {
+        "width": 320,
+        "document": 320,
+        "cards": 288
+      },
+      "keyboard": true,
+      "focus": true,
+      "legend": true,
+      "mobileNavigation": "PASS"
+    }
+  ],
+  "errors": [],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    },
+    {
+      "method": "GET",
+      "path": "/segnalazioni/"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/css/minified/main.min.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/base.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/components.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/shell.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/home.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/css/map.css"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/astra/assets/js/minified/frontend.min.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/navigation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/wp-content/themes/badaround-child/assets/js/ui.js"
+    }
+  ]
+}

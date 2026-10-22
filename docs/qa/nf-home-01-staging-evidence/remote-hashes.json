@@ -1,0 +1,14 @@
+[
+  {
+    "path": "front-page.php",
+    "remote_sha256": "a9dc0b994e9426a29bc7921b74e61af04aece93f8ef4934ec6964f9efc617f4b",
+    "candidate_sha256": "a9dc0b994e9426a29bc7921b74e61af04aece93f8ef4934ec6964f9efc617f4b",
+    "match": true
+  },
+  {
+    "path": "assets/css/home.css",
+    "remote_sha256": "8369538c0b6ed50ac8650fa6774e648a1ef7cc82cbd20e2e7b73db424e34f442",
+    "candidate_sha256": "8369538c0b6ed50ac8650fa6774e648a1ef7cc82cbd20e2e7b73db424e34f442",
+    "match": true
+  }
+]
