@@ -1,0 +1,13 @@
+'use strict';
+const {chromium,fs,ck,checks,boot,set,seed,contract}=require('./nf05-helpers.cjs');
+(async()=>{const browser=await chromium.launch();try{const {context,page}=await boot(browser,1440);const output=[];
+for(const [key,spec] of Object.entries(contract.fields).filter(([,s])=>s.source_field)){
+ const row=contract.regression_oracle.find(o=>contract.matrix.find(r=>r.subtype===o.subtype).fields[key].state!=='HIDDEN');await seed(page,row);
+ await page.evaluate(key=>{const {model:m,config:c}=document.querySelector('[data-native-report]').nativeReport;function activate(e){if(e.all)e.all.forEach(activate);else if(e.any)activate(e.any[0]);else if(e.op!=='active'){const r=m.rule(e.field);if(r?.condition)activate(r.condition);m.set(e.field,e.op==='contains'?[e.value]:e.value??(e.values.includes(m.effective(e.field))?m.effective(e.field):e.values[0]));}}activate(m.rule(key).condition);m.step=Object.keys(c.steps).indexOf(c.fields[key].step);document.querySelector('[name="content.description"]').dispatchEvent(new Event('input',{bubbles:true}));},key);
+ const input=page.locator(`[name="${key}"]`);await input.fill('');await page.locator('[data-native-next]').click();ck(await input.getAttribute('aria-invalid')==='true','active required specification blocks '+key);
+ await page.evaluate(key=>{const {model:m,config:c}=document.querySelector('[data-native-report]').nativeReport;const parent=c.fields[key].sourceField,f=c.fields[parent],v=(f.constraints.enum||f.constraints.item_enum).find(v=>v!=='other');m.set(parent,f.type==='array'?[v]:v);const el=document.querySelector(`[name="${parent}"]`);el.dispatchEvent(new Event('change',{bubbles:true}));},key);
+ ck(!(await input.isVisible())&&await input.isDisabled()&&await input.getAttribute('aria-invalid')!=='true','dynamic hidden removes error and focusability '+key);
+ ck(await page.evaluate(key=>{const {model:m}=document.querySelector('[data-native-report]').nativeReport;return !m.validate().some(e=>e.field===key)&&key.split('.').reduce((v,k)=>v?.[k],m.payload())===undefined;},key),'hidden no validation payload '+key);
+ await page.locator('[data-native-back]').click();await page.locator('[data-native-next]').click();ck(await input.getAttribute('aria-invalid')!=='true'&&!(await input.isVisible()),'back/forward no resurrected error '+key);output.push({field:key,result:'PASS'});
+}
+fs.writeFileSync('evidence/dynamic-ui-errors.json',JSON.stringify({pass:true,output,checks},null,2));await context.close();}finally{await browser.close();}})().catch(e=>{fs.writeFileSync('evidence/dynamic-ui-failure.json',JSON.stringify({message:e.message,stack:e.stack},null,2));console.error(e);process.exitCode=1;});

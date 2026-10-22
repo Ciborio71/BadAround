@@ -51,10 +51,11 @@ jobs:
           php -l ops/nf05-probe.php
           node --check ops/nf05-sweep.cjs
           node --check ops/nf05-golden.cjs
-      - name: Prepare official browser test dependencies before any upload
+      - name: Prepare bundled Chromium using existing runner system dependencies
+        timeout-minutes: 5
         run: |
           npm install --prefix /tmp/nf03-live --no-save playwright@1.62.1
-          node /tmp/nf03-live/node_modules/playwright/cli.js install --with-deps chromium
+          node /tmp/nf03-live/node_modules/playwright/cli.js install chromium
       - name: Provision officially signed chain and verify against runner root trust
         shell: bash
         run: |
@@ -80,6 +81,8 @@ jobs:
         run: python ops/nf05-custody.py differential
       - name: Eight Altro and frozen emergency actual browser regression
         run: node ops/nf04-live.cjs qa
+      - name: Dynamically hidden specification errors clear on back-forward
+        run: node ops/nf05-ui-errors.cjs
       - name: Targeted responsive representative profiles
         run: node ops/nf05-responsive.cjs
       - name: Quick isolated C.1 and C.2 regression
