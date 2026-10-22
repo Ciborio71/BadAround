@@ -1,0 +1,8 @@
+{
+  "candidate": "48bab2229c00fb28f01d54117dd1278074f10d69",
+  "run": "39874856966",
+  "phase": "UPLOAD",
+  "preupload": "53/53 custody, 7 byte-exact backups and DB/protected-state captured",
+  "max_report": 72,
+  "max_event": 351
+}
