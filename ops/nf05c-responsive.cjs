@@ -49,7 +49,7 @@ for(const width of [320,390,1440])for(const profile of profiles){
  if(profile.activate){
   if(profile.activate==='animal'){
    const edit=page.locator('[data-native-field="animal.type"] .ba-native-edit-choice');if(await edit.count()&&await edit.isVisible())await edit.click();
-   await page.locator('[data-native-field="animal.type"] input[type=radio][value=other]').press('Space');
+   await page.locator('[name="animal.type"]').selectOption('other');
   }else{
    const edit=page.locator('[data-native-field="authority.status"] .ba-native-edit-choice');if(await edit.count()&&await edit.isVisible())await edit.click();
    await page.locator('[data-beta-authority]').selectOption('yes:other');
