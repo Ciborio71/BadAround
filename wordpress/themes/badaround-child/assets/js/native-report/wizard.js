@@ -521,10 +521,9 @@
       ns.presentErrors(container, visibleErrors, config, (path, file) => {
         model.step = steps.indexOf(config.fields[path].step); render();
         if (config.fields[path].step === 'location' && path.startsWith('location.') && !config.fields[path].sourceField) {
-          focusStep('location');
           const start = container.querySelector('[data-smart-start]');
           const search = start && !start.hidden ? start : container.querySelector('[data-smart-widget]')?.firstElementChild;
-          if (search && !search.disabled) search.focus();
+          if (search && !search.disabled) revealQuestion(search,search.closest('[data-native-smart-address]'));
           return;
         }
         if (file && mediaView) return mediaView.focus(file);
@@ -539,7 +538,8 @@
         const index=visibleErrors.findIndex(error=>declarationPaths.includes(error.field));
         const item=container.querySelectorAll('[data-native-errors] li')[index];
         const button=document.createElement('button');button.type='button';button.textContent='Prima di inviare: conferma le dichiarazioni per proseguire.';
-        button.addEventListener('click',()=>{model.step=steps.indexOf('contact');render();declarationInput.focus();});item.replaceChildren(button);
+        button.addEventListener('click',()=>{model.step=steps.indexOf('contact');render();revealQuestion(declarationInput,declaration);});item.replaceChildren(button);
+        if(visibleErrors.length===1){container.querySelector('[data-native-errors]').hidden=true;revealQuestion(declarationInput,declaration);}
       }
     }
     wrappers.forEach(wrapper => {
@@ -567,7 +567,7 @@
     listen(form,'change', event => {
       const wrapper = event.target.closest('[data-native-field]'); if (!wrapper) return;
       model.set(wrapper.dataset.nativeField, read(wrapper)); ns.presentErrors(container, [], config); render();
-      if(event.target.tagName==='SELECT'&&!event.target.hidden){
+      if(event.target.tagName==='SELECT'&&!event.target.hidden&&event.target.value){
         clearTimeout(selectAdvanceTimer);
         selectAdvanceTimer=setTimeout(()=>{if(!disposed&&document.activeElement===event.target)nextQuestion(wrapper);},140);
       }

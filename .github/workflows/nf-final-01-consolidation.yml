@@ -24,6 +24,12 @@ jobs:
           set -euo pipefail
           mkdir -p evidence
           git diff --check
+          git diff --name-only a4ef16aa067afc94a96cacd55a46a62d1248ed93 HEAD -- wordpress > evidence/runtime-files.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          expected=['assets/css/native-report.css','assets/js/native-report/errors.js','assets/js/native-report/location-map.js','assets/js/native-report/smart-address.js','assets/js/native-report/wizard.js','template-parts/native-report/step.php']
+          assert Path('evidence/runtime-files.txt').read_text().splitlines()==['wordpress/themes/badaround-child/'+p for p in expected]
+          PY
           git diff --exit-code a4ef16aa067afc94a96cacd55a46a62d1248ed93 HEAD -- wordpress/plugins wordpress/themes/badaround-child/inc/native-report.php wordpress/themes/badaround-child/assets/js/native-report/model.js wordpress/themes/badaround-child/assets/js/native-report/api.js wordpress/themes/badaround-child/assets/js/native-report/media.js wordpress/themes/badaround-child/assets/js/native-report/media-view.js wordpress/themes/badaround-child/front-page.php wordpress/themes/badaround-child/assets/css/home.css
           echo 'dc282153243ffb80f3bd4f2a222ea0f4c4f42806fba6f3a0bde0a76855bd8e3c  wordpress/plugins/badaround-core/contracts/nf-conditional-v1.0.json' | sha256sum -c -
           find wordpress/themes/badaround-child -name '*.php' -print0 | xargs -0 -n1 php -l > evidence/php-lint.log
@@ -31,7 +37,7 @@ jobs:
       - name: Quick V1 V2 C.1 C.2 GEO Social media regression
         run: |
           set -euo pipefail
-          for test in native-report-f12 native-report-f13 native-report-f14 native-report-f15 native-report-f16 nf-ux-02b-v1-differential nf-ux-02b-v2 nf-ux-02b-media nf-ux-02c-immutability nf-ux-02c1-persistence nf-ux-02c2-recovery native-media-no-media-differential native-social-preference; do
+          for test in native-report-f12 native-report-f13 native-report-f14 native-report-f15 native-report-f16 nf-ux-02b-v1-differential nf-ux-02b-v2 nf-ux-02b-media nf-ux-02c-immutability nf-ux-02c1-persistence nf-ux-02c2-recovery native-media-f17b native-media-no-media-differential native-social-preference; do
             php tests/$test.php > evidence/$test.log
           done
       - name: Frozen semantic differential and presentation regression

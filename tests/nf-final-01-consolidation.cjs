@@ -44,3 +44,14 @@ test('topic labels never reveal irrelevant blocks, reporter choices remain expli
   h.click('new');assert.equal(h.model.values['reward.status'],undefined);assert.equal(h.model.values['reporter.public_identity_mode'],undefined);
  }finally{h.close();}
 });
+
+test('one bundled declaration error focuses its visible checkbox without duplicate generic summary',()=>{
+ const h=create();try{seed(h,contract.regression_oracle.find(r=>r.subtype==='civic_waste'),4);h.set('consents.truthfulness',false);h.click('next');
+  const box=h.doc.querySelector('[data-beta-confirm]');assert.equal(h.doc.activeElement,box);assert.equal(box.getAttribute('aria-invalid'),'true');assert(!h.doc.querySelector('#ba-native-declarations-error').hidden);assert(h.doc.querySelector('[data-native-errors]').hidden);
+ }finally{h.close();}
+});
+
+test('clearing a long select is not a meaningful choice and must not auto-advance',async()=>{
+ const h=create();try{seed(h,contract.regression_oracle.find(r=>r.subtype==='animal_missing'),2);const input=h.doc.querySelector('[name="animal.type"]');input.focus();h.set('animal.type','','change');await new Promise(r=>setTimeout(r,200));assert.equal(h.doc.activeElement,input);
+ }finally{h.close();}
+});
