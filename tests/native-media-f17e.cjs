@@ -29,7 +29,7 @@ test('late upload cannot trigger a DELETE after controller teardown',async()=>{
 test('teardown suppresses late report completion and detaches wizard listeners',async()=>{
  let finish;const h=create({fetch(url,request,body){if(url.endsWith('/reports'))return new Promise(r=>{finish=()=>r({ok:true,status:200,json:async()=>({status:'success',schema_version:body.schema_version,submission_id:body.submission_id,next_state:'moderation_pending'})});});}});
  h.fill();h.set('media.availability','yes');h.select();await tick();h.goReview();h.submit();await tick();const snapshot=h.model.snapshot;
- h.root.nativeReport.teardown();h.doc.querySelector('[data-native-next]').dispatchEvent(new h.w.Event('click'));assert.equal(h.model.step,6);
+ h.root.nativeReport.teardown();h.doc.querySelector('[data-native-next]').dispatchEvent(new h.w.Event('click'));assert.equal(h.model.step,Object.keys(h.root.nativeReport.config.steps).indexOf('review'));
  finish();await tick();assert.equal(h.model.completed,false);assert.equal(h.model.snapshot,snapshot);assert(h.doc.querySelector('[data-native-success]').hidden);h.close();
 });
 test('final review separates unresolved selections from accepted images',async()=>{
@@ -86,7 +86,7 @@ test('late DELETE completion never double-revokes URLs or re-renders detached st
 test('navigation during upload retains live queue, preview/focus and request identity',async()=>{
  const h=create({upload(){}});h.fill();h.set('media.availability','yes');for(let i=0;i<4;i++)h.click('next');h.select();await tick();const preview=h.doc.querySelector('[data-media-list] img').src,key=h.uploads[0].key;
  for(const action of ['next','back','back','next','back','next','next','back'])h.click(action);
- assert.equal(h.model.step,4);assert.equal(h.uploads.length,1);assert.equal(h.doc.querySelector('[data-media-list] img').src,preview);assert.equal(h.doc.activeElement.tagName,'H2');
+ assert.equal(h.model.step,Object.keys(h.root.nativeReport.config.steps).indexOf('media'));assert.equal(h.uploads.length,1);assert.equal(h.doc.querySelector('[data-media-list] img').src,preview);assert.equal(h.doc.activeElement.tagName,'H2');
  h.uploads[0].finish();await tick();assert.equal(h.uploads[0].key,key);assert.equal(h.doc.querySelectorAll('[data-media-list] li').length,1);assert.equal(h.doc.querySelector('[data-media-state]').textContent,'Accettata e riservata');h.close();
 });
 test('100 percent upload is awaiting acceptance, not a canonical accepted image',async()=>{
@@ -100,13 +100,13 @@ test('rerender/reinitialization does not create listeners, session, rows or a ne
  assert.equal(h.uploads.length,1);assert.equal(h.requests.filter(r=>r.url.endsWith('/report-media-sessions')).length,1);assert.equal(h.doc.querySelectorAll('[data-media-list] li').length,1);h.close();
 });
 test('double Continue at review cannot leave seven-step bounds; frozen handlers cannot navigate',async()=>{
- const h=create({fetch(url){if(url.endsWith('/reports'))throw Error('uncertain');}});h.fill();h.set('media.availability','yes');h.select();await tick();h.goReview();h.click('next');h.click('next');assert.equal(h.model.step,6);h.submit();await tick();const snapshot=h.model.snapshot;
- h.doc.querySelector('[data-native-back]').dispatchEvent(new h.w.Event('click'));h.doc.querySelector('[data-native-next]').dispatchEvent(new h.w.Event('click'));assert.equal(h.model.step,6);assert.equal(h.model.snapshot,snapshot);h.close();
+ const h=create({fetch(url){if(url.endsWith('/reports'))throw Error('uncertain');}});h.fill();h.set('media.availability','yes');h.select();await tick();h.goReview();h.click('next');h.click('next');assert.equal(h.model.step,Object.keys(h.root.nativeReport.config.steps).indexOf('review'));h.submit();await tick();const snapshot=h.model.snapshot;
+ h.doc.querySelector('[data-native-back]').dispatchEvent(new h.w.Event('click'));h.doc.querySelector('[data-native-next]').dispatchEvent(new h.w.Event('click'));assert.equal(h.model.step,Object.keys(h.root.nativeReport.config.steps).indexOf('review'));assert.equal(h.model.snapshot,snapshot);h.close();
 });
 for(const [code,status,retryable] of [['media_upload_incomplete',409,true],['media_commit_in_progress',409,true],['media_binding_failed',500,true],['media_binding_invariant_failed',500,false],['media_service_unavailable',503,true],['media_rate_limited',429,true],['media_manifest_conflict',409,false],['media_session_expired',410,false]])test('ambiguous/post-pin code never unlocks manifest: '+code,async()=>{
  const h=create({fetch(url){if(url.endsWith('/reports'))return {ok:false,status,json:async()=>({status:'error',error:{code,retryable,field:'media.items'}})};}});
  h.fill();h.set('media.availability','yes');h.select();await tick();h.goReview();h.submit();h.submit();await tick();const frozen=h.model.snapshot,body=h.requests.find(r=>r.url.endsWith('/reports')).request.body;
- assert(frozen && Object.isFrozen(frozen.media.items));assert.equal(h.model.step,6);assert(!h.requests.some(r=>r.request.method==='GET'));assert(h.doc.querySelector('input[type=file]').disabled);
+ assert(frozen && Object.isFrozen(frozen.media.items));assert.equal(h.model.step,Object.keys(h.root.nativeReport.config.steps).indexOf('review'));assert(!h.requests.some(r=>r.request.method==='GET'));assert(h.doc.querySelector('input[type=file]').disabled);
  h.select();h.doc.querySelector('[data-media-action=remove]').click();assert.equal(h.model.snapshot,frozen);assert.equal(h.uploads.length,1);
  if(!h.model.blocked){h.submit();await tick();assert(h.requests.filter(r=>r.url.endsWith('/reports')).every(r=>r.request.body===body));}h.close();
 });
@@ -122,7 +122,7 @@ test('hostile filename/error body has no executable DOM, bearer or raw original 
 });
 test('five-card mobile/keyboard structure at 390x844 and 360x800',async()=>{
  for(const [width,height] of [[390,844],[360,800]]){
-  const h=create();Object.defineProperty(h.w,'innerWidth',{value:width});Object.defineProperty(h.w,'innerHeight',{value:height});h.fill();h.set('media.availability','yes');h.select(5);await tick();for(let i=0;i<4;i++)h.click('next');
+  const h=create();Object.defineProperty(h.w,'innerWidth',{value:width});Object.defineProperty(h.w,'innerHeight',{value:height});h.fill();h.set('media.availability','yes');h.select(5);await tick();while(h.model.step<Object.keys(h.root.nativeReport.config.steps).indexOf('media'))h.click('next');
   const cards=h.doc.querySelectorAll('[data-media-list] li');assert.equal(cards.length,5);
   for(const card of cards){const remove=card.querySelector('[data-media-action=remove]');remove.focus();assert.equal(h.doc.activeElement,remove);assert.equal(remove.type,'button');assert.equal(card.querySelectorAll('img').length,1);assert(card.querySelector('progress').getAttribute('aria-label'));assert(remove.getAttribute('aria-describedby'));}
   h.click('next');h.click('back');assert.equal(h.doc.activeElement.tagName,'H2');assert.equal(h.doc.querySelectorAll('[data-media-list] li').length,5);h.close();
@@ -131,5 +131,5 @@ test('five-card mobile/keyboard structure at 390x844 and 360x800',async()=>{
 test('expired upload session remains explicit and blocks final without recreating a session',async()=>{
  const h=create({upload(xhr){queueMicrotask(()=>xhr.finish('media_session_expired'));}});h.fill();h.set('media.availability','yes');h.select();await tick();
  assert(h.doc.querySelector('[data-media-error]').textContent.includes('scaduta'));h.doc.querySelector('[data-media-action=retry]').click();await tick();assert.equal(h.requests.filter(r=>r.url.endsWith('/report-media-sessions')).length,1);assert.equal(h.uploads[0].key,h.uploads[1].key);
- h.goReview();h.submit();assert.equal(h.model.snapshot,null);assert.equal(h.model.step,4);assert(!h.requests.some(r=>r.url.endsWith('/reports')));h.close();
+ h.goReview();h.submit();assert.equal(h.model.snapshot,null);assert.equal(h.model.step,Object.keys(h.root.nativeReport.config.steps).indexOf('media'));assert(!h.requests.some(r=>r.url.endsWith('/reports')));h.close();
 });

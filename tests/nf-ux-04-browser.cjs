@@ -16,7 +16,7 @@ try{for(const width of [320,390,1440]){const page=await browser.newPage({viewpor
   // Keyboard can enter and leave a dependent specification without trapping focus.
   await control.focus();await page.keyboard.type('Specifica da tastiera');await page.keyboard.press('Tab');assert(!(await control.evaluate(e=>e===document.activeElement)),key+' no focus trap');
   assert(await page.evaluate(key=>document.querySelector('[data-native-report]').nativeReport.model.payload()[key.split('.')[0]][key.split('.')[1]]==='Specifica da tastiera',key));
-  assert.equal(await control.getAttribute('maxlength'),String(spec.constraints.max_length));
+  assert.equal(await control.getAttribute('data-native-max-length'),String(spec.constraints.max_length));
   const r=await control.boundingBox();assert(r.x>=0&&r.x+r.width<=width+1,key+' fits width');
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'no horizontal overflow');
   await page.evaluate(key=>{const {model:m,config:c}=document.querySelector('[data-native-report]').nativeReport;const p=c.fields[key].sourceField,f=c.fields[p],v=(f.constraints.enum||f.constraints.item_enum).find(v=>v!=='other');m.set(p,f.type==='array'?[v]:v);document.querySelector('[name="content.description"]').dispatchEvent(new Event('input',{bubbles:true}));},key);

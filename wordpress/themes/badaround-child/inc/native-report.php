@@ -147,7 +147,7 @@ function badaround_native_report_config() {
 	foreach ( $contract['fields'] as $path => $spec ) {
 		if ( ! isset( $spec['source_field'] ) ) { continue; }
 		$fields[ $path ]['label'] = $spec['context_label'];
-		$fields[ $path ]['help'] = $spec['help'];
+		$fields[ $path ]['help'] = $spec['help'] . sprintf( ' Massimo %d caratteri.', $spec['constraints']['max_length'] );
 		$fields[ $path ]['step'] = $fields[ $spec['source_field'] ]['step'];
 		$fields[ $path ]['sourceField'] = $spec['source_field'];
 	}
@@ -251,7 +251,7 @@ function badaround_native_report_field( $path, $field ) {
 			$input_type = array( 'email' => 'email', 'phone' => 'tel', 'date' => 'date', 'time' => 'time', 'number' => 'number', 'decimal' => 'number' )[ $type ] ?? 'text';
 			?>
 		<input id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $path ); ?>" type="<?php echo esc_attr( $input_type ); ?>" data-native-input aria-describedby="<?php echo esc_attr( $description ); ?>"
-		<?php if ( isset( $c['max_length'] ) ) : ?> maxlength="<?php echo esc_attr( $c['max_length'] ); ?>"<?php endif; ?>
+		<?php if ( ! empty( $field['sourceField'] ) ) : ?> data-native-max-length="<?php echo esc_attr( $c['max_length'] ); ?>"<?php elseif ( isset( $c['max_length'] ) ) : ?> maxlength="<?php echo esc_attr( $c['max_length'] ); ?>"<?php endif; ?>
 		<?php foreach ( array( 'min', 'max' ) as $limit ) { if ( isset( $c[ $limit ] ) ) { echo ' ' . $limit . '="' . esc_attr( $c[ $limit ] ) . '"'; } } ?>
 		<?php if ( 'number' === $input_type ) : ?> step="any" inputmode="decimal"<?php endif; ?>
 		<?php if ( 'email' === $input_type ) : ?> autocomplete="email"<?php elseif ( 'tel' === $input_type ) : ?> autocomplete="tel"<?php elseif ( 'reporter.first_name' === $path ) : ?> autocomplete="given-name"<?php elseif ( 'reporter.last_name' === $path ) : ?> autocomplete="family-name"<?php endif; ?>>

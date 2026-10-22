@@ -32,6 +32,7 @@ test('8 Altro specifications: activation, limits, requiredness, stale removal an
   function activate(expr){if(expr.all)expr.all.forEach(activate);else if(expr.any)activate(expr.any[0]);else if(expr.op!=='active'){const rule=m.rule(expr.field);if(rule?.condition)activate(rule.condition);m.set(expr.field,expr.op==='contains'?[expr.value]:expr.value??(expr.values.includes(m.effective(expr.field))?m.effective(expr.field):expr.values[0]));}}
   activate(m.rule(key).condition);assert(m.active(key));assert(m.required(key));assert(m.validate().some(e=>e.field===key));
   m.set(key,'Specifica sintetica');assert.equal(get(m.payload(),key),'Specifica sintetica');cases.push(m.payload());
+  m.set(key,'😀'.repeat(spec.constraints.max_length));assert(!m.validate().some(e=>e.field===key),key+' Unicode codepoint length');
   m.set(key,'x'.repeat(spec.constraints.max_length+1));assert(m.validate().some(e=>e.field===key&&e.code==='value_too_long'));
   for(const bad of ['\nprova','<b>testo</b>','\u200b']){m.set(key,bad);assert(m.validate().some(e=>e.field===key),key+' plain text');}
   m.set(key,'Specifica sintetica');const parent=spec.source_field;const def=config.fields[parent];const alternate=def.constraints.enum?.find(v=>v!=='other')||def.constraints.item_enum.find(v=>v!=='other');
