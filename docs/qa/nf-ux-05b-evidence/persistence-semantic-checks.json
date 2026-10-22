@@ -1,0 +1,78 @@
+[
+  {
+    "subtype": "animal_missing",
+    "canonical_valid": true,
+    "inactive_absent": true,
+    "summary_projection_agrees": true,
+    "summary_keys": [
+      "event.category",
+      "event.subtype",
+      "reporter.relationship",
+      "location.exact_address",
+      "time.mode",
+      "animal.type",
+      "animal.type_other_detail",
+      "content.description",
+      "authority.status",
+      "reward.status",
+      "media.availability",
+      "reporter.public_identity_mode",
+      "reporter.first_name",
+      "reporter.last_name",
+      "reporter.email",
+      "reporter.contact_preference",
+      "reporter.social_visibility",
+      "consents.truthfulness"
+    ]
+  },
+  {
+    "subtype": "civic_waste",
+    "canonical_valid": true,
+    "inactive_absent": true,
+    "summary_projection_agrees": true,
+    "summary_keys": [
+      "event.category",
+      "event.subtype",
+      "reporter.relationship",
+      "location.exact_address",
+      "time.mode",
+      "content.description",
+      "media.availability",
+      "reporter.public_identity_mode",
+      "reporter.first_name",
+      "reporter.last_name",
+      "reporter.email",
+      "reporter.contact_preference",
+      "reporter.social_visibility",
+      "consents.truthfulness"
+    ]
+  },
+  {
+    "subtype": "hazard_fire_or_smoke",
+    "canonical_valid": true,
+    "inactive_absent": true,
+    "summary_projection_agrees": true,
+    "summary_keys": [
+      "event.category",
+      "event.subtype",
+      "reporter.relationship",
+      "location.exact_address",
+      "time.mode",
+      "time.duration",
+      "content.description",
+      "damage.status",
+      "damage.description",
+      "authority.status",
+      "authority.type",
+      "authority.type_other_detail",
+      "media.availability",
+      "reporter.public_identity_mode",
+      "reporter.first_name",
+      "reporter.last_name",
+      "reporter.email",
+      "reporter.contact_preference",
+      "reporter.social_visibility",
+      "consents.truthfulness"
+    ]
+  }
+]

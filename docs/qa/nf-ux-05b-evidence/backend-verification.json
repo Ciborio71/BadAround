@@ -1,0 +1,141 @@
+{
+  "contract_sha": "dc282153243ffb80f3bd4f2a222ea0f4c4f42806fba6f3a0bde0a76855bd8e3c",
+  "definition_rows": 33,
+  "media_enabled": false,
+  "v1_valid": true,
+  "snapshot_unchanged": true,
+  "report": 69,
+  "event": 345,
+  "report_count": 1,
+  "event_pending": true,
+  "retry": {
+    "status": "success",
+    "duplicate": true,
+    "report_id": 69,
+    "event_id": 345,
+    "idempotency_status": "COMPLETED"
+  },
+  "new_fixtures": [
+    {
+      "report": "69",
+      "event": "345",
+      "status": "pending",
+      "schema": "badaround-report/v2",
+      "subtype": "animal_missing",
+      "request": "exact_point",
+      "social": "declined",
+      "consents": {
+        "social_visibility_version": "social-preference-v1",
+        "truthfulness": true,
+        "media_rights": true,
+        "publication_rules": true,
+        "terms": true,
+        "privacy": true,
+        "version": "native-f16-v1"
+      },
+      "no_media": true,
+      "damage": null,
+      "authority": {
+        "status": "no"
+      },
+      "animal": {
+        "type": "other",
+        "type_other_detail": "Animale sintetico di collaudo NF05B"
+      },
+      "territory": {
+        "exact_address": "Torvaianica RM, Italia",
+        "exact_lat": 41.6208388,
+        "exact_lng": 12.462638700000001,
+        "public_location_request": "exact_point",
+        "public_location_request_version": "public-location-request-v1",
+        "region": "Lazio",
+        "province": "Roma",
+        "municipality": "Pomezia",
+        "locality": "Torvaianica",
+        "public_precision": "area",
+        "place_type": "road_sidewalk",
+        "immediate_danger": "no"
+      }
+    },
+    {
+      "report": "70",
+      "event": "346",
+      "status": "pending",
+      "schema": "badaround-report/v2",
+      "subtype": "civic_waste",
+      "request": "approximate_area",
+      "social": "declined",
+      "consents": {
+        "social_visibility_version": "social-preference-v1",
+        "truthfulness": true,
+        "media_rights": true,
+        "publication_rules": true,
+        "terms": true,
+        "privacy": true,
+        "version": "native-f16-v1"
+      },
+      "no_media": true,
+      "damage": null,
+      "authority": null,
+      "animal": null,
+      "territory": {
+        "exact_address": "Torvaianica RM, Italia",
+        "exact_lat": 41.6208388,
+        "exact_lng": 12.462638700000001,
+        "public_location_request": "approximate_area",
+        "public_location_request_version": "public-location-request-v1",
+        "region": "Lazio",
+        "province": "Roma",
+        "municipality": "Pomezia",
+        "locality": "Torvaianica",
+        "public_precision": "area",
+        "immediate_danger": "no"
+      }
+    },
+    {
+      "report": "71",
+      "event": "347",
+      "status": "pending",
+      "schema": "badaround-report/v2",
+      "subtype": "hazard_fire_or_smoke",
+      "request": "exact_point",
+      "social": "declined",
+      "consents": {
+        "social_visibility_version": "social-preference-v1",
+        "truthfulness": true,
+        "media_rights": true,
+        "publication_rules": true,
+        "terms": true,
+        "privacy": true,
+        "version": "native-f16-v1"
+      },
+      "no_media": true,
+      "damage": {
+        "status": "yes",
+        "description": "Danno esclusivamente sintetico per verifica conditional."
+      },
+      "authority": {
+        "status": "yes",
+        "type": "other",
+        "type_other_detail": "Servizio sintetico di collaudo"
+      },
+      "animal": null,
+      "territory": {
+        "exact_address": "Torvaianica RM, Italia",
+        "exact_lat": 41.6208388,
+        "exact_lng": 12.462638700000001,
+        "public_location_request": "exact_point",
+        "public_location_request_version": "public-location-request-v1",
+        "region": "Lazio",
+        "province": "Roma",
+        "municipality": "Pomezia",
+        "locality": "Torvaianica",
+        "public_precision": "area",
+        "immediate_danger": "unsure"
+      }
+    }
+  ],
+  "temporary_route_removed": true,
+  "absence_rest_error": "rest_no_route",
+  "unauthorized_error": "nf05b_denied"
+}
