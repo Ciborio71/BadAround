@@ -1,0 +1,27 @@
+{
+  "candidate": "48bab2229c00fb28f01d54117dd1278074f10d69",
+  "branch": "feature/geo-prec-01-user-authoritative",
+  "base": "a4ef16aa067afc94a96cacd55a46a62d1248ed93",
+  "tree": "cc7e8e343d9ed241bf5e6407f157fbb3dd521d4a",
+  "ci_run": 39871909912,
+  "ci_job": 120148099699,
+  "ci_result": "success",
+  "node_tests": 134,
+  "node_failures": 0,
+  "artifact_id": 12467320366,
+  "artifact_sha256": "1c8bd971a622908e004f741366385b16bf57e8aca629923acacfb943768f3ef9",
+  "contract_sha256": "dc282153243ffb80f3bd4f2a222ea0f4c4f42806fba6f3a0bde0a76855bd8e3c",
+  "runtime_sha256": {
+    "wordpress/plugins/badaround-core/includes/class-badaround-audit-log.php": "4bd06b99a878337d981d492ea04bd2bdbc07850fd479096b2fd081bb5929c0b2",
+    "wordpress/plugins/badaround-core/includes/class-badaround-geo-moderation-service.php": "f48dde4e09a4a3ed3b682918664fee5d9d8f5599ec7bb96c7c5b0831122225c4",
+    "wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php": "f54343c508b773c08b60aaf106f385ebfa66b0d5c0dce894e3e22183419450b1",
+    "wordpress/plugins/badaround-core/includes/class-badaround-public-geo-contract.php": "9c1a1969532fb291e087646d636e3886715728fdffd407081cf6644e7318aa9f",
+    "wordpress/plugins/badaround-core/includes/class-badaround-public-geo-projection.php": "54e0667f15fa70cae903a68138fed0f070b434980d584be3b6f0200c1bf10af5",
+    "wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php": "db17abdee51c1184882b261d7dd5c2e68d6a136702551f15ad554115821b032e",
+    "wordpress/plugins/badaround-core/includes/class-badaround-report-repository.php": "d0c6a380fe604e0c9a8251a31bbb2b88905d3ea8eba845990287c1169fd635e7"
+  },
+  "staging_writes": 0,
+  "staging_reports_created": 0,
+  "staging_deploy": false,
+  "nf_final_01_held_candidate": "b4aca00fe7acea5b80aa8b45d423ab915fa071e3"
+}
