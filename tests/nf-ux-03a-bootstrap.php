@@ -6,6 +6,9 @@ function nf03a_check( $ok, $message ) {
 }
 $nf03a_core = WP_PLUGIN_DIR . '/badaround-core/';
 nf03a_check( in_array( realpath( $nf03a_core . 'badaround-core.php' ), get_included_files(), true ), 'Standard active Core entry loaded by WordPress' );
+// This disposable CI WordPress starts without the canonical term fixtures.
+$nf03a_registry = ( new BadAround_Event_Taxonomy_Initializer() )->run();
+nf03a_check( ! is_wp_error( $nf03a_registry ), 'Isolated canonical registry initialized' );
 require getenv( 'NF03A_THEME_CONFIG' );
 if ( '1' === getenv( 'NF03A_EXPECT_ABSENT' ) ) {
 	nf03a_check( ! class_exists( 'BadAround_Report_Conditional_Contract', false ), 'Baseline class absent before Native config' );
