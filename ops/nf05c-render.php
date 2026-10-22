@@ -52,7 +52,7 @@ function wp_head(){
  foreach($ctx['inline'] as $s)echo '<style id="'.esc_attr($s['id']).'">'.$s['text'].'</style>';
 }
 function wp_footer(){
- $ctx=json_decode(file_get_contents(__DIR__.'/nf05c-render-context.json'),true);echo '<script>'.$ctx['astraScript'].'</script><script src="/wp-content/themes/astra/assets/js/minified/frontend.min.js"></script>'; 
+ $ctx=json_decode(file_get_contents(__DIR__.'/nf05c-render-context.json'),true);echo $ctx['scrollTop'];echo '<script>'.$ctx['astraScript'].'</script><script src="/wp-content/themes/astra/assets/js/minified/frontend.min.js"></script>'; 
  foreach(['navigation','native-report/model','native-report/api','native-report/errors','native-report/media','native-report/media-view','native-report/location-map','native-report/smart-address','native-report/wizard'] as $js)echo '<script src="/wp-content/themes/badaround-child/assets/js/'.$js.'.js"></script>';
 }
 ob_start();require dirname(__DIR__).'/wordpress/themes/badaround-child/page-segnala-evento.php';$html=ob_get_clean();

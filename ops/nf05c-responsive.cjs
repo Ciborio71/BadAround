@@ -9,7 +9,7 @@ const profiles=[
  {name:'complex',subtype:'property_theft',extra:{'property.access_method':'other','property.access_method_other_detail':'Accesso sintetico descritto per verificare la leggibilità della specifica su uno schermo piccolo.','property.stolen_item_categories':['other'],'property.stolen_item_categories_other_detail':'Oggetti esclusivamente sintetici per il collaudo responsive.','damage.status':'yes','damage.description':'Descrizione sintetica del danno per verifica del controllo multilinea.'}},
  {name:'altro',subtype:'animal_missing',extra:{'animal.type':'dog'},activate:'animal'},
  {name:'emergency',subtype:'hazard_fire_or_smoke',extra:{'location.immediate_danger':'unsure','damage.status':'yes','damage.description':'Danno esclusivamente sintetico per collaudo responsive.'}},
- {name:'conditional',subtype:'vehicle_stolen',extra:{'reward.status':'fixed','reward.amount':123,'reward.conditions':'Condizioni sintetiche per la verifica responsive, senza alcuna offerta reale.','authority.status':'no'},activate:'authority'}
+ {name:'conditional',subtype:'vehicle_stolen',extra:{'reward.status':'fixed','reward.amount':123,'reward.expires_on':'2027-12-31','reward.confirmed':true,'reward.conditions':'Condizioni sintetiche per la verifica responsive, senza alcuna offerta reale.','authority.status':'no'},activate:'authority'}
 ];
 const results=[],network=[];
 (async()=>{const browser=await chromium.launch();try{
