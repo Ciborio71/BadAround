@@ -8,7 +8,7 @@ const profiles=[
  {name:'simple',subtype:'civic_waste',extra:{}},
  {name:'complex',subtype:'property_theft',extra:{'property.access_method':'other','property.access_method_other_detail':'Accesso sintetico descritto per verificare la leggibilità della specifica su uno schermo piccolo.','property.stolen_item_categories':['other'],'property.stolen_item_categories_other_detail':'Oggetti esclusivamente sintetici per il collaudo responsive.','damage.status':'yes','damage.description':'Descrizione sintetica del danno per verifica del controllo multilinea.'}},
  {name:'altro',subtype:'animal_missing',extra:{'animal.type':'dog'},activate:'animal'},
- {name:'emergency',subtype:'hazard_fire_or_smoke',extra:{'location.immediate_danger':'unsure','damage.status':'yes','damage.description':'Danno esclusivamente sintetico per collaudo responsive.'}},
+ {name:'emergency',subtype:'hazard_fire_or_smoke',extra:{'location.immediate_danger':'no','damage.status':'yes','damage.description':'Danno esclusivamente sintetico per collaudo responsive.'}},
  {name:'conditional',subtype:'vehicle_stolen',extra:{'reward.status':'fixed','reward.amount':123,'reward.expires_on':'2027-12-31','reward.confirmed':true,'reward.conditions':'Condizioni sintetiche per la verifica responsive, senza alcuna offerta reale.','authority.status':'no'},activate:'authority'}
 ];
 const results=[],network=[];
@@ -49,7 +49,7 @@ for(const width of [320,390,1440])for(const profile of profiles){
  if(profile.activate){
   if(profile.activate==='animal'){
    const edit=page.locator('[data-native-field="animal.type"] .ba-native-edit-choice');if(await edit.count()&&await edit.isVisible())await edit.click();
-   await page.locator('[name="animal.type"]').selectOption('other');
+   await page.locator('[name="animal.type"]').selectOption('other');await page.locator('[name="animal.type"]').press('Tab');
   }else{
    const edit=page.locator('[data-native-field="authority.status"] .ba-native-edit-choice');if(await edit.count()&&await edit.isVisible())await edit.click();
    await page.locator('[data-beta-authority]').selectOption('yes:other');
@@ -64,6 +64,10 @@ for(const width of [320,390,1440])for(const profile of profiles){
   await geometry('dependent-after-auto-next');
  }
  if(profile.name==='emergency'){
+  const edit=page.locator('[data-native-field="location.immediate_danger"] .ba-native-edit-choice');if(await edit.count()&&await edit.isVisible())await edit.click();
+  await page.locator('[data-native-field="location.immediate_danger"] input[type=radio][value=unsure]').press('Space');await page.waitForTimeout(650);
+  const autoNotice=await page.locator('[data-native-emergency-notice]').boundingBox();const headerBottom=await page.locator('.ba-site-header').evaluate(e=>e.getBoundingClientRect().bottom);
+  assert(autoNotice.y>=headerBottom&&autoNotice.y+autoNotice.height<=1000,'emergency remains readable during existing auto-focus');checks.push({label:'emergency-auto-focus',rect:autoNotice,headerBottom});
   const notice=page.locator('[data-native-emergency-notice]');assert(await notice.isVisible());assert((await notice.innerText()).includes('112'));
   await notice.scrollIntoViewIfNeeded();await page.waitForTimeout(500);const b=await notice.boundingBox();assert(b.x>=0&&b.x+b.width<=width+1&&b.height>40,'emergency readable');
   checks.push({label:'emergency-notice',rect:b});
