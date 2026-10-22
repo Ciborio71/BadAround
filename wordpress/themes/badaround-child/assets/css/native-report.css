@@ -647,7 +647,7 @@
 .ba-native .ba-native-review-declaration{border-top:2px solid #b9d6d9!important;background:#f2f8f9}
 .ba-native .ba-native-emergency-notice{margin:12px 0 18px;padding:12px 14px;line-height:1.5}
 @media(max-width:767px){
- .ba-native .ba-native-category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .ba-native .ba-native-field .ba-native-category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
  .ba-native .ba-native-category-grid .ba-native-option-card{min-height:144px;padding:14px 12px;grid-template-columns:28px minmax(0,1fr);gap:10px}
  .ba-native .ba-native-review-section dl{grid-template-columns:1fr}
  .ba-native .ba-native-review-section dt{padding-bottom:2px}
@@ -667,7 +667,7 @@
  .ba-native .ba-native-field input:not([type=checkbox]):not([type=radio]){min-height:48px}
 }
 @media(max-width:380px){
- .ba-native .ba-native-category-grid{grid-template-columns:1fr}
+ .ba-native .ba-native-field .ba-native-category-grid{grid-template-columns:1fr}
  .ba-native .ba-native-category-grid .ba-native-option-card{min-height:96px;grid-template-columns:32px minmax(0,1fr)}
  .ba-native .ba-native-card-grid.is-collapsed .ba-native-option-card{min-height:52px}
  .ba-native .ba-native-choice-row:has(>.is-collapsed){grid-template-columns:minmax(0,1fr)}
@@ -675,9 +675,21 @@
 }
 @media(prefers-reduced-motion:reduce){.ba-native .ba-native-option-card{transition:none}}
 
-@media(min-width:600px){.ba-native [data-native-field="location.immediate_danger"] .ba-native-card-grid:not(.is-collapsed){grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:600px){.ba-native .ba-native-field[data-native-field="location.immediate_danger"] .ba-native-card-grid:not(.is-collapsed){grid-template-columns:repeat(3,minmax(0,1fr))}}
 
 /* Keep the selection indicator from squeezing long option names. */
 .ba-native .ba-native-card-grid:not(.ba-native-category-grid) .ba-native-option-card{display:grid;grid-template-columns:minmax(0,1fr) 19px;gap:10px}
 .ba-native .ba-native-card-grid:not(.ba-native-category-grid) .ba-native-option-card::after{margin-left:0}
-@media(max-width:380px){.ba-native [data-native-field="event.subtype"] .ba-native-card-grid:not(.is-collapsed){grid-template-columns:1fr}}
+@media(max-width:380px){.ba-native .ba-native-field[data-native-field="event.subtype"] .ba-native-card-grid:not(.is-collapsed){grid-template-columns:1fr}}
+/* Long contact/Social answers read faster at full width on phones; short choices stay inline. */
+.ba-native a,.ba-native a:visited{color:#086b76;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:600px){
+ .ba-native .ba-native-field[data-native-field="reporter.contact_preference"] .ba-native-card-grid:not(.is-collapsed),
+ .ba-native .ba-native-field[data-native-field="reporter.social_visibility"] .ba-native-card-grid:not(.is-collapsed){grid-template-columns:1fr}
+}
+/* Essential control boundaries and keyboard focus meet non-text contrast, too. */
+.ba-native .ba-native-option-card::after{border-color:#71869a}
+.ba-native .ba-native-field input:not([type=checkbox]):not([type=radio]),
+.ba-native .ba-native-field select,.ba-native .ba-native-field textarea,
+.ba-native [data-smart-start]{border-color:#71869a}
+.ba-native .ba-native-field[data-native-field] :is(input,select,textarea):focus-visible{outline:3px solid var(--ba-teal-700);outline-offset:3px}
