@@ -16,12 +16,12 @@ if ( class_exists( 'BadAround_Discovery_Query' ) ) {
 }
 
 $home_categories = array(
-	array( 'label' => 'Veicoli',             'subtitle' => 'Auto, moto e altri mezzi',             'slug' => 'veicoli',             'class' => 'is-vehicles', 'icon' => 'car' ),
-	array( 'label' => 'Case e attività',     'subtitle' => 'Abitazioni, negozi e uffici',          'slug' => 'case-e-attivita',     'class' => 'is-property', 'icon' => 'home' ),
-	array( 'label' => 'Pericoli',            'subtitle' => 'Rischi e situazioni pericolose',       'slug' => 'pericoli',            'class' => 'is-hazard', 'icon' => 'warning' ),
-	array( 'label' => 'Spazi pubblici',      'subtitle' => 'Strade, aree pubbliche e decoro',      'slug' => 'spazi-pubblici',      'class' => 'is-public', 'icon' => 'public' ),
-	array( 'label' => 'Animali',             'subtitle' => 'Smarrimenti e segnalazioni',           'slug' => 'animali',             'class' => 'is-animal', 'icon' => 'paw' ),
-	array( 'label' => 'Oggetti e documenti', 'subtitle' => 'Oggetti smarriti o ritrovati',         'slug' => 'oggetti-e-documenti', 'class' => 'is-object', 'icon' => 'object' ),
+	array( 'label' => 'Veicoli',             'subtitle' => 'Furti, danni e veicoli sospetti o abbandonati.',             'slug' => 'veicoli',             'class' => 'is-vehicles', 'icon' => 'car' ),
+	array( 'label' => 'Case e attività',     'subtitle' => 'Furti, tentativi di intrusione e danni ad abitazioni, negozi e uffici.',          'slug' => 'case-e-attivita',     'class' => 'is-property', 'icon' => 'home' ),
+	array( 'label' => 'Pericoli',            'subtitle' => 'Ostacoli, rischi stradali e situazioni di pericolo ambientale.',       'slug' => 'pericoli',            'class' => 'is-hazard', 'icon' => 'warning' ),
+	array( 'label' => 'Spazi pubblici',      'subtitle' => 'Rifiuti abbandonati, guasti e danni a strade e aree comuni.',      'slug' => 'spazi-pubblici',      'class' => 'is-public', 'icon' => 'public' ),
+	array( 'label' => 'Animali',             'subtitle' => 'Animali smarriti, ritrovati, feriti o in pericolo.',           'slug' => 'animali',             'class' => 'is-animal', 'icon' => 'paw' ),
+	array( 'label' => 'Oggetti e documenti', 'subtitle' => 'Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.',         'slug' => 'oggetti-e-documenti', 'class' => 'is-object', 'icon' => 'object' ),
 );
 ?>
 <main class="ba-home" id="main-content">
