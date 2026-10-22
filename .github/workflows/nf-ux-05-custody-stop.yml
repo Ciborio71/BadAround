@@ -1,4 +1,4 @@
-name: NF-UX-05 stop and read-only remote custody diagnosis
+name: NF-UX-05 final custody and temporary harness absence
 on:
   push:
     branches: [qa/nf-ux-05-custody-stop]
@@ -16,19 +16,6 @@ jobs:
       FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
       FTP_TLS_NAME: hostmld17.aziendeitalia.com
     steps:
-      - name: Stop certification run before any synthetic submissions
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          python - <<'PYTHON'
-          import os,urllib.request,urllib.error
-          req=urllib.request.Request('https://api.github.com/repos/Ciborio71/BadAround/actions/runs/39769068915/cancel',data=b'',method='POST',headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
-          try:
-            with urllib.request.urlopen(req) as r:print('Certification cancellation requested',r.status)
-          except urllib.error.HTTPError as e:
-            if e.code!=409:raise
-            print('Certification already finished')
-          PYTHON
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -52,10 +39,10 @@ jobs:
           grep -q 'Verify return code: 0 (ok)' tls/handshake.log
           echo 'FTPS server identity and chain VERIFIED; strict TLS remains enabled.'
       - name: Read-only 33-file remote custody, no probes or writes
-        run: python ops/nf05-custody-only.py
+        run: python ops/nf05-final-custody.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: nf05-read-only-custody
+          name: nf05-final-custody
           path: evidence/
           retention-days: 90
