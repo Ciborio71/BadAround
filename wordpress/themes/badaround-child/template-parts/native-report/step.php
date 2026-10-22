@@ -1,9 +1,9 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 if ( 'event' === $key ) : ?>
-	<p>Ti guidiamo una domanda alla volta. Scegli la categoria e il tipo di evento: vedrai solo i dettagli pertinenti. Puoi cambiare una risposta con «Modifica».</p>
+	<p>Scegli una categoria e il tipo di evento. Puoi cambiare ogni scelta con «Modifica».</p>
 <?php elseif ( 'details' === $key ) : ?>
-	<p>Descrivi i fatti e aggiungi le informazioni utili a chi si trova nella zona. Puoi lasciare vuoti i campi facoltativi.</p>
+	<p>Descrivi i fatti. Compila solo i dettagli utili; i campi facoltativi possono restare vuoti.</p>
 <?php elseif ( 'location' === $key ) : ?>
 	<p>Indica il luogo più preciso possibile: il segnaposto finale viene acquisito privatamente. Potrai richiedere come mostrarlo al pubblico, ma la scelta richiederà sempre la moderazione.</p>
 <div class="ba-native-smart-address" data-native-smart-address>

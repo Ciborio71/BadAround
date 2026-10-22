@@ -306,7 +306,7 @@
         if(selected){manual=false;syncVisibility();if(confirmationLabel)confirmationLabel.textContent=fullAddress;if(confirmation)confirmation.hidden=false;}
         else offerManual('Indirizzo incompleto. Inserisci la posizione manualmente.');
         if(!mapped.location)offerManual('Territorio non riconosciuto. Inserisci manualmente.');
-        else if(selected){say('Posizione riconosciuta.');if(Number.isFinite(lat)&&Number.isFinite(lng))mapView?.show({lat,lng});}
+        else if(selected){say('Posizione riconosciuta.');if(Number.isFinite(lat)&&Number.isFinite(lng))mapView?.show({lat,lng})?.then(()=>{if(!disposed&&id===requestId)mapView?.reveal?.();});}
       } catch (_) {
         if (!disposed && id===requestId) offerManual('Google non disponibile. Inserisci la posizione manualmente.');
       }

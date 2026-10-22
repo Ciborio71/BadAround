@@ -10,7 +10,7 @@
   const confirmation=ui.querySelector('[data-smart-confirmation]');
   // Keep the verified address next to the result, without changing its data source.
   if(confirmation){panel.after(confirmation);confirmation.tabIndex=-1;}
-  let disposed=false,map,marker,dragListener,busy=false;
+  let disposed=false,map,marker,dragListener,busy=false,lastRevealTicket;
   let mapTask=Promise.resolve();
   const locked=()=>Boolean(disposed||model.busy||model.snapshot||model.completed);
   const say=text=>{if(!disposed&&status)status.textContent=text;};
@@ -45,8 +45,14 @@
   }
   function revealAddress(ticket){
    const reveal=()=>{
-    if(locked()||!bridge.current(ticket)||!confirmation||confirmation.hidden||ui.closest('[data-native-step]')?.hidden)return;
-    try{confirmation.focus({preventScroll:true});}catch(_){confirmation.focus();}
+    if(locked()||!bridge.current(ticket)||ticket===lastRevealTicket||!confirmation||confirmation.hidden||ui.closest('[data-native-step]')?.hidden)return;
+    // Do not steal focus if the reporter moved on while Google was resolving.
+    const focused=container.ownerDocument.activeElement;
+    if(focused!==container.ownerDocument.body&&!ui.contains(focused))return;
+    lastRevealTicket=ticket;
+    const time=container.querySelector('[data-native-time-fields]');
+    const target=time?.querySelector('.ba-native-card-grid input:not(:disabled),select:not(:disabled):not([hidden]),input:not(:disabled):not([hidden])')||confirmation;
+    try{target.focus({preventScroll:true});}catch(_){target.focus();}
     const header=container.ownerDocument.querySelector('.ba-site-header');
     const safeTop=Math.max(16,(header?.getBoundingClientRect().bottom||0)+16);
     const top=Math.max(0,(root.scrollY||0)+confirmation.getBoundingClientRect().top-safeTop);
@@ -103,7 +109,7 @@
   }
   function categoryChanged(event){if(event.target?.name==='event.category'&&marker)marker.replaceChildren(glyph());}
   geo.addEventListener('click',geolocate);container.addEventListener('input',categoryChanged);sync();
-  return {show,sync,hide(){panel.hidden=true;if(marker)marker.map=null;},dispose(){disposed=true;if(marker&&dragListener)marker.removeEventListener('gmp-dragend',dragListener);if(marker)marker.map=null;geo.removeEventListener('click',geolocate);container.removeEventListener('input',categoryChanged);}};
+  return {show,sync,reveal(){revealAddress(bridge.ticket());},hide(){panel.hidden=true;if(marker)marker.map=null;},dispose(){disposed=true;if(marker&&dragListener)marker.removeEventListener('gmp-dragend',dragListener);if(marker)marker.map=null;geo.removeEventListener('click',geolocate);container.removeEventListener('input',categoryChanged);}};
  }
  ns.LocationMap={mount};
 })(typeof window!=='undefined'?window:globalThis);

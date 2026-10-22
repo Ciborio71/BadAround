@@ -64,7 +64,11 @@
       } else item.textContent = text;
       list.append(item);
     });
-    summary.hidden = false; summary.focus();
+    const first=errors[0],wrapper=Array.from(container.querySelectorAll('[data-native-field]')).find(w=>w.dataset.nativeField===first.field);
+    const local=wrapper&&!wrapper.hidden&&!wrapper.closest('[hidden]');
+    summary.hidden=errors.length===1&&local;
+    if(focusField&&local)focusField(first.field,first.file);
+    else {summary.hidden=false;summary.focus();}
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = {errorMessage:ns.errorMessage};
 })(typeof window !== 'undefined' ? window : globalThis);

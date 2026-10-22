@@ -3,9 +3,9 @@
   const ns = window.BadAroundNative;
   function boot(container) {
     if (container.nativeReport) return; // Reinitialization must retain the current logical wizard.
-    let disposed=false; const listeners=[]; let submitWaitTimer=null;
+    let disposed=false; const listeners=[]; let submitWaitTimer=null,selectAdvanceTimer=null;
     function listen(target,type,handler) { target.addEventListener(type,handler);listeners.push(()=>target.removeEventListener(type,handler)); }
-    function teardown() { if(disposed)return; disposed=true;clearTimeout(submitWaitTimer);submissionFeedback.hidden=true;listeners.forEach(remove=>remove());mediaView?.dispose();smartAddress?.dispose(); }
+    function teardown() { if(disposed)return; disposed=true;clearTimeout(submitWaitTimer);clearTimeout(selectAdvanceTimer);submissionFeedback.hidden=true;listeners.forEach(remove=>remove());mediaView?.dispose();smartAddress?.dispose(); }
     const config = JSON.parse(container.querySelector('[data-native-config]').textContent);
     const model = new ns.Model(config);
     // These are explicit reporter choices in the UI; canonical fallback defaults stay frozen.
@@ -107,7 +107,8 @@
         const valueNode = document.createElement('span'); valueNode.textContent = valueText;
         detail.append(valueNode);
         term.dataset.nativeReviewField=path;
-        if (field.help && !['Dato riservato: non viene pubblicato integralmente.','La pubblicazione avviene solo dopo moderazione.'].includes(field.help)) {
+        if(path.startsWith('consents.')){term.classList.add('ba-native-review-declaration');detail.classList.add('ba-native-review-declaration');}
+        if (field.help && ['location.exact_address','vehicle.plate_raw','object.owner_verification_detail','reporter.public_identity_mode','reporter.contact_preference','reporter.social_visibility'].includes(path) && !['Dato riservato: non viene pubblicato integralmente.','La pubblicazione avviene solo dopo moderazione.'].includes(field.help)) {
           const help = document.createElement('small');
           help.className = 'ba-native-review-help';
           help.textContent = field.help;
@@ -146,11 +147,11 @@
     }
     // Native presentation only: selects remain the sole canonical model inputs.
     const categoryCards = {
-      vehicle: {title:'Veicoli', desc:'Auto, moto e altri mezzi: furti, danneggiamenti e situazioni da segnalare.', icon:'vehicle', color:'#1677E8'},
-      property: {title:'Case e attività', desc:'Furti, tentati furti e altri eventi che riguardano abitazioni, negozi e uffici.', icon:'property', color:'#C9153D'},
-      hazard: {title:'Pericoli', desc:'Ostacoli, rischi stradali o ambientali e situazioni che richiedono attenzione.', icon:'hazard', color:'#F57C00'},
-      public_space: {title:'Spazi pubblici', desc:'Vandalismi, degrado e altre situazioni che interessano aree comuni.', icon:'public', color:'#0AA184'},
-      animal: {title:'Animali', desc:'Animali smarriti, avvistati o in difficoltà.', icon:'animal', color:'#7040C8'},
+      vehicle: {title:'Veicoli', desc:'Furti, danni e veicoli sospetti o abbandonati.', icon:'vehicle', color:'#1677E8'},
+      property: {title:'Case e attività', desc:'Furti, tentativi di intrusione e danni ad abitazioni, negozi e uffici.', icon:'property', color:'#C9153D'},
+      hazard: {title:'Pericoli', desc:'Ostacoli, rischi stradali e situazioni di pericolo ambientale.', icon:'hazard', color:'#F57C00'},
+      public_space: {title:'Spazi pubblici', desc:'Rifiuti abbandonati, guasti e danni a strade e aree comuni.', icon:'public', color:'#0AA184'},
+      animal: {title:'Animali', desc:'Animali smarriti, ritrovati, feriti o in pericolo.', icon:'animal', color:'#7040C8'},
       item_document: {title:'Oggetti e documenti', desc:'Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.', icon:'object', color:'#E3A415'}
     };
     // Same SVG geometry and stroke/fill treatment as the home category pins.
@@ -284,6 +285,25 @@
       row.style.setProperty('--ba-field-columns',String(fields.length));
       fields[0].before(row); fields.forEach(field => row.append(field));
     }
+    const topics=[];
+    for(const [prefix,title] of [['vehicle.','Il veicolo'],['property.','La casa o l’attività'],['animal.','L’animale'],['object.','Oggetti e documenti'],['damage.','Eventuali danni'],['authority.','Autorità già contattate'],['reward.','Ricompensa'],['reporter.public_identity_mode','Identità pubblica'],['reporter.social_visibility','Preferenza Social']]){
+      const members=wrappers.filter(w=>w.dataset.nativeField.startsWith(prefix));
+      if(!members.length)continue;
+      const heading=document.createElement('h3');heading.className='ba-native-topic';heading.dataset.nativeTopic=prefix;heading.textContent=title;
+      const first=members[0].closest('.ba-native-field-pair')||members[0];first.before(heading);topics.push({heading,members});
+    }
+    function revealQuestion(target,anchor=target){
+      if(!target||target.disabled)return;
+      try{target.focus({preventScroll:true});}catch(_){target.focus();}
+      const rect=anchor.getBoundingClientRect(),end=(target.closest('label')||target).getBoundingClientRect();
+      const headerBottom=document.querySelector('.ba-site-header')?.getBoundingClientRect().bottom||0;
+      const safeTop=Math.max(16,headerBottom+16);
+      const actions=form.querySelector('[data-native-navigation]'),sticky=actions&&window.getComputedStyle(actions).position==='sticky';
+      const safeBottom=(window.innerHeight||800)-(sticky?actions.getBoundingClientRect().height:0)-16;
+      if(rect.top>=safeTop&&end.bottom<=safeBottom)return;
+      const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo?.({top:Math.max(0,(window.scrollY||0)+rect.top-safeTop),behavior:reduce?'auto':'smooth'});
+    }
     function expandCards(wrapper) {
       const select = wrapper.querySelector('select[data-native-input]');
       const entry = cardGroups.get(select);
@@ -305,16 +325,9 @@
       });
       const target = nextField ? questionTarget(nextField) : form.querySelector('[data-native-next]:not([hidden])');
       if (!target || target.disabled) return;
-      target.focus({preventScroll:true});
-      // Keep the contextual notice in view when the existing auto-focus advances.
-      const anchor = !emergencyNotice.hidden && wrapper.nextElementSibling===emergencyNotice
-        ? emergencyNotice : nextField || target;
-      const rect = anchor.getBoundingClientRect();
-      const headerBottom = document.querySelector('.ba-site-header')?.getBoundingClientRect().bottom || 0;
-      const safeTop = Math.max(16,headerBottom+16), bottom = target.getBoundingClientRect().bottom;
-      if (rect.top >= safeTop && bottom <= (window.innerHeight || 800)-88) return;
-      const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-      window.scrollTo({top:Math.max(0,(window.scrollY || 0)+rect.top-safeTop),behavior:reduce?'auto':'smooth'});
+      // Preserve a visible emergency notice while moving to the next active control.
+      const anchor=!emergencyNotice.hidden&&wrapper.nextElementSibling===emergencyNotice?emergencyNotice:nextField||target;
+      revealQuestion(target,anchor);
     }
     function syncCards(wrapper, field) {
       const select = wrapper.querySelector('select[data-native-input]');
@@ -379,7 +392,7 @@
               if (disposed || select.disabled || entry.arrowNavigation || select.value !== radio.value || wrapper.closest('[data-native-step]').hidden) return;
               entry.collapsedValue = select.value; syncCards(wrapper,field);
               nextQuestion(wrapper);
-            },0);
+            },140);
           };
           const chooseCard = event => {
             event.stopPropagation();
@@ -460,11 +473,12 @@
       container.querySelectorAll('[data-native-progress]').forEach((li,index) => {
         li.classList.toggle('is-active', index === model.step);
         li.classList.toggle('is-complete', index < model.step);
+        li.setAttribute('aria-label',`${config.steps[steps[index]]}: ${index<model.step?'completato':index===model.step?'in corso':'da completare'}`);
         if (index === model.step) li.setAttribute('aria-current','step'); else li.removeAttribute('aria-current');
       });
       const position = container.querySelector('[data-native-position]');
       if (position) {
-        const text = `Sei in: ${config.steps[current]}.${model.step<steps.length-1?' Dopo: '+config.steps[steps[model.step+1]]+'.':' Controlla e invia la segnalazione.'}`;
+        const text = `Passaggio ${model.step+1} di ${steps.length}. Sei in: ${config.steps[current]}.${model.step<steps.length-1?' Dopo: '+config.steps[steps[model.step+1]]+'.':' Controlla e invia la segnalazione.'}`;
         if (position.textContent !== text) position.textContent = text;
       }
       back.disabled = model.step === 0 || model.busy || !!model.snapshot;
@@ -476,6 +490,7 @@
       smartAddress?.syncVisibility?.();
       if (mediaView) mediaView.render();
       syncFlow();
+      topics.forEach(({heading,members})=>{heading.hidden=members.every(w=>w.hidden||!!w.closest('[hidden]'));});
       const specifications=new Set(wrappers.filter(w=>config.fields[w.dataset.nativeField].sourceField&&model.active(w.dataset.nativeField)).map(w=>w.dataset.nativeField));
       const added=[...specifications].filter(path=>!activeSpecifications.has(path));
       if(added.length)conditionalStatus.textContent=added.map(path=>config.fields[path].label+' — campo obbligatorio.').join(' ');
@@ -489,19 +504,7 @@
       const section = form.querySelector(`[data-native-step="${current}"]`);
       const heading = section?.querySelector('h2');
       if (!section || !heading) return;
-      try { heading.focus({preventScroll:true}); } catch (_) { heading.focus(); }
-      const rect = section.getBoundingClientRect();
-      const header = document.querySelector('.ba-site-header');
-      const headerBottom = header ? header.getBoundingClientRect().bottom : 0;
-      const safeTop = Math.max(16, headerBottom + 16);
-      const safeBottom = Math.max(safeTop + 120, (window.innerHeight || document.documentElement.clientHeight || 0) - 24);
-      if (rect.top >= safeTop && rect.top <= safeBottom) return;
-      const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const top = Math.max(0, (window.scrollY || window.pageYOffset || 0) + rect.top - safeTop);
-      if (typeof window.scrollTo === 'function') {
-        try { window.scrollTo({top,behavior:reduceMotion ? 'auto' : 'smooth'}); }
-        catch (_) { window.scrollTo(0,top); }
-      }
+      revealQuestion(heading,section);
     }
     function displayErrors(errors) {
       errors=errors.filter(error=>!config.fields[error.field]||model.active(error.field));
@@ -529,7 +532,8 @@
         if(declarationPaths.includes(path)){declarationInput.focus();return;}
         if(path==='authority.status'){authorityChoice.focus();return;}
         expandCards(wrapper);
-        (wrapper.querySelector('.ba-native-card-grid input:checked') || wrapper.querySelector('.ba-native-card-grid input:not(:disabled)') || wrapper.querySelector('input,select,textarea,fieldset')).focus();
+        const control=wrapper.querySelector('.ba-native-card-grid input:checked')||wrapper.querySelector('.ba-native-card-grid input:not(:disabled)')||wrapper.querySelector('input:not([hidden]),select:not([hidden]),textarea,fieldset');
+        revealQuestion(control,wrapper);
       });
       if(declarationMissing){
         const index=visibleErrors.findIndex(error=>declarationPaths.includes(error.field));
@@ -563,6 +567,10 @@
     listen(form,'change', event => {
       const wrapper = event.target.closest('[data-native-field]'); if (!wrapper) return;
       model.set(wrapper.dataset.nativeField, read(wrapper)); ns.presentErrors(container, [], config); render();
+      if(event.target.tagName==='SELECT'&&!event.target.hidden){
+        clearTimeout(selectAdvanceTimer);
+        selectAdvanceTimer=setTimeout(()=>{if(!disposed&&document.activeElement===event.target)nextQuestion(wrapper);},140);
+      }
     });
     listen(next,'click', () => {
       if(model.busy || model.snapshot || model.completed || model.step>=steps.length-1)return;
