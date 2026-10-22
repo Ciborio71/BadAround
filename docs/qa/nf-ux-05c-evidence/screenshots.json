@@ -1,0 +1,77 @@
+[
+  {
+    "file": "1440-altro.png",
+    "width": 1440,
+    "sha256": "1ba6259a178fd92df60adc69d17df15195ef8ae1d638cbc0d592dbc64bc79f37"
+  },
+  {
+    "file": "1440-complex.png",
+    "width": 1440,
+    "sha256": "3d1b2108b2cf5b7a191fbdbc79c6f8b058d74a165a63413a13a6b03764dd5146"
+  },
+  {
+    "file": "1440-conditional.png",
+    "width": 1440,
+    "sha256": "da87f6aa9d661d26fc29207a6c2109c10358c859a38a12b206bf23795ba66a25"
+  },
+  {
+    "file": "1440-emergency.png",
+    "width": 1440,
+    "sha256": "e22519eb0fdab160847adc54317c1aed15eedbd478ad44cbf559077e50738fdf"
+  },
+  {
+    "file": "1440-simple.png",
+    "width": 1440,
+    "sha256": "3438f91dd506d3a9b4afeda948c0c0b6f00d4a32059e8688ee7c054eaa52a692"
+  },
+  {
+    "file": "320-altro.png",
+    "width": 320,
+    "sha256": "5e6b7ae1b8534e0b0da0d79acad9d09bc1e23b360816841d6897dacd0500eaee"
+  },
+  {
+    "file": "320-complex.png",
+    "width": 320,
+    "sha256": "2e7f08b9ff4cb6c67f1a4aa71f9f331e0816a792b7d788ccdbd76b3c21a6d2f2"
+  },
+  {
+    "file": "320-conditional.png",
+    "width": 320,
+    "sha256": "3ee8d3163eb61614b2d3375bb8024cefeb237bcef88da26508f07aa6a391c431"
+  },
+  {
+    "file": "320-emergency.png",
+    "width": 320,
+    "sha256": "5365beb5a3a5997bfbd88a4518d8de862f84b84bd26df572e0dc8c2548add573"
+  },
+  {
+    "file": "320-simple.png",
+    "width": 320,
+    "sha256": "9004d8be7eb389054e543a3e909ba537b08db53c1f4c5374a2c3469a63216508"
+  },
+  {
+    "file": "390-altro.png",
+    "width": 390,
+    "sha256": "623b81749dfa9c1c27ac6b11026c0e312fa274a36e4befcc7a122c0d7f66aca0"
+  },
+  {
+    "file": "390-complex.png",
+    "width": 390,
+    "sha256": "696d18e81f2904f0ef4b6f1387101cf9cdea819ed2e0b74ce2d06b12234f7458"
+  },
+  {
+    "file": "390-conditional.png",
+    "width": 390,
+    "sha256": "eef646f3d30154cf776aa5699f4418b2fa638e19325cbd03124f49b7ce34dd97"
+  },
+  {
+    "file": "390-emergency.png",
+    "width": 390,
+    "sha256": "2d5cd12031fe0bb3420124955cb69c94b934cfe4669146413c087ad6d8a2ee9b"
+  },
+  {
+    "file": "390-simple.png",
+    "width": 390,
+    "sha256": "34f19c57af98248dd5a2cf6ce7c5c6190aa4e10d4fff0486a2fc791880246953"
+  }
+]

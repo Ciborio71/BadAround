@@ -1,0 +1,11 @@
+{
+  "changed_top_keys": [
+    "smartAddress",
+    "endpoint",
+    "media"
+  ],
+  "rendering_fields_identical": true,
+  "conditional_metadata_identical": true,
+  "category_labels_identical": true,
+  "change_scope": "local-origin REST endpoint rebasing and blank external Places key; no CSS/markup/evaluator overrides"
+}
