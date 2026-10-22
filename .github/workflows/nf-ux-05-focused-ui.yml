@@ -1,0 +1,30 @@
+name: NF-UX-05 targeted dynamic error and keyboard regression
+on:
+  push:
+    branches: [qa/nf-ux-05-focused-ui]
+permissions:
+  contents: read
+jobs:
+  focused-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BA_PLAYWRIGHT_MODULE: /tmp/nf05-ui/node_modules/playwright
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install official Playwright client, use runner Chrome
+        run: |
+          npm install --prefix /tmp/nf05-ui --no-save playwright@1.62.1
+          google-chrome --version
+          mkdir -p evidence
+      - name: Eight dynamically hidden required errors and back-forward
+        run: node ops/nf05-ui-errors.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nf05-focused-ui
+          path: evidence/
+          retention-days: 90
