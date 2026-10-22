@@ -22,6 +22,7 @@ require_once BADAROUND_CORE_PATH . 'includes/class-badaround-territory-admin.php
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-audit-log.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-report-repository.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-report-schema.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-report-conditional-contract.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-report-normalizer.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-report-validator.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-report-result.php';

@@ -1,0 +1,107 @@
+name: NF-UX-03A conditional contract bootstrap
+
+on:
+  push:
+    branches: [fix/nf-ux-03a-conditional-contract-bootstrap]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    services:
+      database:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: synthetic-nf02b
+          MARIADB_DATABASE: nf02b
+        ports: [3306:3306]
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      BA_TEST_DSN: mysql:host=127.0.0.1;port=3306;dbname=nf02b
+      BA_TEST_DB_USER: root
+      BA_TEST_DB_PASSWORD: synthetic-nf02b
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gd, posix, fileinfo, pdo_mysql, pdo_sqlite, mbstring
+      - name: Syntax and immutable boundary
+        run: |
+          set -euo pipefail
+          find wordpress/plugins/badaround-core wordpress/themes/badaround-child -name '*.php' -print0 | xargs -0 -n1 php -l > /tmp/nf02b-lint.log
+          git diff --check
+          test "$(git diff --name-only 8077c291281ca35f8f26d6f78563de5d7fa87112 HEAD -- wordpress)" = wordpress/plugins/badaround-core/badaround-core.php
+          git diff --exit-code 8077c291281ca35f8f26d6f78563de5d7fa87112 HEAD -- wordpress/plugins/badaround-core/includes/class-badaround-report-conditional-contract.php wordpress/plugins/badaround-core/contracts/nf-conditional-v1.0.json wordpress/themes
+      - name: V1, V2, cross-version and consumer regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p test-results
+          tests=(native-report-f12 native-report-f13 native-report-f14 native-report-f15 native-report-f16 f1-14r-publication-contract geo-public-02-contract geo-public-02-publication-gate geo-public-04-moderation geo-public-05-publication geo-public-05-audit native-social-preference native-media-no-media-differential native-media-f17b native-media-f17c nf-ux-02b-v1-differential nf-ux-02b-v2 nf-ux-02b-media nf-ux-02c-immutability nf-ux-02c1-persistence nf-ux-02c1-v1-differential nf-ux-02c-resume-recovery nf-ux-02c2-recovery nf-ux-02c2-taxonomy-map)
+          for test in "${tests[@]}"; do
+            php "tests/${test}.php" | tee "test-results/${test}.log"
+          done
+      - name: Provision isolated WordPress matching staging (no staging writes)
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /tmp/nf-final-wp-cli.phar
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 https://wordpress.org/wordpress-7.1.3.zip -o /tmp/nf-final-wordpress.zip
+          unzip -q /tmp/nf-final-wordpress.zip -d /tmp/nf-final-extract
+          mv /tmp/nf-final-extract/wordpress /tmp/nf-final-wordpress
+          php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress core verify-checksums --version=7.1.3
+          php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress config create --dbname=nf02b --dbuser=root --dbpass=synthetic-nf02b --dbhost=127.0.0.1:3306
+          php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress config set DISABLE_WP_CRON true --raw
+          php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress config set AUTOMATIC_UPDATER_DISABLED true --raw
+          php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress core install --url=http://nf-final.invalid --title='NF-UX-02C isolated QA' --admin_user=nfqa --admin_password=synthetic-ci-only --admin_email=nf-final@example.invalid --skip-email
+          mkdir -p evidence/concurrency /tmp/nf-final-wordpress/wp-content/mu-plugins
+          echo "<?php add_filter('pre_wp_mail','__return_false');" > /tmp/nf-final-wordpress/wp-content/mu-plugins/no-external-mail.php
+          cp -a wordpress/plugins/badaround-core /tmp/nf-final-wordpress/wp-content/plugins/badaround-core
+          git show 8077c291281ca35f8f26d6f78563de5d7fa87112:wordpress/plugins/badaround-core/badaround-core.php > /tmp/nf-final-wordpress/wp-content/plugins/badaround-core/badaround-core.php
+          php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress plugin activate badaround-core
+      - name: Reproduce original failure then verify standard Core and Native bootstrap
+        env:
+          NF03A_THEME_CONFIG: ${{ github.workspace }}/wordpress/themes/badaround-child/inc/native-report.php
+        run: |
+          set -euo pipefail
+          NF03A_EXPECT_ABSENT=1 php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress eval-file tests/nf-ux-03a-bootstrap.php | tee test-results/bootstrap-baseline.log
+          cp wordpress/plugins/badaround-core/badaround-core.php /tmp/nf-final-wordpress/wp-content/plugins/badaround-core/badaround-core.php
+          php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress eval-file tests/nf-ux-03a-bootstrap.php | tee test-results/bootstrap-fixed.log
+      - name: Genuine independent WordPress/PHP/MySQL concurrency, reservation and crash retry
+        env:
+          NF_FINAL_WPCLI: /tmp/nf-final-wp-cli.phar
+          NF_FINAL_FILE: ${{ github.workspace }}/tests/nf-ux-02c-final-wordpress.php
+          NF_FINAL_DIR: ${{ github.workspace }}/evidence/concurrency
+        run: |
+          set -euo pipefail
+          php /tmp/nf-final-wp-cli.phar --path=/tmp/nf-final-wordpress --quiet eval-file tests/nf-ux-02c-final-wordpress.php | tee evidence/concurrency.log
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Emergency matrix and targeted Native v1 regressions
+        run: |
+          set -euo pipefail
+          mkdir -p evidence/screenshots
+          npm ci --prefix tests
+          node --test tests/nf-ux-03-emergency.cjs tests/native-report-f16.cjs tests/native-report-f16-dom.cjs tests/nf-final-01-ux.cjs tests/native-social-preference.cjs tests/geo-public-03-choice.cjs tests/nf-ux-03-no-media.cjs 2>&1 | tee evidence/dom.log
+      - name: Browser desktop mobile keyboard and contrast
+        run: |
+          set -euo pipefail
+          npm install --prefix /tmp/nf03-browser --no-save playwright@1.62.1
+          node /tmp/nf03-browser/node_modules/playwright/cli.js install --with-deps chromium
+          BA_PLAYWRIGHT_MODULE=/tmp/nf03-browser/node_modules/playwright BA_SCREENSHOT_DIR=evidence/screenshots node tests/nf-ux-03-emergency-browser.cjs 2>&1 | tee evidence/browser.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nf03a-bootstrap-regression-evidence
+          path: |
+            test-results/
+            evidence/
+          retention-days: 90
