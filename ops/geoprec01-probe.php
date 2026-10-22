@@ -1,0 +1,73 @@
+<?php
+/* Temporary authenticated staging-only GEO-PREC-01 certification. No public debug route. */
+if(!defined('ABSPATH')||($_SERVER['HTTP_HOST']??'')!=='staging.badaround.it'||time()>1792720396)return;
+function gp01check($ok,$why){if(!$ok)throw new RuntimeException($why);}
+function gp01digest($sql){global $wpdb;$rows=$wpdb->get_results($sql,ARRAY_A);gp01check(!$wpdb->last_error,'READ_FAILED');return hash('sha256',wp_json_encode($rows));}
+function gp01state($max_report,$max_event){global $wpdb;
+ $events="SELECT ID FROM {$wpdb->posts} WHERE post_type='ba_evento' AND ID<=".(int)$max_event;
+ $out=['reports'=>gp01digest("SELECT * FROM {$wpdb->prefix}ba_reports WHERE id<=".(int)$max_report." ORDER BY id"),
+ 'events'=>gp01digest("SELECT * FROM {$wpdb->posts} WHERE ID IN ($events) ORDER BY ID"),
+ 'eventmeta'=>gp01digest("SELECT * FROM {$wpdb->postmeta} WHERE post_id IN ($events) ORDER BY meta_id"),
+ 'relationships'=>gp01digest("SELECT * FROM {$wpdb->term_relationships} WHERE object_id IN ($events) ORDER BY object_id,term_taxonomy_id"),
+ 'historical_audit'=>gp01digest("SELECT * FROM {$wpdb->prefix}ba_audit_log WHERE (object_type='event' AND object_id IN ($events)) OR (object_type='report' AND object_id BETWEEN 1 AND ".(int)$max_report.") ORDER BY id"),
+ 'terms'=>gp01digest("SELECT * FROM {$wpdb->terms} ORDER BY term_id"),
+ 'taxonomy_registry'=>gp01digest("SELECT term_taxonomy_id,term_id,taxonomy,description,parent FROM {$wpdb->term_taxonomy} ORDER BY term_taxonomy_id"),
+ 'termmeta'=>gp01digest("SELECT * FROM {$wpdb->termmeta} ORDER BY meta_id")];
+ $out['schema']=[];foreach($wpdb->get_col('SHOW TABLES') as $t){if(!str_starts_with($t,$wpdb->prefix))continue;$r=$wpdb->get_row("SHOW CREATE TABLE `$t`",ARRAY_N);$out['schema'][$t]=hash('sha256',preg_replace('/ AUTO_INCREMENT=\d+/','',$r[1]));}return $out;
+}
+function gp01row($id){global $wpdb;return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}ba_reports WHERE id=%d",$id),ARRAY_A);}
+function gp01fixture($case,$s){global $wpdb;gp01check(isset($s['fixtures'][$case]),'UNKNOWN_CASE');$r=gp01row($s['fixtures'][$case]['report']);$e=json_decode($r['content_original'],true);$c=$e['canonical']??[];
+ gp01check($r&&$r['id']>$s['max_report']&&$c['reporter']['email']==='geoprec01@example.invalid'&&str_starts_with($c['content']['description'],'GEO-PREC-01 ')&&$c['reporter']['social_visibility']==='declined'&&empty($c['media']['items']),'FIXTURE_SCOPE');return [$r,$e,$c,(int)$r['event_id']];}
+function gp01inspect($case,$s){global $wpdb;[$r,$e,$c,$id]=gp01fixture($case,$s);$g=(new BadAround_Geo_Moderation_Service())->request_context($id);gp01check(!is_wp_error($g),'CONTEXT_UNAVAILABLE');$admin=new BadAround_Moderation_Admin();ob_start();$admin->render_geo_decision_box(get_post($id));$box=ob_get_clean();ob_start();$admin->render_public_box(get_post($id));$public=ob_get_clean();
+ $p=BadAround_Public_Geo_Projection::public_view($id);$audits=$wpdb->get_results($wpdb->prepare("SELECT action,old_value,new_value,reason FROM {$wpdb->prefix}ba_audit_log WHERE object_type='event' AND object_id=%d ORDER BY id",$id),ARRAY_A);
+ return ['case'=>$case,'report'=>(int)$r['id'],'event'=>$id,'marker'=>$e['public_geo_governance']??null,'version'=>$c['schema_version'],'request'=>$c['location']['public_location_request'],'status'=>get_post_status($id),'moderation'=>get_post_meta($id,'_ba_moderation_status',true),'request_context'=>$g,'geo_ui'=>$box,'coordinate_controls'=>preg_match('/name="ba_public_meta\[(_ba_public_lat|_ba_public_lng|_ba_public_radius_m)\]"/',$public)===1,'decision'=>get_post_meta($id,'_ba_public_location_decision',true),'public_geo'=>$p,'projection'=>get_post_meta($id,'_ba_public_geo',true),'proof_present'=>is_array(get_post_meta($id,'_ba_public_geo_proof',true)),'private_source_hash'=>hash('sha256',wp_json_encode([$r['exact_lat'],$r['exact_lng'],$r['exact_address']])),'canonical_hash'=>hash('sha256',wp_json_encode($c)),'audits'=>$audits,'url'=>get_permalink($id),'subtypes'=>wp_get_object_terms($id,'ba_tipo_evento',['fields'=>'ids']),'territory'=>wp_get_object_terms($id,'ba_territorio',['fields'=>'ids'])];
+}
+add_action('rest_api_init',static function(){register_rest_route('geoprec01-qa/v1','/certify',[
+ 'methods'=>'POST','permission_callback'=>static function($r){return current_user_can('manage_options')&&hash_equals('27ec76dfad56dc4874d75552ec0a87d1db105b7f335192ea73aa03f44bb8f2aa',hash('sha256',(string)$r->get_param('token')))?true:new WP_Error('geoprec01_denied','QA authorization required.',['status'=>403]);},
+ 'callback'=>static function($request){global $wpdb;nocache_headers();header('Cache-Control: private, no-store, max-age=0');header('X-Robots-Tag: noindex, nofollow');
+ $key='geoprec01_qa_20261023_48bab222';$action=$request->get_param('action');$s=get_option($key);try{
+ if($action==='begin'){
+  gp01check(!$s,'SESSION_ALREADY_STARTED');$s=['max_report'=>(int)$wpdb->get_var("SELECT COALESCE(MAX(id),0) FROM {$wpdb->prefix}ba_reports"),'max_event'=>(int)$wpdb->get_var("SELECT COALESCE(MAX(ID),0) FROM {$wpdb->posts}"),'fixtures'=>[]];$s['before']=gp01state($s['max_report'],$s['max_event']);gp01check(add_option($key,$s,'','no'),'QA_SESSION_WRITE');return ['session'=>'prepared','max_report'=>$s['max_report'],'max_event'=>$s['max_event'],'before'=>$s['before'],'native'=>badaround_native_report_config()['schemaVersion'],'contract'=>hash_file('sha256',WP_PLUGIN_DIR.'/badaround-core/contracts/nf-conditional-v1.0.json')];
+ }
+ gp01check(is_array($s),'NO_QA_SESSION');
+ if($action==='status'){
+  $out=['state'=>gp01state($s['max_report'],$s['max_event']),'baseline'=>$s['before'],'fixtures'=>[],'native'=>badaround_native_report_config()['schemaVersion'],'contract'=>BadAround_Report_Conditional_Contract::SHA256,'media_enabled'=>(new BadAround_Native_Media_Config())->enabled()];foreach($s['fixtures'] as $case=>$ids)$out['fixtures'][]=gp01inspect($case,$s);return $out;
+ }
+ if($action==='create'){
+  $case=$request->get_param('case');gp01check(in_array($case,['A','B','C','D'],true),'CASE_SCOPE');gp01check(defined('BadAround_Public_Geo_Contract::USER_AUTHORITY'),'DEPLOY_NOT_ACTIVE');
+  if(isset($s['fixtures'][$case]))return gp01inspect($case,$s);
+  $p=json_decode('{"schema_version":"badaround-report/v2","submission_id":"eea91c2f-f432-46a6-94e1-4c4b8c627e56","event":{"category":"public_space","subtype":"civic_waste"},"reporter":{"relationship":"directly_involved","first_name":"QA","last_name":"GEOPREC01","email":"geoprec01@example.invalid","public_identity_mode":"anonymous","contact_preference":"none","social_visibility":"declined"},"location":{"exact_address":"Punto sorgente sintetico GEO-PREC-01","exact_lat":41.6208388,"exact_lng":12.462638700000001,"public_location_request":"approximate_area","public_location_request_version":"public-location-request-v1","region":"Lazio","province":"Roma","municipality":"Pomezia","locality":"Torvaianica","public_precision":"area","immediate_danger":"no"},"time":{"mode":"unknown"},"content":{"description":"GEO-PREC-01: collaudo sintetico; nessun evento reale. Nessun dato personale reale."},"media":{"availability":"no"},"consents":{"social_visibility_version":"social-preference-v1","truthfulness":true,"media_rights":true,"publication_rules":true,"terms":true,"privacy":true,"version":"native-f16-v1"}}',true);$p['submission_id']=wp_generate_uuid4();$p['location']['public_location_request']=in_array($case,['A','C'],true)?'exact_point':'approximate_area';$p['content']['description']='GEO-PREC-01 '.$case.': collaudo sintetico; nessun evento reale, nessun dato personale reale.';
+  $raw=new WP_REST_Request('POST','/badaround/v1/reports');$raw->set_header('content-type','application/json');$raw->set_header('x-badaround-intake','badaround-report/v1');$raw->set_header('origin','https://staging.badaround.it');$raw->set_body(wp_json_encode($p));$response=rest_do_request($raw);$data=$response->get_data();gp01check($response->get_status()<300&&($data['status']??'')==='success','NATIVE_REST_REJECTED_'.wp_json_encode($data));
+  $s['fixtures'][$case]=['report'=>(int)$data['report_id'],'event'=>(int)$data['event_id'],'payload'=>$p];gp01check(update_option($key,$s),'QA_SESSION_UPDATE');
+  $id=(int)$data['event_id'];gp01check($id>$s['max_event'],'EVENT_NOT_NEW');wp_update_post(['ID'=>$id,'post_title'=>'[QA sintetica GEO-PREC-01 '.$case.'] Nessun evento reale','post_content'=>'Collaudo tecnico sintetico della precisione geografica pubblica. Nessun evento reale.']);
+  return gp01inspect($case,$s);
+ }
+ $case=$request->get_param('case');if($action==='negative'||$action==='moderate'||$action==='retry'){
+  [$r,$e,$c,$id]=gp01fixture($case,$s);$before=hash('sha256',wp_json_encode($r));
+  if($action==='retry'){$raw=new WP_REST_Request('POST','/badaround/v1/reports');$raw->set_header('content-type','application/json');$raw->set_header('x-badaround-intake','badaround-report/v1');$raw->set_header('origin','https://staging.badaround.it');$raw->set_body(wp_json_encode($s['fixtures'][$case]['payload']));$data=rest_do_request($raw)->get_data();gp01check(($data['report_id']??0)==$r['id']&&($data['event_id']??0)==$id,'RETRY_DUPLICATE');return ['retry'=>'PASS','report'=>(int)$r['id'],'event'=>$id];}
+  if($action==='negative'){
+   $results=[];$admin=new BadAround_Moderation_Admin();foreach(['exact_point','approximate_area','street','unsupported'] as $mode){$input=['mode'=>$mode,'revision'=>BadAround_Geo_Moderation_Service::revision(get_post_meta($id,'_ba_public_location_decision',true)),'reason_code'=>'privacy','exact_confirmed'=>true,'public_location_request'=>'unsupported','public_geo_governance'=>'legacy','proof'=>['mode'=>'unsupported']];$result=$admin->process_geo_decision_request($id,$input,wp_create_nonce('ba_save_geo_decision_'.$id),'POST');gp01check(is_wp_error($result)&&$result->get_error_code()==='ba_geo_decision_user_authoritative','OVERRIDE_NOT_BLOCKED');$results[$mode]=$result->get_error_code();}
+   $proof=get_post_meta($id,'_ba_public_geo_proof',true);gp01check(false===update_post_meta($id,'_ba_public_geo_proof',['user_authority'=>['mode'=>'unsupported'],'seal'=>'injected']),'PROOF_WRITE_NOT_BLOCKED');gp01check(get_post_meta($id,'_ba_public_geo_proof',true)===$proof,'PROOF_MUTATED');
+   $unknown=$e;$unknown['public_geo_governance']='unknown-policy';gp01check(is_wp_error(BadAround_Public_Geo_Contract::user_authority($unknown)),'UNKNOWN_POLICY_NOT_BLOCKED');
+   $postBefore=$_POST;try{$_POST=['ba_public_fields_nonce'=>wp_create_nonce('ba_save_public_fields_'.$id),'mode'=>'unsupported','public_location_request'=>'unsupported','ba_public_meta'=>['_ba_public_lat'=>'0','_ba_public_lng'=>'0','_ba_public_radius_m'=>'9999','_ba_public_location_decision'=>['mode'=>'unsupported'],'_ba_public_location_precision'=>'f32-c7']];wp_update_post(['ID'=>$id,'post_title'=>get_post($id)->post_title]);}finally{$_POST=$postBefore;}
+   gp01check(hash('sha256',wp_json_encode(gp01row($r['id'])))===$before&&get_post_meta($id,'_ba_public_location_decision',true)===''&&get_post_status($id)==='pending','NEGATIVE_STATE_MUTATED');return ['case'=>$case,'crafted'=>$results,'proof'=>'BLOCKED','unknown_marker'=>'FAIL_CLOSED','ordinary_save'=>'UNCHANGED','report_hash'=>$before];
+  }
+  $target=in_array($case,['A','B'],true)?'approved':'rejected';$mod=new BadAround_Moderation_Service();if($target==='rejected'){gp01check(is_wp_error($mod->transition($id,$target,'')),'EMPTY_REJECTION_ACCEPTED');}
+  gp01check(true===$mod->transition($id,$target,$target==='rejected'?'Collaudo sintetico GEO-PREC-01: rifiuto di prova.':''),'MODERATION_FAILED');
+  if($target==='approved'){
+   // Suppress only the outbound Sentinel scheduling callback for this synthetic QA publication/request.
+   $removed=[];foreach(($GLOBALS['wp_filter']['badaround_event_published']->callbacks??[]) as $priority=>$callbacks)foreach($callbacks as $item){$cb=$item['function'];if(is_array($cb)&&is_object($cb[0])&&$cb[0] instanceof BadAround_Sentinel_Matching_Service){remove_action('badaround_event_published',$cb,$priority);$removed[]=[$cb,$priority,$item['accepted_args']];}}
+   try{$result=(new BadAround_Publication_Service())->publish($id);gp01check(!is_wp_error($result)&&$result===true,'PUBLICATION_FAILED_'.(is_wp_error($result)?$result->get_error_code():''));}finally{foreach($removed as [$cb,$priority,$args])add_action('badaround_event_published',$cb,$priority,$args);}
+   $p=BadAround_Public_Geo_Projection::public_view($id);gp01check(is_array($p)&&$p['mode']===$c['location']['public_location_request'],'PUBLIC_MODE_MISMATCH');
+   if($p['mode']==='approximate_area'){gp01check((float)$p['lat']!==(float)$r['exact_lat']||(float)$p['lng']!==(float)$r['exact_lng'],'PRIVATE_COORDINATES_LEAKED');gp01check($p['radius_meters']===BadAround_Public_Geo_Projection::radius(get_post_meta($id,'_ba_public_location_precision',true)),'SYSTEM_RADIUS_CHANGED');}
+  }else{gp01check(is_wp_error((new BadAround_Publication_Service())->publish($id))&&get_post_status($id)==='pending'&&BadAround_Public_Geo_Projection::public_view($id)===null,'REJECTED_PUBLISHED');}
+  gp01check(hash('sha256',wp_json_encode(gp01row($r['id'])))===$before,'PUBLICATION_MUTATED_PRIVATE_REPORT');return gp01inspect($case,$s);
+ }
+ if($action==='final'){
+  $now=gp01state($s['max_report'],$s['max_event']);gp01check($now===$s['before'],'HISTORICAL_SCHEMA_OR_TAXONOMY_DRIFT');gp01check(count($s['fixtures'])===4,'FIXTURE_COUNT');$out=['protected_state'=>'UNCHANGED','schema'=>'UNCHANGED','taxonomy'=>'UNCHANGED','fixtures'=>[]];foreach($s['fixtures'] as $case=>$ids){$v=gp01inspect($case,$s);gp01check($v['marker']==='user-public-location/v1'&&$v['version']==='badaround-report/v2'&&!$v['coordinate_controls']&&$v['decision']==='','FIXTURE_INVARIANT');$out['fixtures'][]=$v;}
+  $v1=false;foreach($wpdb->get_col("SELECT content_original FROM {$wpdb->prefix}ba_reports WHERE id BETWEEN 35 AND 55 ORDER BY id") as $raw){$p=json_decode($raw,true)['canonical']??[];if(($p['schema_version']??'')==='badaround-report/v1'){$v1=!is_wp_error(BadAround_Report_Version_Registry::prepare($p));break;}}gp01check($v1,'HISTORICAL_V1_INVALID');$out['v1']='PASS';$out['media_enabled']=(new BadAround_Native_Media_Config())->enabled();gp01check(!$out['media_enabled'],'MEDIA_NOT_FAIL_CLOSED');return $out;
+ }
+ if($action==='cleanup'){delete_option($key);return ['temporary_state_removed'=>get_option($key)===false];}
+ throw new RuntimeException('ACTION_NOT_ALLOWED');
+ }catch(Throwable $e){return new WP_Error('geoprec01_qa_failure',$e->getMessage(),['status'=>500]);}
+ }]);});
