@@ -59,6 +59,16 @@ jobs:
         run: |
           set -euo pipefail
           node ops/nfhome01-cards.cjs 2>&1 | tee evidence/home-cards.log
+      - name: Reviewable screenshot previews and compact result without deployment
+        if: always()
+        run: |
+          node - <<'NODE'
+          const fs=require('node:fs');
+          if(fs.existsSync('evidence/results.json'))console.log('NFHOME_RESULTS '+fs.readFileSync('evidence/results.json','utf8').replace(/\n/g,''));
+          for(const name of ['cards-1440.png','cards-768.png','cards-390.png','cards-320.png','keyboard-focus-1440.png']){
+            if(fs.existsSync('evidence/'+name))console.log('NFHOME_IMAGE '+name+' '+fs.readFileSync('evidence/'+name).toString('base64'));
+          }
+          NODE
       - uses: actions/upload-artifact@v4
         if: always()
         with:

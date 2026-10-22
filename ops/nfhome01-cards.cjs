@@ -38,7 +38,7 @@ for(const width of [1440,1280,1024,768,390,320]){
  const legend=page.locator('.ba-map-legend');assert(await legend.isVisible());await legend.locator('summary').click();assert.equal(await legend.getAttribute('open'),null);await legend.locator('summary').click();assert.notEqual(await legend.getAttribute('open'),null);
  if(width<=768){const toggle=page.locator('.ba-menu-toggle');assert(await toggle.isVisible());await toggle.click();assert.equal(await toggle.getAttribute('aria-expanded'),'true');assert(await page.locator('#ba-mobile-menu').isVisible());await toggle.click();assert.equal(await toggle.getAttribute('aria-expanded'),'false');}
  for(let i=0;i<6;i++){await cards.nth(i).click();const u=new URL(page.url());assert.equal(u.pathname,'/segnalazioni/');assert.equal(u.searchParams.get('categoria'),slugs[i]);await page.goBack();}
- await page.locator('.ba-home-categories').scrollIntoViewIfNeeded();await cards.first().focus();
+ await page.locator('.ba-home-categories').scrollIntoViewIfNeeded();await cards.first().focus();await page.keyboard.press('Tab');await page.keyboard.press('Shift+Tab');
  if([1440,768,390,320].includes(width))await page.locator('.ba-home-categories').screenshot({path:out+'/cards-'+width+'.png'});
  if(width===1440)await page.screenshot({path:out+'/keyboard-focus-1440.png'});
  results.push({width,columns,result:'PASS',cards:data,overflow:over,keyboard:true,focus:true,legend:true,mobileNavigation:width<=768?'PASS':'not applicable'});console.log('PASS NF-HOME-01',width,columns,'columns, six links, focus, contrast, legend, menu');
