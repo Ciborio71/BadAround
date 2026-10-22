@@ -22,8 +22,8 @@ def probe(data=None):
  name='nf03a-probe-'+secrets.token_hex(20)+'.php';token=secrets.token_hex(32);body=pathlib.Path('ops/nf04-probe.php').read_text().replace('__TOKEN__',token).encode()
  try:
   put(name,body);assert read(name)==body
-  req=urllib.request.Request('https://staging.badaround.it/'+name,data=json.dumps(data).encode() if data else None,headers={'X-NF04-Token':token,'Cache-Control':'no-cache'})
-  with urllib.request.urlopen(req,timeout=60) as r:return json.load(r)
+  raw=subprocess.check_output(['node','ops/nf04-probe-client.cjs'],input=json.dumps(dict(url='https://staging.badaround.it/'+name,token=token,data=data)).encode(),timeout=120)
+  return json.loads(raw)
  finally:
   f.delete(ROOT+name)
   try:read(name)
