@@ -87,12 +87,31 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Emergency matrix and targeted Native v1 regressions
+      - name: Conditional v2 matrix, Native payloads and media regressions
         run: |
           set -euo pipefail
           mkdir -p evidence/screenshots
           npm ci --prefix tests
           node --test --test-concurrency=1 tests/nf-ux-04-model.cjs tests/nf-ux-04-dom.cjs tests/nf-ux-04-service.cjs tests/native-media-f17d.cjs tests/native-media-f17d-dom.cjs tests/native-media-f17d-extra.cjs tests/native-media-f17e.cjs 2>&1 | tee evidence/dom.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nf04-conditional-v2-evidence
+          path: |
+            test-results/
+            evidence/
+          retention-days: 90
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - run: mkdir -p evidence/screenshots
       - name: Browser desktop mobile keyboard and contrast
         run: |
           set -euo pipefail
@@ -103,8 +122,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: nf04-conditional-v2-evidence
-          path: |
-            test-results/
-            evidence/
+          name: nf04-browser-evidence
+          path: evidence/
           retention-days: 90

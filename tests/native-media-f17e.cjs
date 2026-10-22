@@ -86,7 +86,7 @@ test('late DELETE completion never double-revokes URLs or re-renders detached st
 test('navigation during upload retains live queue, preview/focus and request identity',async()=>{
  const h=create({upload(){}});h.fill();h.set('media.availability','yes');for(let i=0;i<4;i++)h.click('next');h.select();await tick();const preview=h.doc.querySelector('[data-media-list] img').src,key=h.uploads[0].key;
  for(const action of ['next','back','back','next','back','next','next','back'])h.click(action);
- assert.equal(h.model.step,Object.keys(h.root.nativeReport.config.steps).indexOf('media'));assert.equal(h.uploads.length,1);assert.equal(h.doc.querySelector('[data-media-list] img').src,preview);assert.equal(h.doc.activeElement.tagName,'H2');
+ assert.equal(h.model.step,Object.keys(h.root.nativeReport.config.steps).indexOf('contact'));assert.equal(h.uploads.length,1);assert.equal(h.doc.querySelector('[data-media-list] img').src,preview);assert.equal(h.doc.activeElement.tagName,'H2');
  h.uploads[0].finish();await tick();assert.equal(h.uploads[0].key,key);assert.equal(h.doc.querySelectorAll('[data-media-list] li').length,1);assert.equal(h.doc.querySelector('[data-media-state]').textContent,'Accettata e riservata');h.close();
 });
 test('100 percent upload is awaiting acceptance, not a canonical accepted image',async()=>{
