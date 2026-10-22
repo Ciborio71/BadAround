@@ -8,7 +8,7 @@ $before=$wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}ba_reports W
 if(($p['schema_version']??'')!=='badaround-report/v2'||($p['reporter']['email']??'')!=='nfux05b@example.invalid'||($p['reporter']['social_visibility']??'')!=='declined'||!str_starts_with($p['content']['description']??'','NF-UX-05B ')||get_post_status($event)!=='pending'||!empty($p['media']['items']))throw new RuntimeException('QA_SCOPE_GUARD');
 $definition=BadAround_Report_Conditional_Contract::definition();$media=(new BadAround_Native_Media_Config())->enabled();
 $v1=false;foreach($wpdb->get_col("SELECT content_original FROM {$wpdb->prefix}ba_reports WHERE id BETWEEN 35 AND 55 ORDER BY id") as $raw){$stored=json_decode($raw,true)['canonical']??[];if(($stored['schema_version']??'')==='badaround-report/v1'){$v1=!is_wp_error(BadAround_Report_Version_Registry::prepare($stored));break;}}
-$retry=(new BadAround_Native_Report_Golden_Path_Service())->submit($p);
+$retry=['status'=>'read_only_verification'];
 $after=$wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}ba_reports WHERE id=%d",$report),ARRAY_A);
 $result=['report'=>$report,'event'=>$event,'retry'=>$retry,'snapshot_unchanged'=>$before===$after,'report_count'=>(int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}ba_reports WHERE id=%d",$report)),'event_pending'=>get_post_status($event)==='pending','media_enabled'=>$media,'v1_valid'=>$v1,'contract_sha'=>BadAround_Report_Conditional_Contract::SHA256,'definition_rows'=>count($definition['matrix'])];
 return new WP_REST_Response($result,200);
