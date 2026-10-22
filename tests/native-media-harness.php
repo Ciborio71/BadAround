@@ -50,6 +50,7 @@ class MediaTestDB {
 		// SQLite test adapter for the certified GEO-PUBLIC JSON existence probe.
 		if($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME)==='sqlite') {
 			$q=str_replace("JSON_CONTAINS_PATH(content_original, 'one', '$.canonical.location.public_location_request', '$.canonical.location.public_location_request_version')","(json_type(content_original, '$.canonical.location.public_location_request') IS NOT NULL OR json_type(content_original, '$.canonical.location.public_location_request_version') IS NOT NULL)",$q);
+			$q=str_replace("JSON_CONTAINS_PATH(content_original, 'one', '$.canonical.location.public_location_request', '$.canonical.location.public_location_request_version', '$.public_geo_governance')","(json_type(content_original, '$.canonical.location.public_location_request') IS NOT NULL OR json_type(content_original, '$.canonical.location.public_location_request_version') IS NOT NULL OR json_type(content_original, '$.public_geo_governance') IS NOT NULL)",$q);
 		}
 $this->last_error='';try {if($this->fail && call_user_func($this->fail,$q)){ $this->fail=null;throw new Exception('injected failure'); }return $this->pdo->query($q);}catch(Throwable $e){$this->last_error=$e->getMessage();return false;}}
 	function get_var($q){

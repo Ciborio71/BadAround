@@ -36,7 +36,14 @@ function nd_flow( $frozen ) {
 		if ( $phase === 'conflict' ) { $p['content']['description'] = 'Changed active value'; }
 		$GLOBALS['transients'] = array(); $response = $controller->rest_create( new WP_REST_Request( json_encode( $p ), array( 'content-type' => 'application/json' ) ) );
 		$data = $response->data; if ( isset( $data['event_id'] ) ) { $data['event_id'] = 'generated-event'; }
-		$rows = $db->get_results( 'SELECT status,content_original,event_id FROM test_ba_reports', ARRAY_A ); foreach ( $rows as &$row ) { if ( $row['event_id'] ) { $row['event_id'] = 'generated-event'; } } unset( $row );
+		$rows = $db->get_results( 'SELECT status,content_original,event_id FROM test_ba_reports', ARRAY_A ); foreach ( $rows as &$row ) { if ( $row['event_id'] ) { $row['event_id'] = 'generated-event'; }
+			// GEO-PREC-01 adds server-only governance outside the unchanged canonical V1 contract.
+			if ( ! $frozen && $row['content_original'] ) {
+				$envelope = json_decode( $row['content_original'], true );
+				if ( ( $envelope['public_geo_governance'] ?? null ) !== 'user-public-location/v1' ) { throw new RuntimeException( 'New native governance marker missing.' ); }
+				unset( $envelope['public_geo_governance'] );
+				$row['content_original'] = wp_json_encode( $envelope, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+			} } unset( $row );
 		$out[] = array( $response->status, $data, $rows, count( $GLOBALS['posts'] ) );
 	}
 	return $out;

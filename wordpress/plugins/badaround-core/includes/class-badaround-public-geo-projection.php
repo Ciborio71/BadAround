@@ -48,6 +48,13 @@ class BadAround_Public_Geo_Projection {
 		$p = get_post_meta( $event_id, BadAround_Public_Geo_Contract::PROJECTION_META, true );
 		$d = get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true );
 		$proof = get_post_meta( $event_id, self::PROOF_META, true );
+		if ( is_array( $proof ) && array_key_exists( 'user_authority', $proof ) ) {
+			if ( '' !== $d ) { return self::error(); }
+			$d = $proof['user_authority'];
+			$location = array( 'public_location_request' => is_array( $d ) ? ( $d['mode'] ?? null ) : null,
+				'public_location_request_version' => BadAround_Public_Geo_Contract::REQUEST_VERSION );
+			if ( is_wp_error( BadAround_Public_Geo_Contract::validate_user_authority( $location, $d ) ) ) { return self::error(); }
+		} elseif ( BadAround_Public_Geo_Contract::is_user_authority( $d ) ) { return self::error(); }
 		if ( ! is_array( $p ) || ! is_array( $d ) || ! is_array( $proof ) || ! isset( $proof['source'], $proof['seal'] )
 			|| ! is_string( $proof['source'] ) || ! is_string( $proof['seal'] )
 			|| ! hash_equals( self::signature( $event_id, $p, $d, $proof['source'] ), $proof['seal'] )
@@ -62,7 +69,7 @@ class BadAround_Public_Geo_Projection {
 			|| ! isset( $p['radius_meters'] ) || (int) $radius !== $p['radius_meters'] ) { return self::error(); }
 		$allowed_radii = array( 150, 300, 750, 1000, 3000 );
 		if ( 'exact_point' === $p['mode'] ) {
-			return 0 === $p['radius_meters'] && true === ( $d['exact_confirmed'] ?? false ) ? $p : self::error();
+			return 0 === $p['radius_meters'] && ( BadAround_Public_Geo_Contract::is_user_authority( $d ) || true === ( $d['exact_confirmed'] ?? false ) ) ? $p : self::error();
 		}
 		return in_array( $p['mode'], array( 'approximate_area', 'street', 'legacy_generalized_point' ), true )
 			&& in_array( $p['radius_meters'], $allowed_radii, true ) ? $p : self::error();

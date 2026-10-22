@@ -92,7 +92,7 @@ class BadAround_Moderation_Admin {
 
 		add_meta_box( 'ba_public_data', __( 'PUBBLICABILE — Dati canonici', 'badaround-core' ), array( $this, 'render_public_box' ), BadAround_Event_Post_Type::POST_TYPE, 'normal', 'high' );
 		add_meta_box( 'ba_private_report', __( 'RISERVATO / NON PUBBLICABILE', 'badaround-core' ), array( $this, 'render_private_box' ), BadAround_Event_Post_Type::POST_TYPE, 'normal', 'high' );
-		add_meta_box( 'ba_geo_decision', __( 'Localizzazione — decisione di moderazione', 'badaround-core' ), array( $this, 'render_geo_decision_box' ), BadAround_Event_Post_Type::POST_TYPE, 'normal', 'high' );
+		add_meta_box( 'ba_geo_decision', __( 'Localizzazione pubblica', 'badaround-core' ), array( $this, 'render_geo_decision_box' ), BadAround_Event_Post_Type::POST_TYPE, 'normal', 'high' );
 		add_meta_box( 'ba_private_media', __( 'Media originali privati', 'badaround-core' ), array( $this, 'render_media_box' ), BadAround_Event_Post_Type::POST_TYPE, 'normal', 'default' );
 		add_meta_box( 'ba_audit', __( 'Audit essenziale', 'badaround-core' ), array( $this, 'render_audit_box' ), BadAround_Event_Post_Type::POST_TYPE, 'normal', 'default' );
 		add_meta_box( 'ba_moderation_actions', __( 'Moderazione', 'badaround-core' ), array( $this, 'render_actions_box' ), BadAround_Event_Post_Type::POST_TYPE, 'side', 'high' );
@@ -115,6 +115,10 @@ class BadAround_Moderation_Admin {
 			'_ba_vehicle_color'     => __( 'Colore veicolo', 'badaround-core' ),
 			'_ba_vehicle_plate_masked' => __( 'Targa mascherata', 'badaround-core' ),
 		);
+		$geo_context = ( new BadAround_Geo_Moderation_Service() )->request_context( $post->ID );
+		if ( ! is_wp_error( $geo_context ) && $geo_context['user_authoritative'] ) {
+			unset( $fields['_ba_public_lat'], $fields['_ba_public_lng'], $fields['_ba_public_radius_m'] );
+		}
 		echo '<p><strong>' . esc_html__( 'Titolo pubblico', 'badaround-core' ) . '</strong><br><input class="widefat" name="ba_public_title" value="' . esc_attr( $post->post_title ) . '"></p>';
 		echo '<p><strong>' . esc_html__( 'Descrizione pubblicabile', 'badaround-core' ) . '</strong><br><textarea class="widefat" rows="5" name="ba_public_content">' . esc_textarea( $post->post_content ) . '</textarea></p>';
 		echo '<p><strong>' . esc_html__( 'Categoria / sottocategoria', 'badaround-core' ) . '</strong><br>' . wp_kses_post( $this->term_path( $post->ID, BadAround_Event_Post_Type::EVENT_TYPE_TAX ) ) . '</p>';
@@ -216,6 +220,11 @@ class BadAround_Moderation_Admin {
 		}
 		$labels = BadAround_Geo_Moderation_Service::labels();
 		$request_label = $context['request'] ? $labels[ $context['request'] ] : __( 'non disponibile / criterio legacy', 'badaround-core' );
+		if ( $context['user_authoritative'] ) {
+			echo '<p><strong>' . esc_html__( 'Posizione pubblica richiesta:', 'badaround-core' ) . '</strong> ' . esc_html( $request_label ) . '</p>';
+			echo '<p>' . esc_html__( 'Scelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata.', 'badaround-core' ) . '</p>';
+			return;
+		}
 		$stored = get_post_meta( $post->ID, BadAround_Public_Geo_Contract::DECISION_META, true );
 		$valid_stored = is_array( $stored ) && ! is_wp_error( BadAround_Public_Geo_Contract::validate_decision( $context['location'], $stored ) );
 		$mode = $valid_stored ? $stored['mode'] : '';
@@ -254,7 +263,7 @@ class BadAround_Moderation_Admin {
 		if ( ! $screen || 'ba_evento' !== $screen->post_type || ! $event_id
 			|| ! BadAround_Geo_Moderation_Service::can_edit( $event_id ) || BadAround_Geo_Moderation_Service::read_only( $event_id ) ) { return; }
 		$context = ( new BadAround_Geo_Moderation_Service() )->request_context( $event_id );
-		if ( is_wp_error( $context ) ) { return; }
+		if ( is_wp_error( $context ) || $context['user_authoritative'] ) { return; }
 		echo '<form id="ba-geo-decision-form" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 		echo '<input type="hidden" name="action" value="ba_save_geo_decision"><input type="hidden" name="event_id" value="' . absint( $event_id ) . '">';
 		echo '<input type="hidden" name="revision" value="' . esc_attr( BadAround_Geo_Moderation_Service::revision( get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true ) ) ) . '">';

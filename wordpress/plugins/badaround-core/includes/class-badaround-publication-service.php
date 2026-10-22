@@ -32,7 +32,9 @@ class BadAround_Publication_Service {
 		global $wpdb;
 		if ( '' !== get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true )
 			|| '' !== get_post_meta( $event_id, BadAround_Public_Geo_Contract::PROJECTION_META, true ) ) { return true; }
-		$has = $wpdb->get_var( $wpdb->prepare( "SELECT CASE WHEN JSON_VALID(content_original) THEN JSON_CONTAINS_PATH(content_original, 'one', '$.canonical.location.public_location_request', '$.canonical.location.public_location_request_version') ELSE 0 END FROM {$wpdb->prefix}ba_reports WHERE event_id = %d AND deleted_at IS NULL ORDER BY id ASC LIMIT 1", $event_id ) );
+		$primary = absint( get_post_meta( $event_id, '_ba_primary_report_id', true ) );
+		$primary_sql = $primary ? $wpdb->prepare( ' AND id = %d', $primary ) : '';
+		$has = $wpdb->get_var( $wpdb->prepare( "SELECT CASE WHEN JSON_VALID(content_original) THEN JSON_CONTAINS_PATH(content_original, 'one', '$.canonical.location.public_location_request', '$.canonical.location.public_location_request_version', '$.public_geo_governance') ELSE 0 END FROM {$wpdb->prefix}ba_reports WHERE event_id = %d AND deleted_at IS NULL {$primary_sql} ORDER BY id ASC LIMIT 1", $event_id ) );
 		return ! empty( $wpdb->last_error ) || (int) $has > 0;
 	}
 
@@ -54,6 +56,11 @@ class BadAround_Publication_Service {
 		$territory = $this->deepest_term( $event_id, BadAround_Event_Post_Type::TERRITORY_TAX );
 		$subtype   = $this->deepest_term( $event_id, BadAround_Event_Post_Type::EVENT_TYPE_TAX );
 		$precision = sanitize_key( (string) get_post_meta( $event_id, '_ba_public_location_precision', true ) );
+		if ( $this->b3_event === $event_id ) {
+			$context = $this->versioned_context( $event_id );
+			if ( is_wp_error( $context ) ) { return $context; }
+			if ( BadAround_Public_Geo_Contract::is_user_authority( $context['decision'] ) ) { $precision = ''; }
+		}
 		if ( $this->b3_event === $event_id && 'municipality' === ( get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true )['mode'] ?? '' ) ) { $precision = 'f32-c7'; }
 
 		/*
@@ -255,6 +262,11 @@ class BadAround_Publication_Service {
 			return new WP_Error( 'ba_publication_incomplete_public_coordinates', __( 'Le coordinate pubbliche devono essere complete oppure assenti.', 'badaround-core' ) );
 		}
 		$precision = sanitize_key( (string) get_post_meta( $event_id, '_ba_public_location_precision', true ) );
+		if ( $this->b3_event === $event_id ) {
+			$context = $this->versioned_context( $event_id );
+			if ( is_wp_error( $context ) ) { return $context; }
+			if ( BadAround_Public_Geo_Contract::is_user_authority( $context['decision'] ) ) { $precision = ''; }
+		}
 		if ( $this->b3_event === $event_id && 'municipality' === ( get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true )['mode'] ?? '' ) ) { $precision = 'f32-c7'; }
 
 		if ( 'f32-c7' === $precision ) {
@@ -387,10 +399,12 @@ class BadAround_Publication_Service {
 		global $wpdb;
 		// Read only a presence flag, never load private coordinates/address for
 		// this gate (especially on the municipality-only projection path).
+		$primary = absint( get_post_meta( $event_id, '_ba_primary_report_id', true ) );
+		$primary_sql = $primary ? $wpdb->prepare( ' AND id = %d', $primary ) : '';
 		$has_request = $wpdb->get_var( $wpdb->prepare(
 			"SELECT CASE WHEN JSON_VALID(content_original) THEN JSON_CONTAINS_PATH(content_original, 'one',
-			 '$.canonical.location.public_location_request', '$.canonical.location.public_location_request_version') ELSE 0 END
-			 FROM {$wpdb->prefix}ba_reports WHERE event_id = %d AND deleted_at IS NULL ORDER BY id ASC LIMIT 1",
+			 '$.canonical.location.public_location_request', '$.canonical.location.public_location_request_version', '$.public_geo_governance') ELSE 0 END
+			 FROM {$wpdb->prefix}ba_reports WHERE event_id = %d AND deleted_at IS NULL {$primary_sql} ORDER BY id ASC LIMIT 1",
 			$event_id
 		) );
 		if ( ! empty( $wpdb->last_error ) ) {
@@ -573,12 +587,13 @@ class BadAround_Publication_Service {
 		if ( ! $event_id || ! current_user_can( 'ba_moderate_events' ) || ! current_user_can( 'publish_ba_eventi' ) || ! current_user_can( 'edit_post', $event_id ) ) {
 			return new WP_Error( 'ba_publication_forbidden', __( 'Non sei autorizzato a pubblicare questo evento.', 'badaround-core' ) );
 		}
-		if ( $this->b3_event !== $event_id && self::uses_versioned_geo( $event_id ) ) { return $this->publish_versioned( $event_id ); }
-
 		if (class_exists('BadAround_Native_Media_Fence')) {
 			$fence=BadAround_Native_Media_Fence::check($event_id);
 			if (is_wp_error($fence)) return $fence;
 		}
+
+		// Preserve the existing media fence before entering either geographic policy.
+		if ( $this->b3_event !== $event_id && self::uses_versioned_geo( $event_id ) ) { return $this->publish_versioned( $event_id ); }
 
 		$current = sanitize_key( (string) get_post_meta( $event_id, '_ba_moderation_status', true ) );
 
@@ -727,6 +742,14 @@ class BadAround_Publication_Service {
 		$stored = json_decode( $row->content_original, true );
 		$location = $stored['canonical']['location'] ?? null;
 		$decision = get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true );
+		$authority = BadAround_Public_Geo_Contract::user_authority( $stored );
+		if ( is_wp_error( $authority ) ) { return $authority; }
+		if ( null !== $authority ) {
+			if ( '' !== $decision ) { return $this->geo_error( 'moderator_override_forbidden' ); }
+			$decision = $authority;
+		} elseif ( BadAround_Public_Geo_Contract::is_user_authority( $decision ) ) {
+			return $this->geo_error( 'governance_missing' );
+		}
 		$valid = BadAround_Public_Geo_Contract::validate_decision( $location, $decision );
 		if ( is_wp_error( $valid ) ) { return $valid; }
 		// Never source coordinates from an untrusted alternate JSON representation.
@@ -742,10 +765,10 @@ class BadAround_Publication_Service {
 
 	private function exact_review( $event_id, $context ) {
 		$d = $context['decision'];
-		// Explicit GEO-PUBLIC-04 confirmation is the positive server review.
-		// The existing hook remains a veto/override review point, never an authority bypass.
+		// Legacy: explicit GEO-PUBLIC-04 review. New: persisted reporter authority.
+		// A safety veto rejects publication as a whole; it cannot change the mode.
 		$review = static function ( $allowed ) use ( $context, $d ) {
-			return true === $allowed || ( 'exact_point' === ( $context['location']['public_location_request'] ?? null ) && true === ( $d['exact_confirmed'] ?? false ) );
+			return true === $allowed || ( 'exact_point' === ( $context['location']['public_location_request'] ?? null ) && ( BadAround_Public_Geo_Contract::is_user_authority( $d ) || true === ( $d['exact_confirmed'] ?? false ) ) );
 		};
 		add_filter( 'badaround_public_geo_exact_allowed', $review, -999, 1 );
 		try { return BadAround_Public_Geo_Contract::exact_safety_allowed( $event_id, $context['report_id'], $d ); }
@@ -756,7 +779,7 @@ class BadAround_Publication_Service {
 		if ( $this->b3_event !== (int) $event_id ) { return $this->geo_error( 'b3_required' ); }
 		$c = $this->versioned_context( $event_id );
 		if ( is_wp_error( $c ) ) { return $c; }
-		if ( 'exact_point' === $c['decision']['mode'] && true !== ( $c['decision']['exact_confirmed'] ?? false ) ) { return $this->geo_error( 'exact_confirmation_required' ); }
+		if ( 'exact_point' === $c['decision']['mode'] && ! BadAround_Public_Geo_Contract::is_user_authority( $c['decision'] ) && true !== ( $c['decision']['exact_confirmed'] ?? false ) ) { return $this->geo_error( 'exact_confirmation_required' ); }
 		$existing = get_post_meta( $event_id, BadAround_Public_Geo_Contract::PROJECTION_META, true );
 		if ( '' !== $existing ) {
 			$p = BadAround_Public_Geo_Projection::verified( $event_id );
@@ -778,7 +801,7 @@ class BadAround_Publication_Service {
 				else { delete_post_meta( $event_id, $key ); }
 			}
 			update_post_meta( $event_id, BadAround_Public_Geo_Contract::PROJECTION_META, $p );
-			update_post_meta( $event_id, BadAround_Public_Geo_Projection::PROOF_META, array( 'source' => $c['source'], 'seal' => BadAround_Public_Geo_Projection::signature( $event_id, $p, $c['decision'], $c['source'] ) ) );
+			update_post_meta( $event_id, BadAround_Public_Geo_Projection::PROOF_META, ( BadAround_Public_Geo_Contract::is_user_authority( $c['decision'] ) ? array( 'user_authority' => $c['decision'] ) : array() ) + array( 'source' => $c['source'], 'seal' => BadAround_Public_Geo_Projection::signature( $event_id, $p, $c['decision'], $c['source'] ) ) );
 		} finally { self::$geo_writer = 0; }
 		return is_wp_error( BadAround_Public_Geo_Projection::verified( $event_id ) ) ? $this->geo_error( 'storage_failed' ) : true;
 	}

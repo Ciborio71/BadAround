@@ -4,6 +4,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/class-badaround-public-geo-contract.php';
+
 class BadAround_Report_Repository {
 	/** Infrastructure binding only: no PII, no report migration, never autoloaded.
 	 * wp_options already exists in WordPress. This preserves the certified media
@@ -44,7 +46,7 @@ class BadAround_Report_Repository {
 	public function create_versioned_native_intake_record( $canonical ) {
 		global $wpdb;
 		$parts = $this->native_source_parts( $canonical['submission_id'] ); if ( is_wp_error( $parts ) ) { return $parts; }
-		$payload = wp_json_encode( $this->canonical_storage_envelope( $canonical ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+		$payload = wp_json_encode( $this->canonical_storage_envelope( $canonical, true ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
 		$now = current_time( 'mysql', true );
 		$result = $wpdb->insert( $wpdb->prefix . 'ba_reports', array( 'report_type' => 'initial', 'source_type' => 'native', 'source_form_id' => $parts['form_id'], 'source_entry_id' => $parts['entry_id'], 'user_id' => get_current_user_id() ?: null, 'status' => 'received', 'created_at' => $now, 'updated_at' => $now, 'content_original' => $payload, 'payload_hash' => hash( 'sha256', $payload ) ) );
 		return false === $result ? new WP_Error( 'ba_report_insert_failed', 'Unable to reserve report.' ) : (int) $wpdb->insert_id;
@@ -164,6 +166,7 @@ class BadAround_Report_Repository {
 			$content_payload = $this->canonical_storage_envelope( $canonical );
 		}
 
+		if ( $native ) { $content_payload[ BadAround_Public_Geo_Contract::GOVERNANCE_KEY ] = BadAround_Public_Geo_Contract::USER_AUTHORITY; }
 		$payload = $native && null !== $slot['content_original'] && '' !== $slot['content_original']
 			? $slot['content_original'] : wp_json_encode( $content_payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
 		$contact = isset( $reporter['contact_preference'] ) ? sanitize_key( $reporter['contact_preference'] ) : 'none';
@@ -360,13 +363,13 @@ class BadAround_Report_Repository {
 		return hash( 'sha256', wp_json_encode( $canonical, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
 	}
 
-	private function canonical_storage_envelope( $canonical ) {
+	private function canonical_storage_envelope( $canonical, $native = false ) {
 		$description = '';
 		if ( isset( $canonical['content']['description'] ) ) {
 			$description = sanitize_textarea_field( $canonical['content']['description'] );
 		}
 
-		return array(
+		return ( $native ? array( BadAround_Public_Geo_Contract::GOVERNANCE_KEY => BadAround_Public_Geo_Contract::USER_AUTHORITY ) : array() ) + array(
 			'schema_version' => isset( $canonical['schema_version'] ) ? $canonical['schema_version'] : BadAround_Report_Schema::VERSION,
 			'submission_id'  => isset( $canonical['submission_id'] ) ? $canonical['submission_id'] : '',
 			'canonical'      => $canonical,

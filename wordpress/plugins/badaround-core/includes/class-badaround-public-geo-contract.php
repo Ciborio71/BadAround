@@ -8,10 +8,41 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  * GEO-PUBLIC-04/05 will supply authorized decisions and persist projections.
  */
 class BadAround_Public_Geo_Contract {
+	const USER_AUTHORITY = 'user-public-location/v1';
+	const GOVERNANCE_KEY = 'public_geo_governance';
 	const VERSION = 'public-location/v1';
 	const REQUEST_VERSION = 'public-location-request-v1';
 	const DECISION_META = '_ba_public_location_decision';
 	const PROJECTION_META = '_ba_public_geo';
+
+	/** Server-only storage envelope signal. Absence means immutable legacy policy.
+	 * Never infer governance from schema version, dates or event IDs.
+	 */
+	public static function user_authority( $envelope ) {
+		if ( ! is_array( $envelope ) ) { return self::error( 'governance_invalid' ); }
+		if ( ! array_key_exists( self::GOVERNANCE_KEY, $envelope ) ) { return null; }
+		if ( self::USER_AUTHORITY !== $envelope[ self::GOVERNANCE_KEY ] ) { return self::error( 'governance_invalid' ); }
+		$location = $envelope['canonical']['location'] ?? null;
+		if ( is_wp_error( self::validate_request( $location ) ) || ! isset( $location['public_location_request'] ) ) {
+			return self::error( 'request_invalid' );
+		}
+		return array( 'authority' => self::USER_AUTHORITY, 'mode' => $location['public_location_request'],
+			'request_version' => self::REQUEST_VERSION );
+	}
+
+	public static function is_user_authority( $value ) {
+		return is_array( $value ) && array_key_exists( 'authority', $value );
+	}
+
+	public static function validate_user_authority( $location, $authority ) {
+		$expected = self::user_authority( array( self::GOVERNANCE_KEY => self::USER_AUTHORITY,
+			'canonical' => array( 'location' => $location ) ) );
+		return ! is_wp_error( $expected ) && is_array( $authority ) && count( $authority ) === count( $expected )
+			&& ! array_diff_key( $authority, $expected )
+			&& $authority['authority'] === $expected['authority'] && $authority['mode'] === $expected['mode']
+			&& $authority['request_version'] === $expected['request_version']
+			? true : self::error( 'authority_invalid' );
+	}
 
 	public static function definition() {
 		return array(
@@ -54,6 +85,7 @@ class BadAround_Public_Geo_Contract {
 	}
 
 	public static function validate_decision( $location, $decision ) {
+		if ( self::is_user_authority( $decision ) ) { return self::validate_user_authority( $location, $decision ); }
 		$valid = self::validate_request( $location );
 		if ( is_wp_error( $valid ) ) { return $valid; }
 		$keys = array( 'version', 'mode', 'reason', 'policy_version', 'decided_at', 'decided_by' );

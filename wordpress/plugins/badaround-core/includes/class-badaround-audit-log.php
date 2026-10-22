@@ -4,6 +4,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/class-badaround-public-geo-contract.php';
+
 class BadAround_Audit_Log {
 	public static function record( $object_type, $object_id, $action, $context = 'system', $reason = null, $request_id = null ) {
 		global $wpdb;
@@ -90,6 +92,10 @@ class BadAround_Audit_Log {
 		$value = array( 'user_request' => $context['location']['public_location_request'] ?? 'legacy_unspecified',
 			'moderator_decision' => $context['decision']['mode'], 'public_projection_mode' => $projection['mode'],
 			'radius_meters' => $projection['radius_meters'] ?? null, 'policy_version' => $projection['version'], 'publication_event' => 'event_published' );
+		if ( BadAround_Public_Geo_Contract::is_user_authority( $context['decision'] ) ) {
+			unset( $value['moderator_decision'] );
+			$value['geo_authority'] = BadAround_Public_Geo_Contract::USER_AUTHORITY;
+		}
 		return $wpdb->insert( $wpdb->prefix . 'ba_audit_log', array(
 			'actor_user_id' => get_current_user_id(), 'object_type' => 'event', 'object_id' => absint( $event_id ),
 			'action' => 'public_geo_projection_published', 'context' => 'publication',

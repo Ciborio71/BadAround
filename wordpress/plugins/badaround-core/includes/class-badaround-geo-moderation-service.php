@@ -34,7 +34,9 @@ class BadAround_Geo_Moderation_Service {
 			"SELECT id, source_type, JSON_VALID(content_original) AS valid_json,
 			 CASE WHEN JSON_VALID(content_original) THEN JSON_CONTAINS_PATH(content_original, 'one', '$.canonical.location.public_location_request', '$.canonical.location.public_location_request_version') ELSE 0 END AS has_request,
 			 CASE WHEN JSON_VALID(content_original) THEN JSON_UNQUOTE(JSON_EXTRACT(content_original, '$.canonical.location.public_location_request')) ELSE NULL END AS request_mode,
-			 CASE WHEN JSON_VALID(content_original) THEN JSON_UNQUOTE(JSON_EXTRACT(content_original, '$.canonical.location.public_location_request_version')) ELSE NULL END AS request_version
+			 CASE WHEN JSON_VALID(content_original) THEN JSON_UNQUOTE(JSON_EXTRACT(content_original, '$.canonical.location.public_location_request_version')) ELSE NULL END AS request_version,
+			 CASE WHEN JSON_VALID(content_original) THEN JSON_CONTAINS_PATH(content_original, 'one', '$.public_geo_governance') ELSE 0 END AS has_governance,
+			 CASE WHEN JSON_VALID(content_original) THEN JSON_UNQUOTE(JSON_EXTRACT(content_original, '$.public_geo_governance')) ELSE NULL END AS governance
 			 FROM {$wpdb->prefix}ba_reports WHERE event_id = %d AND deleted_at IS NULL {$primary_sql} ORDER BY id ASC LIMIT 1",
 			$event_id
 		) );
@@ -44,9 +46,14 @@ class BadAround_Geo_Moderation_Service {
 			$location = array( 'public_location_request' => $row->request_mode, 'public_location_request_version' => $row->request_version );
 		}
 		if ( is_wp_error( BadAround_Public_Geo_Contract::validate_request( $location ) ) ) { return $this->error( 'request_invalid' ); }
+		$envelope = array( 'canonical' => array( 'location' => $location ) );
+		if ( ! empty( $row->has_governance ) ) { $envelope[ BadAround_Public_Geo_Contract::GOVERNANCE_KEY ] = $row->governance; }
+		$authority = BadAround_Public_Geo_Contract::user_authority( $envelope );
+		if ( is_wp_error( $authority ) ) { return $authority; }
 		$request = $location['public_location_request'] ?? null;
 		return array( 'report_id' => (int) $row->id, 'location' => $location, 'request' => $request,
-			'allowed' => BadAround_Public_Geo_Contract::allowed_decisions( $request ) );
+			'user_authoritative' => null !== $authority,
+			'allowed' => null !== $authority ? array() : BadAround_Public_Geo_Contract::allowed_decisions( $request ) );
 	}
 
 	public static function revision( $decision ) { return hash( 'sha256', wp_json_encode( $decision ?: null ) ); }
@@ -73,6 +80,7 @@ class BadAround_Geo_Moderation_Service {
 				|| 'published' === get_post_meta( $event_id, '_ba_moderation_status', true ) ) { return $this->error( 'read_only' ); }
 			$context = $this->request_context( $event_id );
 			if ( is_wp_error( $context ) ) { return $context; }
+			if ( $context['user_authoritative'] ) { return $this->error( 'user_authoritative' ); }
 			$before = get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true );
 			if ( ! hash_equals( self::revision( $before ), $input['revision'] ) ) { return $this->error( 'stale' ); }
 			$mode = $input['mode'];

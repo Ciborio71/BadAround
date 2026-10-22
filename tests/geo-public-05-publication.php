@@ -11,7 +11,7 @@ function is_wp_error($v){return $v instanceof WP_Error;}
 class WP_Error {private $c;function __construct($c,$m=''){$this->c=$c;}function get_error_code(){return $this->c;}}
 class WP_Term {public $term_id,$parent,$slug,$name,$taxonomy='ba_territorio';function __construct($id,$parent,$name,$taxonomy='ba_territorio'){$this->term_id=$id;$this->parent=$parent;$this->name=$name;$this->slug=strtolower($name);$this->taxonomy=$taxonomy;}}
 class BadAround_Event_Post_Type {const POST_TYPE='ba_evento';const TERRITORY_TAX='ba_territorio';const EVENT_TYPE_TAX='ba_tipo_evento';}
-class BadAround_Moderation_Service {const STATUS_APPROVED='approved';}
+require_once dirname(__DIR__).'/wordpress/plugins/badaround-core/includes/class-badaround-moderation-service.php';
 class BadAround_Audit_Log {public static function record(){return true;} public static function transition(){return !$GLOBALS['audit_fail'];} public static function geographic_publication($id,$c,$p){if($GLOBALS['audit_fail'])return false;$GLOBALS['geo_audits'][]=[$id,$c['decision']['mode'],$p['mode'],$p['radius_meters']??null];return true;}}
 class DB {public $prefix='wp_',$postmeta='wp_postmeta';function prepare($sql){return $sql;}function get_row($q){return (object)array_merge(['author_name'=>'','author_surname'=>'','author_email'=>'','author_phone'=>'','exact_address'=>'Private Address 99','exact_lat'=>null,'exact_lng'=>null,'full_plate'=>'','content_original'=>''],$GLOBALS['private_fixture']??[]);}function get_var($q){return 0;}function get_results($q){return [];}}
 $wpdb=new DB();
@@ -21,7 +21,7 @@ function get_term($id,$tax=''){ $v=$GLOBALS['terms'][$id]??null;return $v&&(!$ta
 function get_ancestors($id,$tax,$type='taxonomy'){ $out=[];while(($t=get_term($id,$tax))&&$t->parent){$out[]=$t->parent;$id=$t->parent;}return $out;}
 function get_term_meta($id,$key,$single=true){return $GLOBALS['term_meta'][$id][$key]??'';}
 function get_post($id){return $GLOBALS['posts'][$id]??null;}
-function get_post_meta($id,$key,$single=true){return $GLOBALS['meta'][$id][$key]??'';}
+function get_post_meta($id,$key='',$single=true){return $key===''?($GLOBALS['meta'][$id]??[]):($GLOBALS['meta'][$id][$key]??'');}
 function update_post_meta($id,$key,$val){$gate=apply_filters('update_post_metadata',null,$id,$key,$val,null);if($gate!==null)return $gate;$GLOBALS['meta'][$id][$key]=$val;return true;}
 function delete_post_meta($id,$key){$gate=apply_filters('delete_post_metadata',null,$id,$key,null,null);if($gate!==null)return $gate;unset($GLOBALS['meta'][$id][$key]);return true;}
 function wp_get_post_terms($id,$tax){return array_map(fn($i)=>get_term($i,$tax),$GLOBALS['object_terms'][$id][$tax]??[]);}

@@ -66,6 +66,7 @@ function ghtml($id){$a=new BadAround_Moderation_Admin();ob_start();$a->render_ge
 $svc=new BadAround_Geo_Moderation_Service();$admin=new BadAround_Moderation_Admin();
 if(in_array('--html',$argv,true)||in_array('--html-approx',$argv,true)){
  $request=in_array('--html-approx',$argv,true)?'approximate_area':'exact_point';gseed(900,$request);$_GET['post']=900;
+ if(in_array('--user-authority',$argv,true)){$GLOBALS['reports'][900]['has_governance']=1;$GLOBALS['reports'][900]['governance']='user-public-location/v1';}
  echo '<!doctype html><html lang="it"><meta charset="utf-8"><body><form id="post"><input name="public_title" required value="Synthetic">'.ghtml(900).'</form>';
  $admin->render_independent_rejection_form();$admin->render_geo_decision_form();echo '</body></html>';exit;
 }
