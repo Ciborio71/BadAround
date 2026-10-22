@@ -120,7 +120,8 @@ function badaround_native_report_config() {
 	$order = array_flip( array( 'vehicle', 'property', 'hazard', 'public_space', 'animal', 'item_document' ) );
 	uksort( $categories, function ( $a, $b ) use ( $order ) { return ( $order[ $a ] ?? 99 ) <=> ( $order[ $b ] ?? 99 ); } );
 	$fields = array();
-	foreach ( BadAround_Report_Schema::fields() as $path => $definition ) {
+	$contract = BadAround_Report_Conditional_Contract::definition();
+	foreach ( BadAround_Report_Conditional_Contract::fields() as $path => $definition ) {
 		if ( in_array( $path, array( 'schema_version', 'submission_id', 'consents.version', 'consents.social_visibility_version', 'media.items', 'location.place_id', 'authority.reference', 'location.public_location_request', 'location.public_location_request_version' ), true ) ) { continue; }
 		$options = array();
 		foreach ( $definition['constraints']['enum'] ?? $definition['constraints']['item_enum'] ?? array() as $value ) {
@@ -142,6 +143,13 @@ function badaround_native_report_config() {
 			'step' => badaround_native_report_step( $path ),
 			'help' => '', // Generic privacy/moderation guidance is stated once; specific help follows below.
 		);
+	}
+	foreach ( $contract['fields'] as $path => $spec ) {
+		if ( ! isset( $spec['source_field'] ) ) { continue; }
+		$fields[ $path ]['label'] = $spec['context_label'];
+		$fields[ $path ]['help'] = $spec['help'];
+		$fields[ $path ]['step'] = $fields[ $spec['source_field'] ]['step'];
+		$fields[ $path ]['sourceField'] = $spec['source_field'];
 	}
 	// Keep the territorial hierarchy ahead of the precise private address.
 	$location_order = array_flip( array( 'location.region', 'location.province', 'location.municipality', 'location.locality', 'location.area_label', 'location.exact_address', 'location.exact_lat', 'location.exact_lng', 'location.public_precision', 'location.place_type', 'location.immediate_danger' ) );
@@ -185,10 +193,25 @@ function badaround_native_report_config() {
 			$danger_values = array_merge( $danger_values, $row['emergency']['condition']['values'] );
 		}
 	}
+	// Presentation projection only: no storage destinations, privacy internals or test oracle.
+	$profiles = array();
+	foreach ( $contract['matrix'] as $row ) {
+		$profiles[ $row['subtype'] ] = array( 'category' => $row['category'], 'fields' => $row['fields'] );
+	}
+	$ordered_fields = array();
+	foreach ( $fields as $path => $field ) {
+		if ( isset( $field['sourceField'] ) ) { continue; }
+		$ordered_fields[ $path ] = $field;
+		foreach ( $fields as $child => $spec ) {
+			if ( ( $spec['sourceField'] ?? null ) === $path ) { $ordered_fields[ $child ] = $spec; }
+		}
+	}
+	$fields = $ordered_fields;
 	return array(
+		'conditional' => array( 'sha256' => BadAround_Report_Conditional_Contract::SHA256, 'profiles' => $profiles ),
 		'emergencyNotice' => array( 'subtypes' => $emergency_subtypes, 'dangerValues' => array_values( array_unique( $danger_values ) ) ),
 		'smartAddress' => $smart_key ? array( 'key' => $smart_key, 'territories' => $territories, 'country' => 'IT' ) : null,
-		'schemaVersion' => BadAround_Report_Schema::VERSION,
+		'schemaVersion' => 'badaround-report/v2',
 		// Contract scaffolding only: no new visible control before GEO-PUBLIC-03.
 		'publicLocationRequest' => array( 'default' => 'exact_point', 'version' => BadAround_Report_Schema::PUBLIC_LOCATION_REQUEST_VERSION ),
 		'consentVersion' => 'native-f16-v1', // Version of this QA presentation, not a claim of finalized legal policies.

@@ -14,6 +14,7 @@
     media_manifest_invalid:'Controlla le immagini selezionate prima di inviare.', media_manifest_conflict:'Le immagini dell’invio sono già fissate. Non modificarle: verifica l’esito riprovando lo stesso invio quando consentito.',
     media_binding_invariant_failed:'Non è possibile confermare l’associazione delle immagini. Non creare un duplicato: contatta BadAround per verificare l’esito.',
     media_remove_first:'Rimuovi esplicitamente tutte le immagini prima di scegliere un’altra disponibilità.',
+    required_field:'Completa questo campo obbligatorio per il tipo di evento scelto.', invalid_type:'Inserisci un testo valido, senza formattazione o interruzioni di riga.', value_too_short:'Completa la specifica richiesta.',
     missing_required_field:'Completa questo campo obbligatorio.', conditional_field_required:'Completa questo campo per il tipo di evento scelto.',
     consent_required:'È necessaria questa conferma per procedere.', reward_confirmation_required:'Conferma l’impegno relativo alla ricompensa.',
     invalid_email:'Inserisci un indirizzo email valido.', invalid_phone:'Controlla il numero di telefono.', invalid_plate:'Usa lettere, numeri e ? per i caratteri sconosciuti.',
@@ -46,7 +47,7 @@
     errors.forEach(error => {
       const field = config.fields[error.field];
       const item = document.createElement('li');
-      const locationError = field?.step === 'location' && error.field.startsWith('location.');
+      const locationError = field?.step === 'location' && error.field.startsWith('location.') && !field.sourceField;
       const text = (locationError ? 'Posizione dell’evento: ' : field ? field.label + ': ' : '') + (locationError ? 'Torna a Dove e seleziona di nuovo un luogo dai suggerimenti.' : ns.errorMessage(error));
       const wrapper = Array.from(container.querySelectorAll('[data-native-field]')).find(w => w.dataset.nativeField === error.field);
       if (wrapper && !wrapper.hidden && !wrapper.closest('[data-native-location-fields][hidden]')) {

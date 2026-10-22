@@ -21,11 +21,60 @@
       this.submissionId = uuid(this.crypto);
       this.values = {}; this.publicLocationRequest = this.config.publicLocationRequest?.default === 'approximate_area' ? 'approximate_area' : 'exact_point'; this.step = 0; this.busy = false; this.completed = false; this.snapshot = null;
       const defaults = {'location.public_precision':'area', 'reporter.public_identity_mode':'anonymous', 'reward.status':'none'};
-      Object.entries(defaults).forEach(([path, value]) => {
+      Object.entries(this.config.conditional ? {} : defaults).forEach(([path, value]) => {
         if (this.config.fields[path]?.constraints.enum?.includes(value)) this.values[path] = value;
       });
     }
+    profile() {
+      const row = this.config.conditional?.profiles[this.effective('event.subtype')];
+      return row?.category === this.values['event.category'] ? row : null;
+    }
+    rule(path) {
+      const profile=this.profile();
+      if(profile)return profile.fields[path];
+      // During category selection retain only rules shared by every possible profile.
+      const candidates=Object.values(this.config.conditional?.profiles||{}).filter(row=>!this.values['event.category']||row.category===this.values['event.category']);
+      const rule=candidates[0]?.fields[path];
+      return rule&&candidates.every(row=>JSON.stringify(row.fields[path])===JSON.stringify(rule))?rule:null;
+    }
+    required(path) { return this.config.conditional ? this.active(path) && !!this.rule(path)?.required_when_active : !!this.config.fields[path]?.required; }
+    constraints(path) { return {...this.config.fields[path]?.constraints, ...this.rule(path)?.constraints_override}; }
+    matches(expr, seen) {
+      if (expr.all) return expr.all.every(item => this.matches(item, seen));
+      if (expr.any) return expr.any.some(item => this.matches(item, seen));
+      if (expr.op === 'active') return this.active(expr.field, seen);
+      if (!this.active(expr.field, seen)) return false;
+      const value = this.effective(expr.field);
+      if (value === undefined || value === null) return false;
+      if (expr.op === 'eq') return value === expr.value;
+      if (expr.op === 'in') return expr.values.includes(value);
+      if (expr.op === 'contains') return Array.isArray(value) && value.includes(expr.value);
+      throw new Error('Unsupported frozen condition');
+    }
+    pruneInactive() {
+      if (!this.config.conditional || this.busy || this.snapshot || this.completed) return;
+      // Fixed point also covers transitive descendants after a category/parent edit.
+      let changed;
+      do {
+        changed = false;
+        for (const path of Object.keys(this.values)) {
+          if (!this.active(path) || (path === 'event.subtype' && this.effective(path) === undefined)) {
+            delete this.values[path]; changed = true;
+          }
+        }
+      } while (changed);
+      // Existing private/public GEO adapter uses the frozen technical precision default.
+      if(this.active('location.public_precision')&&this.values['location.public_precision']===undefined)this.values['location.public_precision']='area';
+    }
     active(path, seen = new Set()) {
+      if (this.config.conditional) {
+        // Selection controls must be reachable before a valid profile exists.
+        if (['schema_version','submission_id','event.category','event.subtype'].includes(path)) return true;
+        const rule = this.rule(path);
+        if (!rule || seen.has(path) || rule.state === 'HIDDEN') return false;
+        const chain = new Set(seen); chain.add(path);
+        return rule.state !== 'CONDITIONAL' || this.matches(rule.condition, chain);
+      }
       const field = this.config.fields[path];
       if (!field || seen.has(path)) return false;
       const chain = new Set(seen); chain.add(path);
@@ -44,12 +93,16 @@
     }
     subtypes() { return Object.keys(this.config.categories[this.values['event.category']]?.subtypes || {}); }
     set(path, value) {
-      if (!this.busy && !this.snapshot && !this.completed && this.config.fields[path]) this.values[path] = value;
+      if (!this.busy && !this.snapshot && !this.completed && this.config.fields[path]) {
+        this.values[path] = value;
+        this.pruneInactive();
+      }
     }
     setPublicLocationRequest(value) {
       if (!this.busy && !this.snapshot && !this.completed && this.config.publicLocationRequest && ['exact_point', 'approximate_area'].includes(value)) this.publicLocationRequest = value;
     }
     payload() {
+      this.pruneInactive();
       const out = {schema_version:this.config.schemaVersion, submission_id:this.submissionId};
       Object.entries(this.config.fields).forEach(([path, field]) => {
         if (!this.active(path)) return;
@@ -57,6 +110,7 @@
         if (typeof value === 'string') value = value.trim();
         if (value === undefined || value === '' || (Array.isArray(value) && !value.length)) return;
         if (field.type === 'number' || field.type === 'decimal') value = Number(value);
+        if (this.config.conditional && ['email','enum','uuid'].includes(field.type) && typeof value==='string') value=value.toLowerCase();
         if (field.type === 'plate') value = String(value).toUpperCase().replace(/\s/g, '');
         setPath(out, path, value);
       });
@@ -79,10 +133,13 @@
       };
       Object.entries(this.config.fields).forEach(([path, field]) => {
         if (!this.active(path) || (step && step !== field.step)) return;
-        const value = this.effective(path), c = field.constraints;
+        const value = this.effective(path), c = this.constraints(path);
         const empty = value === undefined || (typeof value === 'string' && value.trim() === '') || (Array.isArray(value) && !value.length);
-        if (field.required && (empty || (field.type === 'bool' && value !== true))) { push(path, 'missing_required_field'); return; }
+        if (this.required(path) && (empty || (field.type === 'bool' && value !== true))) { push(path, 'missing_required_field'); return; }
         if (empty) return;
+        if (typeof value === 'string' && c.single_line && (/[\r\n\u0085\u2028\u2029]/u.test(value) || !/[^\p{Z}\p{C}\s]/u.test(value))) push(path, 'invalid_type');
+        if (typeof value === 'string' && c.plain_text && (/<[^>]*>/.test(value) || /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/u.test(value))) push(path, 'invalid_type');
+        if (typeof value === 'string' && c.min_length && Array.from(value.trim()).length < c.min_length) push(path, 'value_too_short');
         if (c.enum && !c.enum.includes(value)) push(path, 'invalid_enum');
         if (c.item_enum && (!Array.isArray(value) || value.some(v => !c.item_enum.includes(v)))) push(path, 'invalid_enum');
         if (c.max_items && value.length > c.max_items) push(path, 'too_many_items');

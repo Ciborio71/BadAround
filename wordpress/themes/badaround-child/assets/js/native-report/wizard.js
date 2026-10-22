@@ -38,6 +38,9 @@
       const text=triggered?emergencyCopy:'';
       if(emergencyNotice.textContent!==text)emergencyNotice.textContent=text;
     }
+    const conditionalStatus=document.createElement('p');conditionalStatus.className='ba-native-conditional-status';
+    conditionalStatus.setAttribute('role','status');conditionalStatus.setAttribute('aria-live','polite');conditionalStatus.setAttribute('aria-atomic','true');form.before(conditionalStatus);
+    let activeSpecifications=new Set();
     const next = form.querySelector('[data-native-next]'), back = form.querySelector('[data-native-back]'), submit = form.querySelector('[data-native-submit]');
     const success = container.querySelector('[data-native-success]');
     // Outside the busy form so assistive technology can announce progress.
@@ -68,7 +71,7 @@
       if (ns.mountMedia && config.media) mediaView = ns.mountMedia(container, model, config.media, () => render());
     }
     // Presentation classification of frozen F1.3 errors, never a validator.
-    const correctableCodes = new Set(['invalid_type', 'missing_required_field', 'conditional_field_required', 'invalid_email', 'invalid_phone', 'invalid_date_time', 'invalid_enum', 'invalid_category_subtype', 'invalid_location', 'invalid_plate', 'invalid_boolean', 'invalid_array', 'invalid_number', 'value_too_short', 'value_too_long', 'value_too_small', 'value_too_large', 'reward_amount_required', 'reward_confirmation_required']);
+    const correctableCodes = new Set(['required_field','invalid_type', 'missing_required_field', 'conditional_field_required', 'invalid_email', 'invalid_phone', 'invalid_date_time', 'invalid_enum', 'invalid_category_subtype', 'invalid_location', 'invalid_plate', 'invalid_boolean', 'invalid_array', 'invalid_number', 'value_too_short', 'value_too_long', 'value_too_small', 'value_too_large', 'reward_amount_required', 'reward_confirmation_required']);
     const read = wrapper => {
       const field = config.fields[wrapper.dataset.nativeField];
       const inputs = wrapper.querySelectorAll('[data-native-input]');
@@ -80,7 +83,7 @@
       Object.entries(config.fields).forEach(([path, field]) => {
         if (!model.active(path) || (declarationPaths.includes(path) && path!=='consents.truthfulness')) return;
         // The review is user-facing: never print canonical territory metadata or coordinates.
-        if (path.startsWith('location.') && path !== 'location.exact_address') return;
+        if (path.startsWith('location.') && path !== 'location.exact_address' && !field.sourceField) return;
         const value = model.effective(path); if (value === undefined || value === '') return;
         const stepKey = field.step || 'review';
         let section = sections.get(stepKey);
@@ -103,6 +106,7 @@
           : Array.isArray(value) ? value.map(label).join(', ') : label(value);
         const valueNode = document.createElement('span'); valueNode.textContent = valueText;
         detail.append(valueNode);
+        term.dataset.nativeReviewField=path;
         if (field.help && !['Dato riservato: non viene pubblicato integralmente.','La pubblicazione avviene solo dopo moderazione.'].includes(field.help)) {
           const help = document.createElement('small');
           help.className = 'ba-native-review-help';
@@ -239,13 +243,13 @@
           const visible=!unit.hidden;
           if(visible){
             const label=unit.querySelector('legend')||unit.querySelector('label');if(unit!==declaration)numberLabel(label,++number);
-            const missing=unit===declaration?!declarationInput.checked:field.required&&unanswered(path);
+            const missing=unit===declaration?!declarationInput.checked:model.required(path)&&unanswered(path);
             const pair=unit.closest('.ba-native-field-pair');
             if(pair){pairBlocked=pairBlocked||missing;if(unit===pair.lastElementChild){blocked=blocked||pairBlocked;pairBlocked=false;}}
             else if(missing)blocked=true;
           }else unit.querySelectorAll('[data-native-question-number]').forEach(el=>el.remove());
           if(!visible)unit.querySelectorAll('input,select,textarea').forEach(el=>{el.disabled=true;el.required=false;el.setAttribute('aria-required','false');});
-          if(unit===authorityWrapper){authorityCanonical.disabled=true;authorityCanonical.required=false;authorityCanonical.setAttribute('aria-required','false');authorityChoice.disabled=!visible||locked;authorityChoice.required=visible;authorityChoice.setAttribute('aria-required',String(visible));}
+          if(unit===authorityWrapper){authorityCanonical.disabled=true;authorityCanonical.required=false;authorityCanonical.setAttribute('aria-required','false');authorityChoice.disabled=!visible||locked;authorityChoice.required=visible&&model.required(path);authorityChoice.setAttribute('aria-required',String(visible&&model.required(path)));}
           if(unit===declaration){declarationInput.disabled=!visible||locked;declarationInput.required=visible;declarationInput.setAttribute('aria-required',String(visible));}
         }
         if(section.dataset.nativeStep==='media'){
@@ -289,7 +293,8 @@
       const section = wrapper.closest('[data-native-step]');
       if (!section || section.hidden || model.busy || model.snapshot || model.completed) return;
       const fields = Array.from(section.querySelectorAll('[data-native-field],[data-beta-declarations]'));
-      const nextField = fields.slice(fields.indexOf(wrapper)+1).find(field => {
+      const dependent=fields.find(field=>config.fields[field.dataset.nativeField]?.sourceField===wrapper.dataset.nativeField&&!field.hidden&&!field.closest('[hidden]')&&unanswered(field.dataset.nativeField));
+      const nextField = dependent || fields.slice(fields.indexOf(wrapper)+1).find(field => {
         if (field.hidden || field.closest('[hidden]')) return false;
         if(field===declaration)return !declarationInput.checked;
         const path = field.dataset.nativeField, select = field.querySelector('select[data-native-input]');
@@ -404,6 +409,7 @@
     }
     function render(focus = false) {
       if(disposed)return;
+      model.pruneInactive();
       const current = steps[model.step];
       if (publicLocationChoice) {
         publicLocationChoice.querySelectorAll('input[type="radio"]').forEach(input=>{
@@ -427,17 +433,27 @@
             ? 'Indica eventuali danni materiali oltre al furto, per esempio a serrature o vetri. Se il mezzo non è stato ritrovato e non puoi verificarli, scegli «Da verificare».'
             : field.help;
         }
+        // Mirror pruned model values into canonical controls and their card adapters.
+        if(config.conditional)wrapper.querySelectorAll('[data-native-input]').forEach(input=>{
+          const value=model.effective(path);
+          if(input.type==='checkbox')input.checked=field.type==='array'?Array.isArray(value)&&value.includes(input.value):value===true;
+          else input.value=value===undefined?'':String(value);
+        });
+        if(config.conditional && field.constraints.enum && path!=='event.subtype'){
+          const select=wrapper.querySelector('select[data-native-input]'), allowed=model.constraints(path).enum;
+          if(select){const value=model.effective(path)||'';select.replaceChildren(new Option('Seleziona…',''));for(const option of allowed)select.add(new Option(field.options[option]||option,option));select.value=value;}
+        }
         const deferred = (path === 'event.subtype' && !model.values['event.category']) || (path === 'reporter.relationship' && !model.effective('event.subtype'));
         wrapper.hidden = !active || deferred;
         const inputs = wrapper.querySelectorAll('[data-native-input]');
         inputs.forEach(input => {
           input.disabled = !active || deferred || model.busy || !!model.snapshot || model.completed;
-          input.required = active && field.required && field.type !== 'array';
-          input.setAttribute('aria-required', String(active && field.required && field.type !== 'array'));
+          input.required = active && model.required(path) && field.type !== 'array';
+          input.setAttribute('aria-required', String(active && model.required(path) && field.type !== 'array'));
           const group = wrapper.querySelector('fieldset');
-          if (group) group.setAttribute('aria-required', String(active && field.required));
+          if (group) group.setAttribute('aria-required', String(active && model.required(path)));
         });
-        const flag = wrapper.querySelector('[data-native-required]'); if (flag) flag.textContent = active && field.required ? ' (obbligatorio)' : ' (facoltativo)';
+        const flag = wrapper.querySelector('[data-native-required]'); if (flag) flag.textContent = active && model.required(path) ? ' (obbligatorio)' : ' (facoltativo)';
         syncCards(wrapper, field);
       });
       form.querySelectorAll('[data-native-step]').forEach(step => { step.hidden = step.dataset.nativeStep !== current; });
@@ -460,6 +476,11 @@
       smartAddress?.syncVisibility?.();
       if (mediaView) mediaView.render();
       syncFlow();
+      const specifications=new Set(wrappers.filter(w=>config.fields[w.dataset.nativeField].sourceField&&model.active(w.dataset.nativeField)).map(w=>w.dataset.nativeField));
+      const added=[...specifications].filter(path=>!activeSpecifications.has(path));
+      if(added.length)conditionalStatus.textContent=added.map(path=>config.fields[path].label+' — campo obbligatorio.').join(' ');
+      else if(specifications.size<activeSpecifications.size)conditionalStatus.textContent='Domande aggiornate in base alle risposte.';
+      activeSpecifications=specifications;
       syncEmergencyNotice(current);
       if (current === 'review') review();
       if (focus) focusStep(current);
@@ -483,6 +504,7 @@
       }
     }
     function displayErrors(errors) {
+      errors=errors.filter(error=>!config.fields[error.field]||model.active(error.field));
       const first = errors.find(error => config.fields[error.field] && model.active(error.field));
       if (first) model.step = steps.indexOf(config.fields[first.field].step);
       render();
@@ -495,7 +517,7 @@
       const visibleErrors=errors.filter((error,index)=>!declarationPaths.includes(error.field)||index===declarationErrorIndex);
       ns.presentErrors(container, visibleErrors, config, (path, file) => {
         model.step = steps.indexOf(config.fields[path].step); render();
-        if (config.fields[path].step === 'location' && path.startsWith('location.')) {
+        if (config.fields[path].step === 'location' && path.startsWith('location.') && !config.fields[path].sourceField) {
           focusStep('location');
           const start = container.querySelector('[data-smart-start]');
           const search = start && !start.hidden ? start : container.querySelector('[data-smart-widget]')?.firstElementChild;
