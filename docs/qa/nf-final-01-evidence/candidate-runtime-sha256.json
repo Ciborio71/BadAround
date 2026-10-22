@@ -1,0 +1,26 @@
+[
+  {
+    "path": "wordpress/themes/badaround-child/assets/css/native-report.css",
+    "sha256": "077368ee2e836a9260957bb3fe17006fd92186690ab36552f52be2665ac1c7fb"
+  },
+  {
+    "path": "wordpress/themes/badaround-child/assets/js/native-report/errors.js",
+    "sha256": "0f02a930c5106926afe00185cfc03eb488a7222a62f2d40ea2d6de254b11e80e"
+  },
+  {
+    "path": "wordpress/themes/badaround-child/assets/js/native-report/location-map.js",
+    "sha256": "84e81ac8f0b5bf2573228997393b790953930f76f3c1a8fc322feb1accb03c73"
+  },
+  {
+    "path": "wordpress/themes/badaround-child/assets/js/native-report/smart-address.js",
+    "sha256": "81cbbe2769056a11b4d2092892e17d16c732ff390acbcfcbe6069482a60c8911"
+  },
+  {
+    "path": "wordpress/themes/badaround-child/assets/js/native-report/wizard.js",
+    "sha256": "e250b5fcd835d60b92b433b0e616fb9307576eaa8073067d55c36ed254207b3d"
+  },
+  {
+    "path": "wordpress/themes/badaround-child/template-parts/native-report/step.php",
+    "sha256": "0ce16ec1cf04dc2de9157caf460f0b1d9a7235b29aa28b652cc5141e7b718281"
+  }
+]

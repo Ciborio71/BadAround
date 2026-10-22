@@ -1,0 +1,26 @@
+[
+  {
+    "path": "wordpress/themes/badaround-child/front-page.php",
+    "expected": "a9dc0b994e9426a29bc7921b74e61af04aece93f8ef4934ec6964f9efc617f4b",
+    "remote": "a9dc0b994e9426a29bc7921b74e61af04aece93f8ef4934ec6964f9efc617f4b",
+    "match": true
+  },
+  {
+    "path": "wordpress/themes/badaround-child/assets/css/home.css",
+    "expected": "8369538c0b6ed50ac8650fa6774e648a1ef7cc82cbd20e2e7b73db424e34f442",
+    "remote": "8369538c0b6ed50ac8650fa6774e648a1ef7cc82cbd20e2e7b73db424e34f442",
+    "match": true
+  },
+  {
+    "path": "wordpress/themes/badaround-child/assets/css/map.css",
+    "expected": "cc8ec70c303636b70f9133ef16673937bd876e1350f63668a24ad20ae1cf7ec1",
+    "remote": "cc8ec70c303636b70f9133ef16673937bd876e1350f63668a24ad20ae1cf7ec1",
+    "match": true
+  },
+  {
+    "path": "wordpress/themes/badaround-child/assets/js/map.js",
+    "expected": "4126dca40efe5ef3bbd1163ef4c6b88ec3f7e14ac4b03d3a656fb6c2e6800a5f",
+    "remote": "4126dca40efe5ef3bbd1163ef4c6b88ec3f7e14ac4b03d3a656fb6c2e6800a5f",
+    "match": true
+  }
+]

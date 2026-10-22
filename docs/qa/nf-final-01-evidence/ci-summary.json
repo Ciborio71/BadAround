@@ -1,0 +1,33 @@
+{
+  "candidate": "b4aca00fe7acea5b80aa8b45d423ab915fa071e3",
+  "run": 39867687289,
+  "result": "success",
+  "semantic": {
+    "tests": 204,
+    "pass": 204,
+    "fail": 0,
+    "oracle": 33,
+    "matrix": 2805,
+    "dependencies": 554
+  },
+  "browser": {
+    "states": 60,
+    "widths": [
+      320,
+      390,
+      768,
+      1024,
+      1440
+    ],
+    "realSubmissions": 0,
+    "googleGpsProviderBoundary": "mocked",
+    "supplementalFullTemplate390": "PASS"
+  },
+  "stagingDeployed": false,
+  "applicationDbWrites": 0,
+  "temporaryRemoteComponents": 0,
+  "artifacts": {
+    "browser": 12465430748,
+    "semantic": 12464932655
+  }
+}

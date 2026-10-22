@@ -1,0 +1,200 @@
+[
+  {
+    "path": "wordpress/plugins/badaround-core/badaround-core.php",
+    "expected": "935a761ca7ffe56eb3f21140319e3725de9480a8c37aa97ec82e72c86b01fba3",
+    "remote": "935a761ca7ffe56eb3f21140319e3725de9480a8c37aa97ec82e72c86b01fba3",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/contracts/nf-conditional-v1.0.json",
+    "expected": "dc282153243ffb80f3bd4f2a222ea0f4c4f42806fba6f3a0bde0a76855bd8e3c",
+    "remote": "dc282153243ffb80f3bd4f2a222ea0f4c4f42806fba6f3a0bde0a76855bd8e3c",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-core.php",
+    "expected": "de751122edee2132a8f89046f6604fcc93e952e0535aa5d23d180d99c0b752cf",
+    "remote": "de751122edee2132a8f89046f6604fcc93e952e0535aa5d23d180d99c0b752cf",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-geo-moderation-service.php",
+    "expected": "458b4c71bac7e63ee7fb657d4ecf5cb141426be836c249d62de817cdf7add67f",
+    "remote": "458b4c71bac7e63ee7fb657d4ecf5cb141426be836c249d62de817cdf7add67f",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php",
+    "expected": "7d7ee58b1e22f0d9b7e2b93add403a07b5c7004e1bc139e670cfa3e2c6e71917",
+    "remote": "7d7ee58b1e22f0d9b7e2b93add403a07b5c7004e1bc139e670cfa3e2c6e71917",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-media-config.php",
+    "expected": "7389aaeb2b13627f40702e7e8cfb3b5f063f726237b949e73552178269ef59de",
+    "remote": "7389aaeb2b13627f40702e7e8cfb3b5f063f726237b949e73552178269ef59de",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-media-fence.php",
+    "expected": "e9b5de25970a923a4d06990b61cecab14fd1da24a5dd5cbd982a6e4232f346f5",
+    "remote": "e9b5de25970a923a4d06990b61cecab14fd1da24a5dd5cbd982a6e4232f346f5",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-media-ledger.php",
+    "expected": "3ea5ccd4029df2bb0f5621baa47299408bc8bb87e457199fb6db9d6e6a7160ca",
+    "remote": "3ea5ccd4029df2bb0f5621baa47299408bc8bb87e457199fb6db9d6e6a7160ca",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-media-persistence.php",
+    "expected": "28982b1f662101e01c1ff66c85b6c571237749c7ad6bcefbd5e604e0711485b4",
+    "remote": "28982b1f662101e01c1ff66c85b6c571237749c7ad6bcefbd5e604e0711485b4",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-media-service.php",
+    "expected": "5c3347d748002265a5d819ee0d582f4aab1aae53685527d0fa3672c7c5af2d97",
+    "remote": "5c3347d748002265a5d819ee0d582f4aab1aae53685527d0fa3672c7c5af2d97",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-report-golden-path-service.php",
+    "expected": "175a6a05cbc95b33443fe94add25f78a3e77eac0ab833c941295a6d9d135b6e2",
+    "remote": "175a6a05cbc95b33443fe94add25f78a3e77eac0ab833c941295a6d9d135b6e2",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-report-intake-service.php",
+    "expected": "1d14303f291fd178f41851c306825ee74853cb3b5e77d73bab288daab1fbbfe3",
+    "remote": "1d14303f291fd178f41851c306825ee74853cb3b5e77d73bab288daab1fbbfe3",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-native-report-rest-controller.php",
+    "expected": "483e6011f1f82b923fa24a69f85e981f35df6e3efd38c4e5c39479c101c896de",
+    "remote": "483e6011f1f82b923fa24a69f85e981f35df6e3efd38c4e5c39479c101c896de",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-public-geo-contract.php",
+    "expected": "19c85b64b52324432886ebfc167cae60210ff47b431942cdf02592bcf6d501a1",
+    "remote": "19c85b64b52324432886ebfc167cae60210ff47b431942cdf02592bcf6d501a1",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-public-geo-projection.php",
+    "expected": "35f2977917e30c38a72bb14a872393bb7462277dc8370f13a2c5f7caf48786e8",
+    "remote": "35f2977917e30c38a72bb14a872393bb7462277dc8370f13a2c5f7caf48786e8",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php",
+    "expected": "30cea6eb27b0a6fd1218078d29508e4dec0f52f02d4af2daa89c87cdc9b5eb33",
+    "remote": "30cea6eb27b0a6fd1218078d29508e4dec0f52f02d4af2daa89c87cdc9b5eb33",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-conditional-contract.php",
+    "expected": "15608cf86c51637741a1370fed90f89b36ac4fc2681dc6c66f6c5394789bdc24",
+    "remote": "15608cf86c51637741a1370fed90f89b36ac4fc2681dc6c66f6c5394789bdc24",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-idempotency-service.php",
+    "expected": "228642c067a6b1164c389c757a7ab8fed37c144e314eecc9afa0e68230e2ce67",
+    "remote": "228642c067a6b1164c389c757a7ab8fed37c144e314eecc9afa0e68230e2ce67",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-normalizer.php",
+    "expected": "9499a42b05309ca1c2d5b24a1b0d5a54961abc186fad357bfa992441608a8d73",
+    "remote": "9499a42b05309ca1c2d5b24a1b0d5a54961abc186fad357bfa992441608a8d73",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-persistence-service.php",
+    "expected": "fa2a5129ab3e852c1eca6052cda3bdbce7a47f8cd209f939f2421de22205c820",
+    "remote": "fa2a5129ab3e852c1eca6052cda3bdbce7a47f8cd209f939f2421de22205c820",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-repository.php",
+    "expected": "75064b889a61b35b507ec326b343aa5c48ba22d90c3c051b72eb828042892c3b",
+    "remote": "75064b889a61b35b507ec326b343aa5c48ba22d90c3c051b72eb828042892c3b",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-result.php",
+    "expected": "ce96f8698e726bfaa85fba8328ce3555d1aa329a8a860f6c4f636626a8d7584e",
+    "remote": "ce96f8698e726bfaa85fba8328ce3555d1aa329a8a860f6c4f636626a8d7584e",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-schema.php",
+    "expected": "55df470c2a26c29de96f3abf781c335e876c6cf4bf729e2b1dd85a4ef27d9e46",
+    "remote": "55df470c2a26c29de96f3abf781c335e876c6cf4bf729e2b1dd85a4ef27d9e46",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-v2-normalizer.php",
+    "expected": "55ef77f4d3deab35730f18458bbe669d1542978a0c3a8e3628a9e88d08054504",
+    "remote": "55ef77f4d3deab35730f18458bbe669d1542978a0c3a8e3628a9e88d08054504",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-v2-validator.php",
+    "expected": "0b68fc8a6f5631c97e1b9f07e22861eb2184f99f17972cbfffd4519a4d1848f2",
+    "remote": "0b68fc8a6f5631c97e1b9f07e22861eb2184f99f17972cbfffd4519a4d1848f2",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-validator.php",
+    "expected": "424b91e39e9ce05a2911183b793344c47986e7d7c36877131a97415ae5fbeb5b",
+    "remote": "424b91e39e9ce05a2911183b793344c47986e7d7c36877131a97415ae5fbeb5b",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-version-registry.php",
+    "expected": "3f466442c573da54a2d068331c647229afb1ad3b278c35ae7243b07da71bf3ad",
+    "remote": "3f466442c573da54a2d068331c647229afb1ad3b278c35ae7243b07da71bf3ad",
+    "match": true
+  },
+  {
+    "path": "wordpress/plugins/badaround-core/includes/class-badaround-territory-resolver.php",
+    "expected": "0e5ea817e65f77eb373bf90289b36b0b2347d4d0b9faee0bc50d3d42c499edac",
+    "remote": "0e5ea817e65f77eb373bf90289b36b0b2347d4d0b9faee0bc50d3d42c499edac",
+    "match": true
+  },
+  {
+    "path": "wordpress/themes/badaround-child/inc/native-report.php",
+    "expected": "22276d4ab2c7c62caeea2ee2342880eeab20261ce6e09976a4f4e3455e4915e7",
+    "remote": "22276d4ab2c7c62caeea2ee2342880eeab20261ce6e09976a4f4e3455e4915e7",
+    "match": true
+  },
+  {
+    "path": "wordpress/themes/badaround-child/assets/js/native-report/model.js",
+    "expected": "958f59b29ebc3e5ace7a45c9a7f3df0acd5532a760d3d4d0bfae4f649c87487d",
+    "remote": "958f59b29ebc3e5ace7a45c9a7f3df0acd5532a760d3d4d0bfae4f649c87487d",
+    "match": true
+  },
+  {
+    "path": "wordpress/themes/badaround-child/assets/js/native-report/wizard.js",
+    "expected": "45b1e1e0304fa698f57ecdbf617f30ff02fac9cdea477b9f130e8eecd2a4bb83",
+    "remote": "45b1e1e0304fa698f57ecdbf617f30ff02fac9cdea477b9f130e8eecd2a4bb83",
+    "match": true
+  },
+  {
+    "path": "wordpress/themes/badaround-child/assets/js/native-report/errors.js",
+    "expected": "18c1df66d6ceae24bfd52c2417c6c5280c8137d6bb6c001e41831b0e0495ef42",
+    "remote": "18c1df66d6ceae24bfd52c2417c6c5280c8137d6bb6c001e41831b0e0495ef42",
+    "match": true
+  },
+  {
+    "path": "wordpress/themes/badaround-child/assets/css/native-report.css",
+    "expected": "fad035f7cf31763536ec4e5aa1ab58cca14ee33516e10608d30e4b0e9d4f3810",
+    "remote": "fad035f7cf31763536ec4e5aa1ab58cca14ee33516e10608d30e4b0e9d4f3810",
+    "match": true
+  }
+]

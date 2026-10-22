@@ -1,0 +1,318 @@
+{
+  "results": [
+    {
+      "width": 320,
+      "state": "category",
+      "result": "PASS"
+    },
+    {
+      "width": 320,
+      "state": "subtype",
+      "result": "PASS"
+    },
+    {
+      "width": 320,
+      "state": "location",
+      "result": "PASS"
+    },
+    {
+      "width": 320,
+      "state": "complex-details",
+      "result": "PASS"
+    },
+    {
+      "width": 320,
+      "state": "no-media",
+      "result": "PASS"
+    },
+    {
+      "width": 320,
+      "state": "contact",
+      "result": "PASS"
+    },
+    {
+      "width": 320,
+      "state": "summary",
+      "result": "PASS"
+    },
+    {
+      "width": 320,
+      "state": "altro",
+      "result": "PASS"
+    },
+    {
+      "width": 320,
+      "state": "emergency",
+      "result": "PASS"
+    },
+    {
+      "width": 320,
+      "state": "emergency-altro",
+      "result": "PASS"
+    },
+    {
+      "width": 320,
+      "state": "reward",
+      "result": "PASS"
+    },
+    {
+      "width": 320,
+      "state": "field-error",
+      "result": "PASS"
+    },
+    {
+      "width": 390,
+      "state": "category",
+      "result": "PASS"
+    },
+    {
+      "width": 390,
+      "state": "subtype",
+      "result": "PASS"
+    },
+    {
+      "width": 390,
+      "state": "location",
+      "result": "PASS"
+    },
+    {
+      "width": 390,
+      "state": "complex-details",
+      "result": "PASS"
+    },
+    {
+      "width": 390,
+      "state": "no-media",
+      "result": "PASS"
+    },
+    {
+      "width": 390,
+      "state": "contact",
+      "result": "PASS"
+    },
+    {
+      "width": 390,
+      "state": "summary",
+      "result": "PASS"
+    },
+    {
+      "width": 390,
+      "state": "altro",
+      "result": "PASS"
+    },
+    {
+      "width": 390,
+      "state": "emergency",
+      "result": "PASS"
+    },
+    {
+      "width": 390,
+      "state": "emergency-altro",
+      "result": "PASS"
+    },
+    {
+      "width": 390,
+      "state": "reward",
+      "result": "PASS"
+    },
+    {
+      "width": 390,
+      "state": "field-error",
+      "result": "PASS"
+    },
+    {
+      "width": 768,
+      "state": "category",
+      "result": "PASS"
+    },
+    {
+      "width": 768,
+      "state": "subtype",
+      "result": "PASS"
+    },
+    {
+      "width": 768,
+      "state": "location",
+      "result": "PASS"
+    },
+    {
+      "width": 768,
+      "state": "complex-details",
+      "result": "PASS"
+    },
+    {
+      "width": 768,
+      "state": "no-media",
+      "result": "PASS"
+    },
+    {
+      "width": 768,
+      "state": "contact",
+      "result": "PASS"
+    },
+    {
+      "width": 768,
+      "state": "summary",
+      "result": "PASS"
+    },
+    {
+      "width": 768,
+      "state": "altro",
+      "result": "PASS"
+    },
+    {
+      "width": 768,
+      "state": "emergency",
+      "result": "PASS"
+    },
+    {
+      "width": 768,
+      "state": "emergency-altro",
+      "result": "PASS"
+    },
+    {
+      "width": 768,
+      "state": "reward",
+      "result": "PASS"
+    },
+    {
+      "width": 768,
+      "state": "field-error",
+      "result": "PASS"
+    },
+    {
+      "width": 1024,
+      "state": "category",
+      "result": "PASS"
+    },
+    {
+      "width": 1024,
+      "state": "subtype",
+      "result": "PASS"
+    },
+    {
+      "width": 1024,
+      "state": "location",
+      "result": "PASS"
+    },
+    {
+      "width": 1024,
+      "state": "complex-details",
+      "result": "PASS"
+    },
+    {
+      "width": 1024,
+      "state": "no-media",
+      "result": "PASS"
+    },
+    {
+      "width": 1024,
+      "state": "contact",
+      "result": "PASS"
+    },
+    {
+      "width": 1024,
+      "state": "summary",
+      "result": "PASS"
+    },
+    {
+      "width": 1024,
+      "state": "altro",
+      "result": "PASS"
+    },
+    {
+      "width": 1024,
+      "state": "emergency",
+      "result": "PASS"
+    },
+    {
+      "width": 1024,
+      "state": "emergency-altro",
+      "result": "PASS"
+    },
+    {
+      "width": 1024,
+      "state": "reward",
+      "result": "PASS"
+    },
+    {
+      "width": 1024,
+      "state": "field-error",
+      "result": "PASS"
+    },
+    {
+      "width": 1440,
+      "state": "category",
+      "result": "PASS"
+    },
+    {
+      "width": 1440,
+      "state": "subtype",
+      "result": "PASS"
+    },
+    {
+      "width": 1440,
+      "state": "location",
+      "result": "PASS"
+    },
+    {
+      "width": 1440,
+      "state": "complex-details",
+      "result": "PASS"
+    },
+    {
+      "width": 1440,
+      "state": "no-media",
+      "result": "PASS"
+    },
+    {
+      "width": 1440,
+      "state": "contact",
+      "result": "PASS"
+    },
+    {
+      "width": 1440,
+      "state": "summary",
+      "result": "PASS"
+    },
+    {
+      "width": 1440,
+      "state": "altro",
+      "result": "PASS"
+    },
+    {
+      "width": 1440,
+      "state": "emergency",
+      "result": "PASS"
+    },
+    {
+      "width": 1440,
+      "state": "emergency-altro",
+      "result": "PASS"
+    },
+    {
+      "width": 1440,
+      "state": "reward",
+      "result": "PASS"
+    },
+    {
+      "width": 1440,
+      "state": "field-error",
+      "result": "PASS"
+    }
+  ],
+  "screens": [
+    "320-category-subtype.png",
+    "320-details.png",
+    "320-summary.png",
+    "320-keyboard-error.png",
+    "390-contact.png",
+    "390-emergency.png",
+    "390-emergency-altro.png",
+    "1440-category.png",
+    "1440-details.png",
+    "1440-contact.png",
+    "1440-summary.png"
+  ],
+  "realSubmissions": 0
+}
