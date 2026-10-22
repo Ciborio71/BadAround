@@ -1,0 +1,614 @@
+[
+  {
+    "client": "browser-navigation",
+    "endpoint": "home",
+    "path": "/",
+    "method": "GET",
+    "status": 200,
+    "headers": {
+      "content-encoding": "gzip",
+      "content-length": "21976",
+      "content-type": "text/html; charset=UTF-8",
+      "date": "Thu, 22 Oct 2026 11:45:51 GMT",
+      "link": "<https://staging.badaround.it/wp-json/>; rel=\"https://api.w.org/\"",
+      "permissions-policy": "private-state-token-redemption=(self \"https://www.google.com\" \"https://www.gstatic.com\" \"https://recaptcha.net\" \"https://challenges.cloudflare.com\" \"https://hcaptcha.com\"), private-state-token-issuance=(self \"https://www.google.com\" \"https://www.gstatic.com\" \"https://recaptcha.net\" \"https://challenges.cloudflare.com\" \"https://hcaptcha.com\")",
+      "server": "nginx",
+      "vary": "Accept-Encoding,User-Agent",
+      "x-powered-by": "PHP/8.3.36"
+    },
+    "body": {
+      "kind": "html",
+      "signature": " BadAround img:is([sizes=auto i],[sizes^=\"auto,\" i]){contain-intrinsic-size:3000px 1500px} /*# sourceURL=wp-img-auto-sizes-contain-inline-css */ :root{--ast-post-nav-space:0;--ast-container-default-xlg-padding:2.5em;--ast-container-default-lg-padding:2.5em;--ast-container-default-slg-padding:2em;--ast-container-default-md-padding:2.5em;--ast-container-default-sm-padding:2.5em;--ast-container-default-xs-padding:2.4em;--ast-container-default-xxs-padding:1.8em;--ast-code-block-background:#ECEFF3;--"
+    },
+    "request": {
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "origin": null,
+      "referer": null,
+      "cookie_present": false,
+      "cookie_count_before": 0,
+      "authorization": "none"
+    }
+  },
+  {
+    "client": "browser-navigation",
+    "endpoint": "native",
+    "path": "/segnala-un-evento/",
+    "method": "GET",
+    "status": 200,
+    "headers": {
+      "content-encoding": "gzip",
+      "content-type": "text/html; charset=UTF-8",
+      "date": "Thu, 22 Oct 2026 11:45:54 GMT",
+      "link": "<https://staging.badaround.it/wp-json/>; rel=\"https://api.w.org/\", <https://staging.badaround.it/wp-json/wp/v2/pages/47>; rel=\"alternate\"; title=\"JSON\"; type=\"application/json\", <https://staging.badaround.it/?p=47>; rel=shortlink",
+      "permissions-policy": "private-state-token-redemption=(self \"https://www.google.com\" \"https://www.gstatic.com\" \"https://recaptcha.net\" \"https://challenges.cloudflare.com\" \"https://hcaptcha.com\"), private-state-token-issuance=(self \"https://www.google.com\" \"https://www.gstatic.com\" \"https://recaptcha.net\" \"https://challenges.cloudflare.com\" \"https://hcaptcha.com\")",
+      "server": "nginx",
+      "vary": "Accept-Encoding,User-Agent",
+      "x-powered-by": "PHP/8.3.36"
+    },
+    "body": {
+      "kind": "html",
+      "signature": " Segnala un evento &#8211; BadAround img:is([sizes=auto i],[sizes^=\"auto,\" i]){contain-intrinsic-size:3000px 1500px} /*# sourceURL=wp-img-auto-sizes-contain-inline-css */ :root{--ast-post-nav-space:0;--ast-container-default-xlg-padding:2.5em;--ast-container-default-lg-padding:2.5em;--ast-container-default-slg-padding:2em;--ast-container-default-md-padding:2.5em;--ast-container-default-sm-padding:2.5em;--ast-container-default-xs-padding:2.4em;--ast-container-default-xxs-padding:1.8em;--ast-code-b"
+    },
+    "request": {
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "origin": null,
+      "referer": null,
+      "cookie_present": false,
+      "cookie_count_before": 0,
+      "authorization": "none"
+    }
+  },
+  {
+    "client": "browser-navigation",
+    "endpoint": "wp-json",
+    "path": "/wp-json/",
+    "method": "GET",
+    "status": 200,
+    "headers": {
+      "access-control-allow-headers": "Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type",
+      "access-control-expose-headers": "X-WP-Total, X-WP-TotalPages, Link",
+      "allow": "GET",
+      "content-encoding": "gzip",
+      "content-length": "23025",
+      "content-type": "application/json; charset=UTF-8",
+      "date": "Thu, 22 Oct 2026 11:45:56 GMT",
+      "link": "<https://staging.badaround.it/wp-json/>; rel=\"https://api.w.org/\"",
+      "server": "nginx",
+      "vary": "Origin,Accept-Encoding,User-Agent",
+      "x-content-type-options": "nosniff",
+      "x-powered-by": "PHP/8.3.36",
+      "x-robots-tag": "noindex",
+      "x-wpvibe-php-time-ms": "14"
+    },
+    "body": {
+      "kind": "public-json",
+      "top_keys": [
+        "name",
+        "description",
+        "url",
+        "home",
+        "gmt_offset",
+        "timezone_string",
+        "page_for_posts",
+        "page_on_front",
+        "show_on_front",
+        "namespaces",
+        "authentication",
+        "routes",
+        "site_logo",
+        "site_icon",
+        "site_icon_url",
+        "_links"
+      ]
+    },
+    "request": {
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "origin": null,
+      "referer": null,
+      "cookie_present": false,
+      "cookie_count_before": 0,
+      "authorization": "none"
+    }
+  },
+  {
+    "client": "browser-navigation",
+    "endpoint": "public-discovery",
+    "path": "/wp-json/badaround/v1/discovery?limit=1",
+    "method": "GET",
+    "status": 200,
+    "headers": {
+      "access-control-allow-headers": "Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type",
+      "access-control-expose-headers": "X-WP-Total, X-WP-TotalPages, Link",
+      "allow": "GET",
+      "content-encoding": "gzip",
+      "content-length": "1314",
+      "content-type": "application/json; charset=UTF-8",
+      "date": "Thu, 22 Oct 2026 11:45:58 GMT",
+      "link": "<https://staging.badaround.it/wp-json/>; rel=\"https://api.w.org/\"",
+      "server": "nginx",
+      "vary": "Origin,Accept-Encoding,User-Agent",
+      "x-content-type-options": "nosniff",
+      "x-powered-by": "PHP/8.3.36",
+      "x-robots-tag": "noindex",
+      "x-wpvibe-php-time-ms": "17"
+    },
+    "body": {
+      "kind": "public-json",
+      "top_keys": [
+        "items",
+        "total",
+        "page",
+        "pages",
+        "filters",
+        "territory_matches"
+      ]
+    },
+    "request": {
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "origin": null,
+      "referer": null,
+      "cookie_present": false,
+      "cookie_count_before": 0,
+      "authorization": "none"
+    }
+  },
+  {
+    "client": "browser-navigation",
+    "endpoint": "protected-probe",
+    "path": "/wp-json/nfqa-access/v1/probe-a9d958ae62b50135cdd3cd8716183333",
+    "method": "GET",
+    "status": 403,
+    "headers": {
+      "access-control-allow-headers": "Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type",
+      "access-control-expose-headers": "X-WP-Total, X-WP-TotalPages, Link",
+      "content-encoding": "gzip",
+      "content-length": "99",
+      "content-type": "application/json; charset=UTF-8",
+      "date": "Thu, 22 Oct 2026 11:45:59 GMT",
+      "link": "<https://staging.badaround.it/wp-json/>; rel=\"https://api.w.org/\"",
+      "server": "nginx",
+      "vary": "Origin,Accept-Encoding,User-Agent",
+      "x-content-type-options": "nosniff",
+      "x-powered-by": "PHP/8.3.36",
+      "x-robots-tag": "noindex",
+      "x-wpvibe-php-time-ms": "2"
+    },
+    "body": {
+      "kind": "wordpress-json-error",
+      "code": "nfqa_unauthorized",
+      "message": "QA authorization required.",
+      "data": {
+        "status": 403
+      }
+    },
+    "request": {
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "origin": null,
+      "referer": null,
+      "cookie_present": false,
+      "cookie_count_before": 0,
+      "authorization": "none"
+    }
+  },
+  {
+    "client": "same-origin-browser-fetch",
+    "endpoint": "home",
+    "path": "/",
+    "method": "GET",
+    "status": 200,
+    "headers": {
+      "content-encoding": "gzip",
+      "content-length": "21976",
+      "content-type": "text/html; charset=UTF-8",
+      "date": "Thu, 22 Oct 2026 11:46:03 GMT",
+      "link": "<https://staging.badaround.it/wp-json/>; rel=\"https://api.w.org/\"",
+      "permissions-policy": "private-state-token-redemption=(self \"https://www.google.com\" \"https://www.gstatic.com\" \"https://recaptcha.net\" \"https://challenges.cloudflare.com\" \"https://hcaptcha.com\"), private-state-token-issuance=(self \"https://www.google.com\" \"https://www.gstatic.com\" \"https://recaptcha.net\" \"https://challenges.cloudflare.com\" \"https://hcaptcha.com\")",
+      "server": "nginx",
+      "vary": "Accept-Encoding,User-Agent",
+      "x-powered-by": "PHP/8.3.36"
+    },
+    "body": {
+      "kind": "html",
+      "signature": " BadAround img:is([sizes=auto i],[sizes^=\"auto,\" i]){contain-intrinsic-size:3000px 1500px} /*# sourceURL=wp-img-auto-sizes-contain-inline-css */ :root{--ast-post-nav-space:0;--ast-container-default-xlg-padding:2.5em;--ast-container-default-lg-padding:2.5em;--ast-container-default-slg-padding:2em;--ast-container-default-md-padding:2.5em;--ast-container-default-sm-padding:2.5em;--ast-container-default-xs-padding:2.4em;--ast-container-default-xxs-padding:1.8em;--ast-code-block-background:#ECEFF3;--"
+    },
+    "request": {
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "origin": "same-origin",
+      "referer": "https://staging.badaround.it/segnala-un-evento/",
+      "cookie_count": 0,
+      "authorization": "none"
+    }
+  },
+  {
+    "client": "same-origin-browser-fetch",
+    "endpoint": "home",
+    "path": "/",
+    "method": "HEAD",
+    "status": 200,
+    "headers": {
+      "content-encoding": "br",
+      "content-type": "text/html; charset=UTF-8",
+      "date": "Thu, 22 Oct 2026 11:46:04 GMT",
+      "link": "<https://staging.badaround.it/wp-json/>; rel=\"https://api.w.org/\"",
+      "permissions-policy": "private-state-token-redemption=(self \"https://www.google.com\" \"https://www.gstatic.com\" \"https://recaptcha.net\" \"https://challenges.cloudflare.com\" \"https://hcaptcha.com\"), private-state-token-issuance=(self \"https://www.google.com\" \"https://www.gstatic.com\" \"https://recaptcha.net\" \"https://challenges.cloudflare.com\" \"https://hcaptcha.com\")",
+      "server": "nginx",
+      "vary": "Accept-Encoding, User-Agent",
+      "x-powered-by": "PHP/8.3.36"
+    },
+    "body": {
+      "kind": "other",
+      "signature": ""
+    },
+    "request": {
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "origin": "same-origin",
+      "referer": "https://staging.badaround.it/segnala-un-evento/",
+      "cookie_count": 0,
+      "authorization": "none"
+    }
+  },
+  {
+    "client": "same-origin-browser-fetch",
+    "endpoint": "native",
+    "path": "/segnala-un-evento/",
+    "method": "GET",
+    "status": 200,
+    "headers": {
+      "content-encoding": "gzip",
+      "content-type": "text/html; charset=UTF-8",
+      "date": "Thu, 22 Oct 2026 11:46:06 GMT",
+      "link": "<https://staging.badaround.it/wp-json/>; rel=\"https://api.w.org/\", <https://staging.badaround.it/wp-json/wp/v2/pages/47>; rel=\"alternate\"; title=\"JSON\"; type=\"application/json\", <https://staging.badaround.it/?p=47>; rel=shortlink",
+      "permissions-policy": "private-state-token-redemption=(self \"https://www.google.com\" \"https://www.gstatic.com\" \"https://recaptcha.net\" \"https://challenges.cloudflare.com\" \"https://hcaptcha.com\"), private-state-token-issuance=(self \"https://www.google.com\" \"https://www.gstatic.com\" \"https://recaptcha.net\" \"https://challenges.cloudflare.com\" \"https://hcaptcha.com\")",
+      "server": "nginx",
+      "vary": "Accept-Encoding,User-Agent",
+      "x-powered-by": "PHP/8.3.36"
+    },
+    "body": {
+      "kind": "html",
+      "signature": " Segnala un evento &#8211; BadAround img:is([sizes=auto i],[sizes^=\"auto,\" i]){contain-intrinsic-size:3000px 1500px} /*# sourceURL=wp-img-auto-sizes-contain-inline-css */ :root{--ast-post-nav-space:0;--ast-container-default-xlg-padding:2.5em;--ast-container-default-lg-padding:2.5em;--ast-container-default-slg-padding:2em;--ast-container-default-md-padding:2.5em;--ast-container-default-sm-padding:2.5em;--ast-container-default-xs-padding:2.4em;--ast-container-default-xxs-padding:1.8em;--ast-code-b"
+    },
+    "request": {
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "origin": "same-origin",
+      "referer": "https://staging.badaround.it/segnala-un-evento/",
+      "cookie_count": 0,
+      "authorization": "none"
+    }
+  },
+  {
+    "client": "same-origin-browser-fetch",
+    "endpoint": "native",
+    "path": "/segnala-un-evento/",
+    "method": "HEAD",
+    "status": 200,
+    "headers": {
+      "content-encoding": "br",
+      "content-type": "text/html; charset=UTF-8",
+      "date": "Thu, 22 Oct 2026 11:46:08 GMT",
+      "link": "<https://staging.badaround.it/wp-json/>; rel=\"https://api.w.org/\", <https://staging.badaround.it/wp-json/wp/v2/pages/47>; rel=\"alternate\"; title=\"JSON\"; type=\"application/json\", <https://staging.badaround.it/?p=47>; rel=shortlink",
+      "permissions-policy": "private-state-token-redemption=(self \"https://www.google.com\" \"https://www.gstatic.com\" \"https://recaptcha.net\" \"https://challenges.cloudflare.com\" \"https://hcaptcha.com\"), private-state-token-issuance=(self \"https://www.google.com\" \"https://www.gstatic.com\" \"https://recaptcha.net\" \"https://challenges.cloudflare.com\" \"https://hcaptcha.com\")",
+      "server": "nginx",
+      "vary": "Accept-Encoding, User-Agent",
+      "x-powered-by": "PHP/8.3.36"
+    },
+    "body": {
+      "kind": "other",
+      "signature": ""
+    },
+    "request": {
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "origin": "same-origin",
+      "referer": "https://staging.badaround.it/segnala-un-evento/",
+      "cookie_count": 0,
+      "authorization": "none"
+    }
+  },
+  {
+    "client": "same-origin-browser-fetch",
+    "endpoint": "wp-json",
+    "path": "/wp-json/",
+    "method": "GET",
+    "status": 200,
+    "headers": {
+      "access-control-allow-headers": "Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type",
+      "access-control-expose-headers": "X-WP-Total, X-WP-TotalPages, Link",
+      "allow": "GET",
+      "content-encoding": "gzip",
+      "content-length": "23025",
+      "content-type": "application/json; charset=UTF-8",
+      "date": "Thu, 22 Oct 2026 11:46:09 GMT",
+      "link": "<https://staging.badaround.it/wp-json/>; rel=\"https://api.w.org/\"",
+      "server": "nginx",
+      "vary": "Origin,Accept-Encoding,User-Agent",
+      "x-content-type-options": "nosniff",
+      "x-powered-by": "PHP/8.3.36",
+      "x-robots-tag": "noindex",
+      "x-wpvibe-php-time-ms": "19"
+    },
+    "body": {
+      "kind": "public-json",
+      "top_keys": [
+        "name",
+        "description",
+        "url",
+        "home",
+        "gmt_offset",
+        "timezone_string",
+        "page_for_posts",
+        "page_on_front",
+        "show_on_front",
+        "namespaces",
+        "authentication",
+        "routes",
+        "site_logo",
+        "site_icon",
+        "site_icon_url",
+        "_links"
+      ]
+    },
+    "request": {
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "origin": "same-origin",
+      "referer": "https://staging.badaround.it/segnala-un-evento/",
+      "cookie_count": 0,
+      "authorization": "none"
+    }
+  },
+  {
+    "client": "same-origin-browser-fetch",
+    "endpoint": "wp-json",
+    "path": "/wp-json/",
+    "method": "HEAD",
+    "status": 200,
+    "headers": {
+      "access-control-allow-headers": "Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type",
+      "access-control-expose-headers": "X-WP-Total, X-WP-TotalPages, Link",
+      "allow": "GET",
+      "content-encoding": "br",
+      "content-type": "application/json; charset=UTF-8",
+      "date": "Thu, 22 Oct 2026 11:46:11 GMT",
+      "link": "<https://staging.badaround.it/wp-json/>; rel=\"https://api.w.org/\"",
+      "server": "nginx",
+      "vary": "Accept-Encoding, User-Agent",
+      "x-content-type-options": "nosniff",
+      "x-powered-by": "PHP/8.3.36",
+      "x-robots-tag": "noindex",
+      "x-wpvibe-php-time-ms": "11"
+    },
+    "body": {
+      "kind": "other",
+      "signature": ""
+    },
+    "request": {
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "origin": "same-origin",
+      "referer": "https://staging.badaround.it/segnala-un-evento/",
+      "cookie_count": 0,
+      "authorization": "none"
+    }
+  },
+  {
+    "client": "same-origin-browser-fetch",
+    "endpoint": "public-discovery",
+    "path": "/wp-json/badaround/v1/discovery?limit=1",
+    "method": "GET",
+    "status": 200,
+    "headers": {
+      "access-control-allow-headers": "Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type",
+      "access-control-expose-headers": "X-WP-Total, X-WP-TotalPages, Link",
+      "allow": "GET",
+      "content-encoding": "gzip",
+      "content-length": "1314",
+      "content-type": "application/json; charset=UTF-8",
+      "date": "Thu, 22 Oct 2026 11:46:12 GMT",
+      "link": "<https://staging.badaround.it/wp-json/>; rel=\"https://api.w.org/\"",
+      "server": "nginx",
+      "vary": "Origin,Accept-Encoding,User-Agent",
+      "x-content-type-options": "nosniff",
+      "x-powered-by": "PHP/8.3.36",
+      "x-robots-tag": "noindex",
+      "x-wpvibe-php-time-ms": "17"
+    },
+    "body": {
+      "kind": "public-json",
+      "top_keys": [
+        "items",
+        "total",
+        "page",
+        "pages",
+        "filters",
+        "territory_matches"
+      ]
+    },
+    "request": {
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "origin": "same-origin",
+      "referer": "https://staging.badaround.it/segnala-un-evento/",
+      "cookie_count": 0,
+      "authorization": "none"
+    }
+  },
+  {
+    "client": "same-origin-browser-fetch",
+    "endpoint": "public-discovery",
+    "path": "/wp-json/badaround/v1/discovery?limit=1",
+    "method": "HEAD",
+    "status": 200,
+    "headers": {
+      "access-control-allow-headers": "Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type",
+      "access-control-expose-headers": "X-WP-Total, X-WP-TotalPages, Link",
+      "allow": "GET",
+      "content-encoding": "br",
+      "content-type": "application/json; charset=UTF-8",
+      "date": "Thu, 22 Oct 2026 11:46:13 GMT",
+      "link": "<https://staging.badaround.it/wp-json/>; rel=\"https://api.w.org/\"",
+      "server": "nginx",
+      "vary": "Accept-Encoding, User-Agent",
+      "x-content-type-options": "nosniff",
+      "x-powered-by": "PHP/8.3.36",
+      "x-robots-tag": "noindex",
+      "x-wpvibe-php-time-ms": "20"
+    },
+    "body": {
+      "kind": "other",
+      "signature": ""
+    },
+    "request": {
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "origin": "same-origin",
+      "referer": "https://staging.badaround.it/segnala-un-evento/",
+      "cookie_count": 0,
+      "authorization": "none"
+    }
+  },
+  {
+    "client": "same-origin-browser-fetch",
+    "endpoint": "protected-probe",
+    "path": "/wp-json/nfqa-access/v1/probe-a9d958ae62b50135cdd3cd8716183333",
+    "method": "GET",
+    "status": 403,
+    "headers": {
+      "access-control-allow-headers": "Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type",
+      "access-control-expose-headers": "X-WP-Total, X-WP-TotalPages, Link",
+      "content-encoding": "gzip",
+      "content-length": "99",
+      "content-type": "application/json; charset=UTF-8",
+      "date": "Thu, 22 Oct 2026 11:46:15 GMT",
+      "link": "<https://staging.badaround.it/wp-json/>; rel=\"https://api.w.org/\"",
+      "server": "nginx",
+      "vary": "Origin,Accept-Encoding,User-Agent",
+      "x-content-type-options": "nosniff",
+      "x-powered-by": "PHP/8.3.36",
+      "x-robots-tag": "noindex",
+      "x-wpvibe-php-time-ms": "1"
+    },
+    "body": {
+      "kind": "wordpress-json-error",
+      "code": "nfqa_unauthorized",
+      "message": "QA authorization required.",
+      "data": {
+        "status": 403
+      }
+    },
+    "request": {
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "origin": "same-origin",
+      "referer": "https://staging.badaround.it/segnala-un-evento/",
+      "cookie_count": 0,
+      "authorization": "none"
+    }
+  },
+  {
+    "client": "same-origin-browser-fetch",
+    "endpoint": "protected-probe",
+    "path": "/wp-json/nfqa-access/v1/probe-a9d958ae62b50135cdd3cd8716183333",
+    "method": "GET",
+    "status": 200,
+    "headers": {
+      "access-control-allow-headers": "Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type",
+      "access-control-expose-headers": "X-WP-Total, X-WP-TotalPages, Link",
+      "allow": "GET, HEAD",
+      "cache-control": "private, no-store, max-age=0",
+      "content-encoding": "gzip",
+      "content-length": "173",
+      "content-type": "application/json; charset=UTF-8",
+      "date": "Thu, 22 Oct 2026 11:46:16 GMT",
+      "expires": "Wed, 11 Jan 1984 05:00:00 GMT",
+      "link": "<https://staging.badaround.it/wp-json/>; rel=\"https://api.w.org/\"",
+      "server": "nginx",
+      "vary": "Origin,Accept-Encoding,User-Agent",
+      "x-content-type-options": "nosniff",
+      "x-nfqa-bootstrap": "wordpress-rest-callback",
+      "x-powered-by": "PHP/8.3.36",
+      "x-robots-tag": "noindex",
+      "x-wpvibe-php-time-ms": "343"
+    },
+    "body": {
+      "kind": "protected-probe-json",
+      "result": {
+        "staging": true,
+        "read_only": true,
+        "core_loaded": true,
+        "conditional_class": true,
+        "native_version": "badaround-report/v2",
+        "contract_sha": "dc282153243ffb80f3bd4f2a222ea0f4c4f42806fba6f3a0bde0a76855bd8e3c",
+        "definition_loaded": true
+      }
+    },
+    "request": {
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "origin": "same-origin",
+      "referer": "https://staging.badaround.it/segnala-un-evento/",
+      "cookie_count": 0,
+      "authorization": "temporary-secret-header"
+    }
+  },
+  {
+    "client": "same-origin-browser-fetch",
+    "endpoint": "protected-probe",
+    "path": "/wp-json/nfqa-access/v1/probe-a9d958ae62b50135cdd3cd8716183333",
+    "method": "HEAD",
+    "status": 403,
+    "headers": {
+      "access-control-allow-headers": "Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type",
+      "access-control-expose-headers": "X-WP-Total, X-WP-TotalPages, Link",
+      "content-encoding": "br",
+      "content-type": "application/json; charset=UTF-8",
+      "date": "Thu, 22 Oct 2026 11:46:18 GMT",
+      "link": "<https://staging.badaround.it/wp-json/>; rel=\"https://api.w.org/\"",
+      "server": "nginx",
+      "vary": "Accept-Encoding, User-Agent",
+      "x-content-type-options": "nosniff",
+      "x-powered-by": "PHP/8.3.36",
+      "x-robots-tag": "noindex",
+      "x-wpvibe-php-time-ms": "1"
+    },
+    "body": {
+      "kind": "other",
+      "signature": ""
+    },
+    "request": {
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "origin": "same-origin",
+      "referer": "https://staging.badaround.it/segnala-un-evento/",
+      "cookie_count": 0,
+      "authorization": "none"
+    }
+  },
+  {
+    "client": "same-origin-browser-fetch",
+    "endpoint": "protected-probe",
+    "path": "/wp-json/nfqa-access/v1/probe-a9d958ae62b50135cdd3cd8716183333",
+    "method": "HEAD",
+    "status": 200,
+    "headers": {
+      "access-control-allow-headers": "Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type",
+      "access-control-expose-headers": "X-WP-Total, X-WP-TotalPages, Link",
+      "allow": "GET, HEAD",
+      "cache-control": "private, no-store, max-age=0",
+      "content-encoding": "br",
+      "content-type": "application/json; charset=UTF-8",
+      "date": "Thu, 22 Oct 2026 11:46:19 GMT",
+      "expires": "Wed, 11 Jan 1984 05:00:00 GMT",
+      "link": "<https://staging.badaround.it/wp-json/>; rel=\"https://api.w.org/\"",
+      "server": "nginx",
+      "vary": "Accept-Encoding, User-Agent",
+      "x-content-type-options": "nosniff",
+      "x-nfqa-bootstrap": "wordpress-rest-callback",
+      "x-powered-by": "PHP/8.3.36",
+      "x-robots-tag": "noindex",
+      "x-wpvibe-php-time-ms": "332"
+    },
+    "body": {
+      "kind": "other",
+      "signature": ""
+    },
+    "request": {
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "origin": "same-origin",
+      "referer": "https://staging.badaround.it/segnala-un-evento/",
+      "cookie_count": 0,
+      "authorization": "temporary-secret-header"
+    }
+  }
+]
