@@ -19,10 +19,10 @@ def custody(commit,label):
  (e/('custody-'+label+'.json')).write_text(json.dumps(rows,indent=2));assert all(r['match'] for r in rows),'RUNTIME_DRIFT_'+label
  print('CUSTODY_PASS',label,len(rows),flush=True)
 def probe(data=None):
- name='nf03a-probe-'+secrets.token_hex(20)+'.php';token=secrets.token_hex(32);body=pathlib.Path('ops/nf04-probe.php').read_text().replace('__TOKEN__',token).encode()
+ route='probe-'+secrets.token_hex(20);name='wp-content/mu-plugins/nf04-'+route+'.php';token=secrets.token_hex(32);body=pathlib.Path('ops/nf04-probe.php').read_text().replace('__TOKEN__',token).replace('__ROUTE__',route).encode()
  try:
   put(name,body);assert read(name)==body
-  raw=subprocess.check_output(['node','ops/nf04-probe-client.cjs'],input=json.dumps(dict(url='https://staging.badaround.it/'+name,token=token,data=data)).encode(),timeout=120)
+  raw=subprocess.check_output(['node','ops/nf04-probe-client.cjs'],input=json.dumps(dict(url='https://staging.badaround.it/wp-json/nf04-qa/v1/'+route,token=token,data=data)).encode(),timeout=120)
   return json.loads(raw)
  finally:
   f.delete(ROOT+name)

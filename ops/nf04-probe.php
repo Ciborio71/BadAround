@@ -1,6 +1,7 @@
 <?php
+if(!defined('ABSPATH'))exit;
+add_action('rest_api_init',static function(){register_rest_route('nf04-qa/v1','/__ROUTE__',array('methods'=>array('GET','POST'),'permission_callback'=>static function($request){return hash_equals('__TOKEN__',(string)$request->get_header('x-nf04-token'));},'callback'=>static function($request){
 if (!hash_equals('__TOKEN__',$_SERVER['HTTP_X_NF04_TOKEN']??'')){http_response_code(404);exit;}
-require __DIR__.'/wp-load.php';
 header('Content-Type: application/json');header('Cache-Control: no-store');global $wpdb;
 function nf04digest($sql){global $wpdb;$rows=$wpdb->get_results($sql,ARRAY_A);if($wpdb->last_error)throw new RuntimeException($wpdb->last_error);return hash('sha256',json_encode($rows));}
 try{
@@ -30,3 +31,6 @@ foreach($wpdb->get_results("SELECT id,event_id,content_original FROM {$wpdb->pre
 $out['new_event_count']=(int)$wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type='ba_evento' AND ID>$oldPost");
 echo json_encode($out,JSON_THROW_ON_ERROR);
 }catch(Throwable $e){http_response_code(500);echo json_encode(['error'=>$e->getMessage()]);}
+
+exit;
+}));});
