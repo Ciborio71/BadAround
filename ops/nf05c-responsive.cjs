@@ -20,6 +20,7 @@ for(const width of [320,390,1440])for(const profile of profiles){
   const req=route.request(),u=new URL(req.url());network.push({method:req.method(),path:u.pathname,local:true});
   assert.equal(req.method(),'GET','NO_SUBMISSIONS');
   if(u.hostname==='nf05c.invalid'&&u.pathname==='/')return route.fulfill({contentType:'text/html',body:html});
+  if(u.pathname==='/wp-content/themes/astra/assets/js/minified/frontend.min.js')return route.fulfill({contentType:'application/javascript',body:fs.readFileSync('evidence/astra-frontend.js')});
   if(u.pathname==='/wp-content/themes/astra/assets/css/minified/main.min.css')return route.fulfill({contentType:'text/css',body:fs.readFileSync('evidence/astra-main.css')});
   if(u.pathname.startsWith('/wp-content/themes/badaround-child/')){
    const file=path.join(root,'wordpress',u.pathname.slice('/wp-content/'.length));
@@ -32,7 +33,7 @@ for(const width of [320,390,1440])for(const profile of profiles){
  assert.equal(await page.evaluate(()=>document.querySelector('[data-native-report]').nativeReport.config.schemaVersion),'badaround-report/v2');
  const oracle=contract.regression_oracle.find(r=>r.subtype===profile.subtype);
  // State preparation only: exact application model and render handlers remain unchanged. No custom CSS or markup.
- await page.evaluate(({oracle,extra})=>{const m=document.querySelector('[data-native-report]').nativeReport.model;m.values={...oracle.minimal_user_values,...extra,'media.availability':'no','reporter.social_visibility':'declined'};m.pruneInactive();m.step=2;document.querySelector('[name="content.description"]').dispatchEvent(new Event('input',{bubbles:true}));},{oracle,extra:profile.extra});
+ await page.evaluate(({oracle,extra})=>{const m=document.querySelector('[data-native-report]').nativeReport.model;m.values={...oracle.minimal_user_values,...extra,'media.availability':'no','reporter.social_visibility':'declined'};m.pruneInactive();m.step=2;document.querySelector('[name="content.description"]').value=m.values['content.description'];document.querySelector('[name="content.description"]').dispatchEvent(new Event('input',{bubbles:true}));},{oracle,extra:profile.extra});
  await page.waitForTimeout(450);
  async function geometry(label){
   const g=await page.evaluate(()=>{
@@ -87,7 +88,7 @@ for(const width of [320,390,1440])for(const profile of profiles){
  const sb=await page.locator('[data-native-submit]').boundingBox();assert(sb.y>=0&&sb.y+sb.height<=1000,'summary CTA reachable');
  assert.deepEqual(errors,[],'no runtime JS errors');
  results.push({width,profile:profile.name,subtype:profile.subtype,result:'PASS',checks});console.log('PASS',width,profile.name);
- }catch(e){results.push({width,profile:profile.name,subtype:profile.subtype,result:'FAIL',error:e.stack,checks});await page.screenshot({path:path.join(out,`failure-${width}-${profile.name}.png`),fullPage:true});throw e;}
+ }catch(e){results.push({width,profile:profile.name,subtype:profile.subtype,result:'FAIL',error:e.stack,errors,checks});await page.screenshot({path:path.join(out,`failure-${width}-${profile.name}.png`),fullPage:true});throw e;}
  finally{fs.writeFileSync(path.join(out,'responsive.json'),JSON.stringify({results,network,submissions:0},null,2));await page.close();}
 }
 assert.equal(results.length,15);console.log('NF05C_RESPONSIVE_PASS 15/15; zero submissions; no live staging HTTP');
