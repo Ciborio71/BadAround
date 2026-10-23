@@ -15,7 +15,7 @@ add_action('template_redirect',static function(){
  $frame=isset($_GET['mapcontrols01s_frame']);$token=$_GET['mapcontrols01s_qa']??'';
  if(!$frame&&!$token)return;
  if(!mcs_auth($token)){wp_send_json_error(['code'=>'qa_denied'],403);exit;}
- nocache_headers();header('Cache-Control: private, no-store, max-age=0');header('X-Robots-Tag: noindex, nofollow');header('Referrer-Policy: same-origin');
+ nocache_headers();header('Cache-Control: private, no-store, max-age=0');header('X-Robots-Tag: noindex, nofollow');header('Referrer-Policy: strict-origin-when-cross-origin');
  if($frame){
   $w=(int)($_GET['width']??390);if(!in_array($w,[320,390,768,1024,1440],true))$w=390;
   $paths=['native'=>'/segnala-un-evento/','home'=>'/','map'=>'/mappa/'];foreach([360,361,362,363] as $id)$paths['event'.$id]=wp_parse_url(get_permalink($id),PHP_URL_PATH);
