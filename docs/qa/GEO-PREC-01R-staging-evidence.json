@@ -1,0 +1,572 @@
+{
+  "candidate": "29a202fd47d6ba6b7a8109b6a596a71f7508109f",
+  "governance_candidate": "48bab2229c00fb28f01d54117dd1278074f10d69",
+  "deploy_run": 39879232412,
+  "result": "SUCCESS",
+  "new_reports": 0,
+  "new_events": 0,
+  "runtime_hashes": [
+    {
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-audit-log.php",
+      "expected": "4bd06b99a878337d981d492ea04bd2bdbc07850fd479096b2fd081bb5929c0b2",
+      "remote": "4bd06b99a878337d981d492ea04bd2bdbc07850fd479096b2fd081bb5929c0b2",
+      "match": true
+    },
+    {
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-discovery-query.php",
+      "expected": "137656d95d8eeb4df21e43446637acaabaff8a8a0d8fb9aa2112cc263da31152",
+      "remote": "137656d95d8eeb4df21e43446637acaabaff8a8a0d8fb9aa2112cc263da31152",
+      "match": true
+    },
+    {
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-geo-moderation-service.php",
+      "expected": "f48dde4e09a4a3ed3b682918664fee5d9d8f5599ec7bb96c7c5b0831122225c4",
+      "remote": "f48dde4e09a4a3ed3b682918664fee5d9d8f5599ec7bb96c7c5b0831122225c4",
+      "match": true
+    },
+    {
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php",
+      "expected": "f54343c508b773c08b60aaf106f385ebfa66b0d5c0dce894e3e22183419450b1",
+      "remote": "f54343c508b773c08b60aaf106f385ebfa66b0d5c0dce894e3e22183419450b1",
+      "match": true
+    },
+    {
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-public-geo-contract.php",
+      "expected": "9c1a1969532fb291e087646d636e3886715728fdffd407081cf6644e7318aa9f",
+      "remote": "9c1a1969532fb291e087646d636e3886715728fdffd407081cf6644e7318aa9f",
+      "match": true
+    },
+    {
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-public-geo-projection.php",
+      "expected": "54e0667f15fa70cae903a68138fed0f070b434980d584be3b6f0200c1bf10af5",
+      "remote": "54e0667f15fa70cae903a68138fed0f070b434980d584be3b6f0200c1bf10af5",
+      "match": true
+    },
+    {
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php",
+      "expected": "db17abdee51c1184882b261d7dd5c2e68d6a136702551f15ad554115821b032e",
+      "remote": "db17abdee51c1184882b261d7dd5c2e68d6a136702551f15ad554115821b032e",
+      "match": true
+    },
+    {
+      "path": "wordpress/plugins/badaround-core/includes/class-badaround-report-repository.php",
+      "expected": "d0c6a380fe604e0c9a8251a31bbb2b88905d3ea8eba845990287c1169fd635e7",
+      "remote": "d0c6a380fe604e0c9a8251a31bbb2b88905d3ea8eba845990287c1169fd635e7",
+      "match": true
+    },
+    {
+      "path": "wordpress/themes/badaround-child/template-parts/single-event-layout.php",
+      "expected": "15ec6d0f4b7ace381c973d063bcba4e23b2ee720090cb55813cb5bc21c66c242",
+      "remote": "15ec6d0f4b7ace381c973d063bcba4e23b2ee720090cb55813cb5bc21c66c242",
+      "match": true
+    }
+  ],
+  "custody_files": 55,
+  "state_unchanged": true,
+  "schema_table_count": 48,
+  "before_digests": {
+    "reports": "d6048c2eae1a3f6171beb99e909e879c0f9b1e2eb4258fb999dc2711ed80b409",
+    "events": "3992a7fe28de725b359ad3e681c1a74103f1e2308aa6ce06b530ac338a31b0a5",
+    "eventmeta": "6ed30abbd35f92fc2663c551824f4c37ae9531951809cef05339ee64cc89474f",
+    "relationships": "7ebfc1887692ed8d0d1c9d19b273172bdc154acf3724c59438e367909535516c",
+    "audit": "cdf3ebf57d042b51f6c9a7ccf7fac6d8376cf7cbcb99844dc06dcc515c053d80",
+    "terms": "8c4e83d6e717f81c065ac5d28f759d21945bcf36228b5005e8ed396c2c5eb868",
+    "taxonomy": "1be484cd66fa9d8490f5f3ca96443cf57a423a01e1ec1b58304fe0c9b032d8e1",
+    "termmeta": "7d2904780062f9b3f9d975da47467bf854f94b3ba08c4618698023071d50c7d4"
+  },
+  "after_digests": {
+    "reports": "d6048c2eae1a3f6171beb99e909e879c0f9b1e2eb4258fb999dc2711ed80b409",
+    "events": "3992a7fe28de725b359ad3e681c1a74103f1e2308aa6ce06b530ac338a31b0a5",
+    "eventmeta": "6ed30abbd35f92fc2663c551824f4c37ae9531951809cef05339ee64cc89474f",
+    "relationships": "7ebfc1887692ed8d0d1c9d19b273172bdc154acf3724c59438e367909535516c",
+    "audit": "cdf3ebf57d042b51f6c9a7ccf7fac6d8376cf7cbcb99844dc06dcc515c053d80",
+    "terms": "8c4e83d6e717f81c065ac5d28f759d21945bcf36228b5005e8ed396c2c5eb868",
+    "taxonomy": "1be484cd66fa9d8490f5f3ca96443cf57a423a01e1ec1b58304fe0c9b032d8e1",
+    "termmeta": "7d2904780062f9b3f9d975da47467bf854f94b3ba08c4618698023071d50c7d4"
+  },
+  "schema_digest_before": "f2d849f1bc673f48fc496bbb9bc97f390235b79c62f76e50b7172ff026e8f7e6",
+  "schema_digest_after": "f2d849f1bc673f48fc496bbb9bc97f390235b79c62f76e50b7172ff026e8f7e6",
+  "fixtures": [
+    {
+      "report": 31,
+      "event": 303,
+      "status": "publish",
+      "moderation": "published",
+      "marker": null,
+      "request": "exact_point",
+      "public_geo": {
+        "version": "public-location/v1",
+        "mode": "exact_point",
+        "lat": 41.8991622,
+        "lng": 12.4730719,
+        "radius_meters": 0,
+        "radius_m": 0,
+        "source": "event_public",
+        "precision": "exact_point"
+      },
+      "render": {
+        "html_sha256": "17b840da75ec5607d8e9b0b6647f1b9d1a2bfee5278fd81be8fdde38ced751bc",
+        "map_tag": "<div class=\"ba-event-location-map\" id=\"ba-event-google-map\" data-ba-map data-ba-map-context=\"detail\" data-ba-event-lat=\"41.8991622\" data-ba-event-lng=\"12.4730719\" data-ba-event-radius=\"0\" data-ba-event-id=\"303\" data-ba-event-mode=\"exact_point\" data-ba-event-category=\"spazi-pubblici\" data-ba-event-status=\"open\" aria-label=\"Mappa: Posizione esatta\">",
+        "exact_label": true,
+        "approx_label": false,
+        "territory_label": false,
+        "private_tokens_present": false
+      },
+      "old_audit_unchanged": true,
+      "source_unchanged": true,
+      "projection_unchanged": true,
+      "historical_html_unchanged": true,
+      "moderation_ui": {
+        "requested_readonly": false,
+        "has_mode_control": false,
+        "has_coordinate_controls": true,
+        "geo_ui_text": "Localizzazione richiesta dall’utenteRichiesta utente: Punto esattoQuesta decisione non pubblica l’evento e non crea coordinate pubbliche. La nuova pubblicazione geografica non è ancora attiva.Precisione pubblica approvata: Punto esattoDecisione in sola lettura: la modifica di eventi già pubblicati o con stato incompatibile richiede un percorso separato."
+      }
+    },
+    {
+      "report": 32,
+      "event": 304,
+      "status": "publish",
+      "moderation": "published",
+      "marker": null,
+      "request": "approximate_area",
+      "public_geo": {
+        "version": "public-location/v1",
+        "mode": "approximate_area",
+        "lat": 41.89553,
+        "lng": 12.479214,
+        "radius_meters": 1000,
+        "radius_m": 1000,
+        "source": "event_public",
+        "precision": "approximate_area"
+      },
+      "render": {
+        "html_sha256": "ac81b430a3d6d46bf1972004d70f90f7c88fbd1f689a753c9b44fdc264b0986a",
+        "map_tag": "<div class=\"ba-event-location-map\" id=\"ba-event-google-map\" data-ba-map data-ba-map-context=\"detail\" data-ba-event-lat=\"41.89553\" data-ba-event-lng=\"12.479214\" data-ba-event-radius=\"1000\" data-ba-event-id=\"304\" data-ba-event-mode=\"approximate_area\" data-ba-event-category=\"spazi-pubblici\" data-ba-event-status=\"open\" aria-label=\"Mappa: Posizione approssimativa\">",
+        "exact_label": false,
+        "approx_label": true,
+        "territory_label": false,
+        "private_tokens_present": false
+      },
+      "old_audit_unchanged": true,
+      "source_unchanged": true,
+      "projection_unchanged": true,
+      "historical_html_unchanged": true,
+      "moderation_ui": {
+        "requested_readonly": false,
+        "has_mode_control": false,
+        "has_coordinate_controls": true,
+        "geo_ui_text": "Localizzazione richiesta dall’utenteRichiesta utente: Area approssimativaQuesta decisione non pubblica l’evento e non crea coordinate pubbliche. La nuova pubblicazione geografica non è ancora attiva.Precisione pubblica approvata: Area approssimativaDecisione in sola lettura: la modifica di eventi già pubblicati o con stato incompatibile richiede un percorso separato."
+      }
+    },
+    {
+      "report": 17,
+      "event": 269,
+      "status": "publish",
+      "moderation": "published",
+      "marker": null,
+      "request": null,
+      "public_geo": null,
+      "render": {
+        "html_sha256": "439b389e8e58ef185552e670885dd1dbc5048101614471df7612d29dcefc3176",
+        "map_tag": null,
+        "exact_label": false,
+        "approx_label": false,
+        "territory_label": true,
+        "private_tokens_present": false
+      },
+      "old_audit_unchanged": true,
+      "source_unchanged": true,
+      "projection_unchanged": true,
+      "historical_html_unchanged": true,
+      "moderation_ui": {
+        "requested_readonly": false,
+        "has_mode_control": false,
+        "has_coordinate_controls": true,
+        "geo_ui_text": "Localizzazione richiesta dall’utenteRichiesta utente: non disponibile / criterio legacyQuesta decisione non pubblica l’evento e non crea coordinate pubbliche. La nuova pubblicazione geografica non è ancora attiva.Precisione pubblica approvata: Da valutareDecisione in sola lettura: la modifica di eventi già pubblicati o con stato incompatibile richiede un percorso separato."
+      }
+    },
+    {
+      "report": 73,
+      "event": 352,
+      "status": "publish",
+      "moderation": "published",
+      "marker": "user-public-location/v1",
+      "request": "exact_point",
+      "public_geo": {
+        "version": "public-location/v1",
+        "mode": "exact_point",
+        "lat": 41.6208388,
+        "lng": 12.4626387,
+        "radius_meters": 0,
+        "radius_m": 0,
+        "source": "event_public",
+        "precision": "exact_point"
+      },
+      "render": {
+        "html_sha256": "a9100dc980ddc44c5577fcffe8ddb20ce6828fe30f21f0a617c15128c9bc2074",
+        "map_tag": "<div class=\"ba-event-location-map\" id=\"ba-event-google-map\" data-ba-map data-ba-map-context=\"detail\" data-ba-event-lat=\"41.6208388\" data-ba-event-lng=\"12.4626387\" data-ba-event-radius=\"0\" data-ba-event-id=\"352\" data-ba-event-mode=\"exact_point\" data-ba-event-category=\"spazi-pubblici\" data-ba-event-status=\"open\" aria-label=\"Mappa: Posizione esatta\">",
+        "exact_label": true,
+        "approx_label": false,
+        "territory_label": false,
+        "private_tokens_present": false
+      },
+      "old_audit_unchanged": true,
+      "source_unchanged": true,
+      "projection_unchanged": true,
+      "historical_html_unchanged": null,
+      "moderation_ui": {
+        "requested_readonly": true,
+        "has_mode_control": false,
+        "has_coordinate_controls": false,
+        "geo_ui_text": "Posizione pubblica richiesta: Punto esattoScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata."
+      }
+    },
+    {
+      "report": 74,
+      "event": 354,
+      "status": "publish",
+      "moderation": "published",
+      "marker": "user-public-location/v1",
+      "request": "approximate_area",
+      "public_geo": {
+        "version": "public-location/v1",
+        "mode": "approximate_area",
+        "lat": 41.62611,
+        "lng": 12.459279,
+        "radius_meters": 1000,
+        "radius_m": 1000,
+        "source": "event_public",
+        "precision": "approximate_area"
+      },
+      "render": {
+        "html_sha256": "d64e1cfdb05c5dc479e4aff366fc79d23ca5cd7e7d5f4285b20c0d7cb6dd5e11",
+        "map_tag": "<div class=\"ba-event-location-map\" id=\"ba-event-google-map\" data-ba-map data-ba-map-context=\"detail\" data-ba-event-lat=\"41.62611\" data-ba-event-lng=\"12.459279\" data-ba-event-radius=\"1000\" data-ba-event-id=\"354\" data-ba-event-mode=\"approximate_area\" data-ba-event-category=\"spazi-pubblici\" data-ba-event-status=\"open\" aria-label=\"Mappa: Posizione approssimativa\">",
+        "exact_label": false,
+        "approx_label": true,
+        "territory_label": false,
+        "private_tokens_present": false
+      },
+      "old_audit_unchanged": true,
+      "source_unchanged": true,
+      "projection_unchanged": true,
+      "historical_html_unchanged": null,
+      "moderation_ui": {
+        "requested_readonly": true,
+        "has_mode_control": false,
+        "has_coordinate_controls": false,
+        "geo_ui_text": "Posizione pubblica richiesta: Area approssimativaScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata."
+      }
+    },
+    {
+      "report": 75,
+      "event": 356,
+      "status": "pending",
+      "moderation": "rejected",
+      "marker": "user-public-location/v1",
+      "request": "exact_point",
+      "public_geo": null,
+      "render": {
+        "html_sha256": "bd362322f214f46b468ef71d817a6d0bb6062e2f94df9f7b3dda96311806a2f8",
+        "map_tag": null,
+        "exact_label": false,
+        "approx_label": false,
+        "territory_label": true,
+        "private_tokens_present": false
+      },
+      "old_audit_unchanged": true,
+      "source_unchanged": true,
+      "projection_unchanged": true,
+      "historical_html_unchanged": null,
+      "moderation_ui": {
+        "requested_readonly": true,
+        "has_mode_control": false,
+        "has_coordinate_controls": false,
+        "geo_ui_text": "Posizione pubblica richiesta: Punto esattoScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata."
+      }
+    },
+    {
+      "report": 76,
+      "event": 358,
+      "status": "pending",
+      "moderation": "rejected",
+      "marker": "user-public-location/v1",
+      "request": "approximate_area",
+      "public_geo": null,
+      "render": {
+        "html_sha256": "b035553e473310849fcd6246faeca5126388119140817f6847120b737df54e52",
+        "map_tag": null,
+        "exact_label": false,
+        "approx_label": false,
+        "territory_label": true,
+        "private_tokens_present": false
+      },
+      "old_audit_unchanged": true,
+      "source_unchanged": true,
+      "projection_unchanged": true,
+      "historical_html_unchanged": null,
+      "moderation_ui": {
+        "requested_readonly": true,
+        "has_mode_control": false,
+        "has_coordinate_controls": false,
+        "geo_ui_text": "Posizione pubblica richiesta: Area approssimativaScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata."
+      }
+    }
+  ],
+  "negative_checks": {
+    "missing_projection": "FAIL_CLOSED",
+    "missing_all_metadata": "FAIL_CLOSED",
+    "unknown_authority": "FAIL_CLOSED",
+    "source_proof_mismatch": "FAIL_CLOSED",
+    "mirror_mismatch": "FAIL_CLOSED",
+    "unknown_governance_marker": "ba_public_geo_governance_invalid",
+    "unpublished_356": "NO_PUBLIC_GEOMETRY",
+    "unpublished_358": "NO_PUBLIC_GEOMETRY",
+    "crafted_356_exact_point": "ba_geo_decision_user_authoritative",
+    "crafted_356_approximate_area": "ba_geo_decision_user_authoritative",
+    "crafted_356_unsupported": "ba_geo_decision_user_authoritative",
+    "crafted_358_exact_point": "ba_geo_decision_user_authoritative",
+    "crafted_358_approximate_area": "ba_geo_decision_user_authoritative",
+    "crafted_358_unsupported": "ba_geo_decision_user_authoritative"
+  },
+  "browser": {
+    "discovery": {
+      "items": [
+        {
+          "geo": {
+            "lat": 41.62611,
+            "lng": 12.459279,
+            "mode": "approximate_area",
+            "precision": "approximate_area",
+            "radius_m": 1000,
+            "radius_meters": 1000,
+            "source": "event_public",
+            "version": "public-location/v1"
+          },
+          "id": 354
+        },
+        {
+          "geo": {
+            "lat": 41.6208388,
+            "lng": 12.4626387,
+            "mode": "exact_point",
+            "precision": "exact_point",
+            "radius_m": 0,
+            "radius_meters": 0,
+            "source": "event_public",
+            "version": "public-location/v1"
+          },
+          "id": 352
+        },
+        {
+          "geo": {
+            "lat": 41.89553,
+            "lng": 12.479214,
+            "mode": "approximate_area",
+            "precision": "approximate_area",
+            "radius_m": 1000,
+            "radius_meters": 1000,
+            "source": "event_public",
+            "version": "public-location/v1"
+          },
+          "id": 304
+        },
+        {
+          "geo": {
+            "lat": 41.8991622,
+            "lng": 12.4730719,
+            "mode": "exact_point",
+            "precision": "exact_point",
+            "radius_m": 0,
+            "radius_meters": 0,
+            "source": "event_public",
+            "version": "public-location/v1"
+          },
+          "id": 303
+        },
+        {
+          "geo": null,
+          "id": 269
+        }
+      ],
+      "privateKeysPresent": false,
+      "total": 15
+    },
+    "historicalBefore": {
+      "269": {
+        "copy": "Zona territoriale",
+        "map": null,
+        "title": "Veicolo rubato a Torvaianica"
+      },
+      "303": {
+        "copy": "Posizione esatta",
+        "map": {
+          "baEventCategory": "spazi-pubblici",
+          "baEventId": "303",
+          "baEventLat": "41.8991622",
+          "baEventLng": "12.4730719",
+          "baEventMode": "exact_point",
+          "baEventRadius": "0",
+          "baEventStatus": "open",
+          "baMap": "",
+          "baMapContext": "detail"
+        },
+        "title": "Rifiuti abbandonati o discarica a Roma"
+      },
+      "304": {
+        "copy": "Posizione approssimativa",
+        "map": {
+          "baEventCategory": "spazi-pubblici",
+          "baEventId": "304",
+          "baEventLat": "41.89553",
+          "baEventLng": "12.479214",
+          "baEventMode": "approximate_area",
+          "baEventRadius": "1000",
+          "baEventStatus": "open",
+          "baMap": "",
+          "baMapContext": "detail"
+        },
+        "title": "Rifiuti abbandonati o discarica a Roma"
+      }
+    },
+    "historicalAfter": {
+      "269": {
+        "copy": "Zona territoriale",
+        "map": null,
+        "title": "Veicolo rubato a Torvaianica"
+      },
+      "303": {
+        "copy": "Posizione esatta",
+        "map": {
+          "baEventCategory": "spazi-pubblici",
+          "baEventId": "303",
+          "baEventLat": "41.8991622",
+          "baEventLng": "12.4730719",
+          "baEventMode": "exact_point",
+          "baEventRadius": "0",
+          "baEventStatus": "open",
+          "baMap": "",
+          "baMapContext": "detail"
+        },
+        "title": "Rifiuti abbandonati o discarica a Roma"
+      },
+      "304": {
+        "copy": "Posizione approssimativa",
+        "map": {
+          "baEventCategory": "spazi-pubblici",
+          "baEventId": "304",
+          "baEventLat": "41.89553",
+          "baEventLng": "12.479214",
+          "baEventMode": "approximate_area",
+          "baEventRadius": "1000",
+          "baEventStatus": "open",
+          "baMap": "",
+          "baMapContext": "detail"
+        },
+        "title": "Rifiuti abbandonati o discarica a Roma"
+      }
+    },
+    "details": {
+      "352": {
+        "dataset": {
+          "baEventCategory": "spazi-pubblici",
+          "baEventId": "352",
+          "baEventLat": "41.6208388",
+          "baEventLng": "12.4626387",
+          "baEventMode": "exact_point",
+          "baEventRadius": "0",
+          "baEventStatus": "open",
+          "baMap": "",
+          "baMapContext": "detail"
+        },
+        "label": "Posizione esatta",
+        "markerTitles": [
+          "Posizione esatta dell'evento: [QA sintetica GEO-PREC-01 A] Nessun evento reale"
+        ],
+        "privateMetadataPresent": false,
+        "url": "https://staging.badaround.it/eventi/qa-sintetica-geo-prec-01-a-nessun-evento-reale/"
+      },
+      "354": {
+        "dataset": {
+          "baEventCategory": "spazi-pubblici",
+          "baEventId": "354",
+          "baEventLat": "41.62611",
+          "baEventLng": "12.459279",
+          "baEventMode": "approximate_area",
+          "baEventRadius": "1000",
+          "baEventStatus": "open",
+          "baMap": "",
+          "baMapContext": "detail"
+        },
+        "label": "Posizione approssimativa",
+        "markerTitles": [
+          "Area approssimativa dell'evento: raggio 1000 metri: [QA sintetica GEO-PREC-01 B] Nessun evento reale"
+        ],
+        "privateMetadataPresent": false,
+        "url": "https://staging.badaround.it/eventi/qa-sintetica-geo-prec-01-b-nessun-evento-reale/"
+      }
+    },
+    "homeMarkers": [
+      "Area approssimativa dell'evento: raggio 1000 metri: [QA sintetica GEO-PREC-01 B] Nessun evento reale",
+      "Posizione esatta dell'evento: [QA sintetica GEO-PREC-01 A] Nessun evento reale"
+    ],
+    "mapMarkers": [
+      "Area approssimativa dell'evento: raggio 1000 metri: [QA sintetica GEO-PREC-01 B] Nessun evento reale",
+      "Posizione esatta dell'evento: [QA sintetica GEO-PREC-01 A] Nessun evento reale"
+    ],
+    "consoleErrors": {
+      "home": [
+        "Error sending browser metadata to extension: Object",
+        "Error sending browser metadata to extension: Object",
+        "Error sending browser metadata to extension: Object",
+        "Error sending browser metadata to extension: Object",
+        "Error sending browser metadata to extension: Object",
+        "Error sending browser metadata to extension: Object",
+        "Error sending browser metadata to extension: Object",
+        "Error sending browser metadata to extension: Object",
+        "Error sending browser metadata to extension: Object",
+        "Error sending browser metadata to extension: Object"
+      ],
+      "map": [
+        "Error sending browser metadata to extension: Object",
+        "Error sending browser metadata to extension: Object",
+        "Error sending browser metadata to extension: Object",
+        "Error sending browser metadata to extension: Object",
+        "Error sending browser metadata to extension: Object"
+      ],
+      "exact": [
+        "Error sending browser metadata to extension: Object"
+      ],
+      "approximate": [
+        "Error sending browser metadata to extension: Object"
+      ],
+      "native": [
+        "Error sending browser metadata to extension: Object",
+        "Error sending browser metadata to extension: Object"
+      ]
+    }
+  },
+  "native": "badaround-report/v2",
+  "contract_sha": "dc282153243ffb80f3bd4f2a222ea0f4c4f42806fba6f3a0bde0a76855bd8e3c",
+  "media_enabled": false,
+  "cleanup": {
+    "ftps_absence": "VERIFIED",
+    "rest": "404 rest_no_route",
+    "raw_local_token": "REMOVED"
+  },
+  "rollback": "READY, NOT USED",
+  "artifacts": [
+    {
+      "id": 12469922134,
+      "sha256": "ec868c622cecff0f9871783a97586927da8610101d57d6b50f1f8d47a2e8f473"
+    },
+    {
+      "id": 12470011711,
+      "sha256": "8c4255c3fc1e0432d842574901ddd2acd5b2eb695ff73ee9e9807fd498296d54"
+    },
+    {
+      "id": 12469414355,
+      "sha256": "a17e5274c9a83ecc83796b5b573715b1e7700493f8f9e1fb041f9bf70f723fcb"
+    }
+  ]
+}
