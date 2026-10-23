@@ -1,0 +1,112 @@
+[
+  {
+    "radius_m": 1000,
+    "center": {
+      "lat": 41.666945,
+      "lng": 12.457416
+    },
+    "zoom": 17,
+    "context": "home",
+    "event": null,
+    "actual_google_maps": true
+  },
+  {
+    "radius_m": 500,
+    "center": {
+      "lat": 41.660817,
+      "lng": 12.459694
+    },
+    "zoom": 17,
+    "context": "home",
+    "event": null,
+    "actual_google_maps": true
+  },
+  {
+    "radius_m": 100,
+    "center": {
+      "lat": 41.662349,
+      "lng": 12.462063
+    },
+    "zoom": 17,
+    "context": "home",
+    "event": null,
+    "actual_google_maps": true
+  },
+  {
+    "radius_m": 1000,
+    "center": {
+      "lat": 41.62611,
+      "lng": 12.459279
+    },
+    "zoom": 17,
+    "context": "home",
+    "event": null,
+    "actual_google_maps": true
+  },
+  {
+    "radius_m": 1000,
+    "center": {
+      "lat": 41.911948,
+      "lng": 12.528783
+    },
+    "zoom": 17,
+    "context": "home",
+    "event": null,
+    "actual_google_maps": true
+  },
+  {
+    "radius_m": 1000,
+    "center": {
+      "lat": 41.89553,
+      "lng": 12.479214
+    },
+    "zoom": 17,
+    "context": "home",
+    "event": null,
+    "actual_google_maps": true
+  },
+  {
+    "radius_m": 1000,
+    "center": {
+      "lat": 41.818432,
+      "lng": 12.482284
+    },
+    "zoom": 17,
+    "context": "home",
+    "event": null,
+    "actual_google_maps": true
+  },
+  {
+    "radius_m": 1000,
+    "center": {
+      "lat": 41.866107,
+      "lng": 12.436241
+    },
+    "zoom": 17,
+    "context": "home",
+    "event": null,
+    "actual_google_maps": true
+  },
+  {
+    "radius_m": 1000,
+    "center": {
+      "lat": 41.67467,
+      "lng": 12.502868
+    },
+    "zoom": 17,
+    "context": "home",
+    "event": null,
+    "actual_google_maps": true
+  },
+  {
+    "radius_m": 1000,
+    "center": {
+      "lat": 41.62112,
+      "lng": 12.46197
+    },
+    "zoom": 17,
+    "context": "home",
+    "event": null,
+    "actual_google_maps": true
+  }
+]

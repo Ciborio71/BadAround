@@ -37,4 +37,6 @@ Home NF-HOME-01 unchanged; no unauthorized runtime file changes. Frozen conditio
 Home still contains historic generic “richiesta dell’utente e alla moderazione” wording; one Native review help sentence says public representation is evaluated by moderation. Neither states a precision override, and no out-of-scope copy was changed.
 
 ## Cleanup
-Guarded deployment removes temporary administrator/token QA MU-plugin in finally and verifies FTPS absence. Final run/hash/REST404 evidence recorded after completion.
+Completed successfully at2026-10-23T02:26:49Z. Final independently downloaded artifact12474217035 SHA256 a31196b1ecd0d2c3137940e392061df853efa6f6dde38ee01fcf47dc775dc625.55/55 final runtime custody PASS;14/14 authorized targets exact candidate. Rollback READY, not used. Temporary MU-plugin removed with FTPS absence verified; POST former REST route returns404 rest_no_route. Raw local token removed.
+
+GEO-AREA-01 COMPLETE — USER RADIUS AND MAP CIRCLE CERTIFIED ON STAGING

@@ -1,0 +1,154 @@
+{
+  "full": [
+    {
+      "radius_m": 1000,
+      "center": {
+        "lat": 41.666945,
+        "lng": 12.457416
+      },
+      "zoom": 17,
+      "context": "full",
+      "event": null,
+      "actual_google_maps": true
+    },
+    {
+      "radius_m": 500,
+      "center": {
+        "lat": 41.660817,
+        "lng": 12.459694
+      },
+      "zoom": 17,
+      "context": "full",
+      "event": null,
+      "actual_google_maps": true
+    },
+    {
+      "radius_m": 100,
+      "center": {
+        "lat": 41.662349,
+        "lng": 12.462063
+      },
+      "zoom": 17,
+      "context": "full",
+      "event": null,
+      "actual_google_maps": true
+    },
+    {
+      "radius_m": 1000,
+      "center": {
+        "lat": 41.62611,
+        "lng": 12.459279
+      },
+      "zoom": 17,
+      "context": "full",
+      "event": null,
+      "actual_google_maps": true
+    },
+    {
+      "radius_m": 1000,
+      "center": {
+        "lat": 41.911948,
+        "lng": 12.528783
+      },
+      "zoom": 17,
+      "context": "full",
+      "event": null,
+      "actual_google_maps": true
+    },
+    {
+      "radius_m": 1000,
+      "center": {
+        "lat": 41.89553,
+        "lng": 12.479214
+      },
+      "zoom": 17,
+      "context": "full",
+      "event": null,
+      "actual_google_maps": true
+    },
+    {
+      "radius_m": 1000,
+      "center": {
+        "lat": 41.818432,
+        "lng": 12.482284
+      },
+      "zoom": 17,
+      "context": "full",
+      "event": null,
+      "actual_google_maps": true
+    },
+    {
+      "radius_m": 1000,
+      "center": {
+        "lat": 41.866107,
+        "lng": 12.436241
+      },
+      "zoom": 17,
+      "context": "full",
+      "event": null,
+      "actual_google_maps": true
+    },
+    {
+      "radius_m": 1000,
+      "center": {
+        "lat": 41.67467,
+        "lng": 12.502868
+      },
+      "zoom": 17,
+      "context": "full",
+      "event": null,
+      "actual_google_maps": true
+    },
+    {
+      "radius_m": 1000,
+      "center": {
+        "lat": 41.62112,
+        "lng": 12.46197
+      },
+      "zoom": 17,
+      "context": "full",
+      "event": null,
+      "actual_google_maps": true
+    }
+  ],
+  "summaries": [
+    {
+      "mode": "approximate_area",
+      "radius": 100,
+      "text": "Cosa è successoChe cosa vuoi segnalare?Spazi pubbliciTipo di eventoRifiuti abbandonati o discaricaCome sei a conoscenza dell’evento?Ho osservato la situazione nella zonaDove e quandoIndirizzo preciso, compreso il civicoMF77+33, 00071 Pomezia RM, ItaliaIndirizzo e civico restano riservati. La rappresentazione pubblica della posizione sarà valutata dalla moderazione.Quando è successo?Non lo soPosizione pubblica richiestaArea approssimativa — circa 100 mDettagliRacconta che cosa è successo[QA sintetica GEO-AREA-01R] Nessun evento reale. Verifica del raggio scelto dal segnalante.Riporta i fatti. Evita nomi, recapiti, accuse e dati personali non necessari. Il testo sarà moderato.ImmaginiDisponi di immagini?NoInformazioni di contattoCome vuoi comparire pubblicamente?In forma anonimaScegli come preferisci essere indicato. BadAround non pubblica automaticamente i tuoi dati personali. La tua preferenza resta soggetta alla moderazione e alle regole di pubblicazione.NomeQACognomeSinteticaEmailgeoarea-qa@example.invalidVuoi ricevere aggiornamenti e informazioni su questo evento?No, non desidero aggiornamenti facoltativiGli altri utenti non vedono i tuoi recapiti e non possono contattarti direttamente.Vuoi dare visibilità a questo evento sui canali social di BadAround?No, preferisco la pubblicazione sul sito BadAround.La tua scelta sarà valutata dalla moderazione. Potranno essere condivisi solo contenuti approvati e destinati alla pubblicazione; i tuoi recapiti e le informazioni riservate resteranno esclusi. Se non rispondi, non richiedi la diffusione social. La richiesta riguarda Facebook, Instagram, X, Google Business Profile (Google Maps) e TikTok, secondo i canali attivati da BadAround.Dichiarazioni, regole e presa visione della privacyConfermato"
+    },
+    {
+      "mode": "approximate_area",
+      "radius": 50,
+      "labelFound": true
+    },
+    {
+      "mode": "approximate_area",
+      "radius": 250,
+      "labelFound": true
+    },
+    {
+      "mode": "approximate_area",
+      "radius": 500,
+      "labelFound": true
+    },
+    {
+      "mode": "1000",
+      "radius": 1000,
+      "labelFound": true,
+      "noStale": true
+    },
+    {
+      "mode": "exact",
+      "radius": null,
+      "labelFound": true,
+      "noStale": true
+    },
+    {
+      "mode": "100",
+      "radius": 100,
+      "labelFound": true,
+      "noStale": true
+    }
+  ]
+}

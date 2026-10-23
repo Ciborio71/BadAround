@@ -1,0 +1,105 @@
+[
+  {
+    "event": 360,
+    "map": {
+      "baEventCategory": "spazi-pubblici",
+      "baEventId": "360",
+      "baEventLat": "41.662349",
+      "baEventLng": "12.462063",
+      "baEventMode": "approximate_area",
+      "baEventRadius": "100",
+      "baEventStatus": "open",
+      "baMap": "",
+      "baMapContext": "detail"
+    },
+    "privateLeak": false,
+    "proof": [
+      {
+        "actual_google_maps": true,
+        "center": {
+          "lat": 41.662349,
+          "lng": 12.462063
+        },
+        "context": "detail",
+        "event": "360",
+        "radius_m": 100,
+        "zoom": 17
+      }
+    ]
+  },
+  {
+    "event": 361,
+    "copy": "Mappa: Posizione approssimativa",
+    "map": {
+      "baEventCategory": "spazi-pubblici",
+      "baEventId": "361",
+      "baEventLat": "41.660817",
+      "baEventLng": "12.459694",
+      "baEventMode": "approximate_area",
+      "baEventRadius": "500",
+      "baEventStatus": "open",
+      "baMap": "",
+      "baMapContext": "detail"
+    },
+    "privateLeak": false,
+    "proof": [
+      {
+        "actual_google_maps": true,
+        "center": {
+          "lat": 41.660817,
+          "lng": 12.459694
+        },
+        "context": "detail",
+        "event": "361",
+        "radius_m": 500,
+        "zoom": 14
+      }
+    ]
+  },
+  {
+    "event": 362,
+    "copy": "Mappa: Posizione approssimativa",
+    "map": {
+      "baEventCategory": "spazi-pubblici",
+      "baEventId": "362",
+      "baEventLat": "41.666945",
+      "baEventLng": "12.457416",
+      "baEventMode": "approximate_area",
+      "baEventRadius": "1000",
+      "baEventStatus": "open",
+      "baMap": "",
+      "baMapContext": "detail"
+    },
+    "privateLeak": false,
+    "proof": [
+      {
+        "actual_google_maps": true,
+        "center": {
+          "lat": 41.666945,
+          "lng": 12.457416
+        },
+        "context": "detail",
+        "event": "362",
+        "radius_m": 1000,
+        "zoom": 13
+      }
+    ]
+  },
+  {
+    "event": 363,
+    "copy": "Mappa: Posizione esatta",
+    "map": {
+      "baEventCategory": "spazi-pubblici",
+      "baEventId": "363",
+      "baEventLat": "41.6626595",
+      "baEventLng": "12.4627245",
+      "baEventMode": "exact_point",
+      "baEventRadius": "0",
+      "baEventStatus": "open",
+      "baMap": "",
+      "baMapContext": "detail"
+    },
+    "privateLeak": false,
+    "proof": []
+  }
+]
