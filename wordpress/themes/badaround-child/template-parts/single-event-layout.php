@@ -75,9 +75,19 @@ $public_lat   = get_post_meta( $post_id, '_ba_public_lat', true );
 $public_lng   = get_post_meta( $post_id, '_ba_public_lng', true );
 $public_mode = '';
 $public_radius = get_post_meta( $post_id, '_ba_public_radius_m', true );
-// Versioned geometry comes exclusively from the approved, sealed public projection.
-if ( class_exists( 'BadAround_Public_Geo_Projection' ) && '' !== get_post_meta( $post_id, '_ba_public_location_decision', true ) ) {
-	$approved_geo = BadAround_Public_Geo_Projection::public_view( $post_id );
+// A sealed projection does not require a historical moderator decision.
+// Retained proof also fences missing/corrupt projections from legacy mirrors.
+$has_versioned_geo = '' !== get_post_meta( $post_id, '_ba_public_geo', true )
+	|| '' !== get_post_meta( $post_id, '_ba_public_geo_proof', true )
+	|| '' !== get_post_meta( $post_id, '_ba_public_location_decision', true );
+// Classification only: the existing predicate returns no report content/coordinates.
+// This also fences a versioned record whose public metadata was entirely lost.
+if ( ! $has_versioned_geo && class_exists( 'BadAround_Publication_Service' ) ) {
+	$has_versioned_geo = BadAround_Publication_Service::uses_versioned_geo( $post_id );
+}
+if ( $has_versioned_geo ) {
+	$approved_geo = class_exists( 'BadAround_Public_Geo_Projection' )
+		? BadAround_Public_Geo_Projection::public_view( $post_id ) : null;
 	$public_mode = $approved_geo['mode'] ?? '';
 	$public_lat = $approved_geo['lat'] ?? '';
 	$public_lng = $approved_geo['lng'] ?? '';

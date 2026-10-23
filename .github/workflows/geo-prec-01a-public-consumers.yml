@@ -1,0 +1,65 @@
+name: GEO-PREC-01A public consumers pre-deploy
+on:
+  push:
+    branches: [fix/geo-prec-01a-public-consumer]
+permissions:
+  contents: read
+jobs:
+  governance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      database:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: synthetic-geo-prec
+          MARIADB_DATABASE: geoprec
+        ports: [3306:3306]
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      BA_TEST_DSN: mysql:host=127.0.0.1;port=3306;dbname=geoprec
+      BA_TEST_DB_USER: root
+      BA_TEST_DB_PASSWORD: synthetic-geo-prec
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gd, posix, fileinfo, pdo_mysql, pdo_sqlite, mbstring
+      - name: Scope, syntax, frozen contract and exact dependency counts
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          git diff --check
+          find wordpress/plugins/badaround-core wordpress/themes/badaround-child -name '*.php' -print0 | xargs -0 -n1 php -l > evidence/php-lint.log
+          node --test tests/geo-prec-01a-boundary.cjs | tee evidence/custody.log
+      - name: New authority, crafted POST, persistence and historical oracles
+        run: |
+          set -euo pipefail
+          for test in geo-prec-01a-consumers geo-prec-01-publication geo-prec-01-moderation geo-prec-01-persistence geo-prec-01-sql-context geo-public-02-contract geo-public-02-publication-gate geo-public-05-audit geo-priv-03a-published-save geo-priv-03a4-rest-lifecycle geo-priv-03a5a-classic-form; do
+            php tests/$test.php > evidence/$test.log
+          done
+      - name: V1 V2 C.1 C.2 Social no-media and media binding compatibility
+        run: |
+          set -euo pipefail
+          for test in native-report-f12 native-report-f13 native-report-f14 native-report-f15 native-report-f16 f1-14r-publication-contract nf-ux-02b-v1-differential nf-ux-02b-v2 nf-ux-02b-media nf-ux-02c-immutability nf-ux-02c1-persistence nf-ux-02c1-v1-differential nf-ux-02c2-recovery native-social-preference native-media-no-media-differential native-media-f17b native-media-f17c; do
+            php tests/$test.php > evidence/$test.log
+          done
+      - name: Unchanged Native semantic matrix, dependency activation, summary, emergency and public consumers
+        run: |
+          set -euo pipefail
+          npm ci --prefix tests --ignore-scripts --no-audit --no-fund
+          node --test --test-concurrency=1 tests/geo-prec-01-admin.cjs tests/geo-public-04-admin.cjs tests/nf-ux-04-model.cjs tests/nf-ux-04-dom.cjs tests/nf-ux-04-service.cjs ops/nf05b-emergency.cjs tests/f1-15b-r5-smart-address.cjs tests/geo-public-03-choice.cjs tests/geo-public-06-rendering.cjs tests/sf9-public-privacy-boundary.cjs tests/native-social-preference.cjs 2>&1 | tee evidence/differential.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: geo-prec-01a-predeploy-evidence
+          path: evidence/
+          retention-days: 90

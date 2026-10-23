@@ -394,7 +394,9 @@ class BadAround_Discovery_Query {
 
 	private function public_geo( $event_id ) {
 		if ( '' !== get_post_meta( $event_id, BadAround_Public_Geo_Contract::PROJECTION_META, true )
-			|| '' !== get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true ) ) {
+			|| '' !== get_post_meta( $event_id, BadAround_Public_Geo_Projection::PROOF_META, true )
+			|| '' !== get_post_meta( $event_id, BadAround_Public_Geo_Contract::DECISION_META, true )
+			|| ( class_exists( 'BadAround_Publication_Service' ) && BadAround_Publication_Service::uses_versioned_geo( $event_id ) ) ) {
 			return BadAround_Public_Geo_Projection::public_view( $event_id );
 		}
 		$lat    = get_post_meta( $event_id, '_ba_public_lat', true );
