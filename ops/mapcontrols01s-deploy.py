@@ -7,9 +7,8 @@ def git(ref,p):
  r=subprocess.run(['git','show',ref+':'+p],capture_output=True);return r.stdout if r.returncode==0 else None
 def baseline(p):
  if p=='wordpress/themes/badaround-child/functions.php':
-  b=git(CAND,p);block=b"/**\n * BadAround admin: prefer the classic WordPress editor on every post type.\n * This is UI-only; moderation/publication permissions and hooks stay intact.\n */\nadd_filter( 'use_block_editor_for_post_type', '__return_false', 100 );\nadd_filter( 'use_block_editor_for_post', '__return_false', 100 );\n\n"
-  old=git(BASE,p);assert b.count(block)==1 and old.count(block)==0
-  return old.replace(b"define( 'BADAROUND_CHILD_VERSION'",block+b"define( 'BADAROUND_CHILD_VERSION'",1)
+  b=git('4622bec87e051f2000884abc0095b258fe2bfcb5',p);assert hashlib.sha256(b).hexdigest()=='693068d807119ebd1691dd3a6dd7401d9d97363ed5cfc799dcbdde5ab141ce6c'
+  return b
  return git(BASE,p)
 def sha(b):return hashlib.sha256(b).hexdigest() if b is not None else None
 def rel(p):assert p.startswith('wordpress/');return p[len('wordpress/'):]
