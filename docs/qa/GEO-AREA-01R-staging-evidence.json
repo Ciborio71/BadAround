@@ -1,0 +1,1313 @@
+{
+  "run": 39885458548,
+  "candidate": "879f55853fbb99c20ad85bc522e03f19f93bc3c6",
+  "before": {
+    "state": {
+      "reports": "d6048c2eae1a3f6171beb99e909e879c0f9b1e2eb4258fb999dc2711ed80b409",
+      "events": "3992a7fe28de725b359ad3e681c1a74103f1e2308aa6ce06b530ac338a31b0a5",
+      "eventmeta": "6ed30abbd35f92fc2663c551824f4c37ae9531951809cef05339ee64cc89474f",
+      "relationships": "7ebfc1887692ed8d0d1c9d19b273172bdc154acf3724c59438e367909535516c",
+      "audit": "2a2a07f3ad6c6c635b168e2d57f73e76cfdf2f1b3fa7692facffc19bfd8df2e4",
+      "terms": "8c4e83d6e717f81c065ac5d28f759d21945bcf36228b5005e8ed396c2c5eb868",
+      "taxonomy": "1be484cd66fa9d8490f5f3ca96443cf57a423a01e1ec1b58304fe0c9b032d8e1",
+      "termmeta": "7d2904780062f9b3f9d975da47467bf854f94b3ba08c4618698023071d50c7d4",
+      "schema": {
+        "cixe6qoXf_actionscheduler_actions": "8275baa753ffa78db2d71604348e11d97f353a75e58891ffc9fc27444cf9980c",
+        "cixe6qoXf_actionscheduler_claims": "141464c8041f4d5d6e9afcc59e19f560538fa6b4a3945f293d7c3e52974d0e01",
+        "cixe6qoXf_actionscheduler_groups": "5f92bb4933096b54b3c8eb5ef2c436593c070b51bc348c20bd9ab5a9f6d51828",
+        "cixe6qoXf_actionscheduler_logs": "4815d1771ee65a1ab7950e5935cff94bd2ca8c1687031529b962e5b0fe82a817",
+        "cixe6qoXf_ba_audit_log": "1ea0f4abd32c2fa28a93d0ce340d6fe2fbcc21b2579828e823ab55a2d8153248",
+        "cixe6qoXf_ba_contribution_media": "0cd9e75e57d43fc4f15e772cad99369e455b3be7bb03ee4878e0f007897b89a2",
+        "cixe6qoXf_ba_contribution_notifications": "a189c17502a68f9489e701f7bf5511cb743d04ac94757445f19890cd604ebc0a",
+        "cixe6qoXf_ba_contributions": "8a30003c3a1004096670ded889c8cf4ac6a61bde65e57b01dafacc9f82ec9413",
+        "cixe6qoXf_ba_native_media_items": "c555fedc2029d3e3ba793327dce9ac6de210465e2645d79f4286a41ec06de1f9",
+        "cixe6qoXf_ba_native_media_limits": "332cd029ddbb28731a75626afb48ac2fbb8cde38375890065415650f3133f698",
+        "cixe6qoXf_ba_native_media_operations": "6c66a455e8c98db6b4147b92640118dd202c68c5960b8229dad2503ffcef473f",
+        "cixe6qoXf_ba_native_media_sessions": "149d73c623f9e85bfa4d526876f147f950cd012567b246ea0fe884f295fd36cb",
+        "cixe6qoXf_ba_native_media_upload_keys": "1b56ce9f9dc4b2ecc83c611329768905dc47d78ba7e9ec49ffd779d62fdf04eb",
+        "cixe6qoXf_ba_report_media": "e3fa604e73ecec676ee9730244b6e76a947486d17e6da2a7f1496ac3beda4ae5",
+        "cixe6qoXf_ba_reports": "813ac3378b6936105783fcdd5af94e4cbf276f8a5628b49c94482184d17ca2c0",
+        "cixe6qoXf_ba_sentinel_event_matches": "fcf57d25fa41a9825eb3857816ef291833c53b03bc712c7d2093394b0204965e",
+        "cixe6qoXf_ba_sentinels": "acfbaad5321753ac7a9d22e42c01808ef796f096b13a6eeb0a5effd9f5acca94",
+        "cixe6qoXf_commentmeta": "440e6a8e02c94cd3d3c107b87b7488b59c0ce6dc1bc4c9ec40992065b1f7fa73",
+        "cixe6qoXf_comments": "01049a48cb13ce909b93edc54b3368ef09aac9ced20a94975fb0108dadd3bf80",
+        "cixe6qoXf_links": "c1f82778294d9650c462a7c0e39769d66895654d1fc9eea9cb69c0274bf0baf9",
+        "cixe6qoXf_options": "d59dbdc2ee8982f7e4efe905b0cfe97262d0c432d51eb279ef0c65cc6104c518",
+        "cixe6qoXf_postmeta": "44c4013aafaa47ce740df734d075c178b38e39071ec8d7b141a21ef466cf3675",
+        "cixe6qoXf_posts": "a14aecb991e96ad84953f6a6845f8039149573495aac35c8ed652fca01994a12",
+        "cixe6qoXf_term_relationships": "4b5bec7bad59e231fc3b76f726e36ecdd32b9579558b478ebc9d8a1a716679a5",
+        "cixe6qoXf_term_taxonomy": "18ed37021b78a8e3dcfd31426519335084a92586adb2ba5ddac7c88939569388",
+        "cixe6qoXf_termmeta": "14be1f3ef3fb0658cbf577ce04b7142c3b2d2a2ac36cae25f330e62e3560ce66",
+        "cixe6qoXf_terms": "a1d31635d9eac4a850e34b7edacb5561869a61851a8ce743a578274b2b904f95",
+        "cixe6qoXf_usermeta": "10e6a20ed815b354e020a8ac08f348d2f5d27b9d5f909fc9d2000bad6a9167c7",
+        "cixe6qoXf_users": "cc58a217d6a143a5be7b7bf71937c48b807a5930e95e62096aaa6b75228e27a7",
+        "cixe6qoXf_wpforms_analytics_fields": "5e2c25800b69b89d8ee6da77a7c473e287b253eadaf009b69906b5ffa87c7463",
+        "cixe6qoXf_wpforms_analytics_forms": "2e58ceab81c1739a9da413984d11c5dadbf62c3e8f1739e3f24d5522a9814110",
+        "cixe6qoXf_wpforms_analytics_snapshot_fields": "3627a5cbd9cde428de6c575c3caafba9bb6edb29e6c9dca0b4f2d474c4d37aa8",
+        "cixe6qoXf_wpforms_analytics_snapshots": "afe53394b83c76fdd97cdf2727a370a201d49c974e3ae811ed0f5c37c47edd4a",
+        "cixe6qoXf_wpforms_dashboard_form_daily": "efd18d63b4ca90ebd2b28875da787927859626df0314f1eaa190cdb4a4d5b3cf",
+        "cixe6qoXf_wpforms_dashboard_location_daily": "199e883ce0314339ae92f6ef38e6757cbbef085ddc260a47e8ce6ed6fd40fda1",
+        "cixe6qoXf_wpforms_dashboard_payment_daily": "e5d1bf46460973f3d1d4b700db394a1f6b9a120b070eb18c84aed046ecf1c613",
+        "cixe6qoXf_wpforms_entries": "54ee30c8a1ff0c9876af7479696f4a75048b57df8cf7d57f1f2fb5d9f07ab1a8",
+        "cixe6qoXf_wpforms_entry_fields": "ab522fa1e343040b87d4360d065b7519b9c455724fe64e4141e26cdc605daa12",
+        "cixe6qoXf_wpforms_entry_meta": "0783b076c0ee38a19ab97af349aa581ba3527a4b81c5e4e704d599cbdd297457",
+        "cixe6qoXf_wpforms_file_restrictions": "71daa831f3a2643a5222cd86a1903ddf9455b9c8d2997ab0e2e061ce0d643b32",
+        "cixe6qoXf_wpforms_logs": "ddedc5575e441d3dc1a6dc035d7f61ace26ecd567db50bd037578d5d86ab587c",
+        "cixe6qoXf_wpforms_payment_meta": "8c7626c658fa712f41f35a638797162390fef4f01f31c94fbdffdce791013c7b",
+        "cixe6qoXf_wpforms_payments": "f58ecfba367f4104fa28af8b478c9b0ea28ce30167661e64e40c20e9080f538c",
+        "cixe6qoXf_wpforms_product_events_queue": "68389ca7415644a627f1d67bb1ee54f237a32b59e96b3ed03ad36dcff6598a36",
+        "cixe6qoXf_wpforms_protected_files": "70148762297a27bb9c23ac4b954b12ad2b3a62afe9d427c8963727acfe21cc48",
+        "cixe6qoXf_wpforms_tasks_meta": "8e64f4513ad56e7f1ad7a7f13ae36db406ccd29cb59ea7b127a2f0a98d48c754",
+        "cixe6qoXf_wpvibe_audit_log": "712bdeb6940e4dbe8c5b13c1252b585e5ad90bd6edc9a78ca11499b1e71090b3",
+        "cixe6qoXf_wpvibe_op_receipts": "2664c47ac4bd3e72626293f97c9f5fd0256b6b244d2d97d87ee03f60b26f2513"
+      }
+    },
+    "native": "badaround-report/v2",
+    "contract_sha": "dc282153243ffb80f3bd4f2a222ea0f4c4f42806fba6f3a0bde0a76855bd8e3c",
+    "media_enabled": false,
+    "fixtures": [
+      {
+        "event": 303,
+        "report": 31,
+        "primary_report": 31,
+        "status": "publish",
+        "moderation": "published",
+        "marker": null,
+        "request": "exact_point",
+        "schema_version": "badaround-report/v1",
+        "request_version": "public-location-request-v1",
+        "decision": {
+          "version": "public-location/v1",
+          "mode": "exact_point",
+          "reason": "",
+          "reason_code": "",
+          "policy_version": "public-location/v1",
+          "decided_at": "2026-10-20T18:17:56Z",
+          "decided_by": 1,
+          "exact_confirmed": true
+        },
+        "public_geo": {
+          "version": "public-location/v1",
+          "mode": "exact_point",
+          "lat": 41.8991622,
+          "lng": 12.4730719,
+          "radius_meters": 0,
+          "radius_m": 0,
+          "source": "event_public",
+          "precision": "exact_point"
+        },
+        "projection": {
+          "version": "public-location/v1",
+          "mode": "exact_point",
+          "lat": 41.8991622,
+          "lng": 12.4730719,
+          "radius_meters": 0
+        },
+        "render": {
+          "html_sha256": "17b840da75ec5607d8e9b0b6647f1b9d1a2bfee5278fd81be8fdde38ced751bc",
+          "map_tag": "<div class=\"ba-event-location-map\" id=\"ba-event-google-map\" data-ba-map data-ba-map-context=\"detail\" data-ba-event-lat=\"41.8991622\" data-ba-event-lng=\"12.4730719\" data-ba-event-radius=\"0\" data-ba-event-id=\"303\" data-ba-event-mode=\"exact_point\" data-ba-event-category=\"spazi-pubblici\" data-ba-event-status=\"open\" aria-label=\"Mappa: Posizione esatta\">",
+          "exact_label": true,
+          "approx_label": false,
+          "territory_label": false,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/eventi/rifiuti-abbandonati-o-discarica-a-roma-2/",
+        "source_sha256": "a0e709435e96f69c1740e39f9c84a65f616caa0ff6cd15fc085e26183d66f524",
+        "context": {
+          "report_id": 31,
+          "location": {
+            "public_location_request": "exact_point",
+            "public_location_request_version": "public-location-request-v1"
+          },
+          "request": "exact_point",
+          "user_authoritative": false,
+          "allowed": [
+            "exact_point",
+            "approximate_area",
+            "street",
+            "municipality",
+            "territory_only"
+          ]
+        },
+        "moderation_ui": {
+          "requested_readonly": false,
+          "has_mode_control": false,
+          "has_coordinate_controls": true,
+          "geo_ui_text": "Localizzazione richiesta dall’utenteRichiesta utente: Punto esattoQuesta decisione non pubblica l’evento e non crea coordinate pubbliche. La nuova pubblicazione geografica non è ancora attiva.Precisione pubblica approvata: Punto esattoDecisione in sola lettura: la modifica di eventi già pubblicati o con stato incompatibile richiede un percorso separato."
+        },
+        "audit_sha256": "675af606ff3826c7702c38e6459d5d098f4eb1f6d380a3a805b32b89872a8bfe"
+      },
+      {
+        "event": 304,
+        "report": 32,
+        "primary_report": 32,
+        "status": "publish",
+        "moderation": "published",
+        "marker": null,
+        "request": "approximate_area",
+        "schema_version": "badaround-report/v1",
+        "request_version": "public-location-request-v1",
+        "decision": {
+          "version": "public-location/v1",
+          "mode": "approximate_area",
+          "reason": "",
+          "reason_code": "",
+          "policy_version": "public-location/v1",
+          "decided_at": "2026-10-20T18:26:16Z",
+          "decided_by": 1,
+          "exact_confirmed": false
+        },
+        "public_geo": {
+          "version": "public-location/v1",
+          "mode": "approximate_area",
+          "lat": 41.89553,
+          "lng": 12.479214,
+          "radius_meters": 1000,
+          "radius_m": 1000,
+          "source": "event_public",
+          "precision": "approximate_area"
+        },
+        "projection": {
+          "version": "public-location/v1",
+          "mode": "approximate_area",
+          "lat": 41.89553,
+          "lng": 12.479214,
+          "radius_meters": 1000
+        },
+        "render": {
+          "html_sha256": "ac81b430a3d6d46bf1972004d70f90f7c88fbd1f689a753c9b44fdc264b0986a",
+          "map_tag": "<div class=\"ba-event-location-map\" id=\"ba-event-google-map\" data-ba-map data-ba-map-context=\"detail\" data-ba-event-lat=\"41.89553\" data-ba-event-lng=\"12.479214\" data-ba-event-radius=\"1000\" data-ba-event-id=\"304\" data-ba-event-mode=\"approximate_area\" data-ba-event-category=\"spazi-pubblici\" data-ba-event-status=\"open\" aria-label=\"Mappa: Posizione approssimativa\">",
+          "exact_label": false,
+          "approx_label": true,
+          "territory_label": false,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/eventi/rifiuti-abbandonati-o-discarica-a-roma-3/",
+        "source_sha256": "a0e709435e96f69c1740e39f9c84a65f616caa0ff6cd15fc085e26183d66f524",
+        "private_point_differs": true,
+        "context": {
+          "report_id": 32,
+          "location": {
+            "public_location_request": "approximate_area",
+            "public_location_request_version": "public-location-request-v1"
+          },
+          "request": "approximate_area",
+          "user_authoritative": false,
+          "allowed": [
+            "approximate_area",
+            "municipality",
+            "territory_only"
+          ]
+        },
+        "moderation_ui": {
+          "requested_readonly": false,
+          "has_mode_control": false,
+          "has_coordinate_controls": true,
+          "geo_ui_text": "Localizzazione richiesta dall’utenteRichiesta utente: Area approssimativaQuesta decisione non pubblica l’evento e non crea coordinate pubbliche. La nuova pubblicazione geografica non è ancora attiva.Precisione pubblica approvata: Area approssimativaDecisione in sola lettura: la modifica di eventi già pubblicati o con stato incompatibile richiede un percorso separato."
+        },
+        "audit_sha256": "65a74101c71863c66a976ac8d0ed472ad64cc22e2ac46507ae458b37d2189b6c"
+      },
+      {
+        "event": 269,
+        "report": 17,
+        "primary_report": 17,
+        "status": "publish",
+        "moderation": "published",
+        "marker": null,
+        "request": null,
+        "schema_version": "badaround-report/v1",
+        "request_version": null,
+        "decision": "",
+        "public_geo": null,
+        "projection": "",
+        "render": {
+          "html_sha256": "439b389e8e58ef185552e670885dd1dbc5048101614471df7612d29dcefc3176",
+          "map_tag": null,
+          "exact_label": false,
+          "approx_label": false,
+          "territory_label": true,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/eventi/segnalazione-da-moderare-17/",
+        "source_sha256": "33545cdf125784edef6a514b46a821f0f7b44b5f0016ef18d03355eaab901589",
+        "context": {
+          "report_id": 17,
+          "location": [],
+          "request": null,
+          "user_authoritative": false,
+          "allowed": [
+            "legacy_generalized_point",
+            "approximate_area",
+            "street",
+            "municipality",
+            "territory_only"
+          ]
+        },
+        "moderation_ui": {
+          "requested_readonly": false,
+          "has_mode_control": false,
+          "has_coordinate_controls": true,
+          "geo_ui_text": "Localizzazione richiesta dall’utenteRichiesta utente: non disponibile / criterio legacyQuesta decisione non pubblica l’evento e non crea coordinate pubbliche. La nuova pubblicazione geografica non è ancora attiva.Precisione pubblica approvata: Da valutareDecisione in sola lettura: la modifica di eventi già pubblicati o con stato incompatibile richiede un percorso separato."
+        },
+        "audit_sha256": "678ed3410f50bfcb003b84d0d819cc56ed14f801c312e3446116387726ffa23a"
+      },
+      {
+        "event": 352,
+        "report": 73,
+        "primary_report": 73,
+        "status": "publish",
+        "moderation": "published",
+        "marker": "user-public-location/v1",
+        "request": "exact_point",
+        "schema_version": "badaround-report/v2",
+        "request_version": "public-location-request-v1",
+        "decision": "",
+        "public_geo": {
+          "version": "public-location/v1",
+          "mode": "exact_point",
+          "lat": 41.6208388,
+          "lng": 12.4626387,
+          "radius_meters": 0,
+          "radius_m": 0,
+          "source": "event_public",
+          "precision": "exact_point"
+        },
+        "projection": {
+          "version": "public-location/v1",
+          "mode": "exact_point",
+          "lat": 41.6208388,
+          "lng": 12.4626387,
+          "radius_meters": 0
+        },
+        "render": {
+          "html_sha256": "a9100dc980ddc44c5577fcffe8ddb20ce6828fe30f21f0a617c15128c9bc2074",
+          "map_tag": "<div class=\"ba-event-location-map\" id=\"ba-event-google-map\" data-ba-map data-ba-map-context=\"detail\" data-ba-event-lat=\"41.6208388\" data-ba-event-lng=\"12.4626387\" data-ba-event-radius=\"0\" data-ba-event-id=\"352\" data-ba-event-mode=\"exact_point\" data-ba-event-category=\"spazi-pubblici\" data-ba-event-status=\"open\" aria-label=\"Mappa: Posizione esatta\">",
+          "exact_label": true,
+          "approx_label": false,
+          "territory_label": false,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/eventi/qa-sintetica-geo-prec-01-a-nessun-evento-reale/",
+        "source_sha256": "f7a25fac050df14ec3765657cccc7ef40543dfb76630d6ed7042b5e9b8cb6533",
+        "context": {
+          "report_id": 73,
+          "location": {
+            "public_location_request": "exact_point",
+            "public_location_request_version": "public-location-request-v1"
+          },
+          "request": "exact_point",
+          "user_authoritative": true,
+          "allowed": []
+        },
+        "moderation_ui": {
+          "requested_readonly": true,
+          "has_mode_control": false,
+          "has_coordinate_controls": false,
+          "geo_ui_text": "Posizione pubblica richiesta: Punto esattoScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata."
+        },
+        "audit_sha256": "ad8d5fff6292b8f9880ee8dcca9a991a996b0ce47908868b48e7dfa258d72841"
+      },
+      {
+        "event": 354,
+        "report": 74,
+        "primary_report": 74,
+        "status": "publish",
+        "moderation": "published",
+        "marker": "user-public-location/v1",
+        "request": "approximate_area",
+        "schema_version": "badaround-report/v2",
+        "request_version": "public-location-request-v1",
+        "decision": "",
+        "public_geo": {
+          "version": "public-location/v1",
+          "mode": "approximate_area",
+          "lat": 41.62611,
+          "lng": 12.459279,
+          "radius_meters": 1000,
+          "radius_m": 1000,
+          "source": "event_public",
+          "precision": "approximate_area"
+        },
+        "projection": {
+          "version": "public-location/v1",
+          "mode": "approximate_area",
+          "lat": 41.62611,
+          "lng": 12.459279,
+          "radius_meters": 1000
+        },
+        "render": {
+          "html_sha256": "d64e1cfdb05c5dc479e4aff366fc79d23ca5cd7e7d5f4285b20c0d7cb6dd5e11",
+          "map_tag": "<div class=\"ba-event-location-map\" id=\"ba-event-google-map\" data-ba-map data-ba-map-context=\"detail\" data-ba-event-lat=\"41.62611\" data-ba-event-lng=\"12.459279\" data-ba-event-radius=\"1000\" data-ba-event-id=\"354\" data-ba-event-mode=\"approximate_area\" data-ba-event-category=\"spazi-pubblici\" data-ba-event-status=\"open\" aria-label=\"Mappa: Posizione approssimativa\">",
+          "exact_label": false,
+          "approx_label": true,
+          "territory_label": false,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/eventi/qa-sintetica-geo-prec-01-b-nessun-evento-reale/",
+        "source_sha256": "f7a25fac050df14ec3765657cccc7ef40543dfb76630d6ed7042b5e9b8cb6533",
+        "private_point_differs": true,
+        "context": {
+          "report_id": 74,
+          "location": {
+            "public_location_request": "approximate_area",
+            "public_location_request_version": "public-location-request-v1"
+          },
+          "request": "approximate_area",
+          "user_authoritative": true,
+          "allowed": []
+        },
+        "moderation_ui": {
+          "requested_readonly": true,
+          "has_mode_control": false,
+          "has_coordinate_controls": false,
+          "geo_ui_text": "Posizione pubblica richiesta: Area approssimativaScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata."
+        },
+        "audit_sha256": "15520c2048adcb10b2d115084687289e6a40e0026b4b9581343c7b37ed6f8c5b"
+      },
+      {
+        "event": 356,
+        "report": 75,
+        "primary_report": 75,
+        "status": "pending",
+        "moderation": "rejected",
+        "marker": "user-public-location/v1",
+        "request": "exact_point",
+        "schema_version": "badaround-report/v2",
+        "request_version": "public-location-request-v1",
+        "decision": "",
+        "public_geo": null,
+        "projection": "",
+        "render": {
+          "html_sha256": "bd362322f214f46b468ef71d817a6d0bb6062e2f94df9f7b3dda96311806a2f8",
+          "map_tag": null,
+          "exact_label": false,
+          "approx_label": false,
+          "territory_label": true,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/?post_type=ba_evento&p=356",
+        "source_sha256": "f7a25fac050df14ec3765657cccc7ef40543dfb76630d6ed7042b5e9b8cb6533",
+        "context": {
+          "report_id": 75,
+          "location": {
+            "public_location_request": "exact_point",
+            "public_location_request_version": "public-location-request-v1"
+          },
+          "request": "exact_point",
+          "user_authoritative": true,
+          "allowed": []
+        },
+        "moderation_ui": {
+          "requested_readonly": true,
+          "has_mode_control": false,
+          "has_coordinate_controls": false,
+          "geo_ui_text": "Posizione pubblica richiesta: Punto esattoScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata."
+        },
+        "audit_sha256": "e9485f7ea88177fa235c3207cf0b4d2eaa501570169c442919c33b7ceaae1f90"
+      },
+      {
+        "event": 358,
+        "report": 76,
+        "primary_report": 76,
+        "status": "pending",
+        "moderation": "rejected",
+        "marker": "user-public-location/v1",
+        "request": "approximate_area",
+        "schema_version": "badaround-report/v2",
+        "request_version": "public-location-request-v1",
+        "decision": "",
+        "public_geo": null,
+        "projection": "",
+        "render": {
+          "html_sha256": "b035553e473310849fcd6246faeca5126388119140817f6847120b737df54e52",
+          "map_tag": null,
+          "exact_label": false,
+          "approx_label": false,
+          "territory_label": true,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/?post_type=ba_evento&p=358",
+        "source_sha256": "f7a25fac050df14ec3765657cccc7ef40543dfb76630d6ed7042b5e9b8cb6533",
+        "context": {
+          "report_id": 76,
+          "location": {
+            "public_location_request": "approximate_area",
+            "public_location_request_version": "public-location-request-v1"
+          },
+          "request": "approximate_area",
+          "user_authoritative": true,
+          "allowed": []
+        },
+        "moderation_ui": {
+          "requested_readonly": true,
+          "has_mode_control": false,
+          "has_coordinate_controls": false,
+          "geo_ui_text": "Posizione pubblica richiesta: Area approssimativaScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata."
+        },
+        "audit_sha256": "47764eea68dd37198f29f56851d85914cd7c3ce363f23c215edcaec3cd0e0acf"
+      }
+    ]
+  },
+  "after": {
+    "state": {
+      "reports": "d6048c2eae1a3f6171beb99e909e879c0f9b1e2eb4258fb999dc2711ed80b409",
+      "events": "3992a7fe28de725b359ad3e681c1a74103f1e2308aa6ce06b530ac338a31b0a5",
+      "eventmeta": "38df6b574d2196a1765f84e9923265cf1a239f542d0bb4acc9ee7b2322dc4f13",
+      "relationships": "7ebfc1887692ed8d0d1c9d19b273172bdc154acf3724c59438e367909535516c",
+      "audit": "2a2a07f3ad6c6c635b168e2d57f73e76cfdf2f1b3fa7692facffc19bfd8df2e4",
+      "terms": "8c4e83d6e717f81c065ac5d28f759d21945bcf36228b5005e8ed396c2c5eb868",
+      "taxonomy": "621d0d639d9544ec5205ed4a5fb9cca9bf7d81c0639df894119726ccad271a11",
+      "termmeta": "7d2904780062f9b3f9d975da47467bf854f94b3ba08c4618698023071d50c7d4",
+      "schema": {
+        "cixe6qoXf_actionscheduler_actions": "8275baa753ffa78db2d71604348e11d97f353a75e58891ffc9fc27444cf9980c",
+        "cixe6qoXf_actionscheduler_claims": "141464c8041f4d5d6e9afcc59e19f560538fa6b4a3945f293d7c3e52974d0e01",
+        "cixe6qoXf_actionscheduler_groups": "5f92bb4933096b54b3c8eb5ef2c436593c070b51bc348c20bd9ab5a9f6d51828",
+        "cixe6qoXf_actionscheduler_logs": "4815d1771ee65a1ab7950e5935cff94bd2ca8c1687031529b962e5b0fe82a817",
+        "cixe6qoXf_ba_audit_log": "1ea0f4abd32c2fa28a93d0ce340d6fe2fbcc21b2579828e823ab55a2d8153248",
+        "cixe6qoXf_ba_contribution_media": "0cd9e75e57d43fc4f15e772cad99369e455b3be7bb03ee4878e0f007897b89a2",
+        "cixe6qoXf_ba_contribution_notifications": "a189c17502a68f9489e701f7bf5511cb743d04ac94757445f19890cd604ebc0a",
+        "cixe6qoXf_ba_contributions": "8a30003c3a1004096670ded889c8cf4ac6a61bde65e57b01dafacc9f82ec9413",
+        "cixe6qoXf_ba_native_media_items": "c555fedc2029d3e3ba793327dce9ac6de210465e2645d79f4286a41ec06de1f9",
+        "cixe6qoXf_ba_native_media_limits": "332cd029ddbb28731a75626afb48ac2fbb8cde38375890065415650f3133f698",
+        "cixe6qoXf_ba_native_media_operations": "6c66a455e8c98db6b4147b92640118dd202c68c5960b8229dad2503ffcef473f",
+        "cixe6qoXf_ba_native_media_sessions": "149d73c623f9e85bfa4d526876f147f950cd012567b246ea0fe884f295fd36cb",
+        "cixe6qoXf_ba_native_media_upload_keys": "1b56ce9f9dc4b2ecc83c611329768905dc47d78ba7e9ec49ffd779d62fdf04eb",
+        "cixe6qoXf_ba_report_media": "e3fa604e73ecec676ee9730244b6e76a947486d17e6da2a7f1496ac3beda4ae5",
+        "cixe6qoXf_ba_reports": "813ac3378b6936105783fcdd5af94e4cbf276f8a5628b49c94482184d17ca2c0",
+        "cixe6qoXf_ba_sentinel_event_matches": "fcf57d25fa41a9825eb3857816ef291833c53b03bc712c7d2093394b0204965e",
+        "cixe6qoXf_ba_sentinels": "acfbaad5321753ac7a9d22e42c01808ef796f096b13a6eeb0a5effd9f5acca94",
+        "cixe6qoXf_commentmeta": "440e6a8e02c94cd3d3c107b87b7488b59c0ce6dc1bc4c9ec40992065b1f7fa73",
+        "cixe6qoXf_comments": "01049a48cb13ce909b93edc54b3368ef09aac9ced20a94975fb0108dadd3bf80",
+        "cixe6qoXf_links": "c1f82778294d9650c462a7c0e39769d66895654d1fc9eea9cb69c0274bf0baf9",
+        "cixe6qoXf_options": "d59dbdc2ee8982f7e4efe905b0cfe97262d0c432d51eb279ef0c65cc6104c518",
+        "cixe6qoXf_postmeta": "44c4013aafaa47ce740df734d075c178b38e39071ec8d7b141a21ef466cf3675",
+        "cixe6qoXf_posts": "a14aecb991e96ad84953f6a6845f8039149573495aac35c8ed652fca01994a12",
+        "cixe6qoXf_term_relationships": "4b5bec7bad59e231fc3b76f726e36ecdd32b9579558b478ebc9d8a1a716679a5",
+        "cixe6qoXf_term_taxonomy": "18ed37021b78a8e3dcfd31426519335084a92586adb2ba5ddac7c88939569388",
+        "cixe6qoXf_termmeta": "14be1f3ef3fb0658cbf577ce04b7142c3b2d2a2ac36cae25f330e62e3560ce66",
+        "cixe6qoXf_terms": "a1d31635d9eac4a850e34b7edacb5561869a61851a8ce743a578274b2b904f95",
+        "cixe6qoXf_usermeta": "10e6a20ed815b354e020a8ac08f348d2f5d27b9d5f909fc9d2000bad6a9167c7",
+        "cixe6qoXf_users": "cc58a217d6a143a5be7b7bf71937c48b807a5930e95e62096aaa6b75228e27a7",
+        "cixe6qoXf_wpforms_analytics_fields": "5e2c25800b69b89d8ee6da77a7c473e287b253eadaf009b69906b5ffa87c7463",
+        "cixe6qoXf_wpforms_analytics_forms": "2e58ceab81c1739a9da413984d11c5dadbf62c3e8f1739e3f24d5522a9814110",
+        "cixe6qoXf_wpforms_analytics_snapshot_fields": "3627a5cbd9cde428de6c575c3caafba9bb6edb29e6c9dca0b4f2d474c4d37aa8",
+        "cixe6qoXf_wpforms_analytics_snapshots": "afe53394b83c76fdd97cdf2727a370a201d49c974e3ae811ed0f5c37c47edd4a",
+        "cixe6qoXf_wpforms_dashboard_form_daily": "efd18d63b4ca90ebd2b28875da787927859626df0314f1eaa190cdb4a4d5b3cf",
+        "cixe6qoXf_wpforms_dashboard_location_daily": "199e883ce0314339ae92f6ef38e6757cbbef085ddc260a47e8ce6ed6fd40fda1",
+        "cixe6qoXf_wpforms_dashboard_payment_daily": "e5d1bf46460973f3d1d4b700db394a1f6b9a120b070eb18c84aed046ecf1c613",
+        "cixe6qoXf_wpforms_entries": "54ee30c8a1ff0c9876af7479696f4a75048b57df8cf7d57f1f2fb5d9f07ab1a8",
+        "cixe6qoXf_wpforms_entry_fields": "ab522fa1e343040b87d4360d065b7519b9c455724fe64e4141e26cdc605daa12",
+        "cixe6qoXf_wpforms_entry_meta": "0783b076c0ee38a19ab97af349aa581ba3527a4b81c5e4e704d599cbdd297457",
+        "cixe6qoXf_wpforms_file_restrictions": "71daa831f3a2643a5222cd86a1903ddf9455b9c8d2997ab0e2e061ce0d643b32",
+        "cixe6qoXf_wpforms_logs": "ddedc5575e441d3dc1a6dc035d7f61ace26ecd567db50bd037578d5d86ab587c",
+        "cixe6qoXf_wpforms_payment_meta": "8c7626c658fa712f41f35a638797162390fef4f01f31c94fbdffdce791013c7b",
+        "cixe6qoXf_wpforms_payments": "f58ecfba367f4104fa28af8b478c9b0ea28ce30167661e64e40c20e9080f538c",
+        "cixe6qoXf_wpforms_product_events_queue": "68389ca7415644a627f1d67bb1ee54f237a32b59e96b3ed03ad36dcff6598a36",
+        "cixe6qoXf_wpforms_protected_files": "70148762297a27bb9c23ac4b954b12ad2b3a62afe9d427c8963727acfe21cc48",
+        "cixe6qoXf_wpforms_tasks_meta": "8e64f4513ad56e7f1ad7a7f13ae36db406ccd29cb59ea7b127a2f0a98d48c754",
+        "cixe6qoXf_wpvibe_audit_log": "712bdeb6940e4dbe8c5b13c1252b585e5ad90bd6edc9a78ca11499b1e71090b3",
+        "cixe6qoXf_wpvibe_op_receipts": "2664c47ac4bd3e72626293f97c9f5fd0256b6b244d2d97d87ee03f60b26f2513"
+      }
+    },
+    "native": "badaround-report/v2",
+    "contract_sha": "dc282153243ffb80f3bd4f2a222ea0f4c4f42806fba6f3a0bde0a76855bd8e3c",
+    "media_enabled": false,
+    "fixtures": [
+      {
+        "event": 303,
+        "report": 31,
+        "primary_report": 31,
+        "status": "publish",
+        "moderation": "published",
+        "marker": null,
+        "request": "exact_point",
+        "schema_version": "badaround-report/v1",
+        "request_version": "public-location-request-v1",
+        "decision": {
+          "version": "public-location/v1",
+          "mode": "exact_point",
+          "reason": "",
+          "reason_code": "",
+          "policy_version": "public-location/v1",
+          "decided_at": "2026-10-20T18:17:56Z",
+          "decided_by": 1,
+          "exact_confirmed": true
+        },
+        "public_geo": {
+          "version": "public-location/v1",
+          "mode": "exact_point",
+          "lat": 41.8991622,
+          "lng": 12.4730719,
+          "radius_meters": 0,
+          "radius_m": 0,
+          "source": "event_public",
+          "precision": "exact_point"
+        },
+        "projection": {
+          "version": "public-location/v1",
+          "mode": "exact_point",
+          "lat": 41.8991622,
+          "lng": 12.4730719,
+          "radius_meters": 0
+        },
+        "render": {
+          "html_sha256": "17b840da75ec5607d8e9b0b6647f1b9d1a2bfee5278fd81be8fdde38ced751bc",
+          "map_tag": "<div class=\"ba-event-location-map\" id=\"ba-event-google-map\" data-ba-map data-ba-map-context=\"detail\" data-ba-event-lat=\"41.8991622\" data-ba-event-lng=\"12.4730719\" data-ba-event-radius=\"0\" data-ba-event-id=\"303\" data-ba-event-mode=\"exact_point\" data-ba-event-category=\"spazi-pubblici\" data-ba-event-status=\"open\" aria-label=\"Mappa: Posizione esatta\">",
+          "exact_label": true,
+          "approx_label": false,
+          "territory_label": false,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/eventi/rifiuti-abbandonati-o-discarica-a-roma-2/",
+        "source_sha256": "a0e709435e96f69c1740e39f9c84a65f616caa0ff6cd15fc085e26183d66f524",
+        "context": {
+          "report_id": 31,
+          "location": {
+            "public_location_request": "exact_point",
+            "public_location_request_version": "public-location-request-v1"
+          },
+          "request": "exact_point",
+          "user_authoritative": false,
+          "allowed": [
+            "exact_point",
+            "approximate_area",
+            "street",
+            "municipality",
+            "territory_only"
+          ]
+        },
+        "moderation_ui": {
+          "requested_readonly": false,
+          "has_mode_control": false,
+          "has_coordinate_controls": true,
+          "geo_ui_text": "Localizzazione richiesta dall’utenteRichiesta utente: Punto esattoQuesta decisione non pubblica l’evento e non crea coordinate pubbliche. La nuova pubblicazione geografica non è ancora attiva.Precisione pubblica approvata: Punto esattoDecisione in sola lettura: la modifica di eventi già pubblicati o con stato incompatibile richiede un percorso separato."
+        },
+        "audit_sha256": "675af606ff3826c7702c38e6459d5d098f4eb1f6d380a3a805b32b89872a8bfe"
+      },
+      {
+        "event": 304,
+        "report": 32,
+        "primary_report": 32,
+        "status": "publish",
+        "moderation": "published",
+        "marker": null,
+        "request": "approximate_area",
+        "schema_version": "badaround-report/v1",
+        "request_version": "public-location-request-v1",
+        "decision": {
+          "version": "public-location/v1",
+          "mode": "approximate_area",
+          "reason": "",
+          "reason_code": "",
+          "policy_version": "public-location/v1",
+          "decided_at": "2026-10-20T18:26:16Z",
+          "decided_by": 1,
+          "exact_confirmed": false
+        },
+        "public_geo": {
+          "version": "public-location/v1",
+          "mode": "approximate_area",
+          "lat": 41.89553,
+          "lng": 12.479214,
+          "radius_meters": 1000,
+          "radius_m": 1000,
+          "source": "event_public",
+          "precision": "approximate_area"
+        },
+        "projection": {
+          "version": "public-location/v1",
+          "mode": "approximate_area",
+          "lat": 41.89553,
+          "lng": 12.479214,
+          "radius_meters": 1000
+        },
+        "render": {
+          "html_sha256": "ac81b430a3d6d46bf1972004d70f90f7c88fbd1f689a753c9b44fdc264b0986a",
+          "map_tag": "<div class=\"ba-event-location-map\" id=\"ba-event-google-map\" data-ba-map data-ba-map-context=\"detail\" data-ba-event-lat=\"41.89553\" data-ba-event-lng=\"12.479214\" data-ba-event-radius=\"1000\" data-ba-event-id=\"304\" data-ba-event-mode=\"approximate_area\" data-ba-event-category=\"spazi-pubblici\" data-ba-event-status=\"open\" aria-label=\"Mappa: Posizione approssimativa\">",
+          "exact_label": false,
+          "approx_label": true,
+          "territory_label": false,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/eventi/rifiuti-abbandonati-o-discarica-a-roma-3/",
+        "source_sha256": "a0e709435e96f69c1740e39f9c84a65f616caa0ff6cd15fc085e26183d66f524",
+        "private_point_differs": true,
+        "context": {
+          "report_id": 32,
+          "location": {
+            "public_location_request": "approximate_area",
+            "public_location_request_version": "public-location-request-v1"
+          },
+          "request": "approximate_area",
+          "user_authoritative": false,
+          "allowed": [
+            "approximate_area",
+            "municipality",
+            "territory_only"
+          ]
+        },
+        "moderation_ui": {
+          "requested_readonly": false,
+          "has_mode_control": false,
+          "has_coordinate_controls": true,
+          "geo_ui_text": "Localizzazione richiesta dall’utenteRichiesta utente: Area approssimativaQuesta decisione non pubblica l’evento e non crea coordinate pubbliche. La nuova pubblicazione geografica non è ancora attiva.Precisione pubblica approvata: Area approssimativaDecisione in sola lettura: la modifica di eventi già pubblicati o con stato incompatibile richiede un percorso separato."
+        },
+        "audit_sha256": "65a74101c71863c66a976ac8d0ed472ad64cc22e2ac46507ae458b37d2189b6c"
+      },
+      {
+        "event": 269,
+        "report": 17,
+        "primary_report": 17,
+        "status": "publish",
+        "moderation": "published",
+        "marker": null,
+        "request": null,
+        "schema_version": "badaround-report/v1",
+        "request_version": null,
+        "decision": "",
+        "public_geo": null,
+        "projection": "",
+        "render": {
+          "html_sha256": "439b389e8e58ef185552e670885dd1dbc5048101614471df7612d29dcefc3176",
+          "map_tag": null,
+          "exact_label": false,
+          "approx_label": false,
+          "territory_label": true,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/eventi/segnalazione-da-moderare-17/",
+        "source_sha256": "33545cdf125784edef6a514b46a821f0f7b44b5f0016ef18d03355eaab901589",
+        "context": {
+          "report_id": 17,
+          "location": [],
+          "request": null,
+          "user_authoritative": false,
+          "allowed": [
+            "legacy_generalized_point",
+            "approximate_area",
+            "street",
+            "municipality",
+            "territory_only"
+          ]
+        },
+        "moderation_ui": {
+          "requested_readonly": false,
+          "has_mode_control": false,
+          "has_coordinate_controls": true,
+          "geo_ui_text": "Localizzazione richiesta dall’utenteRichiesta utente: non disponibile / criterio legacyQuesta decisione non pubblica l’evento e non crea coordinate pubbliche. La nuova pubblicazione geografica non è ancora attiva.Precisione pubblica approvata: Da valutareDecisione in sola lettura: la modifica di eventi già pubblicati o con stato incompatibile richiede un percorso separato."
+        },
+        "audit_sha256": "678ed3410f50bfcb003b84d0d819cc56ed14f801c312e3446116387726ffa23a"
+      },
+      {
+        "event": 352,
+        "report": 73,
+        "primary_report": 73,
+        "status": "publish",
+        "moderation": "published",
+        "marker": "user-public-location/v1",
+        "request": "exact_point",
+        "schema_version": "badaround-report/v2",
+        "request_version": "public-location-request-v1",
+        "decision": "",
+        "public_geo": {
+          "version": "public-location/v1",
+          "mode": "exact_point",
+          "lat": 41.6208388,
+          "lng": 12.4626387,
+          "radius_meters": 0,
+          "radius_m": 0,
+          "source": "event_public",
+          "precision": "exact_point"
+        },
+        "projection": {
+          "version": "public-location/v1",
+          "mode": "exact_point",
+          "lat": 41.6208388,
+          "lng": 12.4626387,
+          "radius_meters": 0
+        },
+        "render": {
+          "html_sha256": "a9100dc980ddc44c5577fcffe8ddb20ce6828fe30f21f0a617c15128c9bc2074",
+          "map_tag": "<div class=\"ba-event-location-map\" id=\"ba-event-google-map\" data-ba-map data-ba-map-context=\"detail\" data-ba-event-lat=\"41.6208388\" data-ba-event-lng=\"12.4626387\" data-ba-event-radius=\"0\" data-ba-event-id=\"352\" data-ba-event-mode=\"exact_point\" data-ba-event-category=\"spazi-pubblici\" data-ba-event-status=\"open\" aria-label=\"Mappa: Posizione esatta\">",
+          "exact_label": true,
+          "approx_label": false,
+          "territory_label": false,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/eventi/qa-sintetica-geo-prec-01-a-nessun-evento-reale/",
+        "source_sha256": "f7a25fac050df14ec3765657cccc7ef40543dfb76630d6ed7042b5e9b8cb6533",
+        "context": {
+          "report_id": 73,
+          "location": {
+            "public_location_request": "exact_point",
+            "public_location_request_version": "public-location-request-v1"
+          },
+          "request": "exact_point",
+          "user_authoritative": true,
+          "allowed": []
+        },
+        "moderation_ui": {
+          "requested_readonly": true,
+          "has_mode_control": false,
+          "has_coordinate_controls": false,
+          "geo_ui_text": "Posizione pubblica richiesta: Punto esattoScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata."
+        },
+        "audit_sha256": "ad8d5fff6292b8f9880ee8dcca9a991a996b0ce47908868b48e7dfa258d72841"
+      },
+      {
+        "event": 354,
+        "report": 74,
+        "primary_report": 74,
+        "status": "publish",
+        "moderation": "published",
+        "marker": "user-public-location/v1",
+        "request": "approximate_area",
+        "schema_version": "badaround-report/v2",
+        "request_version": "public-location-request-v1",
+        "decision": "",
+        "public_geo": {
+          "version": "public-location/v1",
+          "mode": "approximate_area",
+          "lat": 41.62611,
+          "lng": 12.459279,
+          "radius_meters": 1000,
+          "radius_m": 1000,
+          "source": "event_public",
+          "precision": "approximate_area"
+        },
+        "projection": {
+          "version": "public-location/v1",
+          "mode": "approximate_area",
+          "lat": 41.62611,
+          "lng": 12.459279,
+          "radius_meters": 1000
+        },
+        "render": {
+          "html_sha256": "d64e1cfdb05c5dc479e4aff366fc79d23ca5cd7e7d5f4285b20c0d7cb6dd5e11",
+          "map_tag": "<div class=\"ba-event-location-map\" id=\"ba-event-google-map\" data-ba-map data-ba-map-context=\"detail\" data-ba-event-lat=\"41.62611\" data-ba-event-lng=\"12.459279\" data-ba-event-radius=\"1000\" data-ba-event-id=\"354\" data-ba-event-mode=\"approximate_area\" data-ba-event-category=\"spazi-pubblici\" data-ba-event-status=\"open\" aria-label=\"Mappa: Posizione approssimativa\">",
+          "exact_label": false,
+          "approx_label": true,
+          "territory_label": false,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/eventi/qa-sintetica-geo-prec-01-b-nessun-evento-reale/",
+        "source_sha256": "f7a25fac050df14ec3765657cccc7ef40543dfb76630d6ed7042b5e9b8cb6533",
+        "private_point_differs": true,
+        "context": {
+          "report_id": 74,
+          "location": {
+            "public_location_request": "approximate_area",
+            "public_location_request_version": "public-location-request-v1"
+          },
+          "request": "approximate_area",
+          "user_authoritative": true,
+          "allowed": []
+        },
+        "moderation_ui": {
+          "requested_readonly": true,
+          "has_mode_control": false,
+          "has_coordinate_controls": false,
+          "geo_ui_text": "Posizione pubblica richiesta: Area approssimativaScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata."
+        },
+        "audit_sha256": "15520c2048adcb10b2d115084687289e6a40e0026b4b9581343c7b37ed6f8c5b"
+      },
+      {
+        "event": 356,
+        "report": 75,
+        "primary_report": 75,
+        "status": "pending",
+        "moderation": "rejected",
+        "marker": "user-public-location/v1",
+        "request": "exact_point",
+        "schema_version": "badaround-report/v2",
+        "request_version": "public-location-request-v1",
+        "decision": "",
+        "public_geo": null,
+        "projection": "",
+        "render": {
+          "html_sha256": "bd362322f214f46b468ef71d817a6d0bb6062e2f94df9f7b3dda96311806a2f8",
+          "map_tag": null,
+          "exact_label": false,
+          "approx_label": false,
+          "territory_label": true,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/?post_type=ba_evento&p=356",
+        "source_sha256": "f7a25fac050df14ec3765657cccc7ef40543dfb76630d6ed7042b5e9b8cb6533",
+        "context": {
+          "report_id": 75,
+          "location": {
+            "public_location_request": "exact_point",
+            "public_location_request_version": "public-location-request-v1"
+          },
+          "request": "exact_point",
+          "user_authoritative": true,
+          "allowed": []
+        },
+        "moderation_ui": {
+          "requested_readonly": true,
+          "has_mode_control": false,
+          "has_coordinate_controls": false,
+          "geo_ui_text": "Posizione pubblica richiesta: Punto esattoScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata."
+        },
+        "audit_sha256": "e9485f7ea88177fa235c3207cf0b4d2eaa501570169c442919c33b7ceaae1f90"
+      },
+      {
+        "event": 358,
+        "report": 76,
+        "primary_report": 76,
+        "status": "pending",
+        "moderation": "rejected",
+        "marker": "user-public-location/v1",
+        "request": "approximate_area",
+        "schema_version": "badaround-report/v2",
+        "request_version": "public-location-request-v1",
+        "decision": "",
+        "public_geo": null,
+        "projection": "",
+        "render": {
+          "html_sha256": "b035553e473310849fcd6246faeca5126388119140817f6847120b737df54e52",
+          "map_tag": null,
+          "exact_label": false,
+          "approx_label": false,
+          "territory_label": true,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/?post_type=ba_evento&p=358",
+        "source_sha256": "f7a25fac050df14ec3765657cccc7ef40543dfb76630d6ed7042b5e9b8cb6533",
+        "context": {
+          "report_id": 76,
+          "location": {
+            "public_location_request": "approximate_area",
+            "public_location_request_version": "public-location-request-v1"
+          },
+          "request": "approximate_area",
+          "user_authoritative": true,
+          "allowed": []
+        },
+        "moderation_ui": {
+          "requested_readonly": true,
+          "has_mode_control": false,
+          "has_coordinate_controls": false,
+          "geo_ui_text": "Posizione pubblica richiesta: Area approssimativaScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata."
+        },
+        "audit_sha256": "47764eea68dd37198f29f56851d85914cd7c3ce363f23c215edcaec3cd0e0acf"
+      }
+    ],
+    "new_fixtures": [
+      {
+        "event": 360,
+        "report": 77,
+        "primary_report": 77,
+        "status": "publish",
+        "moderation": "published",
+        "marker": "user-public-location/v1",
+        "request": {
+          "mode": "approximate_area",
+          "radius_m": 100
+        },
+        "schema_version": "badaround-report/v2",
+        "request_version": "public-location-request-v2",
+        "decision": "",
+        "public_geo": {
+          "version": "public-location/v1",
+          "mode": "approximate_area",
+          "lat": 41.662349,
+          "lng": 12.462063,
+          "radius_meters": 100,
+          "radius_m": 100,
+          "source": "event_public",
+          "precision": "approximate_area"
+        },
+        "projection": {
+          "version": "public-location/v1",
+          "mode": "approximate_area",
+          "lat": 41.662349,
+          "lng": 12.462063,
+          "radius_meters": 100
+        },
+        "render": {
+          "html_sha256": "6532ff736880a14bbea40d2f7f0e86e21e7aa052c4561032a6185cd8fc87439d",
+          "map_tag": "<div class=\"ba-event-location-map\" id=\"ba-event-google-map\" data-ba-map data-ba-map-context=\"detail\" data-ba-event-lat=\"41.662349\" data-ba-event-lng=\"12.462063\" data-ba-event-radius=\"100\" data-ba-event-id=\"360\" data-ba-event-mode=\"approximate_area\" data-ba-event-category=\"spazi-pubblici\" data-ba-event-status=\"open\" aria-label=\"Mappa: Posizione approssimativa\">",
+          "exact_label": false,
+          "approx_label": true,
+          "territory_label": false,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/eventi/rifiuti-abbandonati-o-discarica-a-pomezia/",
+        "source_sha256": "5358c9a74c1b9d8e5b5f37638114a77c76afe80352d094d3b2c08147b236476e",
+        "private_point_differs": true,
+        "context": {
+          "report_id": 77,
+          "location": {
+            "public_location_request": {
+              "mode": "approximate_area",
+              "radius_m": 100
+            },
+            "public_location_request_version": "public-location-request-v2"
+          },
+          "request": "approximate_area",
+          "user_authoritative": true,
+          "allowed": []
+        },
+        "moderation_ui": {
+          "requested_readonly": true,
+          "has_mode_control": false,
+          "has_coordinate_controls": false,
+          "geo_ui_text": "Posizione pubblica richiesta: Area approssimativa — circa 100 mScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata."
+        },
+        "audit_sha256": "50975cbd102583cc53f6fbba6c7ddd2e974188fc8b32c148a82717401639f550"
+      },
+      {
+        "event": 361,
+        "report": 78,
+        "primary_report": 78,
+        "status": "publish",
+        "moderation": "published",
+        "marker": "user-public-location/v1",
+        "request": {
+          "mode": "approximate_area",
+          "radius_m": 500
+        },
+        "schema_version": "badaround-report/v2",
+        "request_version": "public-location-request-v2",
+        "decision": "",
+        "public_geo": {
+          "version": "public-location/v1",
+          "mode": "approximate_area",
+          "lat": 41.660817,
+          "lng": 12.459694,
+          "radius_meters": 500,
+          "radius_m": 500,
+          "source": "event_public",
+          "precision": "approximate_area"
+        },
+        "projection": {
+          "version": "public-location/v1",
+          "mode": "approximate_area",
+          "lat": 41.660817,
+          "lng": 12.459694,
+          "radius_meters": 500
+        },
+        "render": {
+          "html_sha256": "7de7604f5a0f61bd7bf18a72288203eb6d31596278f67c30adf5749674b11b74",
+          "map_tag": "<div class=\"ba-event-location-map\" id=\"ba-event-google-map\" data-ba-map data-ba-map-context=\"detail\" data-ba-event-lat=\"41.660817\" data-ba-event-lng=\"12.459694\" data-ba-event-radius=\"500\" data-ba-event-id=\"361\" data-ba-event-mode=\"approximate_area\" data-ba-event-category=\"spazi-pubblici\" data-ba-event-status=\"open\" aria-label=\"Mappa: Posizione approssimativa\">",
+          "exact_label": false,
+          "approx_label": true,
+          "territory_label": false,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/eventi/rifiuti-abbandonati-o-discarica-a-pomezia-2/",
+        "source_sha256": "5358c9a74c1b9d8e5b5f37638114a77c76afe80352d094d3b2c08147b236476e",
+        "private_point_differs": true,
+        "context": {
+          "report_id": 78,
+          "location": {
+            "public_location_request": {
+              "mode": "approximate_area",
+              "radius_m": 500
+            },
+            "public_location_request_version": "public-location-request-v2"
+          },
+          "request": "approximate_area",
+          "user_authoritative": true,
+          "allowed": []
+        },
+        "moderation_ui": {
+          "requested_readonly": true,
+          "has_mode_control": false,
+          "has_coordinate_controls": false,
+          "geo_ui_text": "Posizione pubblica richiesta: Area approssimativa — circa 500 mScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata."
+        },
+        "audit_sha256": "b3665852b3fa3e3669d717e1d4359929393b55fa51e0ead11ec19209d9692ad6"
+      },
+      {
+        "event": 362,
+        "report": 79,
+        "primary_report": 79,
+        "status": "publish",
+        "moderation": "published",
+        "marker": "user-public-location/v1",
+        "request": {
+          "mode": "approximate_area",
+          "radius_m": 1000
+        },
+        "schema_version": "badaround-report/v2",
+        "request_version": "public-location-request-v2",
+        "decision": "",
+        "public_geo": {
+          "version": "public-location/v1",
+          "mode": "approximate_area",
+          "lat": 41.666945,
+          "lng": 12.457416,
+          "radius_meters": 1000,
+          "radius_m": 1000,
+          "source": "event_public",
+          "precision": "approximate_area"
+        },
+        "projection": {
+          "version": "public-location/v1",
+          "mode": "approximate_area",
+          "lat": 41.666945,
+          "lng": 12.457416,
+          "radius_meters": 1000
+        },
+        "render": {
+          "html_sha256": "ee148addc93adb7b97d0934031726010ba9169adbe7d2f8b42571286a242ec67",
+          "map_tag": "<div class=\"ba-event-location-map\" id=\"ba-event-google-map\" data-ba-map data-ba-map-context=\"detail\" data-ba-event-lat=\"41.666945\" data-ba-event-lng=\"12.457416\" data-ba-event-radius=\"1000\" data-ba-event-id=\"362\" data-ba-event-mode=\"approximate_area\" data-ba-event-category=\"spazi-pubblici\" data-ba-event-status=\"open\" aria-label=\"Mappa: Posizione approssimativa\">",
+          "exact_label": false,
+          "approx_label": true,
+          "territory_label": false,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/eventi/rifiuti-abbandonati-o-discarica-a-pomezia-3/",
+        "source_sha256": "5358c9a74c1b9d8e5b5f37638114a77c76afe80352d094d3b2c08147b236476e",
+        "private_point_differs": true,
+        "context": {
+          "report_id": 79,
+          "location": {
+            "public_location_request": {
+              "mode": "approximate_area",
+              "radius_m": 1000
+            },
+            "public_location_request_version": "public-location-request-v2"
+          },
+          "request": "approximate_area",
+          "user_authoritative": true,
+          "allowed": []
+        },
+        "moderation_ui": {
+          "requested_readonly": true,
+          "has_mode_control": false,
+          "has_coordinate_controls": false,
+          "geo_ui_text": "Posizione pubblica richiesta: Area approssimativa — circa 1 kmScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata."
+        },
+        "audit_sha256": "8e3b0164f2b28451c6d034f824a6dd4920a8f6975e256dbfda3211aa7f1fbfbc"
+      },
+      {
+        "event": 363,
+        "report": 80,
+        "primary_report": 80,
+        "status": "publish",
+        "moderation": "published",
+        "marker": "user-public-location/v1",
+        "request": {
+          "mode": "exact_point"
+        },
+        "schema_version": "badaround-report/v2",
+        "request_version": "public-location-request-v2",
+        "decision": "",
+        "public_geo": {
+          "version": "public-location/v1",
+          "mode": "exact_point",
+          "lat": 41.6626595,
+          "lng": 12.4627245,
+          "radius_meters": 0,
+          "radius_m": 0,
+          "source": "event_public",
+          "precision": "exact_point"
+        },
+        "projection": {
+          "version": "public-location/v1",
+          "mode": "exact_point",
+          "lat": 41.6626595,
+          "lng": 12.4627245,
+          "radius_meters": 0
+        },
+        "render": {
+          "html_sha256": "19f36ae938666d902106bdf1422edc123047b83382cbe6f7efa3563c719c4016",
+          "map_tag": "<div class=\"ba-event-location-map\" id=\"ba-event-google-map\" data-ba-map data-ba-map-context=\"detail\" data-ba-event-lat=\"41.6626595\" data-ba-event-lng=\"12.4627245\" data-ba-event-radius=\"0\" data-ba-event-id=\"363\" data-ba-event-mode=\"exact_point\" data-ba-event-category=\"spazi-pubblici\" data-ba-event-status=\"open\" aria-label=\"Mappa: Posizione esatta\">",
+          "exact_label": true,
+          "approx_label": false,
+          "territory_label": false,
+          "private_tokens_present": false
+        },
+        "url": "https://staging.badaround.it/eventi/rifiuti-abbandonati-o-discarica-a-pomezia-4/",
+        "source_sha256": "5358c9a74c1b9d8e5b5f37638114a77c76afe80352d094d3b2c08147b236476e",
+        "context": {
+          "report_id": 80,
+          "location": {
+            "public_location_request": {
+              "mode": "exact_point"
+            },
+            "public_location_request_version": "public-location-request-v2"
+          },
+          "request": "exact_point",
+          "user_authoritative": true,
+          "allowed": []
+        },
+        "moderation_ui": {
+          "requested_readonly": true,
+          "has_mode_control": false,
+          "has_coordinate_controls": false,
+          "geo_ui_text": "Posizione pubblica richiesta: Punto esattoScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata."
+        },
+        "audit_sha256": "69d97cc6c78a99e330db7731d8cac2a76abb4b49f46197472880dce190c50391"
+      }
+    ]
+  },
+  "retry": {
+    "http": 200,
+    "duplicate": true,
+    "report": 78,
+    "event": 361
+  },
+  "immutability": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"c1\": \"BLOCKED_BYTES_UNCHANGED\"\n}"
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "moderation_additional_radii": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"renderings\": {\n    \"50\": \"Posizione pubblica richiesta: Area approssimativa — circa 50 mScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata.\",\n    \"250\": \"Posizione pubblica richiesta: Area approssimativa — circa 250 mScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata.\"\n  }\n}"
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "negative": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"results\": [\n    {\n      \"error\": \"ba_report_public_location_request_invalid\"\n    },\n    {\n      \"error\": \"ba_report_public_location_request_invalid\"\n    },\n    {\n      \"error\": \"ba_report_public_location_request_invalid\"\n    },\n    {\n      \"error\": \"ba_report_public_location_request_invalid\"\n    },\n    {\n      \"error\": \"ba_report_public_location_request_invalid\"\n    },\n    {\n      \"error\": \"ba_report_public_location_request_invalid\"\n    },\n    {\n      \"error\": \"ba_report_public_location_request_invalid\"\n    },\n    {\n      \"error\": \"ba_report_public_location_request_invalid\"\n    }\n  ]\n}"
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "discovery": [
+    {
+      "id": 363,
+      "title": "Rifiuti abbandonati o discarica a Pomezia",
+      "permalink": "https://staging.badaround.it/eventi/rifiuti-abbandonati-o-discarica-a-pomezia-4/",
+      "excerpt": "Segnalazione relativa a Rifiuti abbandonati o discarica nella zona di Pomezia.",
+      "thumbnail": "",
+      "event_type": {
+        "id": 9,
+        "name": "Rifiuti abbandonati o discarica",
+        "slug": "rifiuti-abbandonati-o-discarica"
+      },
+      "territory": {
+        "id": 4,
+        "name": "Pomezia",
+        "slug": "pomezia"
+      },
+      "occurred_date": "",
+      "occurred_time": "",
+      "event_status": "open",
+      "public_place_name": "Pomezia",
+      "public_geo": {
+        "version": "public-location/v1",
+        "mode": "exact_point",
+        "lat": 41.6626595,
+        "lng": 12.4627245,
+        "radius_meters": 0,
+        "radius_m": 0,
+        "source": "event_public",
+        "precision": "exact_point"
+      }
+    },
+    {
+      "id": 362,
+      "title": "Rifiuti abbandonati o discarica a Pomezia",
+      "permalink": "https://staging.badaround.it/eventi/rifiuti-abbandonati-o-discarica-a-pomezia-3/",
+      "excerpt": "Segnalazione relativa a Rifiuti abbandonati o discarica nella zona di Pomezia.",
+      "thumbnail": "",
+      "event_type": {
+        "id": 9,
+        "name": "Rifiuti abbandonati o discarica",
+        "slug": "rifiuti-abbandonati-o-discarica"
+      },
+      "territory": {
+        "id": 4,
+        "name": "Pomezia",
+        "slug": "pomezia"
+      },
+      "occurred_date": "",
+      "occurred_time": "",
+      "event_status": "open",
+      "public_place_name": "Pomezia",
+      "public_geo": {
+        "version": "public-location/v1",
+        "mode": "approximate_area",
+        "lat": 41.666945,
+        "lng": 12.457416,
+        "radius_meters": 1000,
+        "radius_m": 1000,
+        "source": "event_public",
+        "precision": "approximate_area"
+      }
+    },
+    {
+      "id": 361,
+      "title": "Rifiuti abbandonati o discarica a Pomezia",
+      "permalink": "https://staging.badaround.it/eventi/rifiuti-abbandonati-o-discarica-a-pomezia-2/",
+      "excerpt": "Segnalazione relativa a Rifiuti abbandonati o discarica nella zona di Pomezia.",
+      "thumbnail": "",
+      "event_type": {
+        "id": 9,
+        "name": "Rifiuti abbandonati o discarica",
+        "slug": "rifiuti-abbandonati-o-discarica"
+      },
+      "territory": {
+        "id": 4,
+        "name": "Pomezia",
+        "slug": "pomezia"
+      },
+      "occurred_date": "",
+      "occurred_time": "",
+      "event_status": "open",
+      "public_place_name": "Pomezia",
+      "public_geo": {
+        "version": "public-location/v1",
+        "mode": "approximate_area",
+        "lat": 41.660817,
+        "lng": 12.459694,
+        "radius_meters": 500,
+        "radius_m": 500,
+        "source": "event_public",
+        "precision": "approximate_area"
+      }
+    },
+    {
+      "id": 360,
+      "title": "Rifiuti abbandonati o discarica a Pomezia",
+      "permalink": "https://staging.badaround.it/eventi/rifiuti-abbandonati-o-discarica-a-pomezia/",
+      "excerpt": "Segnalazione relativa a Rifiuti abbandonati o discarica nella zona di Pomezia.",
+      "thumbnail": "",
+      "event_type": {
+        "id": 9,
+        "name": "Rifiuti abbandonati o discarica",
+        "slug": "rifiuti-abbandonati-o-discarica"
+      },
+      "territory": {
+        "id": 4,
+        "name": "Pomezia",
+        "slug": "pomezia"
+      },
+      "occurred_date": "",
+      "occurred_time": "",
+      "event_status": "open",
+      "public_place_name": "Pomezia",
+      "public_geo": {
+        "version": "public-location/v1",
+        "mode": "approximate_area",
+        "lat": 41.662349,
+        "lng": 12.462063,
+        "radius_meters": 100,
+        "radius_m": 100,
+        "source": "event_public",
+        "precision": "approximate_area"
+      }
+    }
+  ],
+  "source_envelopes_byte_identical": true,
+  "custody_exception": "Only editor-lock timestamps on346/347. Baseline SHA exactly reconstructed restoring346=1792712821:1 and347=1792708952:1. No staging restore/write was performed. Taxonomy baseline SHA exactly reconstructed with counts4/9/14 reduced by4 (authorized publication count increments)."
+}
