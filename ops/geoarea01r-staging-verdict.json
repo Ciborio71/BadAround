@@ -1,0 +1,6 @@
+{
+  "candidate": "879f55853fbb99c20ad85bc522e03f19f93bc3c6",
+  "run": 39885458548,
+  "phase": "UPLOAD",
+  "note": "55-file baseline custody and byte-exact rollback archived; protected state and historical HTML match certified baseline."
+}
