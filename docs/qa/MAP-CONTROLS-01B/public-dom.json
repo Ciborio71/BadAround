@@ -1,0 +1,73 @@
+{
+  "ancestors": [
+    {
+      "cls": "ba-google-map",
+      "id": "ba-google-map",
+      "overflow": "hidden",
+      "pointerEvents": "auto",
+      "position": "absolute",
+      "tag": "DIV",
+      "transform": "none",
+      "zIndex": "auto"
+    },
+    {
+      "cls": "ba-map-canvas",
+      "id": "",
+      "overflow": "hidden",
+      "pointerEvents": "auto",
+      "position": "relative",
+      "tag": "DIV",
+      "transform": "none",
+      "zIndex": "auto"
+    },
+    {
+      "cls": "ba-map-workspace",
+      "id": "",
+      "overflow": "visible",
+      "pointerEvents": "auto",
+      "position": "static",
+      "tag": "SECTION",
+      "transform": "none",
+      "zIndex": "auto"
+    },
+    {
+      "cls": "ba-map-page",
+      "id": "main-content",
+      "overflow": "visible",
+      "pointerEvents": "auto",
+      "position": "static",
+      "tag": "MAIN",
+      "transform": "none",
+      "zIndex": "auto"
+    },
+    {
+      "cls": "wp-singular page-template page-template-page-mappa page-template-page-mappa-php page page-id-230 wp-embed-responsive wp-theme-astra wp-child-theme-badaround-child ast-desktop ast-plain-container ast-no-sidebar astra-4.14.0 ast-single-post ast-inherit-site-logo-transparent ast-hfb-header ast-normal-title-enabled ast-header-loaded",
+      "id": "",
+      "overflow": "hidden auto",
+      "pointerEvents": "auto",
+      "position": "relative",
+      "tag": "BODY",
+      "transform": "none",
+      "zIndex": "auto"
+    },
+    {
+      "cls": "",
+      "id": "",
+      "overflow": "visible",
+      "pointerEvents": "auto",
+      "position": "static",
+      "tag": "HTML",
+      "transform": "none",
+      "zIndex": "auto"
+    }
+  ],
+  "button": "<button draggable=\"false\" aria-label=\"Attiva/disattiva vista schermo intero\" title=\"Attiva/disattiva vista schermo intero\" type=\"button\" aria-pressed=\"true\" class=\"gm-control-active gm-fullscreen-control\" style=\"background: none rgb(255, 255, 255); border: 0px; margin: 10px; padding: 0px; text-transform: none; appearance: none; position: absolute; cursor: pointer; user-select: none; border-radius: 2px; height: 40px; width: 40px; box-shadow: rgba(",
+  "iframes": [
+    {
+      "allow": null,
+      "sandbox": null,
+      "title": ""
+    }
+  ],
+  "referrer": ""
+}

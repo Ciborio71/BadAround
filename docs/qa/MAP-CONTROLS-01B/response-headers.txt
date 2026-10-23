@@ -1,0 +1,13 @@
+HTTP/1.1 200 OK
+date: Fri, 23 Oct 2026 11:01:24 GMT
+
+HTTP/2 200 
+server: envoy
+date: Fri, 23 Oct 2026 11:01:25 GMT
+content-type: text/html; charset=UTF-8
+vary: Accept-Encoding,Accept-Encoding,User-Agent
+x-powered-by: PHP/8.3.36
+permissions-policy: private-state-token-redemption=(self "https://www.google.com" "https://www.gstatic.com" "https://recaptcha.net" "https://challenges.cloudflare.com" "https://hcaptcha.com"), private-state-token-issuance=(self "https://www.google.com" "https://www.gstatic.com" "https://recaptcha.net" "https://challenges.cloudflare.com" "https://hcaptcha.com")
+link: <https://staging.badaround.it/wp-json/>; rel="https://api.w.org/", <https://staging.badaround.it/wp-json/wp/v2/pages/230>; rel="alternate"; title="JSON"; type="application/json", <https://staging.badaround.it/?p=230>; rel=shortlink
+x-envoy-upstream-service-time: 1951
+
