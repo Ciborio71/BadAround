@@ -1,0 +1,9 @@
+{
+  "candidate": "56853ec079cbd9bdd1f466104790e07f54bb60d1",
+  "run": 39945370252,
+  "phase": "UPLOAD",
+  "custody": "59/59 PASS",
+  "rollback": "BYTE_EXACT_VERIFIED",
+  "fixtures": "MATCH_PREVIOUS_CERTIFIED_READ_ONLY_STATE",
+  "fullscreen": "NON_BLOCKING"
+}
