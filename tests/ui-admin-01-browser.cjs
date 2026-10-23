@@ -1,6 +1,6 @@
 const {chromium}=require('playwright');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{execFileSync}=require('node:child_process');
-const root=path.join(__dirname,'..'), fixture=require('./fixtures/ui-admin-01/staging-markup.json');
+const root=path.join(__dirname,'..'), fixture=JSON.parse(require('node:zlib').gunzipSync(fs.readFileSync(path.join(__dirname,'fixtures/ui-admin-01/staging-markup.json.gz'))));
 const cssPath='wordpress/plugins/badaround-core/assets/css/classic-editor-publish-box.css', css=fs.readFileSync(path.join(root,cssPath),'utf8');
 const out=path.join(root,'evidence/ui-admin-01');fs.mkdirSync(out,{recursive:true});
 fs.copyFileSync(path.join(__dirname,'fixtures/ui-admin-01/before.jpg'),path.join(out,'before-staging.jpg'));
