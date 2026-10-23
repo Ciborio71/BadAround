@@ -1,8 +1,12 @@
 {
   "candidate": "29a202fd47d6ba6b7a8109b6a596a71f7508109f",
   "run": 39879232412,
-  "phase": "UPLOAD",
-  "baseline_custody": "55/55",
-  "rollback": "9/9 BYTE-EXACT VERIFIED",
-  "snapshot": "READ-ONLY PASS"
+  "phase": "PASS",
+  "runtime": "9/9; custody 55/55",
+  "browser": "EXACT/APPROX/Discovery/Home/Map PASS",
+  "negative": "FAIL-CLOSED PASS; crafted moderator overrides blocked",
+  "historical": "303/304/269 HTML byte-identical; ALL report/event/meta/audit/schema/taxonomy digests unchanged",
+  "new_fixtures": 0,
+  "native": "badaround-report/v2",
+  "deferred_copy": "STILL STALE"
 }
