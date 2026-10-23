@@ -1,8 +1,29 @@
 {
   "candidate": "48bab2229c00fb28f01d54117dd1278074f10d69",
   "run": "39874856966",
-  "phase": "UPLOAD",
-  "preupload": "53/53 custody, 7 byte-exact backups and DB/protected-state captured",
-  "max_report": 72,
-  "max_event": 351
+  "phase": "FAIL",
+  "reason": "ACTUAL_PUBLIC_DETAIL_REGRESSION: event 352 persisted public_geo.mode=exact_point but rendered Posizione approssimativa and approximate marker label",
+  "fixtures": [
+    {
+      "report": 73,
+      "event": 352,
+      "status": "published"
+    },
+    {
+      "report": 74,
+      "event": 354,
+      "status": "published"
+    },
+    {
+      "report": 75,
+      "event": 356,
+      "status": "rejected_pending"
+    },
+    {
+      "report": 76,
+      "event": 358,
+      "status": "rejected_pending"
+    }
+  ],
+  "instruction": "Rollback only seven runtime files; preserve all persisted synthetic fixtures and historical state"
 }
