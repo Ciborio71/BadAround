@@ -64,7 +64,7 @@ jobs:
           name: mapcontrols01s-rollback-before-upload
           path: evidence/
           retention-days: 90
-      - name: Temporary authenticated administrator plus token staging QA probe
+      - name: Temporary staging read-only probe with POST token and secure cookie
         run: python ops/mapcontrols01s-deploy.py install-probe
       - name: Wait for database custody gate then upload ONLY five files
         run: python ops/mapcontrols01s-deploy.py deploy

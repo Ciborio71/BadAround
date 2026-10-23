@@ -12,18 +12,22 @@ add_action('rest_api_init',static function(){register_rest_route('mapcontrols01s
  $rows=$wpdb->get_results("SELECT id,event_id,SHA2(content_original,256) AS content_sha256 FROM {$wpdb->prefix}ba_reports WHERE id BETWEEN 77 AND 80 ORDER BY id",ARRAY_A);if($s!==mcs_state())return new WP_Error('qa_read_mutation','Read-only state changed.',['status'=>500]);
  return ['state'=>$s,'native'=>badaround_native_report_config()['schemaVersion'],'contract_sha'=>hash_file('sha256',WP_PLUGIN_DIR.'/badaround-core/contracts/nf-conditional-v1.0.json'),'fixtures'=>$fixtures,'rows'=>$rows,'classic_editor'=>array_map(static function($type){return ['type'=>$type,'block_editor'=>use_block_editor_for_post_type($type),'filter_type_priority'=>has_filter('use_block_editor_for_post_type','__return_false'),'filter_post_priority'=>has_filter('use_block_editor_for_post','__return_false')];},['ba_evento','post','page'])];}]);});
 add_action('template_redirect',static function(){
- $frame=isset($_GET['mapcontrols01s_frame']);$token=$_GET['mapcontrols01s_qa']??'';
- if(!$frame&&!$token)return;
+ $frame=isset($_GET['mapcontrols01s_frame']);$qa=isset($_GET['mapcontrols01s_qa']);$login=isset($_GET['mapcontrols01s_login']);
+ if(!$frame&&!$qa&&!$login)return;
+ if($login&&'POST'!==($_SERVER['REQUEST_METHOD']??'')){nocache_headers();header('Cache-Control: private, no-store');header('X-Robots-Tag: noindex, nofollow');echo '<!doctype html><html lang="it"><meta name="viewport" content="width=device-width"><title>Accesso QA temporaneo staging</title><form method="post"><label>Token diagnostico temporaneo <input type="password" name="mapcontrols01s_token" autocomplete="off" required></label><button type="submit">Autorizza QA read-only</button></form></html>';exit;}
+ $token=$_POST['mapcontrols01s_token']??$_COOKIE['ba_mapcontrols_qa']??'';
+
  if(!mcs_auth($token)){wp_send_json_error(['code'=>'qa_denied'],403);exit;}
+ if($login){setcookie('ba_mapcontrols_qa',$token,['expires'=>time()+7200,'path'=>'/','secure'=>true,'httponly'=>true,'samesite'=>'Strict']);wp_safe_redirect(home_url('/?mapcontrols01s_frame=1&width=390&page=home'));exit;}
  nocache_headers();header('Cache-Control: private, no-store, max-age=0');header('X-Robots-Tag: noindex, nofollow');header('Referrer-Policy: strict-origin-when-cross-origin');
  if($frame){
   $w=(int)($_GET['width']??390);if(!in_array($w,[320,390,768,1024,1440],true))$w=390;
   $paths=['native'=>'/segnala-un-evento/','home'=>'/','map'=>'/mappa/'];foreach([360,361,362,363] as $id)$paths['event'.$id]=wp_parse_url(get_permalink($id),PHP_URL_PATH);
   $key=$_GET['page']??'home';if(!isset($paths[$key]))$key='home';
-  header('Content-Type: text/html; charset=utf-8');echo '<!doctype html><html lang="it"><meta name="viewport" content="width=device-width"><title>QA staging — viewport reale</title><body style="margin:0;background:#edf4f5;color:#102a43;font:16px system-ui"><form method="get" style="padding:8px"><strong>QA temporanea — pagine staging reali / Google Maps reale</strong><input type="hidden" name="mapcontrols01s_frame" value="1"><input type="hidden" name="mapcontrols01s_qa" value="'.esc_attr($token).'"><label> Larghezza <select name="width">';
+  header('Content-Type: text/html; charset=utf-8');echo '<!doctype html><html lang="it"><meta name="viewport" content="width=device-width"><title>QA staging — viewport reale</title><body style="margin:0;background:#edf4f5;color:#102a43;font:16px system-ui"><form method="get" style="padding:8px"><strong>QA temporanea — pagine staging reali / Google Maps reale</strong><input type="hidden" name="mapcontrols01s_frame" value="1"><label> Larghezza <select name="width">';
   foreach([320,390,768,1024,1440] as $v)echo '<option value="'.$v.'" '.selected($w,$v,false).'>'.$v.'</option>';
   echo '</select></label><label> Pagina <select name="page">';foreach($paths as $k=>$p)echo '<option value="'.esc_attr($k).'" '.selected($key,$k,false).'>'.esc_html($k).'</option>';
-  echo '</select></label><button type="submit">Apri viewport</button></form><iframe id="mapcontrols-live-frame" title="Pagina staging effettiva" allow="fullscreen; geolocation" allowfullscreen width="'.$w.'" height="1000" style="display:block;border:0" src="'.esc_url(add_query_arg('mapcontrols01s_qa',$token,home_url($paths[$key]))).'"></iframe></body></html>';exit;
+  echo '</select></label><button type="submit">Apri viewport</button></form><iframe id="mapcontrols-live-frame" title="Pagina staging effettiva" allow="fullscreen; geolocation" allowfullscreen width="'.$w.'" height="1000" style="display:block;border:0" src="'.esc_url(add_query_arg('mapcontrols01s_qa','1',home_url($paths[$key]))).'"></iframe></body></html>';exit;
  }
  add_action('wp_head',static function() use ($token){?>
  <script>
