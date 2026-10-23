@@ -1,0 +1,42 @@
+name: UI-ADMIN-01 isolated Classic Editor publish box pre-deploy
+on:
+  push:
+    branches: [fix/ui-admin-01-publish-box-alignment]
+permissions:
+  contents: read
+jobs:
+  pre-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: PHP lint and admin scope / byte custody
+        run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php
+          php -l tests/ui-admin-01-scope.php
+          php tests/ui-admin-01-scope.php
+      - name: Existing isolated save and rejection lifecycle regression
+        run: |
+          php tests/geo-priv-03a5a-classic-form.php
+          php tests/geo-priv-03a-published-save.php
+          php tests/geo-priv-03a4-rest-lifecycle.php
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install browser harness
+        run: |
+          npm install --prefix /tmp/ui-admin-01 --no-audit --no-fund playwright@1.58.2
+          /tmp/ui-admin-01/node_modules/.bin/playwright install --with-deps chromium
+      - name: Captured staging markup layout, focus and isolated form interactions
+        env:
+          NODE_PATH: /tmp/ui-admin-01/node_modules
+        run: node tests/ui-admin-01-browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-admin-01-pre-deploy-evidence
+          path: evidence/ui-admin-01/

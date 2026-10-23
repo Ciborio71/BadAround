@@ -9,6 +9,7 @@ require_once __DIR__ . '/class-badaround-geo-moderation-service.php';
 /** Minimal, capability-gated B2 moderation UI for ba_evento. */
 class BadAround_Moderation_Admin {
 	public function register_hooks() {
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_classic_editor_styles' ) );
 		add_filter( 'views_edit-' . BadAround_Event_Post_Type::POST_TYPE, array( $this, 'add_moderation_queue_view' ) );
 		add_action( 'add_meta_boxes_' . BadAround_Event_Post_Type::POST_TYPE, array( $this, 'register_meta_boxes' ) );
 		add_action( 'save_post_' . BadAround_Event_Post_Type::POST_TYPE, array( $this, 'save_public_fields' ), 10, 2 );
@@ -26,6 +27,19 @@ class BadAround_Moderation_Admin {
 		add_action( 'admin_footer-post.php', array( $this, 'customize_native_publish_controls' ) );
 		add_action( 'admin_footer-post.php', array( $this, 'render_independent_rejection_form' ) );
 		add_action( 'admin_footer-post.php', array( $this, 'render_geo_decision_form' ) );
+	}
+
+	/** Presentation only: never loaded in the frontend or another editor. */
+	public function enqueue_classic_editor_styles( $hook_suffix ) {
+		$screen = get_current_screen();
+		if ( ! in_array( $hook_suffix, array( 'post.php', 'post-new.php' ), true )
+			|| ! $screen || 'post' !== $screen->base
+			|| BadAround_Event_Post_Type::POST_TYPE !== $screen->post_type
+			|| $screen->is_block_editor() ) {
+			return;
+		}
+		$relative = 'assets/css/classic-editor-publish-box.css';
+		wp_enqueue_style( 'badaround-classic-editor-publish-box', plugins_url( $relative, BADAROUND_CORE_FILE ), array( 'edit', 'buttons' ), (string) filemtime( BADAROUND_CORE_PATH . $relative ) );
 	}
 
 	public function add_moderation_queue_view( $views ) {
