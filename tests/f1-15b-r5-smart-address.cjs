@@ -38,6 +38,7 @@ function setup(withMap=false){
   <input data-native-input name="location.exact_address"><input data-native-input name="location.exact_lat"><input data-native-input name="location.exact_lng"></div>
   </section></body></html>`,{url:'https://staging.badaround.it/segnala-un-evento/',runScripts:'outside-only'});
   if(withMap){
+    dom.window.eval(fs.readFileSync(path.join(__dirname,'../wordpress/themes/badaround-child/assets/js/map-navigation.js'),'utf8'));
     dom.window.document.querySelector('[data-native-smart-address]').insertAdjacentHTML('beforeend','<button data-smart-geolocate type="button">Usa la mia posizione</button><div data-smart-map-panel hidden><div data-smart-map></div></div><p data-smart-map-status></p>');
     dom.window.eval(fs.readFileSync(path.join(__dirname,'../wordpress/themes/badaround-child/assets/js/native-report/location-map.js'),'utf8'));
   }
@@ -549,9 +550,10 @@ async function mapHarness(){
  const h=await liveWidget(territory,true),maps=[],markers=[],geocodes=[],placeReads=[];let gps,components;
  const libraries=[];
  const base=[ac('country','Italia','IT'),ac('administrative_area_level_1','Lazio','Lazio'),ac('administrative_area_level_2','Roma','RM'),ac('locality','Pomezia','Pomezia')];
+ h.win.google.maps.ControlPosition={RIGHT_TOP:'RIGHT_TOP'};
  h.win.google.maps.importLibrary=async library=>{
   libraries.push(library);
-  if(library==='maps')return {Map:class{constructor(canvas,options){this.center=options.center;maps.push(this);}setCenter(position){this.center=position;}}};
+  if(library==='maps')return {Map:class{constructor(canvas,options){this.center=options.center;this.controls={RIGHT_TOP:{push:el=>canvas.append(el)}};maps.push(this);}setCenter(position){this.center=position;}}};
   if(library==='marker')return {AdvancedMarkerElement:class extends h.win.EventTarget{constructor(options){super();Object.assign(this,options);markers.push(this);}replaceChildren(node){this.content=node;}removeEventListener(...args){super.removeEventListener(...args);this.removed=true;}}};
   if(library==='geocoding')return {Geocoder:class{async geocode(request){geocodes.push(request);return {results:[{place_id:'test-google-id'}]};}}};
   return {Place:class{constructor(options){this.id=options.id;this.addressComponents=components||base;this.formattedAddress='Via verificata, Pomezia RM, Italia';}async fetchFields(options){placeReads.push(options.fields);}}};

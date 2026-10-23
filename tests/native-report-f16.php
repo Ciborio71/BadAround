@@ -40,10 +40,11 @@ $config = badaround_native_report_config();
 if ( in_array( '--config', $argv, true ) ) { echo json_encode( $config ); exit; }
 if ( in_array( '--html', $argv, true ) ) {
 	echo '<!doctype html><html lang="it"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>F1.6 native fixture</title>';
-	foreach ( array( 'base', 'components', 'report', 'native-report' ) as $css ) { echo '<link rel="stylesheet" href="/wordpress/themes/badaround-child/assets/css/' . $css . '.css">'; }
+	foreach ( array( 'base', 'components', 'report', 'native-report', 'map-navigation' ) as $css ) { echo '<link rel="stylesheet" href="/wordpress/themes/badaround-child/assets/css/' . $css . '.css">'; }
 	echo '<body class="page-template-page-segnala-evento"><main class="ba-report-app"><section class="ba-report-workspace ba-container"><header class="ba-report-workspace__head"><h1>Segnala un evento</h1></header><div class="ba-report-stage">';
 	require $base . 'themes/badaround-child/template-parts/native-report/shell.php';
 	echo '</div></section></main>';
+	echo '<script src="/wordpress/themes/badaround-child/assets/js/map-navigation.js"></script>';
 	foreach ( array( 'model', 'api', 'errors', 'media', 'media-view', 'wizard' ) as $js ) { echo '<script src="/wordpress/themes/badaround-child/assets/js/native-report/' . $js . '.js"></script>'; }
 	echo '</body></html>'; exit;
 }
@@ -133,7 +134,7 @@ foreach ( array( 'native', 'normal', 'anonymous', 'non-staging' ) as $scenario )
 	f16_assert( $native === isset( $GLOBALS['test_assets']['badaround-native-wizard'] ), 'native JS conditional enqueue: ' . $scenario );
 	f16_assert( ! isset( $GLOBALS['test_assets']['badaround-report-ui'], $GLOBALS['test_assets']['badaround-wpforms'] ), 'no legacy builder assets: ' . $scenario );
 	if ( $native ) {
-		f16_assert( $GLOBALS['test_assets']['badaround-native-model'] === array() && $GLOBALS['test_assets']['badaround-native-wizard'] === array( 'badaround-native-smart-address' ) && $GLOBALS['test_assets']['badaround-native-smart-address'] === array( 'badaround-native-location-map' ) && $GLOBALS['test_assets']['badaround-native-location-map'] === array( 'badaround-native-media-view' ) && $GLOBALS['test_assets']['badaround-native-media'] === array( 'badaround-native-errors' ), 'native production dependency chain has no builder dependency' );
+		f16_assert( $GLOBALS['test_assets']['badaround-native-model'] === array( 'badaround-map-navigation' ) && $GLOBALS['test_assets']['badaround-map-navigation'] === array() && $GLOBALS['test_assets']['badaround-native-wizard'] === array( 'badaround-native-smart-address' ) && $GLOBALS['test_assets']['badaround-native-smart-address'] === array( 'badaround-native-location-map' ) && $GLOBALS['test_assets']['badaround-native-location-map'] === array( 'badaround-native-media-view' ) && $GLOBALS['test_assets']['badaround-native-media'] === array( 'badaround-native-errors' ), 'native production dependency chain has no builder dependency' );
 	}
 }
 $GLOBALS['test_screen'] = 'other-page.php'; $GLOBALS['test_assets'] = array();

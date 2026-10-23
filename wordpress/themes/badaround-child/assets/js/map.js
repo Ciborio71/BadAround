@@ -401,9 +401,10 @@
 			const category = categoryFor(item) || node.dataset.baEventCategory || '';
 			const map = new google.maps.Map(node, {
 				center: geometry.position, zoom: geometry.mode === 'exact_point' ? 16 : 14,
-				mapTypeControl: false, streetViewControl: false, fullscreenControl: false,
-				gestureHandling: 'cooperative', styles: baseMapStyles,
+				mapTypeControl: false, streetViewControl: false, styles: baseMapStyles,
+				...window.BadAroundMapNavigation.options(),
 			});
+			window.BadAroundMapNavigation.mount(map, node);
 			const entry = createProjection(map, item, geo, category, true);
 			entry.selected = true;
 			if (entry.circle) map.fitBounds(entry.circle.getBounds(), 32);
@@ -411,9 +412,10 @@
 		}
 		const map = new google.maps.Map(node, {
 			center: { lat: 41.9028, lng: 12.4964 }, zoom: 7,
-			mapTypeControl: false, streetViewControl: false, fullscreenControl: context !== 'home',
-			gestureHandling: context === 'home' ? 'cooperative' : 'greedy', styles: baseMapStyles,
+			mapTypeControl: false, streetViewControl: false, styles: baseMapStyles,
+			...window.BadAroundMapNavigation.options(),
 		});
+		window.BadAroundMapNavigation.mount(map, node);
 		const bounds = new google.maps.LatLngBounds();
 
 		const infoWindow = new google.maps.InfoWindow();

@@ -124,6 +124,12 @@ function badaround_child_enqueue_assets() {
 		);
 	}
 
+	if ( $is_map || $is_home || $is_event || $is_reporting ) {
+		wp_enqueue_style( 'badaround-map-navigation', $uri . '/assets/css/map-navigation.css', array( 'badaround-components' ), (string) filemtime( $dir . '/assets/css/map-navigation.css' ) );
+		wp_enqueue_script( 'badaround-map-navigation', $uri . '/assets/js/map-navigation.js', array(), (string) filemtime( $dir . '/assets/js/map-navigation.js' ), true );
+		wp_script_add_data( 'badaround-map-navigation', 'strategy', 'defer' );
+	}
+
 	if ( $is_map || $is_home || $is_event ) {
 		wp_enqueue_style(
 			'badaround-map',
@@ -140,7 +146,7 @@ function badaround_child_enqueue_assets() {
 		wp_enqueue_script(
 			'badaround-map',
 			$uri . '/assets/js/map.js',
-			array(),
+			array( 'badaround-map-navigation' ),
 			(string) filemtime( $dir . '/assets/js/map.js' ),
 			true
 		);
@@ -254,7 +260,7 @@ function badaround_child_enqueue_assets() {
 			(string) filemtime( $dir . '/assets/css/report.css' )
 		);
 		wp_enqueue_style( 'badaround-native-report', $uri . '/assets/css/native-report.css', array( 'badaround-report' ), (string) filemtime( $dir . '/assets/css/native-report.css' ) );
-		$previous = array();
+		$previous = array( 'badaround-map-navigation' );
 		foreach ( array( 'model', 'api', 'errors', 'media', 'media-view', 'location-map', 'smart-address', 'wizard' ) as $module ) {
 			$handle = 'badaround-native-' . $module;
 			wp_enqueue_script( $handle, $uri . '/assets/js/native-report/' . $module . '.js', $previous, (string) filemtime( $dir . '/assets/js/native-report/' . $module . '.js' ), true );

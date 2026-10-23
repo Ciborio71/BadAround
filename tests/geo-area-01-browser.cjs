@@ -1,5 +1,6 @@
 'use strict';
 // Source-backed browser fixture with mocked provider APIs. No external requests.
+const installControlsProvider=require('./map-controls-provider.cjs');
 const {chromium,webkit}=require(process.env.BA_PLAYWRIGHT_MODULE||'playwright');
 const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 (async()=>{
@@ -8,8 +9,9 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
  html=html.replace(`<script src="${prefix}wizard.js">`,`<script src="${prefix}location-map.js"></script><script src="${prefix}smart-address.js"></script><script src="${prefix}wizard.js">`);
  html=html.replace('"smartAddress":null','"smartAddress":{"key":"TEST","territories":[[2,0,"Lazio"],[3,2,"Roma"],[4,3,"Pomezia"]]}');
  const browser=process.env.BA_BROWSER_ENGINE==='webkit'?await webkit.launch({headless:true}):await chromium.launch({headless:true,...(process.env.BA_CHROMIUM?{executablePath:process.env.BA_CHROMIUM}:{}),args:['--no-sandbox','--disable-dev-shm-usage']});
- try{for(const width of [320,390,768,1440]){
+ try{for(const width of [320,390,768,1024,1440]){
   const page=await browser.newPage({viewport:{width,height:850},reducedMotion:'reduce'});page.setDefaultTimeout(12000);const failures=[];page.on('pageerror',e=>failures.push(e.message));
+  await page.addInitScript(installControlsProvider);
   await page.addInitScript(()=>{
    window.providerCalls=[];window.gpsCalls=0;
    window.circles=[];
@@ -25,10 +27,10 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
     this.innerHTML='<input aria-label="Ricerca Google simulata" autocomplete="off"><button type="button">Via verificata, Pomezia</button>';
     this.querySelector('button').onclick=()=>{const event=new Event('gmp-select');event.placePrediction={toPlace:()=>new Place()};this.dispatchEvent(event);};
    }}customElements.define('test-google-autocomplete',Widget);
-   window.google={maps:{Circle,importLibrary:async name=>{
+   window.google={maps:{ControlPosition:{RIGHT_TOP:"RIGHT_TOP"},Circle,importLibrary:async name=>{
     providerCalls.push(name);
     if(name==='places')return {Place,PlaceAutocompleteElement:class{constructor(){return document.createElement('test-google-autocomplete');}}};
-    if(name==='maps')return {Map:class{constructor(canvas,o){this.canvas=canvas;this.zoom=o.zoom;canvas.style.position='relative';canvas.textContent='Provider Google simulato — nessuna richiesta esterna';window.testMap=this;}setCenter(p){this.center=p;}setZoom(z){this.zoom=z;circles.forEach(c=>c.draw());}fitBounds(b){this.zoom=Math.log2(156543.03392*Math.cos(b.center.lat*Math.PI/180)*Math.min(this.canvas.clientWidth,this.canvas.clientHeight)/(b.radius*2.5));this.setZoom(this.zoom);}}};
+    if(name==='maps')return {Map:class{constructor(canvas,o){window.testMapCount=(window.testMapCount||0)+1;this.canvas=canvas;this.options=o;this.controls=mapControlsProvider(this,canvas,o);this.zoom=o.zoom;canvas.style.position='relative';window.testMap=this;}getZoom(){return this.zoom;}setCenter(p){this.center=p;}setZoom(z){this.zoom=z;circles.forEach(c=>c.draw());}fitBounds(b){this.zoom=Math.log2(156543.03392*Math.cos(b.center.lat*Math.PI/180)*Math.min(this.canvas.clientWidth,this.canvas.clientHeight)/(b.radius*2.5));this.setZoom(this.zoom);}}};
     if(name==='marker')return {AdvancedMarkerElement:class extends EventTarget{constructor(o){super();Object.assign(this,o);window.testMarker=this;}replaceChildren(node){this.content=node;}}};
     if(name==='geocoding')return {Geocoder:class{async geocode(){return {results:[{place_id:'private-google-id'}]};}}};
    }}};
@@ -47,6 +49,9 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
   await page.locator('[data-native-next]').click();assert(await page.locator('[data-native-step="location"]').isVisible());assert.equal(await page.locator('[name="location.exact_address"]').inputValue(),'');
   await page.locator('test-google-autocomplete button').click();await page.locator('[data-smart-map-panel]').waitFor({state:'visible'});
   // GEO-PUBLIC-03: one authoritative choice, keyboard-operable, independent of private point.
+  const exactSnapshot=await page.evaluate(()=>JSON.stringify(document.querySelector('[data-native-report]').nativeReport.model.payload()));
+  assert.equal(await page.evaluate(()=>circles.length),0);await page.getByRole('button',{name:'Aumenta zoom (provider simulato)',exact:true}).click();await page.getByRole('button',{name:'Riduci zoom (provider simulato)',exact:true}).click();await page.getByRole('button',{name:'Sposta mappa verso est',exact:true}).click();
+  assert.equal(await page.evaluate(()=>JSON.stringify(document.querySelector('[data-native-report]').nativeReport.model.payload())),exactSnapshot);
   const choice=page.locator('[data-native-public-location-choice]');
   assert(await choice.isVisible());
   assert(await choice.getByRole('radio',{name:/Punto esatto/}).isChecked());
@@ -60,8 +65,18 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
   for(const r of [50,100,250,500,1000]){
    await radius.selectOption(String(r));
    assert.deepEqual(await page.evaluate(()=>({radius:circles.at(-1).radius,center:circles.at(-1).center,payload:document.querySelector('[data-native-report]').nativeReport.model.payload().location.public_location_request})),{radius:r,center:{lat:41.66,lng:12.43},payload:{mode:'approximate_area',radius_m:r}});
+   const unchanged=await page.evaluate(()=>JSON.stringify({payload:document.querySelector('[data-native-report]').nativeReport.model.payload(),point:testMarker.position,center:circles.at(-1).center,radius:circles.at(-1).radius}));
+   const z=await page.evaluate(()=>testMap.zoom);await page.getByRole('button',{name:'Aumenta zoom (provider simulato)',exact:true}).click();assert.equal(await page.evaluate(()=>testMap.zoom),z+1);await page.getByRole('button',{name:'Riduci zoom (provider simulato)',exact:true}).click();assert.equal(await page.evaluate(()=>testMap.zoom),z);
+   for(const direction of ['nord','sud','ovest','est'])await page.getByRole('button',{name:'Sposta mappa verso '+direction,exact:true}).click();
+   assert.equal(await page.evaluate(()=>JSON.stringify({payload:document.querySelector('[data-native-report]').nativeReport.model.payload(),point:testMarker.position,center:circles.at(-1).center,radius:circles.at(-1).radius})),unchanged);
    const zoomBefore=await page.evaluate(()=>testMap.zoom);await page.evaluate(()=>testMap.setZoom(testMap.zoom+1));assert.equal(await page.evaluate(()=>circles.at(-1).radius),r);await page.evaluate(z=>testMap.setZoom(z),zoomBefore);
   }
+  await page.getByRole('button',{name:'Schermo intero (provider simulato)',exact:true}).click();await page.waitForFunction(()=>Boolean(document.fullscreenElement));
+  assert.equal(await page.evaluate(()=>circles.at(-1).radius),1000);await page.getByRole('button',{name:'Sposta mappa verso est',exact:true}).click();
+  await page.getByRole('button',{name:'Schermo intero (provider simulato)',exact:true}).click();await page.waitForFunction(()=>!document.fullscreenElement);
+  const navRects=await page.locator('.ba-map-pan button').evaluateAll(bs=>bs.map(b=>({width:b.getBoundingClientRect().width,height:b.getBoundingClientRect().height})));assert(navRects.every(r=>r.width>=44&&r.height>=44));
+  await page.getByRole('button',{name:'Sposta mappa verso nord',exact:true}).focus();await page.keyboard.press('Enter');assert.equal(await page.locator('.ba-map-pan button').first().evaluate(e=>getComputedStyle(e).outlineStyle),'solid');
+  await page.keyboard.press('Tab');await page.keyboard.press('Tab');await page.keyboard.press('Tab');await page.keyboard.press('Tab');assert(!await page.locator('.ba-map-pan').evaluate(e=>e.contains(document.activeElement)));
   await radius.selectOption('500');await radius.focus();await page.keyboard.press('ArrowUp');await page.keyboard.press('Tab');assert.equal(await radius.inputValue(),'250');
   for(const r of [50,1000]){await radius.selectOption(String(r));await choice.getByRole('radio',{name:/Punto esatto/}).check();assert(!(await radius.isVisible()));assert(await radius.isDisabled());assert.equal(await page.evaluate(()=>circles.at(-1).map),null);assert.deepEqual(await page.evaluate(()=>document.querySelector('[data-native-report]').nativeReport.model.payload().location.public_location_request),{mode:'exact_point'});await choice.getByRole('radio',{name:/Area approssimata/}).check();assert.equal(await radius.inputValue(),'500');}
   await radius.selectOption('100');assert.equal(await page.evaluate(()=>circles.at(-1).radius),100);await radius.selectOption('500');
@@ -94,6 +109,7 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
   assert(await choice.getByRole('radio',{name:/Punto esatto/}).isChecked());
   await choice.getByRole('radio',{name:/Area approssimata/}).check();
   assert(await choice.getByRole('radio',{name:/Area approssimata/}).isChecked());
-  console.log(`PASS ${width}px: all five circles, zoom invariance, live radius, stale clear, keyboard, center follow, GPS denial and responsive rendering`);await page.close();
+  assert.equal(await page.evaluate(()=>testMapCount),1);
+  console.log(`PASS ${width}px: map controls/fullscreen/viewport isolation, all five circles, zoom invariance, live radius, stale clear, keyboard, center follow, GPS denial and responsive rendering`);await page.close();
  }}finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

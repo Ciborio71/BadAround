@@ -1,0 +1,17 @@
+/* Shared map-navigation rail. Google retains ownership of zoom/fullscreen. */
+.ba-map-navigation-enabled{min-height:340px}
+.ba-map-pan{display:grid;grid-template-columns:repeat(2,44px);gap:2px;margin:10px;background:#fff;border:1px solid #c9d7e2;border-radius:6px;box-shadow:0 2px 6px #071a3830;padding:2px}
+.ba-map-pan>button{box-sizing:border-box;display:grid;place-items:center;width:44px;min-width:44px;height:44px;min-height:44px;margin:0;padding:0;border:0;border-radius:3px;background:#fff;color:#16324f;font:700 24px/1 system-ui,sans-serif;cursor:pointer;touch-action:manipulation;scroll-margin-block:100px 24px}
+.ba-map-pan>button:hover{background:#edf5f6}
+.ba-map-pan>button:focus-visible{outline:3px solid #075d69;outline-offset:-3px;background:#e0f4f6}
+/* Reserve the same right-hand rail for all maps, including open previews. */
+.ba-map-navigation-shell>.ba-map-legend{left:10px;right:auto;max-width:calc(100% - 132px)}
+.ba-map-navigation-shell>.ba-map-legend .ba-map-legend__body{max-height:190px;overflow:auto}
+.ba-map-navigation-shell>.ba-map-preview{left:auto;right:122px;bottom:36px;width:min(340px,calc(100% - 132px));max-height:calc(100% - 56px)}
+.ba-map-navigation-shell>.ba-map-privacy-note{right:auto;max-width:calc(100% - 132px);bottom:36px}
+@media(max-width:760px){
+	.ba-map-navigation-shell>.ba-map-preview{padding:14px 10px;border-radius:12px}
+	.ba-map-navigation-shell .ba-map-preview-card{padding-right:0}
+	.ba-map-navigation-shell .ba-map-preview-card h3{padding-right:28px;overflow-wrap:anywhere}
+	.ba-map-navigation-shell .ba-map-preview-card__cta{white-space:normal;text-align:center}
+}

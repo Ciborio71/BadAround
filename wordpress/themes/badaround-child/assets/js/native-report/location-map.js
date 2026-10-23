@@ -41,7 +41,8 @@
     if(disposed||!bridge.current(ticket))return;
     panel.hidden=false;
     if(!map){
-     map=new GoogleMap(canvas,{center:position,zoom:17,mapId:config.smartAddress?.mapId||'DEMO_MAP_ID',mapTypeControl:false,streetViewControl:false,fullscreenControl:false,gestureHandling:'cooperative',clickableIcons:false});
+     map=new GoogleMap(canvas,{center:position,zoom:17,mapId:config.smartAddress?.mapId||'DEMO_MAP_ID',mapTypeControl:false,streetViewControl:false,clickableIcons:false,...root.BadAroundMapNavigation.options()});
+     root.BadAroundMapNavigation.mount(map,canvas);
      marker=new AdvancedMarkerElement({map,position,title:'Posizione riservata dell’evento. Sposta per correggere.',gmpDraggable:true});
      marker.replaceChildren(glyph());
      dragListener=()=>{const p=marker.position;reverse({lat:typeof p.lat==='function'?p.lat():p.lat,lng:typeof p.lng==='function'?p.lng():p.lng});};

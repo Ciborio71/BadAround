@@ -25,16 +25,17 @@ async function render(items, context='full', dataset={}) {
  class Circle extends Layer {constructor(o){super(o);state.circles.push(this);} getBounds(){return new Bounds();}}
  class Bounds { extend(){return this;}getCenter(){return {lat:41.9,lng:12.4};}}
  class Map extends Layer {
-  constructor(n,o){super(o);state.maps.push(this);} getZoom(){return this.zoom;}
+  constructor(n,o){super(o);this.controls={RIGHT_TOP:{push:el=>n.append(el)}};this.panCalls=[];state.maps.push(this);} panBy(x,y){this.panCalls.push([x,y]);}getZoom(){return this.zoom;}
   setZoom(z){this.zoom=z;}setCenter(p){this.center=p;}fitBounds(){this.zoom=14;}
  }
  class Overlay {
   constructor(){state.overlays.push(this);}setMap(m){this.map=m;}
   getProjection(){return{fromLatLngToDivPixel:p=>({x:p.lat*100,y:p.lng*100})};}
  }
- w.google={maps:{Map,Marker,Circle,LatLngBounds:Bounds,OverlayView:Overlay,LatLng:class{constructor(p){Object.assign(this,p);}},Size:class{constructor(w,h){this.width=w;this.height=h;}},Point:class{constructor(x,y){this.x=x;this.y=y;}},InfoWindow:class{setContent(){}open(){}close(){}}}};
+ w.google={maps:{ControlPosition:{RIGHT_TOP:"RIGHT_TOP"},Map,Marker,Circle,LatLngBounds:Bounds,OverlayView:Overlay,LatLng:class{constructor(p){Object.assign(this,p);}},Size:class{constructor(w,h){this.width=w;this.height=h;}},Point:class{constructor(x,y){this.x=x;this.y=y;}},InfoWindow:class{setContent(){}open(){}close(){}}}};
  w.BadAroundMap={hasMaps:true,mapsUrl:'https://maps.googleapis.com',endpoint:'/wp-json/badaround/v1/discovery',categoryByTerm:{1:'spazi-pubblici'}};
  w.fetch=async()=>({ok:true,json:async()=>({items,total:items.length})});
+ w.eval(fs.readFileSync("wordpress/themes/badaround-child/assets/js/map-navigation.js","utf8"));
  w.eval(source);
  await new Promise(r=>setTimeout(r,0));
  return {...state,dom,node,close:()=>w.close()};

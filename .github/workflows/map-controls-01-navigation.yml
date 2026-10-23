@@ -1,0 +1,73 @@
+name: MAP-CONTROLS-01 global navigation pre-deploy
+on:
+  push:
+    branches: [feature/map-controls-01-global-navigation]
+permissions:
+  contents: read
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      database:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: synthetic-map-controls
+          MARIADB_DATABASE: mapcontrols
+        ports: [3306:3306]
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      BA_TEST_DSN: mysql:host=127.0.0.1;port=3306;dbname=mapcontrols
+      BA_TEST_DB_USER: root
+      BA_TEST_DB_PASSWORD: synthetic-map-controls
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gd, posix, fileinfo, pdo_mysql, pdo_sqlite, mbstring
+      - name: Presentation-only scope, syntax and frozen contract
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          git diff --check 879f55853fbb99c20ad85bc522e03f19f93bc3c6 HEAD
+          php -l wordpress/themes/badaround-child/functions.php
+          php -l tests/map-controls-01-render.php
+          node --check wordpress/themes/badaround-child/assets/js/map-navigation.js
+          node --check wordpress/themes/badaround-child/assets/js/map.js
+          node --check wordpress/themes/badaround-child/assets/js/native-report/location-map.js
+          echo 'dc282153243ffb80f3bd4f2a222ea0f4c4f42806fba6f3a0bde0a76855bd8e3c  wordpress/plugins/badaround-core/contracts/nf-conditional-v1.0.json' | sha256sum -c -
+          npm ci --prefix tests --ignore-scripts --no-audit --no-fund
+          node --test tests/map-controls-01.cjs | tee evidence/scope-and-policy.log
+      - name: GEO-PREC and GEO-AREA production service regressions, no staging
+        run: |
+          set -euo pipefail
+          for test in geo-area-01a-moderation geo-area-01-publication geo-area-01-consumers geo-prec-01-publication geo-prec-01-moderation geo-prec-01-persistence geo-prec-01a-consumers native-report-f16 nf-ux-02b-v1-differential nf-ux-02b-v2 nf-ux-02c1-persistence nf-ux-02c2-recovery native-social-preference native-media-no-media-differential; do
+            php tests/$test.php > evidence/$test.log
+          done
+      - name: Frozen Native semantics and public geometry/cluster differential
+        run: |
+          set -euo pipefail
+          node --test --test-concurrency=1 tests/geo-area-01-model.cjs tests/geo-prec-01-admin.cjs tests/nf-ux-04-model.cjs tests/nf-ux-04-dom.cjs tests/nf-ux-04-service.cjs ops/nf05b-emergency.cjs tests/f1-15b-r5-smart-address.cjs tests/geo-public-03-choice.cjs tests/geo-public-06-rendering.cjs tests/sf9-public-privacy-boundary.cjs tests/native-social-preference.cjs 2>&1 | tee evidence/regression.log
+      - name: Fresh offline Chromium navigation/fullscreen and responsive evidence
+        run: |
+          set -euo pipefail
+          npm install --prefix /tmp/map-controls-browser --no-save playwright@1.56.1
+          node /tmp/map-controls-browser/node_modules/playwright/cli.js install --with-deps chromium
+          export BA_PLAYWRIGHT_MODULE=/tmp/map-controls-browser/node_modules/playwright
+          BA_EVIDENCE_DIR=evidence/browser/native node tests/geo-area-01-browser.cjs | tee evidence/native-browser.log
+          BA_EVIDENCE_DIR=evidence/browser/public node tests/map-controls-01-browser.cjs | tee evidence/public-browser.log
+          node tests/nf-ux-06-location-browser.cjs | tee evidence/device-location.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: map-controls-01-predeploy-evidence
+          path: evidence/
+          retention-days: 90

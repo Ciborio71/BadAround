@@ -16,10 +16,10 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
     this.innerHTML='<input aria-label="Ricerca Google simulata" autocomplete="off"><button type="button">Via verificata, Pomezia</button>';
     this.querySelector('button').onclick=()=>{const event=new Event('gmp-select');event.placePrediction={toPlace:()=>new Place()};this.dispatchEvent(event);};
    }}customElements.define('test-google-autocomplete',Widget);
-   window.google={maps:{importLibrary:async name=>{
+   window.google={maps:{ControlPosition:{RIGHT_TOP:"RIGHT_TOP"},importLibrary:async name=>{
     providerCalls.push(name);
     if(name==='places')return {Place,PlaceAutocompleteElement:class{constructor(){return document.createElement('test-google-autocomplete');}}};
-    if(name==='maps')return {Map:class{constructor(canvas){canvas.textContent='Anteprima mappa Google simulata';}setCenter(){}}};
+    if(name==='maps')return {Map:class{constructor(canvas){this.controls={RIGHT_TOP:{push:el=>canvas.append(el)}};canvas.textContent='Anteprima mappa Google simulata';}setCenter(){}}};
     if(name==='marker')return {AdvancedMarkerElement:class extends EventTarget{constructor(o){super();Object.assign(this,o);window.testMarker=this;}replaceChildren(node){this.content=node;}}};
     if(name==='geocoding')return {Geocoder:class{async geocode(){return {results:[{place_id:'private-google-id'}]};}}};
    }}};
