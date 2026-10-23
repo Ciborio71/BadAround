@@ -1,6 +1,32 @@
 {
   "candidate": "879f55853fbb99c20ad85bc522e03f19f93bc3c6",
   "run": 39885458548,
-  "phase": "UPLOAD",
-  "note": "55-file baseline custody and byte-exact rollback archived; protected state and historical HTML match certified baseline."
+  "phase": "PASS",
+  "fixtures": [
+    {
+      "report": 77,
+      "event": 360,
+      "radius": 100
+    },
+    {
+      "report": 78,
+      "event": 361,
+      "radius": 500
+    },
+    {
+      "report": 79,
+      "event": 362,
+      "radius": 1000
+    },
+    {
+      "report": 80,
+      "event": 363,
+      "mode": "exact_point"
+    }
+  ],
+  "live_google_maps": "PASS",
+  "public_detail_discovery_home_map": "PASS",
+  "protected_semantic_state": "UNCHANGED",
+  "custody_notes": "Only WordPress _edit_lock timestamps on old events346/347 changed. Exact baseline metadata SHA reproduced locally restoring only those two timestamps. Taxonomy baseline SHA reproduced subtracting authorized four publication counts from term_taxonomy4/9/14. No historical data/audit/projection changes.",
+  "cleanup": "runner finally required"
 }
