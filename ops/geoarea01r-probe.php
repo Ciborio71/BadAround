@@ -60,7 +60,7 @@ function gpr_negatives(){
 }
 add_action('rest_api_init',static function(){register_rest_route('geoarea01r-qa/v1','/inspect',[
  'methods'=>'POST','permission_callback'=>static function($r){return current_user_can('manage_options')&&hash_equals('cb226d4797ed6e7b0a9a8bd5c9b69cba9678c3cb00ffea668d24cf25f0d78073',hash('sha256',(string)$r->get_param('token')))?true:new WP_Error('geoarea01r_denied','QA authorization required.',['status'=>403]);},
- 'callback'=>static function($r){nocache_headers();header('Cache-Control: private, no-store, max-age=0');header('X-Robots-Tag: noindex, nofollow');try{
+ 'callback'=>static function($r){global $wpdb;nocache_headers();header('Cache-Control: private, no-store, max-age=0');header('X-Robots-Tag: noindex, nofollow');try{
   $action=$r->get_param('action');gpr_assert(in_array($action,['snapshot','negative','inspect','validate','submit','publish','radius_render','immutability'],true),'ACTION_SCOPE');$before=gpr_state();
   $allowed=array('13fed916-036d-48e4-a6b2-e6dd3f2b5fbe','5d21b702-d68c-4c60-be6f-bfcf7d25a3d7','a1528a9d-b937-4ba2-a49b-1a93309ee21b','81ead244-6243-480c-b825-eb6e9a352c15');
   if($action==='validate'){
