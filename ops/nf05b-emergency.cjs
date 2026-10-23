@@ -39,7 +39,7 @@ test('NF-UX-03: navigation, in-memory boot, keyboard focus, reset and payload is
  h.set('location.immediate_danger','no');assert(!visible(h));assert.equal(JSON.stringify(h.model.payload()),original);
  h.fill();h.set('location.immediate_danger','unsure');h.goReview();assert(visible(h));assert.equal(notice(h).previousElementSibling.tagName,'H2');
  h.set('location.immediate_danger','no');h.set('reporter.social_visibility','requested');h.model.setPublicLocationRequest('approximate_area');
- const expected=h.model.payload();h.submit();await tick();await tick();const sent=JSON.parse(h.requests.at(-1).request.body);assert.deepEqual(sent,JSON.parse(JSON.stringify(expected)));assert.equal(sent.schema_version,'badaround-report/v2');assert.equal(sent.location.public_location_request,'approximate_area');assert.equal(sent.reporter.social_visibility,'requested');assert.equal(sent.media.availability,'no');
+ const expected=h.model.payload();h.submit();await tick();await tick();const sent=JSON.parse(h.requests.at(-1).request.body);assert.deepEqual(sent,JSON.parse(JSON.stringify(expected)));assert.equal(sent.schema_version,'badaround-report/v2');assert.deepEqual(sent.location.public_location_request,{mode:'approximate_area',radius_m:500});assert.equal(sent.location.public_location_request_version,'public-location-request-v2');assert.equal(sent.reporter.social_visibility,'requested');assert.equal(sent.media.availability,'no');
  for(const key of ['truthfulness','media_rights','publication_rules','terms','privacy'])assert.equal(sent.consents[key],true);
  h.click('new');assert(!visible(h));assert.equal(h.model.step,0);h.close();
 });
