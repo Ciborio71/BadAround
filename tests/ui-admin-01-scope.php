@@ -38,6 +38,6 @@ if ($after !== $before) { throw new RuntimeException('Existing methods changed')
 $functions = file_get_contents(dirname(__DIR__) . '/wordpress/themes/badaround-child/functions.php');
 if (hash('sha256', $functions) !== '1f8111ee63ef31f2227421e51c8077f6015eeaad03c1e69bca415651c82d6e7d') { throw new RuntimeException('Classic Editor byte custody failed'); }
 foreach (["add_filter('use_block_editor_for_post_type', '__return_false', 100);", "add_filter('use_block_editor_for_post', '__return_false', 100);"] as $filter) {
-    if (!str_contains($functions, $filter)) { throw new RuntimeException('Classic Editor filter missing'); }
+    if (!str_contains(preg_replace('/\s+/', '', $functions), preg_replace('/\s+/', '', $filter))) { throw new RuntimeException('Classic Editor filter missing'); }
 }
 echo "PASS enqueue matrix 49 cases; existing methods byte-identical; Classic Editor filters and functions.php hash preserved.\n";

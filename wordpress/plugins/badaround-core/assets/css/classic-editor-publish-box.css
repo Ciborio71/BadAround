@@ -25,9 +25,11 @@ body.post-type-ba_evento:not(.block-editor-page) #submitdiv #publishing-action {
 body.post-type-ba_evento:not(.block-editor-page) #submitdiv #minor-publishing-actions > .clear,
 body.post-type-ba_evento:not(.block-editor-page) #submitdiv #major-publishing-actions > .clear {
 	/* Float-clearing nodes have no role in these flex rows. */
-	flex-basis: 100%;
-	height: 0;
-	margin-top: -12px;
+	display: none;
+}
+body.post-type-ba_evento:not(.block-editor-page) #submitdiv #preview-action,
+body.post-type-ba_evento:not(.block-editor-page) #submitdiv #publishing-action {
+	margin-left: auto;
 }
 body.post-type-ba_evento:not(.block-editor-page) #submitdiv .button,
 body.post-type-ba_evento:not(.block-editor-page) #ba_moderation_actions .inside .button {
