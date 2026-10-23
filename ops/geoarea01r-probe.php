@@ -61,11 +61,21 @@ function gpr_negatives(){
 add_action('rest_api_init',static function(){register_rest_route('geoarea01r-qa/v1','/inspect',[
  'methods'=>'POST','permission_callback'=>static function($r){return current_user_can('manage_options')&&hash_equals('cb226d4797ed6e7b0a9a8bd5c9b69cba9678c3cb00ffea668d24cf25f0d78073',hash('sha256',(string)$r->get_param('token')))?true:new WP_Error('geoarea01r_denied','QA authorization required.',['status'=>403]);},
  'callback'=>static function($r){nocache_headers();header('Cache-Control: private, no-store, max-age=0');header('X-Robots-Tag: noindex, nofollow');try{
-  $action=$r->get_param('action');gpr_assert(in_array($action,['snapshot','negative','inspect','validate','submit','publish'],true),'ACTION_SCOPE');$before=gpr_state();
-  $allowed=array('c6485fe9-aea6-4a12-a06e-ad9f6f43853f','5d21b702-d68c-4c60-be6f-bfcf7d25a3d7','a1528a9d-b937-4ba2-a49b-1a93309ee21b','81ead244-6243-480c-b825-eb6e9a352c15');
+  $action=$r->get_param('action');gpr_assert(in_array($action,['snapshot','negative','inspect','validate','submit','publish','radius_render','immutability'],true),'ACTION_SCOPE');$before=gpr_state();
+  $allowed=array('13fed916-036d-48e4-a6b2-e6dd3f2b5fbe','5d21b702-d68c-4c60-be6f-bfcf7d25a3d7','a1528a9d-b937-4ba2-a49b-1a93309ee21b','81ead244-6243-480c-b825-eb6e9a352c15');
   if($action==='validate'){
    $results=[];foreach((array)$r->get_param('cases') as $p){$v=BadAround_Report_Version_Registry::prepare($p);$results[]=is_wp_error($v)?['error'=>$v->get_error_code()]:['valid'=>true];}
    gpr_assert($before===gpr_state(),'VALIDATION_MUTATED_PROTECTED_STATE');return ['results'=>$results];
+  }
+  if($action==='radius_render'){
+   $htmls=[];foreach([50,250] as $radius){
+    $filter=static function($sql)use($radius){if(str_contains($sql,'AS request_mode')&&str_contains($sql,'event_id = 360'))$sql=str_replace("JSON_UNQUOTE(JSON_EXTRACT(content_original, '$.canonical.location.public_location_request'))","'{\"mode\":\"approximate_area\",\"radius_m\":".$radius."}'",$sql);return $sql;};
+    add_filter('query',$filter,PHP_INT_MAX);try{ob_start();(new BadAround_Moderation_Admin())->render_geo_decision_box(get_post(360));$html=ob_get_clean();gpr_assert(str_contains($html,'Area approssimativa — circa '.$radius.' m')&&!preg_match('/<(input|select|textarea|button)\\b/i',$html),'READ_ONLY_RADIUS_RENDER');$htmls[$radius]=wp_strip_all_tags($html);}finally{remove_filter('query',$filter,PHP_INT_MAX);}
+   }gpr_assert($before===gpr_state(),'READ_ONLY_RENDER_MUTATION');return ['renderings'=>$htmls];
+  }
+  if($action==='immutability'){
+   $repo=new BadAround_Report_Repository();$id=$repo->find_by_native_submission('13fed916-036d-48e4-a6b2-e6dd3f2b5fbe');$old=$wpdb->get_var($wpdb->prepare("SELECT content_original FROM {$wpdb->prefix}ba_reports WHERE id=%d",$id));$e=json_decode($old,true);$c=$e['canonical'];$c['location']['public_location_request']['radius_m']=500;
+   $result=$repo->persist_canonical_private_data($id,$c);$after=$wpdb->get_var($wpdb->prepare("SELECT content_original FROM {$wpdb->prefix}ba_reports WHERE id=%d",$id));gpr_assert($result===false&&$old===$after,'C1_RADIUS_IMMUTABILITY');return ['c1'=>'BLOCKED_BYTES_UNCHANGED'];
   }
   if($action==='submit'){
    $p=$r->get_param('payload');gpr_assert(in_array($p['submission_id']??null,$allowed,true),'UUID_SCOPE');
