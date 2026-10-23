@@ -1,1 +1,1 @@
-{"candidate":"443bb4cb90782a45d058ce03717762c3648f3d6c","run":39921737539,"phase":"FAIL","reason":"Pre-upload QA-only referrer policy correction; no application upload authorized in this attempt."}
+{"candidate":"443bb4cb90782a45d058ce03717762c3648f3d6c","run":39922002566,"phase":"FAIL","reason":"STOP: pre-upload runtime custody mismatch under investigation; no upload permitted."}
