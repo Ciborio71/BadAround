@@ -29,9 +29,11 @@ $block = "/**\n * BadAround admin: prefer the classic WordPress editor on every 
 if (substr_count($current, $block) !== 1 || str_replace($block, '', $current) !== $base) {
     throw new RuntimeException('Unexpected functions.php change beyond approved Classic Editor block');
 }
-foreach (array('assets/js/map-navigation.js','assets/css/map-navigation.css','assets/js/map.js','assets/js/native-report/location-map.js') as $file) {
+foreach (array('assets/js/map-navigation.js','assets/js/map.js','assets/js/native-report/location-map.js') as $file) {
     $path = 'wordpress/themes/badaround-child/' . $file;
     $before = shell_exec('git show dc5ca5be7314e841f2b70e6d43fb6cda5bc12f7a:' . $path);
     if ($before !== file_get_contents(dirname(__DIR__) . '/' . $path)) { throw new RuntimeException('Changed map runtime: ' . $file); }
 }
 echo "PASS: exact additive reconciliation; all map runtime bytes preserved\n";
+
+if (hash_file('sha256', dirname(__DIR__) . '/wordpress/themes/badaround-child/functions.php') !== '1f8111ee63ef31f2227421e51c8077f6015eeaad03c1e69bca415651c82d6e7d') { throw new RuntimeException('Reconciled functions.php bytes changed'); }

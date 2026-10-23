@@ -15,3 +15,7 @@
 	.ba-map-navigation-shell .ba-map-preview-card h3{padding-right:28px;overflow-wrap:anywhere}
 	.ba-map-navigation-shell .ba-map-preview-card__cta{white-space:normal;text-align:center}
 }
+
+/* Native's Places widget has an intrinsic minimum width. Constrain the grid
+ * track, not Google's controls, so the navigation rail stays inside the form. */
+.ba-native .ba-native-smart-address{grid-template-columns:minmax(0,1fr)}

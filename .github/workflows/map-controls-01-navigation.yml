@@ -1,7 +1,7 @@
 name: MAP-CONTROLS-01 global navigation pre-deploy
 on:
   push:
-    branches: [feature/map-controls-01-global-navigation, fix/map-controls-01a-classic-editor-reconcile]
+    branches: [feature/map-controls-01-global-navigation, fix/map-controls-01a-classic-editor-reconcile, fix/map-controls-01d-native-mobile-clipping]
 permissions:
   contents: read
 jobs:

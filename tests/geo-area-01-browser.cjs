@@ -9,7 +9,7 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
  html=html.replace(`<script src="${prefix}wizard.js">`,`<script src="${prefix}location-map.js"></script><script src="${prefix}smart-address.js"></script><script src="${prefix}wizard.js">`);
  html=html.replace('"smartAddress":null','"smartAddress":{"key":"TEST","territories":[[2,0,"Lazio"],[3,2,"Roma"],[4,3,"Pomezia"]]}');
  const browser=process.env.BA_BROWSER_ENGINE==='webkit'?await webkit.launch({headless:true}):await chromium.launch({headless:true,...(process.env.BA_CHROMIUM?{executablePath:process.env.BA_CHROMIUM}:{}),args:['--no-sandbox','--disable-dev-shm-usage']});
- try{for(const width of [320,390,768,1024,1440]){
+ try{for(const width of [305,320,375,390,768,1024,1440]){
   const page=await browser.newPage({viewport:{width,height:850},reducedMotion:'reduce'});page.setDefaultTimeout(12000);const failures=[];page.on('pageerror',e=>failures.push(e.message));
   await page.addInitScript(installControlsProvider);
   await page.addInitScript(()=>{
@@ -24,7 +24,8 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
    const components=[['country','Italia','IT'],['administrative_area_level_1','Lazio','Lazio'],['administrative_area_level_2','Roma','RM'],['locality','Pomezia','Pomezia']].map(([type,longText,shortText])=>({types:[type],longText,shortText}));
    class Place{constructor(){this.addressComponents=components;this.formattedAddress='Via verificata, Pomezia RM, Italia';this.location={lat:()=>41.66,lng:()=>12.43};}async fetchFields(){providerCalls.push('details');}}
    class Widget extends HTMLElement{connectedCallback(){
-    this.innerHTML='<input aria-label="Ricerca Google simulata" autocomplete="off"><button type="button">Via verificata, Pomezia</button>';
+    this.style.cssText='display:block;width:100%;max-width:100%;box-sizing:border-box;overflow:hidden';
+    this.innerHTML='<input style="width:406px" aria-label="Ricerca Google simulata" autocomplete="off"><button type="button">Via verificata, Pomezia</button>';
     this.querySelector('button').onclick=()=>{const event=new Event('gmp-select');event.placePrediction={toPlace:()=>new Place()};this.dispatchEvent(event);};
    }}customElements.define('test-google-autocomplete',Widget);
    window.google={maps:{ControlPosition:{RIGHT_TOP:"RIGHT_TOP"},Circle,importLibrary:async name=>{
@@ -48,6 +49,23 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
   await page.getByLabel('Ricerca Google simulata').fill('testo non selezionato');await page.getByLabel('Ricerca Google simulata').press('Enter');
   await page.locator('[data-native-next]').click();assert(await page.locator('[data-native-step="location"]').isVisible());assert.equal(await page.locator('[name="location.exact_address"]').inputValue(),'');
   await page.locator('test-google-autocomplete button').click();await page.locator('[data-smart-map-panel]').waitFor({state:'visible'});
+  // Reproduce the live Places widget's 406px intrinsic contribution. Root overflow
+  // alone misses a clipped grid track; inspect each control and clipping ancestor.
+  const geometry=await page.evaluate(()=>{
+   const map=document.querySelector('[data-smart-map]'),m=map.getBoundingClientRect();
+   const nodes=[...map.querySelectorAll('[data-test-controls] button'),map.querySelector('.ba-map-pan')];
+   const bounds=nodes.map(el=>{const r=el.getBoundingClientRect();let left=0,right=innerWidth;
+    for(let p=el.parentElement;p;p=p.parentElement){if(/hidden|clip|auto|scroll/.test(getComputedStyle(p).overflowX)){const b=p.getBoundingClientRect();left=Math.max(left,b.left);right=Math.min(right,b.right);}}
+    return {label:el.getAttribute('aria-label')||'pan pad',left:r.left,right:r.right,width:r.width,height:r.height,visible:r.left>=left&&r.right<=right,inset:m.right-r.right};});
+   return {width:innerWidth,map:{left:m.left,right:m.right,width:m.width},bounds};
+  });
+  assert(geometry.bounds.every(b=>b.visible&&b.left>=geometry.map.left&&b.inset>=8),JSON.stringify(geometry));
+  assert(geometry.bounds.filter(b=>b.label.startsWith('Sposta')).every(b=>b.width>=44&&b.height>=44));
+  await page.locator('[data-smart-geolocate]').focus();
+  const visited=[];
+  for(let i=0;i<16;i++){await page.keyboard.press('Tab');const f=await page.evaluate(()=>{const e=document.activeElement,r=e.getBoundingClientRect(),m=document.querySelector('[data-smart-map]').getBoundingClientRect();return {label:e.getAttribute('aria-label')||'',left:r.left,right:r.right,mapLeft:m.left,mapRight:m.right};});if(f.label.startsWith('Sposta')||f.label.includes('zoom (provider')){assert(f.left>=f.mapLeft&&f.right<=Math.min(geometry.width,f.mapRight));visited.push(f.label);}}
+  assert.equal(new Set(visited.filter(l=>l.startsWith('Sposta'))).size,4);
+  const geometryDir=process.env.BA_EVIDENCE_DIR||'/tmp/geo-area-01-browser';fs.mkdirSync(geometryDir,{recursive:true});fs.writeFileSync(path.join(geometryDir,`geometry-${width}.json`),JSON.stringify(geometry,null,2));
   // GEO-PUBLIC-03: one authoritative choice, keyboard-operable, independent of private point.
   const exactSnapshot=await page.evaluate(()=>JSON.stringify(document.querySelector('[data-native-report]').nativeReport.model.payload()));
   assert.equal(await page.evaluate(()=>circles.length),0);await page.getByRole('button',{name:'Aumenta zoom (provider simulato)',exact:true}).click();await page.getByRole('button',{name:'Riduci zoom (provider simulato)',exact:true}).click();await page.getByRole('button',{name:'Sposta mappa verso est',exact:true}).click();
