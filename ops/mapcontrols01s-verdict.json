@@ -1,8 +1,6 @@
 {
   "candidate": "56853ec079cbd9bdd1f466104790e07f54bb60d1",
   "run": 39939688213,
-  "phase": "UPLOAD",
-  "custody": "59/59 PASS",
-  "rollback": "BYTE_EXACT_VERIFIED",
-  "fixtures": "READ_ONLY_SNAPSHOT_CAPTURED"
+  "phase": "FAIL",
+  "reason": "LIVE_FULLSCREEN_GATE_NOT_CERTIFIED: Google control aria-pressed=true but actual rendered map remains embedded; read-only runtime proof fullscreen=false. No unsupported PASS or application patch."
 }
