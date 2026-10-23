@@ -33,6 +33,7 @@ body.post-type-ba_evento:not(.block-editor-page) #submitdiv #publishing-action {
 }
 body.post-type-ba_evento:not(.block-editor-page) #submitdiv .button,
 body.post-type-ba_evento:not(.block-editor-page) #ba_moderation_actions .inside .button {
+	float: none;
 	box-sizing: border-box;
 	max-width: 100%;
 	min-height: 40px;
