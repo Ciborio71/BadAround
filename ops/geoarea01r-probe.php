@@ -61,8 +61,44 @@ function gpr_negatives(){
 add_action('rest_api_init',static function(){register_rest_route('geoarea01r-qa/v1','/inspect',[
  'methods'=>'POST','permission_callback'=>static function($r){return current_user_can('manage_options')&&hash_equals('cb226d4797ed6e7b0a9a8bd5c9b69cba9678c3cb00ffea668d24cf25f0d78073',hash('sha256',(string)$r->get_param('token')))?true:new WP_Error('geoarea01r_denied','QA authorization required.',['status'=>403]);},
  'callback'=>static function($r){nocache_headers();header('Cache-Control: private, no-store, max-age=0');header('X-Robots-Tag: noindex, nofollow');try{
-  $action=$r->get_param('action');gpr_assert(in_array($action,['snapshot','negative','inspect'],true),'ACTION_SCOPE');$before=gpr_state();$out=['state'=>$before,'native'=>badaround_native_report_config()['schemaVersion'],'contract_sha'=>hash_file('sha256',WP_PLUGIN_DIR.'/badaround-core/contracts/nf-conditional-v1.0.json'),'media_enabled'=>(new BadAround_Native_Media_Config())->enabled(),'fixtures'=>[]];
+  $action=$r->get_param('action');gpr_assert(in_array($action,['snapshot','negative','inspect','validate','submit','publish'],true),'ACTION_SCOPE');$before=gpr_state();
+  $allowed=array('c6485fe9-aea6-4a12-a06e-ad9f6f43853f','5d21b702-d68c-4c60-be6f-bfcf7d25a3d7','a1528a9d-b937-4ba2-a49b-1a93309ee21b','81ead244-6243-480c-b825-eb6e9a352c15');
+  if($action==='validate'){
+   $results=[];foreach((array)$r->get_param('cases') as $p){$v=BadAround_Report_Version_Registry::prepare($p);$results[]=is_wp_error($v)?['error'=>$v->get_error_code()]:['valid'=>true];}
+   gpr_assert($before===gpr_state(),'VALIDATION_MUTATED_PROTECTED_STATE');return ['results'=>$results];
+  }
+  if($action==='submit'){
+   $p=$r->get_param('payload');gpr_assert(in_array($p['submission_id']??null,$allowed,true),'UUID_SCOPE');
+   gpr_assert(($p['schema_version']??null)==='badaround-report/v2'&&($p['reporter']['social_visibility']??null)==='declined'&&empty($p['media']['items'])&&str_contains($p['content']['description']??'','QA sintetica GEO-AREA-01R'),'SYNTHETIC_SCOPE');
+   $req=new WP_REST_Request('POST','/badaround/v1/reports');$req->set_header('content-type','application/json');$req->set_header('x-badaround-intake','badaround-report/v1');$req->set_body(wp_json_encode($p));
+   $res=rest_do_request($req);gpr_assert($before===gpr_state(),'SUBMISSION_MUTATED_PROTECTED_STATE');return ['http'=>$res->get_status(),'body'=>$res->get_data()];
+  }
+  if($action==='publish'){
+   $id=(int)$r->get_param('event');gpr_assert($id>358,'NEW_EVENT_ONLY');
+   $row=$wpdb->get_row($wpdb->prepare("SELECT content_original FROM {$wpdb->prefix}ba_reports WHERE event_id=%d AND deleted_at IS NULL ORDER BY id LIMIT 1",$id),ARRAY_A);$e=json_decode($row['content_original']??'',true);$p=$e['canonical']??[];
+   gpr_assert(in_array($p['submission_id']??null,$allowed,true)&&($p['reporter']['social_visibility']??null)==='declined','FIXTURE_SCOPE');
+   $mod=(new BadAround_Moderation_Service())->transition($id,'approved');gpr_assert(!is_wp_error($mod),'APPROVAL_FAILED');$pub=(new BadAround_Publication_Service())->publish($id);gpr_assert(!is_wp_error($pub),'PUBLICATION_FAILED:'.(is_wp_error($pub)?$pub->get_error_code():''));
+   return ['fixture'=>gpr_inspect($id)];
+  }
+  $out=['state'=>$before,'native'=>badaround_native_report_config()['schemaVersion'],'contract_sha'=>hash_file('sha256',WP_PLUGIN_DIR.'/badaround-core/contracts/nf-conditional-v1.0.json'),'media_enabled'=>(new BadAround_Native_Media_Config())->enabled(),'fixtures'=>[]];
   foreach([303,304,269,352,354,356,358] as $id)$out['fixtures'][]=gpr_inspect($id);
   if($action==='inspect'){foreach((array)$r->get_param('events') as $id){gpr_assert((int)$id>358,'NEW_FIXTURE_ONLY');$out['new_fixtures'][]=gpr_inspect((int)$id);}}if($action==='negative')$out['negatives']=gpr_negatives();gpr_assert($before===gpr_state(),'READ_ONLY_INVARIANT');return $out;
  }catch(Throwable $e){return new WP_Error('geoarea01r_failure',$e->getMessage(),['status'=>500]);}
  }]);});
+
+add_action('template_redirect',static function(){
+ if(!isset($_GET['geoarea01r_qa'])||!hash_equals('cb226d4797ed6e7b0a9a8bd5c9b69cba9678c3cb00ffea668d24cf25f0d78073',hash('sha256',(string)$_GET['geoarea01r_qa'])))return;
+ nocache_headers();header('Cache-Control: private, no-store, max-age=0');header('X-Robots-Tag: noindex, nofollow');
+ add_action('wp_head',static function(){?>
+ <script>
+ (()=>{'use strict';const circles=[];let imported;
+ function wrap(){const g=window.google?.maps;if(!g?.Circle||g.Circle.__geoareaQA)return;const Original=g.Circle;const Observed=new Proxy(Original,{construct(C,args){const c=Reflect.construct(C,args);circles.push(c);return c;}});Observed.__geoareaQA=true;g.Circle=Observed;}
+ const timer=setInterval(()=>{const g=window.google?.maps;if(!g)return;wrap();if(g.importLibrary&&g.importLibrary!==imported){const original=g.importLibrary;imported=function(...args){return original.apply(this,args).then(result=>{wrap();return result;});};g.importLibrary=imported;}},100);
+ addEventListener('DOMContentLoaded',()=>{const box=document.createElement('aside');box.id='geoarea01r-live-qa';box.style.cssText='padding:8px;background:#fff;border:2px solid #087f8c;color:#111;font:12px monospace;overflow-wrap:anywhere';box.innerHTML='<strong>QA temporanea — Google Maps reale</strong><output id="geoarea01r-google-proof"></output><button type="button" id="geoarea01r-zoom-in">QA zoom +</button><button type="button" id="geoarea01r-zoom-out">QA zoom −</button>';document.body.append(box);
+ function active(){return circles.filter(c=>c.getMap());}
+ for(const [id,delta] of [['geoarea01r-zoom-in',1],['geoarea01r-zoom-out',-1]])document.getElementById(id).onclick=()=>{for(const map of new Set(active().map(c=>c.getMap())))map.setZoom(map.getZoom()+delta);};
+ setInterval(()=>{document.getElementById('geoarea01r-google-proof').textContent=JSON.stringify(active().map(c=>({radius_m:c.getRadius(),center:{lat:c.getCenter().lat(),lng:c.getCenter().lng()},zoom:c.getMap().getZoom(),context:c.getMap().getDiv().dataset.baMapContext||'native',event:c.getMap().getDiv().dataset.baEventId||null,actual_google_maps:true})));},100);
+ });})();
+ </script>
+ <?php },0);
+});

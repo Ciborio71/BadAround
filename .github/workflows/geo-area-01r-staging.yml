@@ -2,7 +2,7 @@ name: GEO-AREA-01R composite fourteen-file staging deploy and live QA
 on:
   push:
     branches: [deploy/geo-area-01r-composite]
-    paths: ['ops/geoarea01r-deploy.py', 'ops/geoarea01r-probe.php', 'ops/geoarea01r-scope.json', '.github/workflows/geo-area-01r-staging.yml']
+    paths: ['ops/geoarea01r-launch.json']
 permissions:
   contents: read
   actions: read

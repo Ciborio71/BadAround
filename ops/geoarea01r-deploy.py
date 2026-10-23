@@ -57,6 +57,13 @@ elif phase=='install-probe':
   b=pathlib.Path('ops/geoarea01r-probe.php').read_bytes();(E/'probe-installed.txt').write_text(PROBE);put(f,PROBE,b);assert read(f,PROBE)==b
  finally:f.quit()
  print('TEMPORARY_ADMIN_TOKEN_PROBE_READY',flush=True)
+elif phase=='update-probe':
+ f=connect()
+ try:
+  assert read(f,PROBE)==git('7a6d4b9d683741f12369d96f4281b73dfa543871','ops/geoarea01r-probe.php'),'QA_PROBE_DRIFT'
+  b=pathlib.Path('ops/geoarea01r-probe.php').read_bytes();put(f,PROBE,b);assert read(f,PROBE)==b
+ finally:f.quit()
+ print('TEMPORARY_QA_PROBE_REFRESHED_HASH_VERIFIED',flush=True)
 elif phase=='deploy':
  deadline=time.time()+1800
  while time.time()<deadline:

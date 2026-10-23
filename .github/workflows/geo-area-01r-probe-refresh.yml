@@ -1,0 +1,31 @@
+name: GEO-AREA-01R temporary QA component refresh
+on:
+  push:
+    branches: [deploy/geo-area-01r-composite]
+    paths: ['ops/geoarea01r-probe.php']
+permissions:
+  contents: read
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Strict FTPS trust chain
+        run: |
+          set -euo pipefail
+          mkdir -p tls
+          curl --fail --silent --show-error https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl --fail --silent --show-error https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          openssl verify -CAfile /etc/ssl/certs/ca-certificates.crt -untrusted tls/yr-by-x1.pem tls/yr2.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/curl-chain.pem
+      - name: Refresh only existing staging QA component
+        run: python ops/geoarea01r-deploy.py update-probe
