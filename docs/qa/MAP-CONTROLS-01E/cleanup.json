@@ -1,0 +1,10 @@
+{
+  "status": 404,
+  "body": {
+    "code": "rest_no_route",
+    "message": "Nessun percorso fornisce una corrispondenza tra l'URL ed il metodo richiesto.",
+    "data": {
+      "status": 404
+    }
+  }
+}

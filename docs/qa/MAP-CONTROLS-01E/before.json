@@ -1,0 +1,294 @@
+{
+  "state": {
+    "reports": "541b472254b13fe89dfeabe88c787509ae4862c60c152607a181fd419bba3a5a",
+    "legacy_reports": "d6048c2eae1a3f6171beb99e909e879c0f9b1e2eb4258fb999dc2711ed80b409",
+    "events": "b038cb6b195c9bf1fd9f83580cb2464fceb38e62d45393ed8d275272a8266b82",
+    "legacy_events": "3992a7fe28de725b359ad3e681c1a74103f1e2308aa6ce06b530ac338a31b0a5",
+    "eventmeta": "bfdcd378602745fb12b2af5144466349030197104af62d559461e8901c5a2cc2",
+    "legacy_semantic_meta": "a6f9f3546b706d22b3f55cafcd998a3afa8891e5ec04500d494a1c3300aaee9c",
+    "relationships": "9e529ed2ba08c3a3b1aa67cb97f61cefaaedf4bb028411e814c1e196ba73ddcb",
+    "audit": "98c500fabb984342d81383460080c0234b0a5ffecaf9ad8b41a2a29127037b9a",
+    "legacy_audit": "2a2a07f3ad6c6c635b168e2d57f73e76cfdf2f1b3fa7692facffc19bfd8df2e4",
+    "terms": "8c4e83d6e717f81c065ac5d28f759d21945bcf36228b5005e8ed396c2c5eb868",
+    "taxonomy": "621d0d639d9544ec5205ed4a5fb9cca9bf7d81c0639df894119726ccad271a11",
+    "termmeta": "7d2904780062f9b3f9d975da47467bf854f94b3ba08c4618698023071d50c7d4",
+    "schema": {
+      "cixe6qoXf_actionscheduler_actions": "8275baa753ffa78db2d71604348e11d97f353a75e58891ffc9fc27444cf9980c",
+      "cixe6qoXf_actionscheduler_claims": "141464c8041f4d5d6e9afcc59e19f560538fa6b4a3945f293d7c3e52974d0e01",
+      "cixe6qoXf_actionscheduler_groups": "5f92bb4933096b54b3c8eb5ef2c436593c070b51bc348c20bd9ab5a9f6d51828",
+      "cixe6qoXf_actionscheduler_logs": "4815d1771ee65a1ab7950e5935cff94bd2ca8c1687031529b962e5b0fe82a817",
+      "cixe6qoXf_ba_audit_log": "1ea0f4abd32c2fa28a93d0ce340d6fe2fbcc21b2579828e823ab55a2d8153248",
+      "cixe6qoXf_ba_contribution_media": "0cd9e75e57d43fc4f15e772cad99369e455b3be7bb03ee4878e0f007897b89a2",
+      "cixe6qoXf_ba_contribution_notifications": "a189c17502a68f9489e701f7bf5511cb743d04ac94757445f19890cd604ebc0a",
+      "cixe6qoXf_ba_contributions": "8a30003c3a1004096670ded889c8cf4ac6a61bde65e57b01dafacc9f82ec9413",
+      "cixe6qoXf_ba_native_media_items": "c555fedc2029d3e3ba793327dce9ac6de210465e2645d79f4286a41ec06de1f9",
+      "cixe6qoXf_ba_native_media_limits": "332cd029ddbb28731a75626afb48ac2fbb8cde38375890065415650f3133f698",
+      "cixe6qoXf_ba_native_media_operations": "6c66a455e8c98db6b4147b92640118dd202c68c5960b8229dad2503ffcef473f",
+      "cixe6qoXf_ba_native_media_sessions": "149d73c623f9e85bfa4d526876f147f950cd012567b246ea0fe884f295fd36cb",
+      "cixe6qoXf_ba_native_media_upload_keys": "1b56ce9f9dc4b2ecc83c611329768905dc47d78ba7e9ec49ffd779d62fdf04eb",
+      "cixe6qoXf_ba_report_media": "e3fa604e73ecec676ee9730244b6e76a947486d17e6da2a7f1496ac3beda4ae5",
+      "cixe6qoXf_ba_reports": "813ac3378b6936105783fcdd5af94e4cbf276f8a5628b49c94482184d17ca2c0",
+      "cixe6qoXf_ba_sentinel_event_matches": "fcf57d25fa41a9825eb3857816ef291833c53b03bc712c7d2093394b0204965e",
+      "cixe6qoXf_ba_sentinels": "acfbaad5321753ac7a9d22e42c01808ef796f096b13a6eeb0a5effd9f5acca94",
+      "cixe6qoXf_commentmeta": "440e6a8e02c94cd3d3c107b87b7488b59c0ce6dc1bc4c9ec40992065b1f7fa73",
+      "cixe6qoXf_comments": "01049a48cb13ce909b93edc54b3368ef09aac9ced20a94975fb0108dadd3bf80",
+      "cixe6qoXf_links": "c1f82778294d9650c462a7c0e39769d66895654d1fc9eea9cb69c0274bf0baf9",
+      "cixe6qoXf_options": "d59dbdc2ee8982f7e4efe905b0cfe97262d0c432d51eb279ef0c65cc6104c518",
+      "cixe6qoXf_postmeta": "44c4013aafaa47ce740df734d075c178b38e39071ec8d7b141a21ef466cf3675",
+      "cixe6qoXf_posts": "a14aecb991e96ad84953f6a6845f8039149573495aac35c8ed652fca01994a12",
+      "cixe6qoXf_term_relationships": "4b5bec7bad59e231fc3b76f726e36ecdd32b9579558b478ebc9d8a1a716679a5",
+      "cixe6qoXf_term_taxonomy": "18ed37021b78a8e3dcfd31426519335084a92586adb2ba5ddac7c88939569388",
+      "cixe6qoXf_termmeta": "14be1f3ef3fb0658cbf577ce04b7142c3b2d2a2ac36cae25f330e62e3560ce66",
+      "cixe6qoXf_terms": "a1d31635d9eac4a850e34b7edacb5561869a61851a8ce743a578274b2b904f95",
+      "cixe6qoXf_usermeta": "10e6a20ed815b354e020a8ac08f348d2f5d27b9d5f909fc9d2000bad6a9167c7",
+      "cixe6qoXf_users": "cc58a217d6a143a5be7b7bf71937c48b807a5930e95e62096aaa6b75228e27a7",
+      "cixe6qoXf_wpforms_analytics_fields": "5e2c25800b69b89d8ee6da77a7c473e287b253eadaf009b69906b5ffa87c7463",
+      "cixe6qoXf_wpforms_analytics_forms": "2e58ceab81c1739a9da413984d11c5dadbf62c3e8f1739e3f24d5522a9814110",
+      "cixe6qoXf_wpforms_analytics_snapshot_fields": "3627a5cbd9cde428de6c575c3caafba9bb6edb29e6c9dca0b4f2d474c4d37aa8",
+      "cixe6qoXf_wpforms_analytics_snapshots": "afe53394b83c76fdd97cdf2727a370a201d49c974e3ae811ed0f5c37c47edd4a",
+      "cixe6qoXf_wpforms_dashboard_form_daily": "efd18d63b4ca90ebd2b28875da787927859626df0314f1eaa190cdb4a4d5b3cf",
+      "cixe6qoXf_wpforms_dashboard_location_daily": "199e883ce0314339ae92f6ef38e6757cbbef085ddc260a47e8ce6ed6fd40fda1",
+      "cixe6qoXf_wpforms_dashboard_payment_daily": "e5d1bf46460973f3d1d4b700db394a1f6b9a120b070eb18c84aed046ecf1c613",
+      "cixe6qoXf_wpforms_entries": "54ee30c8a1ff0c9876af7479696f4a75048b57df8cf7d57f1f2fb5d9f07ab1a8",
+      "cixe6qoXf_wpforms_entry_fields": "ab522fa1e343040b87d4360d065b7519b9c455724fe64e4141e26cdc605daa12",
+      "cixe6qoXf_wpforms_entry_meta": "0783b076c0ee38a19ab97af349aa581ba3527a4b81c5e4e704d599cbdd297457",
+      "cixe6qoXf_wpforms_file_restrictions": "71daa831f3a2643a5222cd86a1903ddf9455b9c8d2997ab0e2e061ce0d643b32",
+      "cixe6qoXf_wpforms_logs": "ddedc5575e441d3dc1a6dc035d7f61ace26ecd567db50bd037578d5d86ab587c",
+      "cixe6qoXf_wpforms_payment_meta": "8c7626c658fa712f41f35a638797162390fef4f01f31c94fbdffdce791013c7b",
+      "cixe6qoXf_wpforms_payments": "f58ecfba367f4104fa28af8b478c9b0ea28ce30167661e64e40c20e9080f538c",
+      "cixe6qoXf_wpforms_product_events_queue": "68389ca7415644a627f1d67bb1ee54f237a32b59e96b3ed03ad36dcff6598a36",
+      "cixe6qoXf_wpforms_protected_files": "70148762297a27bb9c23ac4b954b12ad2b3a62afe9d427c8963727acfe21cc48",
+      "cixe6qoXf_wpforms_tasks_meta": "8e64f4513ad56e7f1ad7a7f13ae36db406ccd29cb59ea7b127a2f0a98d48c754",
+      "cixe6qoXf_wpvibe_audit_log": "712bdeb6940e4dbe8c5b13c1252b585e5ad90bd6edc9a78ca11499b1e71090b3",
+      "cixe6qoXf_wpvibe_op_receipts": "2664c47ac4bd3e72626293f97c9f5fd0256b6b244d2d97d87ee03f60b26f2513"
+    }
+  },
+  "native": "badaround-report/v2",
+  "contract_sha": "dc282153243ffb80f3bd4f2a222ea0f4c4f42806fba6f3a0bde0a76855bd8e3c",
+  "fixtures": [
+    {
+      "event": 303,
+      "report": 31,
+      "status": "publish",
+      "moderation": "published",
+      "public_geo": {
+        "version": "public-location/v1",
+        "mode": "exact_point",
+        "lat": 41.8991622,
+        "lng": 12.4730719,
+        "radius_meters": 0,
+        "radius_m": 0,
+        "source": "event_public",
+        "precision": "exact_point"
+      },
+      "moderation_text": "Localizzazione richiesta dall’utenteRichiesta utente: Punto esattoQuesta decisione non pubblica l’evento e non crea coordinate pubbliche. La nuova pubblicazione geografica non è ancora attiva.Precisione pubblica approvata: Punto esattoDecisione in sola lettura: la modifica di eventi già pubblicati o con stato incompatibile richiede un percorso separato.",
+      "moderator_geo_controls": false,
+      "audit_sha256": "675af606ff3826c7702c38e6459d5d098f4eb1f6d380a3a805b32b89872a8bfe"
+    },
+    {
+      "event": 304,
+      "report": 32,
+      "status": "publish",
+      "moderation": "published",
+      "public_geo": {
+        "version": "public-location/v1",
+        "mode": "approximate_area",
+        "lat": 41.89553,
+        "lng": 12.479214,
+        "radius_meters": 1000,
+        "radius_m": 1000,
+        "source": "event_public",
+        "precision": "approximate_area"
+      },
+      "moderation_text": "Localizzazione richiesta dall’utenteRichiesta utente: Area approssimativaQuesta decisione non pubblica l’evento e non crea coordinate pubbliche. La nuova pubblicazione geografica non è ancora attiva.Precisione pubblica approvata: Area approssimativaDecisione in sola lettura: la modifica di eventi già pubblicati o con stato incompatibile richiede un percorso separato.",
+      "moderator_geo_controls": false,
+      "audit_sha256": "65a74101c71863c66a976ac8d0ed472ad64cc22e2ac46507ae458b37d2189b6c"
+    },
+    {
+      "event": 269,
+      "report": 17,
+      "status": "publish",
+      "moderation": "published",
+      "public_geo": null,
+      "moderation_text": "Localizzazione richiesta dall’utenteRichiesta utente: non disponibile / criterio legacyQuesta decisione non pubblica l’evento e non crea coordinate pubbliche. La nuova pubblicazione geografica non è ancora attiva.Precisione pubblica approvata: Da valutareDecisione in sola lettura: la modifica di eventi già pubblicati o con stato incompatibile richiede un percorso separato.",
+      "moderator_geo_controls": false,
+      "audit_sha256": "678ed3410f50bfcb003b84d0d819cc56ed14f801c312e3446116387726ffa23a"
+    },
+    {
+      "event": 352,
+      "report": 73,
+      "status": "publish",
+      "moderation": "published",
+      "public_geo": {
+        "version": "public-location/v1",
+        "mode": "exact_point",
+        "lat": 41.6208388,
+        "lng": 12.4626387,
+        "radius_meters": 0,
+        "radius_m": 0,
+        "source": "event_public",
+        "precision": "exact_point"
+      },
+      "moderation_text": "Posizione pubblica richiesta: Punto esattoScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata.",
+      "moderator_geo_controls": false,
+      "audit_sha256": "ad8d5fff6292b8f9880ee8dcca9a991a996b0ce47908868b48e7dfa258d72841"
+    },
+    {
+      "event": 354,
+      "report": 74,
+      "status": "publish",
+      "moderation": "published",
+      "public_geo": {
+        "version": "public-location/v1",
+        "mode": "approximate_area",
+        "lat": 41.62611,
+        "lng": 12.459279,
+        "radius_meters": 1000,
+        "radius_m": 1000,
+        "source": "event_public",
+        "precision": "approximate_area"
+      },
+      "moderation_text": "Posizione pubblica richiesta: Area approssimativaScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata.",
+      "moderator_geo_controls": false,
+      "audit_sha256": "15520c2048adcb10b2d115084687289e6a40e0026b4b9581343c7b37ed6f8c5b"
+    },
+    {
+      "event": 356,
+      "report": 75,
+      "status": "pending",
+      "moderation": "rejected",
+      "public_geo": null,
+      "moderation_text": "Posizione pubblica richiesta: Punto esattoScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata.",
+      "moderator_geo_controls": false,
+      "audit_sha256": "e9485f7ea88177fa235c3207cf0b4d2eaa501570169c442919c33b7ceaae1f90"
+    },
+    {
+      "event": 358,
+      "report": 76,
+      "status": "pending",
+      "moderation": "rejected",
+      "public_geo": null,
+      "moderation_text": "Posizione pubblica richiesta: Area approssimativaScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata.",
+      "moderator_geo_controls": false,
+      "audit_sha256": "47764eea68dd37198f29f56851d85914cd7c3ce363f23c215edcaec3cd0e0acf"
+    },
+    {
+      "event": 360,
+      "report": 77,
+      "status": "publish",
+      "moderation": "published",
+      "public_geo": {
+        "version": "public-location/v1",
+        "mode": "approximate_area",
+        "lat": 41.662349,
+        "lng": 12.462063,
+        "radius_meters": 100,
+        "radius_m": 100,
+        "source": "event_public",
+        "precision": "approximate_area"
+      },
+      "moderation_text": "Posizione pubblica richiesta: Area approssimativa — circa 100 mScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata.",
+      "moderator_geo_controls": false,
+      "audit_sha256": "50975cbd102583cc53f6fbba6c7ddd2e974188fc8b32c148a82717401639f550"
+    },
+    {
+      "event": 361,
+      "report": 78,
+      "status": "publish",
+      "moderation": "published",
+      "public_geo": {
+        "version": "public-location/v1",
+        "mode": "approximate_area",
+        "lat": 41.660817,
+        "lng": 12.459694,
+        "radius_meters": 500,
+        "radius_m": 500,
+        "source": "event_public",
+        "precision": "approximate_area"
+      },
+      "moderation_text": "Posizione pubblica richiesta: Area approssimativa — circa 500 mScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata.",
+      "moderator_geo_controls": false,
+      "audit_sha256": "b3665852b3fa3e3669d717e1d4359929393b55fa51e0ead11ec19209d9692ad6"
+    },
+    {
+      "event": 362,
+      "report": 79,
+      "status": "publish",
+      "moderation": "published",
+      "public_geo": {
+        "version": "public-location/v1",
+        "mode": "approximate_area",
+        "lat": 41.666945,
+        "lng": 12.457416,
+        "radius_meters": 1000,
+        "radius_m": 1000,
+        "source": "event_public",
+        "precision": "approximate_area"
+      },
+      "moderation_text": "Posizione pubblica richiesta: Area approssimativa — circa 1 kmScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata.",
+      "moderator_geo_controls": false,
+      "audit_sha256": "8e3b0164f2b28451c6d034f824a6dd4920a8f6975e256dbfda3211aa7f1fbfbc"
+    },
+    {
+      "event": 363,
+      "report": 80,
+      "status": "publish",
+      "moderation": "published",
+      "public_geo": {
+        "version": "public-location/v1",
+        "mode": "exact_point",
+        "lat": 41.6626595,
+        "lng": 12.4627245,
+        "radius_meters": 0,
+        "radius_m": 0,
+        "source": "event_public",
+        "precision": "exact_point"
+      },
+      "moderation_text": "Posizione pubblica richiesta: Punto esattoScelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata.",
+      "moderator_geo_controls": false,
+      "audit_sha256": "69d97cc6c78a99e330db7731d8cac2a76abb4b49f46197472880dce190c50391"
+    }
+  ],
+  "rows": [
+    {
+      "id": "77",
+      "event_id": "360",
+      "content_sha256": "e755f318fd3dc9ef35b1da51168602245a166d6938a91b09f42afe9ec5576349"
+    },
+    {
+      "id": "78",
+      "event_id": "361",
+      "content_sha256": "c5cf055c80ed64c0a7cb5181629d5d8884e9f0ad5bcfa874438a97d970d69b6d"
+    },
+    {
+      "id": "79",
+      "event_id": "362",
+      "content_sha256": "dd3be3fed06f8e9143776342d743df72fc138edb468589c5b9930c522094b8a4"
+    },
+    {
+      "id": "80",
+      "event_id": "363",
+      "content_sha256": "58e5533c4e67c607cb538a6dc01ac23adb8ee1391ec47636d8f3c497e64e75a9"
+    }
+  ],
+  "classic_editor": [
+    {
+      "type": "ba_evento",
+      "block_editor": false,
+      "filter_type_priority": 100,
+      "filter_post_priority": 100
+    },
+    {
+      "type": "post",
+      "block_editor": false,
+      "filter_type_priority": 100,
+      "filter_post_priority": 100
+    },
+    {
+      "type": "page",
+      "block_editor": false,
+      "filter_type_priority": 100,
+      "filter_post_priority": 100
+    }
+  ]
+}

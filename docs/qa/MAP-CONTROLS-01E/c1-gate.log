@@ -1,0 +1,3 @@
+{"case":"active_value","write_accepted":false,"snapshot_unchanged":true,"before_sha256":"c7f4b219845154822d553bdbb350d7f67f0dcba87ce7e7ce6f8088c53c5f396f","after_sha256":"c7f4b219845154822d553bdbb350d7f67f0dcba87ce7e7ce6f8088c53c5f396f","stored_version":"badaround-report/v2","canonical_version":"badaround-report/v2","invariant_pass":true}
+{"case":"schema_version","write_accepted":false,"snapshot_unchanged":true,"before_sha256":"9b2eb2f41eda6a60a6d4303f62b8f3d8209aed751d629f9680ffe198bc766d62","after_sha256":"9b2eb2f41eda6a60a6d4303f62b8f3d8209aed751d629f9680ffe198bc766d62","stored_version":"badaround-report/v2","canonical_version":"badaround-report/v2","invariant_pass":true}
+NF_UX_02C_PERSISTENCE_GATE=PASS violations=0

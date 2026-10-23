@@ -1,0 +1,103 @@
+✔ canonical Pomezia/Torvaianica match is strict and complete (4.036722ms)
+✔ exact hierarchy is accepted; location is optional (1.623872ms)
+✔ country guard, omissions and homonymous ambiguous terms are fail-closed (0.804006ms)
+✔ zero Google initial requests: load only after explicit click, without map instance (210.233593ms)
+✔ when Google fails, manual canonical controls are still usable (19.089298ms)
+✔ frozen adapters and report schema are not touched by the smart address module (0.256881ms)
+✔ R6-01: unreconciled second selection never retains the first canonical territory or private coordinates (38.937117ms)
+✔ R6-02: user edits during pending Place Details; late response cannot overwrite manual values (30.140651ms)
+✔ R6-02: second Google selection wins even when first resolves last (27.414052ms)
+✔ R6-03: no Google Place ID requested, stored or sent to the Native model (33.653891ms)
+✔ R6-04: manual edit after selected address invalidates private coordinates and stale street when territory changes (25.505056ms)
+✔ R6-04: foreign address cannot inject coordinates or old territory (23.234893ms)
+✔ R6-04: absent coordinates leave manual address and canonical hierarchy usable (23.174901ms)
+✔ R6D timeout removes loader script, clears callback, and permits explicit retry (15.955689ms)
+✔ R6D in-flight callers share one pending loader and never inject duplicate scripts (11.335875ms)
+✔ R6D late callback from expired attempt cannot complete or poison new retry (11.494121ms)
+✔ R6D network error cleans script and permits a subsequent attempt (11.746934ms)
+✔ R6D existing Google Maps bootstrap is reused without a new script (22.126958ms)
+✔ SF2: no selected address cannot advance and canonical fields are hidden by default (10.784081ms)
+✔ SF2: Google failure reveals fallback only on explicit manual action (28.450915ms)
+✔ SF2: route without house number is stored in private exact address (19.628318ms)
+✔ SF2: selected Google address is invalidated on widget input edit (22.318738ms)
+✔ SF2: synthetic canonical mappings for Milano, Napoli and Moricone (1.677252ms)
+✔ SF2: frozen schema untouched and non-geographic required questions moved out of Step 2 (0.254226ms)
+✔ SF4: double focus/click while loading uses one Google bootstrap (10.897463ms)
+✔ SF4: editing an accepted Google suggestion clears stale private address and coordinates (22.904886ms)
+✔ SF4: missing Places browser key never loads Google and provides explicit manual entry (18.823881ms)
+✔ SF6: verified selected Google suggestion restores Piazza del Plebiscito when Place Details omit route (21.524961ms)
+✔ SF6: suggestion name is not duplicated when full formatted address already contains it (20.986352ms)
+✔ SF6: city-only Google selection does not fabricate a street (35.78868ms)
+✔ SF6: never reuse the query or accept a postal code as a street name (18.548014ms)
+✔ SF7: Rocca di Mezzo AQ canonical registry resolves Google AQ sigla (0.723154ms)
+✔ SF7: AQ province sigla cannot resolve into wrong region or arbitrary municipality (0.502572ms)
+✔ SF7: curly apostrophes and fully named province can resolve without a sigla (0.494978ms)
+✔ UX01: Google Piazza del Duomo vs P.za del Duomo is not duplicated (18.090658ms)
+✔ UX01: explicit P.zza abbreviation is equivalent, without removing street details (21.032017ms)
+✔ UX01: a distinct selected square absent from Google details is still preserved (29.455998ms)
+✔ UX01: a genuinely different first segment is not deduplicated (40.825295ms)
+✔ SF10: compact territory tuples hydrate to exactly the same selected canonical fields (18.042046ms)
+✔ SF10: compact tuple registry remains fail-closed for unknown municipality (21.832948ms)
+✔ SF10: browser PHP territory registry is compact, canonical and not included in report contract (0.386233ms)
+✔ UX06: Enter cannot confirm free text; editing during Place Details rejects the stale response (19.803136ms)
+✔ UX06: map loads only after verified selection and hides on free text edits (35.19597ms)
+✔ UX06: explicit geolocation resolves a Google Place through canonical territory and stores private selected point only (33.182938ms)
+✔ UX06: permission denial leaves search available; stale GPS cannot overwrite a later search (33.163192ms)
+✔ UX06: dragging revalidates address and territory; an outside-Italy point cannot advance (65.043699ms)
+✔ UX06: submission lock blocks GPS and marker changes (49.266969ms)
+✔ GEO-UX-01: browser error 1 preserves the verified address, private pin and search (49.237831ms)
+✔ GEO-UX-01: browser error 2 preserves the verified address, private pin and search (48.603076ms)
+✔ GEO-UX-01: browser error 3 preserves the verified address, private pin and search (54.833445ms)
+✔ GEO-UX-01: unsupported/insecure context and synchronous browser failure preserve a valid location (146.321622ms)
+✔ GEO-UX-01: device first, moved pin, address, moved pin, then device; latest private pair wins (96.680523ms)
+✔ explicit exact: one body, separate grounded shadow, correct tip, icon/category and no radius (116.791325ms)
+✔ approximate: geographic meter circle, category badge without pin body and both click targets (24.737869ms)
+✔ territory-only and invalid geo never derive from private fields or fabricate a marker (22.231264ms)
+✔ legacy point, street, area and municipality retain existing generalized renderer and radius (70.466739ms)
+✔ Home and Mappa share exact/area semantics and public approved coordinates (43.269228ms)
+✔ detail uses same renderer, single map, approved dataset and meter fit bounds (34.837709ms)
+BadAround map: categoria marker non risolta per evento 304
+✔ cluster redraw hides and restores each projection as a unit without circle/shadow duplication (12.204171ms)
+✔ resolved state uses existing registry, category exclusions remain exclusions, no private DOM (11.622281ms)
+✔ radius-aware public Home/map/detail circles preserve all five approved meter radii (179.613373ms)
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+✔ SOCIAL: no default, optional, independent from contact and required declaration (3219.755345ms)
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+✔ SOCIAL: requested persists in snapshot/review; reset clears it (3772.968964ms)
+Not implemented: Window's scrollTo() method
+✔ SOCIAL: declined persists in snapshot/review; reset clears it (3411.326084ms)
+✔ 33 oracle / 2805 matrix pairs agree with frozen PHP, including payload normalization (16.420857ms)
+✔ all active required fields block locally when omitted; all optional fields may be absent (241.107877ms)
+✔ 8 Altro specifications: activation, limits, requiredness, stale removal and exact canonical key (173.664783ms)
+✔ subtype and category changes clear old active state while preserving GEO and Social (3.339497ms)
+✔ every conditional dependency across 33 profiles agrees with backend after activation and stale clearing (2258.187787ms)
+✔ 33 oracle / 2805 matrix pairs agree with frozen PHP, including payload normalization (17.108569ms)
+✔ all active required fields block locally when omitted; all optional fields may be absent (260.602667ms)
+✔ 8 Altro specifications: activation, limits, requiredness, stale removal and exact canonical key (176.393573ms)
+✔ subtype and category changes clear old active state while preserving GEO and Social (2.880184ms)
+✔ every conditional dependency across 33 profiles agrees with backend after activation and stale clearing (2345.343448ms)
+✔ 33 actual Native v2 payloads pass REST/Golden Path, SQL persistence, pending and retry (512.897222ms)
+✔ SF9: public discovery requires BOTH WordPress published status and moderation published (1.032935ms)
+✔ SF9: public discovery projection is explicit allowlist with no raw report or sensitive address (0.877053ms)
+✔ SF9: public geo never falls back to private coordinates or territory centroid (0.20309ms)
+✔ SF9: publication safety checks block PII, exact coords, unmasked plates, sensitive meta and private originals (0.201157ms)
+✔ SF9: native intake starts pending and avoids auto-generating public projection (0.237826ms)
+ℹ tests 80
+ℹ suites 0
+ℹ pass 80
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 20978.021955

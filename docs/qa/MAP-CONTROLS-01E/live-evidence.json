@@ -1,0 +1,7889 @@
+[
+  {
+    "profile": "native",
+    "width": 390,
+    "geometry": {
+      "controls": [
+        {
+          "bounds": {
+            "bottom": 845.515625,
+            "height": 40,
+            "left": 308,
+            "right": 348,
+            "top": 805.515625,
+            "width": 40,
+            "x": 308,
+            "y": 805.515625
+          },
+          "clip": 0,
+          "inset": 11,
+          "label": "Zoom avanti"
+        },
+        {
+          "bounds": {
+            "bottom": 886.515625,
+            "height": 40,
+            "left": 308,
+            "right": 348,
+            "top": 846.515625,
+            "width": 40,
+            "x": 308,
+            "y": 846.515625
+          },
+          "clip": 0,
+          "inset": 11,
+          "label": "Zoom indietro"
+        },
+        {
+          "bounds": {
+            "bottom": 953.515625,
+            "height": 44,
+            "left": 255,
+            "right": 299,
+            "top": 909.515625,
+            "width": 44,
+            "x": 255,
+            "y": 909.515625
+          },
+          "clip": 0,
+          "inset": 60,
+          "label": "Sposta mappa verso nord"
+        },
+        {
+          "bounds": {
+            "bottom": 953.515625,
+            "height": 44,
+            "left": 301,
+            "right": 345,
+            "top": 909.515625,
+            "width": 44,
+            "x": 301,
+            "y": 909.515625
+          },
+          "clip": 0,
+          "inset": 14,
+          "label": "Sposta mappa verso sud"
+        },
+        {
+          "bounds": {
+            "bottom": 999.515625,
+            "height": 44,
+            "left": 255,
+            "right": 299,
+            "top": 955.515625,
+            "width": 44,
+            "x": 255,
+            "y": 955.515625
+          },
+          "clip": 0,
+          "inset": 60,
+          "label": "Sposta mappa verso ovest"
+        },
+        {
+          "bounds": {
+            "bottom": 999.515625,
+            "height": 44,
+            "left": 301,
+            "right": 345,
+            "top": 955.515625,
+            "width": 44,
+            "x": 301,
+            "y": 955.515625
+          },
+          "clip": 0,
+          "inset": 14,
+          "label": "Sposta mappa verso est"
+        }
+      ],
+      "documentWidth": 375,
+      "map": {
+        "bottom": 1074.515625,
+        "height": 340,
+        "left": 16,
+        "right": 359,
+        "top": 734.515625,
+        "width": 343,
+        "x": 16,
+        "y": 734.515625
+      },
+      "viewport": 375
+    }
+  },
+  {
+    "profile": "native",
+    "width": 390,
+    "radii": [
+      {
+        "radius": 50,
+        "sameLocation": true,
+        "sameCircle": true,
+        "actualCircle": [
+          {
+            "center": {
+              "lat": 41.6208388,
+              "lng": 12.462638700000001
+            },
+            "radius": 50
+          }
+        ],
+        "panActions": 4,
+        "controls": 1,
+        "scripts": 1
+      },
+      {
+        "radius": 100,
+        "sameLocation": true,
+        "sameCircle": true,
+        "actualCircle": [
+          {
+            "center": {
+              "lat": 41.6208388,
+              "lng": 12.462638700000001
+            },
+            "radius": 100
+          }
+        ],
+        "panActions": 4,
+        "controls": 1,
+        "scripts": 1
+      },
+      {
+        "radius": 250,
+        "sameLocation": true,
+        "sameCircle": true,
+        "actualCircle": [
+          {
+            "center": {
+              "lat": 41.6208388,
+              "lng": 12.462638700000001
+            },
+            "radius": 250
+          }
+        ],
+        "panActions": 4,
+        "controls": 1,
+        "scripts": 1
+      },
+      {
+        "radius": 500,
+        "sameLocation": true,
+        "sameCircle": true,
+        "actualCircle": [
+          {
+            "center": {
+              "lat": 41.6208388,
+              "lng": 12.462638700000001
+            },
+            "radius": 500
+          }
+        ],
+        "panActions": 4,
+        "controls": 1,
+        "scripts": 1
+      },
+      {
+        "radius": 1000,
+        "sameLocation": true,
+        "sameCircle": true,
+        "actualCircle": [
+          {
+            "center": {
+              "lat": 41.6208388,
+              "lng": 12.462638700000001
+            },
+            "radius": 1000
+          }
+        ],
+        "panActions": 4,
+        "controls": 1,
+        "scripts": 1
+      }
+    ]
+  },
+  {
+    "profile": "native",
+    "width": 390,
+    "tabEvidence": [
+      {
+        "bottom": -1962.484375,
+        "label": "Zoom avanti",
+        "left": 137,
+        "mapLeft": 16,
+        "mapRight": 359,
+        "outline": "solid",
+        "right": 177,
+        "top": -2002.484375,
+        "viewport": 375
+      },
+      {
+        "bottom": -1921.484375,
+        "label": "Zoom indietro",
+        "left": 137,
+        "mapLeft": 16,
+        "mapRight": 359,
+        "outline": "solid",
+        "right": 177,
+        "top": -1961.484375,
+        "viewport": 375
+      },
+      {
+        "bottom": -1854.484375,
+        "label": "Sposta mappa verso nord",
+        "left": 84,
+        "mapLeft": 16,
+        "mapRight": 359,
+        "outline": "solid",
+        "right": 128,
+        "top": -1898.484375,
+        "viewport": 375
+      },
+      {
+        "bottom": -1854.484375,
+        "label": "Sposta mappa verso sud",
+        "left": 130,
+        "mapLeft": 16,
+        "mapRight": 359,
+        "outline": "solid",
+        "right": 174,
+        "top": -1898.484375,
+        "viewport": 375
+      },
+      {
+        "bottom": -1808.484375,
+        "label": "Sposta mappa verso ovest",
+        "left": 84,
+        "mapLeft": 16,
+        "mapRight": 359,
+        "outline": "solid",
+        "right": 128,
+        "top": -1852.484375,
+        "viewport": 375
+      },
+      {
+        "bottom": -1808.484375,
+        "label": "Sposta mappa verso est",
+        "left": 130,
+        "mapLeft": 16,
+        "mapRight": 359,
+        "outline": "solid",
+        "right": 174,
+        "top": -1852.484375,
+        "viewport": 375
+      }
+    ]
+  },
+  {
+    "profile": "native",
+    "width": 390,
+    "naturalTabs": [
+      {
+        "label": "Zoom avanti",
+        "map": {
+          "bottom": 1049.515625,
+          "height": 340,
+          "left": 16,
+          "right": 359,
+          "top": 709.515625,
+          "width": 343,
+          "x": 16,
+          "y": 709.515625
+        },
+        "outline": "solid",
+        "rect": {
+          "bottom": 820.515625,
+          "height": 40,
+          "left": 308,
+          "right": 348,
+          "top": 780.515625,
+          "width": 40,
+          "x": 308,
+          "y": 780.515625
+        },
+        "viewport": {
+          "height": 1000,
+          "width": 375
+        }
+      },
+      {
+        "label": "Zoom indietro",
+        "map": {
+          "bottom": 1049.515625,
+          "height": 340,
+          "left": 16,
+          "right": 359,
+          "top": 709.515625,
+          "width": 343,
+          "x": 16,
+          "y": 709.515625
+        },
+        "outline": "solid",
+        "rect": {
+          "bottom": 861.515625,
+          "height": 40,
+          "left": 308,
+          "right": 348,
+          "top": 821.515625,
+          "width": 40,
+          "x": 308,
+          "y": 821.515625
+        },
+        "viewport": {
+          "height": 1000,
+          "width": 375
+        }
+      },
+      {
+        "label": "Sposta mappa verso nord",
+        "map": {
+          "bottom": 1049.515625,
+          "height": 340,
+          "left": 16,
+          "right": 359,
+          "top": 709.515625,
+          "width": 343,
+          "x": 16,
+          "y": 709.515625
+        },
+        "outline": "solid",
+        "rect": {
+          "bottom": 928.515625,
+          "height": 44,
+          "left": 255,
+          "right": 299,
+          "top": 884.515625,
+          "width": 44,
+          "x": 255,
+          "y": 884.515625
+        },
+        "viewport": {
+          "height": 1000,
+          "width": 375
+        }
+      },
+      {
+        "label": "Sposta mappa verso sud",
+        "map": {
+          "bottom": 1049.515625,
+          "height": 340,
+          "left": 16,
+          "right": 359,
+          "top": 709.515625,
+          "width": 343,
+          "x": 16,
+          "y": 709.515625
+        },
+        "outline": "solid",
+        "rect": {
+          "bottom": 928.515625,
+          "height": 44,
+          "left": 301,
+          "right": 345,
+          "top": 884.515625,
+          "width": 44,
+          "x": 301,
+          "y": 884.515625
+        },
+        "viewport": {
+          "height": 1000,
+          "width": 375
+        }
+      },
+      {
+        "label": "Sposta mappa verso ovest",
+        "map": {
+          "bottom": 1049.515625,
+          "height": 340,
+          "left": 16,
+          "right": 359,
+          "top": 709.515625,
+          "width": 343,
+          "x": 16,
+          "y": 709.515625
+        },
+        "outline": "solid",
+        "rect": {
+          "bottom": 974.515625,
+          "height": 44,
+          "left": 255,
+          "right": 299,
+          "top": 930.515625,
+          "width": 44,
+          "x": 255,
+          "y": 930.515625
+        },
+        "viewport": {
+          "height": 1000,
+          "width": 375
+        }
+      },
+      {
+        "label": "Sposta mappa verso est",
+        "map": {
+          "bottom": 1049.515625,
+          "height": 340,
+          "left": 16,
+          "right": 359,
+          "top": 709.515625,
+          "width": 343,
+          "x": 16,
+          "y": 709.515625
+        },
+        "outline": "solid",
+        "rect": {
+          "bottom": 974.515625,
+          "height": 44,
+          "left": 301,
+          "right": 345,
+          "top": 930.515625,
+          "width": 44,
+          "x": 301,
+          "y": 930.515625
+        },
+        "viewport": {
+          "height": 1000,
+          "width": 375
+        }
+      }
+    ]
+  },
+  {
+    "profile": "native",
+    "width": 320,
+    "geometry": {
+      "controls": [
+        {
+          "bounds": {
+            "bottom": 864.359375,
+            "height": 40,
+            "left": 238,
+            "right": 278,
+            "top": 824.359375,
+            "width": 40,
+            "x": 238,
+            "y": 824.359375
+          },
+          "clip": 0,
+          "inset": 11,
+          "label": "Zoom avanti"
+        },
+        {
+          "bounds": {
+            "bottom": 905.359375,
+            "height": 40,
+            "left": 238,
+            "right": 278,
+            "top": 865.359375,
+            "width": 40,
+            "x": 238,
+            "y": 865.359375
+          },
+          "clip": 0,
+          "inset": 11,
+          "label": "Zoom indietro"
+        },
+        {
+          "bounds": {
+            "bottom": 972.359375,
+            "height": 44,
+            "left": 185,
+            "right": 229,
+            "top": 928.359375,
+            "width": 44,
+            "x": 185,
+            "y": 928.359375
+          },
+          "clip": 0,
+          "inset": 60,
+          "label": "Sposta mappa verso nord"
+        },
+        {
+          "bounds": {
+            "bottom": 972.359375,
+            "height": 44,
+            "left": 231,
+            "right": 275,
+            "top": 928.359375,
+            "width": 44,
+            "x": 231,
+            "y": 928.359375
+          },
+          "clip": 0,
+          "inset": 14,
+          "label": "Sposta mappa verso sud"
+        },
+        {
+          "bounds": {
+            "bottom": 1018.359375,
+            "height": 44,
+            "left": 185,
+            "right": 229,
+            "top": 974.359375,
+            "width": 44,
+            "x": 185,
+            "y": 974.359375
+          },
+          "clip": 0,
+          "inset": 60,
+          "label": "Sposta mappa verso ovest"
+        },
+        {
+          "bounds": {
+            "bottom": 1018.359375,
+            "height": 44,
+            "left": 231,
+            "right": 275,
+            "top": 974.359375,
+            "width": 44,
+            "x": 231,
+            "y": 974.359375
+          },
+          "clip": 0,
+          "inset": 14,
+          "label": "Sposta mappa verso est"
+        }
+      ],
+      "documentWidth": 305,
+      "map": {
+        "bottom": 1093.359375,
+        "height": 340,
+        "left": 16,
+        "right": 289,
+        "top": 753.359375,
+        "width": 273,
+        "x": 16,
+        "y": 753.359375
+      },
+      "viewport": 305
+    }
+  },
+  {
+    "profile": "native",
+    "width": 320,
+    "focus": [
+      {
+        "bounds": {
+          "bottom": 864.359375,
+          "height": 40,
+          "left": 102,
+          "right": 142,
+          "top": 824.359375,
+          "width": 40,
+          "x": 102,
+          "y": 824.359375
+        },
+        "label": "Zoom avanti",
+        "map": {
+          "bottom": 1093.359375,
+          "height": 340,
+          "left": 16,
+          "right": 289,
+          "top": 753.359375,
+          "width": 273,
+          "x": 16,
+          "y": 753.359375
+        },
+        "outline": "solid",
+        "viewport": 305
+      },
+      {
+        "bounds": {
+          "bottom": 905.359375,
+          "height": 40,
+          "left": 102,
+          "right": 142,
+          "top": 865.359375,
+          "width": 40,
+          "x": 102,
+          "y": 865.359375
+        },
+        "label": "Zoom indietro",
+        "map": {
+          "bottom": 1093.359375,
+          "height": 340,
+          "left": 16,
+          "right": 289,
+          "top": 753.359375,
+          "width": 273,
+          "x": 16,
+          "y": 753.359375
+        },
+        "outline": "solid",
+        "viewport": 305
+      },
+      {
+        "bounds": {
+          "bottom": 972.359375,
+          "height": 44,
+          "left": 49,
+          "right": 93,
+          "top": 928.359375,
+          "width": 44,
+          "x": 49,
+          "y": 928.359375
+        },
+        "label": "Sposta mappa verso nord",
+        "map": {
+          "bottom": 1093.359375,
+          "height": 340,
+          "left": 16,
+          "right": 289,
+          "top": 753.359375,
+          "width": 273,
+          "x": 16,
+          "y": 753.359375
+        },
+        "outline": "solid",
+        "viewport": 305
+      },
+      {
+        "bounds": {
+          "bottom": 972.359375,
+          "height": 44,
+          "left": 95,
+          "right": 139,
+          "top": 928.359375,
+          "width": 44,
+          "x": 95,
+          "y": 928.359375
+        },
+        "label": "Sposta mappa verso sud",
+        "map": {
+          "bottom": 1093.359375,
+          "height": 340,
+          "left": 16,
+          "right": 289,
+          "top": 753.359375,
+          "width": 273,
+          "x": 16,
+          "y": 753.359375
+        },
+        "outline": "solid",
+        "viewport": 305
+      },
+      {
+        "bounds": {
+          "bottom": 1018.359375,
+          "height": 44,
+          "left": 49,
+          "right": 93,
+          "top": 974.359375,
+          "width": 44,
+          "x": 49,
+          "y": 974.359375
+        },
+        "label": "Sposta mappa verso ovest",
+        "map": {
+          "bottom": 1093.359375,
+          "height": 340,
+          "left": 16,
+          "right": 289,
+          "top": 753.359375,
+          "width": 273,
+          "x": 16,
+          "y": 753.359375
+        },
+        "outline": "solid",
+        "viewport": 305
+      },
+      {
+        "bounds": {
+          "bottom": 1018.359375,
+          "height": 44,
+          "left": 95,
+          "right": 139,
+          "top": 974.359375,
+          "width": 44,
+          "x": 95,
+          "y": 974.359375
+        },
+        "label": "Sposta mappa verso est",
+        "map": {
+          "bottom": 1093.359375,
+          "height": 340,
+          "left": 16,
+          "right": 289,
+          "top": 753.359375,
+          "width": 273,
+          "x": 16,
+          "y": 753.359375
+        },
+        "outline": "solid",
+        "viewport": 305
+      }
+    ]
+  },
+  {
+    "profile": "native",
+    "width": 320,
+    "dragResult": {
+      "locationUnchanged": true,
+      "circleUnchanged": true,
+      "viewportCenterChanged": true
+    }
+  },
+  {
+    "profile": "native",
+    "width": 768,
+    "geometry": {
+      "controls": [
+        {
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 826.328125,
+            "height": 40,
+            "left": 656.75,
+            "right": 696.75,
+            "top": 786.328125,
+            "width": 40,
+            "x": 656.75,
+            "y": 786.328125
+          }
+        },
+        {
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 867.328125,
+            "height": 40,
+            "left": 656.75,
+            "right": 696.75,
+            "top": 827.328125,
+            "width": 40,
+            "x": 656.75,
+            "y": 827.328125
+          }
+        },
+        {
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 934.328125,
+            "height": 44,
+            "left": 603.75,
+            "right": 647.75,
+            "top": 890.328125,
+            "width": 44,
+            "x": 603.75,
+            "y": 890.328125
+          }
+        },
+        {
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 934.328125,
+            "height": 44,
+            "left": 649.75,
+            "right": 693.75,
+            "top": 890.328125,
+            "width": 44,
+            "x": 649.75,
+            "y": 890.328125
+          }
+        },
+        {
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 980.328125,
+            "height": 44,
+            "left": 603.75,
+            "right": 647.75,
+            "top": 936.328125,
+            "width": 44,
+            "x": 603.75,
+            "y": 936.328125
+          }
+        },
+        {
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 980.328125,
+            "height": 44,
+            "left": 649.75,
+            "right": 693.75,
+            "top": 936.328125,
+            "width": 44,
+            "x": 649.75,
+            "y": 936.328125
+          }
+        }
+      ],
+      "map": {
+        "bottom": 1055.328125,
+        "height": 340,
+        "left": 45.25,
+        "right": 707.75,
+        "top": 715.328125,
+        "width": 662.5,
+        "x": 45.25,
+        "y": 715.328125
+      },
+      "overflow": false,
+      "width": 753
+    },
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 768,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "native",
+          "event": null,
+          "center": {
+            "lat": 41.62083895642227,
+            "lng": 12.462638700000035
+          },
+          "zoom": 15,
+          "pan_calls": [],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [],
+          "advanced_markers": [
+            {
+              "lat": 41.6208388,
+              "lng": 12.462638700000001
+            }
+          ],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.6208388,
+                "lng": 12.462638700000001
+              },
+              "radius": 500
+            }
+          ]
+        }
+      ],
+      "native": {
+        "schema": "badaround-report/v2",
+        "location": {
+          "region": "Lazio",
+          "province": "Roma",
+          "municipality": "Pomezia",
+          "locality": "Torvaianica",
+          "exact_address": "Torvaianica RM, Italia",
+          "exact_lat": 41.6208388,
+          "exact_lng": 12.462638700000001,
+          "public_precision": "area",
+          "public_location_request": {
+            "mode": "approximate_area",
+            "radius_m": 500
+          },
+          "public_location_request_version": "public-location-request-v2"
+        }
+      }
+    }
+  },
+  {
+    "profile": "native",
+    "width": 1024,
+    "geometry": {
+      "controls": [
+        {
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 823,
+            "height": 40,
+            "left": 863.5,
+            "right": 903.5,
+            "top": 783,
+            "width": 40,
+            "x": 863.5,
+            "y": 783
+          }
+        },
+        {
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 864,
+            "height": 40,
+            "left": 863.5,
+            "right": 903.5,
+            "top": 824,
+            "width": 40,
+            "x": 863.5,
+            "y": 824
+          }
+        },
+        {
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 931,
+            "height": 44,
+            "left": 810.5,
+            "right": 854.5,
+            "top": 887,
+            "width": 44,
+            "x": 810.5,
+            "y": 887
+          }
+        },
+        {
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 931,
+            "height": 44,
+            "left": 856.5,
+            "right": 900.5,
+            "top": 887,
+            "width": 44,
+            "x": 856.5,
+            "y": 887
+          }
+        },
+        {
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 977,
+            "height": 44,
+            "left": 810.5,
+            "right": 854.5,
+            "top": 933,
+            "width": 44,
+            "x": 810.5,
+            "y": 933
+          }
+        },
+        {
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 977,
+            "height": 44,
+            "left": 856.5,
+            "right": 900.5,
+            "top": 933,
+            "width": 44,
+            "x": 856.5,
+            "y": 933
+          }
+        }
+      ],
+      "documentWidth": 1009,
+      "map": {
+        "bottom": 1052,
+        "height": 340,
+        "left": 94.5,
+        "right": 914.5,
+        "top": 712,
+        "width": 820,
+        "x": 94.5,
+        "y": 712
+      },
+      "viewport": 1009
+    },
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 1024,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "native",
+          "event": null,
+          "center": {
+            "lat": 41.62083895642227,
+            "lng": 12.462638700000035
+          },
+          "zoom": 15,
+          "pan_calls": [
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -205,
+              0
+            ],
+            [
+              205,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [],
+          "advanced_markers": [
+            {
+              "lat": 41.6208388,
+              "lng": 12.462638700000001
+            }
+          ],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.6208388,
+                "lng": 12.462638700000001
+              },
+              "radius": 500
+            }
+          ]
+        }
+      ],
+      "native": {
+        "schema": "badaround-report/v2",
+        "location": {
+          "region": "Lazio",
+          "province": "Roma",
+          "municipality": "Pomezia",
+          "locality": "Torvaianica",
+          "exact_address": "Torvaianica RM, Italia",
+          "exact_lat": 41.6208388,
+          "exact_lng": 12.462638700000001,
+          "public_precision": "area",
+          "public_location_request": {
+            "mode": "approximate_area",
+            "radius_m": 500
+          },
+          "public_location_request_version": "public-location-request-v2"
+        }
+      }
+    },
+    "immutable": true
+  },
+  {
+    "profile": "native",
+    "width": 1440,
+    "geometry": {
+      "controls": [
+        {
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 822.640625,
+            "height": 40,
+            "left": 1101.5,
+            "right": 1141.5,
+            "top": 782.640625,
+            "width": 40,
+            "x": 1101.5,
+            "y": 782.640625
+          }
+        },
+        {
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 863.640625,
+            "height": 40,
+            "left": 1101.5,
+            "right": 1141.5,
+            "top": 823.640625,
+            "width": 40,
+            "x": 1101.5,
+            "y": 823.640625
+          }
+        },
+        {
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 930.640625,
+            "height": 44,
+            "left": 1048.5,
+            "right": 1092.5,
+            "top": 886.640625,
+            "width": 44,
+            "x": 1048.5,
+            "y": 886.640625
+          }
+        },
+        {
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 930.640625,
+            "height": 44,
+            "left": 1094.5,
+            "right": 1138.5,
+            "top": 886.640625,
+            "width": 44,
+            "x": 1094.5,
+            "y": 886.640625
+          }
+        },
+        {
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 976.640625,
+            "height": 44,
+            "left": 1048.5,
+            "right": 1092.5,
+            "top": 932.640625,
+            "width": 44,
+            "x": 1048.5,
+            "y": 932.640625
+          }
+        },
+        {
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 976.640625,
+            "height": 44,
+            "left": 1094.5,
+            "right": 1138.5,
+            "top": 932.640625,
+            "width": 44,
+            "x": 1094.5,
+            "y": 932.640625
+          }
+        }
+      ],
+      "documentWidth": 1425,
+      "map": {
+        "bottom": 1051.640625,
+        "height": 340,
+        "left": 272.5,
+        "right": 1152.5,
+        "top": 711.640625,
+        "width": 880,
+        "x": 272.5,
+        "y": 711.640625
+      },
+      "viewport": 1425
+    },
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "native",
+          "event": null,
+          "center": {
+            "lat": 41.62083895642227,
+            "lng": 12.462638700000035
+          },
+          "zoom": 15,
+          "pan_calls": [
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -220,
+              0
+            ],
+            [
+              220,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [],
+          "advanced_markers": [
+            {
+              "lat": 41.6208388,
+              "lng": 12.462638700000001
+            }
+          ],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.6208388,
+                "lng": 12.462638700000001
+              },
+              "radius": 500
+            }
+          ]
+        }
+      ],
+      "native": {
+        "schema": "badaround-report/v2",
+        "location": {
+          "region": "Lazio",
+          "province": "Roma",
+          "municipality": "Pomezia",
+          "locality": "Torvaianica",
+          "exact_address": "Torvaianica RM, Italia",
+          "exact_lat": 41.6208388,
+          "exact_lng": 12.462638700000001,
+          "public_precision": "area",
+          "public_location_request": {
+            "mode": "approximate_area",
+            "radius_m": 500
+          },
+          "public_location_request_version": "public-location-request-v2"
+        }
+      }
+    },
+    "immutable": true,
+    "fullscreenControl": true
+  },
+  {
+    "profile": "home",
+    "width": 1440,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 10,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 219,
+            "height": 40,
+            "left": 1375,
+            "right": 1415,
+            "top": 179,
+            "width": 40,
+            "x": 1375,
+            "y": 179
+          }
+        },
+        {
+          "inset": 10,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 260,
+            "height": 40,
+            "left": 1375,
+            "right": 1415,
+            "top": 220,
+            "width": 40,
+            "x": 1375,
+            "y": 220
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 327,
+            "height": 44,
+            "left": 1322,
+            "right": 1366,
+            "top": 283,
+            "width": 44,
+            "x": 1322,
+            "y": 283
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 327,
+            "height": 44,
+            "left": 1368,
+            "right": 1412,
+            "top": 283,
+            "width": 44,
+            "x": 1368,
+            "y": 283
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 373,
+            "height": 44,
+            "left": 1322,
+            "right": 1366,
+            "top": 329,
+            "width": 44,
+            "x": 1322,
+            "y": 329
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 373,
+            "height": 44,
+            "left": 1368,
+            "right": 1412,
+            "top": 329,
+            "width": 44,
+            "x": 1368,
+            "y": 329
+          }
+        }
+      ],
+      "documentWidth": 1425,
+      "fullscreen": true,
+      "map": {
+        "bottom": 772.703125,
+        "height": 663.703125,
+        "left": 555.75,
+        "right": 1425,
+        "top": 109,
+        "width": 869.25,
+        "x": 555.75,
+        "y": 109
+      },
+      "pads": 1,
+      "viewport": 1425
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "home",
+          "event": null,
+          "center": {
+            "lat": 41.76655851096578,
+            "lng": 12.467521500000002
+          },
+          "zoom": 10,
+          "pan_calls": [
+            [
+              0,
+              -166
+            ],
+            [
+              0,
+              166
+            ],
+            [
+              -217,
+              0
+            ],
+            [
+              217,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Ostacolo Pericoloso Sulla Carreggiata a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.663192625,
+                "lng": 12.460474375
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.6222269,
+                "lng": 12.4616316
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.8788135,
+                "lng": 12.4212505
+              },
+              "title": "2 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.907271333333334,
+                "lng": 12.492741166666669
+              },
+              "title": "3 segnalazioni"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "home",
+    "width": 1440,
+    "clusterZoom": 10,
+    "legendClosed": true,
+    "legendReopened": true,
+    "controlsAfter": 1,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "home",
+          "event": null,
+          "center": {
+            "lat": 41.76655851096578,
+            "lng": 12.467521500000002
+          },
+          "zoom": 10,
+          "pan_calls": [
+            [
+              0,
+              -166
+            ],
+            [
+              0,
+              166
+            ],
+            [
+              -217,
+              0
+            ],
+            [
+              217,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Ostacolo Pericoloso Sulla Carreggiata a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.663192625,
+                "lng": 12.460474375
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.6222269,
+                "lng": 12.4616316
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.8788135,
+                "lng": 12.4212505
+              },
+              "title": "2 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.907271333333334,
+                "lng": 12.492741166666669
+              },
+              "title": "3 segnalazioni"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "home",
+    "width": 1440,
+    "clusterExpanded": true,
+    "zoom": 18,
+    "publicRadii": [
+      1000,
+      500,
+      100,
+      1000,
+      1000,
+      1000,
+      1000,
+      1000,
+      1000,
+      1000
+    ],
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "home",
+          "event": null,
+          "center": {
+            "lat": 41.66250425018715,
+            "lng": 12.462393749999991
+          },
+          "zoom": 18,
+          "pan_calls": [
+            [
+              0,
+              -166
+            ],
+            [
+              0,
+              166
+            ],
+            [
+              -217,
+              0
+            ],
+            [
+              217,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.6626595,
+                "lng": 12.4627245
+              },
+              "title": "Posizione esatta dell'evento: Rifiuti abbandonati o discarica a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.6626595,
+                "lng": 12.4627245
+              }
+            },
+            {
+              "position": {
+                "lat": 41.666945,
+                "lng": 12.457416
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.660817,
+                "lng": 12.459694
+              },
+              "title": "Area approssimativa dell'evento: raggio 500 metri: Rifiuti abbandonati o discarica a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.662349,
+                "lng": 12.462063
+              },
+              "title": "Area approssimativa dell'evento: raggio 100 metri: Rifiuti abbandonati o discarica a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.62611,
+                "lng": 12.459279
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: [QA sintetica GEO-PREC-01 B] Nessun evento reale"
+            },
+            {
+              "position": {
+                "lat": 41.6208388,
+                "lng": 12.4626387
+              },
+              "title": "Posizione esatta dell'evento: [QA sintetica GEO-PREC-01 A] Nessun evento reale"
+            },
+            {
+              "position": {
+                "lat": 41.6208388,
+                "lng": 12.4626387
+              }
+            },
+            {
+              "position": {
+                "lat": 41.6208388,
+                "lng": 12.4626387
+              },
+              "title": "Posizione esatta dell'evento: Fumo Incendio O Situazione Anomala a Torvaianica"
+            },
+            {
+              "position": {
+                "lat": 41.6208388,
+                "lng": 12.4626387
+              }
+            },
+            {
+              "position": {
+                "lat": 41.89152,
+                "lng": 12.40626
+              },
+              "title": "Posizione esatta dell'evento: Danno O Incidente Durante La Sosta a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.89152,
+                "lng": 12.40626
+              }
+            },
+            {
+              "position": {
+                "lat": 41.911948,
+                "lng": 12.528783
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Ostacolo Pericoloso Sulla Carreggiata a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.9107038,
+                "lng": 12.4763686
+              },
+              "title": "Posizione esatta dell'evento: Ostacolo Pericoloso Sulla Carreggiata a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.9107038,
+                "lng": 12.4763686
+              }
+            },
+            {
+              "position": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.8991622,
+                "lng": 12.4730719
+              },
+              "title": "Posizione esatta dell'evento: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.8991622,
+                "lng": 12.4730719
+              }
+            },
+            {
+              "position": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.866107,
+                "lng": 12.436241
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Danno O Incidente Durante La Sosta a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Ostacolo Pericoloso Sulla Carreggiata a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.62112,
+                "lng": 12.46197
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Veicolo rubato a Torvaianica"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.666945,
+                "lng": 12.457416
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.660817,
+                "lng": 12.459694
+              },
+              "radius": 500
+            },
+            {
+              "center": {
+                "lat": 41.662349,
+                "lng": 12.462063
+              },
+              "radius": 100
+            },
+            {
+              "center": {
+                "lat": 41.62611,
+                "lng": 12.459279
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.911948,
+                "lng": 12.528783
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.866107,
+                "lng": 12.436241
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.62112,
+                "lng": 12.46197
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "home",
+    "width": 320,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 10,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 943.1875,
+            "height": 40,
+            "left": 255,
+            "right": 295,
+            "top": 903.1875,
+            "width": 40,
+            "x": 255,
+            "y": 903.1875
+          }
+        },
+        {
+          "inset": 10,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 984.1875,
+            "height": 40,
+            "left": 255,
+            "right": 295,
+            "top": 944.1875,
+            "width": 40,
+            "x": 255,
+            "y": 944.1875
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 1051.1875,
+            "height": 44,
+            "left": 202,
+            "right": 246,
+            "top": 1007.1875,
+            "width": 44,
+            "x": 202,
+            "y": 1007.1875
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 1051.1875,
+            "height": 44,
+            "left": 248,
+            "right": 292,
+            "top": 1007.1875,
+            "width": 44,
+            "x": 248,
+            "y": 1007.1875
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 1097.1875,
+            "height": 44,
+            "left": 202,
+            "right": 246,
+            "top": 1053.1875,
+            "width": 44,
+            "x": 202,
+            "y": 1053.1875
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 1097.1875,
+            "height": 44,
+            "left": 248,
+            "right": 292,
+            "top": 1053.1875,
+            "width": 44,
+            "x": 248,
+            "y": 1053.1875
+          }
+        }
+      ],
+      "documentWidth": 305,
+      "fullscreen": true,
+      "map": {
+        "bottom": 1223.1875,
+        "height": 390,
+        "left": 0,
+        "right": 305,
+        "top": 833.1875,
+        "width": 305,
+        "x": 0,
+        "y": 833.1875
+      },
+      "pads": 1,
+      "viewport": 305
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 320,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "home",
+          "event": null,
+          "center": {
+            "lat": 41.76655851096578,
+            "lng": 12.467521500000002
+          },
+          "zoom": 10,
+          "pan_calls": [
+            [
+              0,
+              -98
+            ],
+            [
+              0,
+              98
+            ],
+            [
+              -76,
+              0
+            ],
+            [
+              76,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Ostacolo Pericoloso Sulla Carreggiata a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.663192625,
+                "lng": 12.460474375
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.6222269,
+                "lng": 12.4616316
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.8788135,
+                "lng": 12.4212505
+              },
+              "title": "2 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.907271333333334,
+                "lng": 12.492741166666669
+              },
+              "title": "3 segnalazioni"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "home",
+    "width": 390,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 10,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 839.65625,
+            "height": 40,
+            "left": 325,
+            "right": 365,
+            "top": 799.65625,
+            "width": 40,
+            "x": 325,
+            "y": 799.65625
+          }
+        },
+        {
+          "inset": 10,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 880.65625,
+            "height": 40,
+            "left": 325,
+            "right": 365,
+            "top": 840.65625,
+            "width": 40,
+            "x": 325,
+            "y": 840.65625
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 947.65625,
+            "height": 44,
+            "left": 272,
+            "right": 316,
+            "top": 903.65625,
+            "width": 44,
+            "x": 272,
+            "y": 903.65625
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 947.65625,
+            "height": 44,
+            "left": 318,
+            "right": 362,
+            "top": 903.65625,
+            "width": 44,
+            "x": 318,
+            "y": 903.65625
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 993.65625,
+            "height": 44,
+            "left": 272,
+            "right": 316,
+            "top": 949.65625,
+            "width": 44,
+            "x": 272,
+            "y": 949.65625
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 993.65625,
+            "height": 44,
+            "left": 318,
+            "right": 362,
+            "top": 949.65625,
+            "width": 44,
+            "x": 318,
+            "y": 949.65625
+          }
+        }
+      ],
+      "documentWidth": 375,
+      "fullscreen": true,
+      "map": {
+        "bottom": 1119.65625,
+        "height": 390,
+        "left": 0,
+        "right": 375,
+        "top": 729.65625,
+        "width": 375,
+        "x": 0,
+        "y": 729.65625
+      },
+      "pads": 1,
+      "viewport": 375
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 390,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "home",
+          "event": null,
+          "center": {
+            "lat": 41.76655851096578,
+            "lng": 12.467521500000002
+          },
+          "zoom": 10,
+          "pan_calls": [
+            [
+              0,
+              -98
+            ],
+            [
+              0,
+              98
+            ],
+            [
+              -94,
+              0
+            ],
+            [
+              94,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Ostacolo Pericoloso Sulla Carreggiata a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.663192625,
+                "lng": 12.460474375
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.6222269,
+                "lng": 12.4616316
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.8788135,
+                "lng": 12.4212505
+              },
+              "title": "2 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.907271333333334,
+                "lng": 12.492741166666669
+              },
+              "title": "3 segnalazioni"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "home",
+    "width": 768,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 10,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 746.390625,
+            "height": 40,
+            "left": 703,
+            "right": 743,
+            "top": 706.390625,
+            "width": 40,
+            "x": 703,
+            "y": 706.390625
+          }
+        },
+        {
+          "inset": 10,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 787.390625,
+            "height": 40,
+            "left": 703,
+            "right": 743,
+            "top": 747.390625,
+            "width": 40,
+            "x": 703,
+            "y": 747.390625
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 854.390625,
+            "height": 44,
+            "left": 650,
+            "right": 694,
+            "top": 810.390625,
+            "width": 44,
+            "x": 650,
+            "y": 810.390625
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 854.390625,
+            "height": 44,
+            "left": 696,
+            "right": 740,
+            "top": 810.390625,
+            "width": 44,
+            "x": 696,
+            "y": 810.390625
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 900.390625,
+            "height": 44,
+            "left": 650,
+            "right": 694,
+            "top": 856.390625,
+            "width": 44,
+            "x": 650,
+            "y": 856.390625
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 900.390625,
+            "height": 44,
+            "left": 696,
+            "right": 740,
+            "top": 856.390625,
+            "width": 44,
+            "x": 696,
+            "y": 856.390625
+          }
+        }
+      ],
+      "documentWidth": 753,
+      "fullscreen": true,
+      "map": {
+        "bottom": 1116.390625,
+        "height": 480,
+        "left": 0,
+        "right": 753,
+        "top": 636.390625,
+        "width": 753,
+        "x": 0,
+        "y": 636.390625
+      },
+      "pads": 1,
+      "viewport": 753
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 768,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "home",
+          "event": null,
+          "center": {
+            "lat": 41.76655851096578,
+            "lng": 12.467521500000002
+          },
+          "zoom": 10,
+          "pan_calls": [
+            [
+              0,
+              -120
+            ],
+            [
+              0,
+              120
+            ],
+            [
+              -188,
+              0
+            ],
+            [
+              188,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Ostacolo Pericoloso Sulla Carreggiata a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.663192625,
+                "lng": 12.460474375
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.6222269,
+                "lng": 12.4616316
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.8788135,
+                "lng": 12.4212505
+              },
+              "title": "2 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.907271333333334,
+                "lng": 12.492741166666669
+              },
+              "title": "3 segnalazioni"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "home",
+    "width": 1024,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 10,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 219,
+            "height": 40,
+            "left": 959,
+            "right": 999,
+            "top": 179,
+            "width": 40,
+            "x": 959,
+            "y": 179
+          }
+        },
+        {
+          "inset": 10,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 260,
+            "height": 40,
+            "left": 959,
+            "right": 999,
+            "top": 220,
+            "width": 40,
+            "x": 959,
+            "y": 220
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 327,
+            "height": 44,
+            "left": 906,
+            "right": 950,
+            "top": 283,
+            "width": 44,
+            "x": 906,
+            "y": 283
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 327,
+            "height": 44,
+            "left": 952,
+            "right": 996,
+            "top": 283,
+            "width": 44,
+            "x": 952,
+            "y": 283
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 373,
+            "height": 44,
+            "left": 906,
+            "right": 950,
+            "top": 329,
+            "width": 44,
+            "x": 906,
+            "y": 329
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 373,
+            "height": 44,
+            "left": 952,
+            "right": 996,
+            "top": 329,
+            "width": 44,
+            "x": 952,
+            "y": 329
+          }
+        }
+      ],
+      "documentWidth": 1009,
+      "fullscreen": true,
+      "map": {
+        "bottom": 704.609375,
+        "height": 595.609375,
+        "left": 492.1875,
+        "right": 1009,
+        "top": 109,
+        "width": 516.8125,
+        "x": 492.1875,
+        "y": 109
+      },
+      "pads": 1,
+      "viewport": 1009
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 1024,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "home",
+          "event": null,
+          "center": {
+            "lat": 41.76655851096578,
+            "lng": 12.467521500000002
+          },
+          "zoom": 10,
+          "pan_calls": [
+            [
+              0,
+              -149
+            ],
+            [
+              0,
+              149
+            ],
+            [
+              -129,
+              0
+            ],
+            [
+              129,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Ostacolo Pericoloso Sulla Carreggiata a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.663192625,
+                "lng": 12.460474375
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.6222269,
+                "lng": 12.4616316
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.8788135,
+                "lng": 12.4212505
+              },
+              "title": "2 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.907271333333334,
+                "lng": 12.492741166666669
+              },
+              "title": "3 segnalazioni"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "map",
+    "width": 320,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 10,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 288,
+            "height": 40,
+            "left": 270,
+            "right": 310,
+            "top": 248,
+            "width": 40,
+            "x": 270,
+            "y": 248
+          }
+        },
+        {
+          "inset": 10,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 329,
+            "height": 40,
+            "left": 270,
+            "right": 310,
+            "top": 289,
+            "width": 40,
+            "x": 270,
+            "y": 289
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 396,
+            "height": 44,
+            "left": 217,
+            "right": 261,
+            "top": 352,
+            "width": 44,
+            "x": 217,
+            "y": 352
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 396,
+            "height": 44,
+            "left": 263,
+            "right": 307,
+            "top": 352,
+            "width": 44,
+            "x": 263,
+            "y": 352
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 442,
+            "height": 44,
+            "left": 217,
+            "right": 261,
+            "top": 398,
+            "width": 44,
+            "x": 217,
+            "y": 398
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 442,
+            "height": 44,
+            "left": 263,
+            "right": 307,
+            "top": 398,
+            "width": 44,
+            "x": 263,
+            "y": 398
+          }
+        }
+      ],
+      "documentWidth": 320,
+      "fullscreen": true,
+      "map": {
+        "bottom": 1057,
+        "height": 879,
+        "left": 0,
+        "right": 320,
+        "top": 178,
+        "width": 320,
+        "x": 0,
+        "y": 178
+      },
+      "pads": 1,
+      "viewport": 320
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 320,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "full",
+          "event": null,
+          "center": {
+            "lat": 41.76655851096578,
+            "lng": 12.467521500000002
+          },
+          "zoom": 11,
+          "pan_calls": [
+            [
+              0,
+              -220
+            ],
+            [
+              0,
+              220
+            ],
+            [
+              -80,
+              0
+            ],
+            [
+              80,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.89152,
+                "lng": 12.40626
+              },
+              "title": "Posizione esatta dell'evento: Danno O Incidente Durante La Sosta a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.89152,
+                "lng": 12.40626
+              }
+            },
+            {
+              "position": {
+                "lat": 41.911948,
+                "lng": 12.528783
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Ostacolo Pericoloso Sulla Carreggiata a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.866107,
+                "lng": 12.436241
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Danno O Incidente Durante La Sosta a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Ostacolo Pericoloso Sulla Carreggiata a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.663192625,
+                "lng": 12.460474375
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.6222269,
+                "lng": 12.4616316
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.904933,
+                "lng": 12.47472025
+              },
+              "title": "2 segnalazioni"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.911948,
+                "lng": 12.528783
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.866107,
+                "lng": 12.436241
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "map",
+    "width": 390,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 10,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 288,
+            "height": 40,
+            "left": 340,
+            "right": 380,
+            "top": 248,
+            "width": 40,
+            "x": 340,
+            "y": 248
+          }
+        },
+        {
+          "inset": 10,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 329,
+            "height": 40,
+            "left": 340,
+            "right": 380,
+            "top": 289,
+            "width": 40,
+            "x": 340,
+            "y": 289
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 396,
+            "height": 44,
+            "left": 287,
+            "right": 331,
+            "top": 352,
+            "width": 44,
+            "x": 287,
+            "y": 352
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 396,
+            "height": 44,
+            "left": 333,
+            "right": 377,
+            "top": 352,
+            "width": 44,
+            "x": 333,
+            "y": 352
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 442,
+            "height": 44,
+            "left": 287,
+            "right": 331,
+            "top": 398,
+            "width": 44,
+            "x": 287,
+            "y": 398
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 442,
+            "height": 44,
+            "left": 333,
+            "right": 377,
+            "top": 398,
+            "width": 44,
+            "x": 333,
+            "y": 398
+          }
+        }
+      ],
+      "documentWidth": 390,
+      "fullscreen": true,
+      "map": {
+        "bottom": 1057,
+        "height": 879,
+        "left": 0,
+        "right": 390,
+        "top": 178,
+        "width": 390,
+        "x": 0,
+        "y": 178
+      },
+      "pads": 1,
+      "viewport": 390
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 390,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "full",
+          "event": null,
+          "center": {
+            "lat": 41.76655851096578,
+            "lng": 12.467521500000002
+          },
+          "zoom": 11,
+          "pan_calls": [
+            [
+              0,
+              -220
+            ],
+            [
+              0,
+              220
+            ],
+            [
+              -98,
+              0
+            ],
+            [
+              98,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.89152,
+                "lng": 12.40626
+              },
+              "title": "Posizione esatta dell'evento: Danno O Incidente Durante La Sosta a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.89152,
+                "lng": 12.40626
+              }
+            },
+            {
+              "position": {
+                "lat": 41.911948,
+                "lng": 12.528783
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Ostacolo Pericoloso Sulla Carreggiata a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.866107,
+                "lng": 12.436241
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Danno O Incidente Durante La Sosta a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Ostacolo Pericoloso Sulla Carreggiata a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.663192625,
+                "lng": 12.460474375
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.6222269,
+                "lng": 12.4616316
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.904933,
+                "lng": 12.47472025
+              },
+              "title": "2 segnalazioni"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.911948,
+                "lng": 12.528783
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.866107,
+                "lng": 12.436241
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "map",
+    "width": 768,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 10,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 288,
+            "height": 40,
+            "left": 718,
+            "right": 758,
+            "top": 248,
+            "width": 40,
+            "x": 718,
+            "y": 248
+          }
+        },
+        {
+          "inset": 10,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 329,
+            "height": 40,
+            "left": 718,
+            "right": 758,
+            "top": 289,
+            "width": 40,
+            "x": 718,
+            "y": 289
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 396,
+            "height": 44,
+            "left": 665,
+            "right": 709,
+            "top": 352,
+            "width": 44,
+            "x": 665,
+            "y": 352
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 396,
+            "height": 44,
+            "left": 711,
+            "right": 755,
+            "top": 352,
+            "width": 44,
+            "x": 711,
+            "y": 352
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 442,
+            "height": 44,
+            "left": 665,
+            "right": 709,
+            "top": 398,
+            "width": 44,
+            "x": 665,
+            "y": 398
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 442,
+            "height": 44,
+            "left": 711,
+            "right": 755,
+            "top": 398,
+            "width": 44,
+            "x": 711,
+            "y": 398
+          }
+        }
+      ],
+      "documentWidth": 768,
+      "fullscreen": true,
+      "map": {
+        "bottom": 1052,
+        "height": 874,
+        "left": 0,
+        "right": 768,
+        "top": 178,
+        "width": 768,
+        "x": 0,
+        "y": 178
+      },
+      "pads": 1,
+      "viewport": 768
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 768,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "full",
+          "event": null,
+          "center": {
+            "lat": 41.76655851096578,
+            "lng": 12.467521500000002
+          },
+          "zoom": 11,
+          "pan_calls": [
+            [
+              0,
+              -219
+            ],
+            [
+              0,
+              219
+            ],
+            [
+              -192,
+              0
+            ],
+            [
+              192,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.89152,
+                "lng": 12.40626
+              },
+              "title": "Posizione esatta dell'evento: Danno O Incidente Durante La Sosta a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.89152,
+                "lng": 12.40626
+              }
+            },
+            {
+              "position": {
+                "lat": 41.911948,
+                "lng": 12.528783
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Ostacolo Pericoloso Sulla Carreggiata a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.866107,
+                "lng": 12.436241
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Danno O Incidente Durante La Sosta a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Ostacolo Pericoloso Sulla Carreggiata a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.663192625,
+                "lng": 12.460474375
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.6222269,
+                "lng": 12.4616316
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.904933,
+                "lng": 12.47472025
+              },
+              "title": "2 segnalazioni"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.911948,
+                "lng": 12.528783
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.866107,
+                "lng": 12.436241
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "map",
+    "width": 1024,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 10,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 303.390625,
+            "height": 40,
+            "left": 959,
+            "right": 999,
+            "top": 263.390625,
+            "width": 40,
+            "x": 959,
+            "y": 263.390625
+          }
+        },
+        {
+          "inset": 10,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 344.390625,
+            "height": 40,
+            "left": 959,
+            "right": 999,
+            "top": 304.390625,
+            "width": 40,
+            "x": 959,
+            "y": 304.390625
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 411.390625,
+            "height": 44,
+            "left": 906,
+            "right": 950,
+            "top": 367.390625,
+            "width": 44,
+            "x": 906,
+            "y": 367.390625
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 411.390625,
+            "height": 44,
+            "left": 952,
+            "right": 996,
+            "top": 367.390625,
+            "width": 44,
+            "x": 952,
+            "y": 367.390625
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 457.390625,
+            "height": 44,
+            "left": 906,
+            "right": 950,
+            "top": 413.390625,
+            "width": 44,
+            "x": 906,
+            "y": 413.390625
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 457.390625,
+            "height": 44,
+            "left": 952,
+            "right": 996,
+            "top": 413.390625,
+            "width": 44,
+            "x": 952,
+            "y": 413.390625
+          }
+        }
+      ],
+      "documentWidth": 1009,
+      "fullscreen": true,
+      "map": {
+        "bottom": 3306.453125,
+        "height": 3113.0625,
+        "left": 340,
+        "right": 1009,
+        "top": 193.390625,
+        "width": 669,
+        "x": 340,
+        "y": 193.390625
+      },
+      "pads": 1,
+      "viewport": 1009
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 1024,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "full",
+          "event": null,
+          "center": {
+            "lat": 41.76655851096581,
+            "lng": 12.467521500000002
+          },
+          "zoom": 12,
+          "pan_calls": [
+            [
+              0,
+              -778
+            ],
+            [
+              0,
+              778
+            ],
+            [
+              -167,
+              0
+            ],
+            [
+              167,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.89152,
+                "lng": 12.40626
+              },
+              "title": "Posizione esatta dell'evento: Danno O Incidente Durante La Sosta a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.89152,
+                "lng": 12.40626
+              }
+            },
+            {
+              "position": {
+                "lat": 41.911948,
+                "lng": 12.528783
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Ostacolo Pericoloso Sulla Carreggiata a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.866107,
+                "lng": 12.436241
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Danno O Incidente Durante La Sosta a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Ostacolo Pericoloso Sulla Carreggiata a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.663192625,
+                "lng": 12.460474375
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.6222269,
+                "lng": 12.4616316
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.904933,
+                "lng": 12.47472025
+              },
+              "title": "2 segnalazioni"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.911948,
+                "lng": 12.528783
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.866107,
+                "lng": 12.436241
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "map",
+    "width": 1440,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 10,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 303.390625,
+            "height": 40,
+            "left": 1375,
+            "right": 1415,
+            "top": 263.390625,
+            "width": 40,
+            "x": 1375,
+            "y": 263.390625
+          }
+        },
+        {
+          "inset": 10,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 344.390625,
+            "height": 40,
+            "left": 1375,
+            "right": 1415,
+            "top": 304.390625,
+            "width": 40,
+            "x": 1375,
+            "y": 304.390625
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 411.390625,
+            "height": 44,
+            "left": 1322,
+            "right": 1366,
+            "top": 367.390625,
+            "width": 44,
+            "x": 1322,
+            "y": 367.390625
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 411.390625,
+            "height": 44,
+            "left": 1368,
+            "right": 1412,
+            "top": 367.390625,
+            "width": 44,
+            "x": 1368,
+            "y": 367.390625
+          }
+        },
+        {
+          "inset": 59,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 457.390625,
+            "height": 44,
+            "left": 1322,
+            "right": 1366,
+            "top": 413.390625,
+            "width": 44,
+            "x": 1322,
+            "y": 413.390625
+          }
+        },
+        {
+          "inset": 13,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 457.390625,
+            "height": 44,
+            "left": 1368,
+            "right": 1412,
+            "top": 413.390625,
+            "width": 44,
+            "x": 1368,
+            "y": 413.390625
+          }
+        }
+      ],
+      "documentWidth": 1425,
+      "fullscreen": true,
+      "map": {
+        "bottom": 3201.125,
+        "height": 3007.734375,
+        "left": 390,
+        "right": 1425,
+        "top": 193.390625,
+        "width": 1035,
+        "x": 390,
+        "y": 193.390625
+      },
+      "pads": 1,
+      "viewport": 1425
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "full",
+          "event": null,
+          "center": {
+            "lat": 41.76655851096578,
+            "lng": 12.467521500000002
+          },
+          "zoom": 13,
+          "pan_calls": [
+            [
+              0,
+              -752
+            ],
+            [
+              0,
+              752
+            ],
+            [
+              -259,
+              0
+            ],
+            [
+              259,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.89152,
+                "lng": 12.40626
+              },
+              "title": "Posizione esatta dell'evento: Danno O Incidente Durante La Sosta a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.89152,
+                "lng": 12.40626
+              }
+            },
+            {
+              "position": {
+                "lat": 41.911948,
+                "lng": 12.528783
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Ostacolo Pericoloso Sulla Carreggiata a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.9107038,
+                "lng": 12.4763686
+              },
+              "title": "Posizione esatta dell'evento: Ostacolo Pericoloso Sulla Carreggiata a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.9107038,
+                "lng": 12.4763686
+              }
+            },
+            {
+              "position": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.8991622,
+                "lng": 12.4730719
+              },
+              "title": "Posizione esatta dell'evento: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.8991622,
+                "lng": 12.4730719
+              }
+            },
+            {
+              "position": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.866107,
+                "lng": 12.436241
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Danno O Incidente Durante La Sosta a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Ostacolo Pericoloso Sulla Carreggiata a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.663192625,
+                "lng": 12.460474375
+              },
+              "title": "4 segnalazioni"
+            },
+            {
+              "position": {
+                "lat": 41.6222269,
+                "lng": 12.4616316
+              },
+              "title": "4 segnalazioni"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.911948,
+                "lng": 12.528783
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.866107,
+                "lng": 12.436241
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event363",
+    "width": 1440,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 457.28125,
+            "height": 40,
+            "left": 987,
+            "right": 1027,
+            "top": 417.28125,
+            "width": 40,
+            "x": 987,
+            "y": 417.28125
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 498.28125,
+            "height": 40,
+            "left": 987,
+            "right": 1027,
+            "top": 458.28125,
+            "width": 40,
+            "x": 987,
+            "y": 458.28125
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 565.28125,
+            "height": 44,
+            "left": 934,
+            "right": 978,
+            "top": 521.28125,
+            "width": 44,
+            "x": 934,
+            "y": 521.28125
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 565.28125,
+            "height": 44,
+            "left": 980,
+            "right": 1024,
+            "top": 521.28125,
+            "width": 44,
+            "x": 980,
+            "y": 521.28125
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 611.28125,
+            "height": 44,
+            "left": 934,
+            "right": 978,
+            "top": 567.28125,
+            "width": 44,
+            "x": 934,
+            "y": 567.28125
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 611.28125,
+            "height": 44,
+            "left": 980,
+            "right": 1024,
+            "top": 567.28125,
+            "width": 44,
+            "x": 980,
+            "y": 567.28125
+          }
+        }
+      ],
+      "documentWidth": 1425,
+      "fullscreen": true,
+      "map": {
+        "bottom": 686.28125,
+        "height": 340,
+        "left": 41,
+        "right": 1038,
+        "top": 346.28125,
+        "width": 997,
+        "x": 41,
+        "y": 346.28125
+      },
+      "pads": 1,
+      "viewport": 1425
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "363",
+          "center": {
+            "lat": 41.662659500000004,
+            "lng": 12.46272450000002
+          },
+          "zoom": 16,
+          "pan_calls": [
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -249,
+              0
+            ],
+            [
+              249,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.6626595,
+                "lng": 12.4627245
+              },
+              "title": "Posizione esatta dell'evento: Rifiuti abbandonati o discarica a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.6626595,
+                "lng": 12.4627245
+              }
+            }
+          ],
+          "advanced_markers": [],
+          "circles": []
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event360",
+    "width": 390,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 504.28125,
+            "height": 40,
+            "left": 293,
+            "right": 333,
+            "top": 464.28125,
+            "width": 40,
+            "x": 293,
+            "y": 464.28125
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 545.28125,
+            "height": 40,
+            "left": 293,
+            "right": 333,
+            "top": 505.28125,
+            "width": 40,
+            "x": 293,
+            "y": 505.28125
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 612.28125,
+            "height": 44,
+            "left": 240,
+            "right": 284,
+            "top": 568.28125,
+            "width": 44,
+            "x": 240,
+            "y": 568.28125
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 612.28125,
+            "height": 44,
+            "left": 286,
+            "right": 330,
+            "top": 568.28125,
+            "width": 44,
+            "x": 286,
+            "y": 568.28125
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 658.28125,
+            "height": 44,
+            "left": 240,
+            "right": 284,
+            "top": 614.28125,
+            "width": 44,
+            "x": 240,
+            "y": 614.28125
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 658.28125,
+            "height": 44,
+            "left": 286,
+            "right": 330,
+            "top": 614.28125,
+            "width": 44,
+            "x": 286,
+            "y": 614.28125
+          }
+        }
+      ],
+      "documentWidth": 375,
+      "fullscreen": true,
+      "map": {
+        "bottom": 733.28125,
+        "height": 340,
+        "left": 31,
+        "right": 344,
+        "top": 393.28125,
+        "width": 313,
+        "x": 31,
+        "y": 393.28125
+      },
+      "pads": 1,
+      "viewport": 375
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 390,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "360",
+          "center": {
+            "lat": 41.66234900626603,
+            "lng": 12.462062999999963
+          },
+          "zoom": 17,
+          "pan_calls": [
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -78,
+              0
+            ],
+            [
+              78,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.662349,
+                "lng": 12.462063
+              },
+              "title": "Area approssimativa dell'evento: raggio 100 metri: Rifiuti abbandonati o discarica a Pomezia"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.662349,
+                "lng": 12.462063
+              },
+              "radius": 100
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event361",
+    "width": 390,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 504.28125,
+            "height": 40,
+            "left": 293,
+            "right": 333,
+            "top": 464.28125,
+            "width": 40,
+            "x": 293,
+            "y": 464.28125
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 545.28125,
+            "height": 40,
+            "left": 293,
+            "right": 333,
+            "top": 505.28125,
+            "width": 40,
+            "x": 293,
+            "y": 505.28125
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 612.28125,
+            "height": 44,
+            "left": 240,
+            "right": 284,
+            "top": 568.28125,
+            "width": 44,
+            "x": 240,
+            "y": 568.28125
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 612.28125,
+            "height": 44,
+            "left": 286,
+            "right": 330,
+            "top": 568.28125,
+            "width": 44,
+            "x": 286,
+            "y": 568.28125
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 658.28125,
+            "height": 44,
+            "left": 240,
+            "right": 284,
+            "top": 614.28125,
+            "width": 44,
+            "x": 240,
+            "y": 614.28125
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 658.28125,
+            "height": 44,
+            "left": 286,
+            "right": 330,
+            "top": 614.28125,
+            "width": 44,
+            "x": 286,
+            "y": 614.28125
+          }
+        }
+      ],
+      "documentWidth": 375,
+      "fullscreen": true,
+      "map": {
+        "bottom": 733.28125,
+        "height": 340,
+        "left": 31,
+        "right": 344,
+        "top": 393.28125,
+        "width": 313,
+        "x": 31,
+        "y": 393.28125
+      },
+      "pads": 1,
+      "viewport": 375
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 390,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "361",
+          "center": {
+            "lat": 41.66081715664222,
+            "lng": 12.459693999999994
+          },
+          "zoom": 14,
+          "pan_calls": [
+            [
+              0,
+              -0.0024428206961601973
+            ],
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -78,
+              0
+            ],
+            [
+              78,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.660817,
+                "lng": 12.459694
+              },
+              "title": "Area approssimativa dell'evento: raggio 500 metri: Rifiuti abbandonati o discarica a Pomezia"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.660817,
+                "lng": 12.459694
+              },
+              "radius": 500
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event362",
+    "width": 390,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 504.28125,
+            "height": 40,
+            "left": 293,
+            "right": 333,
+            "top": 464.28125,
+            "width": 40,
+            "x": 293,
+            "y": 464.28125
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 545.28125,
+            "height": 40,
+            "left": 293,
+            "right": 333,
+            "top": 505.28125,
+            "width": 40,
+            "x": 293,
+            "y": 505.28125
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 612.28125,
+            "height": 44,
+            "left": 240,
+            "right": 284,
+            "top": 568.28125,
+            "width": 44,
+            "x": 240,
+            "y": 568.28125
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 612.28125,
+            "height": 44,
+            "left": 286,
+            "right": 330,
+            "top": 568.28125,
+            "width": 44,
+            "x": 286,
+            "y": 568.28125
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 658.28125,
+            "height": 44,
+            "left": 240,
+            "right": 284,
+            "top": 614.28125,
+            "width": 44,
+            "x": 240,
+            "y": 614.28125
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 658.28125,
+            "height": 44,
+            "left": 286,
+            "right": 330,
+            "top": 614.28125,
+            "width": 44,
+            "x": 286,
+            "y": 614.28125
+          }
+        }
+      ],
+      "documentWidth": 375,
+      "fullscreen": true,
+      "map": {
+        "bottom": 733.28125,
+        "height": 340,
+        "left": 31,
+        "right": 344,
+        "top": 393.28125,
+        "width": 313,
+        "x": 31,
+        "y": 393.28125
+      },
+      "pads": 1,
+      "viewport": 375
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 390,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "362",
+          "center": {
+            "lat": 41.666945626703836,
+            "lng": 12.457416
+          },
+          "zoom": 13,
+          "pan_calls": [
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -78,
+              0
+            ],
+            [
+              78,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.666945,
+                "lng": 12.457416
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Pomezia"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.666945,
+                "lng": 12.457416
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event363",
+    "width": 390,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 504.28125,
+            "height": 40,
+            "left": 293,
+            "right": 333,
+            "top": 464.28125,
+            "width": 40,
+            "x": 293,
+            "y": 464.28125
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 545.28125,
+            "height": 40,
+            "left": 293,
+            "right": 333,
+            "top": 505.28125,
+            "width": 40,
+            "x": 293,
+            "y": 505.28125
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 612.28125,
+            "height": 44,
+            "left": 240,
+            "right": 284,
+            "top": 568.28125,
+            "width": 44,
+            "x": 240,
+            "y": 568.28125
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 612.28125,
+            "height": 44,
+            "left": 286,
+            "right": 330,
+            "top": 568.28125,
+            "width": 44,
+            "x": 286,
+            "y": 568.28125
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 658.28125,
+            "height": 44,
+            "left": 240,
+            "right": 284,
+            "top": 614.28125,
+            "width": 44,
+            "x": 240,
+            "y": 614.28125
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 658.28125,
+            "height": 44,
+            "left": 286,
+            "right": 330,
+            "top": 614.28125,
+            "width": 44,
+            "x": 286,
+            "y": 614.28125
+          }
+        }
+      ],
+      "documentWidth": 375,
+      "fullscreen": true,
+      "map": {
+        "bottom": 733.28125,
+        "height": 340,
+        "left": 31,
+        "right": 344,
+        "top": 393.28125,
+        "width": 313,
+        "x": 31,
+        "y": 393.28125
+      },
+      "pads": 1,
+      "viewport": 375
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 390,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "363",
+          "center": {
+            "lat": 41.662659500000004,
+            "lng": 12.46272450000002
+          },
+          "zoom": 16,
+          "pan_calls": [
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -78,
+              0
+            ],
+            [
+              78,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.6626595,
+                "lng": 12.4627245
+              },
+              "title": "Posizione esatta dell'evento: Rifiuti abbandonati o discarica a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.6626595,
+                "lng": 12.4627245
+              }
+            }
+          ],
+          "advanced_markers": [],
+          "circles": []
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event360",
+    "width": 320,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 504.84375,
+            "height": 40,
+            "left": 223,
+            "right": 263,
+            "top": 464.84375,
+            "width": 40,
+            "x": 223,
+            "y": 464.84375
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 545.84375,
+            "height": 40,
+            "left": 223,
+            "right": 263,
+            "top": 505.84375,
+            "width": 40,
+            "x": 223,
+            "y": 505.84375
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 612.84375,
+            "height": 44,
+            "left": 170,
+            "right": 214,
+            "top": 568.84375,
+            "width": 44,
+            "x": 170,
+            "y": 568.84375
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 612.84375,
+            "height": 44,
+            "left": 216,
+            "right": 260,
+            "top": 568.84375,
+            "width": 44,
+            "x": 216,
+            "y": 568.84375
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 658.84375,
+            "height": 44,
+            "left": 170,
+            "right": 214,
+            "top": 614.84375,
+            "width": 44,
+            "x": 170,
+            "y": 614.84375
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 658.84375,
+            "height": 44,
+            "left": 216,
+            "right": 260,
+            "top": 614.84375,
+            "width": 44,
+            "x": 216,
+            "y": 614.84375
+          }
+        }
+      ],
+      "documentWidth": 305,
+      "fullscreen": true,
+      "map": {
+        "bottom": 733.84375,
+        "height": 340,
+        "left": 31,
+        "right": 274,
+        "top": 393.84375,
+        "width": 243,
+        "x": 31,
+        "y": 393.84375
+      },
+      "pads": 1,
+      "viewport": 305
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 320,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "360",
+          "center": {
+            "lat": 41.662349006266005,
+            "lng": 12.462062999999963
+          },
+          "zoom": 16,
+          "pan_calls": [
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -60,
+              0
+            ],
+            [
+              60,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.662349,
+                "lng": 12.462063
+              },
+              "title": "Area approssimativa dell'evento: raggio 100 metri: Rifiuti abbandonati o discarica a Pomezia"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.662349,
+                "lng": 12.462063
+              },
+              "radius": 100
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event361",
+    "width": 320,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 504.84375,
+            "height": 40,
+            "left": 223,
+            "right": 263,
+            "top": 464.84375,
+            "width": 40,
+            "x": 223,
+            "y": 464.84375
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 545.84375,
+            "height": 40,
+            "left": 223,
+            "right": 263,
+            "top": 505.84375,
+            "width": 40,
+            "x": 223,
+            "y": 505.84375
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 612.84375,
+            "height": 44,
+            "left": 170,
+            "right": 214,
+            "top": 568.84375,
+            "width": 44,
+            "x": 170,
+            "y": 568.84375
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 612.84375,
+            "height": 44,
+            "left": 216,
+            "right": 260,
+            "top": 568.84375,
+            "width": 44,
+            "x": 216,
+            "y": 568.84375
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 658.84375,
+            "height": 44,
+            "left": 170,
+            "right": 214,
+            "top": 614.84375,
+            "width": 44,
+            "x": 170,
+            "y": 614.84375
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 658.84375,
+            "height": 44,
+            "left": 216,
+            "right": 260,
+            "top": 614.84375,
+            "width": 44,
+            "x": 216,
+            "y": 614.84375
+          }
+        }
+      ],
+      "documentWidth": 305,
+      "fullscreen": true,
+      "map": {
+        "bottom": 733.84375,
+        "height": 340,
+        "left": 31,
+        "right": 274,
+        "top": 393.84375,
+        "width": 243,
+        "x": 31,
+        "y": 393.84375
+      },
+      "pads": 1,
+      "viewport": 305
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 320,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "361",
+          "center": {
+            "lat": 41.66081715664222,
+            "lng": 12.459693999999994
+          },
+          "zoom": 14,
+          "pan_calls": [
+            [
+              0,
+              -0.0024428206961601973
+            ],
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -60,
+              0
+            ],
+            [
+              60,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.660817,
+                "lng": 12.459694
+              },
+              "title": "Area approssimativa dell'evento: raggio 500 metri: Rifiuti abbandonati o discarica a Pomezia"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.660817,
+                "lng": 12.459694
+              },
+              "radius": 500
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event362",
+    "width": 320,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 504.84375,
+            "height": 40,
+            "left": 223,
+            "right": 263,
+            "top": 464.84375,
+            "width": 40,
+            "x": 223,
+            "y": 464.84375
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 545.84375,
+            "height": 40,
+            "left": 223,
+            "right": 263,
+            "top": 505.84375,
+            "width": 40,
+            "x": 223,
+            "y": 505.84375
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 612.84375,
+            "height": 44,
+            "left": 170,
+            "right": 214,
+            "top": 568.84375,
+            "width": 44,
+            "x": 170,
+            "y": 568.84375
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 612.84375,
+            "height": 44,
+            "left": 216,
+            "right": 260,
+            "top": 568.84375,
+            "width": 44,
+            "x": 216,
+            "y": 568.84375
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 658.84375,
+            "height": 44,
+            "left": 170,
+            "right": 214,
+            "top": 614.84375,
+            "width": 44,
+            "x": 170,
+            "y": 614.84375
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 658.84375,
+            "height": 44,
+            "left": 216,
+            "right": 260,
+            "top": 614.84375,
+            "width": 44,
+            "x": 216,
+            "y": 614.84375
+          }
+        }
+      ],
+      "documentWidth": 305,
+      "fullscreen": true,
+      "map": {
+        "bottom": 733.84375,
+        "height": 340,
+        "left": 31,
+        "right": 274,
+        "top": 393.84375,
+        "width": 243,
+        "x": 31,
+        "y": 393.84375
+      },
+      "pads": 1,
+      "viewport": 305
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 320,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "362",
+          "center": {
+            "lat": 41.666945626703836,
+            "lng": 12.457416
+          },
+          "zoom": 13,
+          "pan_calls": [
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -60,
+              0
+            ],
+            [
+              60,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.666945,
+                "lng": 12.457416
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Pomezia"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.666945,
+                "lng": 12.457416
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event363",
+    "width": 320,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 504.84375,
+            "height": 40,
+            "left": 223,
+            "right": 263,
+            "top": 464.84375,
+            "width": 40,
+            "x": 223,
+            "y": 464.84375
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 545.84375,
+            "height": 40,
+            "left": 223,
+            "right": 263,
+            "top": 505.84375,
+            "width": 40,
+            "x": 223,
+            "y": 505.84375
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 612.84375,
+            "height": 44,
+            "left": 170,
+            "right": 214,
+            "top": 568.84375,
+            "width": 44,
+            "x": 170,
+            "y": 568.84375
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 612.84375,
+            "height": 44,
+            "left": 216,
+            "right": 260,
+            "top": 568.84375,
+            "width": 44,
+            "x": 216,
+            "y": 568.84375
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 658.84375,
+            "height": 44,
+            "left": 170,
+            "right": 214,
+            "top": 614.84375,
+            "width": 44,
+            "x": 170,
+            "y": 614.84375
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 658.84375,
+            "height": 44,
+            "left": 216,
+            "right": 260,
+            "top": 614.84375,
+            "width": 44,
+            "x": 216,
+            "y": 614.84375
+          }
+        }
+      ],
+      "documentWidth": 305,
+      "fullscreen": true,
+      "map": {
+        "bottom": 733.84375,
+        "height": 340,
+        "left": 31,
+        "right": 274,
+        "top": 393.84375,
+        "width": 243,
+        "x": 31,
+        "y": 393.84375
+      },
+      "pads": 1,
+      "viewport": 305
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 320,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "363",
+          "center": {
+            "lat": 41.662659500000004,
+            "lng": 12.46272450000002
+          },
+          "zoom": 16,
+          "pan_calls": [
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -60,
+              0
+            ],
+            [
+              60,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.6626595,
+                "lng": 12.4627245
+              },
+              "title": "Posizione esatta dell'evento: Rifiuti abbandonati o discarica a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.6626595,
+                "lng": 12.4627245
+              }
+            }
+          ],
+          "advanced_markers": [],
+          "circles": []
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event360",
+    "width": 768,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 474.234375,
+            "height": 40,
+            "left": 665,
+            "right": 705,
+            "top": 434.234375,
+            "width": 40,
+            "x": 665,
+            "y": 434.234375
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 515.234375,
+            "height": 40,
+            "left": 665,
+            "right": 705,
+            "top": 475.234375,
+            "width": 40,
+            "x": 665,
+            "y": 475.234375
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 582.234375,
+            "height": 44,
+            "left": 612,
+            "right": 656,
+            "top": 538.234375,
+            "width": 44,
+            "x": 612,
+            "y": 538.234375
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 582.234375,
+            "height": 44,
+            "left": 658,
+            "right": 702,
+            "top": 538.234375,
+            "width": 44,
+            "x": 658,
+            "y": 538.234375
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 628.234375,
+            "height": 44,
+            "left": 612,
+            "right": 656,
+            "top": 584.234375,
+            "width": 44,
+            "x": 612,
+            "y": 584.234375
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 628.234375,
+            "height": 44,
+            "left": 658,
+            "right": 702,
+            "top": 584.234375,
+            "width": 44,
+            "x": 658,
+            "y": 584.234375
+          }
+        }
+      ],
+      "documentWidth": 753,
+      "fullscreen": true,
+      "map": {
+        "bottom": 703.234375,
+        "height": 340,
+        "left": 37,
+        "right": 716,
+        "top": 363.234375,
+        "width": 679,
+        "x": 37,
+        "y": 363.234375
+      },
+      "pads": 1,
+      "viewport": 753
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 768,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "360",
+          "center": {
+            "lat": 41.66234900626603,
+            "lng": 12.462062999999963
+          },
+          "zoom": 17,
+          "pan_calls": [
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -169,
+              0
+            ],
+            [
+              169,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.662349,
+                "lng": 12.462063
+              },
+              "title": "Area approssimativa dell'evento: raggio 100 metri: Rifiuti abbandonati o discarica a Pomezia"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.662349,
+                "lng": 12.462063
+              },
+              "radius": 100
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event361",
+    "width": 768,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 474.234375,
+            "height": 40,
+            "left": 665,
+            "right": 705,
+            "top": 434.234375,
+            "width": 40,
+            "x": 665,
+            "y": 434.234375
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 515.234375,
+            "height": 40,
+            "left": 665,
+            "right": 705,
+            "top": 475.234375,
+            "width": 40,
+            "x": 665,
+            "y": 475.234375
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 582.234375,
+            "height": 44,
+            "left": 612,
+            "right": 656,
+            "top": 538.234375,
+            "width": 44,
+            "x": 612,
+            "y": 538.234375
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 582.234375,
+            "height": 44,
+            "left": 658,
+            "right": 702,
+            "top": 538.234375,
+            "width": 44,
+            "x": 658,
+            "y": 538.234375
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 628.234375,
+            "height": 44,
+            "left": 612,
+            "right": 656,
+            "top": 584.234375,
+            "width": 44,
+            "x": 612,
+            "y": 584.234375
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 628.234375,
+            "height": 44,
+            "left": 658,
+            "right": 702,
+            "top": 584.234375,
+            "width": 44,
+            "x": 658,
+            "y": 584.234375
+          }
+        }
+      ],
+      "documentWidth": 753,
+      "fullscreen": true,
+      "map": {
+        "bottom": 703.234375,
+        "height": 340,
+        "left": 37,
+        "right": 716,
+        "top": 363.234375,
+        "width": 679,
+        "x": 37,
+        "y": 363.234375
+      },
+      "pads": 1,
+      "viewport": 753
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 768,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "361",
+          "center": {
+            "lat": 41.66081715664222,
+            "lng": 12.459693999999994
+          },
+          "zoom": 14,
+          "pan_calls": [
+            [
+              0,
+              -0.0024428206961601973
+            ],
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -169,
+              0
+            ],
+            [
+              169,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.660817,
+                "lng": 12.459694
+              },
+              "title": "Area approssimativa dell'evento: raggio 500 metri: Rifiuti abbandonati o discarica a Pomezia"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.660817,
+                "lng": 12.459694
+              },
+              "radius": 500
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event362",
+    "width": 768,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 474.234375,
+            "height": 40,
+            "left": 665,
+            "right": 705,
+            "top": 434.234375,
+            "width": 40,
+            "x": 665,
+            "y": 434.234375
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 515.234375,
+            "height": 40,
+            "left": 665,
+            "right": 705,
+            "top": 475.234375,
+            "width": 40,
+            "x": 665,
+            "y": 475.234375
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 582.234375,
+            "height": 44,
+            "left": 612,
+            "right": 656,
+            "top": 538.234375,
+            "width": 44,
+            "x": 612,
+            "y": 538.234375
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 582.234375,
+            "height": 44,
+            "left": 658,
+            "right": 702,
+            "top": 538.234375,
+            "width": 44,
+            "x": 658,
+            "y": 538.234375
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 628.234375,
+            "height": 44,
+            "left": 612,
+            "right": 656,
+            "top": 584.234375,
+            "width": 44,
+            "x": 612,
+            "y": 584.234375
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 628.234375,
+            "height": 44,
+            "left": 658,
+            "right": 702,
+            "top": 584.234375,
+            "width": 44,
+            "x": 658,
+            "y": 584.234375
+          }
+        }
+      ],
+      "documentWidth": 753,
+      "fullscreen": true,
+      "map": {
+        "bottom": 703.234375,
+        "height": 340,
+        "left": 37,
+        "right": 716,
+        "top": 363.234375,
+        "width": 679,
+        "x": 37,
+        "y": 363.234375
+      },
+      "pads": 1,
+      "viewport": 753
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 768,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "362",
+          "center": {
+            "lat": 41.666945626703836,
+            "lng": 12.457416
+          },
+          "zoom": 13,
+          "pan_calls": [
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -169,
+              0
+            ],
+            [
+              169,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.666945,
+                "lng": 12.457416
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Pomezia"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.666945,
+                "lng": 12.457416
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event363",
+    "width": 768,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 474.234375,
+            "height": 40,
+            "left": 665,
+            "right": 705,
+            "top": 434.234375,
+            "width": 40,
+            "x": 665,
+            "y": 434.234375
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 515.234375,
+            "height": 40,
+            "left": 665,
+            "right": 705,
+            "top": 475.234375,
+            "width": 40,
+            "x": 665,
+            "y": 475.234375
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 582.234375,
+            "height": 44,
+            "left": 612,
+            "right": 656,
+            "top": 538.234375,
+            "width": 44,
+            "x": 612,
+            "y": 538.234375
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 582.234375,
+            "height": 44,
+            "left": 658,
+            "right": 702,
+            "top": 538.234375,
+            "width": 44,
+            "x": 658,
+            "y": 538.234375
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 628.234375,
+            "height": 44,
+            "left": 612,
+            "right": 656,
+            "top": 584.234375,
+            "width": 44,
+            "x": 612,
+            "y": 584.234375
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 628.234375,
+            "height": 44,
+            "left": 658,
+            "right": 702,
+            "top": 584.234375,
+            "width": 44,
+            "x": 658,
+            "y": 584.234375
+          }
+        }
+      ],
+      "documentWidth": 753,
+      "fullscreen": true,
+      "map": {
+        "bottom": 703.234375,
+        "height": 340,
+        "left": 37,
+        "right": 716,
+        "top": 363.234375,
+        "width": 679,
+        "x": 37,
+        "y": 363.234375
+      },
+      "pads": 1,
+      "viewport": 753
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 768,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "363",
+          "center": {
+            "lat": 41.662659500000004,
+            "lng": 12.46272450000002
+          },
+          "zoom": 16,
+          "pan_calls": [
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -169,
+              0
+            ],
+            [
+              169,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.6626595,
+                "lng": 12.4627245
+              },
+              "title": "Posizione esatta dell'evento: Rifiuti abbandonati o discarica a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.6626595,
+                "lng": 12.4627245
+              }
+            }
+          ],
+          "advanced_markers": [],
+          "circles": []
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event360",
+    "width": 1024,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 467.265625,
+            "height": 40,
+            "left": 571,
+            "right": 611,
+            "top": 427.265625,
+            "width": 40,
+            "x": 571,
+            "y": 427.265625
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 508.265625,
+            "height": 40,
+            "left": 571,
+            "right": 611,
+            "top": 468.265625,
+            "width": 40,
+            "x": 571,
+            "y": 468.265625
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 575.265625,
+            "height": 44,
+            "left": 518,
+            "right": 562,
+            "top": 531.265625,
+            "width": 44,
+            "x": 518,
+            "y": 531.265625
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 575.265625,
+            "height": 44,
+            "left": 564,
+            "right": 608,
+            "top": 531.265625,
+            "width": 44,
+            "x": 564,
+            "y": 531.265625
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 621.265625,
+            "height": 44,
+            "left": 518,
+            "right": 562,
+            "top": 577.265625,
+            "width": 44,
+            "x": 518,
+            "y": 577.265625
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 621.265625,
+            "height": 44,
+            "left": 564,
+            "right": 608,
+            "top": 577.265625,
+            "width": 44,
+            "x": 564,
+            "y": 577.265625
+          }
+        }
+      ],
+      "documentWidth": 1009,
+      "fullscreen": true,
+      "map": {
+        "bottom": 696.265625,
+        "height": 340,
+        "left": 41,
+        "right": 622,
+        "top": 356.265625,
+        "width": 581,
+        "x": 41,
+        "y": 356.265625
+      },
+      "pads": 1,
+      "viewport": 1009
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 1024,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "360",
+          "center": {
+            "lat": 41.66234900626603,
+            "lng": 12.462062999999963
+          },
+          "zoom": 17,
+          "pan_calls": [
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -145,
+              0
+            ],
+            [
+              145,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.662349,
+                "lng": 12.462063
+              },
+              "title": "Area approssimativa dell'evento: raggio 100 metri: Rifiuti abbandonati o discarica a Pomezia"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.662349,
+                "lng": 12.462063
+              },
+              "radius": 100
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event361",
+    "width": 1024,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 467.265625,
+            "height": 40,
+            "left": 571,
+            "right": 611,
+            "top": 427.265625,
+            "width": 40,
+            "x": 571,
+            "y": 427.265625
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 508.265625,
+            "height": 40,
+            "left": 571,
+            "right": 611,
+            "top": 468.265625,
+            "width": 40,
+            "x": 571,
+            "y": 468.265625
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 575.265625,
+            "height": 44,
+            "left": 518,
+            "right": 562,
+            "top": 531.265625,
+            "width": 44,
+            "x": 518,
+            "y": 531.265625
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 575.265625,
+            "height": 44,
+            "left": 564,
+            "right": 608,
+            "top": 531.265625,
+            "width": 44,
+            "x": 564,
+            "y": 531.265625
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 621.265625,
+            "height": 44,
+            "left": 518,
+            "right": 562,
+            "top": 577.265625,
+            "width": 44,
+            "x": 518,
+            "y": 577.265625
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 621.265625,
+            "height": 44,
+            "left": 564,
+            "right": 608,
+            "top": 577.265625,
+            "width": 44,
+            "x": 564,
+            "y": 577.265625
+          }
+        }
+      ],
+      "documentWidth": 1009,
+      "fullscreen": true,
+      "map": {
+        "bottom": 696.265625,
+        "height": 340,
+        "left": 41,
+        "right": 622,
+        "top": 356.265625,
+        "width": 581,
+        "x": 41,
+        "y": 356.265625
+      },
+      "pads": 1,
+      "viewport": 1009
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 1024,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "361",
+          "center": {
+            "lat": 41.66081715664222,
+            "lng": 12.459693999999994
+          },
+          "zoom": 14,
+          "pan_calls": [
+            [
+              0,
+              -0.0024428206961601973
+            ],
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -145,
+              0
+            ],
+            [
+              145,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.660817,
+                "lng": 12.459694
+              },
+              "title": "Area approssimativa dell'evento: raggio 500 metri: Rifiuti abbandonati o discarica a Pomezia"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.660817,
+                "lng": 12.459694
+              },
+              "radius": 500
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event362",
+    "width": 1024,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 467.265625,
+            "height": 40,
+            "left": 571,
+            "right": 611,
+            "top": 427.265625,
+            "width": 40,
+            "x": 571,
+            "y": 427.265625
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 508.265625,
+            "height": 40,
+            "left": 571,
+            "right": 611,
+            "top": 468.265625,
+            "width": 40,
+            "x": 571,
+            "y": 468.265625
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 575.265625,
+            "height": 44,
+            "left": 518,
+            "right": 562,
+            "top": 531.265625,
+            "width": 44,
+            "x": 518,
+            "y": 531.265625
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 575.265625,
+            "height": 44,
+            "left": 564,
+            "right": 608,
+            "top": 531.265625,
+            "width": 44,
+            "x": 564,
+            "y": 531.265625
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 621.265625,
+            "height": 44,
+            "left": 518,
+            "right": 562,
+            "top": 577.265625,
+            "width": 44,
+            "x": 518,
+            "y": 577.265625
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 621.265625,
+            "height": 44,
+            "left": 564,
+            "right": 608,
+            "top": 577.265625,
+            "width": 44,
+            "x": 564,
+            "y": 577.265625
+          }
+        }
+      ],
+      "documentWidth": 1009,
+      "fullscreen": true,
+      "map": {
+        "bottom": 696.265625,
+        "height": 340,
+        "left": 41,
+        "right": 622,
+        "top": 356.265625,
+        "width": 581,
+        "x": 41,
+        "y": 356.265625
+      },
+      "pads": 1,
+      "viewport": 1009
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 1024,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "362",
+          "center": {
+            "lat": 41.666945626703836,
+            "lng": 12.457416
+          },
+          "zoom": 13,
+          "pan_calls": [
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -145,
+              0
+            ],
+            [
+              145,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.666945,
+                "lng": 12.457416
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Pomezia"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.666945,
+                "lng": 12.457416
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event363",
+    "width": 1024,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 467.265625,
+            "height": 40,
+            "left": 571,
+            "right": 611,
+            "top": 427.265625,
+            "width": 40,
+            "x": 571,
+            "y": 427.265625
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 508.265625,
+            "height": 40,
+            "left": 571,
+            "right": 611,
+            "top": 468.265625,
+            "width": 40,
+            "x": 571,
+            "y": 468.265625
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 575.265625,
+            "height": 44,
+            "left": 518,
+            "right": 562,
+            "top": 531.265625,
+            "width": 44,
+            "x": 518,
+            "y": 531.265625
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 575.265625,
+            "height": 44,
+            "left": 564,
+            "right": 608,
+            "top": 531.265625,
+            "width": 44,
+            "x": 564,
+            "y": 531.265625
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 621.265625,
+            "height": 44,
+            "left": 518,
+            "right": 562,
+            "top": 577.265625,
+            "width": 44,
+            "x": 518,
+            "y": 577.265625
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 621.265625,
+            "height": 44,
+            "left": 564,
+            "right": 608,
+            "top": 577.265625,
+            "width": 44,
+            "x": 564,
+            "y": 577.265625
+          }
+        }
+      ],
+      "documentWidth": 1009,
+      "fullscreen": true,
+      "map": {
+        "bottom": 696.265625,
+        "height": 340,
+        "left": 41,
+        "right": 622,
+        "top": 356.265625,
+        "width": 581,
+        "x": 41,
+        "y": 356.265625
+      },
+      "pads": 1,
+      "viewport": 1009
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 1024,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "363",
+          "center": {
+            "lat": 41.662659500000004,
+            "lng": 12.46272450000002
+          },
+          "zoom": 16,
+          "pan_calls": [
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -145,
+              0
+            ],
+            [
+              145,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.6626595,
+                "lng": 12.4627245
+              },
+              "title": "Posizione esatta dell'evento: Rifiuti abbandonati o discarica a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.6626595,
+                "lng": 12.4627245
+              }
+            }
+          ],
+          "advanced_markers": [],
+          "circles": []
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event360",
+    "width": 1440,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 467.28125,
+            "height": 40,
+            "left": 987,
+            "right": 1027,
+            "top": 427.28125,
+            "width": 40,
+            "x": 987,
+            "y": 427.28125
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 508.28125,
+            "height": 40,
+            "left": 987,
+            "right": 1027,
+            "top": 468.28125,
+            "width": 40,
+            "x": 987,
+            "y": 468.28125
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 575.28125,
+            "height": 44,
+            "left": 934,
+            "right": 978,
+            "top": 531.28125,
+            "width": 44,
+            "x": 934,
+            "y": 531.28125
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 575.28125,
+            "height": 44,
+            "left": 980,
+            "right": 1024,
+            "top": 531.28125,
+            "width": 44,
+            "x": 980,
+            "y": 531.28125
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 621.28125,
+            "height": 44,
+            "left": 934,
+            "right": 978,
+            "top": 577.28125,
+            "width": 44,
+            "x": 934,
+            "y": 577.28125
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 621.28125,
+            "height": 44,
+            "left": 980,
+            "right": 1024,
+            "top": 577.28125,
+            "width": 44,
+            "x": 980,
+            "y": 577.28125
+          }
+        }
+      ],
+      "documentWidth": 1425,
+      "fullscreen": true,
+      "map": {
+        "bottom": 696.28125,
+        "height": 340,
+        "left": 41,
+        "right": 1038,
+        "top": 356.28125,
+        "width": 997,
+        "x": 41,
+        "y": 356.28125
+      },
+      "pads": 1,
+      "viewport": 1425
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "360",
+          "center": {
+            "lat": 41.66234900626603,
+            "lng": 12.462062999999963
+          },
+          "zoom": 17,
+          "pan_calls": [
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -249,
+              0
+            ],
+            [
+              249,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.662349,
+                "lng": 12.462063
+              },
+              "title": "Area approssimativa dell'evento: raggio 100 metri: Rifiuti abbandonati o discarica a Pomezia"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.662349,
+                "lng": 12.462063
+              },
+              "radius": 100
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event361",
+    "width": 1440,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 457.28125,
+            "height": 40,
+            "left": 987,
+            "right": 1027,
+            "top": 417.28125,
+            "width": 40,
+            "x": 987,
+            "y": 417.28125
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 498.28125,
+            "height": 40,
+            "left": 987,
+            "right": 1027,
+            "top": 458.28125,
+            "width": 40,
+            "x": 987,
+            "y": 458.28125
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 565.28125,
+            "height": 44,
+            "left": 934,
+            "right": 978,
+            "top": 521.28125,
+            "width": 44,
+            "x": 934,
+            "y": 521.28125
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 565.28125,
+            "height": 44,
+            "left": 980,
+            "right": 1024,
+            "top": 521.28125,
+            "width": 44,
+            "x": 980,
+            "y": 521.28125
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 611.28125,
+            "height": 44,
+            "left": 934,
+            "right": 978,
+            "top": 567.28125,
+            "width": 44,
+            "x": 934,
+            "y": 567.28125
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 611.28125,
+            "height": 44,
+            "left": 980,
+            "right": 1024,
+            "top": 567.28125,
+            "width": 44,
+            "x": 980,
+            "y": 567.28125
+          }
+        }
+      ],
+      "documentWidth": 1425,
+      "fullscreen": true,
+      "map": {
+        "bottom": 686.28125,
+        "height": 340,
+        "left": 41,
+        "right": 1038,
+        "top": 346.28125,
+        "width": 997,
+        "x": 41,
+        "y": 346.28125
+      },
+      "pads": 1,
+      "viewport": 1425
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "361",
+          "center": {
+            "lat": 41.66081715664222,
+            "lng": 12.459693999999994
+          },
+          "zoom": 14,
+          "pan_calls": [
+            [
+              0,
+              -0.0024428206961601973
+            ],
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -249,
+              0
+            ],
+            [
+              249,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.660817,
+                "lng": 12.459694
+              },
+              "title": "Area approssimativa dell'evento: raggio 500 metri: Rifiuti abbandonati o discarica a Pomezia"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.660817,
+                "lng": 12.459694
+              },
+              "radius": 500
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event362",
+    "width": 1440,
+    "geometry": {
+      "controls": [
+        {
+          "inset": 11,
+          "label": "Zoom avanti",
+          "rect": {
+            "bottom": 457.28125,
+            "height": 40,
+            "left": 987,
+            "right": 1027,
+            "top": 417.28125,
+            "width": 40,
+            "x": 987,
+            "y": 417.28125
+          }
+        },
+        {
+          "inset": 11,
+          "label": "Zoom indietro",
+          "rect": {
+            "bottom": 498.28125,
+            "height": 40,
+            "left": 987,
+            "right": 1027,
+            "top": 458.28125,
+            "width": 40,
+            "x": 987,
+            "y": 458.28125
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso nord",
+          "rect": {
+            "bottom": 565.28125,
+            "height": 44,
+            "left": 934,
+            "right": 978,
+            "top": 521.28125,
+            "width": 44,
+            "x": 934,
+            "y": 521.28125
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso sud",
+          "rect": {
+            "bottom": 565.28125,
+            "height": 44,
+            "left": 980,
+            "right": 1024,
+            "top": 521.28125,
+            "width": 44,
+            "x": 980,
+            "y": 521.28125
+          }
+        },
+        {
+          "inset": 60,
+          "label": "Sposta mappa verso ovest",
+          "rect": {
+            "bottom": 611.28125,
+            "height": 44,
+            "left": 934,
+            "right": 978,
+            "top": 567.28125,
+            "width": 44,
+            "x": 934,
+            "y": 567.28125
+          }
+        },
+        {
+          "inset": 14,
+          "label": "Sposta mappa verso est",
+          "rect": {
+            "bottom": 611.28125,
+            "height": 44,
+            "left": 980,
+            "right": 1024,
+            "top": 567.28125,
+            "width": 44,
+            "x": 980,
+            "y": 567.28125
+          }
+        }
+      ],
+      "documentWidth": 1425,
+      "fullscreen": true,
+      "map": {
+        "bottom": 686.28125,
+        "height": 340,
+        "left": 41,
+        "right": 1038,
+        "top": 346.28125,
+        "width": 997,
+        "x": 41,
+        "y": 346.28125
+      },
+      "pads": 1,
+      "viewport": 1425
+    },
+    "geometryInvariant": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "detail",
+          "event": "362",
+          "center": {
+            "lat": 41.666945626703836,
+            "lng": 12.457416
+          },
+          "zoom": 13,
+          "pan_calls": [
+            [
+              0,
+              -85
+            ],
+            [
+              0,
+              85
+            ],
+            [
+              -249,
+              0
+            ],
+            [
+              249,
+              0
+            ]
+          ],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.666945,
+                "lng": 12.457416
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Pomezia"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.666945,
+                "lng": 12.457416
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  },
+  {
+    "profile": "event362",
+    "drag": true,
+    "viewportChanged": true,
+    "geometryUnchanged": true
+  },
+  {
+    "profile": "home",
+    "drag": true,
+    "viewportChanged": true,
+    "circleGeometryUnchanged": true
+  },
+  {
+    "profile": "map",
+    "drag": true,
+    "viewportChanged": true,
+    "circleGeometryUnchanged": true
+  },
+  {
+    "profile": "map",
+    "width": 1024,
+    "clusterExpanded": true,
+    "legendClosed": true,
+    "legendReopened": true,
+    "proof": {
+      "actual_google_maps": true,
+      "viewport": {
+        "width": 1024,
+        "height": 1000,
+        "touch_points": 0
+      },
+      "fullscreen": false,
+      "bootstrap_scripts": 1,
+      "maps": [
+        {
+          "context": "full",
+          "event": null,
+          "center": {
+            "lat": 41.66388107290135,
+            "lng": 12.46007024999999
+          },
+          "zoom": 17,
+          "pan_calls": [],
+          "controls": 1,
+          "policy": {
+            "zoom": true,
+            "fullscreen": true,
+            "drag": true,
+            "gestures": "cooperative"
+          },
+          "markers": [
+            {
+              "position": {
+                "lat": 41.6626595,
+                "lng": 12.4627245
+              },
+              "title": "Posizione esatta dell'evento: Rifiuti abbandonati o discarica a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.6626595,
+                "lng": 12.4627245
+              }
+            },
+            {
+              "position": {
+                "lat": 41.666945,
+                "lng": 12.457416
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.660817,
+                "lng": 12.459694
+              },
+              "title": "Area approssimativa dell'evento: raggio 500 metri: Rifiuti abbandonati o discarica a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.662349,
+                "lng": 12.462063
+              },
+              "title": "Area approssimativa dell'evento: raggio 100 metri: Rifiuti abbandonati o discarica a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.62611,
+                "lng": 12.459279
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: [QA sintetica GEO-PREC-01 B] Nessun evento reale"
+            },
+            {
+              "position": {
+                "lat": 41.6208388,
+                "lng": 12.4626387
+              },
+              "title": "Posizione esatta dell'evento: [QA sintetica GEO-PREC-01 A] Nessun evento reale"
+            },
+            {
+              "position": {
+                "lat": 41.6208388,
+                "lng": 12.4626387
+              }
+            },
+            {
+              "position": {
+                "lat": 41.6208388,
+                "lng": 12.4626387
+              },
+              "title": "Posizione esatta dell'evento: Fumo Incendio O Situazione Anomala a Torvaianica"
+            },
+            {
+              "position": {
+                "lat": 41.6208388,
+                "lng": 12.4626387
+              }
+            },
+            {
+              "position": {
+                "lat": 41.89152,
+                "lng": 12.40626
+              },
+              "title": "Posizione esatta dell'evento: Danno O Incidente Durante La Sosta a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.89152,
+                "lng": 12.40626
+              }
+            },
+            {
+              "position": {
+                "lat": 41.911948,
+                "lng": 12.528783
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Ostacolo Pericoloso Sulla Carreggiata a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.9107038,
+                "lng": 12.4763686
+              },
+              "title": "Posizione esatta dell'evento: Ostacolo Pericoloso Sulla Carreggiata a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.9107038,
+                "lng": 12.4763686
+              }
+            },
+            {
+              "position": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "title": "Area approssimativa dell'evento: raggio 1000 metri: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.8991622,
+                "lng": 12.4730719
+              },
+              "title": "Posizione esatta dell'evento: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.8991622,
+                "lng": 12.4730719
+              }
+            },
+            {
+              "position": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Rifiuti abbandonati o discarica a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.866107,
+                "lng": 12.436241
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Danno O Incidente Durante La Sosta a Roma"
+            },
+            {
+              "position": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Ostacolo Pericoloso Sulla Carreggiata a Pomezia"
+            },
+            {
+              "position": {
+                "lat": 41.62112,
+                "lng": 12.46197
+              },
+              "title": "Posizione pubblica approssimata dell'evento: Veicolo rubato a Torvaianica"
+            }
+          ],
+          "advanced_markers": [],
+          "circles": [
+            {
+              "center": {
+                "lat": 41.666945,
+                "lng": 12.457416
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.660817,
+                "lng": 12.459694
+              },
+              "radius": 500
+            },
+            {
+              "center": {
+                "lat": 41.662349,
+                "lng": 12.462063
+              },
+              "radius": 100
+            },
+            {
+              "center": {
+                "lat": 41.62611,
+                "lng": 12.459279
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.911948,
+                "lng": 12.528783
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.89553,
+                "lng": 12.479214
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.818432,
+                "lng": 12.482284
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.866107,
+                "lng": 12.436241
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.67467,
+                "lng": 12.502868
+              },
+              "radius": 1000
+            },
+            {
+              "center": {
+                "lat": 41.62112,
+                "lng": 12.46197
+              },
+              "radius": 1000
+            }
+          ]
+        }
+      ],
+      "native": null
+    }
+  }
+]
