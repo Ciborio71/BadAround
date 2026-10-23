@@ -1,9 +1,6 @@
 {
   "candidate": "56853ec079cbd9bdd1f466104790e07f54bb60d1",
   "run": 39945370252,
-  "phase": "UPLOAD",
-  "custody": "59/59 PASS",
-  "rollback": "BYTE_EXACT_VERIFIED",
-  "fixtures": "MATCH_PREVIOUS_CERTIFIED_READ_ONLY_STATE",
-  "fullscreen": "NON_BLOCKING"
+  "phase": "FAIL",
+  "reason": "MANDATORY_NATIVE_MOBILE_CONTROL_CLIPPING: at 390px frame (375px useful), actual normal Tab flow leaves zoom button x=355..395 and east/south pan x=348..392; ancestor native smart-address width343 has scrollWidth406, workspace clips. Fullscreen UNKNOWN is NON_BLOCKING and is not the failure reason."
 }
