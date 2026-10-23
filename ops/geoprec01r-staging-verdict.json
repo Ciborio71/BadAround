@@ -1,0 +1,8 @@
+{
+  "candidate": "29a202fd47d6ba6b7a8109b6a596a71f7508109f",
+  "run": 39879232412,
+  "phase": "UPLOAD",
+  "baseline_custody": "55/55",
+  "rollback": "9/9 BYTE-EXACT VERIFIED",
+  "snapshot": "READ-ONLY PASS"
+}
