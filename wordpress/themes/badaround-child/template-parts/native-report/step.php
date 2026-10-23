@@ -5,11 +5,11 @@ if ( 'event' === $key ) : ?>
 <?php elseif ( 'details' === $key ) : ?>
 	<p>Descrivi i fatti e aggiungi le informazioni utili a chi si trova nella zona. Puoi lasciare vuoti i campi facoltativi.</p>
 <?php elseif ( 'location' === $key ) : ?>
-	<p>Indica il luogo più preciso possibile: il segnaposto finale viene acquisito privatamente. Potrai richiedere come mostrarlo al pubblico, ma la scelta richiederà sempre la moderazione.</p>
+	<p>Indica il luogo più preciso possibile: il segnaposto finale viene acquisito privatamente. Scegli come mostrarlo al pubblico: punto esatto oppure area approssimativa. La segnalazione sarà esaminata prima della pubblicazione.</p>
 <div class="ba-native-smart-address" data-native-smart-address>
   <label for="ba-smart-search">Dove è successo?</label>
   <input id="ba-smart-search" data-smart-start type="text" readonly autocomplete="off" placeholder="Cerca indirizzo o località" aria-describedby="ba-smart-privacy ba-smart-status">
-  <p id="ba-smart-privacy" class="ba-native-help"><strong>L’indirizzo completo e il numero civico non vengono pubblicati automaticamente. La posizione pubblica richiesta sarà valutata dalla moderazione.</strong></p>
+  <p id="ba-smart-privacy" class="ba-native-help"><strong>L’indirizzo completo e il numero civico non vengono pubblicati automaticamente. La posizione pubblica seguirà la tua scelta se la segnalazione sarà approvata.</strong></p>
   <div data-smart-widget></div>
   <button data-smart-geolocate type="button" class="ba-button ba-native-gps-button">Usa la mia posizione</button>
   <p class="ba-native-help">Seleziona un suggerimento Google, anche usando le frecce e Invio. La posizione del dispositivo viene richiesta solo premendo il pulsante.</p>
@@ -33,7 +33,19 @@ if ( 'event' === $key ) : ?>
       <input type="radio" name="ba-public-location-choice" value="approximate_area">
       <span><strong>Area approssimata</strong><small>Richiedi di mostrare una zona approssimata intorno al luogo dell’evento.</small></span>
     </label>
-    <p id="ba-native-public-location-help" class="ba-native-help">La tua scelta sarà valutata dalla moderazione, che potrà ridurre la precisione per tutelare la privacy. Indirizzo completo e numero civico non vengono pubblicati automaticamente.</p>
+    <div class="ba-native-radius" data-native-radius-field hidden>
+      <label for="ba-public-location-radius">Raggio dell’area approssimativa (obbligatorio)</label>
+      <select id="ba-public-location-radius" name="ba-public-location-radius" aria-describedby="ba-public-radius-help ba-public-radius-error" disabled>
+        <option value="50">50 m — area ridotta</option>
+        <option value="100">100 m — piccola area</option>
+        <option value="250">250 m — zona limitata</option>
+        <option value="500">500 m — zona ampia</option>
+        <option value="1000">1 km — area estesa</option>
+      </select>
+      <p id="ba-public-radius-help" class="ba-native-help">Il cerchio mostra il raggio in metri intorno al punto indicato. La scala geografica resta la stessa cambiando zoom.</p>
+      <p id="ba-public-radius-error" class="ba-native-error" hidden></p>
+    </div>
+    <p id="ba-native-public-location-help" class="ba-native-help">Scegli il punto esatto oppure un’area approssimativa con il suo raggio. Se la segnalazione è approvata, la posizione pubblica segue questa scelta. Indirizzo completo e numero civico non vengono pubblicati automaticamente.</p>
   </fieldset>
   <?php endif; ?>
 <?php elseif ( 'time' === $key ) : ?>

@@ -13,6 +13,7 @@
     clearReporterChoices();
     const form = container.querySelector('[data-native-form]');
     const publicLocationChoice = form.querySelector('[data-native-public-location-choice]');
+    const radiusField=form.querySelector('[data-native-radius-field]'),radiusSelect=radiusField?.querySelector('select');
     const steps = Object.keys(config.steps);
     const wrappers = Array.from(form.querySelectorAll('[data-native-field]'));
     // One contextual, non-blocking notice. No model value or payload field is added.
@@ -123,7 +124,7 @@
           locationSection.append(heading,document.createElement('dl'));sections.set('location',locationSection);region.append(locationSection);
         }
         const term=document.createElement('dt');term.textContent='Posizione pubblica richiesta';
-        const detail=document.createElement('dd');detail.textContent=model.publicLocationRequest==='approximate_area'?'Area approssimativa':'Punto esatto';
+        const detail=document.createElement('dd');detail.textContent=model.publicLocationLabel();
         locationSection.querySelector('dl').append(term,detail);
       }
       // Follow the seven-step sequence even when schema fields are ordered differently.
@@ -417,6 +418,7 @@
           input.disabled=model.busy || !!model.snapshot || model.completed;
         });
       }
+      if(radiusField){const active=model.publicLocationRequest==='approximate_area';radiusField.hidden=!active;radiusSelect.disabled=!active||model.busy||!!model.snapshot||model.completed;radiusSelect.required=active;radiusSelect.value=active?String(model.publicLocationRadius??''):'';}
       const subtype = form.querySelector('[name="event.subtype"]');
       const previous = model.effective('event.subtype') || '';
       subtype.replaceChildren(new Option('Seleziona…',''));
@@ -507,6 +509,7 @@
       errors=errors.filter(error=>!config.fields[error.field]||model.active(error.field));
       const first = errors.find(error => config.fields[error.field] && model.active(error.field));
       if (first) model.step = steps.indexOf(config.fields[first.field].step);
+      if(errors.some(e=>e.field==='location.public_location_request.radius_m'))model.step=steps.indexOf('location');
       render();
       const declarationMissing=errors.some(error=>declarationPaths.includes(error.field));
       declarationError.hidden=!declarationMissing;declarationError.textContent=declarationMissing?'Conferma le dichiarazioni prima di proseguire.':'';
@@ -516,6 +519,7 @@
       const declarationErrorIndex=errors.findIndex(error=>declarationPaths.includes(error.field));
       const visibleErrors=errors.filter((error,index)=>!declarationPaths.includes(error.field)||index===declarationErrorIndex);
       ns.presentErrors(container, visibleErrors, config, (path, file) => {
+        if(path==='location.public_location_request.radius_m'){model.step=steps.indexOf('location');render();radiusSelect?.focus();return;}
         model.step = steps.indexOf(config.fields[path].step); render();
         if (config.fields[path].step === 'location' && path.startsWith('location.') && !config.fields[path].sourceField) {
           focusStep('location');
@@ -549,9 +553,10 @@
     mountMedia();
     if (publicLocationChoice) {
       listen(publicLocationChoice,'change',event=>{
-        if (!event.target.matches('input[type="radio"]')) return;
-        model.setPublicLocationRequest(event.target.value);
-        render();
+        if(event.target===radiusSelect)model.setPublicLocationRadius(Number(event.target.value));
+        else if(event.target.matches('input[type="radio"]'))model.setPublicLocationRequest(event.target.value);
+        else return;
+        ns.presentErrors(container,[],config);render();
       });
     }
     listen(form,'input', event => {

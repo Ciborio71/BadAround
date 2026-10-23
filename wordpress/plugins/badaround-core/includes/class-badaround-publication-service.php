@@ -301,7 +301,10 @@ class BadAround_Publication_Service {
 			return new WP_Error( 'ba_publication_location_missing', __( 'È necessaria una posizione pubblica o approssimata.', 'badaround-core' ) );
 		}
 		$explicit_exact = $this->b3_event === $event_id && 'exact_point' === ( get_post_meta( $event_id, BadAround_Public_Geo_Contract::PROJECTION_META, true )['mode'] ?? '' );
-		if ( $has_public_coords && $radius < 100 && ! $explicit_exact ) {
+		// A radius below the legacy floor is valid only in a verified, versioned user request.
+		$explicit_radius = $this->b3_event === $event_id && isset( $context ) && BadAround_Public_Geo_Contract::radius_aware( $context['location'] )
+			&& 'approximate_area' === $context['decision']['mode'] && $radius === ( $context['decision']['radius_m'] ?? null );
+		if ( $has_public_coords && $radius < 100 && ! $explicit_exact && ! $explicit_radius ) {
 			return new WP_Error( 'ba_publication_location_too_precise', __( 'Le coordinate pubbliche devono avere un raggio di approssimazione adeguato.', 'badaround-core' ) );
 		}
 
@@ -768,7 +771,7 @@ class BadAround_Publication_Service {
 		// Legacy: explicit GEO-PUBLIC-04 review. New: persisted reporter authority.
 		// A safety veto rejects publication as a whole; it cannot change the mode.
 		$review = static function ( $allowed ) use ( $context, $d ) {
-			return true === $allowed || ( 'exact_point' === ( $context['location']['public_location_request'] ?? null ) && ( BadAround_Public_Geo_Contract::is_user_authority( $d ) || true === ( $d['exact_confirmed'] ?? false ) ) );
+			return true === $allowed || ( 'exact_point' === BadAround_Public_Geo_Contract::request_mode( $context['location'] ) && ( BadAround_Public_Geo_Contract::is_user_authority( $d ) || true === ( $d['exact_confirmed'] ?? false ) ) );
 		};
 		add_filter( 'badaround_public_geo_exact_allowed', $review, -999, 1 );
 		try { return BadAround_Public_Geo_Contract::exact_safety_allowed( $event_id, $context['report_id'], $d ); }

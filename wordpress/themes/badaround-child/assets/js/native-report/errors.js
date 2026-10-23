@@ -2,6 +2,7 @@
   'use strict';
   const ns = root.BadAroundNative = root.BadAroundNative || {};
   const messages = {
+    invalid_public_radius:'Scegli un raggio tra 50 m, 100 m, 250 m, 500 m e 1 km.',
     media_count_limit:'Puoi selezionare al massimo 5 immagini.', media_file_too_large:'Ogni immagine può pesare al massimo 5 MiB (5.242.880 byte).',
     media_type_unsupported:'Formato non supportato. Usa uno dei formati disponibili indicati nel modulo.', media_image_invalid:'L’immagine è vuota, danneggiata, animata o supera i limiti consentiti. Scegli un’altra immagine.',
     media_decoder_unavailable:'La verifica delle immagini non è disponibile. Riprova più tardi.', media_service_unavailable:'Il servizio immagini non è disponibile. Riprova più tardi o rimuovi le immagini non caricate.',
@@ -33,7 +34,7 @@
     ba_native_request_integrity:'Il modulo non può inviare la richiesta. Riprova più tardi.', ba_native_cross_site:'Il modulo deve essere aperto sul sito BadAround.',
     ba_native_cross_origin:'Il modulo deve essere aperto sul sito BadAround.', cross_origin_config:'Il modulo non è disponibile. Riprova più tardi.'
   };
-  ns.errorMessage = error => messages[error.code] || 'Controlla i dati inseriti. Se il problema persiste, riprova più tardi.';
+  ns.errorMessage = error => error.field==='location.public_location_request.radius_m'?messages.invalid_public_radius:messages[error.code] || 'Controlla i dati inseriti. Se il problema persiste, riprova più tardi.';
   ns.presentErrors = function (container, errors, config, focusField) {
     const summary = container.querySelector('[data-native-errors]');
     summary.replaceChildren();
@@ -41,6 +42,8 @@
       wrapper.querySelectorAll('[data-native-input], .ba-native-card-grid input, fieldset').forEach(input => input.setAttribute('aria-invalid','false'));
       const message = wrapper.querySelector('.ba-native-error'); message.hidden = true; message.textContent = '';
     });
+    const radius=container.querySelector('[data-native-radius-field]');
+    if(radius){radius.querySelector('select').setAttribute('aria-invalid','false');const message=radius.querySelector('.ba-native-error');message.hidden=true;message.textContent='';}
     if (!errors.length) { summary.hidden = true; return; }
     const title = document.createElement('p'); title.textContent = 'Controlla la segnalazione'; summary.append(title);
     const list = document.createElement('ul'); summary.append(list);
@@ -49,10 +52,10 @@
       const item = document.createElement('li');
       const locationError = field?.step === 'location' && error.field.startsWith('location.') && !field.sourceField;
       const text = (locationError ? 'Posizione dell’evento: ' : field ? field.label + ': ' : '') + (locationError ? 'Torna a Dove e seleziona di nuovo un luogo dai suggerimenti.' : ns.errorMessage(error));
-      const wrapper = Array.from(container.querySelectorAll('[data-native-field]')).find(w => w.dataset.nativeField === error.field);
+      const wrapper = error.field==='location.public_location_request.radius_m'?radius:Array.from(container.querySelectorAll('[data-native-field]')).find(w => w.dataset.nativeField === error.field);
       if (wrapper && !wrapper.hidden && !wrapper.closest('[data-native-location-fields][hidden]')) {
         const message = wrapper.querySelector('.ba-native-error'); message.textContent = ns.errorMessage(error); message.hidden = false;
-        wrapper.querySelectorAll('[data-native-input], .ba-native-card-grid input, fieldset').forEach(input => input.setAttribute('aria-invalid','true'));
+        wrapper.querySelectorAll('[data-native-input], .ba-native-card-grid input, fieldset, #ba-public-location-radius').forEach(input => input.setAttribute('aria-invalid','true'));
         const button = document.createElement('button'); button.type = 'button'; button.textContent = text;
         button.addEventListener('click', () => {
           if (focusField) focusField(error.field,error.file);

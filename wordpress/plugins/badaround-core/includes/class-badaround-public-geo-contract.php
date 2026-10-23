@@ -12,6 +12,8 @@ class BadAround_Public_Geo_Contract {
 	const GOVERNANCE_KEY = 'public_geo_governance';
 	const VERSION = 'public-location/v1';
 	const REQUEST_VERSION = 'public-location-request-v1';
+	const RADIUS_REQUEST_VERSION = 'public-location-request-v2';
+	const USER_RADII = array( 50, 100, 250, 500, 1000 );
 	const DECISION_META = '_ba_public_location_decision';
 	const PROJECTION_META = '_ba_public_geo';
 
@@ -26,8 +28,10 @@ class BadAround_Public_Geo_Contract {
 		if ( is_wp_error( self::validate_request( $location ) ) || ! isset( $location['public_location_request'] ) ) {
 			return self::error( 'request_invalid' );
 		}
-		return array( 'authority' => self::USER_AUTHORITY, 'mode' => $location['public_location_request'],
-			'request_version' => self::REQUEST_VERSION );
+		$authority = array( 'authority' => self::USER_AUTHORITY, 'mode' => self::request_mode( $location ),
+			'request_version' => $location['public_location_request_version'] );
+		if ( self::radius_aware( $location ) ) { $authority['radius_m'] = $location['public_location_request']['radius_m'] ?? null; }
+		return $authority;
 	}
 
 	public static function is_user_authority( $value ) {
@@ -39,8 +43,7 @@ class BadAround_Public_Geo_Contract {
 			'canonical' => array( 'location' => $location ) ) );
 		return ! is_wp_error( $expected ) && is_array( $authority ) && count( $authority ) === count( $expected )
 			&& ! array_diff_key( $authority, $expected )
-			&& $authority['authority'] === $expected['authority'] && $authority['mode'] === $expected['mode']
-			&& $authority['request_version'] === $expected['request_version']
+			&& $authority === array_replace( $authority, $expected )
 			? true : self::error( 'authority_invalid' );
 	}
 
@@ -59,15 +62,34 @@ class BadAround_Public_Geo_Contract {
 		);
 	}
 
+	public static function radius_aware( $location ) {
+		return is_array( $location ) && self::RADIUS_REQUEST_VERSION === ( $location['public_location_request_version'] ?? null );
+	}
+	public static function request_mode( $location ) {
+		return self::radius_aware( $location ) ? ( $location['public_location_request']['mode'] ?? null ) : ( $location['public_location_request'] ?? null );
+	}
+	/** Temporary validation view only; never persisted or used as a public projection. */
+	public static function validation_report( $report ) {
+		if ( self::radius_aware( $report['location'] ?? null ) ) {
+			$report['location']['public_location_request'] = self::request_mode( $report['location'] );
+			$report['location']['public_location_request_version'] = self::REQUEST_VERSION;
+		}
+		return $report;
+	}
 	public static function validate_request( $location ) {
 		if ( ! is_array( $location ) ) { return self::error( 'request_invalid' ); }
 		$has_request = array_key_exists( 'public_location_request', $location );
 		$has_version = array_key_exists( 'public_location_request_version', $location );
 		if ( ! $has_request && ! $has_version ) { return true; }
-		if ( ! $has_request || ! $has_version || self::REQUEST_VERSION !== $location['public_location_request_version']
-			|| ! in_array( $location['public_location_request'], array( 'exact_point', 'approximate_area' ), true ) ) {
-			return self::error( 'request_invalid' );
+		if ( self::radius_aware( $location ) ) {
+			$r = $location['public_location_request'] ?? null;
+			if ( ! is_array( $r ) || array_diff( array_keys( $r ), array( 'mode', 'radius_m' ) )
+				|| ! in_array( $r['mode'] ?? null, array( 'exact_point', 'approximate_area' ), true ) ) { return self::error( 'request_invalid' ); }
+			if ( 'exact_point' === $r['mode'] ) { return null === ( $r['radius_m'] ?? null ) ? true : self::error( 'radius_invalid' ); }
+			return isset( $r['radius_m'] ) && is_int( $r['radius_m'] ) && in_array( $r['radius_m'], self::USER_RADII, true ) ? true : self::error( 'radius_invalid' );
 		}
+		if ( ! $has_request || ! $has_version || self::REQUEST_VERSION !== $location['public_location_request_version']
+			|| ! in_array( $location['public_location_request'], array( 'exact_point', 'approximate_area' ), true ) ) { return self::error( 'request_invalid' ); }
 		return true;
 	}
 
@@ -151,7 +173,8 @@ class BadAround_Public_Geo_Contract {
 			}
 			return true;
 		}
-		if ( $radius < 100 || $equals_private ) { return self::error( 'generalized_location_too_precise' ); }
+		if ( self::radius_aware( $location ) && ( ! self::is_user_authority( $decision ) || $radius !== ( $decision['radius_m'] ?? null ) ) ) { return self::error( 'radius_invalid' ); }
+		if ( $radius < ( self::radius_aware( $location ) ? 50 : 100 ) || $equals_private ) { return self::error( 'generalized_location_too_precise' ); }
 		return true;
 	}
 

@@ -32,6 +32,7 @@ function get_terms( $query ) {
 $base = dirname( __DIR__ ) . '/wordpress/';
 require $base . 'plugins/badaround-core/includes/class-badaround-report-schema.php';
 require $base . 'plugins/badaround-core/includes/class-badaround-report-conditional-contract.php';
+require $base . 'plugins/badaround-core/includes/class-badaround-public-geo-contract.php';
 require $base . 'plugins/badaround-core/includes/class-badaround-event-taxonomy-map.php';
 require $base . 'plugins/badaround-core/includes/class-badaround-native-report-rest-controller.php';
 require $base . 'themes/badaround-child/inc/native-report.php';

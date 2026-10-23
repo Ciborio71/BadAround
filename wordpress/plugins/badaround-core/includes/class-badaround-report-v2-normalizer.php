@@ -1,11 +1,15 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 require_once __DIR__ . '/class-badaround-report-conditional-contract.php';
+require_once __DIR__ . '/class-badaround-public-geo-contract.php';
 
 /** V2 deterministic snapshot. Only proven inactive fields are removed. */
 class BadAround_Report_V2_Normalizer extends BadAround_Report_Normalizer {
 	public function normalize( $report ) {
 		if ( ! is_array( $report ) ) { return array(); }
+		$radius_aware = BadAround_Public_Geo_Contract::radius_aware( $report['location'] ?? null );
+		$request = $radius_aware ? ( $report['location']['public_location_request'] ?? null ) : null;
+		$report = BadAround_Public_Geo_Contract::validation_report( $report );
 		$fields = BadAround_Report_Conditional_Contract::fields(); $basic = array();
 		foreach ( $fields as $path => $field ) {
 			if ( $this->has_path( $report, $path ) ) { $this->set_path( $basic, $path, $this->normalize_value( $path, $this->get_path( $report, $path ), $field ) ); }
@@ -19,6 +23,11 @@ class BadAround_Report_V2_Normalizer extends BadAround_Report_Normalizer {
 			$value = $this->get_path( $basic, $path );
 			if ( '' === $value || ( is_array( $value ) && ! $value && 'media.items' !== $path ) ) { continue; }
 			$this->set_path( $out, $path, $value );
+		}
+		if ( $radius_aware ) {
+			if ( is_array( $request ) && 'exact_point' === ( $request['mode'] ?? null ) && null === ( $request['radius_m'] ?? null ) ) { unset( $request['radius_m'] ); }
+			$out['location']['public_location_request'] = $request;
+			$out['location']['public_location_request_version'] = BadAround_Public_Geo_Contract::RADIUS_REQUEST_VERSION;
 		}
 		return $out;
 	}

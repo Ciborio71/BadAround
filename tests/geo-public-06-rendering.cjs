@@ -111,3 +111,10 @@ test('resolved state uses existing registry, category exclusions remain exclusio
  assert.equal(r.markers.length,2);assert.equal(r.circles.length,0);assert.match(svg(r.markers[0]),/#8292A8/);
  assert.doesNotMatch(r.dom.serialize(),/exact_lat|exact_lng|exact_address/);r.close();
 });
+
+test('radius-aware public Home/map/detail circles preserve all five approved meter radii',async()=>{
+ for(const radius of [50,100,250,500,1000])for(const context of ['home','full','detail']){
+  const r=await render([{...approximate,public_geo:{...approximate.public_geo,radius_meters:radius}}],context,{...pointData,baEventMode:'approximate_area',baEventRadius:String(radius)});
+  assert.equal(r.circles.length,1);assert.equal(r.circles[0].radius,radius);r.close();
+ }
+});

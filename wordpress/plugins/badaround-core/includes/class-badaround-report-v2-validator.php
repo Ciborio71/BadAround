@@ -6,6 +6,11 @@ require_once __DIR__ . '/class-badaround-report-v2-normalizer.php';
 class BadAround_Report_V2_Validator extends BadAround_Report_Validator {
 	public function validate_raw_contract( $report ) {
 		if ( ! is_array( $report ) ) { return new WP_Error( 'ba_report_invalid_payload', 'Invalid report.' ); }
+		$location = $report['location'] ?? array();
+		if ( is_array( $location ) && ( is_array( $location['public_location_request'] ?? null ) || ( isset( $location['public_location_request_version'] ) && BadAround_Public_Geo_Contract::REQUEST_VERSION !== $location['public_location_request_version'] ) ) ) {
+			$geo = $this->validate_public_location_request( $report ); if ( is_wp_error( $geo ) ) { return $geo; }
+			$report = BadAround_Public_Geo_Contract::validation_report( $report );
+		}
 		$fields = BadAround_Report_Conditional_Contract::fields();
 		$unknown = $this->unknown_paths( $report, $fields );
 		if ( $unknown ) { return new WP_Error( 'ba_report_unknown_field', 'Unknown field.', array( 'field' => $unknown[0] ) ); }
@@ -45,6 +50,7 @@ class BadAround_Report_V2_Validator extends BadAround_Report_Validator {
 		$row = BadAround_Report_Conditional_Contract::row( $report );
 		if ( ! $row ) { return $this->field_error( 'ba_report_category_subtype_mismatch', 'event.subtype', 'Invalid category/subtype.' ); }
 		$geo = $this->validate_public_location_request( $report ); if ( is_wp_error( $geo ) ) { return $geo; }
+		$report = BadAround_Public_Geo_Contract::validation_report( $report );
 		foreach ( $fields as $path => $definition ) {
 			if ( ! BadAround_Report_Conditional_Contract::active( $path, $report, $row ) ) { continue; }
 			$rule = $row['fields'][ $path ]; $present = $this->has_meaningful_value( $report, $path );
@@ -67,4 +73,11 @@ class BadAround_Report_V2_Validator extends BadAround_Report_Validator {
 		foreach ( array( 'truthfulness', 'media_rights', 'publication_rules', 'terms', 'privacy' ) as $consent ) { if ( true !== $this->get_path( $report, 'consents.' . $consent ) ) { return $this->field_error( 'ba_report_consent_required', 'consents.' . $consent, 'Consent required.' ); } }
 		return true;
 	}
+	protected function validate_public_location_request( $report ) {
+		$location = $report['location'] ?? array();
+		if ( ! BadAround_Public_Geo_Contract::radius_aware( $location ) ) { return parent::validate_public_location_request( $report ); }
+		$error = BadAround_Public_Geo_Contract::validate_request( $location );
+		return is_wp_error( $error ) ? $this->field_error( 'ba_report_public_location_request_invalid', 'location.public_location_request.radius_m', 'Scegli un raggio valido per la posizione pubblica.' ) : true;
+	}
+
 }

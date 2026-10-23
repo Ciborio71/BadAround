@@ -51,7 +51,7 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
   await page.keyboard.press('Space');
   assert(await choice.getByRole('radio',{name:/Area approssimata/}).isChecked());
   assert.equal(await page.evaluate(()=>document.querySelector('[data-native-public-location-choice] input:checked').value),'approximate_area');
-  assert.equal(await page.evaluate(()=>document.querySelector('[data-native-config]').textContent.includes('public-location-request-v1')),true);
+  assert.equal(await page.evaluate(()=>document.querySelector('[data-native-config]').textContent.includes('public-location-request-v2')),true);
   assert(!(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1)));
   assert.equal(await page.locator('[name="location.municipality"]').inputValue(),'Pomezia');assert.equal(await page.evaluate(()=>gpsCalls),0);
   await page.locator('[data-smart-geolocate]').click();await page.waitForFunction(()=>document.querySelector('[name="location.exact_lat"]').value==='41.665');

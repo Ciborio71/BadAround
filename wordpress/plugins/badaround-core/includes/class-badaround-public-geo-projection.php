@@ -26,10 +26,12 @@ class BadAround_Public_Geo_Projection {
 			return $p + array( 'lat' => (float) $lat, 'lng' => (float) $lng, 'radius_meters' => 0 );
 		}
 		if ( ! in_array( $mode, array( 'approximate_area', 'street', 'legacy_generalized_point' ), true ) ) { return self::error(); }
-		$radius = 'street' === $mode ? self::RADII['f32-c5'] : self::radius( $precision );
+		$radius_aware = ( $decision['request_version'] ?? null ) === BadAround_Public_Geo_Contract::RADIUS_REQUEST_VERSION;
+		$radius = $radius_aware ? ( $decision['radius_m'] ?? null ) : ( 'street' === $mode ? self::RADII['f32-c5'] : self::radius( $precision ) );
+		if ( $radius_aware && ( ! is_int( $radius ) || ! in_array( $radius, BadAround_Public_Geo_Contract::USER_RADII, true ) ) ) { return self::error(); }
 		$seed = hash_hmac( 'sha256', 'ba-public-geo-v1|' . (int) $event_id, wp_salt( 'auth' ) );
 		$bearing = 2 * M_PI * hexdec( substr( $seed, 0, 8 ) ) / 4294967295;
-		$distance = max( 100, (int) round( $radius * 0.65 ) ) / 6378137;
+		$distance = ( $radius_aware ? $radius * 0.65 : max( 100, (int) round( $radius * 0.65 ) ) ) / 6378137;
 		$phi = deg2rad( (float) $lat ); $lambda = deg2rad( (float) $lng );
 		$phi2 = asin( sin( $phi ) * cos( $distance ) + cos( $phi ) * sin( $distance ) * cos( $bearing ) );
 		$lambda2 = $lambda + atan2( sin( $bearing ) * sin( $distance ) * cos( $phi ), cos( $distance ) - sin( $phi ) * sin( $phi2 ) );
@@ -52,7 +54,8 @@ class BadAround_Public_Geo_Projection {
 			if ( '' !== $d ) { return self::error(); }
 			$d = $proof['user_authority'];
 			$location = array( 'public_location_request' => is_array( $d ) ? ( $d['mode'] ?? null ) : null,
-				'public_location_request_version' => BadAround_Public_Geo_Contract::REQUEST_VERSION );
+				'public_location_request_version' => $d['request_version'] ?? BadAround_Public_Geo_Contract::REQUEST_VERSION );
+			if ( BadAround_Public_Geo_Contract::radius_aware( $location ) ) { $location['public_location_request'] = array( 'mode' => $d['mode'] ?? null, 'radius_m' => $d['radius_m'] ?? null ); }
 			if ( is_wp_error( BadAround_Public_Geo_Contract::validate_user_authority( $location, $d ) ) ) { return self::error(); }
 		} elseif ( BadAround_Public_Geo_Contract::is_user_authority( $d ) ) { return self::error(); }
 		if ( ! is_array( $p ) || ! is_array( $d ) || ! is_array( $proof ) || ! isset( $proof['source'], $proof['seal'] )
@@ -67,7 +70,8 @@ class BadAround_Public_Geo_Projection {
 		if ( ! self::pair( $p['lat'] ?? null, $p['lng'] ?? null ) || ! self::pair( $lat, $lng )
 			|| abs( (float) $lat - $p['lat'] ) > 0.0000001 || abs( (float) $lng - $p['lng'] ) > 0.0000001
 			|| ! isset( $p['radius_meters'] ) || (int) $radius !== $p['radius_meters'] ) { return self::error(); }
-		$allowed_radii = array( 150, 300, 750, 1000, 3000 );
+		$allowed_radii = ( $d['request_version'] ?? null ) === BadAround_Public_Geo_Contract::RADIUS_REQUEST_VERSION
+			? array( $d['radius_m'] ) : array( 150, 300, 750, 1000, 3000 );
 		if ( 'exact_point' === $p['mode'] ) {
 			return 0 === $p['radius_meters'] && ( BadAround_Public_Geo_Contract::is_user_authority( $d ) || true === ( $d['exact_confirmed'] ?? false ) ) ? $p : self::error();
 		}

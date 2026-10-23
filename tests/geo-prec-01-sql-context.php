@@ -8,7 +8,7 @@ class GPContextDB extends Geo04_DB {
    $extract=static function($json,$path){$v=json_decode($json,true);foreach(explode('.',substr($path,2)) as $key){if(!is_array($v)||!array_key_exists($key,$v))return null;$v=$v[$key];}return json_encode($v);};
    $this->pdo->sqliteCreateFunction('JSON_EXTRACT',$extract,2);
    $this->pdo->sqliteCreateFunction('JSON_VALID',static function($s){json_decode($s);return json_last_error()===JSON_ERROR_NONE;},1);
-   $this->pdo->sqliteCreateFunction('JSON_UNQUOTE',static fn($s)=>$s===null?null:json_decode($s,true),1);
+   $this->pdo->sqliteCreateFunction('JSON_UNQUOTE',static function($s){if($s===null)return null;$v=json_decode($s,true);return is_array($v)?$s:$v;},1);
    $this->pdo->sqliteCreateFunction('JSON_CONTAINS_PATH',static function($s,$mode,...$paths)use($extract){foreach($paths as $p)if($extract($s,$p)!==null)return 1;return 0;},-1);
   }
   $this->pdo->exec('DROP TABLE IF EXISTS gprec_sql_ba_reports');

@@ -10,11 +10,18 @@
   const confirmation=ui.querySelector('[data-smart-confirmation]');
   // Keep the verified address next to the result, without changing its data source.
   if(confirmation){panel.after(confirmation);confirmation.tabIndex=-1;}
-  let disposed=false,map,marker,dragListener,busy=false;
-  let mapTask=Promise.resolve();
+  let disposed=false,map,marker,circle,dragListener,dragMoveListener,busy=false;
+  let mapTask=Promise.resolve(),lastCircleRadius=null;
   const locked=()=>Boolean(disposed||model.busy||model.snapshot||model.completed);
   const say=text=>{if(!disposed&&status)status.textContent=text;};
-  function sync(){geo.disabled=locked()||busy||!config.smartAddress?.key;if(marker)marker.gmpDraggable=!locked()&&!busy;}
+  function syncCircle(){
+   const radius=model.publicLocationRadius;
+   if(!map||!marker||panel.hidden||model.publicLocationRequest!=='approximate_area'||!Number.isInteger(radius)||!config.publicLocationRequest?.radii?.includes(radius)){circle?.setMap(null);if(model.publicLocationRequest==='exact_point'&&lastCircleRadius!==null){map?.setZoom?.(17);lastCircleRadius=null;}return;}
+   const p=marker.position,center={lat:typeof p.lat==='function'?p.lat():p.lat,lng:typeof p.lng==='function'?p.lng():p.lng};
+   if(!circle&&root.google?.maps?.Circle)circle=new root.google.maps.Circle({map,center,radius,strokeColor:'#087f8c',strokeOpacity:.8,strokeWeight:2,fillColor:'#087f8c',fillOpacity:.12,clickable:false});
+   if(circle){circle.setCenter(center);circle.setRadius(radius);circle.setMap(map);if(lastCircleRadius!==radius&&map.fitBounds&&circle.getBounds)map.fitBounds(circle.getBounds(),24);lastCircleRadius=radius;}
+  }
+  function sync(){geo.disabled=locked()||busy||!config.smartAddress?.key;if(marker)marker.gmpDraggable=!locked()&&!busy;syncCircle();}
   function glyph(){
    const category=model.values['event.category'];
    const colors={vehicle:'#1677E8',property:'#C9153D',hazard:'#F57C00',public_space:'#0AA184',animal:'#7040C8',item_document:'#E3A415'};
@@ -39,6 +46,7 @@
      marker.replaceChildren(glyph());
      dragListener=()=>{const p=marker.position;reverse({lat:typeof p.lat==='function'?p.lat():p.lat,lng:typeof p.lng==='function'?p.lng():p.lng});};
      marker.addEventListener('gmp-dragend',dragListener);
+     dragMoveListener=()=>syncCircle();marker.addEventListener('gmp-drag',dragMoveListener);
     }else{marker.map=map;marker.position=position;marker.replaceChildren(glyph());map.setCenter(position);}
     sync();say('Il segnaposto indica la posizione riservata dell’evento. Puoi correggerla spostandolo.');
    }catch(_){if(!disposed&&bridge.current(ticket))say('Mappa non disponibile. Puoi continuare con l’indirizzo Google confermato.');}
@@ -102,8 +110,9 @@
    },failed,{enableHighAccuracy:true,timeout:12000,maximumAge:0});}catch(_){failed();}
   }
   function categoryChanged(event){if(event.target?.name==='event.category'&&marker)marker.replaceChildren(glyph());}
-  geo.addEventListener('click',geolocate);container.addEventListener('input',categoryChanged);sync();
-  return {show,sync,hide(){panel.hidden=true;if(marker)marker.map=null;},dispose(){disposed=true;if(marker&&dragListener)marker.removeEventListener('gmp-dragend',dragListener);if(marker)marker.map=null;geo.removeEventListener('click',geolocate);container.removeEventListener('input',categoryChanged);}};
+  function geoChoiceChanged(event){if(['ba-public-location-choice','ba-public-location-radius'].includes(event.target?.name))syncCircle();}
+  geo.addEventListener('click',geolocate);container.addEventListener('input',categoryChanged);container.addEventListener('change',geoChoiceChanged);sync();
+  return {show,sync,hide(){panel.hidden=true;if(marker)marker.map=null;circle?.setMap(null);},dispose(){disposed=true;if(marker&&dragListener)marker.removeEventListener('gmp-dragend',dragListener);if(marker&&dragMoveListener)marker.removeEventListener('gmp-drag',dragMoveListener);circle?.setMap(null);if(marker)marker.map=null;container.removeEventListener('change',geoChoiceChanged);geo.removeEventListener('click',geolocate);container.removeEventListener('input',categoryChanged);}};
  }
  ns.LocationMap={mount};
 })(typeof window!=='undefined'?window:globalThis);

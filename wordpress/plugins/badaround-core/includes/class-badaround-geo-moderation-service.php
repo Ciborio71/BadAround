@@ -43,14 +43,14 @@ class BadAround_Geo_Moderation_Service {
 		if ( ! $row || ! empty( $wpdb->last_error ) || ( 'native' === $row->source_type && ! (int) $row->valid_json ) ) { return $this->error( 'report_unavailable' ); }
 		$location = array();
 		if ( (int) $row->has_request ) {
-			$location = array( 'public_location_request' => $row->request_mode, 'public_location_request_version' => $row->request_version );
+			$location = array( 'public_location_request' => BadAround_Public_Geo_Contract::RADIUS_REQUEST_VERSION === $row->request_version ? json_decode( $row->request_mode, true ) : $row->request_mode, 'public_location_request_version' => $row->request_version );
 		}
 		if ( is_wp_error( BadAround_Public_Geo_Contract::validate_request( $location ) ) ) { return $this->error( 'request_invalid' ); }
 		$envelope = array( 'canonical' => array( 'location' => $location ) );
 		if ( ! empty( $row->has_governance ) ) { $envelope[ BadAround_Public_Geo_Contract::GOVERNANCE_KEY ] = $row->governance; }
 		$authority = BadAround_Public_Geo_Contract::user_authority( $envelope );
 		if ( is_wp_error( $authority ) ) { return $authority; }
-		$request = $location['public_location_request'] ?? null;
+		$request = BadAround_Public_Geo_Contract::request_mode( $location );
 		return array( 'report_id' => (int) $row->id, 'location' => $location, 'request' => $request,
 			'user_authoritative' => null !== $authority,
 			'allowed' => null !== $authority ? array() : BadAround_Public_Geo_Contract::allowed_decisions( $request ) );

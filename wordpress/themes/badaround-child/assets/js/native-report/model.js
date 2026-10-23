@@ -19,6 +19,7 @@
     }
     reset() {
       this.submissionId = uuid(this.crypto);
+      this.publicLocationRadius = null;
       this.values = {}; this.publicLocationRequest = this.config.publicLocationRequest?.default === 'approximate_area' ? 'approximate_area' : 'exact_point'; this.step = 0; this.busy = false; this.completed = false; this.snapshot = null;
       const defaults = {'location.public_precision':'area', 'reporter.public_identity_mode':'anonymous', 'reward.status':'none'};
       Object.entries(this.config.conditional ? {} : defaults).forEach(([path, value]) => {
@@ -99,7 +100,17 @@
       }
     }
     setPublicLocationRequest(value) {
-      if (!this.busy && !this.snapshot && !this.completed && this.config.publicLocationRequest && ['exact_point', 'approximate_area'].includes(value)) this.publicLocationRequest = value;
+      if (!this.busy && !this.snapshot && !this.completed && this.config.publicLocationRequest && ['exact_point', 'approximate_area'].includes(value)) {
+        this.publicLocationRequest = value;
+        this.publicLocationRadius = value === 'approximate_area' ? (this.publicLocationRadius ?? this.config.publicLocationRequest.defaultRadius ?? 500) : null;
+      }
+    }
+    setPublicLocationRadius(value) {
+      if (!this.busy && !this.snapshot && !this.completed && this.publicLocationRequest==='approximate_area') this.publicLocationRadius=value;
+    }
+    publicLocationLabel() {
+      if(this.publicLocationRequest!=='approximate_area')return 'Punto esatto';
+      return 'Area approssimativa — circa '+(this.publicLocationRadius===1000?'1 km':this.publicLocationRadius+' m');
     }
     payload() {
       this.pruneInactive();
@@ -117,7 +128,9 @@
       setPath(out, 'consents.version', this.config.consentVersion);
       // Versioned request only. Approval and public coordinates remain server-owned.
       if (this.config.publicLocationRequest) {
-        setPath(out, 'location.public_location_request', this.publicLocationRequest);
+        const radiusAware=this.config.publicLocationRequest.version==='public-location-request-v2';
+        const request=radiusAware ? {mode:this.publicLocationRequest,...(this.publicLocationRequest==='approximate_area'?{radius_m:this.publicLocationRadius}:{})} : this.publicLocationRequest;
+        setPath(out, 'location.public_location_request', request);
         setPath(out, 'location.public_location_request_version', this.config.publicLocationRequest.version);
       }
       // Optional request, independent of the mandatory declaration and contact choices.
@@ -151,6 +164,7 @@
         if (field.type === 'date' && (!/^\d{4}-\d{2}-\d{2}$/.test(value) || Number.isNaN(Date.parse(value + 'T00:00:00Z')) || new Date(value + 'T00:00:00Z').toISOString().slice(0,10) !== value)) push(path, 'invalid_date_time');
         if (['number','decimal'].includes(field.type) && (!Number.isFinite(Number(value)) || (c.min !== undefined && Number(value) < c.min) || (c.max !== undefined && Number(value) > c.max))) push(path, 'invalid_number');
       });
+      if ((!step || step==='location') && this.config.publicLocationRequest?.version==='public-location-request-v2' && this.publicLocationRequest==='approximate_area' && (!Number.isInteger(this.publicLocationRadius)||!this.config.publicLocationRequest.radii.includes(this.publicLocationRadius))) errors.push({field:'location.public_location_request.radius_m',code:'invalid_public_radius'});
       const present = path => this.active(path) && this.effective(path) !== undefined && this.effective(path) !== '';
       if (present('location.exact_lat') !== present('location.exact_lng')) push('location.exact_lat', 'invalid_location');
       if (this.active('time.range_end') && this.values['time.range_start'] && this.values['time.range_end'] < this.values['time.range_start']) push('time.range_end', 'invalid_date_time');

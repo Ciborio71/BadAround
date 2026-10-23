@@ -15,14 +15,14 @@ function m(){return new Model(config,{randomUUID:()=> 'b1f8a000-0000-4000-8000-0
 test('GEO-PUBLIC-03: default request is exact_point and version is immutable',()=>{
  const v=m(),p=v.payload();
  assert.equal(v.publicLocationRequest,'exact_point');
- assert.equal(p.location.public_location_request,'exact_point');
- assert.equal(p.location.public_location_request_version,'public-location-request-v1');
+ assert.deepEqual(p.location.public_location_request,{mode:'exact_point'});
+ assert.equal(p.location.public_location_request_version,'public-location-request-v2');
 });
 test('selection is actual serialized request, not config default',()=>{
  const v=m();v.setPublicLocationRequest('approximate_area');
- assert.equal(v.payload().location.public_location_request,'approximate_area');
- assert.equal(v.payload().location.public_location_request_version,'public-location-request-v1');
- v.setPublicLocationRequest('exact_point');assert.equal(v.payload().location.public_location_request,'exact_point');
+ assert.deepEqual(v.payload().location.public_location_request,{mode:'approximate_area',radius_m:500});
+ assert.equal(v.payload().location.public_location_request_version,'public-location-request-v2');
+ v.setPublicLocationRequest('exact_point');assert.deepEqual(v.payload().location.public_location_request,{mode:'exact_point'});
 });
 test('location controls are independent of exact private point and legacy public_precision',()=>{
  const v=m();v.set('location.exact_lat',41.68);v.set('location.exact_lng',12.49);
@@ -39,8 +39,8 @@ test('snapshot/retry locks choice and reset restores default',()=>{
  const p=v.payload();v.snapshot=p;
  v.setPublicLocationRequest('exact_point');
  assert.equal(v.publicLocationRequest,'approximate_area');
- assert.equal(v.snapshot.location.public_location_request,'approximate_area');
- assert.equal(v.snapshot.location.public_location_request_version,'public-location-request-v1');
+ assert.deepEqual(v.snapshot.location.public_location_request,{mode:'approximate_area',radius_m:500});
+ assert.equal(v.snapshot.location.public_location_request_version,'public-location-request-v2');
  v.snapshot=null;v.reset();
  assert.equal(v.publicLocationRequest,'exact_point');
 });
@@ -60,7 +60,7 @@ test('HTML displays exactly two descriptive radio choices, no technical fields',
  assert(html.includes('value="exact_point" checked'));
  assert(html.includes('value="approximate_area"'));
  assert(html.includes('Come vuoi che venga mostrata pubblicamente la posizione?'));
- assert(html.includes('La tua scelta sarà valutata dalla moderazione'));
+ assert(html.includes('Se la segnalazione è approvata'));
  assert(!html.includes('name="location.public_location_request_version"'));
  assert(!html.includes('name="location.public_location_request"'));
 });
@@ -72,7 +72,7 @@ test('display location choice is between private pinpoint and time details',()=>
 });
 test('wizard keeps source of truth in model, renders review without coordinates',()=>{
  assert(wizard.includes('model.setPublicLocationRequest(event.target.value)'));
- assert(wizard.includes("model.publicLocationRequest==='approximate_area'?'Area approssimativa':'Punto esatto'"));
+ assert(wizard.includes("model.publicLocationLabel()"));
  assert(wizard.includes('Posizione pubblica richiesta'));
  assert(!wizard.includes('config.publicLocationRequest.default);'));
  assert(wizard.includes('model.snapshot=payload;'));
