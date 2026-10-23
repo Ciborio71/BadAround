@@ -221,6 +221,10 @@ class BadAround_Moderation_Admin {
 		$labels = BadAround_Geo_Moderation_Service::labels();
 		$request_label = $context['request'] ? $labels[ $context['request'] ] : __( 'non disponibile / criterio legacy', 'badaround-core' );
 		if ( $context['user_authoritative'] ) {
+			if ( BadAround_Public_Geo_Contract::radius_aware( $context['location'] ) && 'approximate_area' === $context['request'] ) {
+				$radius = $context['location']['public_location_request']['radius_m'];
+				$request_label .= ' — circa ' . ( 1000 === $radius ? '1 km' : $radius . ' m' );
+			}
 			echo '<p><strong>' . esc_html__( 'Posizione pubblica richiesta:', 'badaround-core' ) . '</strong> ' . esc_html( $request_label ) . '</p>';
 			echo '<p>' . esc_html__( 'Scelta del segnalante in sola lettura. Approva o rifiuta la segnalazione nel suo insieme; la precisione geografica non può essere modificata.', 'badaround-core' ) . '</p>';
 			return;
