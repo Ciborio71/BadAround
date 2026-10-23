@@ -4,6 +4,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * BadAround admin: prefer the classic WordPress editor on every post type.
+ * This is UI-only; moderation/publication permissions and hooks stay intact.
+ */
+add_filter( 'use_block_editor_for_post_type', '__return_false', 100 );
+add_filter( 'use_block_editor_for_post', '__return_false', 100 );
+
 define( 'BADAROUND_CHILD_VERSION', '0.6.0' );
 
 require_once __DIR__ . '/inc/native-report.php';

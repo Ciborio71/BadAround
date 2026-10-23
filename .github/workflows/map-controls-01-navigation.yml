@@ -1,7 +1,7 @@
 name: MAP-CONTROLS-01 global navigation pre-deploy
 on:
   push:
-    branches: [feature/map-controls-01-global-navigation]
+    branches: [feature/map-controls-01-global-navigation, fix/map-controls-01a-classic-editor-reconcile]
 permissions:
   contents: read
 jobs:
@@ -40,6 +40,7 @@ jobs:
           git diff --check 879f55853fbb99c20ad85bc522e03f19f93bc3c6 HEAD
           php -l wordpress/themes/badaround-child/functions.php
           php -l tests/map-controls-01-render.php
+          php tests/map-controls-01a-classic-editor.php | tee evidence/classic-editor.log
           node --check wordpress/themes/badaround-child/assets/js/map-navigation.js
           node --check wordpress/themes/badaround-child/assets/js/map.js
           node --check wordpress/themes/badaround-child/assets/js/native-report/location-map.js
