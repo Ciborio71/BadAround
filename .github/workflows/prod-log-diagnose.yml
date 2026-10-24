@@ -1,0 +1,45 @@
+name: PROD-DIAG-02 read recent hosting logs
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths: ['ops/prod-log-diagnose-launch.txt']
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+    steps:
+      - name: List and read recent log tails
+        run: |
+          python - <<'PY'
+          import ftplib,ssl,os,io,json
+          f=ftplib.FTP_TLS(context=ssl._create_unverified_context(),timeout=60)
+          f.connect(os.environ['FTP_HOST'],21);f.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);f.prot_p()
+          out=[]
+          try:
+            entries=list(f.mlsd('/logs'))
+          except Exception as e:
+            entries=[]
+            print(json.dumps({'list_error':str(e)}))
+          for name,facts in entries:
+            if name in ('.','..') or facts.get('type')!='file': continue
+            path='/logs/'+name
+            size=int(facts.get('size','0') or 0)
+            if size>20_000_000: continue
+            try:
+              b=io.BytesIO();f.retrbinary('RETR '+path,b.write)
+              data=b.getvalue()
+              tail=data[-30000:].decode('utf-8','replace')
+              if any(k in name.lower() for k in ['error','php','proxy','access']):
+                out.append({'name':name,'size':size,'modify':facts.get('modify'),'tail':tail})
+            except Exception as e:
+              out.append({'name':name,'error':str(e)})
+          f.quit()
+          print(json.dumps(out))
+          PY
