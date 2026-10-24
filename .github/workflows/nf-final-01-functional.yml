@@ -22,6 +22,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
+          extensions: pdo_sqlite, mbstring, gd
       - name: Dependencies
         run: npm ci --prefix tests
       - name: Prepare read-only custody
@@ -48,11 +49,11 @@ jobs:
       - name: Native functional DOM, state, retry, geo and privacy
         run: |
           set -euo pipefail
-          node --test tests/native-report-f16.cjs tests/native-report-f16-dom.cjs tests/nf-ux-04-dom.cjs tests/nf-ux-04-service.cjs tests/nf-ux-07-submit-feedback.cjs tests/geo-area-01-model.cjs tests/native-social-preference.cjs tests/sf9-public-privacy-boundary.cjs tests/f1-15b-r5-smart-address.cjs tests/native-media-f17d-dom.cjs tests/native-media-f17d-extra.cjs | tee evidence/nf-final-01/js-tests.txt
+          node --test tests/nf-ux-04-model.cjs tests/nf-ux-04-dom.cjs tests/nf-ux-04-service.cjs tests/nf-ux-07-submit-feedback.cjs tests/geo-area-01-model.cjs tests/geo-public-03-choice.cjs tests/geo-public-06-rendering.cjs tests/native-social-preference.cjs tests/sf9-public-privacy-boundary.cjs tests/f1-15b-r5-smart-address.cjs tests/native-media-f17d-dom.cjs tests/native-media-f17d-extra.cjs | tee evidence/nf-final-01/js-tests.txt
       - name: Backend canonical, persistence, security and regressions
         run: |
           set -euo pipefail
-          for f in native-report-f13 native-report-f14 native-report-f15 geo-area-01-publication geo-prec-01-publication f1-15a3-territory native-social-preference f1-14r-publication-contract f1-14r-consumers ui-admin-01-scope ui-admin-01-rejection; do
+          for f in native-report-f13 native-report-f14 native-report-f15 geo-area-01-publication geo-prec-01-publication f1-15a3-territory geo-area-01-consumers geo-prec-01-moderation geo-priv-03a5a-classic-form native-social-preference f1-14r-publication-contract f1-14r-consumers ui-admin-01-scope ui-admin-01-rejection; do
             echo "RUN $f" | tee -a evidence/nf-final-01/php-tests.txt
             php tests/$f.php >> evidence/nf-final-01/php-tests.txt
           done
