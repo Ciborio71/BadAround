@@ -6,7 +6,8 @@
 .ba-map-pan>button:focus-visible{outline:3px solid #075d69;outline-offset:-3px;background:#e0f4f6}
 /* Reserve the same right-hand rail for all maps, including open previews. */
 .ba-map-navigation-shell>.ba-map-legend{left:10px;right:auto;max-width:calc(100% - 132px)}
-.ba-map-navigation-shell>.ba-map-legend .ba-map-legend__body{max-height:190px;overflow:auto}
+.ba-map-navigation-shell>.ba-map-legend .ba-map-legend__body{max-height:none;overflow:visible;gap:7px;padding-bottom:11px}
+.ba-map-navigation-shell>.ba-map-legend .ba-map-legend__item:first-child{padding-top:9px}
 .ba-map-navigation-shell>.ba-map-preview{left:auto;right:122px;top:24px;bottom:24px;width:min(340px,calc(100% - 132px));max-height:none}
 .ba-map-navigation-shell>.ba-map-privacy-note{right:auto;max-width:calc(100% - 132px);bottom:36px}
 @media(max-width:760px){
