@@ -1,0 +1,48 @@
+name: MAINTENANCE-01 production deploy
+on:
+  push:
+    branches: [feature/maintenance-01]
+    paths: ['ops/maintenance-01-launch.txt']
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP lint
+        run: php -l wordpress/themes/badaround-child/functions.php
+      - name: Backup and deploy functions.php to production
+        run: |
+          python - <<'PY'
+          import ftplib,ssl,os,hashlib,io
+          local='wordpress/themes/badaround-child/functions.php'
+          remote='/httpdocs/wp-content/themes/badaround-child/functions.php'
+          backup='/httpdocs/wp-content/themes/badaround-child/functions.php.maintenance01.bak'
+          ctx=ssl._create_unverified_context()
+          f=ftplib.FTP_TLS(context=ctx,timeout=60)
+          f.connect(os.environ['FTP_HOST'],21)
+          f.login(os.environ['FTP_USER'],os.environ['FTP_PASS'])
+          f.prot_p()
+          old=io.BytesIO(); f.retrbinary('RETR '+remote,old.write)
+          try:
+            f.delete(backup)
+          except Exception:
+            pass
+          old.seek(0); f.storbinary('STOR '+backup,old)
+          with open(local,'rb') as fh:
+            f.storbinary('STOR '+remote,fh)
+          new=io.BytesIO(); f.retrbinary('RETR '+remote,new.write)
+          f.quit()
+          local_sha=hashlib.sha256(open(local,'rb').read()).hexdigest()
+          remote_sha=hashlib.sha256(new.getvalue()).hexdigest()
+          print('local_sha256='+local_sha)
+          print('remote_sha256='+remote_sha)
+          assert local_sha==remote_sha
+          PY
