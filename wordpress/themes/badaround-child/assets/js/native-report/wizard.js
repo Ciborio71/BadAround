@@ -91,10 +91,23 @@
         if (!section) {
           section = document.createElement('section');
           section.className = 'ba-native-review-section';
+          const head = document.createElement('div');
+          head.className = 'ba-native-review-section__head';
           const heading = document.createElement('h3');
           heading.textContent = config.steps[stepKey] || 'Riepilogo';
+          const edit = document.createElement('button');
+          edit.type = 'button';
+          edit.className = 'ba-native-review-edit';
+          edit.textContent = 'Modifica';
+          edit.setAttribute('aria-label','Modifica: ' + (config.steps[stepKey] || 'sezione'));
+          edit.addEventListener('click',()=>{
+            const index=steps.indexOf(stepKey);
+            if(index<0 || model.busy || model.snapshot || model.completed)return;
+            model.step=index;ns.presentErrors(container,[],config);render(true);
+          });
+          head.append(heading,edit);
           const list = document.createElement('dl');
-          section.append(heading, list);
+          section.append(head, list);
           sections.set(stepKey, section);
           region.append(section);
         }
@@ -120,8 +133,11 @@
         let locationSection = sections.get('location');
         if (!locationSection) {
           locationSection = document.createElement('section');locationSection.className='ba-native-review-section';
+          const head=document.createElement('div');head.className='ba-native-review-section__head';
           const heading=document.createElement('h3');heading.textContent=config.steps.location || 'Dove e quando';
-          locationSection.append(heading,document.createElement('dl'));sections.set('location',locationSection);region.append(locationSection);
+          const edit=document.createElement('button');edit.type='button';edit.className='ba-native-review-edit';edit.textContent='Modifica';edit.setAttribute('aria-label','Modifica: '+(config.steps.location || 'Dove e quando'));
+          edit.addEventListener('click',()=>{if(model.busy||model.snapshot||model.completed)return;model.step=steps.indexOf('location');ns.presentErrors(container,[],config);render(true);});
+          head.append(heading,edit);locationSection.append(head,document.createElement('dl'));sections.set('location',locationSection);region.append(locationSection);
         }
         const term=document.createElement('dt');term.textContent='Posizione pubblica richiesta';
         const detail=document.createElement('dd');detail.textContent=model.publicLocationLabel();
@@ -506,7 +522,16 @@
       }
     }
     function displayErrors(errors) {
-      errors=errors.filter(error=>!config.fields[error.field]||model.active(error.field));
+      // Keep the canonical validator untouched, but do not surface errors for
+      // questions that progressive disclosure has not shown to the user yet.
+      errors=errors.filter(error=>{
+        if(!config.fields[error.field])return true;
+        if(!model.active(error.field))return false;
+        if(declarationPaths.includes(error.field))return true;
+        if(error.field==='location.public_location_request.radius_m')return model.publicLocationRequest==='approximate_area';
+        const wrapper=wrappers.find(w=>w.dataset.nativeField===error.field);
+        return !wrapper || (!wrapper.hidden && !wrapper.closest('[hidden]'));
+      });
       const first = errors.find(error => config.fields[error.field] && model.active(error.field));
       if (first) model.step = steps.indexOf(config.fields[first.field].step);
       if(errors.some(e=>e.field==='location.public_location_request.radius_m'))model.step=steps.indexOf('location');
