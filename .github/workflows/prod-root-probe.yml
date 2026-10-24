@@ -28,6 +28,7 @@ jobs:
         run: |
           python ops/prod-root-probe.py
           python ops/prod-tree-probe.py
+          python ops/prod-httpdocs-tree.py
       - uses: actions/upload-artifact@v4
         with:
           name: prod-root-probe
