@@ -639,11 +639,10 @@
 
 	const scheduleMaps = (run) => {
 		const homeOnly = mapNodes.every((node) => (node.dataset.baMapContext || 'full') === 'home');
-		if (!homeOnly) { run(); return; }
-		const start = () => {
-			if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 1800 });
-			else window.setTimeout(run, 250);
-		};
+		// Progressive enhancement only: environments without idle scheduling keep
+		// the certified immediate behavior, including test/legacy browsers.
+		if (!homeOnly || !('requestIdleCallback' in window)) { run(); return; }
+		const start = () => window.requestIdleCallback(run, { timeout: 1800 });
 		if (document.readyState === 'complete') start();
 		else window.addEventListener('load', start, { once: true });
 	};
