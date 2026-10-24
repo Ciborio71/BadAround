@@ -1,0 +1,50 @@
+name: UX-RESPONSIVE-01B.3 shell accessibility QA
+on:
+  push:
+    branches: [feature/ux-responsive-01b3-shell-accessibility]
+    paths: ['ops/ux-responsive-01b3-launch.txt']
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Scope syntax and static assertions
+        run: |
+          set -euo pipefail
+          git diff --check e7a6b191c60e49ba5f83e6f3a30008f821a05704 HEAD
+          git diff --name-only e7a6b191c60e49ba5f83e6f3a30008f821a05704 HEAD -- wordpress | sort > runtime.txt
+          cat > expected.txt <<'EOF'
+          wordpress/themes/badaround-child/assets/css/components.css
+          wordpress/themes/badaround-child/assets/css/legal.css
+          wordpress/themes/badaround-child/assets/css/sentinels.css
+          wordpress/themes/badaround-child/assets/js/sentinels.js
+          wordpress/themes/badaround-child/functions.php
+          wordpress/themes/badaround-child/page-sentinelle.php
+          EOF
+          sort -o expected.txt expected.txt
+          cmp runtime.txt expected.txt
+          php -l wordpress/themes/badaround-child/functions.php
+          php -l wordpress/themes/badaround-child/page-sentinelle.php
+          node --check wordpress/themes/badaround-child/assets/js/sentinels.js
+          grep -F "termini-e-condizioni" wordpress/themes/badaround-child/functions.php
+          grep -F "data-ba-sentinel-territory-search" wordpress/themes/badaround-child/page-sentinelle.php
+          grep -F ".ba-button--urgent { background: #b4232f; }" wordpress/themes/badaround-child/assets/css/components.css
+      - name: Existing sentinel and privacy regressions
+        run: |
+          set -euo pipefail
+          php tests/sentinels-d1.php
+          php tests/sentinels-d2.php
+          php tests/sentinels-d3.php
+          npm ci --prefix tests --ignore-scripts --no-audit --no-fund
+          node --test tests/sf9-public-privacy-boundary.cjs
