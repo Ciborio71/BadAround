@@ -27,11 +27,27 @@ if ( 'event' === $key ) : ?>
     <legend>Come vuoi che venga mostrata pubblicamente la posizione?</legend>
     <label class="ba-native-public-location-option">
       <input type="radio" name="ba-public-location-choice" value="exact_point" checked>
-      <span><strong>Punto esatto</strong><small>Richiedi di mostrare sulla mappa il punto che hai indicato.</small></span>
+      <span class="ba-native-public-location-visual" aria-hidden="true">
+        <svg viewBox="0 0 160 104" focusable="false">
+          <rect x="6" y="6" width="148" height="92" rx="14" class="ba-geo-map-bg"/>
+          <path d="M20 30h120M20 53h120M20 76h120M47 18v68M83 18v68M118 18v68" class="ba-geo-map-grid"/>
+          <path d="M68 71c-6-8-17-20-17-33 0-12 9-21 21-21s21 9 21 21c0 13-11 25-17 33l-4 5-4-5Z" class="ba-geo-pin"/>
+          <circle cx="72" cy="38" r="7" class="ba-geo-pin-core"/>
+        </svg>
+      </span>
+      <span class="ba-native-public-location-copy"><strong>Punto esatto</strong><small>Richiedi di mostrare sulla mappa il punto che hai indicato.</small></span>
     </label>
     <label class="ba-native-public-location-option">
       <input type="radio" name="ba-public-location-choice" value="approximate_area">
-      <span><strong>Area approssimata</strong><small>Richiedi di mostrare una zona approssimata intorno al luogo dell’evento.</small></span>
+      <span class="ba-native-public-location-visual" aria-hidden="true">
+        <svg viewBox="0 0 160 104" focusable="false">
+          <rect x="6" y="6" width="148" height="92" rx="14" class="ba-geo-map-bg"/>
+          <path d="M20 30h120M20 53h120M20 76h120M47 18v68M83 18v68M118 18v68" class="ba-geo-map-grid"/>
+          <circle cx="80" cy="52" r="28" class="ba-geo-area"/>
+          <circle cx="80" cy="52" r="5" class="ba-geo-area-core"/>
+        </svg>
+      </span>
+      <span class="ba-native-public-location-copy"><strong>Area approssimata</strong><small>Richiedi di mostrare una zona approssimata intorno al luogo dell’evento.</small></span>
     </label>
     <div class="ba-native-radius" data-native-radius-field hidden>
       <label for="ba-public-location-radius">Raggio dell’area approssimativa (obbligatorio)</label>
