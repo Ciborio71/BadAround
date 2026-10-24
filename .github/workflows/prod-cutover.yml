@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: badaround-production-cutover
+  group: badaround-production-live-cutover
   cancel-in-progress: false
 jobs:
   cutover:
