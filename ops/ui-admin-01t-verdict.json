@@ -1,9 +1,56 @@
 {
   "candidate": "0c2863b2a1bfbfb1e5c9641c78ba8d28bd21f21c",
   "run": 40090862353,
-  "phase": "UPLOAD",
+  "phase": "PASS",
   "task": "UI-ADMIN-01T",
-  "preupload_health": "Authenticated Classic Editor active, Home healthy, DB/protected custody captured; upload remains conditional on duplicate and 59-file remote custody gates",
+  "viewport": {
+    "width": 1363,
+    "height": 936
+  },
   "responsive_source": 40031438660,
-  "qa_event": 298
+  "live": {
+    "layout": "PASS",
+    "keyboard": "PASS",
+    "focus": "PASS",
+    "labels": "UNCHANGED",
+    "tab_order": "UNCHANGED",
+    "save_pending": "PASS",
+    "save_no_rejection_reason": "PASS",
+    "preview": "PASS",
+    "rejection": "Empty required reason blocked; separate form ba-reject-event-form; no rejection submitted",
+    "approval": "Action available with ba_moderate_event / approved; source and isolated service regression preserved; no public event published",
+    "admin_scope": "Only ba_evento Classic Editor; stylesheet absent on frontend Home/Native/Mappa/detail and unrelated Bacheca"
+  },
+  "data": {
+    "taxonomy": {
+      "unchanged": true,
+      "rows": 3
+    },
+    "posts": {
+      "rows": 93,
+      "changed": [
+        "298"
+      ],
+      "newIds": []
+    },
+    "reports": {
+      "unchanged": true,
+      "rows": 80
+    },
+    "meta": {
+      "unchanged": true,
+      "rows": 329
+    },
+    "qa": {
+      "status": "pending",
+      "moderation": "new",
+      "modified": "2026-10-24 11:47:32"
+    }
+  },
+  "qa_meta_changes": [],
+  "new_events": 0,
+  "new_reports": 0,
+  "protected_fixtures": "UNCHANGED",
+  "runtime": "Only two authorized files; remote hashes 2/2 and custody after upload 59/59 PASS",
+  "verdict": "UI-ADMIN-01 COMPLETE — CLASSIC EDITOR PUBLISH BOX ALIGNMENT CERTIFIED ON STAGING"
 }
