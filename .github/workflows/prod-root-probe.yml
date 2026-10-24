@@ -25,9 +25,11 @@ jobs:
           curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
           cat "$ca" tls/yr2.pem tls/yr-by-x1.pem > tls/curl-chain.pem
       - name: Probe production roots read-only
-        run: python ops/prod-root-probe.py
+        run: |
+          python ops/prod-root-probe.py
+          python ops/prod-tree-probe.py
       - uses: actions/upload-artifact@v4
         with:
           name: prod-root-probe
-          path: evidence/prod-root-probe.json
+          path: evidence/
           retention-days: 30
