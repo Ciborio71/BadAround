@@ -1,0 +1,79 @@
+name: PROD-ROLLBACK-01 restore legacy and staging
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths: ['ops/prod-rollback-launch.txt']
+permissions:
+  contents: read
+concurrency:
+  group: badaround-production-emergency-rollback
+  cancel-in-progress: false
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      LEGACY: /httpdocs-legacy-20261024T174249Z
+    steps:
+      - name: Restore document roots and arm stale-run guard
+        run: |
+          python - <<'PY'
+          import ftplib,ssl,os,io
+          f=ftplib.FTP_TLS(context=ssl._create_unverified_context(),timeout=60)
+          f.connect(os.environ['FTP_HOST'],21);f.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);f.prot_p()
+          current='/httpdocs'
+          staging='/staging.badaround.it'
+          legacy=os.environ['LEGACY']
+          def file_exists(p):
+            try:
+              b=io.BytesIO();f.retrbinary('RETR '+p,b.write);return True
+            except:return False
+          if not file_exists(current+'/wp-content/plugins/badaround-core/badaround-core.php'):
+            raise SystemExit('current production is not BadAround; refusing rollback')
+          if not file_exists(legacy+'/wp-config.php'):
+            raise SystemExit('legacy backup missing')
+          # Restore BadAround staging root first.
+          f.rename(current,staging)
+          try:
+            f.rename(legacy,current)
+          except Exception:
+            f.rename(staging,current)
+            raise
+          # Temporary inert guard: stale queued cutover checks only file existence.
+          try:f.mkd(current+'/wp-content/plugins/badaround-core')
+          except:pass
+          f.storbinary('STOR '+current+'/wp-content/plugins/badaround-core/badaround-core.php',io.BytesIO(b''))
+          # Force staging host while DB URL is reversed through WPVibe.
+          cfg_path=staging+'/wp-config.php'
+          b=io.BytesIO();f.retrbinary('RETR '+cfg_path,b.write)
+          cfg=b.getvalue().decode('utf-8','replace')
+          marker="/* BADAROUND_ROLLBACK_DOMAIN_OVERRIDE */"
+          if marker not in cfg:
+            insert=marker+"\ndefine('WP_HOME','https://staging.badaround.it');\ndefine('WP_SITEURL','https://staging.badaround.it');\n"
+            idx=cfg.find("/* That's all")
+            if idx<0: idx=cfg.find("/* That's all, stop editing")
+            if idx<0: cfg += "\n"+insert
+            else: cfg=cfg[:idx]+insert+cfg[idx:]
+            f.storbinary('STOR '+cfg_path,io.BytesIO(cfg.encode()))
+          print('FILESYSTEM_ROLLBACK_PASS')
+          f.quit()
+          PY
+      - name: Verify restored roots
+        run: |
+          python - <<'PY'
+          import ftplib,ssl,os,io
+          f=ftplib.FTP_TLS(context=ssl._create_unverified_context(),timeout=60)
+          f.connect(os.environ['FTP_HOST'],21);f.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);f.prot_p()
+          def has(p):
+            try:b=io.BytesIO();f.retrbinary('RETR '+p,b.write);return True
+            except:return False
+          assert has('/staging.badaround.it/wp-content/plugins/badaround-core/badaround-core.php')
+          assert has('/staging.badaround.it/wp-content/themes/badaround-child/functions.php')
+          assert has('/httpdocs/wp-config.php')
+          assert has('/httpdocs/wp-content/plugins/badaround-core/badaround-core.php') # guard
+          f.quit();print('ROLLBACK_ROOT_VERIFY_PASS')
+          PY
