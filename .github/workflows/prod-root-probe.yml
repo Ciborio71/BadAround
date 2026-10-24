@@ -1,0 +1,33 @@
+name: PROD-ROOT-01 read-only probe
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths: ['ops/prod-root-probe-launch.txt']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify FTPS TLS
+        run: |
+          mkdir -p tls evidence
+          ca=/etc/ssl/certs/ca-certificates.crt
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat "$ca" tls/yr2.pem tls/yr-by-x1.pem > tls/curl-chain.pem
+      - name: Probe production roots read-only
+        run: python ops/prod-root-probe.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: prod-root-probe
+          path: evidence/prod-root-probe.json
+          retention-days: 30
