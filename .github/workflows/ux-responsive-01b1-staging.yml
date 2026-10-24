@@ -50,8 +50,8 @@ jobs:
           git diff --check "$BASELINE" "$CANDIDATE"
           mkdir -p old new rollback verified tls
           while IFS= read -r file; do
+            mkdir -p "old/$(dirname "$file")" "new/$(dirname "$file")" "rollback/$(dirname "$file")" "verified/$(dirname "$file")"
             git show "$BASELINE:wordpress/$file" > "old/$file"
-            mkdir -p "new/$(dirname "$file")" "rollback/$(dirname "$file")" "verified/$(dirname "$file")"
             git show "$CANDIDATE:wordpress/$file" > "new/$file"
           done < files.txt
       - name: Verify FTPS TLS chain
@@ -110,7 +110,7 @@ jobs:
           grep -q 'ba-map-workspace' map.html
           grep -q 'assets/css/map.css' map.html
       - name: Roll back on upload verification or smoke failure
-        if: always() && (steps.upload.outcome == 'failure' || steps.verify.outcome != 'success' || steps.smoke.outcome != 'success')
+        if: always() && steps.upload.outcome != 'skipped' && (steps.upload.outcome == 'failure' || steps.verify.outcome != 'success' || steps.smoke.outcome != 'success')
         run: |
           set -euo pipefail
           while IFS= read -r file; do
