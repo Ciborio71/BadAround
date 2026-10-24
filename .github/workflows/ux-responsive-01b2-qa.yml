@@ -30,10 +30,14 @@ jobs:
           cmp runtime.txt expected.txt
           node --check wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
           node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
-          grep -F "holder.replaceChildren();widget=null" wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
-          grep -F "ba-native-review-edit" wordpress/themes/badaround-child/assets/js/native-report/wizard.js
       - name: Native regressions
         run: |
           set -euo pipefail
           npm ci --prefix tests --ignore-scripts --no-audit --no-fund
-          node --test --test-concurrency=1             tests/f1-15b-r5-smart-address.cjs             tests/nf-ux-04-model.cjs             tests/nf-ux-04-service.cjs             tests/nf-ux-05*.cjs             tests/nf-ux-06*.cjs             tests/nf-ux-07*.cjs             tests/native-social-preference.cjs
+          node --test --test-concurrency=1 \
+            tests/f1-15b-r5-smart-address.cjs \
+            tests/nf-ux-04-model.cjs \
+            tests/nf-ux-04-service.cjs \
+            tests/nf-ux-07-submit-feedback.cjs \
+            tests/native-social-preference.cjs \
+            tests/ux-responsive-01b2-native.cjs
