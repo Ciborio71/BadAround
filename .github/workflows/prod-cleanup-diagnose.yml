@@ -1,0 +1,42 @@
+name: PROD-CLEANUP-01 app-root diagnosis
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths: ['ops/prod-cleanup-diagnose-launch.txt']
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+    steps:
+      - name: Cleanup guard and compare application-root PHP hints
+        run: |
+          python - <<'PY'
+          import ftplib,ssl,os,io,json
+          f=ftplib.FTP_TLS(context=ssl._create_unverified_context(),timeout=60)
+          f.connect(os.environ['FTP_HOST'],21);f.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);f.prot_p()
+          guard='/httpdocs/wp-content/plugins/badaround-core/badaround-core.php'
+          try:
+            b=io.BytesIO();f.retrbinary('RETR '+guard,b.write)
+            if b.getvalue()==b'': f.delete(guard)
+          except Exception: pass
+          try:f.rmd('/httpdocs/wp-content/plugins/badaround-core')
+          except Exception: pass
+          out={}
+          for label,root in [('production','/httpdocs'),('staging','/staging.badaround.it')]:
+            out[label]={}
+            for name in ['.htaccess','.user.ini','php.ini','.php-version']:
+              try:
+                b=io.BytesIO();f.retrbinary('RETR '+root+'/'+name,b.write)
+                out[label][name]=b.getvalue().decode('utf-8','replace')[:12000]
+              except Exception:
+                out[label][name]=None
+          f.quit()
+          print(json.dumps(out))
+          PY
