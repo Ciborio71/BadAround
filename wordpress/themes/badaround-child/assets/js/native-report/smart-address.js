@@ -357,6 +357,10 @@
       if(confirmation)confirmation.hidden=true;
       mapView?.hide();
       if(confirmationLabel)confirmationLabel.textContent='';
+      // A new report must not retain free text or prediction state inside the
+      // Google custom element. Recreate it lazily on the next explicit focus.
+      if(widget){widget.removeEventListener('gmp-select',choose);holder.replaceChildren();widget=null;}
+      start.value='';start.hidden=false;start.disabled=false;
       if(manualButton)manualButton.hidden=config.locationManualEntry===false || Boolean(config.smartAddress?.key);
       syncVisibility();
       say('Seleziona il campo per cercare un luogo.');
