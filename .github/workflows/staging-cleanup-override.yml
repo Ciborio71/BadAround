@@ -1,0 +1,35 @@
+name: STAGING-CLEANUP-02 remove rollback URL override
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths: ['ops/staging-cleanup-override-launch.txt']
+permissions:
+  contents: read
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+    steps:
+      - name: Remove rollback-only wp-config URL override
+        run: |
+          python - <<'PY'
+          import ftplib,ssl,os,io
+          path='/staging.badaround.it/wp-config.php'
+          f=ftplib.FTP_TLS(context=ssl._create_unverified_context(),timeout=60)
+          f.connect(os.environ['FTP_HOST'],21);f.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);f.prot_p()
+          b=io.BytesIO();f.retrbinary('RETR '+path,b.write)
+          cfg=b.getvalue().decode('utf-8','replace')
+          snippet="/* BADAROUND_ROLLBACK_DOMAIN_OVERRIDE */\ndefine('WP_HOME','https://staging.badaround.it');\ndefine('WP_SITEURL','https://staging.badaround.it');\n"
+          if snippet in cfg:
+            cfg=cfg.replace(snippet,'')
+            f.storbinary('STOR '+path,io.BytesIO(cfg.encode()))
+          b2=io.BytesIO();f.retrbinary('RETR '+path,b2.write)
+          assert b'BADAROUND_ROLLBACK_DOMAIN_OVERRIDE' not in b2.getvalue()
+          f.quit()
+          print('STAGING_URL_OVERRIDE_REMOVED')
+          PY
