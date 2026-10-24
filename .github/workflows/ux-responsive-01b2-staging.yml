@@ -1,0 +1,123 @@
+name: UX-RESPONSIVE-01B.2 guarded staging deploy
+on:
+  push:
+    branches: [deploy/ux-responsive-01b2-staging]
+    paths: ['ops/ux-responsive-01b2-deploy-launch.txt']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
+      BASELINE: a38b1a50ee0ff2260a6b6ae906dcad20e8deff34
+      CANDIDATE: e7a6b191c60e49ba5f83e6f3a30008f821a05704
+      QA_RUN: 40111038824
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: e7a6b191c60e49ba5f83e6f3a30008f821a05704
+          fetch-depth: 0
+      - name: Verify QA and exact runtime scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os,urllib.request
+          req=urllib.request.Request('https://api.github.com/repos/Ciborio71/BadAround/actions/runs/'+os.environ['QA_RUN'],headers={'Authorization':'Bearer '+os.environ['GH_TOKEN']})
+          with urllib.request.urlopen(req,timeout=30) as r:j=json.load(r)
+          assert j['head_sha']==os.environ['CANDIDATE'] and j['conclusion']=='success'
+          PY
+          cat > files.txt <<'EOF'
+          themes/badaround-child/assets/css/native-report.css
+          themes/badaround-child/assets/js/native-report/smart-address.js
+          themes/badaround-child/assets/js/native-report/wizard.js
+          EOF
+          git diff --name-only "$BASELINE" "$CANDIDATE" -- wordpress | sort > affected.txt
+          sed 's|^|wordpress/|' files.txt | sort > expected.txt
+          cmp affected.txt expected.txt
+          git diff --check "$BASELINE" "$CANDIDATE"
+          mkdir -p old new rollback verified tls
+          while IFS= read -r file; do
+            mkdir -p "old/$(dirname "$file")" "new/$(dirname "$file")" "rollback/$(dirname "$file")" "verified/$(dirname "$file")"
+            git show "$BASELINE:wordpress/$file" > "old/$file"
+            git show "$CANDIDATE:wordpress/$file" > "new/$file"
+          done < files.txt
+      - name: Verify FTPS TLS chain
+        run: |
+          set -euo pipefail
+          ca=/etc/ssl/certs/ca-certificates.crt
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 --max-time 25 https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 --max-time 25 https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat tls/yr2.pem tls/yr-by-x1.pem > tls/untrusted.pem
+          cat "$ca" tls/untrusted.pem > tls/curl-chain.pem
+          openssl verify -CAfile "$ca" -untrusted tls/yr-by-x1.pem tls/yr2.pem
+          timeout 30s openssl s_client -starttls ftp -connect "${FTP_HOST}:21" -servername "$FTP_TLS_NAME" -verify_hostname "$FTP_TLS_NAME" -verify_return_error -CAfile tls/curl-chain.pem < /dev/null > tls/handshake.log 2>&1
+          grep -q 'Verify return code: 0 (ok)' tls/handshake.log
+      - name: Capture remote baseline and rollback
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            remote="ftp://${FTP_TLS_NAME}:21/staging.badaround.it/wp-content/$file"
+            curl --fail --silent --show-error --ssl-reqd --cacert tls/curl-chain.pem --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" --user "$FTP_USER:$FTP_PASS" "$remote" -o "rollback/$file"
+            cmp "rollback/$file" "old/$file"
+          done < files.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ux-responsive-01b2-rollback
+          path: rollback/
+          retention-days: 90
+      - name: Upload three Native assets
+        id: upload
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            remote="ftp://${FTP_TLS_NAME}:21/staging.badaround.it/wp-content/$file"
+            curl --fail --silent --show-error --ssl-reqd --cacert tls/curl-chain.pem --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" --user "$FTP_USER:$FTP_PASS" --upload-file "new/$file" "$remote"
+          done < files.txt
+      - name: Verify remote candidate
+        id: verify
+        if: steps.upload.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            remote="ftp://${FTP_TLS_NAME}:21/staging.badaround.it/wp-content/$file"
+            curl --fail --silent --show-error --ssl-reqd --cacert tls/curl-chain.pem --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" --user "$FTP_USER:$FTP_PASS" "$remote" -o "verified/$file"
+            cmp "verified/$file" "new/$file"
+            sha256sum "verified/$file" | tee -a remote-sha256.txt
+          done < files.txt
+      - name: Native HTTP smoke
+        id: smoke
+        if: steps.verify.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location https://staging.badaround.it/segnala-un-evento/ -o native.html
+          grep -q 'data-native-report' native.html
+          grep -q 'assets/css/native-report.css' native.html
+      - name: Roll back on failure
+        if: always() && steps.upload.outcome != 'skipped' && (steps.upload.outcome == 'failure' || steps.verify.outcome != 'success' || steps.smoke.outcome != 'success')
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            remote="ftp://${FTP_TLS_NAME}:21/staging.badaround.it/wp-content/$file"
+            curl --fail --silent --show-error --ssl-reqd --cacert tls/curl-chain.pem --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" --user "$FTP_USER:$FTP_PASS" --upload-file "rollback/$file" "$remote"
+          done < files.txt
+      - name: Final gate
+        if: always()
+        run: |
+          test '${{ steps.upload.outcome }}' = success
+          test '${{ steps.verify.outcome }}' = success
+          test '${{ steps.smoke.outcome }}' = success
