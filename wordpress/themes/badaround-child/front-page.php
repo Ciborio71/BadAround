@@ -16,11 +16,11 @@ if ( class_exists( 'BadAround_Discovery_Query' ) ) {
 }
 
 $home_categories = array(
-	array( 'label' => 'Veicoli',             'subtitle' => 'Furti, danni e veicoli sospetti o abbandonati.',             'slug' => 'veicoli',             'class' => 'is-vehicles', 'icon' => 'car' ),
-	array( 'label' => 'Case e attività',     'subtitle' => 'Furti, tentativi di intrusione e danni ad abitazioni, negozi e uffici.',          'slug' => 'case-e-attivita',     'class' => 'is-property', 'icon' => 'home' ),
-	array( 'label' => 'Pericoli',            'subtitle' => 'Ostacoli, rischi stradali e situazioni di pericolo ambientale.',       'slug' => 'pericoli',            'class' => 'is-hazard', 'icon' => 'warning' ),
-	array( 'label' => 'Spazi pubblici',      'subtitle' => 'Rifiuti abbandonati, guasti e danni a strade e aree comuni.',      'slug' => 'spazi-pubblici',      'class' => 'is-public', 'icon' => 'public' ),
-	array( 'label' => 'Animali',             'subtitle' => 'Animali smarriti, ritrovati, feriti o in pericolo.',           'slug' => 'animali',             'class' => 'is-animal', 'icon' => 'paw' ),
+	array( 'label' => 'Veicoli',             'subtitle' => 'Auto, moto e altri mezzi: furti, danneggiamenti e situazioni da segnalare.',             'slug' => 'veicoli',             'class' => 'is-vehicles', 'icon' => 'car' ),
+	array( 'label' => 'Case e attività',     'subtitle' => 'Furti, tentati furti e altri eventi che riguardano abitazioni, negozi e uffici.',          'slug' => 'case-e-attivita',     'class' => 'is-property', 'icon' => 'home' ),
+	array( 'label' => 'Pericoli',            'subtitle' => 'Ostacoli, rischi stradali o ambientali e situazioni che richiedono attenzione.',       'slug' => 'pericoli',            'class' => 'is-hazard', 'icon' => 'warning' ),
+	array( 'label' => 'Spazi pubblici',      'subtitle' => 'Vandalismi, degrado e altre situazioni che interessano aree comuni.',      'slug' => 'spazi-pubblici',      'class' => 'is-public', 'icon' => 'public' ),
+	array( 'label' => 'Animali',             'subtitle' => 'Animali smarriti, avvistati o in difficoltà.',           'slug' => 'animali',             'class' => 'is-animal', 'icon' => 'paw' ),
 	array( 'label' => 'Oggetti e documenti', 'subtitle' => 'Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.',         'slug' => 'oggetti-e-documenti', 'class' => 'is-object', 'icon' => 'object' ),
 );
 ?>
