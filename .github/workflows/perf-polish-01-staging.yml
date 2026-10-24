@@ -1,0 +1,90 @@
+name: PERF-POLISH-01 guarded map.js staging deploy
+on:
+  push:
+    branches: [deploy/perf-polish-01-staging]
+    paths: ['ops/perf-polish-01-deploy-launch.txt']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: badaround-staging-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
+      BASELINE: c54a924ed98cac9e3051fd38e26eed2c10d89a23
+      CANDIDATE: 1184253c732afb51e6de5ea71dff3ca27f5108ff
+      QA_RUN: 40112686028
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 1184253c732afb51e6de5ea71dff3ca27f5108ff
+          fetch-depth: 0
+      - name: Verify QA and one-file scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os,urllib.request
+          req=urllib.request.Request('https://api.github.com/repos/Ciborio71/BadAround/actions/runs/'+os.environ['QA_RUN'],headers={'Authorization':'Bearer '+os.environ['GH_TOKEN']})
+          with urllib.request.urlopen(req,timeout=30) as r:j=json.load(r)
+          assert j['head_sha']==os.environ['CANDIDATE'] and j['conclusion']=='success'
+          PY
+          test "$(git diff --name-only "$BASELINE" "$CANDIDATE" -- wordpress)" = "wordpress/themes/badaround-child/assets/js/map.js"
+          git diff --check "$BASELINE" "$CANDIDATE"
+          mkdir -p old new rollback verified tls
+          git show "$BASELINE":wordpress/themes/badaround-child/assets/js/map.js > old/map.js
+          git show "$CANDIDATE":wordpress/themes/badaround-child/assets/js/map.js > new/map.js
+      - name: Verify FTPS TLS
+        run: |
+          set -euo pipefail
+          ca=/etc/ssl/certs/ca-certificates.crt
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat tls/yr2.pem tls/yr-by-x1.pem > tls/untrusted.pem
+          cat "$ca" tls/untrusted.pem > tls/curl-chain.pem
+          openssl verify -CAfile "$ca" -untrusted tls/yr-by-x1.pem tls/yr2.pem
+      - name: Capture rollback baseline
+        run: |
+          set -euo pipefail
+          remote="ftp://${FTP_TLS_NAME}:21/staging.badaround.it/wp-content/themes/badaround-child/assets/js/map.js"
+          curl --fail --silent --show-error --ssl-reqd --cacert tls/curl-chain.pem --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" --user "$FTP_USER:$FTP_PASS" "$remote" -o rollback/map.js
+          cmp rollback/map.js old/map.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: perf-polish-01-mapjs-rollback
+          path: rollback/map.js
+          retention-days: 90
+      - name: Upload candidate
+        id: upload
+        continue-on-error: true
+        run: |
+          remote="ftp://${FTP_TLS_NAME}:21/staging.badaround.it/wp-content/themes/badaround-child/assets/js/map.js"
+          curl --fail --silent --show-error --ssl-reqd --cacert tls/curl-chain.pem --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" --user "$FTP_USER:$FTP_PASS" --upload-file new/map.js "$remote"
+      - name: Verify remote candidate
+        id: verify
+        if: steps.upload.outcome == 'success'
+        continue-on-error: true
+        run: |
+          remote="ftp://${FTP_TLS_NAME}:21/staging.badaround.it/wp-content/themes/badaround-child/assets/js/map.js"
+          curl --fail --silent --show-error --ssl-reqd --cacert tls/curl-chain.pem --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" --user "$FTP_USER:$FTP_PASS" "$remote" -o verified/map.js
+          cmp verified/map.js new/map.js
+          sha256sum verified/map.js
+      - name: Rollback on failure
+        if: always() && steps.upload.outcome != 'skipped' && (steps.upload.outcome == 'failure' || steps.verify.outcome != 'success')
+        run: |
+          remote="ftp://${FTP_TLS_NAME}:21/staging.badaround.it/wp-content/themes/badaround-child/assets/js/map.js"
+          curl --fail --silent --show-error --ssl-reqd --cacert tls/curl-chain.pem --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" --user "$FTP_USER:$FTP_PASS" --upload-file rollback/map.js "$remote"
+      - name: Final gate
+        if: always()
+        run: |
+          test '${{ steps.upload.outcome }}' = success
+          test '${{ steps.verify.outcome }}' = success
