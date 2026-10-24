@@ -1,0 +1,19 @@
+name: PROD-BACKUP-01 read-only inventory
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths: ['ops/prod-backup-inventory-launch.txt']
+permissions:
+  contents: read
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python ops/prod-backup-inventory.py
