@@ -1,0 +1,44 @@
+name: UX-RESPONSIVE-01B.1 map territory QA
+on:
+  push:
+    branches: [feature/ux-responsive-01b1-map-territory]
+    paths: ['ops/ux-responsive-01b1-launch.txt']
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Scope and patch assertions
+        run: |
+          set -euo pipefail
+          git diff --check 0c2863b2a1bfbfb1e5c9641c78ba8d28bd21f21c HEAD
+          git diff --name-only 0c2863b2a1bfbfb1e5c9641c78ba8d28bd21f21c HEAD -- wordpress | sort > runtime.txt
+          cat > expected.txt <<'EOF'
+          wordpress/themes/badaround-child/assets/css/map-navigation.css
+          wordpress/themes/badaround-child/assets/css/map.css
+          wordpress/themes/badaround-child/assets/css/pages.css
+          EOF
+          sort -o expected.txt expected.txt
+          cmp runtime.txt expected.txt
+          grep -F 'height:clamp(520px,68vh,680px);min-height:0' wordpress/themes/badaround-child/assets/css/map.css
+          grep -F 'top:24px;bottom:24px' wordpress/themes/badaround-child/assets/css/map-navigation.css
+          grep -F '.ba-territory-eventgrid .ba-badge{max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.25}' wordpress/themes/badaround-child/assets/css/pages.css
+      - name: Relevant regressions
+        run: |
+          set -euo pipefail
+          php tests/f1-15a3-territory.php
+          php tests/map-controls-01-render.php
+          php tests/geo-area-01-consumers.php
+          npm ci --prefix tests --ignore-scripts --no-audit --no-fund
+          node --test --test-concurrency=1 tests/geo-public-06-rendering.cjs tests/map-controls-01.cjs tests/map-controls-provider.cjs
