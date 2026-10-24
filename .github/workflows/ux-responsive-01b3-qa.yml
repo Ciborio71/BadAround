@@ -30,11 +30,13 @@ jobs:
           wordpress/themes/badaround-child/assets/css/sentinels.css
           wordpress/themes/badaround-child/assets/js/sentinels.js
           wordpress/themes/badaround-child/functions.php
+          wordpress/themes/badaround-child/header.php
           wordpress/themes/badaround-child/page-sentinelle.php
           EOF
           sort -o expected.txt expected.txt
           cmp runtime.txt expected.txt
           php -l wordpress/themes/badaround-child/functions.php
+          php -l wordpress/themes/badaround-child/header.php
           php -l wordpress/themes/badaround-child/page-sentinelle.php
           node --check wordpress/themes/badaround-child/assets/js/sentinels.js
           grep -F "termini-e-condizioni" wordpress/themes/badaround-child/functions.php
