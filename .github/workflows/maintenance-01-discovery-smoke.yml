@@ -1,0 +1,16 @@
+name: MAINTENANCE-01 discovery smoke
+on:
+  push:
+    branches: [feature/maintenance-01]
+    paths: ['ops/maintenance-01-smoke.txt']
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check discovery status only
+        run: |
+          code="$(curl -k -sS -o /dev/null -w '%{http_code}' 'https://badaround.it/wp-json/badaround/v1/discovery?per_page=1' || true)"
+          echo "discovery_http=$code"
+          test "$code" != "503"
