@@ -59,7 +59,8 @@ function badaround_child_enqueue_assets() {
 	$is_account   = is_page_template( 'page-area-personale.php' );
 	$is_not_found    = is_404();
 	$is_how_it_works = is_page( 'come-funziona' );
-	$is_badaround     = $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_search || $is_reports || $is_sentinel || $is_states || $is_account || $is_not_found || $is_how_it_works;
+	$is_legal         = is_page( array( 'termini-e-condizioni', 'privacy-policy', 'cookie-policy', 'regole-di-pubblicazione' ) );
+	$is_badaround     = $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_search || $is_reports || $is_sentinel || $is_states || $is_account || $is_not_found || $is_how_it_works || $is_legal;
 
 	if ( ! $is_badaround ) {
 		return;
@@ -101,6 +102,15 @@ function badaround_child_enqueue_assets() {
 			$uri . '/assets/css/how-it-works.css',
 			array( 'badaround-components' ),
 			(string) filemtime( $dir . '/assets/css/how-it-works.css' )
+		);
+	}
+
+	if ( $is_legal ) {
+		wp_enqueue_style(
+			'badaround-legal',
+			$uri . '/assets/css/legal.css',
+			array( 'badaround-shell' ),
+			(string) filemtime( $dir . '/assets/css/legal.css' )
 		);
 	}
 
