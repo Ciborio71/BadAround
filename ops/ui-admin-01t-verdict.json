@@ -1,0 +1,9 @@
+{
+  "candidate": "0c2863b2a1bfbfb1e5c9641c78ba8d28bd21f21c",
+  "run": 40090862353,
+  "phase": "UPLOAD",
+  "task": "UI-ADMIN-01T",
+  "preupload_health": "Authenticated Classic Editor active, Home healthy, DB/protected custody captured; upload remains conditional on duplicate and 59-file remote custody gates",
+  "responsive_source": 40031438660,
+  "qa_event": 298
+}
