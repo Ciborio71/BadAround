@@ -360,6 +360,10 @@
 			link.appendChild(text('Vedi dettaglio →'));
 			body.appendChild(link);
 			card.appendChild(body);
+			card.addEventListener('click', (event) => {
+				if (event.target.closest('a,button')) return;
+				document.dispatchEvent(new CustomEvent('badaround:list-select', { detail: { id: String(item.id || '') } }));
+			});
 			list.appendChild(card);
 		});
 	};
@@ -499,6 +503,15 @@
 
 		previewClose?.addEventListener('click', clearSelected);
 
+		document.addEventListener('badaround:list-select', (event) => {
+			const target = event.detail?.id;
+			const entry = eventMarkers.find((candidate) => String(candidate.item.id) === String(target));
+			if (!entry) return;
+			setSelected(entry);
+			map.panTo(entry.position);
+			if (map.getZoom() < 14) map.setZoom(14);
+		});
+
 		items.forEach((item) => {
 			const geo = item.public_geo;
 			if (!publicGeometry(geo)) return;
@@ -521,6 +534,17 @@
 			entry.marker.addListener('click', select);
 			entry.circle?.addListener('click', select);
 			bounds.extend(entry.position);
+		});
+
+		document.addEventListener('badaround:map-filtered', (event) => {
+			const allowed = new Set((event.detail?.items || []).map((item) => String(item.id)));
+			eventMarkers.forEach((entry) => {
+				const visible = allowed.has(String(entry.item.id));
+				entry.marker.setMap(visible ? map : null);
+				entry.layers.forEach((layer) => layer.setMap(visible ? map : null));
+			});
+			removeClusters();
+			refreshClusters();
 		});
 
 		const removeClusters = () => {
@@ -686,8 +710,47 @@
 		}
 
 		const items = Array.isArray(payload.items) ? payload.items : [];
-		const total = Number.isFinite(Number(payload.total)) ? Number(payload.total) : items.length;
-		renderList(items, total);
+		let visibleItems = [...items];
+		let activeCategory = 'all';
+		let searchQuery = '';
+
+		const applyFilters = () => {
+			visibleItems = items.filter((item) => {
+				const category = categoryFor(item);
+				const matchesCategory = activeCategory === 'all' || category === activeCategory;
+				const haystack = [
+					item.title,
+					item.excerpt,
+					item.public_place_name,
+					item.territory?.name,
+					item.event_type?.name,
+				].filter(Boolean).join(' ').toLowerCase();
+				const matchesSearch = !searchQuery || haystack.includes(searchQuery);
+				return matchesCategory && matchesSearch;
+			});
+			renderList(visibleItems, visibleItems.length);
+			document.dispatchEvent(new CustomEvent('badaround:map-filtered', { detail: { items: visibleItems } }));
+		};
+
+		document.querySelectorAll('[data-ba-map-filter]').forEach((button) => {
+			button.addEventListener('click', () => {
+				activeCategory = button.dataset.baMapFilter || 'all';
+				document.querySelectorAll('[data-ba-map-filter]').forEach((el) => {
+					const active = el === button;
+					el.classList.toggle('is-active', active);
+					el.setAttribute('aria-pressed', String(active));
+				});
+				applyFilters();
+			});
+		});
+
+		const searchInput = document.querySelector('[data-ba-map-search]');
+		searchInput?.addEventListener('input', () => {
+			searchQuery = searchInput.value.trim().toLowerCase();
+			applyFilters();
+		});
+
+		renderList(visibleItems, visibleItems.length);
 
 		scheduleMaps(async () => {
 			try { await loadGoogleMaps(); }
