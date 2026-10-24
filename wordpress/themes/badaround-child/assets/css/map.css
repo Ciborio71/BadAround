@@ -332,40 +332,41 @@ body.page-template-page-mappa .ba-map-workspace{
 }
 .ba-map-category-filter{
 	--ba-filter-color:var(--ba-teal-700);
+	--ba-filter-hover:var(--ba-teal-700);
 	min-width:0;
 	min-height:36px;
 	padding:7px 10px;
-	border:1px solid color-mix(in srgb,var(--ba-filter-color) 42%,#dce5ee);
+	border:1px solid var(--ba-filter-color);
 	border-radius:999px;
-	background:color-mix(in srgb,var(--ba-filter-color) 8%,white);
-	color:color-mix(in srgb,var(--ba-filter-color) 78%,#071a38);
+	background:var(--ba-filter-color);
+	color:#fff;
 	font-size:.72rem;
 	font-weight:800;
 	line-height:1.2;
 	cursor:pointer;
-	transition:background-color .16s ease,border-color .16s ease,color .16s ease,transform .16s ease,box-shadow .16s ease;
+	transition:background-color .16s ease,border-color .16s ease,color .16s ease,transform .16s ease,box-shadow .16s ease,filter .16s ease;
 }
-.ba-map-category-filter[data-ba-map-filter="all"]{--ba-filter-color:var(--ba-teal-700)}
-.ba-map-category-filter[data-ba-map-filter="veicoli"]{--ba-filter-color:#1677E8}
-.ba-map-category-filter[data-ba-map-filter="case-e-attivita"]{--ba-filter-color:#C9153D}
-.ba-map-category-filter[data-ba-map-filter="pericoli"]{--ba-filter-color:#F57C00}
-.ba-map-category-filter[data-ba-map-filter="spazi-pubblici"]{--ba-filter-color:#0AA184}
-.ba-map-category-filter[data-ba-map-filter="animali"]{--ba-filter-color:#7040C8}
-.ba-map-category-filter[data-ba-map-filter="oggetti-e-documenti"]{--ba-filter-color:#E3A415}
+.ba-map-category-filter[data-ba-map-filter="all"]{--ba-filter-color:var(--ba-teal-700);--ba-filter-hover:#066F79}
+.ba-map-category-filter[data-ba-map-filter="veicoli"]{--ba-filter-color:#1677E8;--ba-filter-hover:#0D55B6}
+.ba-map-category-filter[data-ba-map-filter="case-e-attivita"]{--ba-filter-color:#C9153D;--ba-filter-hover:#97102E}
+.ba-map-category-filter[data-ba-map-filter="pericoli"]{--ba-filter-color:#F57C00;--ba-filter-hover:#C45D00}
+.ba-map-category-filter[data-ba-map-filter="spazi-pubblici"]{--ba-filter-color:#0AA184;--ba-filter-hover:#067763}
+.ba-map-category-filter[data-ba-map-filter="animali"]{--ba-filter-color:#7040C8;--ba-filter-hover:#503096}
+.ba-map-category-filter[data-ba-map-filter="oggetti-e-documenti"]{--ba-filter-color:#E3A415;--ba-filter-hover:#AA780C}
 .ba-map-category-filter:hover:not(.is-active),
 .ba-map-category-filter:focus-visible:not(.is-active){
-	border-color:var(--ba-filter-color);
-	background:color-mix(in srgb,var(--ba-filter-color) 16%,white);
-	color:color-mix(in srgb,var(--ba-filter-color) 86%,#071a38);
+	border-color:var(--ba-filter-hover);
+	background:var(--ba-filter-hover);
+	color:#fff;
 	transform:translateY(-1px);
-	box-shadow:0 5px 12px color-mix(in srgb,var(--ba-filter-color) 14%,transparent);
+	box-shadow:0 6px 14px color-mix(in srgb,var(--ba-filter-color) 24%,transparent);
 }
 .ba-map-category-filter.is-active,
 .ba-map-category-filter[aria-pressed="true"]{
-	border-color:var(--ba-filter-color);
-	background:var(--ba-filter-color);
+	border-color:var(--ba-filter-hover);
+	background:var(--ba-filter-hover);
 	color:#fff;
-	box-shadow:0 6px 14px color-mix(in srgb,var(--ba-filter-color) 22%,transparent);
+	box-shadow:0 7px 16px color-mix(in srgb,var(--ba-filter-color) 28%,transparent);
 }
 @media(max-width:1180px){
 	.ba-map-category-filters{grid-template-columns:repeat(3,minmax(0,1fr))}
