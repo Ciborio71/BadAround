@@ -8,7 +8,7 @@
 .ba-map-navigation-shell>.ba-map-legend{left:10px;right:auto;max-width:calc(100% - 132px)}
 .ba-map-navigation-shell>.ba-map-legend .ba-map-legend__body{max-height:none;overflow:visible;gap:7px;padding-bottom:11px}
 .ba-map-navigation-shell>.ba-map-legend .ba-map-legend__item:first-child{padding-top:9px}
-.ba-map-navigation-shell>.ba-map-preview{left:auto;right:122px;top:24px;bottom:24px;width:min(340px,calc(100% - 132px));max-height:none}
+.ba-map-navigation-shell>.ba-map-preview{left:auto;right:122px;top:24px;bottom:auto;width:min(470px,calc(100% - 150px));max-height:calc(100% - 48px)}
 .ba-map-navigation-shell>.ba-map-privacy-note{right:auto;max-width:calc(100% - 132px);bottom:36px}
 @media(max-width:760px){
 	.ba-map-navigation-shell>.ba-map-preview{padding:14px 10px;border-radius:12px}
