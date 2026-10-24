@@ -15,7 +15,7 @@ test('discovery renders before Google Maps bootstrap',()=>{
 
 test('only Home map bootstrap is deferred; full/detail contexts remain immediate',()=>{
   assert(source.includes("mapNodes.every((node) => (node.dataset.baMapContext || 'full') === 'home')"));
-  assert(source.includes("if (!homeOnly) { run(); return; }"));
+  assert(source.includes("if (!homeOnly || !('requestIdleCallback' in window)) { run(); return; }"));
   assert(source.includes("!('requestIdleCallback' in window)"));
   assert(source.includes("window.addEventListener('load', start, { once: true })"));
 });
