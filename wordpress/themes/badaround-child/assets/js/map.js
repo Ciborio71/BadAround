@@ -229,38 +229,63 @@
 		const wrap = document.createElement('div');
 		wrap.className = 'ba-map-preview-card';
 
+		const category = categoryFor(item);
+		const palette = categories[category] || neutral;
+		wrap.style.setProperty('--ba-card-accent', palette.color);
+
+		const imageUrl = item.thumbnail || config.placeholder;
+		if (imageUrl) {
+			const media = document.createElement('a');
+			media.className = 'ba-map-preview-card__media';
+			media.href = item.permalink;
+			media.tabIndex = -1;
+			media.setAttribute('aria-hidden', 'true');
+
+			const img = document.createElement('img');
+			img.src = imageUrl;
+			img.alt = '';
+			img.loading = 'lazy';
+			img.decoding = 'async';
+			media.appendChild(img);
+			wrap.appendChild(media);
+		}
+
+		const body = document.createElement('div');
+		body.className = 'ba-map-preview-card__body';
+
 		if (item.event_type?.name) {
 			const badge = document.createElement('span');
-			badge.className = 'ba-badge ba-badge--info';
+			badge.className = 'ba-badge ba-map-preview-card__badge';
 			badge.appendChild(text(item.event_type.name));
-			wrap.appendChild(badge);
+			body.appendChild(badge);
 		}
 
 		const title = document.createElement('h3');
 		title.appendChild(text(item.title));
-		wrap.appendChild(title);
+		body.appendChild(title);
 
 		const metaParts = [item.occurred_date, item.occurred_time, item.public_place_name || item.territory?.name].filter(Boolean);
 		if (metaParts.length) {
 			const meta = document.createElement('p');
 			meta.className = 'ba-map-preview-card__meta';
 			meta.appendChild(text(metaParts.join(' · ')));
-			wrap.appendChild(meta);
+			body.appendChild(meta);
 		}
 
 		if (item.excerpt) {
 			const excerpt = document.createElement('p');
 			excerpt.className = 'ba-map-preview-card__excerpt';
 			excerpt.appendChild(text(item.excerpt));
-			wrap.appendChild(excerpt);
+			body.appendChild(excerpt);
 		}
 
 		const link = document.createElement('a');
 		link.className = 'ba-button ba-map-preview-card__cta';
 		link.href = item.permalink;
 		link.appendChild(text('Vedi dettaglio'));
-		wrap.appendChild(link);
+		body.appendChild(link);
 
+		wrap.appendChild(body);
 		return wrap;
 	};
 
