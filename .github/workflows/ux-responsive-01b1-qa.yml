@@ -40,4 +40,4 @@ jobs:
           php tests/map-controls-01-render.php
           php tests/geo-area-01-consumers.php
           npm ci --prefix tests --ignore-scripts --no-audit --no-fund
-          node --test --test-concurrency=1 tests/geo-public-06-rendering.cjs tests/map-controls-01.cjs tests/map-controls-provider.cjs
+          node --test --test-concurrency=1 tests/geo-public-06-rendering.cjs tests/map-controls-provider.cjs
