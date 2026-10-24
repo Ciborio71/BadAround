@@ -60,21 +60,21 @@ function badaround_child_render_maintenance() {
 		<meta name="robots" content="noindex,nofollow,noarchive">
 		<title><?php echo esc_html( $title ); ?></title>
 		<style>
-			:root{color-scheme:light;--ba:#111827;--muted:#667085;--line:#e5e7eb;--surface:#fff;--bg:#f7f8fa}
+			:root{color-scheme:light;--ba-navy:#071A38;--ba-teal:#0798A8;--ba-teal-dark:#066F79;--muted:#5E7288;--line:#CFE1E7;--surface:#fff;--bg:#EAF7FA}
 			*{box-sizing:border-box}
-			html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ba);background:var(--bg)}
+			html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ba-navy);background:linear-gradient(135deg,#F8FCFD 0%,var(--bg) 58%,#D6F1F5 100%)}
 			body{min-height:100vh;display:grid;place-items:center;padding:24px}
-			main{width:min(680px,100%);background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:clamp(32px,6vw,64px);text-align:center;box-shadow:0 18px 60px rgba(17,24,39,.08)}
-			.brand{font-size:clamp(34px,7vw,54px);line-height:1;font-weight:800;letter-spacing:-.045em;margin:0 0 28px}
-			h1{font-size:clamp(26px,5vw,38px);line-height:1.15;letter-spacing:-.025em;margin:0 0 16px}
+			main{width:min(680px,100%);background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:clamp(32px,6vw,64px);text-align:center;box-shadow:0 18px 60px rgba(7,26,56,.12);position:relative;overflow:hidden}
+			.brand{font-size:clamp(34px,7vw,54px);line-height:1;font-weight:800;letter-spacing:-.045em;margin:0 0 28px;color:var(--ba-navy)} .brand-accent{color:var(--ba-teal)}
+			h1{font-size:clamp(26px,5vw,38px);line-height:1.15;letter-spacing:-.025em;margin:0 0 16px;color:var(--ba-navy)}
 			p{font-size:clamp(17px,3vw,20px);line-height:1.6;color:var(--muted);margin:0 auto;max-width:520px}
-			.status{display:inline-flex;align-items:center;gap:9px;margin-top:30px;padding:9px 14px;border:1px solid var(--line);border-radius:999px;font-size:14px;color:var(--muted)}
-			.dot{width:9px;height:9px;border-radius:50%;background:#f59e0b;box-shadow:0 0 0 4px rgba(245,158,11,.14)}
+			.status{display:inline-flex;align-items:center;gap:9px;margin-top:30px;padding:9px 14px;border:1px solid #A8DDE3;border-radius:999px;font-size:14px;font-weight:700;color:var(--ba-navy);background:#EEF9FA}
+			.dot{width:9px;height:9px;border-radius:50%;background:var(--ba-teal);box-shadow:0 0 0 4px rgba(7,152,168,.14)}
 		</style>
 	</head>
 	<body>
 		<main>
-			<div class="brand">BadAround</div>
+			<div class="brand"><span>Bad</span><span class="brand-accent">Around</span></div>
 			<h1>Stiamo lavorando per arrivare presto nel tuo quartiere.</h1>
 			<p>BadAround è in fase di preparazione. Stiamo completando gli ultimi lavori prima dell'apertura al pubblico.</p>
 			<div class="status"><span class="dot" aria-hidden="true"></span> Sito in manutenzione</div>
