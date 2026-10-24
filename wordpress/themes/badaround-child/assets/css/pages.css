@@ -145,6 +145,10 @@
 .ba-territory-eventgrid .ba-event-card__title a{color:var(--ba-navy-950);text-decoration:none}
 .ba-territory-eventgrid .ba-event-card__title a:hover{text-decoration:underline}
 .ba-territory-eventgrid .ba-event-card__meta{color:#6f8396;font-size:.74rem;line-height:1.45}
+.ba-territory-eventgrid .ba-event-card__body>*{max-width:100%;min-width:0}
+.ba-territory-eventgrid .ba-badge{max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.25}
+.ba-territory-eventgrid .ba-event-card__meta{overflow-wrap:anywhere}
+.ba-territory-eventgrid .ba-event-card__link{white-space:normal;overflow-wrap:anywhere}
 .ba-event-card__excerpt{display:-webkit-box;margin:0;color:#53697d;font-size:.8rem;line-height:1.5;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:3}
 .ba-event-card__link{margin-top:auto;color:var(--ba-teal-700);font-size:.77rem;font-weight:850;text-decoration:none}
 .ba-event-card__link:hover{text-decoration:underline}
