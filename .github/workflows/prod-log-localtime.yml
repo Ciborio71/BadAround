@@ -1,0 +1,46 @@
+name: PROD-DIAG-04 local-time cutover log analysis
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths: ['ops/prod-log-localtime-launch.txt']
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+    steps:
+      - name: Pull relevant logs and search 19:41-19:44 local
+        run: |
+          mkdir -p logs
+          python - <<'PY'
+          import ftplib,ssl,os,io,pathlib,re,json
+          f=ftplib.FTP_TLS(context=ssl._create_unverified_context(),timeout=60)
+          f.connect(os.environ['FTP_HOST'],21);f.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);f.prot_p()
+          selected=[]
+          for name,facts in f.mlsd('/logs'):
+            if name in ('.','..') or facts.get('type')!='file': continue
+            size=int(facts.get('size','0') or 0); mod=facts.get('modify',''); low=name.lower()
+            if size<=50_000_000 and (mod.startswith('20261024') or any(k in low for k in ['error','access','proxy'])):
+              safe=re.sub(r'[^A-Za-z0-9._-]','_',name)
+              try:
+                b=io.BytesIO();f.retrbinary('RETR /logs/'+name,b.write)
+                pathlib.Path('logs/'+safe).write_bytes(b.getvalue())
+                selected.append((name,safe,size,mod))
+              except: pass
+          f.quit()
+          print(json.dumps(selected))
+          PY
+          echo '=== CUTOVER 19:41-19:44 LOCAL ==='
+          for f in logs/*; do
+            [ -f "$f" ] || continue
+            case "$f" in
+              *.gz) gzip -cd "$f" 2>/dev/null ;;
+              *) strings "$f" ;;
+            esac | grep -Eai -C 4 '24/Oct/2026:19:4[1-4]|Oct 24 19:4[1-4]|PHP Fatal|Uncaught|AH01071|503|Primary script unknown|Premature end' | tail -n 400
+          done
