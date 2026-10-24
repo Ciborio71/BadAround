@@ -13,6 +13,101 @@ add_filter( 'use_block_editor_for_post', '__return_false', 100 );
 
 define( 'BADAROUND_CHILD_VERSION', '0.6.0' );
 
+
+/**
+ * MAINTENANCE-01 — public maintenance gate.
+ *
+ * Anonymous visitors receive a branded HTTP 503 page while authenticated users,
+ * wp-admin and WPVibe management access remain available.
+ */
+function badaround_child_maintenance_enabled() {
+	return true;
+}
+
+function badaround_child_is_maintenance_exempt() {
+	if ( ! badaround_child_maintenance_enabled() ) {
+		return true;
+	}
+
+	if ( is_user_logged_in() || is_admin() || wp_doing_ajax() || wp_doing_cron() ) {
+		return true;
+	}
+
+	if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		return true;
+	}
+
+	return false;
+}
+
+function badaround_child_render_maintenance() {
+	if ( badaround_child_is_maintenance_exempt() ) {
+		return;
+	}
+
+	status_header( 503 );
+	nocache_headers();
+	header( 'Retry-After: 3600' );
+	header( 'X-Robots-Tag: noindex, nofollow, noarchive', true );
+
+	$title = 'BadAround — Stiamo lavorando';
+	?>
+	<!doctype html>
+	<html lang="it">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="robots" content="noindex,nofollow,noarchive">
+		<title><?php echo esc_html( $title ); ?></title>
+		<style>
+			:root{color-scheme:light;--ba:#111827;--muted:#667085;--line:#e5e7eb;--surface:#fff;--bg:#f7f8fa}
+			*{box-sizing:border-box}
+			html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ba);background:var(--bg)}
+			body{min-height:100vh;display:grid;place-items:center;padding:24px}
+			main{width:min(680px,100%);background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:clamp(32px,6vw,64px);text-align:center;box-shadow:0 18px 60px rgba(17,24,39,.08)}
+			.brand{font-size:clamp(34px,7vw,54px);line-height:1;font-weight:800;letter-spacing:-.045em;margin:0 0 28px}
+			h1{font-size:clamp(26px,5vw,38px);line-height:1.15;letter-spacing:-.025em;margin:0 0 16px}
+			p{font-size:clamp(17px,3vw,20px);line-height:1.6;color:var(--muted);margin:0 auto;max-width:520px}
+			.status{display:inline-flex;align-items:center;gap:9px;margin-top:30px;padding:9px 14px;border:1px solid var(--line);border-radius:999px;font-size:14px;color:var(--muted)}
+			.dot{width:9px;height:9px;border-radius:50%;background:#f59e0b;box-shadow:0 0 0 4px rgba(245,158,11,.14)}
+		</style>
+	</head>
+	<body>
+		<main>
+			<div class="brand">BadAround</div>
+			<h1>Stiamo lavorando per arrivare presto nel tuo quartiere.</h1>
+			<p>BadAround è in fase di preparazione. Stiamo completando gli ultimi lavori prima dell'apertura al pubblico.</p>
+			<div class="status"><span class="dot" aria-hidden="true"></span> Sito in manutenzione</div>
+		</main>
+	</body>
+	</html>
+	<?php
+	exit;
+}
+add_action( 'template_redirect', 'badaround_child_render_maintenance', -100 );
+
+/**
+ * Hide public REST data during maintenance while preserving authenticated access
+ * and the WPVibe management namespace used for administration.
+ */
+function badaround_child_maintenance_rest_gate( $result, $server, $request ) {
+	if ( ! badaround_child_maintenance_enabled() || is_user_logged_in() ) {
+		return $result;
+	}
+
+	$route = $request->get_route();
+	if ( 0 === strpos( $route, '/wpvibe/' ) ) {
+		return $result;
+	}
+
+	return new WP_Error(
+		'badaround_maintenance',
+		'BadAround è temporaneamente in manutenzione.',
+		array( 'status' => 503 )
+	);
+}
+add_filter( 'rest_pre_dispatch', 'badaround_child_maintenance_rest_gate', 5, 3 );
+
 require_once __DIR__ . '/inc/native-report.php';
 
 /**
