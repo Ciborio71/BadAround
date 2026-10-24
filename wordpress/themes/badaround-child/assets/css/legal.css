@@ -11,3 +11,6 @@ body.page-template-default .entry-content h2{margin:1.8em 0 .55em;color:var(--ba
 body.page-template-default .entry-content a{color:var(--ba-teal-700);font-weight:700;text-underline-offset:2px}
 body.page-template-default .entry-content strong{color:var(--ba-navy-950)}
 @media(max-width:640px){body.page-template-default .site-main{width:min(100% - 24px,920px);padding:24px 0 48px}body.page-template-default .entry-content{padding:20px 18px;border-radius:14px}}
+
+.ba-main-anchor{display:block;position:relative;top:-76px;width:1px;height:1px;overflow:hidden}
+.ba-main-anchor:focus{outline:none}
