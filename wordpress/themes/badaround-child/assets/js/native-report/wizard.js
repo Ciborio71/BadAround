@@ -458,7 +458,12 @@
           else input.value=value===undefined?'':String(value);
         });
         if(config.conditional && field.constraints.enum && path!=='event.subtype'){
-          const select=wrapper.querySelector('select[data-native-input]'), allowed=model.constraints(path).enum;
+          const select=wrapper.querySelector('select[data-native-input]');
+          let allowed=model.constraints(path).enum;
+          if(path==='event.category'){
+            const presentationOrder=['vehicle','property','hazard','public_space','animal','item_document'];
+            allowed=[...allowed].sort((a,b)=>presentationOrder.indexOf(a)-presentationOrder.indexOf(b));
+          }
           if(select){const value=model.effective(path)||'';select.replaceChildren(new Option('Seleziona…',''));for(const option of allowed)select.add(new Option(field.options[option]||option,option));select.value=value;}
         }
         const deferred = (path === 'event.subtype' && !model.values['event.category']) || (path === 'reporter.relationship' && !model.effective('event.subtype'));
