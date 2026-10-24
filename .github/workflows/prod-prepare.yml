@@ -1,0 +1,123 @@
+name: PROD-PREPARE-01 build production root
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths: ['ops/prod-prepare-launch.txt']
+permissions:
+  contents: read
+concurrency:
+  group: badaround-production-cutover
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 1184253c732afb51e6de5ea71dff3ca27f5108ff
+          fetch-depth: 1
+      - name: Install lftp and trust chain
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+          mkdir -p tls stage-site
+          ca=/etc/ssl/certs/ca-certificates.crt
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat "$ca" tls/yr2.pem tls/yr-by-x1.pem > tls/chain.pem
+      - name: Mirror certified staging filesystem locally
+        run: |
+          set -euo pipefail
+          lftp -u "$FTP_USER","$FTP_PASS" "ftps://$FTP_HOST:21" <<'LFTP'
+          set ssl:verify-certificate no
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set net:max-retries 2
+          set net:timeout 20
+          mirror --verbose=1 --parallel=4             --exclude-glob wp-content/cache/**             --exclude-glob wp-content/upgrade/**             --exclude-glob wp-content/debug.log             /staging.badaround.it/ stage-site/
+          bye
+          LFTP
+          test -f stage-site/wp-config.php
+          test -f stage-site/wp-includes/version.php
+          test -f stage-site/wp-content/themes/badaround-child/functions.php
+          test -f stage-site/wp-content/plugins/badaround-core/badaround-core.php
+          grep -Fq "Version: 0.18.0" stage-site/wp-content/plugins/badaround-core/badaround-core.php
+          grep -Fq "BADAROUND_CHILD_VERSION" stage-site/wp-content/themes/badaround-child/functions.php
+          php -r '$v=file_get_contents("stage-site/wp-includes/version.php"); if(!preg_match("/\\$wp_version\\s*=\\s*[\x27\x22]7\\.1\\.3/",$v)) exit(1);'
+      - name: Verify candidate code equals staging clone
+        run: |
+          set -euo pipefail
+          diff -qr wordpress/themes/badaround-child stage-site/wp-content/themes/badaround-child             --exclude='*.map' > theme-diff.txt || true
+          diff -qr wordpress/plugins/badaround-core stage-site/wp-content/plugins/badaround-core > core-diff.txt || true
+          test ! -s core-diff.txt
+          # Theme may contain deployment-only files; every repository runtime file must match.
+          while IFS= read -r f; do
+            rel="${f#wordpress/themes/badaround-child/}"
+            cmp "$f" "stage-site/wp-content/themes/badaround-child/$rel"
+          done < <(find wordpress/themes/badaround-child -type f | sort)
+      - name: Inspect safe environment flags
+        run: |
+          python - <<'PY'
+          import re,pathlib,json
+          c=pathlib.Path('stage-site/wp-config.php').read_text(errors='replace')
+          keys=['WP_HOME','WP_SITEURL','WP_ENVIRONMENT_TYPE','WP_DEBUG','WP_DEBUG_LOG','WP_DEBUG_DISPLAY']
+          out={}
+          for k in keys:
+            m=re.search(r"define\(\s*['\"]"+k+r"['\"]\s*,\s*([^\)]+)\)",c)
+            out[k]=m.group(1).strip() if m else None
+          print(json.dumps(out))
+          PY
+      - name: Remove stale prepared root if present
+        run: |
+          python - <<'PY'
+          import ftplib,ssl,os
+          ctx=ssl._create_unverified_context()
+          f=ftplib.FTP_TLS(context=ctx,timeout=60);f.connect(os.environ['FTP_HOST'],21);f.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);f.prot_p()
+          root='/badaround-mvp-next'
+          def rm(path):
+            try:
+              for name,facts in list(f.mlsd(path)):
+                if name in ('.','..'): continue
+                p=path.rstrip('/')+'/'+name
+                if facts.get('type')=='dir': rm(p)
+                else:
+                  try:f.delete(p)
+                  except:pass
+              f.rmd(path)
+            except: pass
+          rm(root)
+          f.quit()
+          PY
+      - name: Upload prepared production root
+        run: |
+          set -euo pipefail
+          lftp -u "$FTP_USER","$FTP_PASS" "ftps://$FTP_HOST:21" <<'LFTP'
+          set ssl:verify-certificate no
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set net:max-retries 2
+          set net:timeout 20
+          mirror --reverse --verbose=1 --parallel=4 stage-site/ /badaround-mvp-next/
+          bye
+          LFTP
+      - name: Verify prepared root key files byte-exact
+        run: |
+          python - <<'PY'
+          import ftplib,ssl,os,io,hashlib,pathlib
+          ctx=ssl._create_unverified_context()
+          f=ftplib.FTP_TLS(context=ctx,timeout=60);f.connect(os.environ['FTP_HOST'],21);f.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);f.prot_p()
+          files=['wp-config.php','wp-includes/version.php','wp-content/themes/badaround-child/functions.php','wp-content/plugins/badaround-core/badaround-core.php']
+          for rel in files:
+            b=io.BytesIO();f.retrbinary('RETR /badaround-mvp-next/'+rel,b.write)
+            assert b.getvalue()==pathlib.Path('stage-site/'+rel).read_bytes(),rel
+          f.quit()
+          print('PRODUCTION_ROOT_PREPARED')
+          PY
