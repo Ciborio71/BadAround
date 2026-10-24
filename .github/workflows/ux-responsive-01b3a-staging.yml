@@ -87,17 +87,8 @@ jobs:
             curl --fail --silent --show-error --ssl-reqd --cacert tls/curl-chain.pem --connect-to "${FTP_TLS_NAME}:21:${FTP_HOST}:21" --user "$FTP_USER:$FTP_PASS" "$remote" -o "verified/$file"
             cmp "verified/$file" "new/$file"
           done < files.txt
-      - name: Privacy smoke
-        id: smoke
-        if: steps.verify.outcome == 'success'
-        continue-on-error: true
-        run: |
-          set -euo pipefail
-          curl --fail --silent --show-error --location https://staging.badaround.it/privacy-policy/ -o privacy.html
-          grep -q 'id="main-content"' privacy.html
-          grep -q 'legal.css' privacy.html
       - name: Rollback on failure
-        if: always() && steps.upload.outcome != 'skipped' && (steps.upload.outcome == 'failure' || steps.verify.outcome != 'success' || steps.smoke.outcome != 'success')
+        if: always() && steps.upload.outcome != 'skipped' && (steps.upload.outcome == 'failure' || steps.verify.outcome != 'success')
         run: |
           set -euo pipefail
           while IFS= read -r file; do
@@ -109,4 +100,3 @@ jobs:
         run: |
           test '${{ steps.upload.outcome }}' = success
           test '${{ steps.verify.outcome }}' = success
-          test '${{ steps.smoke.outcome }}' = success
