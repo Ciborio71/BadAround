@@ -248,3 +248,9 @@
 @media(max-width:900px){.ba-sentinel-hero__grid{grid-template-columns:1fr;min-height:auto}.ba-sentinel-hero-art{min-height:470px;margin-top:10px}.ba-sentinel-art-caption{right:5%}.ba-sentinel-art-notification{right:5%}}
 @media(max-width:600px){.ba-sentinel-hero{background:linear-gradient(180deg,#fff 0 53%,#edf7ff 53% 100%)!important}.ba-sentinel-hero-art{min-height:390px}.ba-sentinel-hero-art__halo--outer{width:100%;height:270px}.ba-sentinel-hero-art__halo--inner{width:310px;height:310px}.ba-sentinel-hero-art__map{width:285px;height:285px}.ba-sentinel-art-zone{width:135px;height:135px}.ba-sentinel-art-caption{display:none}.ba-sentinel-art-status{left:2%;top:8%}.ba-sentinel-art-notification{right:2%;bottom:3%;width:86%}}
 @media(prefers-reduced-motion:reduce){.ba-sentinel-art-zone i{animation:none}}
+
+
+/* UX-RESPONSIVE-01B.3 — searchable territory picker. */
+.ba-sentinel-territory-search{margin-bottom:6px}
+.ba-sentinel-search-status{min-height:1.25em;margin:0 0 10px;color:#667b8e;font-size:.72rem}
+.ba-sentinel-field>span strong{color:#8f2833}
