@@ -1,0 +1,63 @@
+name: PROD-CUTOVER-01 atomic document-root swap
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths: ['ops/prod-cutover-launch.txt']
+permissions:
+  contents: read
+concurrency:
+  group: badaround-production-cutover
+  cancel-in-progress: false
+jobs:
+  cutover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+    steps:
+      - name: Swap document roots atomically over FTPS
+        run: |
+          python - <<'PY'
+          import ftplib,ssl,os,datetime
+          ctx=ssl._create_unverified_context()
+          f=ftplib.FTP_TLS(context=ctx,timeout=60)
+          f.connect(os.environ['FTP_HOST'],21);f.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);f.prot_p()
+          stamp=datetime.datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
+          legacy=f'/httpdocs-legacy-{stamp}'
+          staged='/staging.badaround.it'
+          prod='/httpdocs'
+          # Guard: staging must still look like BadAround and production like legacy.
+          def exists(path):
+            try:
+              f.size(path); return True
+            except: return False
+          if not exists(staged+'/wp-content/plugins/badaround-core/badaround-core.php'):
+            raise SystemExit('staging BadAround runtime missing')
+          if not exists(staged+'/wp-content/themes/badaround-child/functions.php'):
+            raise SystemExit('staging BadAround child theme missing')
+          if exists(prod+'/wp-content/plugins/badaround-core/badaround-core.php'):
+            raise SystemExit('production already appears to be BadAround; aborting swap')
+          f.rename(prod,legacy)
+          try:
+            f.rename(staged,prod)
+          except Exception:
+            f.rename(legacy,prod)
+            raise
+          print('LEGACY_BACKUP='+legacy)
+          print('CUTOVER_SWAP_PASS')
+          f.quit()
+          PY
+      - name: Verify production root key files
+        run: |
+          python - <<'PY'
+          import ftplib,ssl,os,io
+          f=ftplib.FTP_TLS(context=ssl._create_unverified_context(),timeout=60)
+          f.connect(os.environ['FTP_HOST'],21);f.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);f.prot_p()
+          for p in ['/httpdocs/wp-content/plugins/badaround-core/badaround-core.php','/httpdocs/wp-content/themes/badaround-child/functions.php','/httpdocs/wp-config.php']:
+            b=io.BytesIO();f.retrbinary('RETR '+p,b.write);assert len(b.getvalue())>100,p
+          print('PROD_ROOT_VERIFY_PASS')
+          f.quit()
+          PY
