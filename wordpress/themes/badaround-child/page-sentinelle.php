@@ -197,8 +197,13 @@ function badaround_sentinel_territory_label( WP_Term $term ) {
 							<p>Dove vuoi che BadAround tenga gli occhi aperti per te?</p>
 						</div>
 					</div>
+					<label class="ba-sentinel-field ba-sentinel-territory-search">
+						<span>Cerca territorio</span>
+						<input type="search" autocomplete="off" placeholder="Es. Pomezia, Torvaianica, Roma" data-ba-sentinel-territory-search aria-describedby="ba-sentinel-territory-search-status">
+					</label>
+					<p id="ba-sentinel-territory-search-status" class="ba-sentinel-search-status" data-ba-sentinel-territory-search-status role="status" aria-live="polite"></p>
 					<label class="ba-sentinel-field">
-						<span>Territorio</span>
+						<span>Territorio <strong aria-hidden="true">*</strong></span>
 						<select name="territory_term_id" required data-ba-sentinel-territory>
 							<option value="">Seleziona un territorio</option>
 							<?php foreach ( $territories as $term ) : ?>
