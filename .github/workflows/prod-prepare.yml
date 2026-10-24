@@ -36,7 +36,7 @@ jobs:
       - name: Mirror certified staging filesystem locally
         run: |
           set -euo pipefail
-          lftp -u "$FTP_USER","$FTP_PASS" "ftps://$FTP_HOST:21" <<'LFTP'
+          lftp -u "$FTP_USER","$FTP_PASS" "ftp://$FTP_HOST:21" <<'LFTP'
           set ssl:verify-certificate no
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
@@ -99,7 +99,7 @@ jobs:
       - name: Upload prepared production root
         run: |
           set -euo pipefail
-          lftp -u "$FTP_USER","$FTP_PASS" "ftps://$FTP_HOST:21" <<'LFTP'
+          lftp -u "$FTP_USER","$FTP_PASS" "ftp://$FTP_HOST:21" <<'LFTP'
           set ssl:verify-certificate no
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
