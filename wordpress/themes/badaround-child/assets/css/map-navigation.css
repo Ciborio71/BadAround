@@ -7,7 +7,7 @@
 /* Reserve the same right-hand rail for all maps, including open previews. */
 .ba-map-navigation-shell>.ba-map-legend{left:10px;right:auto;max-width:calc(100% - 132px)}
 .ba-map-navigation-shell>.ba-map-legend .ba-map-legend__body{max-height:190px;overflow:auto}
-.ba-map-navigation-shell>.ba-map-preview{left:auto;right:122px;bottom:36px;width:min(340px,calc(100% - 132px));max-height:calc(100% - 56px)}
+.ba-map-navigation-shell>.ba-map-preview{left:auto;right:122px;top:24px;bottom:24px;width:min(340px,calc(100% - 132px));max-height:none}
 .ba-map-navigation-shell>.ba-map-privacy-note{right:auto;max-width:calc(100% - 132px);bottom:36px}
 @media(max-width:760px){
 	.ba-map-navigation-shell>.ba-map-preview{padding:14px 10px;border-radius:12px}
