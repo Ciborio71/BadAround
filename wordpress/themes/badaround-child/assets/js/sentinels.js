@@ -5,6 +5,8 @@
 	if (!form) return;
 
 	const territory = form.querySelector('[data-ba-sentinel-territory]');
+	const territorySearch = form.querySelector('[data-ba-sentinel-territory-search]');
+	const territorySearchStatus = form.querySelector('[data-ba-sentinel-territory-search-status]');
 	const category = form.querySelector('[data-ba-sentinel-category]');
 	const eventType = form.querySelector('[data-ba-sentinel-event-type]');
 	const email = form.querySelector('[data-ba-sentinel-email]');
@@ -41,7 +43,20 @@
 		updatePreview();
 	};
 
-	territory?.addEventListener('change', updatePreview);
+	const filterTerritories = () => {
+		if (!territory || !territorySearch) return;
+		const query = territorySearch.value.trim().toLocaleLowerCase('it-IT');
+		let matches = 0;
+		[...territory.options].forEach((option,index) => {
+			if (index === 0) { option.hidden = false; return; }
+			const visible = !query || option.textContent.toLocaleLowerCase('it-IT').includes(query) || option.selected;
+			option.hidden = !visible;
+			if (visible) matches++;
+		});
+		if (territorySearchStatus) territorySearchStatus.textContent = query ? (matches ? `${matches} territori disponibili.` : 'Nessun territorio corrisponde alla ricerca.') : '';
+	};
+	territorySearch?.addEventListener('input', filterTerritories);
+	territory?.addEventListener('change', () => { updatePreview(); filterTerritories(); });
 	category?.addEventListener('change', filterEventTypes);
 	eventType?.addEventListener('change', updatePreview);
 
@@ -87,6 +102,7 @@
 		}
 	});
 
+	filterTerritories();
 	filterEventTypes();
 	updatePreview();
 })();
