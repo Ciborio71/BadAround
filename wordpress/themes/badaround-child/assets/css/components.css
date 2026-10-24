@@ -5,7 +5,8 @@
 	font-weight: 750; text-decoration: none; cursor: pointer;
 }
 .ba-button:hover, .ba-button:focus-visible { background: var(--ba-teal-700); color: #fff; }
-.ba-button--urgent { background: var(--ba-coral-600); }
+.ba-button--urgent { background: #b4232f; }
+.ba-button--urgent:hover, .ba-button--urgent:focus-visible { background:#8f1d28; color:#fff; }
 .ba-button--outline { color: var(--ba-teal-700); background: #fff; border-color: var(--ba-teal-600); }
 .ba-button--outline:hover { color: #fff; }
 
