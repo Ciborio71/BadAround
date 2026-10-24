@@ -1,0 +1,96 @@
+name: MVP UX Release Candidate certification
+on:
+  push:
+    branches: [release/mvp-ux-rc]
+    paths: ['ops/mvp-ux-rc-launch.txt']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_sqlite, gd, posix, fileinfo, mbstring
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Candidate integrity and runtime scope
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "1184253c732afb51e6de5ea71dff3ca27f5108ff" || {
+            test "$(git diff --name-only 1184253c732afb51e6de5ea71dff3ca27f5108ff HEAD -- wordpress | wc -l)" -eq 0
+          }
+          git diff --check 0c2863b2a1bfbfb1e5c9641c78ba8d28bd21f21c 1184253c732afb51e6de5ea71dff3ca27f5108ff
+          git diff --name-only 0c2863b2a1bfbfb1e5c9641c78ba8d28bd21f21c 1184253c732afb51e6de5ea71dff3ca27f5108ff -- wordpress | sort > runtime.txt
+          cat > expected.txt <<'EOF'
+          wordpress/themes/badaround-child/assets/css/components.css
+          wordpress/themes/badaround-child/assets/css/legal.css
+          wordpress/themes/badaround-child/assets/css/map-navigation.css
+          wordpress/themes/badaround-child/assets/css/map.css
+          wordpress/themes/badaround-child/assets/css/native-report.css
+          wordpress/themes/badaround-child/assets/css/pages.css
+          wordpress/themes/badaround-child/assets/css/sentinels.css
+          wordpress/themes/badaround-child/assets/js/map.js
+          wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
+          wordpress/themes/badaround-child/assets/js/native-report/wizard.js
+          wordpress/themes/badaround-child/assets/js/sentinels.js
+          wordpress/themes/badaround-child/functions.php
+          wordpress/themes/badaround-child/header.php
+          wordpress/themes/badaround-child/page-sentinelle.php
+          EOF
+          sort -o expected.txt expected.txt
+          cmp runtime.txt expected.txt
+      - name: Full PHP lint
+        run: |
+          set -euo pipefail
+          find wordpress -type f -name '*.php' -print0 | xargs -0 -n1 php -l > php-lint.log
+          echo "PHP_FILES=$(find wordpress -type f -name '*.php' | wc -l)"
+      - name: Functional regression suite
+        run: |
+          set -euo pipefail
+          php tests/geo-area-01-publication.php
+          php tests/geo-area-01-consumers.php
+          php tests/geo-area-01a-moderation.php
+          php tests/geo-prec-01-moderation.php
+          php tests/map-controls-01-render.php
+          php tests/ui-admin-01-rejection.php
+          php tests/f1-14r-publication-contract.php
+          php tests/sentinels-d1.php
+          php tests/sentinels-d2.php
+          php tests/sentinels-d3.php
+          npm ci --prefix tests --ignore-scripts --no-audit --no-fund
+          node --test --test-concurrency=1             tests/f1-15b-r5-smart-address.cjs             tests/nf-ux-04-model.cjs             tests/nf-ux-04-service.cjs             tests/nf-ux-07-submit-feedback.cjs             tests/native-social-preference.cjs             tests/ux-responsive-01b2-native.cjs             tests/perf-polish-01-map-loading.cjs             tests/geo-public-06-rendering.cjs             tests/map-controls-provider.cjs             tests/sf9-public-privacy-boundary.cjs
+      - name: Verify FTPS TLS
+        run: |
+          set -euo pipefail
+          mkdir -p tls evidence
+          ca=/etc/ssl/certs/ca-certificates.crt
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat tls/yr2.pem tls/yr-by-x1.pem > tls/untrusted.pem
+          cat "$ca" tls/untrusted.pem > tls/curl-chain.pem
+          openssl verify -CAfile "$ca" -untrusted tls/yr-by-x1.pem tls/yr2.pem
+      - name: Read-only staging runtime custody
+        run: python ops/mvp-ux-rc-custody.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mvp-ux-rc-certification-evidence
+          path: |
+            evidence/
+            php-lint.log
+            runtime.txt
+          retention-days: 90
