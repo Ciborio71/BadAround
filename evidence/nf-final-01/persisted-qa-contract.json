@@ -1,0 +1,106 @@
+{
+  "report": {
+    "id": "81",
+    "event_id": "369",
+    "status": "validated",
+    "source_type": "native",
+    "author_name": "QA",
+    "author_surname": "NFFINAL01Sintetico",
+    "author_email": "nf-final-01@example.invalid",
+    "contact_preference": "f78-c10",
+    "exact_address": "P.za Indipendenza, 00071 Pomezia RM, Italia",
+    "exact_lat": "41.6695343",
+    "exact_lng": "12.5017000",
+    "full_plate": "QA000ZZ",
+    "consent_privacy": "1",
+    "consent_publication": "1",
+    "consent_contact": "0",
+    "consent_version": "native-f16-v1",
+    "content_original": "{\"public_geo_governance\":\"user-public-location/v1\",\"schema_version\":\"badaround-report/v2\",\"submission_id\":\"a00bdd68-85db-48cf-b1bf-61a9ff773e50\",\"canonical\":{\"schema_version\":\"badaround-report/v2\",\"submission_id\":\"a00bdd68-85db-48cf-b1bf-61a9ff773e50\",\"event\":{\"category\":\"vehicle\",\"subtype\":\"vehicle_stolen\"},\"reporter\":{\"relationship\":\"directly_involved\",\"first_name\":\"QA\",\"last_name\":\"NFFINAL01Sintetico\",\"email\":\"nf-final-01@example.invalid\",\"public_identity_mode\":\"anonymous\",\"contact_preference\":\"none\",\"social_visibility\":\"requested\"},\"location\":{\"exact_address\":\"P.za Indipendenza, 00071 Pomezia RM, Italia\",\"exact_lat\":41.6695343,\"exact_lng\":12.5017,\"public_location_request\":{\"mode\":\"approximate_area\",\"radius_m\":250},\"public_location_request_version\":\"public-location-request-v2\",\"region\":\"Lazio\",\"province\":\"Roma\",\"municipality\":\"Pomezia\",\"public_precision\":\"area\",\"place_type\":\"public_parking\",\"immediate_danger\":\"no\"},\"time\":{\"mode\":\"exact\",\"date\":\"2026-10-23\",\"knowledge\":\"exact\",\"exact_time\":\"10:15\"},\"vehicle\":{\"type\":\"car\",\"plate_knowledge\":\"full\",\"plate_raw\":\"QA000ZZ\"},\"content\":{\"description\":\"[QA NF-FINAL-01 2026-10-24] Segnalazione interamente sintetica per certificazione funzionale su staging. Nessun furto, veicolo o persona reale coinvolti. Targa e contatti fittizi. NON PUBBLICARE.\"},\"media\":{\"availability\":\"no\"},\"consents\":{\"social_visibility_version\":\"social-preference-v1\",\"truthfulness\":true,\"media_rights\":true,\"publication_rules\":true,\"terms\":true,\"privacy\":true,\"version\":\"native-f16-v1\"}},\"private_fields\":{\"55\":\"[QA NF-FINAL-01 2026-10-24] Segnalazione interamente sintetica per certificazione funzionale su staging. Nessun furto, veicolo o persona reale coinvolti. Targa e contatti fittizi. NON PUBBLICARE.\"}}"
+  },
+  "event": {
+    "ID": "369",
+    "post_type": "ba_evento",
+    "post_status": "pending",
+    "post_title": "Segnalazione da moderare #81",
+    "post_content": "",
+    "post_excerpt": ""
+  },
+  "meta": [
+    {
+      "meta_key": "_ba_event_status",
+      "meta_value": "open"
+    },
+    {
+      "meta_key": "_ba_imported_at",
+      "meta_value": "2026-10-24 12:21:05"
+    },
+    {
+      "meta_key": "_ba_moderation_status",
+      "meta_value": "new"
+    },
+    {
+      "meta_key": "_ba_occurred_date",
+      "meta_value": "23/10/2026"
+    },
+    {
+      "meta_key": "_ba_occurred_time",
+      "meta_value": "10:15"
+    },
+    {
+      "meta_key": "_ba_primary_report_id",
+      "meta_value": "81"
+    },
+    {
+      "meta_key": "_ba_public_location_precision",
+      "meta_value": "f32-c6"
+    },
+    {
+      "meta_key": "_ba_reward_available",
+      "meta_value": ""
+    },
+    {
+      "meta_key": "_ba_source_submission_id",
+      "meta_value": "a00bdd68-85db-48cf-b1bf-61a9ff773e50"
+    },
+    {
+      "meta_key": "_ba_source_type",
+      "meta_value": "native"
+    },
+    {
+      "meta_key": "_ba_time_precision",
+      "meta_value": "f16-c4"
+    },
+    {
+      "meta_key": "_ba_vehicle_involved",
+      "meta_value": "1"
+    },
+    {
+      "meta_key": "_ba_vehicle_type",
+      "meta_value": "f38-c9"
+    }
+  ],
+  "terms": [
+    {
+      "term_id": "4",
+      "name": "Pomezia",
+      "slug": "pomezia",
+      "taxonomy": "ba_territorio",
+      "parent": "3"
+    },
+    {
+      "term_id": "11",
+      "name": "Veicolo rubato",
+      "slug": "veicolo-rubato",
+      "taxonomy": "ba_tipo_evento",
+      "parent": "6"
+    },
+    {
+      "term_id": "6",
+      "name": "Veicoli",
+      "slug": "veicoli",
+      "taxonomy": "ba_tipo_evento",
+      "parent": "0"
+    }
+  ]
+}

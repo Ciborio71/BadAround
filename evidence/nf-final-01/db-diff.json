@@ -1,0 +1,68 @@
+{
+  "reports": {
+    "prior": 80,
+    "after": 81,
+    "changedExisting": [],
+    "added": [
+      {
+        "id": "81",
+        "event_id": "369",
+        "status": "validated",
+        "custody": "96ac5d196eaa56db7d876aff37002bccfd3d8928bb8363eb0325f0a2d1254de6"
+      }
+    ]
+  },
+  "posts": {
+    "prior": 93,
+    "after": 94,
+    "changedExisting": [],
+    "added": [
+      {
+        "ID": "369",
+        "post_type": "ba_evento",
+        "post_status": "pending",
+        "custody": "56d17d3071f548e2e4bc49abbb61f28b5d89c6b3795efd20339b50d689109340"
+      }
+    ]
+  },
+  "meta": {
+    "same": true,
+    "beforeCount": 329,
+    "afterCount": 329
+  },
+  "taxonomy": {
+    "same": false,
+    "beforeCount": 3,
+    "afterCount": 3
+  },
+  "taxonomyDefinition": {
+    "same": true,
+    "beforeCount": 1,
+    "afterCount": 1
+  },
+  "taxonomyStructure": {
+    "same": true,
+    "beforeCount": 1,
+    "afterCount": 1
+  },
+  "relationships": {
+    "existingPreserved": true,
+    "added": [
+      {
+        "object_id": "369",
+        "term_taxonomy_id": "4",
+        "term_order": "0"
+      },
+      {
+        "object_id": "369",
+        "term_taxonomy_id": "6",
+        "term_order": "0"
+      },
+      {
+        "object_id": "369",
+        "term_taxonomy_id": "11",
+        "term_order": "0"
+      }
+    ]
+  }
+}
