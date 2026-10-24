@@ -10,28 +10,30 @@ get_header();
 $report_url = home_url( '/segnala-un-evento/' );
 ?>
 <main class="ba-map-page" id="main-content">
-	<section class="ba-map-page__toolbar">
-		<div class="ba-container--wide">
-			<div class="ba-map-toolbar">
-				<div class="ba-map-toolbar__title">
-					<span class="ba-eyebrow">Mappa BadAround</span>
-					<h1>Eventi pubblicati sul territorio</h1>
-				</div>
-				<div class="ba-map-toolbar__actions">
-					<a class="ba-button ba-button--urgent ba-map-report-cta" href="<?php echo esc_url( $report_url ); ?>">Segnala un evento</a>
-				</div>
-			</div>
-		</div>
-	</section>
-
 	<section class="ba-map-workspace">
 		<aside class="ba-map-results-panel" data-ba-map-results aria-label="Eventi pubblicati">
 			<div class="ba-map-results-panel__top">
 				<div>
-					<span class="ba-map-results-panel__eyebrow">Discovery</span>
-					<h2>Segnalazioni pubblicate</h2>
+					<span class="ba-map-results-panel__eyebrow">Mappa BadAround</span>
+					<h1>Segnalazioni nella zona</h1>
 				</div>
 				<button class="ba-map-results-panel__close" type="button" data-ba-map-close aria-label="Chiudi elenco">×</button>
+			</div>
+
+			<div class="ba-map-results-panel__controls">
+				<label class="ba-map-inline-search">
+					<span class="screen-reader-text">Cerca tra le segnalazioni</span>
+					<input type="search" placeholder="Cerca evento o luogo" data-ba-map-search>
+				</label>
+				<div class="ba-map-category-filters" role="group" aria-label="Filtra per categoria">
+					<button type="button" class="ba-map-category-filter is-active" data-ba-map-filter="all" aria-pressed="true">Tutte</button>
+					<button type="button" class="ba-map-category-filter" data-ba-map-filter="veicoli" aria-pressed="false">Veicoli</button>
+					<button type="button" class="ba-map-category-filter" data-ba-map-filter="case-e-attivita" aria-pressed="false">Case e attività</button>
+					<button type="button" class="ba-map-category-filter" data-ba-map-filter="pericoli" aria-pressed="false">Pericoli</button>
+					<button type="button" class="ba-map-category-filter" data-ba-map-filter="spazi-pubblici" aria-pressed="false">Spazi pubblici</button>
+					<button type="button" class="ba-map-category-filter" data-ba-map-filter="animali" aria-pressed="false">Animali</button>
+					<button type="button" class="ba-map-category-filter" data-ba-map-filter="oggetti-e-documenti" aria-pressed="false">Oggetti e documenti</button>
+				</div>
 			</div>
 
 			<div class="ba-map-results-panel__meta">
