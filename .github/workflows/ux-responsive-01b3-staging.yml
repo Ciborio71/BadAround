@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 86d12960b041cedc8b2272c6b18d6a714b0fe8c2
+          ref: deploy/ux-responsive-01b3-staging
           fetch-depth: 0
       - name: Verify QA
         env:
