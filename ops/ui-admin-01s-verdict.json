@@ -1,0 +1,6 @@
+{
+  "candidate": "0c2863b2a1bfbfb1e5c9641c78ba8d28bd21f21c",
+  "run": 40083319595,
+  "phase": "FAIL",
+  "reason": "PREUPLOAD_STOP: required live responsive viewport matrix cannot be executed with documented browser capabilities. No upload authorized by gate; no runtime writes."
+}
