@@ -1,0 +1,40 @@
+name: PROD-SMOKE-LOG-01 final cutover window
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths: ['ops/prod-smoke-log-launch.txt']
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+    steps:
+      - name: Inspect final cutover log window
+        run: |
+          python - <<'PY'
+          import ftplib,ssl,os,io,gzip,re
+          f=ftplib.FTP_TLS(context=ssl._create_unverified_context(),timeout=60)
+          f.connect(os.environ['FTP_HOST'],21);f.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);f.prot_p()
+          for name,facts in f.mlsd('/logs'):
+            if name in ('.','..') or facts.get('type')!='file': continue
+            size=int(facts.get('size','0') or 0)
+            if size>50_000_000: continue
+            try:
+              b=io.BytesIO();f.retrbinary('RETR /logs/'+name,b.write);data=b.getvalue()
+              if name.endswith('.gz'):
+                try:data=gzip.decompress(data)
+                except:continue
+              text=data.decode('utf-8','replace')
+              matches=[line for line in text.splitlines() if re.search(r'24/Oct/2026:20:3[3-6]|Oct 24 20:3[3-6]',line)]
+              if matches:
+                print('===',name,'===')
+                for line in matches[-250:]: print(line)
+            except: pass
+          f.quit()
+          PY
