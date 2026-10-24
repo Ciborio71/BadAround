@@ -20,13 +20,20 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq default-mysql-client
+      - name: Prepare FTPS trust chain
+        run: |
+          mkdir -p tls
+          ca=/etc/ssl/certs/ca-certificates.crt
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat "$ca" tls/yr2.pem tls/yr-by-x1.pem > tls/chain.pem
       - name: Retrieve configs privately and test database connectivity
         run: |
           python - <<'PY'
           import ftplib,ssl,os,io,re,subprocess,tempfile
-          ctx=ssl.create_default_context()
+          ctx=ssl.create_default_context(cafile='tls/chain.pem')
           f=ftplib.FTP_TLS(context=ctx,timeout=30)
-          f.connect(os.environ['FTP_HOST'],21);f.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);f.prot_p()
+          f.connect(os.environ['FTP_HOST'],21);f.host=os.environ['FTP_TLS_NAME'];f.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);f.prot_p()
           def read(path):
             b=io.BytesIO();f.retrbinary('RETR '+path,b.write);return b.getvalue().decode('utf-8','replace')
           def val(cfg,key):
