@@ -57,3 +57,6 @@ $report_url = home_url( '/segnala-un-evento/' );
 		</nav>
 	</div>
 </header>
+<?php if ( is_page( array( 'termini-e-condizioni', 'privacy-policy', 'cookie-policy', 'regole-di-pubblicazione' ) ) ) : ?>
+	<span id="main-content" class="ba-main-anchor" tabindex="-1"></span>
+<?php endif; ?>
