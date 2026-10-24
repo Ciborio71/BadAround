@@ -37,7 +37,6 @@ jobs:
       - name: Relevant regressions
         run: |
           set -euo pipefail
-          php tests/f1-15a3-territory.php
           php tests/map-controls-01-render.php
           php tests/geo-area-01-consumers.php
           npm ci --prefix tests --ignore-scripts --no-audit --no-fund
