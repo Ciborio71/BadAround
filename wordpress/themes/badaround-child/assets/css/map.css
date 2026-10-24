@@ -115,6 +115,10 @@ body.page-template-page-mappa .ba-site-footer{display:none}
 .ba-map-toolbar{grid-template-columns:minmax(0,1fr) auto;padding:16px 0}
 .ba-map-toolbar__actions{grid-column:auto}
 .ba-map-workspace{height:calc(100vh - 146px);min-height:560px}
+/* UX-RESPONSIVE-01B.1 — keep the public map useful without forcing an almost full-viewport canvas on desktop. */
+@media(min-width:861px){
+ .ba-map-workspace{height:clamp(520px,68vh,680px);min-height:0}
+}
 .ba-google-map{position:absolute;inset:0;width:100%;height:100%}
 .ba-map-status{position:absolute;top:16px;left:50%;z-index:5;max-width:min(520px,calc(100% - 32px));padding:10px 14px;border:1px solid var(--ba-border);border-radius:10px;background:rgba(255,255,255,.96);color:#52687c;font-size:.75rem;box-shadow:0 8px 20px rgba(7,26,56,.08);transform:translateX(-50%)}
 .ba-map-legend{position:absolute;top:16px;right:16px;z-index:8;width:min(260px,calc(100% - 32px));border:1px solid rgba(210,223,232,.95);border-radius:14px;background:rgba(255,255,255,.96);box-shadow:0 10px 28px rgba(7,26,56,.12);overflow:hidden}
