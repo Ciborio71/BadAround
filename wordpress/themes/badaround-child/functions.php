@@ -96,8 +96,17 @@ function badaround_child_maintenance_rest_gate( $result, $server, $request ) {
 	}
 
 	$route = $request->get_route();
-	if ( 0 === strpos( $route, '/wpvibe/' ) ) {
-		return $result;
+
+	$allowed_prefixes = array(
+		'/wpvibe/',
+		'/badaround/v1/discovery',
+		'/badaround/v1/sentinels',
+	);
+
+	foreach ( $allowed_prefixes as $prefix ) {
+		if ( 0 === strpos( $route, $prefix ) ) {
+			return $result;
+		}
 	}
 
 	return new WP_Error(
