@@ -637,14 +637,23 @@
 		return response.json();
 	};
 
-	const load = async () => {
-		const [discoveryResult, mapsResult] = await Promise.allSettled([
-			loadDiscovery(),
-			loadGoogleMaps(),
-		]);
+	const scheduleMaps = (run) => {
+		const homeOnly = mapNodes.every((node) => (node.dataset.baMapContext || 'full') === 'home');
+		if (!homeOnly) { run(); return; }
+		const start = () => {
+			if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 1800 });
+			else window.setTimeout(run, 250);
+		};
+		if (document.readyState === 'complete') start();
+		else window.addEventListener('load', start, { once: true });
+	};
 
-		if (discoveryResult.status === 'rejected') {
-			console.error('BadAround map:', discoveryResult.reason);
+	const load = async () => {
+		let payload;
+		try {
+			payload = await loadDiscovery();
+		} catch (error) {
+			console.error('BadAround map:', error);
 			document.querySelectorAll('[data-ba-map-status]').forEach((el) => {
 				el.textContent = 'Errore nel caricamento della mappa. Puoi continuare con la ricerca manuale.';
 				el.hidden = false;
@@ -652,15 +661,15 @@
 			return;
 		}
 
-		const payload = discoveryResult.value;
 		const items = Array.isArray(payload.items) ? payload.items : [];
 		const total = Number.isFinite(Number(payload.total)) ? Number(payload.total) : items.length;
 		renderList(items, total);
 
-		if (mapsResult.status === 'rejected') {
-			console.error('BadAround map:', mapsResult.reason);
-		}
-		mapNodes.forEach((node) => initMap(node, items));
+		scheduleMaps(async () => {
+			try { await loadGoogleMaps(); }
+			catch (error) { console.error('BadAround map:', error); }
+			mapNodes.forEach((node) => initMap(node, items));
+		});
 	};
 
 	bindResultsPanel();
