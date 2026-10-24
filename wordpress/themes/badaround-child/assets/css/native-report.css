@@ -598,6 +598,23 @@
 .ba-native .ba-native-public-location-option input{flex:0 0 auto;width:22px;height:22px;margin:2px 0;accent-color:var(--ba-teal-700)}
 .ba-native .ba-native-public-location-option span{display:flex;flex-direction:column;gap:5px;min-width:0}
 .ba-native .ba-native-public-location-option small{font-size:.9rem;font-weight:400;line-height:1.45}
+.ba-native .ba-native-public-location-option{display:grid;grid-template-columns:auto 136px minmax(0,1fr);align-items:center}
+.ba-native .ba-native-public-location-option input{align-self:center}
+.ba-native .ba-native-public-location-visual{display:block;width:136px;min-width:136px}
+.ba-native .ba-native-public-location-visual svg{display:block;width:100%;height:auto}
+.ba-native .ba-native-public-location-copy{display:flex;flex-direction:column;gap:5px;min-width:0}
+.ba-native .ba-geo-map-bg{fill:#f8fcfd;stroke:#cfe1e7;stroke-width:2}
+.ba-native .ba-geo-map-grid{fill:none;stroke:#d7e7ec;stroke-width:2;stroke-linecap:round}
+.ba-native .ba-geo-pin{fill:var(--ba-teal-700);stroke:#066f79;stroke-width:2}
+.ba-native .ba-geo-pin-core{fill:#fff}
+.ba-native .ba-geo-area{fill:rgba(7,152,168,.18);stroke:var(--ba-teal-700);stroke-width:3}
+.ba-native .ba-geo-area-core{fill:var(--ba-teal-700);stroke:#fff;stroke-width:2}
+@media(max-width:680px){
+  .ba-native .ba-native-public-location-option{grid-template-columns:auto minmax(0,1fr);align-items:start}
+  .ba-native .ba-native-public-location-visual{grid-column:2;width:min(180px,100%);min-width:0;margin-bottom:4px}
+  .ba-native .ba-native-public-location-copy{grid-column:2}
+}
+
 .ba-native [data-smart-geolocate].ba-native-gps-button{background:var(--ba-teal-700);color:#fff;border:1px solid var(--ba-teal-700);font-weight:700;opacity:1}
 .ba-native [data-smart-geolocate].ba-native-gps-button:hover{background:var(--ba-teal-700);color:#fff;filter:brightness(.91)}
 .ba-native [data-smart-geolocate].ba-native-gps-button:focus-visible{outline:3px solid var(--ba-teal-700);outline-offset:3px}
