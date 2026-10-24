@@ -1,0 +1,24 @@
+name: PROD-ORIGIN-01 read-only origin reachability
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths: ['ops/prod-origin-readonly-launch.txt']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+    steps:
+      - name: Probe existing sites through origin
+        run: |
+          set -euo pipefail
+          ORIGIN_IP="$(getent ahostsv4 "$FTP_HOST" | awk 'NR==1{print $1}')"
+          test -n "$ORIGIN_IP"
+          for host in staging.badaround.it badaround.it www.badaround.it; do
+            code="$(curl -k --silent --show-error --output /dev/null --write-out '%{http_code}' --resolve "$host:443:$ORIGIN_IP" "https://$host/" || true)"
+            echo "$host=$code"
+          done
