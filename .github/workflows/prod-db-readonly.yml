@@ -1,0 +1,48 @@
+name: PROD-DB-01 read-only MySQL reachability
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths: ['ops/prod-db-readonly-launch.txt']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
+    steps:
+      - name: Install MySQL client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq default-mysql-client
+      - name: Retrieve configs privately and test database connectivity
+        run: |
+          python - <<'PY'
+          import ftplib,ssl,os,io,re,subprocess,tempfile
+          ctx=ssl.create_default_context()
+          f=ftplib.FTP_TLS(context=ctx,timeout=30)
+          f.connect(os.environ['FTP_HOST'],21);f.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);f.prot_p()
+          def read(path):
+            b=io.BytesIO();f.retrbinary('RETR '+path,b.write);return b.getvalue().decode('utf-8','replace')
+          def val(cfg,key):
+            m=re.search(r"define\(\s*['\"]"+re.escape(key)+r"['\"]\s*,\s*['\"]([^'\"]+)['\"]",cfg)
+            if not m: raise SystemExit('missing '+key)
+            return m.group(1)
+          results=[]
+          for label,path in [('production','/httpdocs/wp-config.php'),('staging','/staging.badaround.it/wp-config.php')]:
+            cfg=read(path)
+            env=os.environ.copy()
+            env['MYSQL_PWD']=val(cfg,'DB_PASSWORD')
+            cmd=['mysql','--connect-timeout=8','--host',os.environ['FTP_HOST'],'--port','3306','--user',val(cfg,'DB_USER'),'--database',val(cfg,'DB_NAME'),'--batch','--skip-column-names','--execute','SELECT 1']
+            p=subprocess.run(cmd,env=env,capture_output=True,text=True,timeout=15)
+            results.append((label,p.returncode,p.stdout.strip(),p.stderr.splitlines()[-1][:160] if p.stderr else ''))
+          f.quit()
+          for label,code,out,err in results:
+            print(label,'PASS' if code==0 and out=='1' else 'FAIL',err if code else '')
+          if not all(code==0 and out=='1' for _,code,out,_ in results): raise SystemExit(1)
+          PY
