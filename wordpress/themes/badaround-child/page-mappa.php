@@ -21,10 +21,15 @@ $report_url = home_url( '/segnala-un-evento/' );
 			</div>
 
 			<div class="ba-map-results-panel__controls">
-				<label class="ba-map-inline-search">
-					<span class="screen-reader-text">Cerca tra le segnalazioni</span>
-					<input type="search" placeholder="Cerca evento o luogo" data-ba-map-search>
-				</label>
+				<div class="ba-map-search-row">
+					<label class="ba-map-inline-search">
+						<span class="screen-reader-text">Cerca tra le segnalazioni</span>
+						<input type="search" placeholder="Cerca evento o luogo" data-ba-map-search>
+					</label>
+					<button type="button" class="ba-map-nearby-button" data-ba-map-nearby aria-pressed="false">
+						<span aria-hidden="true">⌖</span><strong>Vicino a me</strong>
+					</button>
+				</div>
 				<div class="ba-map-category-filters" role="group" aria-label="Filtra per categoria">
 					<button type="button" class="ba-map-category-filter is-active" data-ba-map-filter="all" aria-pressed="true">Tutte</button>
 					<button type="button" class="ba-map-category-filter" data-ba-map-filter="veicoli" aria-pressed="false">Veicoli</button>
@@ -34,6 +39,17 @@ $report_url = home_url( '/segnala-un-evento/' );
 					<button type="button" class="ba-map-category-filter" data-ba-map-filter="animali" aria-pressed="false">Animali</button>
 					<button type="button" class="ba-map-category-filter" data-ba-map-filter="oggetti-e-documenti" aria-pressed="false">Oggetti e documenti</button>
 				</div>
+				<div class="ba-map-time-filter-wrap">
+					<span class="ba-map-filter-label">Quando</span>
+					<div class="ba-map-time-filters" role="group" aria-label="Filtra per data dell'evento">
+						<button type="button" class="ba-map-time-filter is-active" data-ba-map-time="all" aria-pressed="true">Tutti</button>
+						<button type="button" class="ba-map-time-filter" data-ba-map-time="today" aria-pressed="false">Oggi</button>
+						<button type="button" class="ba-map-time-filter" data-ba-map-time="3" aria-pressed="false">3 giorni</button>
+						<button type="button" class="ba-map-time-filter" data-ba-map-time="7" aria-pressed="false">7 giorni</button>
+						<button type="button" class="ba-map-time-filter" data-ba-map-time="30" aria-pressed="false">30 giorni</button>
+					</div>
+				</div>
+				<p class="ba-map-nearby-status" data-ba-map-nearby-status role="status" aria-live="polite"></p>
 			</div>
 
 			<div class="ba-map-results-panel__meta">
