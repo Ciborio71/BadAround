@@ -226,17 +226,16 @@
 	};
 
 	const buildPreviewContent = (item) => {
-		const wrap = document.createElement('div');
-		wrap.className = 'ba-map-preview-card';
-
 		const category = categoryFor(item);
 		const palette = categories[category] || neutral;
+		const wrap = document.createElement('article');
+		wrap.className = 'ba-card ba-event-card ba-event-card--home ba-map-preview-card' + (category ? ' ba-event-card--category-' + category : '');
 		wrap.style.setProperty('--ba-card-accent', palette.color);
 
 		const imageUrl = item.thumbnail || config.placeholder;
 		if (imageUrl) {
 			const media = document.createElement('a');
-			media.className = 'ba-map-preview-card__media';
+			media.className = 'ba-event-card__media';
 			media.href = item.permalink;
 			media.tabIndex = -1;
 			media.setAttribute('aria-hidden', 'true');
@@ -247,42 +246,58 @@
 			img.loading = 'lazy';
 			img.decoding = 'async';
 			media.appendChild(img);
+
+			const medallion = document.createElement('span');
+			medallion.className = 'ba-event-card__media-category';
+			medallion.setAttribute('aria-hidden', 'true');
+			medallion.innerHTML = '<svg viewBox="0 0 24 24" focusable="false">' + iconMarkup(palette.icon) + '</svg>';
+			media.appendChild(medallion);
 			wrap.appendChild(media);
+		} else {
+			wrap.classList.add('ba-event-card--no-media');
 		}
 
 		const body = document.createElement('div');
-		body.className = 'ba-map-preview-card__body';
+		body.className = 'ba-event-card__body';
 
 		if (item.event_type?.name) {
 			const badge = document.createElement('span');
-			badge.className = 'ba-badge ba-map-preview-card__badge';
+			badge.className = 'ba-badge ba-badge--info';
 			badge.appendChild(text(item.event_type.name));
 			body.appendChild(badge);
 		}
 
 		const title = document.createElement('h3');
-		title.appendChild(text(item.title));
+		title.className = 'ba-event-card__title';
+		const titleLink = document.createElement('a');
+		titleLink.href = item.permalink;
+		titleLink.appendChild(text(item.title));
+		title.appendChild(titleLink);
 		body.appendChild(title);
 
 		const metaParts = [item.occurred_date, item.occurred_time, item.public_place_name || item.territory?.name].filter(Boolean);
 		if (metaParts.length) {
-			const meta = document.createElement('p');
-			meta.className = 'ba-map-preview-card__meta';
+			const meta = document.createElement('div');
+			meta.className = 'ba-event-card__meta';
 			meta.appendChild(text(metaParts.join(' · ')));
 			body.appendChild(meta);
 		}
 
 		if (item.excerpt) {
 			const excerpt = document.createElement('p');
-			excerpt.className = 'ba-map-preview-card__excerpt';
+			excerpt.className = 'ba-event-card__excerpt';
 			excerpt.appendChild(text(item.excerpt));
 			body.appendChild(excerpt);
 		}
 
 		const link = document.createElement('a');
-		link.className = 'ba-button ba-map-preview-card__cta';
+		link.className = 'ba-event-card__link';
 		link.href = item.permalink;
-		link.appendChild(text('Vedi dettaglio'));
+		link.appendChild(text('Visualizza segnalazione '));
+		const arrow = document.createElement('span');
+		arrow.setAttribute('aria-hidden','true');
+		arrow.textContent = '→';
+		link.appendChild(arrow);
 		body.appendChild(link);
 
 		wrap.appendChild(body);
