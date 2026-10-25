@@ -10,26 +10,28 @@ get_header();
 $report_url = home_url( '/segnala-un-evento/' );
 ?>
 <main class="ba-map-page" id="main-content">
-	<section class="ba-map-workspace">
-		<aside class="ba-map-results-panel" data-ba-map-results aria-label="Eventi pubblicati">
-			<div class="ba-map-results-panel__top">
-				<div>
-					<span class="ba-map-results-panel__eyebrow">Mappa BadAround</span>
-					<h1>Segnalazioni nella zona</h1>
-				</div>
-				<button class="ba-map-results-panel__close" type="button" data-ba-map-close aria-label="Chiudi elenco">×</button>
+	<section class="ba-map-commandbar" aria-label="Ricerca e filtri mappa">
+		<div class="ba-map-commandbar__summary">
+			<span class="ba-map-results-panel__eyebrow">Mappa BadAround</span>
+			<div class="ba-map-commandbar__heading">
+				<h1>Segnalazioni nella zona</h1>
+				<span class="ba-map-commandbar__count" data-ba-map-count>Caricamento…</span>
+			</div>
+		</div>
+
+		<div class="ba-map-commandbar__controls">
+			<div class="ba-map-commandbar__primary">
+				<label class="ba-map-inline-search">
+					<span class="screen-reader-text">Cerca tra le segnalazioni</span>
+					<input type="search" placeholder="Cerca evento o luogo" data-ba-map-search>
+				</label>
+				<button type="button" class="ba-map-nearby-button" data-ba-map-nearby aria-pressed="false">
+					<span aria-hidden="true">⌖</span><strong>Vicino a me</strong>
+				</button>
+				<p class="ba-map-nearby-status" data-ba-map-nearby-status role="status" aria-live="polite"></p>
 			</div>
 
-			<div class="ba-map-results-panel__controls">
-				<div class="ba-map-search-row">
-					<label class="ba-map-inline-search">
-						<span class="screen-reader-text">Cerca tra le segnalazioni</span>
-						<input type="search" placeholder="Cerca evento o luogo" data-ba-map-search>
-					</label>
-					<button type="button" class="ba-map-nearby-button" data-ba-map-nearby aria-pressed="false">
-						<span aria-hidden="true">⌖</span><strong>Vicino a me</strong>
-					</button>
-				</div>
+			<div class="ba-map-commandbar__filters">
 				<div class="ba-map-category-filters" role="group" aria-label="Filtra per categoria">
 					<button type="button" class="ba-map-category-filter is-active" data-ba-map-filter="all" aria-pressed="true">Tutte</button>
 					<button type="button" class="ba-map-category-filter" data-ba-map-filter="veicoli" aria-pressed="false">Veicoli</button>
@@ -39,6 +41,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 					<button type="button" class="ba-map-category-filter" data-ba-map-filter="animali" aria-pressed="false">Animali</button>
 					<button type="button" class="ba-map-category-filter" data-ba-map-filter="oggetti-e-documenti" aria-pressed="false">Oggetti e documenti</button>
 				</div>
+
 				<div class="ba-map-time-filter-wrap">
 					<span class="ba-map-filter-label">Quando</span>
 					<div class="ba-map-time-filters" role="group" aria-label="Filtra per data dell'evento">
@@ -49,11 +52,18 @@ $report_url = home_url( '/segnala-un-evento/' );
 						<button type="button" class="ba-map-time-filter" data-ba-map-time="30" aria-pressed="false">30 giorni</button>
 					</div>
 				</div>
-				<p class="ba-map-nearby-status" data-ba-map-nearby-status role="status" aria-live="polite"></p>
 			</div>
+		</div>
+	</section>
 
-			<div class="ba-map-results-panel__meta">
-				<span data-ba-map-count>Caricamento…</span>
+	<section class="ba-map-workspace">
+		<aside class="ba-map-results-panel" data-ba-map-results aria-label="Eventi pubblicati">
+			<div class="ba-map-results-panel__mobile-head">
+				<div>
+					<span class="ba-map-results-panel__eyebrow">Risultati</span>
+					<strong data-ba-map-mobile-count>0 risultati</strong>
+				</div>
+				<button class="ba-map-results-panel__close" type="button" data-ba-map-close aria-label="Chiudi elenco">×</button>
 			</div>
 
 			<div class="ba-map-results-list" data-ba-map-list aria-live="polite">
