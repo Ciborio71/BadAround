@@ -523,8 +523,6 @@
 			const entry = eventMarkers.find((candidate) => String(candidate.item.id) === String(target));
 			if (!entry) return;
 			setSelected(entry);
-			map.panTo(entry.position);
-			if (map.getZoom() < 14) map.setZoom(14);
 		});
 
 		items.forEach((item) => {
@@ -543,7 +541,11 @@
 				if (listCard && context === 'full') {
 					document.querySelectorAll('.ba-map-event-card.is-selected').forEach((el) => el.classList.remove('is-selected'));
 					listCard.classList.add('is-selected');
-					listCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+					const list = document.querySelector('[data-ba-map-list]');
+					if (list) {
+						const targetTop = Math.max(0, listCard.offsetTop - 12);
+						list.scrollTo({ top: targetTop, behavior: 'smooth' });
+					}
 				}
 			};
 			entry.marker.addListener('click', select);
