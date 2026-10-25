@@ -192,7 +192,8 @@ body.page-template-page-mappa .ba-site-footer{display:none}
 	background:transparent;
 	box-shadow:none;
 }
-.ba-map-preview[hidden]{display:none}
+.ba-map-preview[hidden]{display:none!important}
+.ba-map-preview.is-open{display:block;visibility:visible;opacity:1;pointer-events:auto}
 .ba-map-preview__close{
 	position:absolute;
 	z-index:20;
