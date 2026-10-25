@@ -70,11 +70,6 @@ $report_url = home_url( '/segnala-un-evento/' );
 
 			<div class="ba-map-status" data-ba-map-status hidden></div>
 
-			<aside class="ba-map-preview" data-ba-map-preview hidden aria-live="polite">
-				<button class="ba-map-preview__close" type="button" data-ba-map-preview-close aria-label="Chiudi anteprima evento">×</button>
-				<div data-ba-map-preview-content></div>
-			</aside>
-
 			<details class="ba-map-legend" open>
 				<summary>Legenda pinpoint</summary>
 				<div class="ba-map-legend__body">
@@ -89,6 +84,10 @@ $report_url = home_url( '/segnala-un-evento/' );
 				</div>
 			</details>
 
+			<aside class="ba-map-preview ba-home-map__preview" data-ba-map-preview hidden aria-live="polite" aria-label="Anteprima evento selezionato">
+				<button class="ba-map-preview__close" type="button" data-ba-map-preview-close aria-label="Chiudi anteprima">×</button>
+				<div data-ba-map-preview-content></div>
+			</aside>
 
 			<button class="ba-map-mobile-results" type="button" data-ba-map-open>
 				<span data-ba-map-mobile-count>0 risultati</span>
