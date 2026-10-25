@@ -1,0 +1,43 @@
+name: MAP-SPLITVIEW-17 production deploy
+on:
+  push:
+    branches: [feature/maintenance-01]
+    paths: ['ops/map-splitview-17-launch.txt']
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: php -l wordpress/themes/badaround-child/page-mappa.php
+      - name: Deploy split-view files
+        run: |
+          python - <<'PY'
+          import ftplib,ssl,os,hashlib,io
+          files=[
+            ('wordpress/themes/badaround-child/page-mappa.php','/httpdocs/wp-content/themes/badaround-child/page-mappa.php'),
+            ('wordpress/themes/badaround-child/assets/css/map.css','/httpdocs/wp-content/themes/badaround-child/assets/css/map.css'),
+          ]
+          f=ftplib.FTP_TLS(context=ssl._create_unverified_context(),timeout=60)
+          f.connect(os.environ['FTP_HOST'],21); f.login(os.environ['FTP_USER'],os.environ['FTP_PASS']); f.prot_p()
+          for local,remote in files:
+            backup=remote+'.mapsplitview17.bak'
+            old=io.BytesIO(); f.retrbinary('RETR '+remote,old.write)
+            try:f.delete(backup)
+            except:pass
+            old.seek(0); f.storbinary('STOR '+backup,old)
+            with open(local,'rb') as fh:f.storbinary('STOR '+remote,fh)
+            new=io.BytesIO(); f.retrbinary('RETR '+remote,new.write)
+            lsha=hashlib.sha256(open(local,'rb').read()).hexdigest()
+            rsha=hashlib.sha256(new.getvalue()).hexdigest()
+            print(local,lsha,rsha); assert lsha==rsha
+          f.quit()
+          PY
