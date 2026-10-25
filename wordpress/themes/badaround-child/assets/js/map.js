@@ -289,7 +289,7 @@
 		if (item.excerpt) {
 			const excerpt = document.createElement('p');
 			excerpt.className = 'ba-event-card__excerpt';
-			excerpt.appendChild(text(item.excerpt));
+			excerpt.appendChild(text(editorialText(item.excerpt)));
 			body.appendChild(excerpt);
 		}
 
@@ -885,7 +885,7 @@
 		else window.addEventListener('load', start, { once: true });
 	};
 
-	const setupPlacesAutocomplete = async (input) => {
+	const setupPlacesAutocomplete = async (input, onSelected) => {
 		if (!input || !window.google?.maps?.importLibrary) return;
 		let places;
 		try {
@@ -923,8 +923,8 @@
 				const place = prediction.toPlace();
 				await place.fetchFields({ fields:['displayName','formattedAddress','location','viewport'] });
 				input.value = place.formattedAddress || place.displayName || '';
-				searchQuery = '';
 				close();
+				if (typeof onSelected === 'function') onSelected();
 				token = new AutocompleteSessionToken();
 				const location = place.location;
 				document.dispatchEvent(new CustomEvent('badaround:place-selected', {
@@ -1141,7 +1141,10 @@
 			try { await loadGoogleMaps(); }
 			catch (error) { console.error('BadAround map:', error); }
 			mapNodes.forEach((node) => initMap(node, items));
-			await setupPlacesAutocomplete(searchInput);
+			await setupPlacesAutocomplete(searchInput, () => {
+				searchQuery = '';
+				applyFilters();
+			});
 			applyFilters();
 		});
 	};
