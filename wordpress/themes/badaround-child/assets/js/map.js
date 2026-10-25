@@ -516,17 +516,42 @@
 				const canvasRect = canvas.getBoundingClientRect();
 				const width = Math.min(preview.offsetWidth || 420, Math.max(220, canvasRect.width - 24));
 				const height = preview.offsetHeight || 160;
-				const gap = entry.mode === 'exact_point' ? 24 : 18;
 				const safe = 12;
 				const controlRail = context === 'full' ? 118 : 12;
+				const markerRadius = entry.mode === 'exact_point' ? 38 : 30;
+				const gap = 18;
+				const clearance = markerRadius + gap;
 				const maxLeft = Math.max(safe, canvasRect.width - width - controlRail - safe);
 
 				let left = point.x - width / 2;
 				left = Math.min(Math.max(safe, left), maxLeft);
 
-				let top = point.y - height - gap;
-				if (top < safe) top = point.y + gap;
-				top = Math.min(Math.max(safe, top), Math.max(safe, canvasRect.height - height - safe));
+				const canFitAbove = point.y - clearance - height >= safe;
+				const canFitBelow = point.y + clearance + height <= canvasRect.height - safe;
+
+				let top;
+				if (canFitAbove) {
+					top = point.y - clearance - height;
+				} else if (canFitBelow) {
+					top = point.y + clearance;
+				} else {
+					top = Math.min(Math.max(safe, point.y - height / 2), Math.max(safe, canvasRect.height - height - safe));
+
+					const markerLeft = point.x - markerRadius;
+					const markerRight = point.x + markerRadius;
+					const cardLeft = left;
+					const cardRight = left + width;
+
+					if (cardLeft < markerRight && cardRight > markerLeft) {
+						const leftCandidate = point.x - clearance - width;
+						const rightCandidate = point.x + clearance;
+						const canFitLeft = leftCandidate >= safe;
+						const canFitRight = rightCandidate + width <= canvasRect.width - controlRail - safe;
+
+						if (canFitRight) left = rightCandidate;
+						else if (canFitLeft) left = leftCandidate;
+					}
+				}
 
 				preview.style.left = Math.round(left) + 'px';
 				preview.style.top = Math.round(top) + 'px';
