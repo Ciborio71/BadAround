@@ -622,7 +622,20 @@
 			const target = event.detail?.id;
 			const entry = eventMarkers.find((candidate) => String(candidate.item.id) === String(target));
 			if (!entry) return;
+
+			document.querySelectorAll('.ba-map-event-card.is-selected').forEach((el) => el.classList.remove('is-selected'));
+			const listCard = document.querySelector('[data-ba-event-id="' + String(entry.item.id) + '"]');
+			listCard?.classList.add('is-selected');
+
 			setSelected(entry);
+
+			const targetZoom = entry.mode === 'exact_point' ? 16 : 14;
+			map.panTo(entry.position);
+			if (map.getZoom() < targetZoom) map.setZoom(targetZoom);
+
+			google.maps.event.addListenerOnce(map, 'idle', () => {
+				positionPreview(entry);
+			});
 		});
 
 		items.forEach((item) => {
