@@ -45,11 +45,11 @@ $report_url = home_url( '/segnala-un-evento/' );
 				<div class="ba-map-time-filter-wrap">
 					<span class="ba-map-filter-label">Quando</span>
 					<div class="ba-map-time-filters" role="group" aria-label="Filtra per data dell'evento">
-						<button type="button" class="ba-map-time-filter is-active" data-ba-map-time="all" aria-pressed="true">Tutti</button>
 						<button type="button" class="ba-map-time-filter" data-ba-map-time="today" aria-pressed="false">Oggi</button>
-						<button type="button" class="ba-map-time-filter" data-ba-map-time="3" aria-pressed="false">3 giorni</button>
-						<button type="button" class="ba-map-time-filter" data-ba-map-time="7" aria-pressed="false">7 giorni</button>
+						<button type="button" class="ba-map-time-filter" data-ba-map-time="3" aria-pressed="false">Ultimi 3 giorni</button>
+						<button type="button" class="ba-map-time-filter is-active" data-ba-map-time="7" aria-pressed="true">7 giorni</button>
 						<button type="button" class="ba-map-time-filter" data-ba-map-time="30" aria-pressed="false">30 giorni</button>
+						<button type="button" class="ba-map-time-filter" data-ba-map-time="all" aria-pressed="false">Tutti</button>
 					</div>
 				</div>
 			</div>
