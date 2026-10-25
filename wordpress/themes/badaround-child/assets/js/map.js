@@ -766,6 +766,18 @@
 			setStatus('Gli eventi pubblicati non dispongono ancora di una posizione pubblica cartografabile.');
 		}
 
+		if (context === 'full') {
+			const requestedArea = initialMapArea();
+			if (requestedArea?.bounds) {
+				map.fitBounds(requestedArea.bounds, 64);
+			} else if (requestedArea?.position) {
+				map.setCenter(requestedArea.position);
+				map.setZoom(14);
+			}
+			const searchField = document.querySelector('[data-ba-map-search]');
+			if (requestedArea?.area && searchField) searchField.value = requestedArea.area;
+		}
+
 		const geoButton = document.querySelector('[data-ba-geolocate]');
 		const geoStatus = document.querySelector('[data-ba-geolocation-status]');
 		if (geoButton && context === 'home') {
@@ -887,7 +899,7 @@
 		else window.addEventListener('load', start, { once: true });
 	};
 
-	const setupPlacesAutocomplete = async (input, onSelected) => {
+	const setupPlacesAutocomplete = async (input, onSelected, options = {}) => {
 		if (!input || !window.google?.maps?.importLibrary) return;
 		let places;
 		try {
@@ -926,15 +938,18 @@
 				await place.fetchFields({ fields:['displayName','formattedAddress','location','viewport'] });
 				input.value = place.formattedAddress || place.displayName || '';
 				close();
-				if (typeof onSelected === 'function') onSelected();
-				token = new AutocompleteSessionToken();
 				const location = place.location;
-				document.dispatchEvent(new CustomEvent('badaround:place-selected', {
-					detail: {
-						position: location ? { lat:location.lat(), lng:location.lng() } : null,
-						viewport: place.viewport || null,
-					}
-				}));
+				const detail = {
+					placeId: place.id || prediction.placeId || '',
+					label: place.formattedAddress || place.displayName || '',
+					position: location ? { lat:location.lat(), lng:location.lng() } : null,
+					viewport: place.viewport || null,
+				};
+				if (typeof onSelected === 'function') onSelected(detail);
+				token = new AutocompleteSessionToken();
+				if (options.dispatch !== false) {
+					document.dispatchEvent(new CustomEvent('badaround:place-selected', { detail }));
+				}
 			} catch (error) {
 				console.warn('BadAround Places selection:', error);
 			}
@@ -986,6 +1001,70 @@
 		document.addEventListener('click', (event) => {
 			if (!host.contains(event.target)) close();
 		});
+	};
+
+	const setupHomePlaceSearch = async () => {
+		const form = document.querySelector('[data-ba-home-place-search]');
+		const input = form?.querySelector('[data-ba-home-place-input]');
+		if (!form || !input) return;
+
+		const setValue = (selector, value) => {
+			const field = form.querySelector(selector);
+			if (field) field.value = value ?? '';
+		};
+		const clearResolvedPlace = () => {
+			setValue('[data-ba-home-place-id]','');
+			setValue('[data-ba-home-place-lat]','');
+			setValue('[data-ba-home-place-lng]','');
+			setValue('[data-ba-home-place-north]','');
+			setValue('[data-ba-home-place-south]','');
+			setValue('[data-ba-home-place-east]','');
+			setValue('[data-ba-home-place-west]','');
+		};
+
+		await setupPlacesAutocomplete(input, (detail) => {
+			clearResolvedPlace();
+			setValue('[data-ba-home-place-id]', detail?.placeId || '');
+			setValue('[data-ba-home-place-lat]', detail?.position?.lat ?? '');
+			setValue('[data-ba-home-place-lng]', detail?.position?.lng ?? '');
+			const viewport = detail?.viewport;
+			if (viewport) {
+				const ne = viewport.getNorthEast?.();
+				const sw = viewport.getSouthWest?.();
+				setValue('[data-ba-home-place-north]', ne?.lat?.() ?? '');
+				setValue('[data-ba-home-place-east]', ne?.lng?.() ?? '');
+				setValue('[data-ba-home-place-south]', sw?.lat?.() ?? '');
+				setValue('[data-ba-home-place-west]', sw?.lng?.() ?? '');
+			}
+		}, { dispatch:false });
+
+		input.addEventListener('input', clearResolvedPlace);
+		form.addEventListener('submit', (event) => {
+			const area = input.value.trim();
+			if (!area) {
+				event.preventDefault();
+				input.focus();
+			}
+		});
+	};
+
+	const initialMapArea = () => {
+		const params = new URLSearchParams(window.location.search);
+		const area = params.get('area') || '';
+		const lat = Number(params.get('lat'));
+		const lng = Number(params.get('lng'));
+		const north = Number(params.get('north'));
+		const south = Number(params.get('south'));
+		const east = Number(params.get('east'));
+		const west = Number(params.get('west'));
+		const hasPosition = Number.isFinite(lat) && Number.isFinite(lng);
+		const hasBounds = [north,south,east,west].every(Number.isFinite);
+		if (!area && !hasPosition && !hasBounds) return null;
+		return {
+			area,
+			position: hasPosition ? { lat, lng } : null,
+			bounds: hasBounds ? { north, south, east, west } : null,
+		};
 	};
 
 	const load = async () => {
@@ -1132,6 +1211,8 @@
 		});
 
 		const searchInput = document.querySelector('[data-ba-map-search]');
+		const requestedArea = initialMapArea();
+		if (requestedArea?.area && searchInput) searchInput.value = requestedArea.area;
 		searchInput?.addEventListener('input', () => {
 			searchQuery = searchInput.value.trim().toLowerCase();
 			applyFilters();
@@ -1148,6 +1229,7 @@
 			try { await loadGoogleMaps(); }
 			catch (error) { console.error('BadAround map:', error); }
 			mapNodes.forEach((node) => initMap(node, items));
+			await setupHomePlaceSearch();
 			if (hasFullMap) {
 				await setupPlacesAutocomplete(searchInput, () => {
 					searchQuery = '';
