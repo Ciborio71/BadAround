@@ -1,0 +1,38 @@
+name: MAP-CARD-BOTTOM-21 production deploy
+on:
+  push:
+    branches: [feature/maintenance-01]
+    paths: ['ops/map-card-bottom-21-launch.txt']
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy map.css only
+        run: |
+          python - <<'PY'
+          import ftplib,ssl,os,hashlib,io
+          local='wordpress/themes/badaround-child/assets/css/map.css'
+          remote='/httpdocs/wp-content/themes/badaround-child/assets/css/map.css'
+          backup=remote+'.mapcardbottom21.bak'
+          f=ftplib.FTP_TLS(context=ssl._create_unverified_context(),timeout=60)
+          f.connect(os.environ['FTP_HOST'],21); f.login(os.environ['FTP_USER'],os.environ['FTP_PASS']); f.prot_p()
+          old=io.BytesIO(); f.retrbinary('RETR '+remote,old.write)
+          try:f.delete(backup)
+          except:pass
+          old.seek(0); f.storbinary('STOR '+backup,old)
+          with open(local,'rb') as fh:f.storbinary('STOR '+remote,fh)
+          new=io.BytesIO(); f.retrbinary('RETR '+remote,new.write)
+          lsha=hashlib.sha256(open(local,'rb').read()).hexdigest()
+          rsha=hashlib.sha256(new.getvalue()).hexdigest()
+          print(lsha,rsha); assert lsha==rsha
+          f.quit()
+          PY
