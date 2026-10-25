@@ -683,16 +683,18 @@
 			bounds.extend(entry.position);
 		});
 
-		document.addEventListener('badaround:map-filtered', (event) => {
-			const allowed = new Set((event.detail?.items || []).map((item) => String(item.id)));
-			eventMarkers.forEach((entry) => {
-				entry.filteredVisible = allowed.has(String(entry.item.id));
-				showProjection(entry, entry.filteredVisible ? map : null);
+		if (context === 'full') {
+			document.addEventListener('badaround:map-filtered', (event) => {
+				const allowed = new Set((event.detail?.items || []).map((item) => String(item.id)));
+				eventMarkers.forEach((entry) => {
+					entry.filteredVisible = allowed.has(String(entry.item.id));
+					showProjection(entry, entry.filteredVisible ? map : null);
+				});
+				if (selected && !selected.filteredVisible) clearSelected();
+				removeClusters();
+				refreshClusters();
 			});
-			if (selected && !selected.filteredVisible) clearSelected();
-			removeClusters();
-			refreshClusters();
-		});
+		}
 
 		const removeClusters = () => {
 			clusterMarkers.forEach((marker) => marker.setMap(null));
@@ -1002,7 +1004,7 @@
 		const items = Array.isArray(payload.items) ? payload.items : [];
 		let visibleItems = [...items];
 		let activeCategory = 'all';
-		let activeTime = '7';
+		let activeTime = 'all';
 		let searchQuery = '';
 		let nearbyPosition = null;
 		const nearbyRadiusKm = 5;
@@ -1135,17 +1137,24 @@
 			applyFilters();
 		});
 
-		applyFilters();
+		const hasFullMap = mapNodes.some((node) => (node.dataset.baMapContext || 'full') === 'full');
+		if (hasFullMap) {
+			applyFilters();
+		} else {
+			renderList(visibleItems, visibleItems.length);
+		}
 
 		scheduleMaps(async () => {
 			try { await loadGoogleMaps(); }
 			catch (error) { console.error('BadAround map:', error); }
 			mapNodes.forEach((node) => initMap(node, items));
-			await setupPlacesAutocomplete(searchInput, () => {
-				searchQuery = '';
+			if (hasFullMap) {
+				await setupPlacesAutocomplete(searchInput, () => {
+					searchQuery = '';
+					applyFilters();
+				});
 				applyFilters();
-			});
-			applyFilters();
+			}
 		});
 	};
 
