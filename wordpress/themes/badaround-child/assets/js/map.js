@@ -492,10 +492,21 @@
 			entry.marker.setZIndex(300);
 
 			if (preview && previewContent) {
-				previewContent.replaceChildren(buildPreviewContent(entry.item));
-				preview.hidden = false;
-				preview.classList.add('is-open');
-			} else {
+				try {
+					previewContent.replaceChildren(buildPreviewContent(entry.item));
+					preview.hidden = false;
+					preview.removeAttribute('hidden');
+					preview.classList.add('is-open');
+					preview.style.display = 'block';
+				} catch (error) {
+					console.error('BadAround map preview:', error);
+					previewContent.textContent = entry.item?.title || 'Segnalazione BadAround';
+					preview.hidden = false;
+					preview.removeAttribute('hidden');
+					preview.classList.add('is-open');
+					preview.style.display = 'block';
+				}
+			} else if (context !== 'full') {
 				const wrapper = buildPreviewContent(entry.item);
 				infoWindow.setContent(wrapper);
 				infoWindow.open({ map, anchor: entry.marker });
@@ -511,6 +522,7 @@
 			}
 			if (preview) {
 				preview.classList.remove('is-open');
+				preview.style.display = '';
 				preview.hidden = true;
 			}
 			infoWindow.close();
