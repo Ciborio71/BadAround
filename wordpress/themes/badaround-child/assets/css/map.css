@@ -179,18 +179,20 @@ body.page-template-page-mappa .ba-site-footer{display:none}
 /* C4 — shared event selection preview */
 .ba-map-preview{
 	position:absolute;
-	right:152px;
-	bottom:22px;
-	top:auto;
+	left:12px;
+	top:12px;
+	right:auto;
+	bottom:auto;
 	z-index:12;
-	width:min(520px,calc(100% - 330px));
-	max-height:min(230px,calc(100% - 44px));
+	width:min(520px,calc(100% - 24px));
+	max-height:min(230px,calc(100% - 24px));
 	overflow:visible;
 	padding:0;
 	border:0;
 	border-radius:16px;
 	background:transparent;
 	box-shadow:none;
+	pointer-events:auto;
 }
 .ba-map-preview[hidden]{display:none!important}
 .ba-map-preview.is-open{display:block;visibility:visible;opacity:1;pointer-events:auto}
@@ -357,20 +359,14 @@ body.page-template-page-mappa .ba-site-footer{display:none}
 .ba-map-preview-card.ba-event-card--no-media .ba-event-card__body{padding-left:16px}
 
 @media(max-width:980px){
-	.ba-map-preview{
-		right:132px;
-		width:min(440px,calc(100% - 285px));
-	}
+	.ba-map-preview{width:min(440px,calc(100% - 24px))}
 	.ba-map-preview-card{grid-template-columns:112px minmax(0,1fr)}
 	.ba-map-preview-card .ba-event-card__media,
 	.ba-map-preview-card .ba-event-card__media img{min-height:140px}
 }
 @media(max-width:760px){
 	.ba-map-preview{
-		left:12px;
-		right:12px;
-		bottom:78px;
-		width:auto;
+		width:min(420px,calc(100% - 24px));
 		max-height:min(42vh,310px);
 		padding:0;
 		border:0;
