@@ -906,7 +906,8 @@ body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map
 }
 body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map-event-card .ba-map-event-card__select-hint{
 	display:block;
-	margin-top:6px;
-	padding:0 0 4px;
+	margin-top:0;
+	margin-bottom:8px;
+	padding:0;
 	line-height:1.35;
 }
