@@ -190,7 +190,7 @@
 	const createProjection = (map, item, geo, category, active = false) => {
 		const geometry = publicGeometry(geo);
 		if (!geometry) return null;
-		const entry = { ...geometry, item, category, resolved: isResolved(item), layers: [] };
+		const entry = { ...geometry, item, category, resolved: isResolved(item), layers: [], filteredVisible: true };
 		const label = geometry.mode === 'exact_point' ? "Posizione esatta dell'evento"
 			: geometry.mode === 'approximate_area' ? "Area approssimativa dell'evento: raggio " + geometry.radius + ' metri'
 			: "Posizione pubblica approssimata dell'evento";
@@ -539,10 +539,10 @@
 		document.addEventListener('badaround:map-filtered', (event) => {
 			const allowed = new Set((event.detail?.items || []).map((item) => String(item.id)));
 			eventMarkers.forEach((entry) => {
-				const visible = allowed.has(String(entry.item.id));
-				entry.marker.setMap(visible ? map : null);
-				entry.layers.forEach((layer) => layer.setMap(visible ? map : null));
+				entry.filteredVisible = allowed.has(String(entry.item.id));
+				showProjection(entry, entry.filteredVisible ? map : null);
 			});
+			if (selected && !selected.filteredVisible) clearSelected();
 			removeClusters();
 			refreshClusters();
 		});
@@ -558,13 +558,14 @@
 			if (!projection) return;
 
 			removeClusters();
-			eventMarkers.forEach((entry) => showProjection(entry, map));
+			const visibleMarkers = eventMarkers.filter((entry) => entry.filteredVisible !== false);
+			eventMarkers.forEach((entry) => showProjection(entry, entry.filteredVisible !== false ? map : null));
 
 			if (map.getZoom() >= 17) return;
 
 			const grid = 64;
 			const groups = new Map();
-			eventMarkers.forEach((entry) => {
+			visibleMarkers.forEach((entry) => {
 				const point = projection.fromLatLngToDivPixel(new google.maps.LatLng(entry.position));
 				if (!point) return;
 				const key = Math.floor(point.x / grid) + ':' + Math.floor(point.y / grid);
@@ -669,6 +670,23 @@
 				);
 			});
 		}
+
+		if (context === 'full') {
+			document.addEventListener('badaround:nearby-request', (event) => {
+				const current = event.detail?.position;
+				if (!current || !Number.isFinite(current.lat) || !Number.isFinite(current.lng)) return;
+				if (!userMarker) {
+					userMarker = new google.maps.Marker({
+						map, position: current, title: 'La tua posizione attuale',
+						icon: userDotSvg(), zIndex: 400,
+					});
+				} else {
+					userMarker.setPosition(current); userMarker.setMap(map);
+				}
+				map.panTo(current);
+				if (map.getZoom() < 13) map.setZoom(13);
+			});
+		}
 	};
 
 	const loadDiscovery = async () => {
@@ -712,7 +730,47 @@
 		const items = Array.isArray(payload.items) ? payload.items : [];
 		let visibleItems = [...items];
 		let activeCategory = 'all';
+		let activeTime = 'all';
 		let searchQuery = '';
+		let nearbyPosition = null;
+		const nearbyRadiusKm = 20;
+
+		const parseEventDate = (value) => {
+			const raw = String(value || '').trim();
+			if (!raw) return null;
+			let match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+			if (match) return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+			match = raw.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
+			if (match) return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
+			const parsed = new Date(raw);
+			return Number.isNaN(parsed.getTime()) ? null : new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+		};
+
+		const haversineKm = (a, b) => {
+			const toRad = (deg) => deg * Math.PI / 180;
+			const dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
+			const lat1 = toRad(a.lat), lat2 = toRad(b.lat);
+			const h = Math.sin(dLat/2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng/2) ** 2;
+			return 6371 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1-h));
+		};
+
+		const matchesTime = (item) => {
+			if (activeTime === 'all') return true;
+			const date = parseEventDate(item.occurred_date);
+			if (!date) return false;
+			const now = new Date();
+			const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+			const diffDays = Math.floor((today - date) / 86400000);
+			if (activeTime === 'today') return diffDays === 0;
+			const days = Number(activeTime);
+			return Number.isFinite(days) && diffDays >= 0 && diffDays < days;
+		};
+
+		const matchesNearby = (item) => {
+			if (!nearbyPosition) return true;
+			const geo = publicGeometry(item.public_geo);
+			return geo ? haversineKm(nearbyPosition, geo.position) <= nearbyRadiusKm : false;
+		};
 
 		const applyFilters = () => {
 			visibleItems = items.filter((item) => {
@@ -726,8 +784,14 @@
 					item.event_type?.name,
 				].filter(Boolean).join(' ').toLowerCase();
 				const matchesSearch = !searchQuery || haystack.includes(searchQuery);
-				return matchesCategory && matchesSearch;
+				return matchesCategory && matchesSearch && matchesTime(item) && matchesNearby(item);
 			});
+			if (nearbyPosition) {
+				visibleItems.sort((a,b) => {
+					const ga=publicGeometry(a.public_geo), gb=publicGeometry(b.public_geo);
+					return (ga ? haversineKm(nearbyPosition,ga.position) : Infinity) - (gb ? haversineKm(nearbyPosition,gb.position) : Infinity);
+				});
+			}
 			renderList(visibleItems, visibleItems.length);
 			document.dispatchEvent(new CustomEvent('badaround:map-filtered', { detail: { items: visibleItems } }));
 		};
@@ -742,6 +806,55 @@
 				});
 				applyFilters();
 			});
+		});
+
+		document.querySelectorAll('[data-ba-map-time]').forEach((button) => {
+			button.addEventListener('click', () => {
+				activeTime = button.dataset.baMapTime || 'all';
+				document.querySelectorAll('[data-ba-map-time]').forEach((el) => {
+					const active = el === button;
+					el.classList.toggle('is-active', active);
+					el.setAttribute('aria-pressed', String(active));
+				});
+				applyFilters();
+			});
+		});
+
+		const nearbyButton = document.querySelector('[data-ba-map-nearby]');
+		const nearbyStatus = document.querySelector('[data-ba-map-nearby-status]');
+		nearbyButton?.addEventListener('click', () => {
+			if (nearbyPosition) {
+				nearbyPosition = null;
+				nearbyButton.setAttribute('aria-pressed','false');
+				if (nearbyStatus) nearbyStatus.textContent = '';
+				applyFilters();
+				return;
+			}
+			if (!navigator.geolocation) {
+				if (nearbyStatus) nearbyStatus.textContent = 'La geolocalizzazione non è disponibile nel browser.';
+				return;
+			}
+			nearbyButton.disabled = true;
+			if (nearbyStatus) nearbyStatus.textContent = 'Ricerca della tua posizione…';
+			navigator.geolocation.getCurrentPosition(
+				(position) => {
+					nearbyPosition = { lat:Number(position.coords.latitude), lng:Number(position.coords.longitude) };
+					nearbyButton.disabled = false;
+					nearbyButton.setAttribute('aria-pressed','true');
+					if (nearbyStatus) nearbyStatus.textContent = 'Mostro gli eventi entro 20 km. La tua posizione non viene salvata.';
+					document.dispatchEvent(new CustomEvent('badaround:nearby-request',{detail:{position:nearbyPosition}}));
+					applyFilters();
+				},
+				(error) => {
+					nearbyButton.disabled = false;
+					let message = 'Non è stato possibile determinare la posizione.';
+					if (error.code === error.PERMISSION_DENIED) message = 'Permesso posizione non concesso.';
+					else if (error.code === error.TIMEOUT) message = 'La richiesta della posizione è scaduta.';
+					else if (error.code === error.POSITION_UNAVAILABLE) message = 'Posizione temporaneamente non disponibile.';
+					if (nearbyStatus) nearbyStatus.textContent = message;
+				},
+				{ enableHighAccuracy:false, timeout:10000, maximumAge:60000 }
+			);
 		});
 
 		const searchInput = document.querySelector('[data-ba-map-search]');
