@@ -33,10 +33,17 @@ $home_categories = array(
 			<p class="ba-home-hero__lead"><strong>Furti, danni, comportamenti sospetti, pericoli, animali smarriti e richieste di testimoni.</strong>Segui le segnalazioni della tua zona e contribuisci a far circolare informazioni utili nella comunità.</p>
 			<p class="ba-home-hero__payoff">Osserva. Segnala. Condividi. Fai rete.</p>
 
-			<form class="ba-home-search" role="search" action="<?php echo esc_url( home_url( '/cerca/' ) ); ?>" method="get">
-				<label class="ba-sr-only" for="ba-home-location">Cerca territorio o evento</label>
+			<form class="ba-home-search" role="search" action="<?php echo esc_url( home_url( '/mappa/' ) ); ?>" method="get" data-ba-home-place-search>
+				<label class="ba-sr-only" for="ba-home-location">Cerca indirizzo o località</label>
 				<span class="ba-home-search__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" focusable="false"><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="10" r="2.2" fill="currentColor"/></svg></span>
-				<input id="ba-home-location" name="q" type="search" placeholder="Cerca comune, quartiere o evento…">
+				<input id="ba-home-location" name="area" type="search" placeholder="Cerca indirizzo, comune o quartiere…" autocomplete="off" data-ba-home-place-input>
+				<input type="hidden" name="place_id" data-ba-home-place-id>
+				<input type="hidden" name="lat" data-ba-home-place-lat>
+				<input type="hidden" name="lng" data-ba-home-place-lng>
+				<input type="hidden" name="north" data-ba-home-place-north>
+				<input type="hidden" name="south" data-ba-home-place-south>
+				<input type="hidden" name="east" data-ba-home-place-east>
+				<input type="hidden" name="west" data-ba-home-place-west>
 				<button class="ba-button" type="submit">Cerca</button>
 			</form>
 
