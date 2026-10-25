@@ -330,11 +330,12 @@
 			const category = categoryFor(item);
 			card.className = 'ba-card ba-event-card ba-map-event-card' + (category ? ' ba-event-card--category-' + category : '');
 			card.dataset.baEventId = String(item.id || '');
+			card.tabIndex = 0;
+			card.setAttribute('role','button');
+			card.setAttribute('aria-label','Mostra sulla mappa: ' + (item.title || 'Segnalazione BadAround'));
 			if (item.thumbnail || config.placeholder) {
-				const media = document.createElement('a');
+				const media = document.createElement('div');
 				media.className = 'ba-event-card__media';
-				media.href = item.permalink;
-				media.tabIndex = -1;
 				media.setAttribute('aria-hidden', 'true');
 				const img = document.createElement('img');
 				img.src = item.thumbnail || config.placeholder;
@@ -355,10 +356,7 @@
 			}
 			const heading = document.createElement('h3');
 			heading.className = 'ba-event-card__title';
-			const headingLink = document.createElement('a');
-			headingLink.href = item.permalink;
-			headingLink.appendChild(text(item.title));
-			heading.appendChild(headingLink);
+			heading.appendChild(text(item.title));
 			body.appendChild(heading);
 
 			const metaParts = [item.occurred_date, item.occurred_time, item.public_place_name || item.territory?.name].filter(Boolean);
@@ -369,15 +367,20 @@
 				body.appendChild(meta);
 			}
 
-			const link = document.createElement('a');
-			link.className = 'ba-event-card__link';
-			link.href = item.permalink;
-			link.appendChild(text('Vedi dettaglio →'));
+			const link = document.createElement('span');
+			link.className = 'ba-event-card__link ba-map-event-card__select-hint';
+			link.appendChild(text('Mostra sulla mappa →'));
 			body.appendChild(link);
 			card.appendChild(body);
-			card.addEventListener('click', (event) => {
-				if (event.target.closest('a,button')) return;
+			const selectFromList = () => {
 				document.dispatchEvent(new CustomEvent('badaround:list-select', { detail: { id: String(item.id || '') } }));
+			};
+			card.addEventListener('click', selectFromList);
+			card.addEventListener('keydown', (event) => {
+				if (event.key === 'Enter' || event.key === ' ') {
+					event.preventDefault();
+					selectFromList();
+				}
 			});
 			list.appendChild(card);
 		});
