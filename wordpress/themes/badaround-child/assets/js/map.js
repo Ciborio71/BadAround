@@ -495,6 +495,8 @@
 		let selected = null;
 		let userMarker = null;
 		let overlayReady = false;
+		let programmaticViewportMove = false;
+		let preservedZoomCenter = null;
 
 		const overlay = new google.maps.OverlayView();
 		overlay.onAdd = () => {};
@@ -571,52 +573,34 @@
 
 		const focusEntryAboveFold = (entry) => {
 			if (!entry || !canvas) return;
+			programmaticViewportMove = true;
+
 			const targetZoom = entry.mode === 'exact_point' ? 16 : 15;
+			map.setZoom(targetZoom);
 			map.setCenter(entry.position);
-			if (map.getZoom() < targetZoom) map.setZoom(targetZoom);
 
-			const settle = () => {
-				showProjection(entry, map);
-				entry.marker.setZIndex(400);
-
+			google.maps.event.addListenerOnce(map, 'idle', () => {
 				const projection = overlay.getProjection();
-				if (!projection) {
-					positionPreview(entry);
-					return;
+				if (projection) {
+					const width = canvas.clientWidth || 0;
+					const height = canvas.clientHeight || 0;
+					const point = projection.fromLatLngToContainerPixel(new google.maps.LatLng(entry.position));
+					if (point && width && height) {
+						const desiredX = Math.max(140, Math.min(width * 0.55, width - 180));
+						const desiredY = Math.max(240, Math.min(height * 0.66, height - 130));
+						const dx = point.x - desiredX;
+						const dy = point.y - desiredY;
+						map.panBy(dx, dy);
+					}
 				}
 
-				const width = canvas.clientWidth || 0;
-				const height = canvas.clientHeight || 0;
-				const eventPoint = projection.fromLatLngToContainerPixel(new google.maps.LatLng(entry.position));
-				if (!eventPoint || !width || !height) {
+				google.maps.event.addListenerOnce(map, 'idle', () => {
+					showProjection(entry, map);
+					entry.marker.setZIndex(400);
 					positionPreview(entry);
-					return;
-				}
-
-				// Keep the selected event in a stable, immediately visible region of the map.
-				// The marker sits lower in the canvas to leave space for its preview above.
-				const desiredX = Math.max(120, Math.min(width * 0.55, width - 170));
-				const desiredY = Math.max(220, Math.min(height * 0.68, height - 110));
-				const centrePixel = new google.maps.Point(width / 2, height / 2);
-				const targetCentrePixel = new google.maps.Point(
-					centrePixel.x + (eventPoint.x - desiredX),
-					centrePixel.y + (eventPoint.y - desiredY)
-				);
-				const targetCentre = projection.fromContainerPixelToLatLng(targetCentrePixel);
-
-				if (targetCentre) {
-					map.setCenter(targetCentre);
-					google.maps.event.addListenerOnce(map, 'idle', () => {
-						showProjection(entry, map);
-						entry.marker.setZIndex(400);
-						positionPreview(entry);
-					});
-				} else {
-					positionPreview(entry);
-				}
-			};
-
-			google.maps.event.addListenerOnce(map, 'idle', settle);
+					programmaticViewportMove = false;
+				});
+			});
 		};
 
 		const setSelected = (entry) => {
@@ -779,10 +763,33 @@
 			});
 		}
 
-		map.addListener('idle', () => {
-			refreshClusters();
-			if (selected) positionPreview(selected);
-		});
+		if (context === 'full') {
+			map.addListener('zoom_changed', () => {
+				if (programmaticViewportMove) return;
+				preservedZoomCenter = map.getCenter();
+			});
+			map.addListener('idle', () => {
+				if (!programmaticViewportMove && preservedZoomCenter) {
+					const current = map.getCenter();
+					const latDiff = Math.abs((current?.lat?.() || 0) - preservedZoomCenter.lat());
+					const lngDiff = Math.abs((current?.lng?.() || 0) - preservedZoomCenter.lng());
+					if (latDiff > 1e-7 || lngDiff > 1e-7) {
+						const centre = preservedZoomCenter;
+						preservedZoomCenter = null;
+						map.setCenter(centre);
+						return;
+					}
+					preservedZoomCenter = null;
+				}
+				refreshClusters();
+				if (selected) positionPreview(selected);
+			});
+		} else {
+			map.addListener('idle', () => {
+				refreshClusters();
+				if (selected) positionPreview(selected);
+			});
+		}
 
 		if (eventMarkers.length === 1) {
 			map.setCenter(bounds.getCenter());
