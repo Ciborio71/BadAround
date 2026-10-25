@@ -74,6 +74,9 @@
 		.replaceAll("'", '&#039;');
 
 	const text = (value) => document.createTextNode(value || '');
+	const editorialText = (value) => String(value || '')
+		.replace(/\bO\b/g, 'o')
+		.replace(/\bE\b/g, 'e');
 
 	const iconMarkup = (name) => {
 		const common = 'fill="none" stroke="white" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"';
@@ -271,7 +274,7 @@
 		title.className = 'ba-event-card__title';
 		const titleLink = document.createElement('a');
 		titleLink.href = item.permalink;
-		titleLink.appendChild(text(item.title));
+		titleLink.appendChild(text(editorialText(item.title)));
 		title.appendChild(titleLink);
 		body.appendChild(title);
 
@@ -332,7 +335,7 @@
 			card.dataset.baEventId = String(item.id || '');
 			card.tabIndex = 0;
 			card.setAttribute('role','button');
-			card.setAttribute('aria-label','Mostra sulla mappa: ' + (item.title || 'Segnalazione BadAround'));
+			card.setAttribute('aria-label','Mostra sulla mappa: ' + editorialText(item.title || 'Segnalazione BadAround'));
 			if (item.thumbnail || config.placeholder) {
 				const media = document.createElement('div');
 				media.className = 'ba-event-card__media';
@@ -356,7 +359,7 @@
 			}
 			const heading = document.createElement('h3');
 			heading.className = 'ba-event-card__title';
-			heading.appendChild(text(item.title));
+			heading.appendChild(text(editorialText(item.title)));
 			body.appendChild(heading);
 
 			const metaParts = [item.occurred_date, item.occurred_time, item.public_place_name || item.territory?.name].filter(Boolean);
@@ -843,6 +846,17 @@
 				map.panTo(current);
 				if (map.getZoom() < 13) map.setZoom(13);
 			});
+			document.addEventListener('badaround:place-selected', (event) => {
+				const position = event.detail?.position;
+				const viewport = event.detail?.viewport;
+				if (viewport) {
+					map.fitBounds(viewport, 64);
+					return;
+				}
+				if (!position || !Number.isFinite(position.lat) || !Number.isFinite(position.lng)) return;
+				map.panTo(position);
+				if (map.getZoom() < 13) map.setZoom(13);
+			});
 		}
 	};
 
@@ -871,6 +885,107 @@
 		else window.addEventListener('load', start, { once: true });
 	};
 
+	const setupPlacesAutocomplete = async (input) => {
+		if (!input || !window.google?.maps?.importLibrary) return;
+		let places;
+		try {
+			places = await google.maps.importLibrary('places');
+		} catch (error) {
+			console.warn('BadAround Places Autocomplete non disponibile:', error);
+			return;
+		}
+		const { AutocompleteSuggestion, AutocompleteSessionToken } = places || {};
+		if (!AutocompleteSuggestion || !AutocompleteSessionToken) return;
+
+		const host = input.closest('.ba-map-inline-search') || input.parentElement;
+		if (!host) return;
+		host.classList.add('ba-map-search--autocomplete');
+
+		const menu = document.createElement('div');
+		menu.className = 'ba-map-place-suggestions';
+		menu.hidden = true;
+		menu.setAttribute('role','listbox');
+		host.appendChild(menu);
+
+		let token = new AutocompleteSessionToken();
+		let timer = null;
+		let requestId = 0;
+
+		const close = () => {
+			menu.hidden = true;
+			menu.replaceChildren();
+		};
+
+		const choose = async (suggestion) => {
+			const prediction = suggestion?.placePrediction;
+			if (!prediction) return;
+			try {
+				const place = prediction.toPlace();
+				await place.fetchFields({ fields:['displayName','formattedAddress','location','viewport'] });
+				input.value = place.formattedAddress || place.displayName || '';
+				searchQuery = '';
+				close();
+				token = new AutocompleteSessionToken();
+				const location = place.location;
+				document.dispatchEvent(new CustomEvent('badaround:place-selected', {
+					detail: {
+						position: location ? { lat:location.lat(), lng:location.lng() } : null,
+						viewport: place.viewport || null,
+					}
+				}));
+			} catch (error) {
+				console.warn('BadAround Places selection:', error);
+			}
+		};
+
+		input.addEventListener('input', () => {
+			clearTimeout(timer);
+			const query = input.value.trim();
+			if (query.length < 2) { close(); return; }
+			const currentRequest = ++requestId;
+			timer = setTimeout(async () => {
+				try {
+					const response = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+						input: query,
+						sessionToken: token,
+						includedRegionCodes: ['it'],
+					});
+					if (currentRequest !== requestId) return;
+					const suggestions = response?.suggestions || [];
+					menu.replaceChildren();
+					suggestions.slice(0,6).forEach((suggestion) => {
+						const prediction = suggestion.placePrediction;
+						if (!prediction) return;
+						const button = document.createElement('button');
+						button.type = 'button';
+						button.className = 'ba-map-place-suggestion';
+						button.setAttribute('role','option');
+						const primary = prediction.mainText?.text || prediction.text?.text || '';
+						const secondary = prediction.secondaryText?.text || '';
+						const strong = document.createElement('strong');
+						strong.textContent = primary;
+						const small = document.createElement('small');
+						small.textContent = secondary;
+						button.append(strong,small);
+						button.addEventListener('mousedown', (event) => event.preventDefault());
+						button.addEventListener('click', () => choose(suggestion));
+						menu.appendChild(button);
+					});
+					menu.hidden = !menu.childElementCount;
+				} catch (error) {
+					close();
+					console.warn('BadAround Places predictions:', error);
+				}
+			},180);
+		});
+		input.addEventListener('keydown', (event) => {
+			if (event.key === 'Escape') close();
+		});
+		document.addEventListener('click', (event) => {
+			if (!host.contains(event.target)) close();
+		});
+	};
+
 	const load = async () => {
 		let payload;
 		try {
@@ -887,10 +1002,10 @@
 		const items = Array.isArray(payload.items) ? payload.items : [];
 		let visibleItems = [...items];
 		let activeCategory = 'all';
-		let activeTime = 'all';
+		let activeTime = '7';
 		let searchQuery = '';
 		let nearbyPosition = null;
-		const nearbyRadiusKm = 20;
+		const nearbyRadiusKm = 5;
 
 		const parseEventDate = (value) => {
 			const raw = String(value || '').trim();
@@ -998,7 +1113,7 @@
 					nearbyPosition = { lat:Number(position.coords.latitude), lng:Number(position.coords.longitude) };
 					nearbyButton.disabled = false;
 					nearbyButton.setAttribute('aria-pressed','true');
-					if (nearbyStatus) nearbyStatus.textContent = 'Mostro gli eventi entro 20 km. La tua posizione non viene salvata.';
+					if (nearbyStatus) nearbyStatus.textContent = 'Mostro gli eventi entro 5 km. La tua posizione non viene salvata.';
 					document.dispatchEvent(new CustomEvent('badaround:nearby-request',{detail:{position:nearbyPosition}}));
 					applyFilters();
 				},
@@ -1020,12 +1135,14 @@
 			applyFilters();
 		});
 
-		renderList(visibleItems, visibleItems.length);
+		applyFilters();
 
 		scheduleMaps(async () => {
 			try { await loadGoogleMaps(); }
 			catch (error) { console.error('BadAround map:', error); }
 			mapNodes.forEach((node) => initMap(node, items));
+			await setupPlacesAutocomplete(searchInput);
+			applyFilters();
 		});
 	};
 
