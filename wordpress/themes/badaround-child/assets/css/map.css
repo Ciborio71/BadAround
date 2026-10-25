@@ -836,11 +836,13 @@ body.page-template-page-mappa .ba-google-map{height:100%;min-height:0}
 	font-weight:750;
 }
 body.page-template-page-mappa .ba-map-results-list .ba-event-card__body{
-	padding-bottom:14px;
+	padding-bottom:18px;
 }
 body.page-template-page-mappa .ba-map-results-list .ba-event-card__link{
-	padding-bottom:2px;
-	line-height:1.35;
+	display:inline-block;
+	margin-top:auto;
+	padding-bottom:4px;
+	line-height:1.4;
 }
 .ba-map-search--autocomplete{position:relative}
 .ba-map-place-suggestions{
