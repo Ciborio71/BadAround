@@ -891,3 +891,22 @@ body.page-template-page-mappa .ba-map-results-list .ba-event-card__link{
 	text-overflow:ellipsis;
 	white-space:nowrap;
 }
+
+
+/* MAP-CARD-SPACING-20 — exact left-results toolbar spacing. */
+body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map-event-card{
+	min-height:124px;
+}
+body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map-event-card .ba-event-card__media,
+body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map-event-card .ba-event-card__media img{
+	min-height:124px;
+}
+body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map-event-card .ba-event-card__body{
+	padding:11px 12px 16px;
+}
+body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map-event-card .ba-map-event-card__select-hint{
+	display:block;
+	margin-top:6px;
+	padding:0 0 4px;
+	line-height:1.35;
+}
