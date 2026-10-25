@@ -570,33 +570,53 @@
 		};
 
 		const focusEntryAboveFold = (entry) => {
-			if (!entry) return;
+			if (!entry || !canvas) return;
 			const targetZoom = entry.mode === 'exact_point' ? 16 : 15;
-			map.panTo(entry.position);
+			map.setCenter(entry.position);
 			if (map.getZoom() < targetZoom) map.setZoom(targetZoom);
 
 			const settle = () => {
-				// A selected event must never disappear into a cluster.
 				showProjection(entry, map);
 				entry.marker.setZIndex(400);
 
 				const projection = overlay.getProjection();
-				if (projection && canvas) {
-					const point = projection.fromLatLngToContainerPixel(new google.maps.LatLng(entry.position));
-					if (point) {
-						const height = canvas.clientHeight || 0;
-						const desiredY = Math.max(170, Math.min(height * 0.62, height - 120));
-						const deltaY = point.y - desiredY;
-						if (Math.abs(deltaY) > 18) map.panBy(0, deltaY);
-					}
+				if (!projection) {
+					positionPreview(entry);
+					return;
 				}
-				positionPreview(entry);
+
+				const width = canvas.clientWidth || 0;
+				const height = canvas.clientHeight || 0;
+				const eventPoint = projection.fromLatLngToContainerPixel(new google.maps.LatLng(entry.position));
+				if (!eventPoint || !width || !height) {
+					positionPreview(entry);
+					return;
+				}
+
+				// Keep the selected event in a stable, immediately visible region of the map.
+				// The marker sits lower in the canvas to leave space for its preview above.
+				const desiredX = Math.max(120, Math.min(width * 0.55, width - 170));
+				const desiredY = Math.max(220, Math.min(height * 0.68, height - 110));
+				const centrePixel = new google.maps.Point(width / 2, height / 2);
+				const targetCentrePixel = new google.maps.Point(
+					centrePixel.x + (eventPoint.x - desiredX),
+					centrePixel.y + (eventPoint.y - desiredY)
+				);
+				const targetCentre = projection.fromContainerPixelToLatLng(targetCentrePixel);
+
+				if (targetCentre) {
+					map.setCenter(targetCentre);
+					google.maps.event.addListenerOnce(map, 'idle', () => {
+						showProjection(entry, map);
+						entry.marker.setZIndex(400);
+						positionPreview(entry);
+					});
+				} else {
+					positionPreview(entry);
+				}
 			};
 
-			google.maps.event.addListenerOnce(map, 'idle', () => {
-				settle();
-				google.maps.event.addListenerOnce(map, 'idle', settle);
-			});
+			google.maps.event.addListenerOnce(map, 'idle', settle);
 		};
 
 		const setSelected = (entry) => {
