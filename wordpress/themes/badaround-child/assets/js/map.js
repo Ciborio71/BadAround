@@ -418,7 +418,31 @@
 	const initMap = (node, items) => {
 		const context = node.dataset.baMapContext || 'full';
 		const status = node.parentElement?.querySelector('[data-ba-map-status]') || document.querySelector('[data-ba-map-status]');
-		const preview = node.parentElement?.querySelector('[data-ba-map-preview]');
+		const canvas = node.parentElement;
+		let preview = canvas?.querySelector(':scope > [data-ba-map-preview]') || null;
+		if (context === 'full' && canvas && !preview) {
+			preview = document.createElement('aside');
+			preview.className = 'ba-map-preview ba-home-map__preview';
+			preview.dataset.baMapPreview = '';
+			preview.hidden = true;
+			preview.setAttribute('aria-live','polite');
+			preview.setAttribute('aria-label','Anteprima evento selezionato');
+
+			const close = document.createElement('button');
+			close.type = 'button';
+			close.className = 'ba-map-preview__close';
+			close.dataset.baMapPreviewClose = '';
+			close.setAttribute('aria-label','Chiudi anteprima');
+			close.textContent = '×';
+
+			const content = document.createElement('div');
+			content.dataset.baMapPreviewContent = '';
+			preview.append(close,content);
+			canvas.appendChild(preview);
+		}
+		if (context === 'full' && preview && canvas && preview.parentElement !== canvas) {
+			canvas.appendChild(preview);
+		}
 		const previewContent = preview?.querySelector('[data-ba-map-preview-content]');
 		const previewClose = preview?.querySelector('[data-ba-map-preview-close]');
 
