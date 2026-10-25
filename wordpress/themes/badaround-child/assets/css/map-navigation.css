@@ -8,13 +8,11 @@
 .ba-map-navigation-shell>.ba-map-legend{left:10px;right:auto;max-width:calc(100% - 132px)}
 .ba-map-navigation-shell>.ba-map-legend .ba-map-legend__body{max-height:none;overflow:visible;gap:7px;padding-bottom:11px}
 .ba-map-navigation-shell>.ba-map-legend .ba-map-legend__item:first-child{padding-top:9px}
-.ba-map-navigation-shell>.ba-map-preview{left:auto;right:122px;top:24px;bottom:auto;width:min(470px,calc(100% - 150px));max-height:calc(100% - 48px)}
+.ba-map-navigation-shell>.ba-map-preview{left:auto;right:152px;top:auto;bottom:22px;width:min(520px,calc(100% - 330px));max-height:min(230px,calc(100% - 44px))}
 .ba-map-navigation-shell>.ba-map-privacy-note{right:auto;max-width:calc(100% - 132px);bottom:36px}
 @media(max-width:760px){
-	.ba-map-navigation-shell>.ba-map-preview{padding:14px 10px;border-radius:12px}
-	.ba-map-navigation-shell .ba-map-preview-card{padding-right:0}
-	.ba-map-navigation-shell .ba-map-preview-card h3{padding-right:28px;overflow-wrap:anywhere}
-	.ba-map-navigation-shell .ba-map-preview-card__cta{white-space:normal;text-align:center}
+	.ba-map-navigation-shell>.ba-map-preview{left:12px;right:12px;bottom:78px;top:auto;width:auto;max-height:min(42vh,310px);padding:0;border-radius:14px}
+	.ba-map-navigation-shell .ba-map-preview-card h3{padding-right:0;overflow-wrap:anywhere}
 }
 
 /* Native's Places widget has an intrinsic minimum width. Constrain the grid
