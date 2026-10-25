@@ -495,8 +495,6 @@
 		let selected = null;
 		let userMarker = null;
 		let overlayReady = false;
-		let programmaticViewportMove = false;
-		let preservedZoomCenter = null;
 
 		const overlay = new google.maps.OverlayView();
 		overlay.onAdd = () => {};
@@ -572,34 +570,20 @@
 		};
 
 		const focusEntryAboveFold = (entry) => {
-			if (!entry || !canvas) return;
-			programmaticViewportMove = true;
-
+			if (!entry) return;
 			const targetZoom = entry.mode === 'exact_point' ? 16 : 15;
-			map.setZoom(targetZoom);
+
+			// Keep the selected event at the native Google Maps centre.
+			// No pixel compensation: the preview itself is positioned around the marker.
 			map.setCenter(entry.position);
+			map.setZoom(targetZoom);
+			showProjection(entry, map);
+			entry.marker.setZIndex(400);
 
 			google.maps.event.addListenerOnce(map, 'idle', () => {
-				const projection = overlay.getProjection();
-				if (projection) {
-					const width = canvas.clientWidth || 0;
-					const height = canvas.clientHeight || 0;
-					const point = projection.fromLatLngToContainerPixel(new google.maps.LatLng(entry.position));
-					if (point && width && height) {
-						const desiredX = Math.max(140, Math.min(width * 0.55, width - 180));
-						const desiredY = Math.max(240, Math.min(height * 0.66, height - 130));
-						const dx = point.x - desiredX;
-						const dy = point.y - desiredY;
-						map.panBy(dx, dy);
-					}
-				}
-
-				google.maps.event.addListenerOnce(map, 'idle', () => {
-					showProjection(entry, map);
-					entry.marker.setZIndex(400);
-					positionPreview(entry);
-					programmaticViewportMove = false;
-				});
+				showProjection(entry, map);
+				entry.marker.setZIndex(400);
+				positionPreview(entry);
 			});
 		};
 
@@ -763,33 +747,10 @@
 			});
 		}
 
-		if (context === 'full') {
-			map.addListener('zoom_changed', () => {
-				if (programmaticViewportMove) return;
-				preservedZoomCenter = map.getCenter();
-			});
-			map.addListener('idle', () => {
-				if (!programmaticViewportMove && preservedZoomCenter) {
-					const current = map.getCenter();
-					const latDiff = Math.abs((current?.lat?.() || 0) - preservedZoomCenter.lat());
-					const lngDiff = Math.abs((current?.lng?.() || 0) - preservedZoomCenter.lng());
-					if (latDiff > 1e-7 || lngDiff > 1e-7) {
-						const centre = preservedZoomCenter;
-						preservedZoomCenter = null;
-						map.setCenter(centre);
-						return;
-					}
-					preservedZoomCenter = null;
-				}
-				refreshClusters();
-				if (selected) positionPreview(selected);
-			});
-		} else {
-			map.addListener('idle', () => {
-				refreshClusters();
-				if (selected) positionPreview(selected);
-			});
-		}
+		map.addListener('idle', () => {
+			refreshClusters();
+			if (selected) positionPreview(selected);
+		});
 
 		if (eventMarkers.length === 1) {
 			map.setCenter(bounds.getCenter());
