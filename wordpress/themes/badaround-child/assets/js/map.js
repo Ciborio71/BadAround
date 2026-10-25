@@ -504,6 +504,37 @@
 		overlay.onRemove = () => {};
 		overlay.setMap(map);
 
+		const positionPreview = (entry) => {
+			if (!preview || !entry || !overlayReady) return;
+			const projection = overlay.getProjection();
+			if (!projection) return;
+			const point = projection.fromLatLngToContainerPixel(new google.maps.LatLng(entry.position));
+			if (!point) return;
+
+			requestAnimationFrame(() => {
+				if (!preview || preview.hidden) return;
+				const canvasRect = canvas.getBoundingClientRect();
+				const width = Math.min(preview.offsetWidth || 420, Math.max(220, canvasRect.width - 24));
+				const height = preview.offsetHeight || 160;
+				const gap = entry.mode === 'exact_point' ? 24 : 18;
+				const safe = 12;
+				const controlRail = context === 'full' ? 118 : 12;
+				const maxLeft = Math.max(safe, canvasRect.width - width - controlRail - safe);
+
+				let left = point.x - width / 2;
+				left = Math.min(Math.max(safe, left), maxLeft);
+
+				let top = point.y - height - gap;
+				if (top < safe) top = point.y + gap;
+				top = Math.min(Math.max(safe, top), Math.max(safe, canvasRect.height - height - safe));
+
+				preview.style.left = Math.round(left) + 'px';
+				preview.style.top = Math.round(top) + 'px';
+				preview.style.right = 'auto';
+				preview.style.bottom = 'auto';
+			});
+		};
+
 		const setSelected = (entry) => {
 			if (selected && selected !== entry) {
 				selected.selected = false;
@@ -522,6 +553,7 @@
 					preview.removeAttribute('hidden');
 					preview.classList.add('is-open');
 					preview.style.display = 'block';
+					positionPreview(entry);
 				} catch (error) {
 					console.error('BadAround map preview:', error);
 					previewContent.textContent = entry.item?.title || 'Segnalazione BadAround';
@@ -529,6 +561,7 @@
 					preview.removeAttribute('hidden');
 					preview.classList.add('is-open');
 					preview.style.display = 'block';
+					positionPreview(entry);
 				}
 			} else if (context !== 'full') {
 				const wrapper = buildPreviewContent(entry.item);
@@ -650,7 +683,10 @@
 			});
 		}
 
-		map.addListener('idle', refreshClusters);
+		map.addListener('idle', () => {
+			refreshClusters();
+			if (selected) positionPreview(selected);
+		});
 
 		if (eventMarkers.length === 1) {
 			map.setCenter(bounds.getCenter());
@@ -723,6 +759,10 @@
 				);
 			});
 		}
+
+		window.addEventListener('resize', () => {
+			if (selected) positionPreview(selected);
+		}, { passive: true });
 
 		if (context === 'full') {
 			document.addEventListener('badaround:nearby-request', (event) => {
