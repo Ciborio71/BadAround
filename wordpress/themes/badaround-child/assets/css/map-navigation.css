@@ -8,10 +8,10 @@
 .ba-map-navigation-shell>.ba-map-legend{left:10px;right:auto;max-width:calc(100% - 132px)}
 .ba-map-navigation-shell>.ba-map-legend .ba-map-legend__body{max-height:none;overflow:visible;gap:7px;padding-bottom:11px}
 .ba-map-navigation-shell>.ba-map-legend .ba-map-legend__item:first-child{padding-top:9px}
-.ba-map-navigation-shell>.ba-map-preview{left:auto;right:152px;top:auto;bottom:22px;width:min(520px,calc(100% - 330px));max-height:min(230px,calc(100% - 44px))}
+.ba-map-navigation-shell>.ba-map-preview{width:min(520px,calc(100% - 24px));max-height:min(230px,calc(100% - 24px))}
 .ba-map-navigation-shell>.ba-map-privacy-note{right:auto;max-width:calc(100% - 132px);bottom:36px}
 @media(max-width:760px){
-	.ba-map-navigation-shell>.ba-map-preview{left:12px;right:12px;bottom:78px;top:auto;width:auto;max-height:min(42vh,310px);padding:0;border-radius:14px}
+	.ba-map-navigation-shell>.ba-map-preview{width:min(420px,calc(100% - 24px));max-height:min(42vh,310px);padding:0;border-radius:14px}
 	.ba-map-navigation-shell .ba-map-preview-card h3{padding-right:0;overflow-wrap:anywhere}
 }
 
