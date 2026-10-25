@@ -569,6 +569,36 @@
 			});
 		};
 
+		const focusEntryAboveFold = (entry) => {
+			if (!entry) return;
+			const targetZoom = entry.mode === 'exact_point' ? 16 : 15;
+			map.panTo(entry.position);
+			if (map.getZoom() < targetZoom) map.setZoom(targetZoom);
+
+			const settle = () => {
+				// A selected event must never disappear into a cluster.
+				showProjection(entry, map);
+				entry.marker.setZIndex(400);
+
+				const projection = overlay.getProjection();
+				if (projection && canvas) {
+					const point = projection.fromLatLngToContainerPixel(new google.maps.LatLng(entry.position));
+					if (point) {
+						const height = canvas.clientHeight || 0;
+						const desiredY = Math.max(170, Math.min(height * 0.62, height - 120));
+						const deltaY = point.y - desiredY;
+						if (Math.abs(deltaY) > 18) map.panBy(0, deltaY);
+					}
+				}
+				positionPreview(entry);
+			};
+
+			google.maps.event.addListenerOnce(map, 'idle', () => {
+				settle();
+				google.maps.event.addListenerOnce(map, 'idle', settle);
+			});
+		};
+
 		const setSelected = (entry) => {
 			if (selected && selected !== entry) {
 				selected.selected = false;
@@ -631,14 +661,7 @@
 			listCard?.classList.add('is-selected');
 
 			setSelected(entry);
-
-			const targetZoom = entry.mode === 'exact_point' ? 16 : 14;
-			map.panTo(entry.position);
-			if (map.getZoom() < targetZoom) map.setZoom(targetZoom);
-
-			google.maps.event.addListenerOnce(map, 'idle', () => {
-				positionPreview(entry);
-			});
+			focusEntryAboveFold(entry);
 		});
 
 		items.forEach((item) => {
@@ -694,11 +717,17 @@
 			const visibleMarkers = eventMarkers.filter((entry) => entry.filteredVisible !== false);
 			eventMarkers.forEach((entry) => showProjection(entry, entry.filteredVisible !== false ? map : null));
 
+			if (selected && selected.filteredVisible !== false) {
+				showProjection(selected, map);
+				selected.marker.setIcon(projectionIcon(selected, true));
+				selected.marker.setZIndex(400);
+			}
+
 			if (map.getZoom() >= 17) return;
 
 			const grid = 64;
 			const groups = new Map();
-			visibleMarkers.forEach((entry) => {
+			visibleMarkers.filter((entry) => entry !== selected).forEach((entry) => {
 				const point = projection.fromLatLngToDivPixel(new google.maps.LatLng(entry.position));
 				if (!point) return;
 				const key = Math.floor(point.x / grid) + ':' + Math.floor(point.y / grid);
