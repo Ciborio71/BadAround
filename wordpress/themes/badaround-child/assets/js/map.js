@@ -518,33 +518,39 @@
 				const height = preview.offsetHeight || 160;
 				const safe = 12;
 				const controlRail = context === 'full' ? 118 : 12;
-				const markerRadius = entry.mode === 'exact_point' ? 38 : 30;
-				const gap = 18;
-				const clearance = markerRadius + gap;
+				const markerHalfWidth = entry.mode === 'exact_point' ? 34 : entry.mode === 'approximate_area' ? 28 : 38;
+				// Exact/legacy pins are anchored on their bottom tip, not their visual centre.
+				// Reserve the full rendered marker height above the geographic point.
+				const markerAbove = entry.mode === 'exact_point' ? 76 : entry.mode === 'approximate_area' ? 30 : 86;
+				const markerBelow = entry.mode === 'approximate_area' ? 30 : 10;
+				const gap = 24;
+				const clearanceAbove = markerAbove + gap;
+				const clearanceBelow = markerBelow + gap;
 				const maxLeft = Math.max(safe, canvasRect.width - width - controlRail - safe);
 
 				let left = point.x - width / 2;
 				left = Math.min(Math.max(safe, left), maxLeft);
 
-				const canFitAbove = point.y - clearance - height >= safe;
-				const canFitBelow = point.y + clearance + height <= canvasRect.height - safe;
+				const canFitAbove = point.y - clearanceAbove - height >= safe;
+				const canFitBelow = point.y + clearanceBelow + height <= canvasRect.height - safe;
 
 				let top;
 				if (canFitAbove) {
-					top = point.y - clearance - height;
+					top = point.y - clearanceAbove - height;
 				} else if (canFitBelow) {
-					top = point.y + clearance;
+					top = point.y + clearanceBelow;
 				} else {
 					top = Math.min(Math.max(safe, point.y - height / 2), Math.max(safe, canvasRect.height - height - safe));
 
-					const markerLeft = point.x - markerRadius;
-					const markerRight = point.x + markerRadius;
+					const markerLeft = point.x - markerHalfWidth;
+					const markerRight = point.x + markerHalfWidth;
 					const cardLeft = left;
 					const cardRight = left + width;
 
 					if (cardLeft < markerRight && cardRight > markerLeft) {
-						const leftCandidate = point.x - clearance - width;
-						const rightCandidate = point.x + clearance;
+						const sideClearance = markerHalfWidth + gap;
+						const leftCandidate = point.x - sideClearance - width;
+						const rightCandidate = point.x + sideClearance;
 						const canFitLeft = leftCandidate >= safe;
 						const canFitRight = rightCandidate + width <= canvasRect.width - controlRail - safe;
 
