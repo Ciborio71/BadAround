@@ -45,7 +45,7 @@ function badaround_child_render_maintenance() {
 		return;
 	}
 
-	status_header( 503 );
+	status_header( (int) get_option( 'badaround_maintenance_http_status', 503 ) );
 	nocache_headers();
 	header( 'Retry-After: 3600' );
 	header( 'X-Robots-Tag: noindex, nofollow, noarchive', true );
