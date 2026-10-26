@@ -82,6 +82,7 @@ class BadAround_External_Report_Contract {
 
 	public static function public_hash( $event_id ) {
 		$post = get_post( $event_id );
+		if ( ! $post ) { return ''; }
 		$meta = array();
 		foreach ( array( '_ba_public_place_name', '_ba_public_address', '_ba_occurred_date', '_ba_occurred_time', '_ba_time_precision', '_ba_vehicle_make', '_ba_vehicle_model', '_ba_vehicle_color', '_ba_vehicle_plate_masked' ) as $key ) { $meta[$key] = (string) get_post_meta( $event_id, $key, true ); }
 		return hash( 'sha256', wp_json_encode( array( trim( wp_strip_all_tags( $post->post_title ) ), trim( wp_strip_all_tags( $post->post_content ) ), $meta, wp_get_object_terms( $event_id, 'ba_territorio', array( 'fields'=>'ids' ) ), wp_get_object_terms( $event_id, 'ba_tipo_evento', array( 'fields'=>'ids' ) ) ) ) );
@@ -234,7 +235,6 @@ class BadAround_External_Report_Admin {
 		add_action('add_meta_boxes_ba_evento',array($this,'box'));
 		add_action('admin_footer-post.php',array($this,'review_form'));
 		add_action('admin_post_ba_external_review',array($this,'review_action'));
-		add_filter('badaround_publication_preflight',array($this,'publication_gate'),10,2);
 	}
 	public function routes() {
 		register_rest_route('badaround/v1','/external-reports',array('methods'=>'POST','permission_callback'=>array('BadAround_External_Report_Intake','permitted'),'callback'=>function($request){return (new BadAround_External_Report_Intake())->ingest($request->get_json_params());}));
@@ -305,14 +305,26 @@ class BadAround_External_Report_Admin {
 		wp_safe_redirect(get_edit_post_link($id,'raw'));exit;
 	}
 	public function save_review($id,$input) {
+		global $wpdb;
 		if(!BadAround_External_Report_Intake::permitted() || !current_user_can('edit_post',$id) || !in_array(get_post_status($id),array('draft','pending'),true)){return BadAround_External_Report_Contract::error('review_forbidden');}
-		$row=self::report($id);
 		$basis=$input['basis']??'';$reason=$input['reason']??'';$revision=$input['public_hash']??'';
-		if(!$row || !is_string($basis) || !in_array($basis,array('permission_evidenced','legitimate_interest_assessed','other_documented_basis'),true) || !is_string($reason) || ''===trim($reason) || strlen($reason)>8000 || !is_string($revision) || !hash_equals(BadAround_External_Report_Contract::public_hash($id),$revision)){return BadAround_External_Report_Contract::error('review_stale_or_incomplete');}
-		$review=array('version'=>'external-editorial/v1','source_hash'=>$row->payload_hash,'public_hash'=>$revision,'basis'=>$basis,'reason'=>sanitize_textarea_field($reason),'by'=>(int)get_current_user_id(),'at'=>gmdate('Y-m-d\TH:i:s\Z'));
-		if(!BadAround_Audit_Log::record('event',$id,'external_editorial_review','external_manual',$basis)){return BadAround_External_Report_Contract::error('audit');}
-		update_post_meta($id,self::REVIEW_META,$review);
-		return get_post_meta($id,self::REVIEW_META,true)===$review ? true : BadAround_External_Report_Contract::error('review_storage');
+		if(!is_string($basis) || !in_array($basis,array('permission_evidenced','legitimate_interest_assessed','other_documented_basis'),true) || !is_string($reason) || ''===trim(sanitize_textarea_field($reason)) || strlen($reason)>8000 || !is_string($revision)){return BadAround_External_Report_Contract::error('review_stale_or_incomplete');}
+		foreach(array($wpdb->posts,$wpdb->postmeta,$wpdb->prefix.'ba_audit_log') as $table){
+			if('InnoDB'!==$wpdb->get_var($wpdb->prepare('SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=%s',$table))){return BadAround_External_Report_Contract::error('transaction_unavailable');}
+		}
+		if(false===$wpdb->query('START TRANSACTION')){return BadAround_External_Report_Contract::error('transaction_unavailable');}
+		$committed=false;
+		try{
+			$post=$wpdb->get_row($wpdb->prepare("SELECT ID,post_status FROM {$wpdb->posts} WHERE ID=%d FOR UPDATE",$id));clean_post_cache($id);
+			$row=self::report($id);
+			if(!$post || !in_array($post->post_status,array('draft','pending'),true) || !$row || !hash_equals(BadAround_External_Report_Contract::public_hash($id),$revision)){return BadAround_External_Report_Contract::error('review_stale_or_incomplete');}
+			$review=array('version'=>'external-editorial/v1','source_hash'=>$row->payload_hash,'public_hash'=>$revision,'basis'=>$basis,'reason'=>sanitize_textarea_field($reason),'by'=>(int)get_current_user_id(),'at'=>gmdate('Y-m-d\TH:i:s\Z'));
+			update_post_meta($id,self::REVIEW_META,$review);
+			if(get_post_meta($id,self::REVIEW_META,true)!==$review || !BadAround_Audit_Log::record('event',$id,'external_editorial_review','external_manual',$basis) || false===$wpdb->query('COMMIT')){return BadAround_External_Report_Contract::error('review_storage');}
+			$committed=true;return true;
+		}finally{
+			if(!$committed){$wpdb->query('ROLLBACK');}clean_post_cache($id);
+		}
 	}
 }
 

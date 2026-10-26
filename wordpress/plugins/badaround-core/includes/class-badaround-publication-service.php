@@ -196,7 +196,7 @@ class BadAround_Publication_Service {
 		global $wpdb;
 
 		$event_id = absint( $event_id );
-		$external_gate = apply_filters( 'badaround_publication_preflight', true, $event_id );
+		$external_gate = class_exists( 'BadAround_External_Report_Admin' ) ? ( new BadAround_External_Report_Admin() )->publication_gate( true, $event_id ) : true;
 		if ( is_wp_error( $external_gate ) ) { return $external_gate; }
 		$post     = get_post( $event_id );
 		if ( ! $post || BadAround_Event_Post_Type::POST_TYPE !== $post->post_type ) {
@@ -592,7 +592,7 @@ class BadAround_Publication_Service {
 		if ( ! $event_id || ! current_user_can( 'ba_moderate_events' ) || ! current_user_can( 'publish_ba_eventi' ) || ! current_user_can( 'edit_post', $event_id ) ) {
 			return new WP_Error( 'ba_publication_forbidden', __( 'Non sei autorizzato a pubblicare questo evento.', 'badaround-core' ) );
 		}
-		$external_gate = apply_filters( 'badaround_publication_preflight', true, $event_id );
+		$external_gate = class_exists( 'BadAround_External_Report_Admin' ) ? ( new BadAround_External_Report_Admin() )->publication_gate( true, $event_id ) : true;
 		if ( is_wp_error( $external_gate ) ) { return $external_gate; }
 		if (class_exists('BadAround_Native_Media_Fence')) {
 			$fence=BadAround_Native_Media_Fence::check($event_id);
