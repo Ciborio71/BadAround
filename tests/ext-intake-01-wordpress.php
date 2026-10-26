@@ -2,7 +2,7 @@
 /** Run via wp eval-file ONLY against the disposable CI WordPress database. */
 if ( ! defined('ABSPATH') || ! getenv('BA_EXT_ISOLATED_TEST') ) { throw new RuntimeException('Isolated CI only'); }
 global $wpdb;
-$checks=0;
+$GLOBALS['checks']=0;
 function ext_check($ok,$message){global $checks;$checks++;if(!$ok){throw new RuntimeException('FAIL '.$message);}echo 'PASS '.$message."\n";}
 function ext_code($value){return is_wp_error($value)?$value->get_error_code():'ok';}
 function ext_row($id){global $wpdb;return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}ba_reports WHERE id=%d",$id));}
@@ -115,5 +115,5 @@ ext_check($response->get_status()===401 || $response->get_status()===403,'Privat
 wp_set_current_user(1);
 $native=$input;$native['schema_version']='badaround-report/external-v1';
 ext_check(!BadAround_Report_Version_Registry::supported('badaround-report/external-v1'),'Native version registry does not accept external submissions');
-echo 'EXT_INTAKE_01_WORDPRESS=PASS checks='.$checks."\n";
+echo 'EXT_INTAKE_01_WORDPRESS=PASS checks='.$GLOBALS['checks']."\n";
 

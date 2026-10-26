@@ -263,8 +263,10 @@ class BadAround_External_Report_Admin {
 		$review=get_post_meta($event_id,self::REVIEW_META,true);
 		if ( ! is_array($review) || ($review['source_hash']??'')!==$row->payload_hash || ($review['public_hash']??'')!==BadAround_External_Report_Contract::public_hash($event_id) || empty($review['basis']) || empty($review['reason']) ) { return BadAround_External_Report_Contract::error('editorial_review_required'); }
 		$decision=get_post_meta($event_id,BadAround_Public_Geo_Contract::DECISION_META,true);
+		$media_count=$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}ba_report_media WHERE event_id=%d",$event_id));
+		if(!empty($wpdb->last_error)){return BadAround_External_Report_Contract::error('media_unavailable');}
 		if ( ($decision['mode']??'')!=='territory_only' || has_post_thumbnail($event_id)
-			|| (int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}ba_report_media WHERE event_id=%d",$event_id)) ) { return BadAround_External_Report_Contract::error('geo_or_media_review'); }
+			|| (int)$media_count ) { return BadAround_External_Report_Contract::error('geo_or_media_review'); }
 		return $allowed;
 	}
 	public function box($post) {

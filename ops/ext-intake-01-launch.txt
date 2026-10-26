@@ -1,0 +1,2 @@
+EXT-INTAKE-01M: deploy only the four guarded Core files after dedicated QA.
+Authorized manual screenshot intake; no real event publication.
