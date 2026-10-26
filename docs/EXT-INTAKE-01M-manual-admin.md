@@ -40,3 +40,10 @@ Enrichment first withdraws the event through the Publication Service into pendin
 The report's private coordinate columns hold an explicitly documented approximate geocoded anchor, not a verified incident point. The original contract snapshot remains immutable; the enrichment manifest records source, actor, time, coordinate semantics, transform rectangles and hashes. A 1000 m approximate public area is generated and sealed only by normal B3 publication. No centroid fallback is used.
 
 The private metabox shows the candidate image and original screenshot behind capability/nonce checks. A fresh, explicit editorial assessment of photo reuse and redaction is mandatory in addition to source review. No rights or original-reporter consents are invented. Existing B2 approval, media privacy controls and Publication Service remain required. Native media fences remain unchanged.
+
+
+### Screenshot-only source with an unavailable post URL
+
+An administrator may supply a Facebook capture without a permalink. In that case source_url is empty, source_url_status is not_supplied, source_access is supplied_capture_only, and source_reference is capture:sha256:<exact-primary-capture-hash>. This identifies the supplied evidence, not a verified Facebook post or author. No platform URL is fabricated; the admin UI makes the limitation explicit. A later permalink requires a versioned source update, not mutation of the original snapshot. Byte-identical captures deduplicate by hash; resized/cropped variants still need human duplicate review.
+
+The optional supporting_evidence_sha256 binds a second screenshot (e.g. the text) to the immutable provenance. Enrichment then requires and privately preserves both original files. The primary photo capture may be up to 5 MiB; the supporting screenshot up to 2 MiB. Originals never enter the public media library. Existing captures without the optional supporting evidence retain their previous retry fingerprints.

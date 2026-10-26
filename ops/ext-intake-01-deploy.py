@@ -1,6 +1,6 @@
 """Only the authorized EXT-INTAKE-01 Core delta. Strict TLS, custody, atomic files, rollback."""
 import ftplib, hashlib, io, json, os, pathlib, ssl, subprocess, sys
-BASE = "72ae7ab81fb288adc947f0b49b101d2e91948f57"
+BASE = "7d8b4371681b1ae3d91579072d302341b134e2b1"
 ROOT = "/httpdocs/wp-content/plugins/badaround-core/"
 PREFIX = "wordpress/plugins/badaround-core/"
 # New definitions before loader; activate hooks LAST. Rollback in reverse order.

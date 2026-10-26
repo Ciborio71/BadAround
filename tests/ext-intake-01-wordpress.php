@@ -184,5 +184,25 @@ ext_check(is_array($view) && $view['mode']==='approximate_area' && $view['radius
 ext_check(has_post_thumbnail($eid),'Only reviewed derivative becomes featured image');
 ext_check(ext_row($erid)->content_original===$immutable,'Enriched publication preserves immutable source');
 
+
+// Capture-only provenance: no invented Facebook URL, supporting text retained privately.
+$capture_large=$capture.str_repeat("x",2200000);
+$cap_input=$input;$cap_input['source_url']='';$cap_input['evidence_sha256']=hash('sha256',$capture_large);$cap_input['source_reference']='capture:sha256:'.$cap_input['evidence_sha256'];$cap_input['supporting_evidence_sha256']=hash('sha256',$capture);
+$cap=$svc->ingest($cap_input);
+ext_check(!is_wp_error($cap),'Capture-only Facebook intake accepted without invented URL');
+$cid=$cap['event_id'];$crid=$cap['report_id'];$cp=json_decode(ext_row($crid)->content_original,true);
+ext_check($cp['provenance']['source_url']==='' && $cp['provenance']['source_url_status']==='not_supplied' && $cp['provenance']['source_access']==='supplied_capture_only','Unknown post URL and screenshot-only access recorded explicitly');
+ext_check(($svc->ingest($cap_input)['event_id']??0)===$cid,'Capture identity is idempotent');
+$cap_bad=$cap_input;$cap_bad['source_reference']='group:123456:post:998877';
+ext_check(is_wp_error($svc->ingest($cap_bad)),'Missing URL cannot masquerade as verified post');
+$cap_enrich=$enrichment;$cap_enrich['expected_event_hash']=BadAround_External_Report_Contract::event_hash($cid);$cap_enrich['evidence_base64']=base64_encode($capture_large);$cap_enrich['evidence_sha256']=hash('sha256',$capture_large);
+ext_check(is_wp_error($enricher->save($cid,$cap_enrich)),'Missing supporting screenshot rejected');
+$cap_enrich['supporting_evidence_base64']=base64_encode($capture);
+$cap_saved=$enricher->save($cid,$cap_enrich);
+ext_check(!is_wp_error($cap_saved),'Capture over 2 MiB plus supporting screenshot accepted privately');
+$cap_manifest=get_post_meta($cid,BadAround_External_Report_Enrichment::META,true);
+ext_check(hash_file('sha256',$private.'/report-'.$crid.'/'.$cap_manifest['supporting_original_key'])===hash('sha256',$capture),'Supporting text screenshot retained byte exact privately');
+ext_check(get_post_status($cid)==='pending' && !has_post_thumbnail($cid),'Screenshot-only capture never automatically publishes');
+
 echo 'EXT_INTAKE_01_WORDPRESS=PASS checks='.$GLOBALS['checks']."\n";
 

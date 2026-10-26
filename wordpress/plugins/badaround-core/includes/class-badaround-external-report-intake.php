@@ -16,9 +16,9 @@ class BadAround_External_Report_Contract {
 
 	public static function prepare( $input ) {
 		if ( ! is_array( $input ) ) { return self::error( 'invalid_input' ); }
-		$keys = array( 'source_platform', 'source_url', 'source_reference', 'evidence_sha256', 'original_text', 'title', 'description', 'category', 'subtype', 'territory_id', 'area_label', 'date_start', 'date_end', 'period', 'date_note', 'exact_address', 'plate', 'vehicle_type', 'vehicle_make', 'vehicle_model', 'vehicle_color', 'existing_event_id', 'expected_event_hash', 'adoption_reset_approval' );
+		$keys = array( 'source_platform', 'source_url', 'source_reference', 'evidence_sha256', 'supporting_evidence_sha256', 'original_text', 'title', 'description', 'category', 'subtype', 'territory_id', 'area_label', 'date_start', 'date_end', 'period', 'date_note', 'exact_address', 'plate', 'vehicle_type', 'vehicle_make', 'vehicle_model', 'vehicle_color', 'existing_event_id', 'expected_event_hash', 'adoption_reset_approval' );
 		if ( array_diff( array_keys( $input ), $keys ) ) { return self::error( 'unknown_field' ); }
-		$limits = array( 'source_platform'=>32, 'source_url'=>2048, 'source_reference'=>255, 'evidence_sha256'=>64, 'original_text'=>12000, 'title'=>180, 'description'=>6000, 'category'=>64, 'subtype'=>64, 'area_label'=>191, 'date_start'=>10, 'date_end'=>10, 'period'=>32, 'date_note'=>500, 'exact_address'=>500, 'plate'=>32, 'vehicle_type'=>32, 'vehicle_make'=>100, 'vehicle_model'=>100, 'vehicle_color'=>32, 'expected_event_hash'=>64 );
+		$limits = array( 'source_platform'=>32, 'source_url'=>2048, 'source_reference'=>255, 'evidence_sha256'=>64, 'supporting_evidence_sha256'=>64, 'original_text'=>12000, 'title'=>180, 'description'=>6000, 'category'=>64, 'subtype'=>64, 'area_label'=>191, 'date_start'=>10, 'date_end'=>10, 'period'=>32, 'date_note'=>500, 'exact_address'=>500, 'plate'=>32, 'vehicle_type'=>32, 'vehicle_make'=>100, 'vehicle_model'=>100, 'vehicle_color'=>32, 'expected_event_hash'=>64 );
 		$data = array();
 		foreach ( $limits as $key => $max ) {
 			$value = $input[$key] ?? '';
@@ -32,10 +32,14 @@ class BadAround_External_Report_Contract {
 		}
 		$data['adoption_reset_approval']=$input['adoption_reset_approval']??false;
 		if(!is_bool($data['adoption_reset_approval']) || ($data['adoption_reset_approval'] && !$data['existing_event_id'])){return self::error('adoption_reset_flag');}
-		foreach ( array( 'source_url', 'source_reference', 'title', 'description', 'original_text', 'area_label' ) as $key ) {
+		foreach ( array( 'source_reference', 'title', 'description', 'original_text', 'area_label' ) as $key ) {
 			if ( '' === trim( $data[$key] ) ) { return self::error( 'missing_' . $key ); }
 		}
 		if ( ! in_array( $data['source_platform'], array( 'facebook', 'instagram', 'web', 'rss', 'open_data', 'partner' ), true ) ) { return self::error( 'platform' ); }
+		$capture_only=''===$data['source_url'];
+		if($capture_only){
+			if('facebook'!==$data['source_platform'] || !preg_match('/^[a-f0-9]{64}$/D',$data['evidence_sha256']) || $data['source_reference']!=='capture:sha256:'.$data['evidence_sha256'] || $data['existing_event_id']){return self::error('capture_provenance');}
+		}else{
 		$url = wp_parse_url( $data['source_url'] );
 		if ( ! is_array( $url ) || 'https' !== ( $url['scheme'] ?? '' ) || empty( $url['host'] ) || isset( $url['user'], $url['pass'] ) || isset( $url['user'] ) || isset( $url['pass'] ) || isset( $url['port'] ) ) { return self::error( 'source_url' ); }
 		// Facebook MVP accepts a stable group permalink, not a tracking/share URL.
@@ -48,6 +52,8 @@ class BadAround_External_Report_Contract {
 			if ( ! empty( $url['query'] ) ) { return self::error( 'source_query_not_supported' ); }
 			$data['source_url'] = 'https://' . strtolower( $url['host'] ) . ( $url['path'] ?? '/' );
 		}
+		}
+		if(''!==$data['supporting_evidence_sha256'] && !preg_match('/^[a-f0-9]{64}$/D',$data['supporting_evidence_sha256'])){return self::error('supporting_evidence_hash');}
 		if ( '' !== $data['evidence_sha256'] && ! preg_match( '/^[a-f0-9]{64}$/D', $data['evidence_sha256'] ) ) { return self::error( 'evidence_hash' ); }
 		$categories = BadAround_Report_Schema::category_subtypes();
 		if ( ! isset( $categories[$data['category']] ) || ! in_array( $data['subtype'], $categories[$data['category']], true ) ) { return self::error( 'category_subtype' ); }
@@ -156,7 +162,8 @@ class BadAround_External_Report_Intake {
 			$transaction = true;
 			$existing = $repo->find( $data['identity'] );
 			if ( ! empty( $wpdb->last_error ) ) { return BadAround_External_Report_Contract::error( 'storage' ); }
-			$fingerprint = hash( 'sha256', wp_json_encode( array_diff_key( $data, array_flip( array( 'existing_event_id', 'expected_event_hash', 'adoption_reset_approval' ) ) ) ) );
+			$fingerprint_data=$data;if(''===$fingerprint_data['supporting_evidence_sha256']){unset($fingerprint_data['supporting_evidence_sha256']);}
+			$fingerprint = hash( 'sha256', wp_json_encode( array_diff_key( $fingerprint_data, array_flip( array( 'existing_event_id', 'expected_event_hash', 'adoption_reset_approval' ) ) ) ) );
 			if ( $existing ) {
 				$stored = json_decode( $existing->content_original, true );
 				if ( ! empty( $existing->deleted_at ) || ( $stored['provenance']['identity'] ?? '' ) !== $data['identity'] ) { return BadAround_External_Report_Contract::error( 'identity_conflict' ); }
@@ -191,7 +198,7 @@ class BadAround_External_Report_Intake {
 				'content'=>array('description'=>$data['original_text']), 'reporter'=>array('contact_preference'=>'none'),
 				'consents'=>array('status'=>'not_collected'), 'media'=>array('items'=>array()), 'social'=>array('status'=>'blocked') );
 			$envelope = array( 'schema_version'=>BadAround_External_Report_Contract::ENVELOPE, 'canonical'=>$canonical, 'input_hash'=>$fingerprint,
-				'provenance'=>array('source_type'=>'external','source_platform'=>$data['source_platform'],'source_url'=>$data['source_url'],'source_reference'=>$data['source_reference'],'identity'=>$data['identity'],'import_mode'=>'manual_capture','imported_at'=>$now,'imported_by'=>(int)get_current_user_id(),'evidence_sha256'=>$data['evidence_sha256'],'source_access'=>'unknown','evidence_access'=>'supplied_capture'),
+				'provenance'=>array('source_type'=>'external','source_platform'=>$data['source_platform'],'source_url'=>$data['source_url'],'source_reference'=>$data['source_reference'],'identity'=>$data['identity'],'import_mode'=>'manual_capture','imported_at'=>$now,'imported_by'=>(int)get_current_user_id(),'evidence_sha256'=>$data['evidence_sha256'],'supporting_evidence_sha256'=>$data['supporting_evidence_sha256'],'source_reference_kind'=>(''===$data['source_url']?'supplied_capture':'platform_post'),'source_url_status'=>(''===$data['source_url']?'not_supplied':'supplied'),'source_access'=>(''===$data['source_url']?'supplied_capture_only':'unknown'),'evidence_access'=>'supplied_capture'),
 				'external_governance'=>array('version'=>'external-editorial/v1','state'=>'needs_review','media'=>'excluded','social'=>'blocked','orphan_approval_reset'=>$reset_approval),
 				'retention'=>array('review_due_at'=>gmdate('Y-m-d\TH:i:s\Z', time()+90*DAY_IN_SECONDS)) );
 			$report_id = $repo->insert_external( $data, $canonical, $envelope );
@@ -290,7 +297,9 @@ class BadAround_External_Report_Admin {
 		$row=self::report($post->ID); if(!$row){return;}
 		$p=json_decode($row->content_original,true);$source=$p['provenance']??array();
 		echo '<p><strong>Fonte esterna acquisita manualmente. Consensi dell’autore non acquisiti. Fotografie soggette a verifica separata; diffusione social bloccata.</strong></p>';
+		if(empty($source['source_url'])){echo '<p><strong>Fonte: screenshot fornito manualmente; link del post Facebook non disponibile. Autore, gruppo e autenticità del post non verificati.</strong></p>';}else{
 		echo '<p>Origine: '.esc_html($source['source_platform']??'').' — <a target="_blank" rel="noopener noreferrer" href="'.esc_url($source['source_url']??'').'">Apri la fonte</a></p>';
+		}
 		echo '<p>Acquisita: '.esc_html($source['imported_at']??'').' — ID report: '.absint($row->id).'</p>';
 		$range=$p['canonical']['time']['date_range']??array();
 		echo '<p>Periodo dichiarato: '.esc_html(($range['start']??'non noto').' / '.($range['end']??'non noto').' — '.($range['period']??'')).'</p>';
@@ -364,22 +373,26 @@ class BadAround_External_Report_Enrichment {
 		global $wpdb;
 		if(!BadAround_External_Report_Intake::permitted() || !current_user_can('ba_view_private_media') || !current_user_can('edit_post',$id)){return self::error('forbidden');}
 		$keys=array('expected_event_hash','reopen_for_review','lat','lng','geo_source_url','geo_note','evidence_base64','evidence_sha256','crop','redaction');
-		if(!is_array($input) || array_diff(array_keys($input),$keys) || count(array_diff($keys,array_keys($input))) || $input['reopen_for_review']!==true
+		if(!is_array($input) || array_diff(array_keys($input),array_merge($keys,array('supporting_evidence_base64'))) || count(array_diff($keys,array_keys($input))) || $input['reopen_for_review']!==true
 			|| !is_string($input['expected_event_hash']) || !preg_match('/^[a-f0-9]{64}$/',$input['expected_event_hash'])
 			|| !BadAround_Public_Geo_Projection::pair($input['lat'],$input['lng'])
 			|| (float)$input['lat']<35 || (float)$input['lat']>48 || (float)$input['lng']<6 || (float)$input['lng']>19
 			|| !is_string($input['geo_source_url']) || strlen($input['geo_source_url'])>2048 || !wp_http_validate_url($input['geo_source_url']) || wp_parse_url($input['geo_source_url'],PHP_URL_SCHEME)!=='https'
 			|| !is_string($input['geo_note']) || strlen($input['geo_note'])<20 || strlen($input['geo_note'])>1500
-			|| !is_string($input['evidence_base64']) || strlen($input['evidence_base64'])>2800000
+			|| !is_string($input['evidence_base64']) || strlen($input['evidence_base64'])>7000000
 			|| !is_string($input['evidence_sha256']) || !preg_match('/^[a-f0-9]{64}$/',$input['evidence_sha256'])){return self::error('input');}
 		$bytes=base64_decode($input['evidence_base64'],true);
 		$size=is_string($bytes)?strlen($bytes):0;
-		if(!$size || $size>2097152 || !hash_equals($input['evidence_sha256'],hash('sha256',$bytes))){return self::error('evidence');}
+		if(!$size || $size>5242880 || !hash_equals($input['evidence_sha256'],hash('sha256',$bytes))){return self::error('evidence');}
 		$info=@getimagesizefromstring($bytes);
 		if(!$info || !in_array($info['mime'],array('image/png','image/jpeg','image/webp'),true) || $info[0]*$info[1]>12000000
 			|| !self::rectangle($input['crop'],$info[0],$info[1]) || !self::rectangle($input['redaction'],$input['crop'][2],$input['crop'][3])
 			|| !function_exists('imagecreatefromstring')){return self::error('image');}
-		$fingerprint=hash('sha256',wp_json_encode(array_diff_key($input,array_flip(array('expected_event_hash','evidence_base64')))));
+		$supporting=$input['supporting_evidence_base64']??'';
+		if(!is_string($supporting) || strlen($supporting)>2800000){return self::error('supporting_evidence');}
+		$supporting_bytes=$supporting!==''?base64_decode($supporting,true):'';
+		if($supporting!=='' && (!is_string($supporting_bytes) || !@getimagesizefromstring($supporting_bytes))){return self::error('supporting_evidence');}
+		$fingerprint=hash('sha256',wp_json_encode(array_diff_key($input,array_flip(array('expected_event_hash','evidence_base64','supporting_evidence_base64')))).($supporting_bytes!==''?hash('sha256',$supporting_bytes):''));
 		$base=self::root();if(!$base){return self::error('private_storage');}
 		foreach(array($wpdb->posts,$wpdb->postmeta,$wpdb->prefix.'ba_reports',$wpdb->prefix.'ba_report_media',$wpdb->prefix.'ba_audit_log') as $table){
 			if('InnoDB'!==$wpdb->get_var($wpdb->prepare('SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=%s',$table))){return self::error('transaction');}}
@@ -393,6 +406,8 @@ class BadAround_External_Report_Enrichment {
 			if($old){return ($old['fingerprint']??'')===$fingerprint?array('event_id'=>$id,'media_id'=>$old['media_id'],'duplicate'=>true):self::error('already_enriched');}
 			$payload=json_decode($row->content_original,true);
 			if(($payload['provenance']['evidence_sha256']??'')!==$input['evidence_sha256']){return self::error('source_evidence');}
+			$expected_supporting=$payload['provenance']['supporting_evidence_sha256']??'';
+			if(($expected_supporting!=='')!==($supporting_bytes!=='') || ($expected_supporting!=='' && !hash_equals($expected_supporting,hash('sha256',$supporting_bytes)))){return self::error('supporting_evidence');}
 			$count=$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}ba_report_media WHERE event_id=%d",$id));
 			if(!empty($wpdb->last_error) || (int)$count || has_post_thumbnail($id)){return self::error('existing_media');}
 			$result=(new BadAround_Publication_Service())->reopen_external_for_enrichment($id,$input['expected_event_hash']);if(is_wp_error($result)){return $result;}
@@ -401,6 +416,8 @@ class BadAround_External_Report_Enrichment {
 			$token=wp_generate_uuid4();$original=$dir.'/'.$token.'-evidence.'.($info['mime']==='image/png'?'png':($info['mime']==='image/webp'?'webp':'jpg'));
 			$target=$dir.'/'.$token.'-redacted.jpg';$files=array($original,$target);
 			if(file_put_contents($original,$bytes,LOCK_EX)!==$size){return self::error('private_storage');}@chmod($original,0600);
+			$supporting_path='';
+			if($supporting_bytes!==''){$supporting_path=$dir.'/'.$token.'-supporting-capture.png';$files[]=$supporting_path;if(file_put_contents($supporting_path,$supporting_bytes,LOCK_EX)!==strlen($supporting_bytes)){return self::error('private_storage');}@chmod($supporting_path,0600);}
 			$source=@imagecreatefromstring($bytes);if(!$source){return self::error('image');}
 			$c=$input['crop'];$crop=imagecrop($source,array('x'=>$c[0],'y'=>$c[1],'width'=>$c[2],'height'=>$c[3]));imagedestroy($source);
 			if(!$crop){return self::error('image');}
@@ -410,7 +427,7 @@ class BadAround_External_Report_Enrichment {
 			$media=(new BadAround_External_Enrichment_Media())->insert_candidate((int)$row->id,$id,$target,$checksum);
 			if(!$media){return self::error('storage');}
 			$m=array('version'=>'external-enrichment/v1','fingerprint'=>$fingerprint,'source_hash'=>$row->payload_hash,'original_sha256'=>$input['evidence_sha256'],
-				'original_key'=>basename($original),'candidate_sha256'=>$checksum,'media_id'=>$media,'crop'=>$input['crop'],'redaction'=>$input['redaction'],
+				'supporting_original_key'=>($supporting_path?basename($supporting_path):''),'supporting_original_sha256'=>$expected_supporting,'original_key'=>basename($original),'candidate_sha256'=>$checksum,'media_id'=>$media,'crop'=>$input['crop'],'redaction'=>$input['redaction'],
 				'geo_source_url'=>esc_url_raw($input['geo_source_url']),'geo_note'=>sanitize_textarea_field($input['geo_note']),
 				'anchor_lat'=>(float)$input['lat'],'anchor_lng'=>(float)$input['lng'],'coordinate_semantics'=>'approximate_geocoded_anchor_not_verified_incident_point','by'=>get_current_user_id(),'at'=>gmdate('Y-m-d\TH:i:s\Z'));
 			if(false===$wpdb->update($wpdb->prefix.'ba_reports',array('exact_lat'=>(float)$input['lat'],'exact_lng'=>(float)$input['lng'],'updated_at'=>current_time('mysql',true)),array('id'=>(int)$row->id))){return self::error('storage');}
@@ -451,6 +468,7 @@ class BadAround_External_Report_Enrichment {
 			echo '<p><a target="_blank" rel="noopener" href="'.esc_url($url).'">Verifica foto candidata con targa oscurata</a></p><img style="max-width:480px;width:100%;height:auto" src="'.esc_url($url).'" alt="Foto candidata privata del veicolo, con targa oscurata">';
 			$original=wp_nonce_url(admin_url('admin-post.php?action=ba_external_evidence&event_id='.(int)$id),'ba_external_evidence_'.$id);
 			echo '<p><a target="_blank" rel="noopener" href="'.esc_url($original).'">Screenshot originale riservato</a></p>';
+			if(!empty($m['supporting_original_key'])){echo '<p><a target="_blank" rel="noopener" href="'.esc_url(add_query_arg('kind','supporting',$original)).'">Screenshot del testo riservato</a></p>';}
 		}
 		if(in_array(get_post_status($id),array('draft','pending'),true)){
 			echo '<p><label><input type="checkbox" name="media_reviewed" value="1" form="ba-external-review-form" required> Ho verificato la foto candidata, l’oscuramento degli identificativi e il presupposto documentato per il riutilizzo della fotografia.</label></p>';
@@ -460,8 +478,10 @@ class BadAround_External_Report_Enrichment {
 		$id=absint($_GET['event_id']??0);check_admin_referer('ba_external_evidence_'.$id);
 		if(!BadAround_External_Report_Intake::permitted() || !current_user_can('ba_view_private_media') || !current_user_can('edit_post',$id)){wp_die('Accesso non autorizzato.','',array('response'=>403));}
 		$m=get_post_meta($id,self::META,true);$row=BadAround_External_Report_Admin::report($id);$base=self::root();
-		$file=$row && $base && !empty($m['original_key'])?$base.'/report-'.(int)$row->id.'/'.basename($m['original_key']):'';
-		if(!$file || !is_file($file) || !hash_equals($m['original_sha256'],hash_file('sha256',$file))){wp_die('File non disponibile.');}
+		$kind=($_GET['kind']??'')==='supporting'?'supporting_original':'original';
+		$key=$kind.'_key';$sha=$kind== 'original'?'original_sha256':'supporting_original_sha256';
+		$file=$row && $base && !empty($m[$key])?$base.'/report-'.(int)$row->id.'/'.basename($m[$key]):'';
+		if(!$file || !is_file($file) || !hash_equals($m[$sha],hash_file('sha256',$file))){wp_die('File non disponibile.');}
 		nocache_headers();header('Cache-Control: private, no-store');header('X-Content-Type-Options: nosniff');header('Content-Type: '.wp_get_image_mime($file));readfile($file);exit;
 	}
 }
