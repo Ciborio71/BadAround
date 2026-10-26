@@ -1,0 +1,109 @@
+name: EXT-INTAKE-01 manual admin intake
+on:
+  push:
+    branches: [feature/ext-intake-01-admin-manual]
+permissions:
+  contents: read
+concurrency:
+  group: badaround-ext-intake-01
+  cancel-in-progress: false
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      database:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: isolated-ext-test
+          MARIADB_DATABASE: ext_test
+        ports: [3306:3306]
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mysqli, pdo_mysql, pdo_sqlite, mbstring, gd
+          tools: wp-cli
+      - name: Lint and Native GEO privacy regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          find wordpress/plugins/badaround-core -name '*.php' -print0 | xargs -0 -n1 php -l > evidence/php-lint.log
+          php -l tests/ext-intake-01-wordpress.php
+          for test in native-report-f12 native-report-f13 native-report-f14 native-report-f15 f1-14r-publication-contract geo-public-02-contract geo-public-04-moderation geo-public-05-publication geo-public-05-audit native-social-preference; do
+            php "tests/$test.php" > "evidence/$test.log"
+          done
+          git diff --check
+      - name: Isolated real WordPress golden path and negative tests
+        env:
+          BA_EXT_ISOLATED_TEST: '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          wp core download --path=/tmp/ba-ext-wp
+          wp config create --path=/tmp/ba-ext-wp --dbname=ext_test --dbuser=root --dbpass=isolated-ext-test --dbhost=127.0.0.1:3306
+          wp core install --path=/tmp/ba-ext-wp --url=https://isolated.example.invalid --title=EXT-INTAKE-CI --admin_user=extadmin --admin_password=isolated-ci-only --admin_email=ci@example.invalid --skip-email
+          cp -a wordpress/plugins/badaround-core /tmp/ba-ext-wp/wp-content/plugins/
+          wp plugin activate badaround-core --path=/tmp/ba-ext-wp
+          wp option update timezone_string Europe/Rome --path=/tmp/ba-ext-wp
+          wp core version --path=/tmp/ba-ext-wp | tee evidence/wordpress-version.txt
+          wp eval-file "$GITHUB_WORKSPACE/tests/ext-intake-01-wordpress.php" --path=/tmp/ba-ext-wp | tee evidence/external-golden-path.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ext-intake-01-qa
+          path: evidence/
+          retention-days: 30
+  deploy:
+    if: contains(github.event.head_commit.message, '[deploy EXT-INTAKE-01]')
+    needs: qa
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: staging
+    concurrency:
+      group: badaround-production-runtime
+      cancel-in-progress: false
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify FTPS identity with trusted chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tls evidence
+          ca=/etc/ssl/certs/ca-certificates.crt
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 --max-time 25 https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 --max-time 25 https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          openssl verify -CAfile "$ca" -untrusted tls/yr-by-x1.pem tls/yr2.pem
+          cat "$ca" tls/yr2.pem tls/yr-by-x1.pem > tls/curl-chain.pem
+          timeout 30s openssl s_client -starttls ftp -connect "${FTP_HOST}:21" -servername "$FTP_TLS_NAME" -verify_hostname "$FTP_TLS_NAME" -verify_return_error -CAfile tls/curl-chain.pem < /dev/null > tls/handshake.log 2>&1
+          grep -q 'Verify return code: 0 (ok)' tls/handshake.log
+      - name: Preflight and backup only four Core files
+        run: python ops/ext-intake-01-deploy.py prepare
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ext-intake-01-before-upload
+          path: evidence/
+          retention-days: 30
+      - name: Deploy exact guarded Core delta
+        run: python ops/ext-intake-01-deploy.py deploy
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ext-intake-01-deploy-evidence
+          path: evidence/
+          retention-days: 30
+
