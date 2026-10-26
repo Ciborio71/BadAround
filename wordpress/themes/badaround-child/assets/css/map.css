@@ -655,7 +655,7 @@ body.page-template-page-mappa .ba-map-results-list{
 	display:grid;
 	grid-auto-rows:minmax(116px,auto);
 	align-content:start;
-	gap:10px;
+	gap:15px;
 	height:auto;
 	min-height:0;
 	max-height:none;
