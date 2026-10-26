@@ -134,7 +134,7 @@ wp_set_current_user(1);
 $native=$input;$native['schema_version']='badaround-report/external-v1';
 ext_check(!BadAround_Report_Version_Registry::supported('badaround-report/external-v1'),'Native version registry does not accept external submissions');
 // Enrichment from a synthetic capture; no external photo or rights assertion used.
-$private=ABSPATH.'../external-private-ci';wp_mkdir_p($private);
+$private=dirname(untrailingslashit(ABSPATH)).'/external-private-ci';wp_mkdir_p($private);
 add_filter('badaround_private_media_path',function()use($private){return $private;});
 $img=imagecreatetruecolor(120,100);imagefill($img,0,0,imagecolorallocate($img,180,0,0));imagefilledrectangle($img,25,25,64,44,imagecolorallocate($img,255,255,255));
 ob_start();imagepng($img);$capture=ob_get_clean();imagedestroy($img);
@@ -153,7 +153,7 @@ ext_check(is_wp_error($enricher->save($eid,$bad)) && get_post_status($eid)==='pu
 $bad=$enrichment;$bad['redaction']=array(0,0,999,999);
 ext_check(is_wp_error($enricher->save($eid,$bad)),'Out of bounds image edit rejected');
 $bad=$enrichment;$bad['expected_event_hash']=str_repeat('0',64);
-ext_check(is_wp_error($enricher->save($eid,$bad)) && get_post_status($eid)==='publish','Stale enrichment cannot withdraw event');
+ext_check(ext_code($enricher->save($eid,$bad))==='ba_external_enrichment_conflict' && get_post_status($eid)==='publish','Stale enrichment cannot withdraw event');
 $old_hash=BadAround_External_Report_Contract::public_hash($eid);
 $wpdb->suppress_errors(true);add_filter('query',$fail);$broken=$enricher->save($eid,$enrichment);remove_filter('query',$fail);$wpdb->suppress_errors(false);
 clean_post_cache($eid);
