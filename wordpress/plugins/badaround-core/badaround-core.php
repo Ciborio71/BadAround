@@ -53,6 +53,7 @@ require_once BADAROUND_CORE_PATH . 'includes/class-badaround-contribution-modera
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-contribution-moderation-admin.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-moderation-service.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-moderation-admin.php';
+require_once BADAROUND_CORE_PATH . 'includes/class-badaround-external-report-intake.php';
 
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-media-config.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-media-capability.php';
