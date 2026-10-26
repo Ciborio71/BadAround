@@ -1051,12 +1051,12 @@
 	const initialMapArea = () => {
 		const params = new URLSearchParams(window.location.search);
 		const area = params.get('area') || '';
-		const lat = Number(params.get('lat'));
-		const lng = Number(params.get('lng'));
-		const north = Number(params.get('north'));
-		const south = Number(params.get('south'));
-		const east = Number(params.get('east'));
-		const west = Number(params.get('west'));
+		const lat = params.get('lat') === null ? NaN : Number(params.get('lat'));
+		const lng = params.get('lng') === null ? NaN : Number(params.get('lng'));
+		const north = params.get('north') === null ? NaN : Number(params.get('north'));
+		const south = params.get('south') === null ? NaN : Number(params.get('south'));
+		const east = params.get('east') === null ? NaN : Number(params.get('east'));
+		const west = params.get('west') === null ? NaN : Number(params.get('west'));
 		const hasPosition = Number.isFinite(lat) && Number.isFinite(lng);
 		const hasBounds = [north,south,east,west].every(Number.isFinite);
 		if (!area && !hasPosition && !hasBounds) return null;
