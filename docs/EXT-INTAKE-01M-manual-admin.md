@@ -30,3 +30,13 @@ Only four Core files may be deployed. The job verifies the remote baseline and p
 
 This manual implementation is a subset of the broader External Intake contract. Automatic source polling, source updates, public media derivatives, bulk import and retention deletion jobs remain outside this release.
 
+
+## GEO and photograph enrichment
+
+POST /badaround/v1/external-reports/{event}/enrich is a private administrative path for an existing external report. It requires an exact event revision, explicit reopening acknowledgement, an independently sourced geographic anchor and its uncertainty note, the actual capture matching the immutable provenance hash, and validated integer crop/masking rectangles. No remote download or AI image reconstruction occurs. The source capture is retained byte-exact outside the web root. GD crops the supplied photograph and applies an opaque mask; only that re-encoded, metadata-free derivative enters the existing private Media Repository pipeline. Source URLs, author identity and full plates never enter public filenames.
+
+Enrichment first withdraws the event through the Publication Service into pending/new, clears the previous public geographic projection under its existing write guard, and invalidates prior review. All database changes and audit commit together, with private-file cleanup on rollback. It preserves the event/report IDs, original source snapshot, URL identity and taxonomy. A retry returns the same media; a different enrichment requires future versioned review rather than overwriting the first one.
+
+The report's private coordinate columns hold an explicitly documented approximate geocoded anchor, not a verified incident point. The original contract snapshot remains immutable; the enrichment manifest records source, actor, time, coordinate semantics, transform rectangles and hashes. A 1000 m approximate public area is generated and sealed only by normal B3 publication. No centroid fallback is used.
+
+The private metabox shows the candidate image and original screenshot behind capability/nonce checks. A fresh, explicit editorial assessment of photo reuse and redaction is mandatory in addition to source review. No rights or original-reporter consents are invented. Existing B2 approval, media privacy controls and Publication Service remain required. Native media fences remain unchanged.

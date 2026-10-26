@@ -87,6 +87,8 @@ class BadAround_External_Report_Contract {
 		if ( ! $post ) { return ''; }
 		$meta = array();
 		foreach ( array( '_ba_public_place_name', '_ba_public_address', '_ba_occurred_date', '_ba_occurred_time', '_ba_time_precision', '_ba_vehicle_make', '_ba_vehicle_model', '_ba_vehicle_color', '_ba_vehicle_plate_masked' ) as $key ) { $meta[$key] = (string) get_post_meta( $event_id, $key, true ); }
+		$enrichment=get_post_meta($event_id,BadAround_External_Report_Enrichment::META,true);
+		if($enrichment){$meta['external_enrichment']=$enrichment;$meta['geo_decision']=get_post_meta($event_id,BadAround_Public_Geo_Contract::DECISION_META,true);}
 		return hash( 'sha256', wp_json_encode( array( trim( wp_strip_all_tags( $post->post_title ) ), trim( wp_strip_all_tags( $post->post_content ) ), $meta, wp_get_object_terms( $event_id, 'ba_territorio', array( 'fields'=>'ids' ) ), wp_get_object_terms( $event_id, 'ba_tipo_evento', array( 'fields'=>'ids' ) ) ) ) );
 	}
 }
@@ -241,8 +243,10 @@ class BadAround_External_Report_Admin {
 		add_action('add_meta_boxes_ba_evento',array($this,'box'));
 		add_action('admin_footer-post.php',array($this,'review_form'));
 		add_action('admin_post_ba_external_review',array($this,'review_action'));
+		add_action('admin_post_ba_external_evidence',array('BadAround_External_Report_Enrichment','serve_evidence'));
 	}
 	public function routes() {
+		register_rest_route('badaround/v1','/external-reports/(?P<event>[0-9]+)/enrich',array('methods'=>'POST','permission_callback'=>array('BadAround_External_Report_Intake','permitted'),'callback'=>function($request){return (new BadAround_External_Report_Enrichment())->save((int)$request['event'],$request->get_json_params());}));
 		register_rest_route('badaround/v1','/external-reports',array('methods'=>'POST','permission_callback'=>array('BadAround_External_Report_Intake','permitted'),'callback'=>function($request){return (new BadAround_External_Report_Intake())->ingest($request->get_json_params());}));
 		register_rest_route('badaround/v1','/external-reports/(?P<event>[0-9]+)/preflight',array('methods'=>'GET','permission_callback'=>array('BadAround_External_Report_Intake','permitted'),'callback'=>function($request){
 			$id=(int)$request['event'];$post=get_post($id);
@@ -268,6 +272,7 @@ class BadAround_External_Report_Admin {
 		if ( ($payload['schema_version']??'')!==BadAround_External_Report_Contract::ENVELOPE || ($payload['canonical']['schema_version']??'')!==BadAround_External_Report_Contract::VERSION ) { return BadAround_External_Report_Contract::error('version'); }
 		$review=get_post_meta($event_id,self::REVIEW_META,true);
 		if ( ! is_array($review) || ($review['source_hash']??'')!==$row->payload_hash || ($review['public_hash']??'')!==BadAround_External_Report_Contract::public_hash($event_id) || empty($review['basis']) || empty($review['reason']) ) { return BadAround_External_Report_Contract::error('editorial_review_required'); }
+		if(get_post_meta($event_id,BadAround_External_Report_Enrichment::META,true)){return BadAround_External_Report_Enrichment::gate($event_id,$row,$review);}
 		$decision=get_post_meta($event_id,BadAround_Public_Geo_Contract::DECISION_META,true);
 		$media_count=$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}ba_report_media WHERE event_id=%d",$event_id));
 		if(!empty($wpdb->last_error)){return BadAround_External_Report_Contract::error('media_unavailable');}
@@ -284,13 +289,14 @@ class BadAround_External_Report_Admin {
 		if ( ! BadAround_External_Report_Intake::permitted() ) { return; }
 		$row=self::report($post->ID); if(!$row){return;}
 		$p=json_decode($row->content_original,true);$source=$p['provenance']??array();
-		echo '<p><strong>Fonte esterna acquisita manualmente. Consensi dell’autore non acquisiti. Fotografie escluse; diffusione social bloccata.</strong></p>';
+		echo '<p><strong>Fonte esterna acquisita manualmente. Consensi dell’autore non acquisiti. Fotografie soggette a verifica separata; diffusione social bloccata.</strong></p>';
 		echo '<p>Origine: '.esc_html($source['source_platform']??'').' — <a target="_blank" rel="noopener noreferrer" href="'.esc_url($source['source_url']??'').'">Apri la fonte</a></p>';
 		echo '<p>Acquisita: '.esc_html($source['imported_at']??'').' — ID report: '.absint($row->id).'</p>';
 		$range=$p['canonical']['time']['date_range']??array();
 		echo '<p>Periodo dichiarato: '.esc_html(($range['start']??'non noto').' / '.($range['end']??'non noto').' — '.($range['period']??'')).'</p>';
 		echo '<p>'.esc_html($range['note']??'').'</p>';
-		echo '<p>Localizzazione: solo territorio, senza marker. Prima di pubblicare, salva le modifiche e registra una valutazione editoriale motivata della provenienza, dei dati pubblicabili e del presupposto di riutilizzo.</p>';
+		BadAround_External_Report_Enrichment::render($post->ID);
+		echo '<p>Prima di pubblicare, salva le modifiche e registra una valutazione editoriale motivata della provenienza, dei dati pubblicabili e del presupposto di riutilizzo.</p>';
 		if ( !in_array(get_post_status($post->ID),array('draft','pending'),true) ){return;}
 		$review=get_post_meta($post->ID,self::REVIEW_META,true);
 		if(is_array($review)){echo '<p>Ultima verifica: '.esc_html($review['at']??'').' — '.esc_html($review['basis']??'').'</p>';}
@@ -315,6 +321,7 @@ class BadAround_External_Report_Admin {
 	public function save_review($id,$input) {
 		global $wpdb;
 		if(!BadAround_External_Report_Intake::permitted() || !current_user_can('edit_post',$id) || !in_array(get_post_status($id),array('draft','pending'),true)){return BadAround_External_Report_Contract::error('review_forbidden');}
+		if(get_post_meta($id,BadAround_External_Report_Enrichment::META,true) && ($input['media_reviewed']??'')!=='1'){return BadAround_External_Report_Contract::error('media_review_required');}
 		$basis=$input['basis']??'';$reason=$input['reason']??'';$revision=$input['public_hash']??'';
 		if(!is_string($basis) || !in_array($basis,array('permission_evidenced','legitimate_interest_assessed','other_documented_basis'),true) || !is_string($reason) || ''===trim(sanitize_textarea_field($reason)) || strlen($reason)>8000 || !is_string($revision)){return BadAround_External_Report_Contract::error('review_stale_or_incomplete');}
 		foreach(array($wpdb->posts,$wpdb->postmeta,$wpdb->prefix.'ba_audit_log') as $table){
@@ -326,7 +333,7 @@ class BadAround_External_Report_Admin {
 			$post=$wpdb->get_row($wpdb->prepare("SELECT ID,post_status FROM {$wpdb->posts} WHERE ID=%d FOR UPDATE",$id));clean_post_cache($id);
 			$row=self::report($id);
 			if(!$post || !in_array($post->post_status,array('draft','pending'),true) || !$row || !hash_equals(BadAround_External_Report_Contract::public_hash($id),$revision)){return BadAround_External_Report_Contract::error('review_stale_or_incomplete');}
-			$review=array('version'=>'external-editorial/v1','source_hash'=>$row->payload_hash,'public_hash'=>$revision,'basis'=>$basis,'reason'=>sanitize_textarea_field($reason),'by'=>(int)get_current_user_id(),'at'=>gmdate('Y-m-d\TH:i:s\Z'));
+			$review=array('version'=>'external-editorial/v1','source_hash'=>$row->payload_hash,'public_hash'=>$revision,'basis'=>$basis,'reason'=>sanitize_textarea_field($reason),'by'=>(int)get_current_user_id(),'at'=>gmdate('Y-m-d\TH:i:s\Z'),'media_reviewed'=>(($input['media_reviewed']??'')==='1'));
 			update_post_meta($id,self::REVIEW_META,$review);
 			if(get_post_meta($id,self::REVIEW_META,true)!==$review || !BadAround_Audit_Log::record('event',$id,'external_editorial_review','external_manual',$basis) || false===$wpdb->query('COMMIT')){return BadAround_External_Report_Contract::error('review_storage');}
 			$committed=true;return true;
@@ -336,3 +343,137 @@ class BadAround_External_Report_Admin {
 	}
 }
 
+
+/** Manual enrichment. Evidence and redacted candidate remain outside the web root until B3. */
+class BadAround_External_Report_Enrichment {
+	const META='_ba_external_enrichment_v1';
+	private static function error($code){return BadAround_External_Report_Contract::error('enrichment_'.$code);}
+	private static function root(){
+		$base=defined('BADAROUND_PRIVATE_MEDIA_PATH')?BADAROUND_PRIVATE_MEDIA_PATH:dirname(untrailingslashit(ABSPATH)).'/badaround-private-media';
+		$base=apply_filters('badaround_private_media_path',$base);
+		if(!is_string($base) || !wp_mkdir_p($base)){return false;}
+		$real=realpath($base);if(!$real){return false;}
+		foreach(array(ABSPATH,WP_CONTENT_DIR) as $public){$public=realpath($public);if($public && str_starts_with($real.'/',rtrim($public,'/').'/')){return false;}}
+		return $real;
+	}
+	private static function rectangle($r,$w,$h){
+		return is_array($r) && count($r)===4 && array_keys($r)===array(0,1,2,3)
+			&& count(array_filter($r,'is_int'))===4 && $r[0]>=0 && $r[1]>=0 && $r[2]>0 && $r[3]>0 && $r[0]+$r[2]<=$w && $r[1]+$r[3]<=$h;
+	}
+	public function save($id,$input){
+		global $wpdb;
+		if(!BadAround_External_Report_Intake::permitted() || !current_user_can('ba_view_private_media') || !current_user_can('edit_post',$id)){return self::error('forbidden');}
+		$keys=array('expected_event_hash','reopen_for_review','lat','lng','geo_source_url','geo_note','evidence_base64','evidence_sha256','crop','redaction');
+		if(!is_array($input) || array_diff(array_keys($input),$keys) || count(array_diff($keys,array_keys($input))) || $input['reopen_for_review']!==true
+			|| !is_string($input['expected_event_hash']) || !preg_match('/^[a-f0-9]{64}$/',$input['expected_event_hash'])
+			|| !BadAround_Public_Geo_Projection::pair($input['lat'],$input['lng'])
+			|| (float)$input['lat']<35 || (float)$input['lat']>48 || (float)$input['lng']<6 || (float)$input['lng']>19
+			|| !is_string($input['geo_source_url']) || strlen($input['geo_source_url'])>2048 || !wp_http_validate_url($input['geo_source_url']) || wp_parse_url($input['geo_source_url'],PHP_URL_SCHEME)!=='https'
+			|| !is_string($input['geo_note']) || strlen($input['geo_note'])<20 || strlen($input['geo_note'])>1500
+			|| !is_string($input['evidence_base64']) || strlen($input['evidence_base64'])>2800000
+			|| !is_string($input['evidence_sha256']) || !preg_match('/^[a-f0-9]{64}$/',$input['evidence_sha256'])){return self::error('input');}
+		$bytes=base64_decode($input['evidence_base64'],true);
+		$size=is_string($bytes)?strlen($bytes):0;
+		if(!$size || $size>2097152 || !hash_equals($input['evidence_sha256'],hash('sha256',$bytes))){return self::error('evidence');}
+		$info=@getimagesizefromstring($bytes);
+		if(!$info || !in_array($info['mime'],array('image/png','image/jpeg','image/webp'),true) || $info[0]*$info[1]>12000000
+			|| !self::rectangle($input['crop'],$info[0],$info[1]) || !self::rectangle($input['redaction'],$input['crop'][2],$input['crop'][3])
+			|| !function_exists('imagecreatefromstring')){return self::error('image');}
+		$fingerprint=hash('sha256',wp_json_encode(array_diff_key($input,array_flip(array('expected_event_hash','evidence_base64')))));
+		$base=self::root();if(!$base){return self::error('private_storage');}
+		foreach(array($wpdb->posts,$wpdb->postmeta,$wpdb->prefix.'ba_reports',$wpdb->prefix.'ba_report_media',$wpdb->prefix.'ba_audit_log') as $table){
+			if('InnoDB'!==$wpdb->get_var($wpdb->prepare('SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=%s',$table))){return self::error('transaction');}}
+		if(false===$wpdb->query('START TRANSACTION')){return self::error('transaction');}
+		$committed=false;$files=array();
+		try{
+			$post=$wpdb->get_row($wpdb->prepare("SELECT ID,post_type,post_status FROM {$wpdb->posts} WHERE ID=%d FOR UPDATE",$id));clean_post_cache($id);
+			$row=BadAround_External_Report_Admin::report($id);
+			if(!$post || $post->post_type!=='ba_evento' || !$row || !hash_equals($row->payload_hash,hash('sha256',$row->content_original))){return self::error('source');}
+			$old=get_post_meta($id,self::META,true);
+			if($old){return ($old['fingerprint']??'')===$fingerprint?array('event_id'=>$id,'media_id'=>$old['media_id'],'duplicate'=>true):self::error('already_enriched');}
+			$payload=json_decode($row->content_original,true);
+			if(($payload['provenance']['evidence_sha256']??'')!==$input['evidence_sha256']){return self::error('source_evidence');}
+			$count=$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}ba_report_media WHERE event_id=%d",$id));
+			if(!empty($wpdb->last_error) || (int)$count || has_post_thumbnail($id)){return self::error('existing_media');}
+			$result=(new BadAround_Publication_Service())->reopen_external_for_enrichment($id,$input['expected_event_hash']);if(is_wp_error($result)){return $result;}
+			$dir=$base.'/report-'.(int)$row->id;
+			if(!wp_mkdir_p($dir) || !str_starts_with((realpath($dir)?:'').'/',rtrim($base,'/').'/')){return self::error('private_storage');}
+			$token=wp_generate_uuid4();$original=$dir.'/'.$token.'-evidence.'.($info['mime']==='image/png'?'png':($info['mime']==='image/webp'?'webp':'jpg'));
+			$target=$dir.'/'.$token.'-redacted.jpg';$files=array($original,$target);
+			if(file_put_contents($original,$bytes,LOCK_EX)!==$size){return self::error('private_storage');}@chmod($original,0600);
+			$source=@imagecreatefromstring($bytes);if(!$source){return self::error('image');}
+			$c=$input['crop'];$crop=imagecrop($source,array('x'=>$c[0],'y'=>$c[1],'width'=>$c[2],'height'=>$c[3]));imagedestroy($source);
+			if(!$crop){return self::error('image');}
+			$r=$input['redaction'];imagefilledrectangle($crop,$r[0],$r[1],$r[0]+$r[2]-1,$r[1]+$r[3]-1,imagecolorallocate($crop,30,30,30));
+			$written=imagejpeg($crop,$target,90);imagedestroy($crop);if(!$written){return self::error('image');}@chmod($target,0600);
+			$checksum=hash_file('sha256',$target);
+			$media=(new BadAround_External_Enrichment_Media())->insert_candidate((int)$row->id,$id,$target,$checksum);
+			if(!$media){return self::error('storage');}
+			$m=array('version'=>'external-enrichment/v1','fingerprint'=>$fingerprint,'source_hash'=>$row->payload_hash,'original_sha256'=>$input['evidence_sha256'],
+				'original_key'=>basename($original),'candidate_sha256'=>$checksum,'media_id'=>$media,'crop'=>$input['crop'],'redaction'=>$input['redaction'],
+				'geo_source_url'=>esc_url_raw($input['geo_source_url']),'geo_note'=>sanitize_textarea_field($input['geo_note']),
+				'anchor_lat'=>(float)$input['lat'],'anchor_lng'=>(float)$input['lng'],'coordinate_semantics'=>'approximate_geocoded_anchor_not_verified_incident_point','by'=>get_current_user_id(),'at'=>gmdate('Y-m-d\TH:i:s\Z'));
+			if(false===$wpdb->update($wpdb->prefix.'ba_reports',array('exact_lat'=>(float)$input['lat'],'exact_lng'=>(float)$input['lng'],'updated_at'=>current_time('mysql',true)),array('id'=>(int)$row->id))){return self::error('storage');}
+			update_post_meta($id,self::META,$m);update_post_meta($id,'_ba_public_location_precision','f32-c6');
+			$before=get_post_meta($id,BadAround_Public_Geo_Contract::DECISION_META,true);
+			$decision=array('version'=>BadAround_Public_Geo_Contract::VERSION,'policy_version'=>BadAround_Public_Geo_Contract::VERSION,'mode'=>'approximate_area',
+				'reason'=>'Localizzazione approssimativa della zona indicata nella fonte; nessun punto esatto del furto accertato.','reason_code'=>'privacy','decided_at'=>$m['at'],'decided_by'=>get_current_user_id(),'exact_confirmed'=>false);
+			if(is_wp_error(BadAround_Public_Geo_Contract::validate_decision($payload['canonical']['location'],$decision))){return self::error('geo');}
+			update_post_meta($id,BadAround_Public_Geo_Contract::DECISION_META,$decision);
+			if(get_post_meta($id,self::META,true)!==$m || get_post_meta($id,BadAround_Public_Geo_Contract::DECISION_META,true)!==$decision
+				|| !BadAround_Audit_Log::geographic_decision($id,$payload['canonical']['location'],$before,$decision)
+				|| !BadAround_Audit_Log::record('event',$id,'external_enrichment_received','external_intake','Foto candidata oscurata e zona approssimativa: verifica diritti e nuova moderazione richieste.')){return self::error('storage');}
+			if(false===$wpdb->query('COMMIT')){return self::error('storage');}$committed=true;
+			return array('event_id'=>$id,'report_id'=>(int)$row->id,'media_id'=>$media,'status'=>'pending','geo'=>'approximate_area','radius_m'=>1000,'media'=>'private_candidate_review_required');
+		}finally{if(!$committed){$wpdb->query('ROLLBACK');foreach($files as $file){if(is_file($file)){unlink($file);}}}clean_post_cache($id);}
+	}
+	public static function gate($id,$row,$review){
+		global $wpdb;$m=get_post_meta($id,self::META,true);$d=get_post_meta($id,BadAround_Public_Geo_Contract::DECISION_META,true);
+		if(($m['source_hash']??'')!==$row->payload_hash || ($m['version']??'')!=='external-enrichment/v1' || ($d['mode']??'')!=='approximate_area'
+			|| get_post_meta($id,'_ba_public_location_precision',true)!=='f32-c6' || empty($review['media_reviewed'])){return self::error('review_required');}
+		$anchor=$wpdb->get_row($wpdb->prepare("SELECT exact_lat,exact_lng FROM {$wpdb->prefix}ba_reports WHERE id=%d AND event_id=%d",$row->id,$id));
+		if(!empty($wpdb->last_error) || !$anchor || !BadAround_Public_Geo_Projection::pair($anchor->exact_lat,$anchor->exact_lng) || abs((float)$anchor->exact_lat-($m['anchor_lat']??999))>0.0000001 || abs((float)$anchor->exact_lng-($m['anchor_lng']??999))>0.0000001){return self::error('geo');}
+		$rows=$wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}ba_report_media WHERE event_id=%d",$id));
+		if(!empty($wpdb->last_error) || count($rows)!==1){return self::error('media');}$media=$rows[0];
+		if((int)$media->id!==(int)$m['media_id'] || (int)$media->report_id!==(int)$row->id || $media->checksum!==$m['candidate_sha256'] || $media->deleted_at
+			|| $media->sensitivity!=='private' || $media->redaction_status!=='completed' || !in_array($media->review_status,array('received','approved_public','published'),true)) {return self::error('media');}
+		$file=(new BadAround_Media_Repository())->private_file_for_media_id((int)$media->id);
+		if(is_wp_error($file) || !hash_equals($m['candidate_sha256'],hash_file('sha256',$file['path']))){return self::error('media');}
+		$thumbnail=(int)get_post_thumbnail_id($id);
+		return !$thumbnail || $thumbnail===(int)$media->public_attachment_id ? true : self::error('media');
+	}
+	public static function render($id){
+		$m=get_post_meta($id,self::META,true);if(!$m){echo '<p>Localizzazione: solo territorio, senza marker. Nessuna foto acquisita.</p>';return;}
+		echo '<p><strong>Zona predisposta: area approssimativa, raggio 1.000 m.</strong> Il marker sarà generato dal Publication Service dopo la nuova approvazione. Il riferimento geografico non certifica il punto esatto del fatto.</p>';
+		echo '<p>'.esc_html($m['geo_note']).' — <a target="_blank" rel="noopener noreferrer" href="'.esc_url($m['geo_source_url']).'">Fonte geografica</a></p>';
+		if(current_user_can('ba_view_private_media')){
+			$url=wp_nonce_url(admin_url('admin-post.php?action=ba_private_media&media_id='.(int)$m['media_id']),'ba_private_media_'.(int)$m['media_id']);
+			echo '<p><a target="_blank" rel="noopener" href="'.esc_url($url).'">Verifica foto candidata con targa oscurata</a></p><img style="max-width:480px;width:100%;height:auto" src="'.esc_url($url).'" alt="Foto candidata privata del veicolo, con targa oscurata">';
+			$original=wp_nonce_url(admin_url('admin-post.php?action=ba_external_evidence&event_id='.(int)$id),'ba_external_evidence_'.$id);
+			echo '<p><a target="_blank" rel="noopener" href="'.esc_url($original).'">Screenshot originale riservato</a></p>';
+		}
+		if(in_array(get_post_status($id),array('draft','pending'),true)){
+			echo '<p><label><input type="checkbox" name="media_reviewed" value="1" form="ba-external-review-form" required> Ho verificato la foto candidata, l’oscuramento degli identificativi e il presupposto documentato per il riutilizzo della fotografia.</label></p>';
+		}
+	}
+	public static function serve_evidence(){
+		$id=absint($_GET['event_id']??0);check_admin_referer('ba_external_evidence_'.$id);
+		if(!BadAround_External_Report_Intake::permitted() || !current_user_can('ba_view_private_media') || !current_user_can('edit_post',$id)){wp_die('Accesso non autorizzato.','',array('response'=>403));}
+		$m=get_post_meta($id,self::META,true);$row=BadAround_External_Report_Admin::report($id);$base=self::root();
+		$file=$row && $base && !empty($m['original_key'])?$base.'/report-'.(int)$row->id.'/'.basename($m['original_key']):'';
+		if(!$file || !is_file($file) || !hash_equals($m['original_sha256'],hash_file('sha256',$file))){wp_die('File non disponibile.');}
+		nocache_headers();header('Cache-Control: private, no-store');header('X-Content-Type-Options: nosniff');header('Content-Type: '.wp_get_image_mime($file));readfile($file);exit;
+	}
+}
+
+/** Candidate derivative only; source screenshot is retained separately in private storage. */
+class BadAround_External_Enrichment_Media {
+	public function insert_candidate($report,$event,$path,$checksum){
+		global $wpdb;
+		$result=$wpdb->insert($wpdb->prefix.'ba_report_media',array('report_id'=>$report,'event_id'=>$event,'original_storage_key'=>basename($path),
+			'original_filename'=>'foto-veicolo-targa-oscurata.jpg','mime_type'=>'image/jpeg','file_size'=>filesize($path),'checksum'=>$checksum,
+			'media_type'=>'image','review_status'=>'received','sensitivity'=>'private','redaction_required'=>1,'redaction_status'=>'completed',
+			'exif_removed'=>1,'created_at'=>current_time('mysql',true)));
+		return $result===false?0:(int)$wpdb->insert_id;
+	}
+}

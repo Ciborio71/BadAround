@@ -15,6 +15,31 @@ class BadAround_Publication_Service {
 	private $b3_event = 0;
 	private static $geo_writer = 0;
 
+	/** Withdraw an external event for explicit enrichment and fresh B2/B3 review.
+	 * Caller owns the surrounding InnoDB transaction; this method never publishes.
+	 */
+	public function reopen_external_for_enrichment( $id, $revision ) {
+		if ( ! BadAround_External_Report_Intake::permitted() || ! current_user_can('edit_post',$id)
+			|| ! hash_equals(BadAround_External_Report_Contract::event_hash($id),$revision)
+			|| ! BadAround_External_Report_Admin::report($id)
+			|| ! in_array(get_post_status($id),array('draft','pending','publish'),true) ) {
+			return new WP_Error('ba_external_enrichment_conflict','Evento modificato o non aggiornabile.');
+		}
+		$before=get_post_meta($id,'_ba_moderation_status',true);
+		$result=wp_update_post(array('ID'=>$id,'post_status'=>'pending'),true);
+		if(is_wp_error($result) || get_post_status($id)!=='pending'){return new WP_Error('ba_external_enrichment_storage','Aggiornamento non riuscito.');}
+		self::$geo_writer=(int)$id;
+		try {
+			foreach(array('_ba_public_geo','_ba_public_geo_proof','_ba_public_lat','_ba_public_lng','_ba_public_radius_m') as $key){delete_post_meta($id,$key);if(''!==get_post_meta($id,$key,true)){return new WP_Error('ba_external_enrichment_storage','Proiezione non rimossa.');}}
+		} finally {self::$geo_writer=0;}
+		update_post_meta($id,'_ba_moderation_status','new');
+		delete_post_meta($id,BadAround_External_Report_Admin::REVIEW_META);
+		if(get_post_meta($id,'_ba_moderation_status',true)!=='new' || !BadAround_Audit_Log::transition('event',$id,'external_enrichment_reopened',$before,'new','external_intake','Integrazione manuale GEO e foto: nuova moderazione obbligatoria.')){
+			return new WP_Error('ba_external_enrichment_storage','Audit non registrato.');
+		}
+		return true;
+	}
+
 	public static function register_geo_guards() {
 		foreach ( array( 'add_post_metadata', 'update_post_metadata', 'delete_post_metadata' ) as $hook ) {
 			add_filter( $hook, array( __CLASS__, 'guard_geo_write' ), 999, 5 );

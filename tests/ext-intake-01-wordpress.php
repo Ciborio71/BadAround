@@ -133,5 +133,56 @@ ext_check($response->get_status()===401 || $response->get_status()===403,'Privat
 wp_set_current_user(1);
 $native=$input;$native['schema_version']='badaround-report/external-v1';
 ext_check(!BadAround_Report_Version_Registry::supported('badaround-report/external-v1'),'Native version registry does not accept external submissions');
+// Enrichment from a synthetic capture; no external photo or rights assertion used.
+$private=ABSPATH.'../external-private-ci';wp_mkdir_p($private);
+add_filter('badaround_private_media_path',function()use($private){return $private;});
+$img=imagecreatetruecolor(120,100);imagefill($img,0,0,imagecolorallocate($img,180,0,0));imagefilledrectangle($img,25,25,64,44,imagecolorallocate($img,255,255,255));
+ob_start();imagepng($img);$capture=ob_get_clean();imagedestroy($img);
+$enrich_input=$input;$enrich_input['source_reference']='group:123456:post:987659';$enrich_input['source_url']='https://www.facebook.com/groups/123456/permalink/987659/';$enrich_input['evidence_sha256']=hash('sha256',$capture);
+$created=$svc->ingest($enrich_input);$eid=$created['event_id'];$erid=$created['report_id'];$immutable=ext_row($erid)->content_original;
+$enrich_review=array('basis'=>'other_documented_basis','reason'=>'Synthetic CI evidence only.','public_hash'=>BadAround_External_Report_Contract::public_hash($eid));
+$admin->save_review($eid,$enrich_review);(new BadAround_Moderation_Service())->transition($eid,'approved');
+ext_check($publication->publish($eid)===true,'Synthetic source initially published territory-only');
+$enrichment=array('expected_event_hash'=>BadAround_External_Report_Contract::event_hash($eid),'reopen_for_review'=>true,'lat'=>41.944,'lng'=>12.5525,
+ 'geo_source_url'=>'https://www.turismoroma.it/it/luoghi/antichi-talenti-mercato-vintage','geo_note'=>'Synthetic anchor for contract test; not an incident point.',
+ 'evidence_base64'=>base64_encode($capture),'evidence_sha256'=>hash('sha256',$capture),'crop'=>array(10,10,100,80),'redaction'=>array(15,15,40,20));
+$enricher=new BadAround_External_Report_Enrichment();
+wp_set_current_user(0);ext_check(is_wp_error($enricher->save($eid,$enrichment)),'Enrichment rejects anonymous callers');wp_set_current_user(1);
+$bad=$enrichment;$bad['evidence_sha256']=str_repeat('0',64);
+ext_check(is_wp_error($enricher->save($eid,$bad)) && get_post_status($eid)==='publish','Wrong capture hash preserves published event');
+$bad=$enrichment;$bad['redaction']=array(0,0,999,999);
+ext_check(is_wp_error($enricher->save($eid,$bad)),'Out of bounds image edit rejected');
+$bad=$enrichment;$bad['expected_event_hash']=str_repeat('0',64);
+ext_check(is_wp_error($enricher->save($eid,$bad)) && get_post_status($eid)==='publish','Stale enrichment cannot withdraw event');
+$old_hash=BadAround_External_Report_Contract::public_hash($eid);
+$wpdb->suppress_errors(true);add_filter('query',$fail);$broken=$enricher->save($eid,$enrichment);remove_filter('query',$fail);$wpdb->suppress_errors(false);
+clean_post_cache($eid);
+ext_check(is_wp_error($broken) && get_post_status($eid)==='publish' && BadAround_External_Report_Contract::public_hash($eid)===$old_hash,'Enrichment audit failure rolls back event and review');
+$updated=$enricher->save($eid,$enrichment);
+ext_check(!is_wp_error($updated),'Enrichment succeeds '.ext_code($updated));
+ext_check(get_post_status($eid)==='pending' && get_post_meta($eid,'_ba_moderation_status',true)==='new','Enrichment withdraws event for fresh moderation');
+ext_check(get_post_meta($eid,'_ba_public_geo',true)==='' && get_post_meta($eid,'_ba_public_lat',true)==='' && !has_post_thumbnail($eid),'No premature marker or public image');
+ext_check(ext_row($erid)->content_original===$immutable && ext_row($erid)->consent_privacy===null,'Original capture contract and consents unchanged');
+$manifest=get_post_meta($eid,BadAround_External_Report_Enrichment::META,true);
+$private_file=(new BadAround_Media_Repository())->private_file_for_media_id($updated['media_id']);
+ext_check(!is_wp_error($private_file) && !str_starts_with(realpath($private_file['path']),realpath(ABSPATH)),'Redacted candidate stored outside public WordPress');
+$check_image=imagecreatefromjpeg($private_file['path']);$rgb=imagecolorat($check_image,30,25);imagedestroy($check_image);
+ext_check((($rgb>>16)&255)<50 && (($rgb>>8)&255)<50 && ($rgb&255)<50,'Candidate plate region actually obscured');
+ext_check(hash_file('sha256',$private.'/report-'.$erid.'/'.$manifest['original_key'])===hash('sha256',$capture),'Original screenshot retained privately byte exact');
+$dupe=$enricher->save($eid,$enrichment);
+ext_check(($dupe['duplicate']??false) && $dupe['media_id']===$updated['media_id'],'Enrichment retry does not create duplicate media');
+$enrich_review['public_hash']=BadAround_External_Report_Contract::public_hash($eid);
+ext_check(is_wp_error($admin->save_review($eid,$enrich_review)),'Photo requires separate explicit rights and redaction review');
+$enrich_review['media_reviewed']='1';
+ext_check($admin->save_review($eid,$enrich_review)===true,'Synthetic photo review recorded');
+ext_check(is_wp_error($publication->publish($eid)) && get_post_status($eid)==='pending','Enrichment review does not bypass B2 approval');
+ext_check((new BadAround_Moderation_Service())->transition($eid,'approved')===true,'Fresh normal B2 approval required');
+$published=$publication->publish($eid);
+ext_check($published===true,'B3 publishes enriched synthetic candidate '.ext_code($published));
+$view=BadAround_Public_Geo_Projection::public_view($eid);
+ext_check(is_array($view) && $view['mode']==='approximate_area' && $view['radius_m']==1000 && abs($view['lat']-41.944)>0.00001,'Public marker is generalized and sealed by B3');
+ext_check(has_post_thumbnail($eid),'Only reviewed derivative becomes featured image');
+ext_check(ext_row($erid)->content_original===$immutable,'Enriched publication preserves immutable source');
+
 echo 'EXT_INTAKE_01_WORDPRESS=PASS checks='.$GLOBALS['checks']."\n";
 

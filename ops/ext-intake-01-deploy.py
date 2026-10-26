@@ -1,11 +1,11 @@
 """Only the authorized EXT-INTAKE-01 Core delta. Strict TLS, custody, atomic files, rollback."""
 import ftplib, hashlib, io, json, os, pathlib, ssl, subprocess, sys
-BASE = "1d5e4bb9c1420022416867ea1a71f3e8dd2ada1f"
+BASE = "72ae7ab81fb288adc947f0b49b101d2e91948f57"
 ROOT = "/httpdocs/wp-content/plugins/badaround-core/"
 PREFIX = "wordpress/plugins/badaround-core/"
 # New definitions before loader; activate hooks LAST. Rollback in reverse order.
 TARGETS = ["includes/class-badaround-external-report-intake.php", "includes/class-badaround-publication-service.php", "badaround-core.php", "includes/class-badaround-core.php"]
-PASSIVE = ["includes/class-badaround-report-schema.php", "includes/class-badaround-report-repository.php", "includes/class-badaround-report-persistence-service.php", "includes/class-badaround-moderation-admin.php", "includes/class-badaround-moderation-service.php", "includes/class-badaround-public-geo-contract.php", "includes/class-badaround-public-geo-projection.php", "includes/class-badaround-installer.php"]
+PASSIVE = ["includes/class-badaround-report-schema.php", "includes/class-badaround-report-repository.php", "includes/class-badaround-report-persistence-service.php", "includes/class-badaround-moderation-admin.php", "includes/class-badaround-moderation-service.php", "includes/class-badaround-public-geo-contract.php", "includes/class-badaround-public-geo-projection.php", "includes/class-badaround-installer.php", "includes/class-badaround-media-repository.php", "includes/class-badaround-native-media-fence.php"]
 E=pathlib.Path("evidence"); E.mkdir(exist_ok=True)
 def baseline(p):
     r=subprocess.run(["git","show",BASE+":"+PREFIX+p],capture_output=True)
