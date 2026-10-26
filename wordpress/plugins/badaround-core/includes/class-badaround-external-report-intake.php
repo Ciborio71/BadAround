@@ -16,7 +16,7 @@ class BadAround_External_Report_Contract {
 
 	public static function prepare( $input ) {
 		if ( ! is_array( $input ) ) { return self::error( 'invalid_input' ); }
-		$keys = array( 'source_platform', 'source_url', 'source_reference', 'evidence_sha256', 'original_text', 'title', 'description', 'category', 'subtype', 'territory_id', 'area_label', 'date_start', 'date_end', 'period', 'date_note', 'exact_address', 'plate', 'vehicle_type', 'vehicle_make', 'vehicle_model', 'vehicle_color', 'existing_event_id', 'expected_event_hash' );
+		$keys = array( 'source_platform', 'source_url', 'source_reference', 'evidence_sha256', 'original_text', 'title', 'description', 'category', 'subtype', 'territory_id', 'area_label', 'date_start', 'date_end', 'period', 'date_note', 'exact_address', 'plate', 'vehicle_type', 'vehicle_make', 'vehicle_model', 'vehicle_color', 'existing_event_id', 'expected_event_hash', 'adoption_reset_approval' );
 		if ( array_diff( array_keys( $input ), $keys ) ) { return self::error( 'unknown_field' ); }
 		$limits = array( 'source_platform'=>32, 'source_url'=>2048, 'source_reference'=>255, 'evidence_sha256'=>64, 'original_text'=>12000, 'title'=>180, 'description'=>6000, 'category'=>64, 'subtype'=>64, 'area_label'=>191, 'date_start'=>10, 'date_end'=>10, 'period'=>32, 'date_note'=>500, 'exact_address'=>500, 'plate'=>32, 'vehicle_type'=>32, 'vehicle_make'=>100, 'vehicle_model'=>100, 'vehicle_color'=>32, 'expected_event_hash'=>64 );
 		$data = array();
@@ -30,6 +30,8 @@ class BadAround_External_Report_Contract {
 			if ( ! is_int( $value ) || $value < 0 ) { return self::error( 'invalid_' . $key ); }
 			$data[$key] = $value;
 		}
+		$data['adoption_reset_approval']=$input['adoption_reset_approval']??false;
+		if(!is_bool($data['adoption_reset_approval']) || ($data['adoption_reset_approval'] && !$data['existing_event_id'])){return self::error('adoption_reset_flag');}
 		foreach ( array( 'source_url', 'source_reference', 'title', 'description', 'original_text', 'area_label' ) as $key ) {
 			if ( '' === trim( $data[$key] ) ) { return self::error( 'missing_' . $key ); }
 		}
@@ -152,7 +154,7 @@ class BadAround_External_Report_Intake {
 			$transaction = true;
 			$existing = $repo->find( $data['identity'] );
 			if ( ! empty( $wpdb->last_error ) ) { return BadAround_External_Report_Contract::error( 'storage' ); }
-			$fingerprint = hash( 'sha256', wp_json_encode( array_diff_key( $data, array_flip( array( 'existing_event_id', 'expected_event_hash' ) ) ) ) );
+			$fingerprint = hash( 'sha256', wp_json_encode( array_diff_key( $data, array_flip( array( 'existing_event_id', 'expected_event_hash', 'adoption_reset_approval' ) ) ) ) );
 			if ( $existing ) {
 				$stored = json_decode( $existing->content_original, true );
 				if ( ! empty( $existing->deleted_at ) || ( $stored['provenance']['identity'] ?? '' ) !== $data['identity'] ) { return BadAround_External_Report_Contract::error( 'identity_conflict' ); }
@@ -163,12 +165,15 @@ class BadAround_External_Report_Intake {
 				return array( 'report_id'=>(int)$existing->id, 'event_id'=>$event_id, 'duplicate'=>true );
 			}
 			$event_id = $data['existing_event_id'];
+			$reset_approval=false;
 			if ( $event_id ) {
 				$post = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->posts} WHERE ID=%d FOR UPDATE", $event_id ) );
 				clean_post_cache( $event_id );
+				$previous_moderation=get_post_meta($event_id,'_ba_moderation_status',true);
+				$reset_approval='approved'===$previous_moderation && $data['adoption_reset_approval'];
 				if ( ! $post || 'ba_evento' !== $post->post_type || ! in_array( $post->post_status, array('draft','pending'), true )
 					|| ! current_user_can( 'edit_post', $event_id ) || get_post_meta( $event_id, '_ba_primary_report_id', true )
-					|| ! in_array( get_post_meta( $event_id, '_ba_moderation_status', true ), array('','new'), true )
+					|| (!in_array($previous_moderation,array('','new'),true) && !$reset_approval)
 					|| ! hash_equals( $data['expected_event_hash'], BadAround_External_Report_Contract::event_hash( $event_id ) )
 					|| (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}ba_reports WHERE event_id=%d", $event_id ) ) ) { return BadAround_External_Report_Contract::error( 'adoption_conflict' ); }
 				// Explicit adoption only: existing source note must match the supplied URL.
@@ -185,7 +190,7 @@ class BadAround_External_Report_Intake {
 				'consents'=>array('status'=>'not_collected'), 'media'=>array('items'=>array()), 'social'=>array('status'=>'blocked') );
 			$envelope = array( 'schema_version'=>BadAround_External_Report_Contract::ENVELOPE, 'canonical'=>$canonical, 'input_hash'=>$fingerprint,
 				'provenance'=>array('source_type'=>'external','source_platform'=>$data['source_platform'],'source_url'=>$data['source_url'],'source_reference'=>$data['source_reference'],'identity'=>$data['identity'],'import_mode'=>'manual_capture','imported_at'=>$now,'imported_by'=>(int)get_current_user_id(),'evidence_sha256'=>$data['evidence_sha256'],'source_access'=>'unknown','evidence_access'=>'supplied_capture'),
-				'external_governance'=>array('version'=>'external-editorial/v1','state'=>'needs_review','media'=>'excluded','social'=>'blocked'),
+				'external_governance'=>array('version'=>'external-editorial/v1','state'=>'needs_review','media'=>'excluded','social'=>'blocked','orphan_approval_reset'=>$reset_approval),
 				'retention'=>array('review_due_at'=>gmdate('Y-m-d\TH:i:s\Z', time()+90*DAY_IN_SECONDS)) );
 			$report_id = $repo->insert_external( $data, $canonical, $envelope );
 			if ( ! $report_id ) { return BadAround_External_Report_Contract::error( 'report_storage' ); }
@@ -211,6 +216,7 @@ class BadAround_External_Report_Intake {
 			update_post_meta($event_id,BadAround_Public_Geo_Contract::DECISION_META,$decision);
 			if ( get_post_meta($event_id,BadAround_Public_Geo_Contract::DECISION_META,true)!==$decision ) { return BadAround_External_Report_Contract::error('geo_storage'); }
 			if ( ! BadAround_Audit_Log::record('report',$report_id,'external_report_received','external_manual') || ! BadAround_Audit_Log::record('event',$event_id,'external_event_pending','external_manual') ) { return BadAround_External_Report_Contract::error('audit'); }
+			if($reset_approval && !BadAround_Audit_Log::transition('event',$event_id,'external_orphan_approval_reset','approved','new','external_manual','Nuovo report sorgente: precedente approvazione priva di report non riutilizzata.')){return BadAround_External_Report_Contract::error('audit');}
 			// Provenance now belongs solely to the reserved report, not event metadata.
 			delete_post_meta($event_id,'_ba_admin_test_provenance');
 			if ( get_post_status($event_id)!=='pending' || false===$wpdb->query('COMMIT') ) { return BadAround_External_Report_Contract::error('commit'); }
@@ -241,7 +247,7 @@ class BadAround_External_Report_Admin {
 		register_rest_route('badaround/v1','/external-reports/(?P<event>[0-9]+)/preflight',array('methods'=>'GET','permission_callback'=>array('BadAround_External_Report_Intake','permitted'),'callback'=>function($request){
 			$id=(int)$request['event'];$post=get_post($id);
 			if(!$post || 'ba_evento'!==$post->post_type || !current_user_can('edit_post',$id)){return BadAround_External_Report_Contract::error('event');}
-			return array('event_id'=>$id,'status'=>$post->post_status,'event_hash'=>BadAround_External_Report_Contract::event_hash($id),'report_id'=>(int)get_post_meta($id,'_ba_primary_report_id',true));
+			return array('event_id'=>$id,'status'=>$post->post_status,'moderation_status'=>get_post_meta($id,'_ba_moderation_status',true),'event_hash'=>BadAround_External_Report_Contract::event_hash($id),'report_id'=>(int)get_post_meta($id,'_ba_primary_report_id',true));
 		}));
 	}
 	public static function report($event_id) {

@@ -84,6 +84,24 @@ ext_check(!get_post_meta($draft,'_ba_admin_test_provenance',true),'Provenance re
 $oldrow=ext_row($a['report_id']);
 ext_check(json_decode($oldrow->content_original,true)['provenance']['source_url']===$adopt['source_url'],'Provenance moved into private report');
 
+// A previous approval of an orphan draft cannot be carried over to a new report.
+$orphan_input=$input;$orphan_input['source_reference']='group:123456:post:987657';$orphan_input['source_url']='https://www.facebook.com/groups/123456/permalink/987657/';
+$orphan=wp_insert_post(array('post_type'=>'ba_evento','post_status'=>'draft','post_title'=>'Approved orphan fixture','post_content'=>'Before source intake'));
+update_post_meta($orphan,'_ba_admin_test_provenance',array('source_url'=>$orphan_input['source_url']));
+ext_check((new BadAround_Moderation_Service())->transition($orphan,'approved')===true,'Synthetic orphan approved through existing moderator');
+$orphan_input['existing_event_id']=$orphan;$orphan_input['expected_event_hash']=BadAround_External_Report_Contract::event_hash($orphan);
+ext_check(ext_code($svc->ingest($orphan_input))==='ba_external_adoption_conflict','Approved orphan not silently adopted');
+ext_check(get_post_meta($orphan,'_ba_moderation_status',true)==='approved','Rejected implicit reset preserves approval');
+$orphan_input['adoption_reset_approval']=true;
+$recovered=$svc->ingest($orphan_input);
+ext_check(!is_wp_error($recovered) && $recovered['event_id']===$orphan && get_post_meta($orphan,'_ba_moderation_status',true)==='new' && get_post_status($orphan)==='pending','Explicit orphan recovery requires fresh moderation');
+$audit_before=(int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}ba_audit_log WHERE object_id=%d AND action='external_orphan_approval_reset'",$orphan));
+ext_check($audit_before===1,'Approval reset is audited');
+$orphan_retry=$svc->ingest($orphan_input);
+ext_check(($orphan_retry['event_id']??0)===$orphan && (int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}ba_audit_log WHERE object_id=%d AND action='external_orphan_approval_reset'",$orphan))===1,'Recovery retry does not reset or audit twice');
+$no_published=$orphan_input;$no_published['source_reference']='group:123456:post:987658';$no_published['source_url']='https://www.facebook.com/groups/123456/permalink/987658/';$no_published['existing_event_id']=$id;$no_published['expected_event_hash']=BadAround_External_Report_Contract::event_hash($id);
+ext_check(ext_code($svc->ingest($no_published))==='ba_external_adoption_conflict','Explicit recovery cannot overwrite published or linked event');
+
 // Test rollback after event update (audit failure) with real InnoDB transactions.
 $rollback=$input;$rollback['source_reference']='group:123456:post:987656';$rollback['source_url']='https://www.facebook.com/groups/123456/permalink/987656/';
 $rollback_id=wp_insert_post(array('post_type'=>'ba_evento','post_status'=>'draft','post_title'=>'Rollback fixture','post_content'=>'Original'));

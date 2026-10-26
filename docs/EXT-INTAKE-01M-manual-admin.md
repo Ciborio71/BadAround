@@ -6,7 +6,7 @@ An authenticated administrator sends a reviewed extraction to POST /badaround/v1
 
 The service stores original text, source URL and reference, capture hash, import actor/time, private address/plate and uncertainty about date ranges in the reserved report. No author identity, native consent flag, consent timestamp or IP is synthesized. Only public candidate text and a masked plate enter the event projection.
 
-Creation and adoption commit a real report, the bidirectional primary link, existing canonical taxonomy/territory, audit and a pending event together. Named source lock, unique identity and full identity/fingerprint comparison make retries idempotent and reject changed sources. Adoption additionally requires an unlinked draft/pending event, an exact event revision and matching private provenance note. Reports and canonical snapshots are immutable.
+Creation and adoption commit a real report, the bidirectional primary link, existing canonical taxonomy/territory, audit and a pending event together. Named source lock, unique identity and full identity/fingerprint comparison make retries idempotent and reject changed sources. Adoption additionally requires an unlinked draft/pending event, an exact event revision and matching private provenance note. An already approved orphan can be adopted only with an explicit adoption_reset_approval acknowledgement: its prior approval is retained in audit, the event returns to new/pending, and fresh moderation is required. Published or linked events cannot use this recovery. Reports and canonical snapshots are immutable.
 
 First version uses explicit territory_only GEO, no remote downloads and no public originals or attached images. Social is not requested. The existing Publication Service remains the only publisher. An independent, nonce-protected editorial review records the documented reuse basis and binds the decision to source and public content hashes. Editing content invalidates that review. B2 approval is still required. The new module never publishes.
 
@@ -24,7 +24,7 @@ Real external fixtures remain pending. Production publication of #374 is not per
 
 ## Deployment
 
-Baseline: release/production-mvp-01 at 84ae8fc6d172c5409e4b3a93f522ca2e41c32074.
+Initial baseline: release/production-mvp-01 at 84ae8fc6d172c5409e4b3a93f522ca2e41c32074. Recovery update baseline: the verified four-file deployment at 1d5e4bb9c1420022416867ea1a71f3e8dd2ada1f.
 
 Only four Core files may be deployed. The job verifies the remote baseline and passive Core dependencies, saves exact rollback copies before upload, uses verified TLS/host identity, stages each file via rename, activates hooks last and verifies remote bytes. A failed transfer triggers reverse-order byte-exact rollback. The theme, maintenance mode and fixtures #372 and #252 are outside the mutation scope.
 
