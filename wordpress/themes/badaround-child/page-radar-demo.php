@@ -143,6 +143,13 @@ body.page-template-page-radar-demo .ba-radar-search>label{position:absolute;widt
 .ba-radar-phenomenon p{font-size:11px;line-height:1.45;color:#657b8d;margin:0 0 8px}
 .ba-radar-phenomenon ul{margin:0;padding-left:18px;color:#28455c;font-size:12px;line-height:1.55}
 .ba-radar-phenomenon li+li{margin-top:4px}
+
+/* RADAR-CONTEXT-01: contextual general guidance, transparently not risk predictions. */
+.ba-radar-guidance,.ba-radar-quality{padding:13px;border-radius:11px;border:1px solid #d5e6ea;background:#f0f9fa}
+.ba-radar-guidance h3,.ba-radar-quality h3{margin:0 0 8px;font-size:13px;color:#08394b}
+.ba-radar-guidance p,.ba-radar-quality p{margin:0;color:#4e6a7a;font-size:12px;line-height:1.5}
+.ba-radar-guidance ul{margin:9px 0 0;padding-left:17px;font-size:12px;color:#24465c;line-height:1.6}
+.ba-radar-guidance li+li{margin-top:8px}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -234,6 +241,31 @@ function render(){
   }
   card.append(heading,caption,ul);host.appendChild(card);
  }
+ const guidance={
+  'Veicoli':'Precauzione generale: non lasciare oggetti di valore visibili o nell’abitacolo del veicolo.',
+  'Case e attività':'Precauzione generale: verifica la chiusura di porte e accessi e segnala tempestivamente eventuali effrazioni alle autorità.',
+  'Pericoli':'Precauzione generale: presta attenzione alla viabilità e segui le indicazioni delle autorità competenti.',
+  'Spazi pubblici':'Precauzione generale: documenta eventuali criticità degli spazi pubblici e segnala ai servizi territoriali competenti.',
+  'Animali':'Informazione generale: in caso di animale smarrito o in difficoltà, contatta i servizi locali competenti.'
+ };
+ const guidanceKeys=priority.filter(key=>groups.has(key)&&guidance[key]);
+ if(guidanceKeys.length){
+  const section=document.createElement('section');section.className='ba-radar-guidance';
+  const heading=document.createElement('h3');heading.textContent='Indicazioni preventive generali';
+  const intro=document.createElement('p');intro.textContent='Suggerimenti associati ai temi segnalati, non a un rischio misurato nella zona.';
+  const list=document.createElement('ul');
+  for(const key of guidanceKeys){
+   const item=document.createElement('li');const strong=document.createElement('strong');
+   strong.textContent=key+': ';item.append(strong,document.createTextNode(guidance[key]));list.appendChild(item);
+  }
+  section.append(heading,intro,list);host.appendChild(section);
+ }
+ const undated=filtered.some(event=>!/^\d{4}-\d{2}-\d{2}$/.test(event.occurred_date||''));
+ const quality=document.createElement('section');quality.className='ba-radar-quality';
+ const qualityTitle=document.createElement('h3');qualityTitle.textContent='Affidabilità della lettura';
+ const qualityBody=document.createElement('p');
+ qualityBody.textContent=undated?'Alcune segnalazioni dell’area non indicano la data dell’episodio. Non è possibile stabilire ricorrenze o tendenze temporali affidabili.':'La disponibilità delle date non certifica da sola la completezza dei dati, l’assenza di duplicati o le ricorrenze.';
+ quality.append(qualityTitle,qualityBody);host.appendChild(quality);
  const notice=document.createElement('p');notice.className='ba-radar-note';
  notice.textContent='La presenza di segnalazioni non misura la pericolosità. Duplicati, date mancanti e copertura della community non sono ancora certificati.';
  host.appendChild(notice);
