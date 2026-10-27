@@ -33,7 +33,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 
 			<div class="ba-map-commandbar__filters">
 				<div class="ba-map-category-filters" role="group" aria-label="Filtra per categoria">
-					<button type="button" class="ba-map-category-filter is-active" data-ba-map-filter="all" aria-pressed="true">Tutte</button>
+					<button type="button" class="ba-map-category-filter is-active" data-ba-map-filter="all" aria-pressed="true">Tutte le segnalazioni</button>
 					<button type="button" class="ba-map-category-filter" data-ba-map-filter="veicoli" aria-pressed="false">Veicoli</button>
 					<button type="button" class="ba-map-category-filter" data-ba-map-filter="case-e-attivita" aria-pressed="false">Case e attività</button>
 					<button type="button" class="ba-map-category-filter" data-ba-map-filter="pericoli" aria-pressed="false">Pericoli</button>
@@ -53,7 +53,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 						<button type="button" class="ba-map-time-filter is-active" data-ba-map-time="all" aria-pressed="true">Tutti</button>
 					</div>
 				</div>
-				<button class="ba-map-filter-reset" type="button" data-ba-map-reset hidden aria-label="Azzera i filtri" title="Azzera i filtri">×</button>
+				<button class="ba-map-filter-reset" type="button" data-ba-map-reset hidden aria-label="Reimposta tutti i filtri" title="Reimposta tutti i filtri"><span aria-hidden="true">↺</span><span>Reset</span></button>
 			</div>
 		</div>
 	</section>
