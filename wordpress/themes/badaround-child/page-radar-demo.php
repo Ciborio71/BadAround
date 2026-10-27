@@ -4,6 +4,8 @@
  * RADAR-ONLINE-UX-01: DEMO ONLY — no real event or location data.
  */
 if (!defined('ABSPATH')) exit;
+// This validation-only synthetic experience must not be indexed.
+add_filter('wp_robots', static function ($robots) { $robots['noindex'] = true; $robots['nofollow'] = true; return $robots; });
 get_header();
 ?>
 <main class="ba-radar-demo" id="main-content">
