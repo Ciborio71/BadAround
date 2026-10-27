@@ -1,0 +1,45 @@
+name: HOME-UX-02 targeted production deploy
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths:
+      - 'ops/home-ux-02-deploy-trigger.txt'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: badaround-targeted-production-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
+      EXPECTED_PARENT: 84ae8fc6d172c5409e4b3a93f522ca2e41c32074
+      EXPECTED_HEAD: 5b60bd02f7a1336464292d1cc9cb1ac67241dc5e
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 5b60bd02f7a1336464292d1cc9cb1ac67241dc5e
+          fetch-depth: 2
+      - name: Install TLS trust bundle
+        run: |
+          set -euo pipefail
+          mkdir -p tls evidence
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/curl-chain.pem
+      - name: Targeted four-file guarded deploy
+        run: |
+          python ops/home-ux-02-deploy.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: home-ux-02-deployment-evidence
+          path: evidence/
+          retention-days: 30
