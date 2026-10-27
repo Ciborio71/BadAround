@@ -1,0 +1,44 @@
+name: HOME-CARD-SQUARE-01 targeted production deploy
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths:
+      - 'ops/home-card-square-01-deploy-trigger.txt'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: badaround-targeted-production-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
+      EXPECTED_PARENT: dd92527699f20a6a8d521d056e21a1d09a402628
+      EXPECTED_HEAD: 193fc4b2025ff6d956d18c3ef0208a0f871a24ff
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install TLS trust bundle
+        run: |
+          set -euo pipefail
+          mkdir -p tls evidence
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/curl-chain.pem
+      - name: Targeted one-file guarded deploy
+        run: |
+          python ops/home-card-square-01-deploy.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: home-card-square-01-deployment-evidence
+          path: evidence/
+          retention-days: 30
