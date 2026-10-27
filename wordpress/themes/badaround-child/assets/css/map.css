@@ -933,3 +933,35 @@ body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map
 }
 .ba-map-place-suggestions .ba-map-place-suggestion strong {color:#071a38;}
 .ba-map-place-suggestions .ba-map-place-suggestion small {color:#526d83;}
+
+/* MAP-UX-PHASE1 — compact command bar, isolated to the Mappe template. */
+body.page-template-page-mappa .ba-map-commandbar{display:block;padding:8px 14px;min-height:56px}
+body.page-template-page-mappa .ba-map-commandbar__summary{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+body.page-template-page-mappa .ba-map-commandbar__controls{display:flex;align-items:center;gap:10px;min-width:0}
+body.page-template-page-mappa .ba-map-commandbar__primary{display:flex;align-items:center;gap:7px;flex:0 1 355px;min-width:190px;position:relative}
+body.page-template-page-mappa .ba-map-commandbar__primary .ba-map-inline-search{flex:1 1 auto;min-width:90px}
+body.page-template-page-mappa .ba-map-commandbar__primary .ba-map-nearby-button{flex:none;min-height:38px;white-space:nowrap;padding:7px 10px;font-size:.72rem}
+body.page-template-page-mappa .ba-map-commandbar__primary .ba-map-nearby-status{position:absolute;top:100%;left:0;z-index:30;background:#fff;padding:0 4px;max-width:360px}
+body.page-template-page-mappa .ba-map-commandbar__filters{display:flex;align-items:center;flex:1 1 0;min-width:0;gap:8px}
+body.page-template-page-mappa .ba-map-commandbar .ba-map-category-filters{display:flex;flex:1 1 0;overflow-x:auto;overscroll-behavior-inline:contain;white-space:nowrap;scrollbar-width:thin;scrollbar-color:#b4cbd3 transparent;padding:3px 1px;gap:6px}
+body.page-template-page-mappa .ba-map-commandbar .ba-map-category-filter{flex:none;min-height:32px;padding:6px 9px;font-size:.69rem}
+body.page-template-page-mappa .ba-map-commandbar .ba-map-time-filter-wrap{display:flex;flex:none;gap:5px;align-items:center;padding:0;overflow:visible}
+body.page-template-page-mappa .ba-map-commandbar .ba-map-filter-label{font-size:.7rem;text-transform:none;letter-spacing:0}
+body.page-template-page-mappa .ba-map-time-filters[hidden]{display:none!important}
+body.page-template-page-mappa .ba-map-period-select{height:36px;max-width:136px;padding:5px 26px 5px 10px;border:1px solid #d4e2e9;border-radius:9px;background:#fff;color:#071a38;font-size:.75rem;font-weight:750;cursor:pointer}
+body.page-template-page-mappa .ba-map-filter-reset{flex:none;width:32px;height:34px;padding:0;border:1px solid #d5e2e9;border-radius:50%;background:#f2f6f8;color:#405d70;font-size:1.25rem;cursor:pointer}
+body.page-template-page-mappa .ba-map-filter-reset[hidden]{display:none!important}
+body.page-template-page-mappa .ba-map-filter-reset:hover,body.page-template-page-mappa .ba-map-filter-reset:focus-visible{background:#dceff3;color:#071a38}
+@media(max-width:1050px){
+ body.page-template-page-mappa .ba-map-commandbar__controls{flex-wrap:wrap;gap:6px}
+ body.page-template-page-mappa .ba-map-commandbar__primary{flex:1 1 290px}
+ body.page-template-page-mappa .ba-map-commandbar__filters{flex:1 1 440px}
+}
+@media(max-width:760px){
+ body.page-template-page-mappa .ba-map-commandbar{padding:7px 9px}
+ body.page-template-page-mappa .ba-map-commandbar__primary{flex:1 1 100%;min-width:0}
+ body.page-template-page-mappa .ba-map-commandbar__filters{flex:1 1 100%;gap:6px}
+ body.page-template-page-mappa .ba-map-commandbar .ba-map-category-filters{min-width:0}
+ body.page-template-page-mappa .ba-map-commandbar .ba-map-filter-label{display:none}
+ body.page-template-page-mappa .ba-map-period-select{max-width:100px;font-size:.7rem}
+}
