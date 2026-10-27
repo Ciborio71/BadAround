@@ -43,8 +43,9 @@ $report_url = home_url( '/segnala-un-evento/' );
 				</div>
 
 				<div class="ba-map-time-filter-wrap">
-					<span class="ba-map-filter-label">Quando</span>
-					<div class="ba-map-time-filters" role="group" aria-label="Filtra per data dell'evento">
+					<label class="ba-map-filter-label" for="ba-map-period-select">Periodo</label>
+					<select id="ba-map-period-select" class="ba-map-period-select" aria-label="Filtra per periodo" data-ba-map-period-select><option value="all">Tutti</option><option value="today">Oggi</option><option value="3">Ultimi 3 giorni</option><option value="7">Ultimi 7 giorni</option><option value="30">Ultimi 30 giorni</option></select>
+					<div class="ba-map-time-filters" role="group" aria-label="Filtra per data dell'evento" hidden>
 						<button type="button" class="ba-map-time-filter" data-ba-map-time="today" aria-pressed="false">Oggi</button>
 						<button type="button" class="ba-map-time-filter" data-ba-map-time="3" aria-pressed="false">Ultimi 3 giorni</button>
 						<button type="button" class="ba-map-time-filter" data-ba-map-time="7" aria-pressed="false">7 giorni</button>
@@ -52,6 +53,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 						<button type="button" class="ba-map-time-filter is-active" data-ba-map-time="all" aria-pressed="true">Tutti</button>
 					</div>
 				</div>
+				<button class="ba-map-filter-reset" type="button" data-ba-map-reset hidden aria-label="Azzera i filtri" title="Azzera i filtri">×</button>
 			</div>
 		</div>
 	</section>
@@ -109,4 +111,49 @@ $report_url = home_url( '/segnala-un-evento/' );
 
 	<div class="ba-map-mobile-backdrop" data-ba-map-backdrop hidden></div>
 </main>
+<script>
+/* MAP-UX-PHASE1: presentation adapter; existing certified filter handlers remain authoritative. */
+(function () {
+  const start = () => {
+    const root = document.querySelector('.ba-map-commandbar');
+    if (!root) return;
+    const period = root.querySelector('[data-ba-map-period-select]');
+    const reset = root.querySelector('[data-ba-map-reset]');
+    const search = root.querySelector('[data-ba-map-search]');
+    const nearby = root.querySelector('[data-ba-map-nearby]');
+    const timeButtons = Array.from(root.querySelectorAll('[data-ba-map-time]'));
+    const categoryButtons = Array.from(root.querySelectorAll('[data-ba-map-filter]'));
+    const update = () => {
+      const activeTime = timeButtons.find(x => x.getAttribute('aria-pressed') === 'true')?.dataset.baMapTime || 'all';
+      if (period && period.value !== activeTime) period.value = activeTime;
+      const category = categoryButtons.find(x => x.getAttribute('aria-pressed') === 'true')?.dataset.baMapFilter || 'all';
+      const active = activeTime !== 'all' || category !== 'all' || (search?.value || '').trim() !== '' || nearby?.getAttribute('aria-pressed') === 'true';
+      if (reset) reset.hidden = !active;
+    };
+    period?.addEventListener('change', () => {
+      timeButtons.find(x => x.dataset.baMapTime === period.value)?.click();
+      update();
+    });
+    root.addEventListener('click', (event) => {
+      if (event.target.closest('[data-ba-map-filter], [data-ba-map-time], [data-ba-map-nearby]')) {
+        window.requestAnimationFrame(update);
+      }
+    });
+    search?.addEventListener('input', update);
+    reset?.addEventListener('click', () => {
+      categoryButtons.find(x => x.dataset.baMapFilter === 'all')?.click();
+      timeButtons.find(x => x.dataset.baMapTime === 'all')?.click();
+      if (nearby?.getAttribute('aria-pressed') === 'true') nearby.click();
+      if (search && search.value) {
+        search.value = '';
+        search.dispatchEvent(new Event('input', {bubbles: true}));
+      }
+      update();
+    });
+    update();
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+}());
+</script>
 <?php get_footer(); ?>
