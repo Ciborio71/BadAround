@@ -1,0 +1,1 @@
+Radar Discovery 01: published public events, exact point vs approximate public areas, no real heatmap or risk ratings.
