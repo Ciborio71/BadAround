@@ -1,0 +1,1 @@
+Match Radar search input width and left padding to Mappe.
