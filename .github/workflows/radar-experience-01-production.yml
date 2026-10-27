@@ -1,0 +1,60 @@
+name: RADAR-EXPERIENCE-01 targeted production deploy
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths:
+      - 'ops/radar-experience-01-deploy-trigger.txt'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: badaround-targeted-production-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
+      EXPECTED_PARENT: aff6a20c828f82b03c596f33828e2ffc3fc7753c
+      EXPECTED_HEAD: 2523e16da039ba0b26602ed90c36613d320bf7d0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install TLS trust bundle
+        run: |
+          set -euo pipefail
+          mkdir -p tls evidence
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/curl-chain.pem
+      - name: Validate Radar PHP and JavaScript
+        run: |
+          php -l wordpress/themes/badaround-child/page-radar-demo.php
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          p=Path("wordpress/themes/badaround-child/page-radar-demo.php")
+          s=p.read_text()
+          marker='<script>'+chr(10)+'(()=>{'
+          if marker not in s:
+              raise SystemExit("Radar inline JavaScript not found")
+          body='(()=>{'+s.split(marker,1)[1].split('</script>',1)[0]
+          body=re.sub(r'<[?]php.*?[?]>', '"https://example.invalid/discovery"', body, flags=re.S)
+          Path("/tmp/radar-discovery.js").write_text(body)
+          PY
+          node --check /tmp/radar-discovery.js
+      - name: Targeted one-file guarded deploy
+        run: |
+          python ops/radar-experience-01-deploy.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: radar-experience-01-deployment-evidence
+          path: evidence/
+          retention-days: 30
