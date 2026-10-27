@@ -1,0 +1,1 @@
+Radar UX-04: dashboard footer parity only
