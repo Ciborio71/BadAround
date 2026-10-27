@@ -182,8 +182,9 @@ function eligible(e){
  }
  if(chosenCenter){
   const g=e.public_geo,c=chosenCenter;
-  const p=new google.maps.LatLng(g.lat,g.lng);
-  const d=google.maps.geometry?.spherical?.computeDistanceBetween?.(p,new google.maps.LatLng(c.lat,c.lng));
+  const rad=Math.PI/180,dl=(g.lng-c.lng)*rad,da=(g.lat-c.lat)*rad;
+  const hav=Math.sin(da/2)**2+Math.cos(g.lat*rad)*Math.cos(c.lat*rad)*Math.sin(dl/2)**2;
+  const d=12742000*Math.asin(Math.min(1,Math.sqrt(hav)));
   // Approximate event is included only when its entire PUBLIC uncertainty circle
   // lies inside the requested region; do not present its center as a precise position.
   if(!Number.isFinite(d)||d+(g.mode==='approximate_area'?g.radius_meters:0)>radiusMeters())return false;
@@ -225,7 +226,7 @@ async function fetchReports(){
   if(!response.ok)throw Error('Discovery HTTP '+response.status);
   const payload=await response.json();
   if(!Array.isArray(payload?.items))throw Error('Discovery response invalid');
-  reports=payload.items.filter(e=>e&&typeof e.id==='number'&&typeof e.permalink==='string');
+  reports=payload.items.filter(e=>e&&typeof e.id==='number'&&typeof e.permalink==='string'&&!/^\\s*\\[?QA\\b/i.test(e.title||'')&&!/nessun evento reale|collaudo tecnico sintetico/i.test(e.title||''));
   loadError=false;
  }catch(err){loadError=true;reports=[];console.warn('Radar Discovery:',err);}
  loadingReports=false;render();
