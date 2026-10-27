@@ -1034,3 +1034,34 @@ body.page-template-page-mappa .ba-map-filter-reset span[aria-hidden]{font-size:1
 @media(max-width:760px){
   body.page-template-page-mappa .ba-map-filter-reset{padding:0 8px}
 }
+
+/* MAP-UX-PHASE3 — simplify controls on full Mappe only; preserve shared navigation elsewhere. */
+body.page-template-page-mappa .ba-map-canvas .ba-map-pan{display:none!important}
+body.page-template-page-mappa .ba-map-canvas.ba-map-navigation-shell > .ba-map-legend,
+body.page-template-page-mappa .ba-map-canvas > .ba-map-legend{
+  top:auto;
+  left:auto;
+  right:14px;
+  bottom:42px;
+  width:min(218px,calc(100% - 28px));
+  max-width:calc(100% - 28px);
+  z-index:8;
+  border-radius:12px;
+  box-shadow:0 6px 20px rgba(7,26,56,.12);
+}
+body.page-template-page-mappa .ba-map-canvas > .ba-map-legend .ba-map-legend__body{
+  max-height:min(42vh,310px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+@media(max-width:760px){
+ body.page-template-page-mappa .ba-map-canvas.ba-map-navigation-shell > .ba-map-legend,
+ body.page-template-page-mappa .ba-map-canvas > .ba-map-legend{
+   right:10px;
+   bottom:74px;
+   width:min(194px,calc(100% - 20px));
+ }
+ body.page-template-page-mappa .ba-map-canvas > .ba-map-legend .ba-map-legend__body{
+   max-height:min(34vh,240px);
+ }
+}
