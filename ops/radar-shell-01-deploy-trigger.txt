@@ -1,0 +1,1 @@
+Restore shared BadAround shell for Radar demo only, guarded functions.php update.
