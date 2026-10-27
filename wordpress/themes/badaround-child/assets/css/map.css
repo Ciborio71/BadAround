@@ -965,3 +965,72 @@ body.page-template-page-mappa .ba-map-filter-reset:hover,body.page-template-page
  body.page-template-page-mappa .ba-map-commandbar .ba-map-filter-label{display:none}
  body.page-template-page-mappa .ba-map-period-select{max-width:100px;font-size:.7rem}
 }
+
+/* MAP-UX-PHASE2 — compact results cards; certified card selection and links unchanged. */
+body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list{
+  grid-auto-rows:auto;
+  gap:9px;
+  padding:10px;
+}
+body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map-event-card{
+  grid-template-columns:80px minmax(0,1fr);
+  min-height:94px;
+  height:auto;
+  border-radius:11px;
+  box-shadow:0 3px 12px rgba(7,26,56,.05);
+}
+body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map-event-card .ba-event-card__media{
+  width:80px;
+  height:80px;
+  min-height:80px;
+  align-self:start;
+  margin:7px 0 7px 7px;
+  border-radius:7px;
+}
+body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map-event-card .ba-event-card__media img{
+  display:block;
+  width:80px;
+  height:80px;
+  min-height:80px;
+  object-fit:cover;
+}
+body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map-event-card .ba-event-card__body{
+  gap:3px;
+  padding:8px 10px 8px 14px;
+}
+body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map-event-card .ba-event-card__title{
+  font-size:.81rem;
+  line-height:1.25;
+}
+body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-event-card__meta{
+  font-size:.65rem;
+}
+body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-event-card__excerpt{
+  -webkit-line-clamp:1;
+  font-size:.65rem;
+}
+body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map-event-card .ba-map-event-card__select-hint{
+  margin:1px 0 3px;
+  font-size:.67rem;
+  line-height:1.2;
+}
+body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-event-card__link{
+  font-size:.68rem;
+}
+body.page-template-page-mappa .ba-map-filter-reset{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  width:auto;
+  height:36px;
+  padding:0 10px;
+  border-radius:9px;
+  white-space:nowrap;
+  font-size:.75rem;
+  font-weight:800;
+}
+body.page-template-page-mappa .ba-map-filter-reset span[aria-hidden]{font-size:1.12rem}
+@media(max-width:760px){
+  body.page-template-page-mappa .ba-map-filter-reset{padding:0 8px}
+}
