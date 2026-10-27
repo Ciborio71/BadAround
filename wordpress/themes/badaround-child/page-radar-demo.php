@@ -29,13 +29,13 @@ get_header();
     <circle cx="490" cy="363" r="120" stroke="#078f9c" stroke-width="4" stroke-dasharray="9 8" fill="#0798a8" fill-opacity=".04"/><circle cx="490" cy="363" r="8" fill="#087d90" stroke="white" stroke-width="4"/>
    </svg>
    <div class="ba-radar-map-title" id="rad-map-title">Area dimostrativa · 1 km</div>
-   <div class="ba-radar-legend" id="rad-legend"><strong>Concentrazione simulata</strong><div class="ba-radar-gradient"></div><small>Non rappresenta la pericolosità reale</small></div>
+   <button class="ba-radar-layer-toggle" id="rad-layer-toggle" type="button" aria-pressed="true">Livello termico: attivo</button><div class="ba-radar-legend" id="rad-legend"><strong>Concentrazione simulata</strong><div class="ba-radar-gradient"></div><small>Non rappresenta la pericolosità reale</small></div>
   </section>
   <aside class="ba-radar-panel" id="rad-panel">
    <span class="ba-radar-tag">Analisi territoriale · DEMO</span>
    <h2 id="rad-title">Quartiere Alfa</h2>
-   <p id="rad-copy">Questa è una simulazione UX. Nessun evento reale viene analizzato.</p>
-   <div class="ba-radar-metrics"><div><strong id="rad-count">12</strong><small>Segnalazioni fittizie</small></div><div><strong id="rad-types">3</strong><small>Tipologie fittizie</small></div></div>
+   <p id="rad-copy" role="status" aria-live="polite">Questa è una simulazione UX. Nessun evento reale viene analizzato.</p>
+   <div class="ba-radar-metrics" id="rad-metrics"><div><strong id="rad-count">12</strong><small>Segnalazioni fittizie</small></div><div><strong id="rad-types">3</strong><small>Tipologie fittizie</small></div></div>
    <div id="rad-advice" class="ba-radar-advice"><strong>Esempio di attenzione contestuale</strong><p>Evita di lasciare oggetti di valore in automobile. Questo consiglio non deriva da episodi reali relativi alla zona indicata.</p></div>
    <p class="ba-radar-note">Una maggiore concentrazione di segnalazioni non certifica la pericolosità. Nessun dato non significa zona sicura.</p>
    <div class="ba-radar-states" role="group" aria-label="Simula stati Radar"><button class="is-active" data-rad-state="sample" type="button">Esempio</button><button data-rad-state="few" type="button">Dati insufficienti</button><button data-rad-state="zero" type="button">Nessun risultato</button><button data-rad-state="error" type="button">Errore</button></div>
@@ -54,8 +54,54 @@ get_header();
 @media(max-width:850px){.ba-radar-workspace{grid-template-columns:minmax(0,1fr) 300px}.ba-radar-heading{flex-wrap:wrap}}
 @media(max-width:700px){.ba-radar-controls .ba-radar-search{flex-basis:100%}.ba-radar-workspace{display:block;padding:8px}.ba-radar-map{min-height:calc(100dvh - 320px)}.ba-radar-panel{position:fixed;z-index:999;left:0;right:0;bottom:0;max-height:78dvh;overflow:auto;border-radius:20px 20px 0 0;transform:translateY(110%);transition:transform .25s;box-shadow:0 -10px 40px #071a3833}.ba-radar-panel.is-open{transform:translateY(0)}#rad-drawer{display:block;position:fixed;z-index:1000;bottom:15px;left:50%;transform:translateX(-50%);border:0;border-radius:50px;background:#071a38;color:#fff;padding:13px 20px;font-weight:850;white-space:nowrap}.ba-radar-foot{padding-bottom:70px}.ba-radar-demo-pill{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.ba-radar-panel{transition:none}}
+.ba-radar-layer-toggle{position:absolute;left:15px;bottom:15px;border:1px solid #c6dce3;background:#fff;color:#071a38;border-radius:9px;padding:10px 12px;box-shadow:0 4px 12px #071a3820;cursor:pointer;font-size:12px;font-weight:800;z-index:2}.ba-radar-metrics[hidden]{display:none!important}.ba-radar-layer-toggle:focus-visible{outline:3px solid #0798a8;outline-offset:2px}
+@media(max-width:700px){.ba-radar-layer-toggle{bottom:72px}}
 </style>
 <script>
-(()=>{'use strict';const root=document.querySelector('.ba-radar-demo');if(!root)return;const $=id=>root.querySelector('#'+id);let state='sample';const initial={place:'Quartiere Alfa — area immaginaria',cat:'Tutte le categorie',period:'30',radius:'1'};function render(){const place=$('rad-place').value||'Area dimostrativa';$('rad-title').textContent=place;$('rad-map-title').textContent=place+' · '+$('rad-radius').value+' km';const on=state==='sample';$('rad-heat-layer').style.display=on?'':'none';$('rad-legend').style.display=on?'':'none';$('rad-count').textContent=on?'12':'—';$('rad-types').textContent=on?'3':'—';$('rad-advice').style.display=on?'':'none';$('rad-copy').textContent=on?'Questi dati sono simulati. Categoria: '+$('rad-cat').value+'. Periodo: '+$('rad-period').selectedOptions[0].text+'.':state==='few'?'Dati insufficienti per rappresentare una concentrazione significativa.':state==='zero'?'Nessun risultato nel campione simulato: ciò non indica che la zona sia sicura.':'Simulazione di errore: analisi momentaneamente non disponibile.';}['rad-place','rad-cat','rad-period','rad-radius'].forEach(id=>$(id).addEventListener('input',render));root.querySelectorAll('[data-rad-state]').forEach(btn=>btn.addEventListener('click',()=>{state=btn.dataset.radState;root.querySelectorAll('[data-rad-state]').forEach(x=>x.classList.toggle('is-active',x===btn));render()}));$('rad-reset').addEventListener('click',()=>{$('rad-place').value=initial.place;$('rad-cat').value=initial.cat;$('rad-period').value=initial.period;$('rad-radius').value=initial.radius;state='sample';root.querySelectorAll('[data-rad-state]').forEach(x=>x.classList.toggle('is-active',x.dataset.radState==='sample'));render()});$('rad-drawer').addEventListener('click',()=>{const on=$('rad-panel').classList.toggle('is-open');$('rad-drawer').textContent=on?'Chiudi analisi':'Mostra analisi zona';$('rad-drawer').setAttribute('aria-expanded',String(on))});render()})();
+(()=>{
+'use strict';
+const root=document.querySelector('.ba-radar-demo');if(!root)return;
+const $=id=>root.querySelector('#'+id);
+let state='sample',layer=true;
+const initial={place:'Quartiere Alfa — area immaginaria',cat:'Tutte le categorie',period:'30',radius:'1'};
+const fixtureGroups={'Tutte le categorie':12,'Veicoli':4,'Pericoli':3,'Spazi pubblici':3,'Animali':1,'Case e attività':1,'Oggetti e documenti':0};
+const countForSelection=()=>{
+ const base=fixtureGroups[$('rad-cat').value]??0;
+ const periodFactor=({'7':.35,'30':1,'90':1.3,'365':1.6})[$('rad-period').value]??1;
+ const radiusFactor=({'0.5':.45,'1':1,'2':1.2,'5':1.4})[$('rad-radius').value]??1;
+ return Math.round(base*periodFactor*radiusFactor);
+};
+function render(){
+ const place=$('rad-place').value.trim()||'Area dimostrativa';
+ $('rad-title').textContent=place;
+ $('rad-map-title').textContent=place+' · '+$('rad-radius').value+' km · DEMO';
+ const simulated=countForSelection();
+ const demoAvailable=state==='sample'&&simulated>=3;
+ const effectiveState=state==='sample'&&!demoAvailable?'few':state;
+ $('rad-heat-layer').style.display=demoAvailable&&layer?'':'none';
+ $('rad-legend').style.display=demoAvailable&&layer?'':'none';
+ $('rad-layer-toggle').setAttribute('aria-pressed',String(layer));
+ $('rad-layer-toggle').textContent=layer?'Livello termico: attivo':'Livello termico: nascosto';
+ $('rad-count').textContent=demoAvailable?String(simulated):'—';
+ $('rad-types').textContent=demoAvailable?($('rad-cat').value==='Tutte le categorie'?'3':'1'):'—';
+ $('rad-metrics').hidden=effectiveState!=='sample';
+ $('rad-advice').hidden=effectiveState!=='sample';
+ $('rad-advice').style.display=effectiveState==='sample'?'':'none';
+ const messages={
+ sample:'Simulazione UX: '+simulated+' segnalazioni fittizie per il filtro '+$('rad-cat').value.toLowerCase()+' in '+$('rad-period').selectedOptions[0].text.toLowerCase()+'. Nessuna analisi reale.',
+ few:'Dati insufficienti per rappresentare una concentrazione significativa. Nessuna indicazione di rischio.',
+ zero:'Nessun risultato nel campione simulato. Questo non indica che una zona sia sicura.',
+ error:'Simulazione di errore: servizio momentaneamente non disponibile. Riprovare.'
+ };
+ $('rad-copy').textContent=messages[effectiveState];
+ root.querySelectorAll('[data-rad-state]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.radState===state)));
+}
+['rad-place','rad-cat','rad-period','rad-radius'].forEach(id=>$(id).addEventListener('input',render));
+root.querySelectorAll('[data-rad-state]').forEach(btn=>btn.addEventListener('click',()=>{state=btn.dataset.radState;root.querySelectorAll('[data-rad-state]').forEach(x=>x.classList.toggle('is-active',x===btn));render()}));
+$('rad-layer-toggle').addEventListener('click',()=>{layer=!layer;render()});
+$('rad-reset').addEventListener('click',()=>{for(const [k,v] of Object.entries(initial))$('rad-'+k).value=v;state='sample';layer=true;root.querySelectorAll('[data-rad-state]').forEach(x=>x.classList.toggle('is-active',x.dataset.radState==='sample'));render()});
+$('rad-drawer').addEventListener('click',()=>{const open=$('rad-panel').classList.toggle('is-open');$('rad-drawer').textContent=open?'Chiudi analisi':'Mostra analisi zona';$('rad-drawer').setAttribute('aria-expanded',String(open))});
+render();
+})();
 </script>
 <?php get_footer(); ?>
