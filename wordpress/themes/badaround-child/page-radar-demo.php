@@ -11,7 +11,7 @@ get_header();
 <main class="ba-radar-demo" id="main-content">
  <header class="ba-radar-heading"><div><p class="ba-radar-kicker">RADAR · ANTEPRIMA INTERATTIVA</p><h1>BadAround Radar</h1><p>Conosci una zona prima di andarci.</p></div><strong class="ba-radar-demo-pill">DATI SIMULATI · NON SONO ALLERTE REALI</strong></header>
  <div class="ba-radar-controls" aria-label="Filtri dimostrativi Radar">
-  <label class="ba-radar-search">Luogo dimostrativo<input id="rad-place" value="Quartiere Alfa — area immaginaria" aria-label="Luogo dimostrativo" /></label>
+  <label class="ba-radar-search">Cerca un luogo reale<input id="rad-place" value="" placeholder="Indirizzo, quartiere o località" aria-label="Cerca un luogo reale" autocomplete="off" /><button id="rad-search" type="button">Cerca</button></label>
   <label>Categoria<select id="rad-cat"><option>Tutte le categorie</option><option>Veicoli</option><option>Pericoli</option><option>Spazi pubblici</option><option>Animali</option><option>Case e attività</option><option>Oggetti e documenti</option></select></label>
   <label>Periodo<select id="rad-period"><option value="30">30 giorni</option><option value="7">7 giorni</option><option value="90">90 giorni</option><option value="365">12 mesi</option></select></label>
   <label>Raggio<select id="rad-radius"><option value="1">1 km</option><option value="0.5">500 m</option><option value="2">2 km</option><option value="5">5 km</option></select></label>
@@ -19,16 +19,11 @@ get_header();
  </div>
  <div class="ba-radar-workspace">
   <section class="ba-radar-map" aria-label="Cartografia schematica e fittizia">
-   <svg viewBox="0 0 1000 690" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Mappa di fantasia con distribuzione simulata di segnalazioni">
-    <defs><pattern id="rad-street" width="100" height="100" patternUnits="userSpaceOnUse" patternTransform="rotate(-13)"><path d="M100 0H0V100" fill="none" stroke="#cbdcdd" stroke-width="5"/></pattern><radialGradient id="rad-heat"><stop stop-color="#cb3749" stop-opacity=".85"/><stop offset=".3" stop-color="#ee784b" stop-opacity=".72"/><stop offset=".65" stop-color="#f8c95e" stop-opacity=".53"/><stop offset="1" stop-color="#ffeaa3" stop-opacity="0"/></radialGradient></defs>
-    <rect width="1000" height="690" fill="#e7efe9"/><rect id="rad-streets" width="1000" height="690" fill="url(#rad-street)"/>
-    <path d="M-50 370Q400 220 1060 445M320 -80L685 760" stroke="white" stroke-width="34" fill="none"/>
-    <path d="M-50 370Q400 220 1060 445M320 -80L685 760" stroke="#bbd0d4" stroke-width="3" fill="none"/>
-    <g fill="#6a8484" font-family="sans-serif" font-size="23"><text x="95" y="190">Quartiere Alfa</text><text x="700" y="180">Zona Beta</text><text x="630" y="555">Parco Gamma</text></g>
-    <g id="rad-heat-layer"><ellipse cx="390" cy="342" rx="285" ry="220" fill="url(#rad-heat)"/><ellipse cx="735" cy="330" rx="200" ry="140" fill="url(#rad-heat)" opacity=".6"/></g>
-    <circle id="rad-search-radius" cx="490" cy="363" r="120" stroke="#078f9c" stroke-width="4" stroke-dasharray="9 8" fill="#0798a8" fill-opacity=".04"/><circle cx="490" cy="363" r="8" fill="#087d90" stroke="white" stroke-width="4"/>
-   </svg>
-   <div class="ba-radar-layers" id="rad-layers"><div class="ba-radar-layers__head"><strong>Livelli</strong><button id="rad-layers-close" type="button" aria-label="Chiudi livelli">×</button></div><p>Scegli cosa visualizzare nella simulazione.</p><label><input type="checkbox" id="rad-layer-heat" checked> Heatmap simulata</label><label><input type="checkbox" id="rad-layer-streets" checked> Strade schematiche</label><label><input type="checkbox" id="rad-layer-radius" checked> Area di ricerca</label><small>Tutti i livelli e i dati sono fittizi.</small></div><button id="rad-layers-toggle" type="button" class="ba-radar-layers-toggle" aria-controls="rad-layers" aria-expanded="false">☷ Livelli</button>
+   <div id="rad-google-map" class="ba-radar-google-map" role="application" aria-label="Google Maps — cartografia reale, nessuna segnalazione reale visualizzata"></div>
+   <div id="rad-demo-heat" class="ba-radar-demo-heat" hidden aria-hidden="true"></div>
+   <div id="rad-map-message" class="ba-radar-map-message" role="status" aria-live="polite">Caricamento cartografia Google Maps…</div>
+   <div class="ba-radar-map-disclaimer">CARTOGRAFIA REALE · ANALISI E HEATMAP SIMULATE</div>
+   <div class="ba-radar-layers" id="rad-layers"><div class="ba-radar-layers__head"><strong>Livelli</strong><button id="rad-layers-close" type="button" aria-label="Chiudi livelli">×</button></div><p>Scegli cosa visualizzare nella simulazione.</p><label><input type="checkbox" id="rad-layer-heat" checked> Heatmap simulata</label><label><input type="checkbox" id="rad-layer-streets" checked> Cartografia stradale</label><label><input type="checkbox" id="rad-layer-radius" checked> Area di ricerca</label><small>Tutti i livelli e i dati sono fittizi.</small></div><button id="rad-layers-toggle" type="button" class="ba-radar-layers-toggle" aria-controls="rad-layers" aria-expanded="false">☷ Livelli</button>
    <div class="ba-radar-map-title" id="rad-map-title">Area dimostrativa · 1 km</div>
    <button class="ba-radar-layer-toggle" id="rad-layer-toggle" type="button" aria-pressed="true">Livello termico: attivo</button><div class="ba-radar-legend" id="rad-legend"><strong>Concentrazione simulata</strong><div class="ba-radar-gradient"></div><small>Non rappresenta la pericolosità reale</small></div>
   </section>
@@ -84,63 +79,135 @@ body.page-template-page-radar-demo .ba-site-footer{display:none}
 .ba-radar-demo .ba-radar-panel .ba-radar-brief{margin:12px 0;padding:12px;border:1px solid #cde5e9;border-radius:10px;background:#f0fbfc}
 .ba-radar-brief strong{font-size:12px}.ba-radar-brief p{margin:5px 0 0;font-size:12px;line-height:1.5;color:#486578}
 @media(max-width:700px){.ba-radar-layers-toggle{right:10px;top:10px}.ba-radar-layers{right:10px;top:60px}}
+
+/* RADAR-GMAP-01 — genuine Google basemap; demo analytics never sourced from map content. */
+.ba-radar-google-map{position:absolute;inset:0;width:100%;height:100%;background:#e8f1f4}
+.ba-radar-map-message{position:absolute;top:64px;left:15px;max-width:calc(100% - 30px);z-index:3;background:#fff;color:#4c657b;border-radius:9px;padding:9px 12px;font-size:12px;box-shadow:0 3px 14px #071a3820}
+.ba-radar-map-message[hidden],.ba-radar-demo-heat[hidden]{display:none!important}
+.ba-radar-demo-heat{position:absolute;z-index:1;pointer-events:none;inset:17% 22% 18% 16%;border-radius:50%;background:radial-gradient(ellipse at 48% 45%,rgba(203,56,74,.45) 0%,rgba(245,135,72,.31) 29%,rgba(249,212,101,.19) 57%,transparent 75%);filter:blur(22px)}
+.ba-radar-map-disclaimer{position:absolute;top:60px;right:15px;z-index:2;max-width:210px;padding:8px 10px;background:#fff9e6;border:1px solid #e8d9b3;border-radius:8px;color:#7a561b;font-size:10px;font-weight:900;line-height:1.35}
+.ba-radar-search{display:flex!important;flex-wrap:wrap}
+.ba-radar-search input{flex:1 1 230px;min-width:150px}
+.ba-radar-search button{flex:0 0 auto;min-width:70px;background:#078e99;color:#fff;border:0}
+.ba-radar-search button:hover{background:#067780;color:#fff}
+@media(max-width:700px){.ba-radar-map-disclaimer{top:58px;right:10px;max-width:175px;font-size:9px}.ba-radar-map-message{top:55px}}
 </style>
+<?php
+$radar_maps_settings = get_option('wpforms_settings',array());
+$radar_maps_key = is_array($radar_maps_settings) && !empty($radar_maps_settings['geolocation-google-places-api-key'])
+ ? trim((string)$radar_maps_settings['geolocation-google-places-api-key']) : '';
+$radar_maps_url = $radar_maps_key ? add_query_arg(array('key'=>$radar_maps_key,'v'=>'weekly','loading'=>'async'),'https://maps.googleapis.com/maps/api/js') : '';
+?>
+<script>window.BadAroundRadarMaps=<?php echo wp_json_encode(array('mapsUrl'=>$radar_maps_url)); ?>;</script>
 <script>
 (()=>{
 'use strict';
 const root=document.querySelector('.ba-radar-demo');if(!root)return;
 const $=id=>root.querySelector('#'+id);
-let state='sample',layer=true;
-const initial={place:'Quartiere Alfa — area immaginaria',cat:'Tutte le categorie',period:'30',radius:'1'};
-const fixtureGroups={'Tutte le categorie':12,'Veicoli':4,'Pericoli':3,'Spazi pubblici':3,'Animali':1,'Case e attività':1,'Oggetti e documenti':0};
-const countForSelection=()=>{
- const base=fixtureGroups[$('rad-cat').value]??0;
- const periodFactor=({'7':.35,'30':1,'90':1.3,'365':1.6})[$('rad-period').value]??1;
- const radiusFactor=({'0.5':.45,'1':1,'2':1.2,'5':1.4})[$('rad-radius').value]??1;
- return Math.round(base*periodFactor*radiusFactor);
-};
-function render(){
- const place=$('rad-place').value.trim()||'Area dimostrativa';
- $('rad-title').textContent=place;
- $('rad-map-title').textContent=place+' · '+$('rad-radius').value+' km · DEMO';
- const simulated=countForSelection();
- const demoAvailable=state==='sample'&&simulated>=3;
- const effectiveState=state==='sample'&&!demoAvailable?'few':state;
- $('rad-heat-layer').style.display=demoAvailable&&layer?'':'none';
- $('rad-legend').style.display=demoAvailable&&layer?'':'none';
- $('rad-layer-toggle').setAttribute('aria-pressed',String(layer));
- $('rad-layer-toggle').textContent=layer?'Livello termico: attivo':'Livello termico: nascosto';
- $('rad-count').textContent=demoAvailable?String(simulated):'—';
- $('rad-types').textContent=demoAvailable?($('rad-cat').value==='Tutte le categorie'?'3':'1'):'—';
- $('rad-metrics').hidden=effectiveState!=='sample';
- $('rad-advice').hidden=effectiveState!=='sample';
- $('rad-advice').style.display=effectiveState==='sample'?'':'none';
- const messages={
- sample:'Simulazione UX: '+simulated+' segnalazioni fittizie per il filtro '+$('rad-cat').value.toLowerCase()+' in '+$('rad-period').selectedOptions[0].text.toLowerCase()+'. Nessuna analisi reale.',
- few:'Dati insufficienti per rappresentare una concentrazione significativa. Nessuna indicazione di rischio.',
- zero:'Nessun risultato nel campione simulato. Questo non indica che una zona sia sicura.',
- error:'Simulazione di errore: servizio momentaneamente non disponibile. Riprovare.'
- };
- $('rad-copy').textContent=messages[effectiveState];
- $('rad-brief').textContent=effectiveState==='sample'?'La distribuzione visualizzata è una dimostrazione grafica della categoria selezionata. Nessun indicatore territoriale è reale.':'Analisi dimostrativa non disponibile: nessuna conclusione sulla zona.';
- $('rad-streets').style.display=$('rad-layer-streets').checked?'':'none';
- $('rad-search-radius').style.display=$('rad-layer-radius').checked?'':'none';
- $('rad-heat-layer').style.display=demoAvailable&&layer&&$('rad-layer-heat').checked?'':'none';
- root.querySelectorAll('[data-rad-state]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.radState===state)));
+let map=null,geocoder=null,searchCircle=null,centerMarker=null,state='sample',layer=false;
+const initial={place:'',cat:'Tutte le categorie',period:'30',radius:'1'};
+const categories={'Tutte le categorie':12,'Veicoli':4,'Pericoli':3,'Spazi pubblici':3,'Animali':1,'Case e attività':1,'Oggetti e documenti':0};
+const config=window.BadAroundRadarMaps||{};
+const status=(message)=>{$('rad-map-message').textContent=message;$('rad-map-message').hidden=!message;};
+const radiusMeters=()=>Number($('rad-radius').value)*1000;
+function updateCircle(){
+ if(!map||!searchCircle)return;
+ searchCircle.setRadius(radiusMeters());
 }
-['rad-place','rad-cat','rad-period','rad-radius'].forEach(id=>$(id).addEventListener('input',render));
+function render(){
+ const place=$('rad-place').value.trim()||'Italia · zona non selezionata';
+ $('rad-title').textContent=place;
+ $('rad-map-title').textContent=place+' · '+$('rad-radius').value+' km';
+ const base=categories[$('rad-cat').value]??0;
+ const periodFactor=({'7':.35,'30':1,'90':1.3,'365':1.6})[$('rad-period').value]??1;
+ const count=Math.round(base*periodFactor);
+ const active=state==='sample'&&count>=3;
+ const effective=state==='sample'&&!active?'few':state;
+ const demoHeat=active&&layer&&$('rad-layer-heat').checked;
+ $('rad-demo-heat').hidden=!demoHeat;
+ $('rad-legend').style.display=demoHeat?'':'none';
+ $('rad-layer-toggle').setAttribute('aria-pressed',String(layer));
+ $('rad-layer-toggle').textContent=layer?'Simulazione termica: attiva':'Simula heatmap: disattivata';
+ $('rad-count').textContent=active?String(count):'—';
+ $('rad-types').textContent=active?($('rad-cat').value==='Tutte le categorie'?'3':'1'):'—';
+ $('rad-metrics').hidden=effective!=='sample';
+ $('rad-advice').style.display=effective==='sample'?'':'none';
+ const messages={
+ sample:'Esempio dimostrativo con '+count+' segnalazioni fittizie. Nessuna informazione sui rischi effettivi di '+place+'.',
+ few:'Dati insufficienti: nessuna concentrazione significativa rappresentabile.',
+ zero:'Nessun risultato nella simulazione; questo non dimostra che l’area sia sicura.',
+ error:'Errore simulato: analisi non disponibile.'
+ };
+ $('rad-copy').textContent=messages[effective];
+ $('rad-brief').textContent=effective==='sample'?'La mappa Google mostra luoghi reali; dati, numeri e avvisi Radar restano completamente simulati.':'Nessuna conclusione territoriale disponibile.';
+ root.querySelectorAll('[data-rad-state]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.radState===state)));
+ if(map)map.setMapTypeId($('rad-layer-streets').checked?'roadmap':'terrain');
+ if(searchCircle)searchCircle.setVisible($('rad-layer-radius').checked);
+ updateCircle();
+}
+async function loadMap(){
+ if(!config.mapsUrl){status('Chiave Google Maps non disponibile: verificare la configurazione del sito.');return;}
+ try{
+  if(!window.google?.maps){
+   await new Promise((resolve,reject)=>{
+    const tag=document.createElement('script');tag.src=config.mapsUrl;tag.async=true;
+    tag.onload=resolve;tag.onerror=()=>reject(new Error('Google Maps non raggiungibile'));
+    document.head.appendChild(tag);
+   });
+  }
+  if(!window.google?.maps)throw new Error('Google Maps non inizializzato');
+  map=new google.maps.Map($('rad-google-map'),{
+   center:{lat:42.2,lng:12.5},zoom:6,mapTypeControl:false,streetViewControl:false,
+   fullscreenControl:true,zoomControl:true,gestureHandling:'cooperative',
+  });
+  geocoder=new google.maps.Geocoder();
+  status('');
+  render();
+ }catch(error){status('Impossibile caricare Google Maps. Riprova oppure verifica le autorizzazioni della chiave.');console.error('BadAround Radar demo map:',error);}
+}
+function locate(){
+ if(!geocoder||!map){status('La cartografia non è ancora disponibile.');return;}
+ const address=$('rad-place').value.trim();
+ if(!address){status('Inserisci un indirizzo, una località o un quartiere.');return;}
+ status('Ricerca indirizzo in corso…');
+ geocoder.geocode({address,region:'IT'},(results,code)=>{
+  if(code!=='OK'||!results?.length){status('Località non trovata. Verifica l’indirizzo.');return;}
+  const first=results[0],pos=first.geometry.location;
+  if(!searchCircle)searchCircle=new google.maps.Circle({map,center:pos,radius:radiusMeters(),strokeColor:'#078e99',strokeWeight:2,strokeOpacity:.9,fillColor:'#0798a8',fillOpacity:.05});
+  else searchCircle.setCenter(pos);
+  if(!centerMarker)centerMarker=new google.maps.Marker({map,position:pos,title:'Centro della ricerca Radar (nessun evento)'});
+  else centerMarker.setPosition(pos);
+  searchCircle.setRadius(radiusMeters());
+  searchCircle.setVisible($('rad-layer-radius').checked);
+  map.fitBounds(searchCircle.getBounds(),60);
+  $('rad-place').value=first.formatted_address;
+  status('Area geografica individuata. Nessuna analisi reale viene effettuata.');
+  render();
+ });
+}
+['rad-cat','rad-period','rad-radius'].forEach(id=>$(id).addEventListener('change',render));
+$('rad-radius').addEventListener('change',()=>{if(searchCircle&&map)map.fitBounds(searchCircle.getBounds(),60)});
+$('rad-place').addEventListener('input',render);
+$('rad-place').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();locate()}});
+$('rad-search').addEventListener('click',locate);
 root.querySelectorAll('[data-rad-state]').forEach(btn=>btn.addEventListener('click',()=>{state=btn.dataset.radState;root.querySelectorAll('[data-rad-state]').forEach(x=>x.classList.toggle('is-active',x===btn));render()}));
 $('rad-layer-toggle').addEventListener('click',()=>{layer=!layer;render()});
-const layers=$('rad-layers'),layersToggle=$('rad-layers-toggle');
-function setLayers(open){layers.classList.toggle('is-open',open);layersToggle.setAttribute('aria-expanded',String(open));}
-layersToggle.addEventListener('click',()=>setLayers(!layers.classList.contains('is-open')));
-$('rad-layers-close').addEventListener('click',()=>{setLayers(false);layersToggle.focus()});
+const layers=$('rad-layers'),toggle=$('rad-layers-toggle');
+const setLayers=open=>{layers.classList.toggle('is-open',open);toggle.setAttribute('aria-expanded',String(open))};
+toggle.addEventListener('click',()=>setLayers(!layers.classList.contains('is-open')));
+$('rad-layers-close').addEventListener('click',()=>{setLayers(false);toggle.focus()});
 ['rad-layer-heat','rad-layer-streets','rad-layer-radius'].forEach(id=>$(id).addEventListener('change',render));
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&layers.classList.contains('is-open')){setLayers(false);layersToggle.focus()}});
-
-$('rad-reset').addEventListener('click',()=>{for(const [k,v] of Object.entries(initial))$('rad-'+k).value=v;state='sample';layer=true;root.querySelectorAll('[data-rad-state]').forEach(x=>x.classList.toggle('is-active',x.dataset.radState==='sample'));render()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&layers.classList.contains('is-open')){setLayers(false);toggle.focus()}});
+$('rad-reset').addEventListener('click',()=>{
+ for(const [key,value] of Object.entries(initial))$('rad-'+key).value=value;
+ state='sample';layer=false;$('rad-layer-heat').checked=true;$('rad-layer-streets').checked=true;$('rad-layer-radius').checked=true;
+ root.querySelectorAll('[data-rad-state]').forEach(x=>x.classList.toggle('is-active',x.dataset.radState==='sample'));
+ searchCircle?.setMap(null);searchCircle=null;centerMarker?.setMap(null);centerMarker=null;
+ if(map){map.setCenter({lat:42.2,lng:12.5});map.setZoom(6);}
+ status('');render();
+});
 $('rad-drawer').addEventListener('click',()=>{const open=$('rad-panel').classList.toggle('is-open');$('rad-drawer').textContent=open?'Chiudi analisi':'Mostra analisi zona';$('rad-drawer').setAttribute('aria-expanded',String(open))});
-render();
+render();loadMap();
 })();
 </script>
 <?php get_footer(); ?>
