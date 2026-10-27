@@ -917,3 +917,19 @@ body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map
 .ba-map-legend summary::before{content:"";display:inline-block;width:13px;height:17px;flex:none;background:currentColor;clip-path:polygon(50% 100%,12% 46%,12% 25%,25% 7%,50% 0,75% 7%,88% 25%,88% 46%);opacity:.8}
 .ba-map-legend summary::after{margin-left:auto;font-size:1.1rem;color:#18304d}
 .ba-map-legend summary:hover,.ba-map-legend summary:focus-visible{background:#f2fafb;outline-offset:-2px}
+
+/* MAP-SEARCH-CONTRAST-01 — autocomplete hover/focus readable on Home and Mappe. */
+.ba-map-place-suggestions .ba-map-place-suggestion,
+.ba-map-place-suggestions .ba-map-place-suggestion:hover,
+.ba-map-place-suggestions .ba-map-place-suggestion:focus-visible,
+.ba-map-place-suggestions .ba-map-place-suggestion:active {
+  background:#fff;
+  color:#071a38;
+}
+.ba-map-place-suggestions .ba-map-place-suggestion:hover,
+.ba-map-place-suggestions .ba-map-place-suggestion:focus-visible {
+  background:#eaf7fa;
+  color:#071a38;
+}
+.ba-map-place-suggestions .ba-map-place-suggestion strong {color:#071a38;}
+.ba-map-place-suggestions .ba-map-place-suggestion small {color:#526d83;}
