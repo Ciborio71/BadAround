@@ -21,13 +21,14 @@ get_header();
   <section class="ba-radar-map" aria-label="Cartografia schematica e fittizia">
    <svg viewBox="0 0 1000 690" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Mappa di fantasia con distribuzione simulata di segnalazioni">
     <defs><pattern id="rad-street" width="100" height="100" patternUnits="userSpaceOnUse" patternTransform="rotate(-13)"><path d="M100 0H0V100" fill="none" stroke="#cbdcdd" stroke-width="5"/></pattern><radialGradient id="rad-heat"><stop stop-color="#cb3749" stop-opacity=".85"/><stop offset=".3" stop-color="#ee784b" stop-opacity=".72"/><stop offset=".65" stop-color="#f8c95e" stop-opacity=".53"/><stop offset="1" stop-color="#ffeaa3" stop-opacity="0"/></radialGradient></defs>
-    <rect width="1000" height="690" fill="#e7efe9"/><rect width="1000" height="690" fill="url(#rad-street)"/>
+    <rect width="1000" height="690" fill="#e7efe9"/><rect id="rad-streets" width="1000" height="690" fill="url(#rad-street)"/>
     <path d="M-50 370Q400 220 1060 445M320 -80L685 760" stroke="white" stroke-width="34" fill="none"/>
     <path d="M-50 370Q400 220 1060 445M320 -80L685 760" stroke="#bbd0d4" stroke-width="3" fill="none"/>
     <g fill="#6a8484" font-family="sans-serif" font-size="23"><text x="95" y="190">Quartiere Alfa</text><text x="700" y="180">Zona Beta</text><text x="630" y="555">Parco Gamma</text></g>
     <g id="rad-heat-layer"><ellipse cx="390" cy="342" rx="285" ry="220" fill="url(#rad-heat)"/><ellipse cx="735" cy="330" rx="200" ry="140" fill="url(#rad-heat)" opacity=".6"/></g>
-    <circle cx="490" cy="363" r="120" stroke="#078f9c" stroke-width="4" stroke-dasharray="9 8" fill="#0798a8" fill-opacity=".04"/><circle cx="490" cy="363" r="8" fill="#087d90" stroke="white" stroke-width="4"/>
+    <circle id="rad-search-radius" cx="490" cy="363" r="120" stroke="#078f9c" stroke-width="4" stroke-dasharray="9 8" fill="#0798a8" fill-opacity=".04"/><circle cx="490" cy="363" r="8" fill="#087d90" stroke="white" stroke-width="4"/>
    </svg>
+   <div class="ba-radar-layers" id="rad-layers"><div class="ba-radar-layers__head"><strong>Livelli</strong><button id="rad-layers-close" type="button" aria-label="Chiudi livelli">×</button></div><p>Scegli cosa visualizzare nella simulazione.</p><label><input type="checkbox" id="rad-layer-heat" checked> Heatmap simulata</label><label><input type="checkbox" id="rad-layer-streets" checked> Strade schematiche</label><label><input type="checkbox" id="rad-layer-radius" checked> Area di ricerca</label><small>Tutti i livelli e i dati sono fittizi.</small></div><button id="rad-layers-toggle" type="button" class="ba-radar-layers-toggle" aria-controls="rad-layers" aria-expanded="false">☷ Livelli</button>
    <div class="ba-radar-map-title" id="rad-map-title">Area dimostrativa · 1 km</div>
    <button class="ba-radar-layer-toggle" id="rad-layer-toggle" type="button" aria-pressed="true">Livello termico: attivo</button><div class="ba-radar-legend" id="rad-legend"><strong>Concentrazione simulata</strong><div class="ba-radar-gradient"></div><small>Non rappresenta la pericolosità reale</small></div>
   </section>
@@ -36,7 +37,7 @@ get_header();
    <h2 id="rad-title">Quartiere Alfa</h2>
    <p id="rad-copy" role="status" aria-live="polite">Questa è una simulazione UX. Nessun evento reale viene analizzato.</p>
    <div class="ba-radar-metrics" id="rad-metrics"><div><strong id="rad-count">12</strong><small>Segnalazioni fittizie</small></div><div><strong id="rad-types">3</strong><small>Tipologie fittizie</small></div></div>
-   <div id="rad-advice" class="ba-radar-advice"><strong>Esempio di attenzione contestuale</strong><p>Evita di lasciare oggetti di valore in automobile. Questo consiglio non deriva da episodi reali relativi alla zona indicata.</p></div>
+   <div class="ba-radar-brief"><strong>Panoramica della zona</strong><p id="rad-brief">Distribuzione simulata di segnalazioni, senza attribuzioni di rischio.</p></div><div id="rad-advice" class="ba-radar-advice"><strong>Esempio di attenzione contestuale</strong><p>Evita di lasciare oggetti di valore in automobile. Questo consiglio non deriva da episodi reali relativi alla zona indicata.</p></div>
    <p class="ba-radar-note">Una maggiore concentrazione di segnalazioni non certifica la pericolosità. Nessun dato non significa zona sicura.</p>
    <div class="ba-radar-states" role="group" aria-label="Simula stati Radar"><button class="is-active" data-rad-state="sample" type="button">Esempio</button><button data-rad-state="few" type="button">Dati insufficienti</button><button data-rad-state="zero" type="button">Nessun risultato</button><button data-rad-state="error" type="button">Errore</button></div>
    <a class="ba-radar-back" href="<?php echo esc_url(home_url('/mappa/')); ?>">Apri la mappa delle segnalazioni reali →</a>
@@ -69,6 +70,20 @@ get_header();
 
 /* RADAR-UX-04 — full-screen dashboard shell parity with Mappe; wp_footer remains active. */
 body.page-template-page-radar-demo .ba-site-footer{display:none}
+
+/* RADAR-UX-05 — dashboard controls, synthetic-only interactive layers. */
+.ba-radar-layers-toggle{position:absolute;right:16px;top:16px;z-index:3;border:0;border-radius:10px;background:#fff;color:#071a38;box-shadow:0 5px 18px #071a3825;padding:11px 15px;font-weight:850;cursor:pointer}
+.ba-radar-layers{position:absolute;right:16px;top:64px;z-index:4;width:min(265px,calc(100% - 32px));padding:16px;border:1px solid #d6e3e9;border-radius:12px;background:#fff;box-shadow:0 10px 35px #071a3830;display:none}
+.ba-radar-layers.is-open{display:grid;gap:12px}
+.ba-radar-layers__head{display:flex;justify-content:space-between;align-items:center}
+.ba-radar-layers__head button{background:transparent;border:0;font-size:23px;cursor:pointer;color:#071a38}
+.ba-radar-layers p,.ba-radar-layers small{margin:0;font-size:11px;color:#60768a}
+.ba-radar-layers label{display:flex;align-items:center;gap:10px;font-weight:700;font-size:12px;color:#071a38}
+.ba-radar-layers input{width:16px;height:16px;accent-color:#0798a8}
+.ba-radar-layers-toggle:focus-visible,.ba-radar-layers button:focus-visible{outline:3px solid #0798a8;outline-offset:2px}
+.ba-radar-demo .ba-radar-panel .ba-radar-brief{margin:12px 0;padding:12px;border:1px solid #cde5e9;border-radius:10px;background:#f0fbfc}
+.ba-radar-brief strong{font-size:12px}.ba-radar-brief p{margin:5px 0 0;font-size:12px;line-height:1.5;color:#486578}
+@media(max-width:700px){.ba-radar-layers-toggle{right:10px;top:10px}.ba-radar-layers{right:10px;top:60px}}
 </style>
 <script>
 (()=>{
@@ -107,11 +122,22 @@ function render(){
  error:'Simulazione di errore: servizio momentaneamente non disponibile. Riprovare.'
  };
  $('rad-copy').textContent=messages[effectiveState];
+ $('rad-brief').textContent=effectiveState==='sample'?'La distribuzione visualizzata è una dimostrazione grafica della categoria selezionata. Nessun indicatore territoriale è reale.':'Analisi dimostrativa non disponibile: nessuna conclusione sulla zona.';
+ $('rad-streets').style.display=$('rad-layer-streets').checked?'':'none';
+ $('rad-search-radius').style.display=$('rad-layer-radius').checked?'':'none';
+ $('rad-heat-layer').style.display=demoAvailable&&layer&&$('rad-layer-heat').checked?'':'none';
  root.querySelectorAll('[data-rad-state]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.radState===state)));
 }
 ['rad-place','rad-cat','rad-period','rad-radius'].forEach(id=>$(id).addEventListener('input',render));
 root.querySelectorAll('[data-rad-state]').forEach(btn=>btn.addEventListener('click',()=>{state=btn.dataset.radState;root.querySelectorAll('[data-rad-state]').forEach(x=>x.classList.toggle('is-active',x===btn));render()}));
 $('rad-layer-toggle').addEventListener('click',()=>{layer=!layer;render()});
+const layers=$('rad-layers'),layersToggle=$('rad-layers-toggle');
+function setLayers(open){layers.classList.toggle('is-open',open);layersToggle.setAttribute('aria-expanded',String(open));}
+layersToggle.addEventListener('click',()=>setLayers(!layers.classList.contains('is-open')));
+$('rad-layers-close').addEventListener('click',()=>{setLayers(false);layersToggle.focus()});
+['rad-layer-heat','rad-layer-streets','rad-layer-radius'].forEach(id=>$(id).addEventListener('change',render));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&layers.classList.contains('is-open')){setLayers(false);layersToggle.focus()}});
+
 $('rad-reset').addEventListener('click',()=>{for(const [k,v] of Object.entries(initial))$('rad-'+k).value=v;state='sample';layer=true;root.querySelectorAll('[data-rad-state]').forEach(x=>x.classList.toggle('is-active',x.dataset.radState==='sample'));render()});
 $('rad-drawer').addEventListener('click',()=>{const open=$('rad-panel').classList.toggle('is-open');$('rad-drawer').textContent=open?'Chiudi analisi':'Mostra analisi zona';$('rad-drawer').setAttribute('aria-expanded',String(open))});
 render();
