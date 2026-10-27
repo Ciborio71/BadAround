@@ -684,6 +684,9 @@
 		});
 
 		if (context === 'full') {
+			// MAP-UX-PHASE4: preserve the initial map/URL viewport, then fit to
+			// visible PUBLIC event geometry on subsequent filter changes only.
+			let initialFilterHandled = false;
 			document.addEventListener('badaround:map-filtered', (event) => {
 				const allowed = new Set((event.detail?.items || []).map((item) => String(item.id)));
 				eventMarkers.forEach((entry) => {
@@ -693,6 +696,29 @@
 				if (selected && !selected.filteredVisible) clearSelected();
 				removeClusters();
 				refreshClusters();
+				if (!initialFilterHandled) {
+					initialFilterHandled = true;
+					return;
+				}
+				const visible = eventMarkers.filter((entry) => entry.filteredVisible);
+				if (!visible.length) return; // never jump to an arbitrary region on zero results
+				const targetBounds = new google.maps.LatLngBounds();
+				visible.forEach((entry) => {
+					if (entry.circle && typeof entry.circle.getBounds === 'function') {
+						const circleBounds = entry.circle.getBounds();
+						if (circleBounds) { targetBounds.union(circleBounds); return; }
+					}
+					targetBounds.extend(entry.position);
+				});
+				if (visible.length === 1 && !visible[0].circle) {
+					map.setCenter(visible[0].position);
+					map.setZoom(14);
+				} else {
+					map.fitBounds(targetBounds, 72);
+					google.maps.event.addListenerOnce(map, 'idle', () => {
+						if (map.getZoom() > 15) map.setZoom(15);
+					});
+				}
 			});
 		}
 
