@@ -1,0 +1,1 @@
+Radar first-open discovery topics; no heatmap or new endpoints.
