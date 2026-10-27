@@ -1,0 +1,3 @@
+HOME-UX-02 authorized targeted deploy
+Pinned UI commit: 5b60bd02f7a1336464292d1cc9cb1ac67241dc5e
+Four-file guarded reconciliation only.
