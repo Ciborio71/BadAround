@@ -156,6 +156,7 @@ function badaround_child_enqueue_assets() {
 	$is_location  = is_tax( array( 'ba_territorio', 'badaround_location' ) );
 	$is_reporting = is_page_template( 'page-segnala-evento.php' );
 	$is_map       = is_page_template( 'page-mappa.php' );
+	$is_radar_demo = is_page_template( 'page-radar-demo.php' );
 	$is_search    = is_page_template( 'page-cerca.php' );
 	$is_reports   = is_page_template( 'page-segnalazioni.php' );
 	$is_sentinel  = is_page_template( 'page-sentinelle.php' );
@@ -164,7 +165,7 @@ function badaround_child_enqueue_assets() {
 	$is_not_found    = is_404();
 	$is_how_it_works = is_page( 'come-funziona' );
 	$is_legal         = is_page( array( 'termini-e-condizioni', 'privacy-policy', 'cookie-policy', 'regole-di-pubblicazione' ) );
-	$is_badaround     = $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_search || $is_reports || $is_sentinel || $is_states || $is_account || $is_not_found || $is_how_it_works || $is_legal;
+	$is_badaround     = $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_radar_demo || $is_search || $is_reports || $is_sentinel || $is_states || $is_account || $is_not_found || $is_how_it_works || $is_legal;
 
 	if ( ! $is_badaround ) {
 		return;
