@@ -22,21 +22,21 @@ get_header();
    <div id="rad-google-map" class="ba-radar-google-map" role="application" aria-label="Google Maps — geometrie delle segnalazioni pubblicate"></div>
    
    <div id="rad-map-message" class="ba-radar-map-message" role="status" aria-live="polite">Caricamento cartografia Google Maps…</div>
-   <div class="ba-radar-map-disclaimer">EVENTI PUBBLICI · NESSUNA ANALISI DI RISCHIO</div>
+   <div class="ba-radar-map-disclaimer">PROBLEMATICHE SEGNALATE · NESSUN INDICE DI RISCHIO</div>
    <div class="ba-radar-map-title" id="rad-map-title">Area dimostrativa · 1 km</div>
 
   </section>
   <aside class="ba-radar-panel" id="rad-panel">
-   <span class="ba-radar-tag">Segnalazioni pubbliche · Consultazione</span>
-   <h2 id="rad-title">Eventi pubblicati</h2>
+   <span class="ba-radar-tag">Radar · Problematiche territoriali</span>
+   <h2 id="rad-title">Panoramica territoriale</h2>
    <p id="rad-copy" role="status" aria-live="polite">Caricamento delle segnalazioni pubbliche…</p>
    <p class="ba-radar-note">I risultati non sono un indice di sicurezza. Le segnalazioni prive della data dell'episodio compaiono solo selezionando «Tutti i periodi». Le aree approssimate non identificano il luogo esatto dell'evento.</p>
-   <div id="rad-reports" class="ba-radar-reports" aria-label="Elenco segnalazioni pubbliche"></div>
+   <div id="rad-reports" class="ba-radar-reports" aria-label="Problematiche segnalate nella zona"></div>
    <a class="ba-radar-back" href="<?php echo esc_url(home_url('/mappa/')); ?>">Apri la mappa delle segnalazioni reali →</a>
   </aside>
  </div>
  <button id="rad-drawer" type="button" aria-controls="rad-panel" aria-expanded="false">Mostra analisi zona</button>
- <p class="ba-radar-foot">RADAR-DISCOVERY-01 · Eventi pubblici in sola lettura · Nessuna heatmap di rischio attiva</p>
+ <p class="ba-radar-foot">RADAR-PHENOMENA-01 · Problematiche da dati pubblici · Nessuna heatmap o valutazione di rischio</p>
 </main>
 <style>
 .ba-radar-demo{--navy:#071a38;--teal:#0798a8;--muted:#61778b;color:var(--navy);background:#f3f7fa;min-height:80vh}.ba-radar-demo *{box-sizing:border-box}
@@ -136,6 +136,13 @@ body.page-template-page-radar-demo .ba-radar-search>label{position:absolute;widt
 .ba-radar-report a:hover{text-decoration:underline}
 .ba-radar-report small{color:#637a8a;font-size:11px;line-height:1.45}
 .ba-radar-report--selected{outline:2px solid #078e99}
+
+/* RADAR-PHENOMENA-01 — thematic sidebar, not a duplicate of Mappe event list. */
+.ba-radar-phenomenon{border:1px solid #d8e6eb;border-radius:12px;padding:14px;background:#fff}
+.ba-radar-phenomenon h3{font-size:15px;line-height:1.3;margin:0 0 5px;color:#071a38}
+.ba-radar-phenomenon p{font-size:11px;line-height:1.45;color:#657b8d;margin:0 0 8px}
+.ba-radar-phenomenon ul{margin:0;padding-left:18px;color:#28455c;font-size:12px;line-height:1.55}
+.ba-radar-phenomenon li+li{margin-top:4px}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -194,30 +201,42 @@ function eligible(e){
 function clearGeometry(){for(const g of geometryLayers)g.setMap(null);geometryLayers=[];}
 function render(){
  const filtered=reports.filter(eligible);
- $('rad-title').textContent=chosenCenter?($('rad-place').value.trim()||'Zona selezionata'):'Eventi pubblicati in Italia';
- const label=loadError?'Impossibile caricare le segnalazioni pubbliche.':loadingReports?'Caricamento delle segnalazioni pubbliche…':!filtered.length?'Nessuna segnalazione con geometria pubblica compatibile con i filtri. Non significa che la zona sia sicura.':filtered.length+' segnalazioni pubbliche visualizzabili (non corrette per copertura, duplicati o rischio).';
- $('rad-copy').textContent=label;
- $('rad-map-title').textContent=chosenCenter?'Area di ricerca · '+$('rad-radius').value+' km':'Segnalazioni pubblicate · Italia';
+ $('rad-title').textContent=chosenCenter?($('rad-place').value.trim()||'Zona selezionata'):'Panoramica territoriale';
+ $('rad-map-title').textContent=chosenCenter?'Area di ricerca · '+$('rad-radius').value+' km':'Radar · seleziona una zona';
  const host=$('rad-reports');host.replaceChildren();
- if(map)clearGeometry();
- for(const event of filtered){
-  const card=document.createElement('article');card.className='ba-radar-report';
-  const a=document.createElement('a');a.textContent=event.title||'Segnalazione';a.href=event.permalink||'#';a.rel='noopener';
-  const meta=document.createElement('small');meta.textContent=(event.event_type?.name||'Evento')+' · '+(event.public_place_name||event.territory?.name||'Territorio non specificato')+(event.public_geo.mode==='approximate_area'?' · area approssimata':'');
-  card.append(a,meta);host.appendChild(card);
-  if(!map)continue;
-  const g=event.public_geo;
-  if(g.mode==='approximate_area'){
-   const circle=new google.maps.Circle({map,center:{lat:g.lat,lng:g.lng},radius:g.radius_meters,
-    strokeColor:'#078e99',strokeOpacity:.7,strokeWeight:1,fillColor:'#0798a8',fillOpacity:.09});
-   geometryLayers.push(circle);
-  }else{
-   const marker=new google.maps.Marker({map,position:{lat:g.lat,lng:g.lng},title:event.title||'Evento'});
-   marker.addListener('click',()=>{card.scrollIntoView({block:'nearest',behavior:'smooth'});card.classList.add('ba-radar-report--selected');});
-   geometryLayers.push(marker);
-  }
+ clearGeometry();
+ if(loadError){$('rad-copy').textContent='Impossibile consultare le segnalazioni pubbliche.';return;}
+ if(loadingReports){$('rad-copy').textContent='Caricamento dei dati pubblici…';return;}
+ if(!chosenCenter){
+  $('rad-copy').textContent='Cerca un luogo o usa «Vicino a me» per conoscere le problematiche segnalate nell’area selezionata.';
+  return;
  }
- if(searchCircle)searchCircle.setRadius(radiusMeters());
+ if(!filtered.length){
+  $('rad-copy').textContent='Non sono disponibili segnalazioni geograficamente compatibili con i filtri. Questo non significa che la zona sia sicura.';
+  return;
+ }
+ const groups=new Map();
+ for(const e of filtered){
+  const key=category(e)||'Altre problematiche';
+  if(!groups.has(key))groups.set(key,new Set());
+  groups.get(key).add(e.event_type?.name||'Tipologia non specificata');
+ }
+ $('rad-copy').textContent='Problematiche presenti nelle segnalazioni pubbliche consultabili. Non sono frequenze certificate, indici di rischio o analisi delle ricorrenze.';
+ const priority=['Veicoli','Case e attività','Pericoli','Spazi pubblici','Animali','Oggetti e documenti','Altre problematiche'];
+ for(const key of priority){
+  if(!groups.has(key))continue;
+  const card=document.createElement('section');card.className='ba-radar-phenomenon';
+  const heading=document.createElement('h3');heading.textContent=key;
+  const caption=document.createElement('p');caption.textContent='Tipologie segnalate (senza valutazione di frequenza):';
+  const ul=document.createElement('ul');
+  for(const name of [...groups.get(key)].sort((a,b)=>a.localeCompare(b,'it'))){
+   const li=document.createElement('li');li.textContent=name;ul.appendChild(li);
+  }
+  card.append(heading,caption,ul);host.appendChild(card);
+ }
+ const notice=document.createElement('p');notice.className='ba-radar-note';
+ notice.textContent='La presenza di segnalazioni non misura la pericolosità. Duplicati, date mancanti e copertura della community non sono ancora certificati.';
+ host.appendChild(notice);
 }
 async function fetchReports(){
  loadingReports=true;render();
