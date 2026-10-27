@@ -118,6 +118,18 @@ body.page-template-page-radar-demo .ba-radar-workspace{max-width:none;margin:0;p
 @media(min-width:701px) and (max-width:850px){body.page-template-page-radar-demo .ba-radar-workspace{grid-template-columns:300px minmax(0,1fr)}}
 @media(max-width:700px){body.page-template-page-radar-demo .ba-radar-workspace{padding:0}}
 .ba-radar-layers,.ba-radar-layers-toggle{display:none!important}
+
+/* RADAR-SEARCH-PARITY-02: Mappe-sized text field, Mappe left inset and one-row desktop controls. */
+@media(min-width:931px){
+ body.page-template-page-radar-demo .ba-radar-controls{padding:8px 14px;gap:10px}
+ body.page-template-page-radar-demo .ba-radar-controls .ba-radar-search{flex:0 0 555px;width:555px;max-width:555px;min-width:0;gap:0}
+ body.page-template-page-radar-demo .ba-radar-search-row{flex-wrap:nowrap;align-items:center;gap:7px}
+ body.page-template-page-radar-demo .ba-radar-search-row input{flex:0 1 355px;width:355px;min-width:180px;flex-basis:355px;height:40px}
+ body.page-template-page-radar-demo .ba-radar-search-row #rad-search{flex:0 0 65px}
+ body.page-template-page-radar-demo .ba-radar-search-row #rad-nearby{flex:0 0 120px}
+}
+body.page-template-page-radar-demo .ba-radar-search>label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:930px){body.page-template-page-radar-demo .ba-radar-controls{padding:8px 9px}}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
