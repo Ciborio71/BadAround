@@ -56,6 +56,16 @@ get_header();
 @media(prefers-reduced-motion:reduce){.ba-radar-panel{transition:none}}
 .ba-radar-layer-toggle{position:absolute;left:15px;bottom:15px;border:1px solid #c6dce3;background:#fff;color:#071a38;border-radius:9px;padding:10px 12px;box-shadow:0 4px 12px #071a3820;cursor:pointer;font-size:12px;font-weight:800;z-index:2}.ba-radar-metrics[hidden]{display:none!important}.ba-radar-layer-toggle:focus-visible{outline:3px solid #0798a8;outline-offset:2px}
 @media(max-width:700px){.ba-radar-layer-toggle{bottom:72px}}
+
+/* RADAR-UX-03: align desktop analysis sidebar to Mappe's left-hand rail. */
+@media(min-width:701px){
+ .ba-radar-workspace{grid-template-columns:340px minmax(0,1fr)}
+ .ba-radar-panel{grid-column:1;grid-row:1;min-width:0}
+ .ba-radar-map{grid-column:2;grid-row:1;min-width:0}
+}
+@media(min-width:701px) and (max-width:850px){
+ .ba-radar-workspace{grid-template-columns:300px minmax(0,1fr)}
+}
 </style>
 <script>
 (()=>{
