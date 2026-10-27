@@ -255,6 +255,25 @@ const endpoint=<?php echo wp_json_encode(esc_url_raw(rest_url('badaround/v1/disc
 let reports=[],geometryLayers=[],loadingReports=true,loadError=false,chosenCenter=null;
 const status=message=>{$('rad-map-message').textContent=message;$('rad-map-message').hidden=!message;};
 const radiusMeters=()=>Number($('rad-radius').value)*1000;
+const LAST_AREA_KEY='badaround-radar-last-area-v1';
+function rememberArea(center,label){
+ if(!center||!Number.isFinite(center.lat)||!Number.isFinite(center.lng)||Math.abs(center.lat)>90||Math.abs(center.lng)>180)return;
+ const data={version:1,lat:center.lat,lng:center.lng,label:String(label||'Zona consultata').slice(0,180)};
+ try{window.localStorage.setItem(LAST_AREA_KEY,JSON.stringify(data));}catch(e){/* browsing remains functional if storage is blocked */}
+}
+function restoreArea(){
+ let raw=null;try{raw=window.localStorage.getItem(LAST_AREA_KEY);}catch(e){return false;}
+ if(!raw)return false;
+ try{
+  const data=JSON.parse(raw);
+  if(data.version!==1||typeof data.label!=='string'||!data.label.trim()||data.label.length>180
+   ||!Number.isFinite(data.lat)||!Number.isFinite(data.lng)||Math.abs(data.lat)>90||Math.abs(data.lng)>180)return false;
+  focusLocation({lat:data.lat,lng:data.lng},data.label,false);
+  status('Ripristinata l’ultima zona consultata su questo browser.');
+  return true;
+ }catch(e){return false;}
+}
+
 const validGeo=g=>g&&g.version==='public-location/v1'&&g.source==='event_public'&&
  ['exact_point','approximate_area'].includes(g.mode)&&Number.isFinite(g.lat)&&Number.isFinite(g.lng)&&
  Math.abs(g.lat)<=90&&Math.abs(g.lng)<=180&&(g.mode==='exact_point'||Number.isFinite(g.radius_meters)&&g.radius_meters>0);
@@ -399,10 +418,10 @@ async function loadMap(){
   geocoder=new google.maps.Geocoder();
   try{placesApi=await google.maps.importLibrary('places');}
   catch(error){console.warn('Radar autocomplete unavailable; manual address search remains enabled.',error);}
-  status('');render();
+  if(!restoreArea()){status('');render();}
  }catch(error){status('Google Maps non disponibile: verifica configurazione, autorizzazione del dominio o console del browser.');console.error('Radar map:',error);}
 }
-function focusLocation(position,address){
+function focusLocation(position,address,save=true){
  if(!map)return;
  const pos=position;
  if(!searchCircle)searchCircle=new google.maps.Circle({map,center:pos,radius:radiusMeters(),strokeColor:'#078e99',strokeWeight:2,strokeOpacity:.9,fillColor:'#0798a8',fillOpacity:.05});
@@ -413,6 +432,7 @@ function focusLocation(position,address){
  chosenCenter={lat:pos.lat instanceof Function?pos.lat():pos.lat,lng:pos.lng instanceof Function?pos.lng():pos.lng};
  map.fitBounds(searchCircle.getBounds(),60);
  input.value=address;
+ if(save)rememberArea(chosenCenter,address);
  status('Area individuata. Eventi pubblici filtrati senza analisi di rischio.');
  render();
 }
@@ -500,6 +520,7 @@ $('rad-radius').addEventListener('change',()=>{if(searchCircle&&map)map.fitBound
 $('rad-reset').addEventListener('click',()=>{
  for(const [key,value] of Object.entries(initial))$('rad-'+key).value=value;
  chosenCenter=null;
+ try{window.localStorage.removeItem(LAST_AREA_KEY);}catch(e){}
  searchCircle?.setMap(null);searchCircle=null;centerMarker?.setMap(null);centerMarker=null;
  if(map){map.setCenter({lat:42.2,lng:12.5});map.setZoom(6);}
  status('');render();
