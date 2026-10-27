@@ -10,7 +10,7 @@ if ( class_exists( 'BadAround_Discovery_Query' ) ) {
 	$recent_events = ( new BadAround_Discovery_Query() )->discover(
 		array(
 			'page'     => 1,
-			'per_page' => 6,
+			'per_page' => 9,
 		)
 	);
 }
