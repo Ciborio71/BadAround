@@ -29,6 +29,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 
 		<nav class="ba-primary-nav" id="ba-primary-nav" aria-label="<?php esc_attr_e( 'Navigazione principale', 'badaround-child' ); ?>">
 			<a href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Mappa</a>
+			<a href="<?php echo esc_url( home_url( '/radar-demo/' ) ); ?>"<?php echo is_page( 'radar-demo' ) ? ' aria-current="page"' : ''; ?>>Radar</a>
 			<a href="<?php echo esc_url( home_url( '/cerca/' ) ); ?>">Cerca</a>
 			<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Segnalazioni</a>
 			<a href="<?php echo esc_url( home_url( '/come-funziona/' ) ); ?>">Come funziona</a>
@@ -49,6 +50,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 	<div class="ba-mobile-menu" id="ba-mobile-menu" hidden>
 		<nav aria-label="<?php esc_attr_e( 'Navigazione mobile', 'badaround-child' ); ?>">
 			<a href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Mappa</a>
+			<a href="<?php echo esc_url( home_url( '/radar-demo/' ) ); ?>"<?php echo is_page( 'radar-demo' ) ? ' aria-current="page"' : ''; ?>>Radar</a>
 			<a href="<?php echo esc_url( home_url( '/cerca/' ) ); ?>">Cerca</a>
 			<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Segnalazioni</a>
 			<a href="<?php echo esc_url( home_url( '/come-funziona/' ) ); ?>">Come funziona</a>
