@@ -66,6 +66,9 @@ get_header();
 @media(min-width:701px) and (max-width:850px){
  .ba-radar-workspace{grid-template-columns:300px minmax(0,1fr)}
 }
+
+/* RADAR-UX-04 — full-screen dashboard shell parity with Mappe; wp_footer remains active. */
+body.page-template-page-radar-demo .ba-site-footer{display:none}
 </style>
 <script>
 (()=>{
