@@ -41,10 +41,12 @@ jobs:
           from pathlib import Path
           p=Path("wordpress/themes/badaround-child/page-radar-demo.php")
           s=p.read_text()
-          match=re.search(r'<script>\\s*(\\(\\(\\)=>\\{[\\s\\S]*?\\}\\)\\(\\);)\\s*</script>',s)
-          if not match:
+          marker='<script>\\n(()=>{'
+          if marker not in s:
               raise SystemExit("Radar inline JavaScript not found")
-          Path("/tmp/radar-discovery.js").write_text(match.group(1))
+          body='(()=>{'+s.split(marker,1)[1].split('</script>',1)[0]
+          body=re.sub(r'<\\?php.*?\\?>', '"https://example.invalid/discovery"', body, flags=re.S)
+          Path("/tmp/radar-discovery.js").write_text(body)
           PY
           node --check /tmp/radar-discovery.js
       - name: Targeted one-file guarded deploy
