@@ -103,6 +103,10 @@ body.page-template-page-radar-demo .ba-site-footer{display:none}
 .ba-radar-suggestions[hidden]{display:none!important}
 .ba-radar-suggestions button{display:block;width:100%;height:auto;min-height:42px;padding:11px 13px;border:0;border-bottom:1px solid #edf1f5;border-radius:0;text-align:left;background:#fff;color:#071a38;font-size:12px;cursor:pointer}
 .ba-radar-suggestions button:hover,.ba-radar-suggestions button:focus-visible{background:#eaf7fa;color:#071a38}
+
+/* RADAR-SEARCH-WIDTH-01 — match the compact Mappe search footprint. */
+@media(min-width:701px){.ba-radar-controls .ba-radar-search{flex:0 1 355px;width:355px;max-width:355px;min-width:190px}}
+@media(max-width:700px){.ba-radar-controls .ba-radar-search{flex:1 1 100%;width:100%;max-width:100%;min-width:0}}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
