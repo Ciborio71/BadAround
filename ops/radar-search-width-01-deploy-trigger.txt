@@ -1,0 +1,1 @@
+Radar search box width parity with Mappe only.
