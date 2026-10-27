@@ -11,13 +11,6 @@ $report_url = home_url( '/segnala-un-evento/' );
 ?>
 <main class="ba-map-page" id="main-content">
 	<section class="ba-map-commandbar" aria-label="Ricerca e filtri mappa">
-		<div class="ba-map-commandbar__summary">
-			<span class="ba-map-results-panel__eyebrow">Mappa BadAround</span>
-			<div class="ba-map-commandbar__heading">
-				<h1>Segnalazioni nella zona</h1>
-				<span class="ba-map-commandbar__count" data-ba-map-count>Caricamento…</span>
-			</div>
-		</div>
 
 		<div class="ba-map-commandbar__controls">
 			<div class="ba-map-commandbar__primary">
@@ -60,6 +53,13 @@ $report_url = home_url( '/segnala-un-evento/' );
 
 	<section class="ba-map-workspace">
 		<aside class="ba-map-results-panel" data-ba-map-results aria-label="Eventi pubblicati">
+		<div class="ba-map-commandbar__summary">
+			<span class="ba-map-results-panel__eyebrow">Mappa BadAround</span>
+			<div class="ba-map-commandbar__heading">
+				<h1>Segnalazioni nella zona</h1>
+				<span class="ba-map-commandbar__count" data-ba-map-count>Caricamento…</span>
+			</div>
+		</div>
 			<div class="ba-map-results-panel__mobile-head">
 				<div>
 					<span class="ba-map-results-panel__eyebrow">Risultati</span>
