@@ -1,0 +1,1 @@
+Radar panel shows phenomenon categories, no event listings or risk metrics.
