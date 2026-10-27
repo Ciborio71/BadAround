@@ -226,7 +226,7 @@ async function fetchReports(){
   if(!response.ok)throw Error('Discovery HTTP '+response.status);
   const payload=await response.json();
   if(!Array.isArray(payload?.items))throw Error('Discovery response invalid');
-  reports=payload.items.filter(e=>e&&typeof e.id==='number'&&typeof e.permalink==='string'&&!/^\\s*\\[?QA\\b/i.test(e.title||'')&&!/nessun evento reale|collaudo tecnico sintetico/i.test(e.title||''));
+  reports=payload.items.filter(e=>e&&typeof e.id==='number'&&typeof e.permalink==='string'&&!/^\s*\[?QA\b/i.test(e.title||'')&&!/nessun evento reale|collaudo tecnico sintetico/i.test(e.title||''));
   loadError=false;
  }catch(err){loadError=true;reports=[];console.warn('Radar Discovery:',err);}
  loadingReports=false;render();
