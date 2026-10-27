@@ -1,0 +1,34 @@
+name: RADAR-ONLINE-UX-01 demo template deploy
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths: ['ops/radar-online-ux-01-trigger.txt']
+permissions:
+  contents: read
+concurrency:
+  group: badaround-targeted-production-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    timeout-minutes: 15
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate PHP source
+        run: php -l wordpress/themes/badaround-child/page-radar-demo.php
+      - name: Prepare TLS trust
+        run: |
+          mkdir -p tls
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/chain.pem
+      - name: Deploy and verify single new Radar demo template
+        run: python ops/radar-online-ux-01-deploy.py
