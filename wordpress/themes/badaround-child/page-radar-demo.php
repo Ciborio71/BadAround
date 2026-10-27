@@ -9,9 +9,9 @@ add_filter('wp_robots', static function ($robots) { $robots['noindex'] = true; $
 get_header();
 ?>
 <main class="ba-radar-demo" id="main-content">
- <header class="ba-radar-heading"><div><p class="ba-radar-kicker">RADAR · ANTEPRIMA INTERATTIVA</p><h1>BadAround Radar</h1><p>Conosci una zona prima di andarci.</p></div><strong class="ba-radar-demo-pill">DATI SIMULATI · NON SONO ALLERTE REALI</strong></header>
+ 
  <div class="ba-radar-controls" aria-label="Filtri dimostrativi Radar">
-  <label class="ba-radar-search">Cerca un luogo reale<input id="rad-place" value="" placeholder="Indirizzo, quartiere o località" aria-label="Cerca un luogo reale" autocomplete="off" /><button id="rad-search" type="button">Cerca</button></label>
+  <div class="ba-radar-search"><label for="rad-place">Cerca un luogo reale</label><div class="ba-radar-search-row"><input id="rad-place" value="" placeholder="Indirizzo, quartiere o località" aria-label="Cerca un luogo reale" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="rad-suggestions" /><button id="rad-search" type="button">Cerca</button></div><div id="rad-suggestions" class="ba-radar-suggestions" role="listbox" aria-label="Suggerimenti indirizzi" hidden></div></div>
   <label>Categoria<select id="rad-cat"><option>Tutte le categorie</option><option>Veicoli</option><option>Pericoli</option><option>Spazi pubblici</option><option>Animali</option><option>Case e attività</option><option>Oggetti e documenti</option></select></label>
   <label>Periodo<select id="rad-period"><option value="30">30 giorni</option><option value="7">7 giorni</option><option value="90">90 giorni</option><option value="365">12 mesi</option></select></label>
   <label>Raggio<select id="rad-radius"><option value="1">1 km</option><option value="0.5">500 m</option><option value="2">2 km</option><option value="5">5 km</option></select></label>
@@ -91,6 +91,18 @@ body.page-template-page-radar-demo .ba-site-footer{display:none}
 .ba-radar-search button{flex:0 0 auto;min-width:70px;background:#078e99;color:#fff;border:0}
 .ba-radar-search button:hover{background:#067780;color:#fff}
 @media(max-width:700px){.ba-radar-map-disclaimer{top:58px;right:10px;max-width:175px;font-size:9px}.ba-radar-map-message{top:55px}}
+
+/* RADAR-GMAP-02: compact Mappe-like toolbar and accessible Places suggestions. */
+.ba-radar-heading{display:none!important}
+.ba-radar-controls{position:relative;z-index:12}
+.ba-radar-search{position:relative;flex:1 1 280px;min-width:220px;display:grid!important;gap:4px}
+.ba-radar-search-row{display:flex;gap:5px}
+.ba-radar-search-row input{flex:1 1 auto;min-width:0;width:100%}
+.ba-radar-search-row button{min-width:65px;color:#fff;background:#078e99;border-color:#078e99;cursor:pointer}
+.ba-radar-suggestions{position:absolute;left:0;right:0;top:100%;z-index:60;max-height:320px;overflow:auto;background:#fff;border:1px solid #d9e4eb;border-radius:12px;box-shadow:0 15px 30px #071a3830}
+.ba-radar-suggestions[hidden]{display:none!important}
+.ba-radar-suggestions button{display:block;width:100%;height:auto;min-height:42px;padding:11px 13px;border:0;border-bottom:1px solid #edf1f5;border-radius:0;text-align:left;background:#fff;color:#071a38;font-size:12px;cursor:pointer}
+.ba-radar-suggestions button:hover,.ba-radar-suggestions button:focus-visible{background:#eaf7fa;color:#071a38}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -145,51 +157,112 @@ function render(){
  if(searchCircle)searchCircle.setVisible($('rad-layer-radius').checked);
  updateCircle();
 }
+let placesApi=null,sessionToken=null,debounce=null,requestId=0,selectedPrediction=null;
+const input=$('rad-place'),suggestions=$('rad-suggestions');
+function clearSuggestions(){
+ suggestions.replaceChildren();suggestions.hidden=true;input.setAttribute('aria-expanded','false');
+}
+async function readyMaps(){
+ if(window.google?.maps?.Map)return;
+ if(!config.mapsUrl)throw new Error('Google Maps API key not configured');
+ await new Promise((resolve,reject)=>{
+  const script=document.createElement('script');
+  script.src=config.mapsUrl;script.async=true;script.defer=true;
+  script.onerror=()=>reject(new Error('Google Maps script failed to load'));
+  script.onload=resolve;document.head.appendChild(script);
+ });
+ for(let i=0;i<60;i++){
+  if(window.google?.maps?.Map)return;
+  await new Promise(resolve=>setTimeout(resolve,100));
+ }
+ throw new Error('Google Maps not ready after script load');
+}
 async function loadMap(){
- if(!config.mapsUrl){status('Chiave Google Maps non disponibile: verificare la configurazione del sito.');return;}
  try{
-  if(!window.google?.maps){
-   await new Promise((resolve,reject)=>{
-    const tag=document.createElement('script');tag.src=config.mapsUrl;tag.async=true;
-    tag.onload=resolve;tag.onerror=()=>reject(new Error('Google Maps non raggiungibile'));
-    document.head.appendChild(tag);
-   });
-  }
-  if(!window.google?.maps)throw new Error('Google Maps non inizializzato');
+  await readyMaps();
   map=new google.maps.Map($('rad-google-map'),{
    center:{lat:42.2,lng:12.5},zoom:6,mapTypeControl:false,streetViewControl:false,
-   fullscreenControl:true,zoomControl:true,gestureHandling:'cooperative',
+   fullscreenControl:true,zoomControl:true,gestureHandling:'cooperative'
   });
   geocoder=new google.maps.Geocoder();
-  status('');
-  render();
- }catch(error){status('Impossibile caricare Google Maps. Riprova oppure verifica le autorizzazioni della chiave.');console.error('BadAround Radar demo map:',error);}
+  try{placesApi=await google.maps.importLibrary('places');}
+  catch(error){console.warn('Radar autocomplete unavailable; manual address search remains enabled.',error);}
+  status('');render();
+ }catch(error){status('Google Maps non disponibile: verifica configurazione, autorizzazione del dominio o console del browser.');console.error('Radar map:',error);}
+}
+function focusLocation(position,address){
+ if(!map)return;
+ const pos=position;
+ if(!searchCircle)searchCircle=new google.maps.Circle({map,center:pos,radius:radiusMeters(),strokeColor:'#078e99',strokeWeight:2,strokeOpacity:.9,fillColor:'#0798a8',fillOpacity:.05});
+ else searchCircle.setCenter(pos);
+ if(!centerMarker)centerMarker=new google.maps.Marker({map,position:pos,title:'Centro della ricerca Radar (nessun evento)'});
+ else centerMarker.setPosition(pos);
+ searchCircle.setRadius(radiusMeters());searchCircle.setVisible($('rad-layer-radius').checked);
+ map.fitBounds(searchCircle.getBounds(),60);
+ input.value=address;
+ status('Area individuata. Nessuna analisi reale viene effettuata.');
+ render();
+}
+async function choosePrediction(prediction){
+ clearSuggestions();selectedPrediction=null;
+ try{
+  const place=prediction.toPlace();
+  await place.fetchFields({fields:['formattedAddress','location','viewport']});
+  if(!place.location)throw new Error('Coordinates missing');
+  focusLocation(place.location,place.formattedAddress||input.value);
+  sessionToken=null;
+ }catch(error){console.warn('Radar place selection failed:',error);status('Impossibile selezionare il luogo. Prova con il pulsante Cerca.');}
+}
+async function autocomplete(query){
+ if(!placesApi?.AutocompleteSuggestion || query.length<3){clearSuggestions();return;}
+ const id=++requestId;
+ try{
+  if(!sessionToken)sessionToken=new placesApi.AutocompleteSessionToken();
+  const {suggestions:results}=await placesApi.AutocompleteSuggestion.fetchAutocompleteSuggestions({input:query,sessionToken,region:'it',language:'it'});
+  if(id!==requestId)return;
+  clearSuggestions();
+  for(const item of (results||[]).slice(0,6)){
+   if(!item.placePrediction)continue;
+   const prediction=item.placePrediction;
+   const b=document.createElement('button');b.type='button';b.setAttribute('role','option');
+   b.textContent=prediction.text?.text||prediction.mainText?.text||query;
+   b.addEventListener('click',()=>choosePrediction(prediction));
+   suggestions.appendChild(b);
+  }
+  suggestions.hidden=!suggestions.children.length;
+  input.setAttribute('aria-expanded',String(!suggestions.hidden));
+ }catch(error){if(id===requestId)clearSuggestions();console.warn('Radar autocomplete:',error);}
 }
 function locate(){
- if(!geocoder||!map){status('La cartografia non è ancora disponibile.');return;}
- const address=$('rad-place').value.trim();
- if(!address){status('Inserisci un indirizzo, una località o un quartiere.');return;}
+ requestId++;clearSuggestions();
+ if(!geocoder||!map){status('La cartografia non è disponibile.');return;}
+ const address=input.value.trim();if(!address){status('Inserisci un indirizzo o località.');return;}
  status('Ricerca indirizzo in corso…');
  geocoder.geocode({address,region:'IT'},(results,code)=>{
   if(code!=='OK'||!results?.length){status('Località non trovata. Verifica l’indirizzo.');return;}
-  const first=results[0],pos=first.geometry.location;
-  if(!searchCircle)searchCircle=new google.maps.Circle({map,center:pos,radius:radiusMeters(),strokeColor:'#078e99',strokeWeight:2,strokeOpacity:.9,fillColor:'#0798a8',fillOpacity:.05});
-  else searchCircle.setCenter(pos);
-  if(!centerMarker)centerMarker=new google.maps.Marker({map,position:pos,title:'Centro della ricerca Radar (nessun evento)'});
-  else centerMarker.setPosition(pos);
-  searchCircle.setRadius(radiusMeters());
-  searchCircle.setVisible($('rad-layer-radius').checked);
-  map.fitBounds(searchCircle.getBounds(),60);
-  $('rad-place').value=first.formatted_address;
-  status('Area geografica individuata. Nessuna analisi reale viene effettuata.');
-  render();
+  focusLocation(results[0].geometry.location,results[0].formatted_address);
  });
 }
+input.addEventListener('input',()=>{
+ selectedPrediction=null;requestId++;clearTimeout(debounce);
+ const query=input.value.trim();render();
+ if(query.length<3){clearSuggestions();return;}
+ debounce=setTimeout(()=>autocomplete(query),300);
+});
+input.addEventListener('keydown',e=>{
+ if(e.key==='Escape'){requestId++;clearSuggestions();}
+ if(e.key==='Enter'){
+  e.preventDefault();
+  const first=suggestions.querySelector('button');
+  if(first&&!suggestions.hidden)first.click();else locate();
+ }
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.ba-radar-search')){requestId++;clearSuggestions();}});
+$('rad-search').addEventListener('click',locate);
 ['rad-cat','rad-period','rad-radius'].forEach(id=>$(id).addEventListener('change',render));
 $('rad-radius').addEventListener('change',()=>{if(searchCircle&&map)map.fitBounds(searchCircle.getBounds(),60)});
-$('rad-place').addEventListener('input',render);
-$('rad-place').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();locate()}});
-$('rad-search').addEventListener('click',locate);
+
+
 root.querySelectorAll('[data-rad-state]').forEach(btn=>btn.addEventListener('click',()=>{state=btn.dataset.radState;root.querySelectorAll('[data-rad-state]').forEach(x=>x.classList.toggle('is-active',x===btn));render()}));
 $('rad-layer-toggle').addEventListener('click',()=>{layer=!layer;render()});
 const layers=$('rad-layers'),toggle=$('rad-layers-toggle');
