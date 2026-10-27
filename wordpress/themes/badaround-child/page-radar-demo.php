@@ -23,7 +23,6 @@ get_header();
    <div id="rad-demo-heat" class="ba-radar-demo-heat" hidden aria-hidden="true"></div>
    <div id="rad-map-message" class="ba-radar-map-message" role="status" aria-live="polite">Caricamento cartografia Google Maps…</div>
    <div class="ba-radar-map-disclaimer">CARTOGRAFIA REALE · ANALISI E HEATMAP SIMULATE</div>
-   <div class="ba-radar-layers" id="rad-layers"><div class="ba-radar-layers__head"><strong>Livelli</strong><button id="rad-layers-close" type="button" aria-label="Chiudi livelli">×</button></div><p>Scegli cosa visualizzare nella simulazione.</p><label><input type="checkbox" id="rad-layer-heat" checked> Heatmap simulata</label><label><input type="checkbox" id="rad-layer-streets" checked> Cartografia stradale</label><label><input type="checkbox" id="rad-layer-radius" checked> Area di ricerca</label><small>Tutti i livelli e i dati sono fittizi.</small></div><button id="rad-layers-toggle" type="button" class="ba-radar-layers-toggle" aria-controls="rad-layers" aria-expanded="false">☷ Livelli</button>
    <div class="ba-radar-map-title" id="rad-map-title">Area dimostrativa · 1 km</div>
    <button class="ba-radar-layer-toggle" id="rad-layer-toggle" type="button" aria-pressed="true">Livello termico: attivo</button><div class="ba-radar-legend" id="rad-legend"><strong>Concentrazione simulata</strong><div class="ba-radar-gradient"></div><small>Non rappresenta la pericolosità reale</small></div>
   </section>
@@ -113,6 +112,12 @@ body.page-template-page-radar-demo .ba-site-footer{display:none}
 .ba-radar-search-row #rad-nearby:hover,.ba-radar-search-row #rad-nearby:focus-visible{background:#d4eff1!important;color:#064f59!important}
 .ba-radar-search-row #rad-nearby:disabled{opacity:.6;cursor:wait}
 @media(max-width:930px){.ba-radar-search-row{flex-wrap:wrap}.ba-radar-search-row input{flex-basis:100%}}
+/* RADAR-MAP-PARITY-01: match Mappe edges; keep compact mobile gutters. */
+body.page-template-page-radar-demo .ba-radar-workspace{max-width:none;margin:0;padding:0;gap:0}
+@media(min-width:701px){body.page-template-page-radar-demo .ba-radar-workspace{grid-template-columns:340px minmax(0,1fr)}body.page-template-page-radar-demo .ba-radar-map{border-radius:0;border-left:0;border-right:0}}
+@media(min-width:701px) and (max-width:850px){body.page-template-page-radar-demo .ba-radar-workspace{grid-template-columns:300px minmax(0,1fr)}}
+@media(max-width:700px){body.page-template-page-radar-demo .ba-radar-workspace{padding:0}}
+.ba-radar-layers,.ba-radar-layers-toggle{display:none!important}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -145,7 +150,7 @@ function render(){
  const count=Math.round(base*periodFactor);
  const active=state==='sample'&&count>=3;
  const effective=state==='sample'&&!active?'few':state;
- const demoHeat=active&&layer&&$('rad-layer-heat').checked;
+ const demoHeat=active&&layer;
  $('rad-demo-heat').hidden=!demoHeat;
  $('rad-legend').style.display=demoHeat?'':'none';
  $('rad-layer-toggle').setAttribute('aria-pressed',String(layer));
@@ -163,8 +168,7 @@ function render(){
  $('rad-copy').textContent=messages[effective];
  $('rad-brief').textContent=effective==='sample'?'La mappa Google mostra luoghi reali; dati, numeri e avvisi Radar restano completamente simulati.':'Nessuna conclusione territoriale disponibile.';
  root.querySelectorAll('[data-rad-state]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.radState===state)));
- if(map)map.setMapTypeId($('rad-layer-streets').checked?'roadmap':'terrain');
- if(searchCircle)searchCircle.setVisible($('rad-layer-radius').checked);
+ 
  updateCircle();
 }
 let placesApi=null,sessionToken=null,debounce=null,requestId=0,selectedPrediction=null;
@@ -192,6 +196,7 @@ async function loadMap(){
   await readyMaps();
   map=new google.maps.Map($('rad-google-map'),{
    center:{lat:42.2,lng:12.5},zoom:6,mapTypeControl:false,streetViewControl:false,
+   styles:[{featureType:'poi',elementType:'all',stylers:[{visibility:'off'}]},{featureType:'transit',elementType:'all',stylers:[{visibility:'off'}]},{featureType:'road',elementType:'labels.icon',stylers:[{visibility:'off'}]}],
    fullscreenControl:true,zoomControl:true,gestureHandling:'cooperative'
   });
   geocoder=new google.maps.Geocoder();
@@ -207,7 +212,7 @@ function focusLocation(position,address){
  else searchCircle.setCenter(pos);
  if(!centerMarker)centerMarker=new google.maps.Marker({map,position:pos,title:'Centro della ricerca Radar (nessun evento)'});
  else centerMarker.setPosition(pos);
- searchCircle.setRadius(radiusMeters());searchCircle.setVisible($('rad-layer-radius').checked);
+ searchCircle.setRadius(radiusMeters());searchCircle.setVisible(true);
  map.fitBounds(searchCircle.getBounds(),60);
  input.value=address;
  status('Area individuata. Nessuna analisi reale viene effettuata.');
@@ -296,15 +301,9 @@ $('rad-radius').addEventListener('change',()=>{if(searchCircle&&map)map.fitBound
 
 root.querySelectorAll('[data-rad-state]').forEach(btn=>btn.addEventListener('click',()=>{state=btn.dataset.radState;root.querySelectorAll('[data-rad-state]').forEach(x=>x.classList.toggle('is-active',x===btn));render()}));
 $('rad-layer-toggle').addEventListener('click',()=>{layer=!layer;render()});
-const layers=$('rad-layers'),toggle=$('rad-layers-toggle');
-const setLayers=open=>{layers.classList.toggle('is-open',open);toggle.setAttribute('aria-expanded',String(open))};
-toggle.addEventListener('click',()=>setLayers(!layers.classList.contains('is-open')));
-$('rad-layers-close').addEventListener('click',()=>{setLayers(false);toggle.focus()});
-['rad-layer-heat','rad-layer-streets','rad-layer-radius'].forEach(id=>$(id).addEventListener('change',render));
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&layers.classList.contains('is-open')){setLayers(false);toggle.focus()}});
 $('rad-reset').addEventListener('click',()=>{
  for(const [key,value] of Object.entries(initial))$('rad-'+key).value=value;
- state='sample';layer=false;$('rad-layer-heat').checked=true;$('rad-layer-streets').checked=true;$('rad-layer-radius').checked=true;
+ state='sample';layer=false;
  root.querySelectorAll('[data-rad-state]').forEach(x=>x.classList.toggle('is-active',x.dataset.radState==='sample'));
  searchCircle?.setMap(null);searchCircle=null;centerMarker?.setMap(null);centerMarker=null;
  if(map){map.setCenter({lat:42.2,lng:12.5});map.setZoom(6);}
