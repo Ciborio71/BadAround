@@ -235,6 +235,15 @@ body.page-template-page-radar-demo .ba-radar-search>label{position:absolute;widt
  body.page-template-page-radar-demo #rad-drawer{display:block}
  body.page-template-page-radar-demo .ba-radar-foot{display:none}
 }
+
+/* RADAR-EXPERIENCE-01 — meaningful first-open view without unverified heat or regional ranking. */
+.ba-radar-welcome{padding:16px;border-radius:13px;background:linear-gradient(125deg,#e5f5f7,#f6fafc);border:1px solid #cde5e9}
+.ba-radar-welcome h3{margin:0 0 7px;font-size:16px;color:#082b43}
+.ba-radar-welcome p{margin:0;color:#496a7c;font-size:12px;line-height:1.6}
+.ba-radar-topic{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:13px;border:1px solid #dce7ee;border-radius:11px;background:#fff;cursor:pointer}
+.ba-radar-topic:hover,.ba-radar-topic:focus-visible{border-color:#0798a8;background:#f1fbfc;outline-offset:2px}
+.ba-radar-topic-icon{font-size:23px;line-height:1;flex:none}
+.ba-radar-topic-body{display:grid;gap:3px;min-width:0}.ba-radar-topic-body strong{font-size:13px;color:#071a38}.ba-radar-topic-body small{font-size:11px;color:#627d8d;line-height:1.4}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -319,7 +328,38 @@ function render(){
  if(loadError){$('rad-copy').textContent='Impossibile consultare le segnalazioni pubbliche.';return;}
  if(loadingReports){$('rad-copy').textContent='Caricamento dei dati pubblici…';return;}
  if(!chosenCenter){
-  $('rad-copy').textContent='Cerca un luogo o usa «Vicino a me» per conoscere le problematiche segnalate nell’area selezionata.';
+  $('rad-title').textContent='Cosa segnala la community';
+  $('rad-map-title').textContent='Radar · esplora il territorio';
+  const topics=new Map();
+  for(const e of filtered){
+   const theme=category(e)||'Altre problematiche';
+   if(!topics.has(theme))topics.set(theme,new Set());
+   topics.get(theme).add(e.event_type?.name||'Tipologia non specificata');
+  }
+  $('rad-copy').textContent='Esplora i fenomeni presenti nelle segnalazioni pubbliche disponibili. Scegli una zona per una lettura territoriale: questa anteprima non rappresenta la diffusione nazionale né la frequenza dei fenomeni.';
+  const intro=document.createElement('div');intro.className='ba-radar-welcome';
+  const h=document.createElement('h3');h.textContent='Scopri cosa è utile sapere di una zona';
+  const p=document.createElement('p');p.textContent='Cerca un indirizzo oppure usa «Vicino a me»: Radar collegherà le problematiche pubbliche all’area selezionata.';
+  intro.append(h,p);host.appendChild(intro);
+  const titles=['Veicoli','Case e attività','Pericoli','Spazi pubblici','Animali','Oggetti e documenti','Altre problematiche'];
+  const icons={'Veicoli':'🚗','Case e attività':'🏠','Pericoli':'⚠️','Spazi pubblici':'🏙️','Animali':'🐾','Oggetti e documenti':'📄','Altre problematiche':'◉'};
+  for(const key of titles){
+   if(!topics.has(key))continue;
+   const card=document.createElement('button');card.type='button';card.className='ba-radar-topic';
+   const icon=document.createElement('span');icon.className='ba-radar-topic-icon';icon.textContent=icons[key];
+   const body=document.createElement('span');body.className='ba-radar-topic-body';
+   const strong=document.createElement('strong');strong.textContent=key;
+   const sub=document.createElement('small');sub.textContent=[...topics.get(key)].sort((a,b)=>a.localeCompare(b,'it')).join(' · ');
+   body.append(strong,sub);card.append(icon,body);
+   card.addEventListener('click',()=>{
+    const select=$('rad-cat');if([...select.options].some(o=>o.value===key))select.value=key;
+    render();$('rad-place').focus();
+   });
+   host.appendChild(card);
+  }
+  const note=document.createElement('p');note.className='ba-radar-note';
+  note.textContent='Panoramica delle sole tipologie pubblicate nel campione consultabile, non una classifica delle zone. Nessuna zona viene definita sicura o pericolosa.';
+  host.appendChild(note);
   return;
  }
  if(!filtered.length){
