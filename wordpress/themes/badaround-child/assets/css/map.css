@@ -1065,3 +1065,29 @@ body.page-template-page-mappa .ba-map-canvas > .ba-map-legend .ba-map-legend__bo
    max-height:min(34vh,240px);
  }
 }
+
+/* MAP-UX-COUNT-CATEGORY-01 — visible live result count and category-consistent sidebar pills. */
+body.page-template-page-mappa .ba-map-results-panel > .ba-map-commandbar__summary{
+  position:static;width:auto;height:auto;overflow:visible;clip-path:none;
+  display:flex;align-items:baseline;flex-wrap:wrap;gap:7px;
+  padding:13px 12px 8px;background:#f7fafc;
+}
+body.page-template-page-mappa .ba-map-results-panel > .ba-map-commandbar__summary .ba-map-results-panel__eyebrow{display:none}
+body.page-template-page-mappa .ba-map-results-panel > .ba-map-commandbar__summary .ba-map-commandbar__heading{
+  display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;
+}
+body.page-template-page-mappa .ba-map-results-panel > .ba-map-commandbar__summary h1{
+  font-size:.87rem;font-weight:850;line-height:1.35;margin:0;color:#071a38;
+}
+body.page-template-page-mappa .ba-map-results-panel > .ba-map-commandbar__summary [data-ba-map-count]{
+  display:inline;color:#526d83;font-size:.76rem;font-weight:750;
+}
+body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map-event-card .ba-badge{
+  border:1px solid color-mix(in srgb,var(--ba-card-accent,#8292A8) 36%,white);
+  background:color-mix(in srgb,var(--ba-card-accent,#8292A8) 11%,white);
+  color:var(--ba-card-accent,#627187);
+  font-weight:850;
+}
+@media(max-width:760px){
+ body.page-template-page-mappa .ba-map-results-panel > .ba-map-commandbar__summary{padding:10px 12px 6px}
+}
