@@ -174,7 +174,7 @@ function eligible(e){
  if($('rad-cat').value!=='Tutte le categorie'&&category(e)!==$('rad-cat').value)return false;
  const period=$('rad-period').value;
  if(period!=='all'){
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(e.occurred_date||''))return false;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(e.occurred_date||''))return false;
   const date=new Date(e.occurred_date+'T12:00:00');
   if(!Number.isFinite(date.getTime()))return false;
   const days=(Date.now()-date.getTime())/86400000;
