@@ -1,0 +1,44 @@
+name: MAP-UX-PHASE3 targeted production deploy
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths:
+      - 'ops/map-ux-phase3-deploy-trigger.txt'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: badaround-targeted-production-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
+      EXPECTED_PARENT: 55ff5c6685b5351400f1946b675a721bd0782e7d
+      EXPECTED_HEAD: 7c761186d142f0a338243e281aae9afa1cec0c0e
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install TLS trust bundle
+        run: |
+          set -euo pipefail
+          mkdir -p tls evidence
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/curl-chain.pem
+      - name: Targeted one-file guarded deploy
+        run: |
+          python ops/map-ux-phase3-deploy.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: map-ux-phase3-deployment-evidence
+          path: evidence/
+          retention-days: 30
