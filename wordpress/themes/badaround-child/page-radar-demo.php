@@ -15,7 +15,7 @@ get_header();
   <label>Categoria<select id="rad-cat"><option>Tutte le categorie</option><option>Veicoli</option><option>Pericoli</option><option>Spazi pubblici</option><option>Animali</option><option>Case e attività</option><option>Oggetti e documenti</option></select></label>
   <label>Periodo<select id="rad-period"><option value="all" selected>Tutti i periodi</option><option value="30">30 giorni</option><option value="7">7 giorni</option><option value="90">90 giorni</option><option value="365">12 mesi</option></select></label>
   <label>Raggio<select id="rad-radius"><option value="1">1 km</option><option value="0.5">500 m</option><option value="2">2 km</option><option value="5">5 km</option></select></label>
-  <button id="rad-reset" type="button">↺ Reset</button>
+  <button id="rad-reset" class="ba-radar-reset-visible" type="button" title="Cancella la zona memorizzata e tutti i filtri">↺ Reimposta</button>
  </div>
  <div class="ba-radar-workspace">
   <section class="ba-radar-map" aria-label="Cartografia Google Maps e segnalazioni pubbliche">
@@ -23,7 +23,7 @@ get_header();
    
    <div id="rad-map-message" class="ba-radar-map-message" role="status" aria-live="polite">Caricamento cartografia Google Maps…</div>
    <div class="ba-radar-map-disclaimer">PROBLEMATICHE SEGNALATE · NESSUN INDICE DI RISCHIO</div>
-   <div class="ba-radar-map-title" id="rad-map-title">Area dimostrativa · 1 km</div>
+   <div class="ba-radar-visual-key" aria-label="Legenda informazioni cartografiche"><strong>Radar territoriale</strong><span>Esplora le problematiche documentate nella community</span><small>La heatmap aggregata sarà attiva solo dopo la validazione dei dati</small></div><div class="ba-radar-map-title" id="rad-map-title">Area dimostrativa · 1 km</div>
 
   </section>
   <aside class="ba-radar-panel" id="rad-panel">
@@ -244,6 +244,17 @@ body.page-template-page-radar-demo .ba-radar-search>label{position:absolute;widt
 .ba-radar-topic:hover,.ba-radar-topic:focus-visible{border-color:#0798a8;background:#f1fbfc;outline-offset:2px}
 .ba-radar-topic-icon{font-size:23px;line-height:1;flex:none}
 .ba-radar-topic-body{display:grid;gap:3px;min-width:0}.ba-radar-topic-body strong{font-size:13px;color:#071a38}.ba-radar-topic-body small{font-size:11px;color:#627d8d;line-height:1.4}
+
+/* RADAR-INSIGHT-VISUAL-01 — visible reset and clear analytical hierarchy. */
+body.page-template-page-radar-demo .ba-radar-controls #rad-reset{flex:none;display:inline-flex!important;align-items:center;justify-content:center;visibility:visible!important;min-width:104px;height:40px;padding:0 12px;border:1px solid #0b7c8a!important;border-radius:9px;background:#e6f7f8!important;color:#075c6a!important;font-weight:850;font-size:12px;white-space:nowrap;cursor:pointer}
+body.page-template-page-radar-demo .ba-radar-controls #rad-reset:hover{background:#bce8ed!important}
+.ba-radar-visual-key{position:absolute;z-index:2;left:15px;bottom:22px;display:grid;gap:5px;max-width:min(310px,calc(100% - 30px));background:#fff;padding:13px;border-radius:12px;box-shadow:0 8px 26px #071a3825}
+.ba-radar-visual-key strong{color:#072d43;font-size:13px}.ba-radar-visual-key span{color:#33576c;font-size:12px}.ba-radar-visual-key small{color:#a36c23;font-size:10px;line-height:1.5}
+.ba-radar-metrics-preview{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.ba-radar-metrics-preview>div{padding:12px 10px;border-radius:10px;background:#eaf5f8;border:1px solid #d4e8ed;display:grid;align-content:center;gap:4px;min-height:80px}
+.ba-radar-metrics-preview strong{font-size:24px;line-height:1;color:#075d77}
+.ba-radar-metrics-preview small{font-size:10px;line-height:1.35;color:#486c7b}
+@media(max-width:1040px){body.page-template-page-radar-demo .ba-radar-controls{flex-wrap:wrap;max-height:none;height:auto!important;min-height:56px}body.page-template-page-radar-demo .ba-radar-demo{grid-template-rows:auto minmax(0,1fr)}}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -337,6 +348,13 @@ function render(){
    topics.get(theme).add(e.event_type?.name||'Tipologia non specificata');
   }
   $('rad-copy').textContent='Esplora i fenomeni presenti nelle segnalazioni pubbliche disponibili. Scegli una zona per una lettura territoriale: questa anteprima non rappresenta la diffusione nazionale né la frequenza dei fenomeni.';
+  const metrics=document.createElement('div');metrics.className='ba-radar-metrics-preview';
+  const metric=document.createElement('div');const metricValue=document.createElement('strong');metricValue.textContent=String(topics.size);
+  const metricLabel=document.createElement('small');metricLabel.textContent='Ambiti documentati nei dati disponibili';
+  metric.append(metricValue,metricLabel);metrics.appendChild(metric);
+  const second=document.createElement('div');const secondValue=document.createElement('strong');secondValue.textContent='—';
+  const secondLabel=document.createElement('small');secondLabel.textContent='Indice di rischio: non calcolato';
+  second.append(secondValue,secondLabel);metrics.appendChild(second);host.appendChild(metrics);
   const intro=document.createElement('div');intro.className='ba-radar-welcome';
   const h=document.createElement('h3');h.textContent='Scopri cosa è utile sapere di una zona';
   const p=document.createElement('p');p.textContent='Cerca un indirizzo oppure usa «Vicino a me»: Radar collegherà le problematiche pubbliche all’area selezionata.';
@@ -372,8 +390,14 @@ function render(){
   if(!groups.has(key))groups.set(key,new Set());
   groups.get(key).add(e.event_type?.name||'Tipologia non specificata');
  }
- $('rad-copy').textContent='Problematiche presenti nelle segnalazioni pubbliche consultabili. Non sono frequenze certificate, indici di rischio o analisi delle ricorrenze.';
+ $('rad-copy').textContent='Fenomeni segnalati nella zona selezionata. Nessuna inferenza sulla pericolosità o sul numero effettivo degli episodi.';
  const priority=['Veicoli','Case e attività','Pericoli','Spazi pubblici','Animali','Oggetti e documenti','Altre problematiche'];
+ const summary=document.createElement('div');summary.className='ba-radar-metrics-preview';
+ const metric=document.createElement('div'),value=document.createElement('strong'),label=document.createElement('small');
+ value.textContent=String(groups.size);label.textContent='Ambiti tematici presenti';metric.append(value,label);summary.appendChild(metric);
+ const other=document.createElement('div'),otherValue=document.createElement('strong'),otherLabel=document.createElement('small');
+ otherValue.textContent='—';otherLabel.textContent='Ricorrenze: non verificabili';other.append(otherValue,otherLabel);summary.appendChild(other);
+ host.appendChild(summary);
  for(const key of priority){
   if(!groups.has(key))continue;
   const card=document.createElement('section');card.className='ba-radar-phenomenon';
