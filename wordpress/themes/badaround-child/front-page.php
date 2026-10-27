@@ -47,7 +47,7 @@ $home_categories = array(
 				<button class="ba-button" type="submit">Cerca</button>
 			</form>
 
-			<button class="ba-button ba-button--outline ba-home-position" type="button" data-ba-geolocate aria-describedby="ba-home-geo-status">Usa la mia posizione</button>
+			<button class="ba-button ba-button--outline ba-home-position" type="button" data-ba-geolocate aria-describedby="ba-home-geo-status"><svg class="ba-home-position__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg><span>Esplora l’area attorno a te</span></button>
 			<p class="ba-home-privacy">La posizione pubblica degli eventi può essere approssimata in base alla richiesta dell’utente e alla moderazione. La tua posizione non viene salvata.</p>
 			<p id="ba-home-geo-status" class="ba-home-geo-status" data-ba-geolocation-status role="status" aria-live="polite"></p>
 		</div>
@@ -57,8 +57,8 @@ $home_categories = array(
 
 			<div class="ba-map-status ba-home-map__status" data-ba-map-status hidden></div>
 
-			<details class="ba-map-legend ba-map-legend--home" open>
-				<summary>Legenda pinpoint</summary>
+			<details class="ba-map-legend ba-map-legend--home">
+				<summary><span class="ba-map-legend__label">Legenda pinpoint</span></summary>
 				<div class="ba-map-legend__body">
 					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-vehicles" aria-hidden="true"></span><span><strong>Veicoli</strong><small>Auto, moto e altri mezzi</small></span></div>
 					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-property" aria-hidden="true"></span><span><strong>Case e attività</strong><small>Abitazioni, negozi e uffici</small></span></div>
@@ -76,22 +76,14 @@ $home_categories = array(
 				<div data-ba-map-preview-content></div>
 			</aside>
 
-			<div class="ba-map-privacy-note">
-				<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.8 7.8 7 10 4.2-2.2 7-5.4 7-10V6l-7-3Z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
-				<span>Le posizioni degli eventi sono pubbliche e possono essere approssimate.</span>
-			</div>
 		</div>
 	</section>
 
 	<section class="ba-home-localbar" aria-label="Esplora BadAround">
 		<div class="ba-container--wide ba-home-localbar__inner">
-			<div class="ba-home-localbar__place">
-				<span class="ba-home-localbar__marker" aria-hidden="true">●</span>
-				<div><span>Esplora</span><strong>l’area attorno a te</strong></div>
-			</div>
-			<a class="ba-home-localbar__link" href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Apri la mappa</a>
-			<a class="ba-home-localbar__link" href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Tutte le segnalazioni</a>
-			<a class="ba-home-localbar__link" href="<?php echo esc_url( home_url( '/segnala-un-evento/' ) ); ?>">Segnala un evento</a>
+			<a class="ba-home-localbar__link" href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>"><span class="ba-home-localbar__icon ba-home-localbar__icon--map" aria-hidden="true">▱</span><span>Apri la mappa</span><span class="ba-home-localbar__arrow" aria-hidden="true">→</span></a>
+			<a class="ba-home-localbar__link" href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>"><span class="ba-home-localbar__icon ba-home-localbar__icon--list" aria-hidden="true">☷</span><span>Tutte le segnalazioni</span><span class="ba-home-localbar__arrow" aria-hidden="true">→</span></a>
+			<a class="ba-home-localbar__link" href="<?php echo esc_url( home_url( '/segnala-un-evento/' ) ); ?>"><span class="ba-home-localbar__icon ba-home-localbar__icon--plus" aria-hidden="true">+</span><span>Segnala un evento</span><span class="ba-home-localbar__arrow" aria-hidden="true">→</span></a>
 		</div>
 	</section>
 

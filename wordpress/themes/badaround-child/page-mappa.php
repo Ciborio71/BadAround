@@ -80,8 +80,8 @@ $report_url = home_url( '/segnala-un-evento/' );
 
 			<div class="ba-map-status" data-ba-map-status hidden></div>
 
-			<details class="ba-map-legend" open>
-				<summary>Legenda pinpoint</summary>
+			<details class="ba-map-legend">
+				<summary><span class="ba-map-legend__label">Legenda pinpoint</span></summary>
 				<div class="ba-map-legend__body">
 					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-vehicles" aria-hidden="true"></span><span><strong>Veicoli</strong><small>Auto, moto e altri mezzi</small></span></div>
 					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-property" aria-hidden="true"></span><span><strong>Case e attività</strong><small>Abitazioni, negozi e uffici</small></span></div>

@@ -911,3 +911,9 @@ body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map
 	padding:0;
 	line-height:1.35;
 }
+
+/* HOME-UX-02 — legenda chiusa per impostazione predefinita, apertura accessibile tramite summary */
+.ba-map-legend summary{justify-content:flex-start;gap:9px}
+.ba-map-legend summary::before{content:"";display:inline-block;width:13px;height:17px;flex:none;background:currentColor;clip-path:polygon(50% 100%,12% 46%,12% 25%,25% 7%,50% 0,75% 7%,88% 25%,88% 46%);opacity:.8}
+.ba-map-legend summary::after{margin-left:auto;font-size:1.1rem;color:#18304d}
+.ba-map-legend summary:hover,.ba-map-legend summary:focus-visible{background:#f2fafb;outline-offset:-2px}
