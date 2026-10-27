@@ -11,7 +11,7 @@ get_header();
 <main class="ba-radar-demo" id="main-content">
  
  <div class="ba-radar-controls" aria-label="Filtri dimostrativi Radar">
-  <div class="ba-radar-search"><label for="rad-place">Cerca un luogo reale</label><div class="ba-radar-search-row"><input id="rad-place" value="" placeholder="Indirizzo, quartiere o località" aria-label="Cerca un luogo reale" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="rad-suggestions" /><button id="rad-search" type="button">Cerca</button></div><div id="rad-suggestions" class="ba-radar-suggestions" role="listbox" aria-label="Suggerimenti indirizzi" hidden></div></div>
+  <div class="ba-radar-search"><label for="rad-place">Cerca un luogo reale</label><div class="ba-radar-search-row"><input id="rad-place" value="" placeholder="Indirizzo, quartiere o località" aria-label="Cerca un luogo reale" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="rad-suggestions" /><button id="rad-search" type="button">Cerca</button><button id="rad-nearby" type="button" aria-label="Esplora la zona attorno alla mia posizione">⌖ Vicino a me</button></div><div id="rad-suggestions" class="ba-radar-suggestions" role="listbox" aria-label="Suggerimenti indirizzi" hidden></div></div>
   <label>Categoria<select id="rad-cat"><option>Tutte le categorie</option><option>Veicoli</option><option>Pericoli</option><option>Spazi pubblici</option><option>Animali</option><option>Case e attività</option><option>Oggetti e documenti</option></select></label>
   <label>Periodo<select id="rad-period"><option value="30">30 giorni</option><option value="7">7 giorni</option><option value="90">90 giorni</option><option value="365">12 mesi</option></select></label>
   <label>Raggio<select id="rad-radius"><option value="1">1 km</option><option value="0.5">500 m</option><option value="2">2 km</option><option value="5">5 km</option></select></label>
@@ -107,6 +107,12 @@ body.page-template-page-radar-demo .ba-site-footer{display:none}
 /* RADAR-SEARCH-WIDTH-01 — match the compact Mappe search footprint. */
 @media(min-width:701px){.ba-radar-controls .ba-radar-search{flex:0 1 355px;width:355px;max-width:355px;min-width:190px}}
 @media(max-width:700px){.ba-radar-controls .ba-radar-search{flex:1 1 100%;width:100%;max-width:100%;min-width:0}}
+
+/* RADAR-GEO-01 — compact location control, explicitly permission-gated. */
+.ba-radar-search-row #rad-nearby{min-width:111px;white-space:nowrap;background:#eaf7f8!important;border:1px solid #a9d7dc!important;color:#076a76!important;font-size:12px;font-weight:800}
+.ba-radar-search-row #rad-nearby:hover,.ba-radar-search-row #rad-nearby:focus-visible{background:#d4eff1!important;color:#064f59!important}
+.ba-radar-search-row #rad-nearby:disabled{opacity:.6;cursor:wait}
+@media(max-width:930px){.ba-radar-search-row{flex-wrap:wrap}.ba-radar-search-row input{flex-basis:100%}}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -263,6 +269,27 @@ input.addEventListener('keydown',e=>{
 });
 document.addEventListener('click',e=>{if(!e.target.closest('.ba-radar-search')){requestId++;clearSuggestions();}});
 $('rad-search').addEventListener('click',locate);
+$('rad-nearby').addEventListener('click',()=>{
+ if(!navigator.geolocation){status('Il browser non supporta la geolocalizzazione.');return;}
+ if(!map){status('La mappa non è ancora disponibile.');return;}
+ const button=$('rad-nearby');button.disabled=true;
+ status('Richiesta autorizzazione alla posizione in corso…');
+ navigator.geolocation.getCurrentPosition(
+  position=>{
+   button.disabled=false;
+   const coords={lat:position.coords.latitude,lng:position.coords.longitude};
+   focusLocation(coords,'Vicino alla mia posizione');
+   status('Zona centrata sulla tua posizione. BadAround Radar non la salva.');
+  },
+  error=>{
+   button.disabled=false;
+   const message=error.code===1?'Permesso di localizzazione non concesso.':error.code===2?'Posizione temporaneamente non disponibile.':'Posizione non rilevata entro il tempo previsto.';
+   status(message);
+  },
+  {enableHighAccuracy:false,timeout:12000,maximumAge:60000}
+ );
+});
+
 ['rad-cat','rad-period','rad-radius'].forEach(id=>$(id).addEventListener('change',render));
 $('rad-radius').addEventListener('change',()=>{if(searchCircle&&map)map.fitBounds(searchCircle.getBounds(),60)});
 
