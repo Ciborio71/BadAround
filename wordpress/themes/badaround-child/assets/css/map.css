@@ -1091,3 +1091,24 @@ body.page-template-page-mappa .ba-map-results-panel .ba-map-results-list .ba-map
 @media(max-width:760px){
  body.page-template-page-mappa .ba-map-results-panel > .ba-map-commandbar__summary{padding:10px 12px 6px}
 }
+
+/* HOME-MAP-CARDS-09 — Home map navigation and legend, independent of Mappe page. */
+body.home .ba-home-map .ba-map-pan{display:none!important}
+body.home .ba-home-map .ba-map-legend--home,
+body.home .ba-home-map.ba-map-navigation-shell > .ba-map-legend--home{
+ left:auto;top:auto;right:14px;bottom:44px;
+ width:min(218px,calc(100% - 28px));max-width:calc(100% - 28px);
+ z-index:8;border-radius:12px;box-shadow:0 6px 20px rgba(7,26,56,.12)
+}
+body.home .ba-home-map .ba-map-legend--home .ba-map-legend__body{
+ max-height:min(42vh,310px);overflow-y:auto;overscroll-behavior:contain
+}
+@media(max-width:760px){
+ body.home .ba-home-map .ba-map-legend--home,
+ body.home .ba-home-map.ba-map-navigation-shell > .ba-map-legend--home{
+  right:10px;bottom:44px;width:min(194px,calc(100% - 20px))
+ }
+ body.home .ba-home-map .ba-map-legend--home .ba-map-legend__body{
+  max-height:min(34vh,240px)
+ }
+}
