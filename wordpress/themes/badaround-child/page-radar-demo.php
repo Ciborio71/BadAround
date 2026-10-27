@@ -150,6 +150,91 @@ body.page-template-page-radar-demo .ba-radar-search>label{position:absolute;widt
 .ba-radar-guidance p,.ba-radar-quality p{margin:0;color:#4e6a7a;font-size:12px;line-height:1.5}
 .ba-radar-guidance ul{margin:9px 0 0;padding-left:17px;font-size:12px;color:#24465c;line-height:1.6}
 .ba-radar-guidance li+li{margin-top:8px}
+
+/* RADAR-LAYOUT-PARITY-01 — use the exact Mappe viewport/rail proportions.
+   Header inherited unchanged; Radar interactions remain independent. */
+@media(min-width:861px){
+ body.page-template-page-radar-demo{overflow:hidden}
+ body.page-template-page-radar-demo .ba-radar-demo{
+  display:grid;grid-template-rows:56px minmax(0,1fr);
+  height:calc(100dvh - 76px - var(--wp-admin--admin-bar--height, 0px));
+  min-height:0;max-height:none;overflow:hidden;
+ }
+ body.page-template-page-radar-demo .ba-radar-controls{
+  height:56px;min-height:56px;max-height:56px;
+  padding:8px 14px;align-items:center;flex-wrap:nowrap;
+  overflow:visible;gap:10px;
+ }
+ body.page-template-page-radar-demo .ba-radar-controls>label{gap:0}
+ body.page-template-page-radar-demo .ba-radar-controls>label:not(.ba-radar-search)>select{height:40px}
+ body.page-template-page-radar-demo .ba-radar-controls>label:not(.ba-radar-search){
+  display:flex;align-items:center;gap:5px;white-space:nowrap;
+ }
+ body.page-template-page-radar-demo .ba-radar-workspace{
+  display:grid;grid-template-columns:minmax(360px,420px) minmax(0,1fr);
+  grid-template-rows:minmax(0,1fr);height:100%;max-height:100%;
+  min-height:0;overflow:hidden;margin:0;padding:0;gap:0;
+ }
+ body.page-template-page-radar-demo .ba-radar-panel{
+  grid-column:1;grid-row:1;height:100%;min-height:0;
+  max-height:100%;overflow-y:auto;overflow-x:hidden;
+  border:0;border-right:1px solid #dde7ed;border-radius:0;
+  background:#f7fafc;overscroll-behavior:contain;
+ }
+ body.page-template-page-radar-demo .ba-radar-map{
+  grid-column:2;grid-row:1;height:100%;min-height:0;
+  max-height:100%;border:0;border-radius:0;
+ }
+ body.page-template-page-radar-demo .ba-radar-foot{display:none}
+}
+@media(min-width:1280px){
+ body.page-template-page-radar-demo .ba-radar-workspace{grid-template-columns:420px minmax(0,1fr)}
+}
+@media(min-width:861px) and (max-width:1040px){
+ body.page-template-page-radar-demo .ba-radar-controls{gap:6px;padding:8px 9px}
+ body.page-template-page-radar-demo .ba-radar-controls .ba-radar-search{
+  flex:1 1 290px;min-width:180px;max-width:355px;width:auto;
+ }
+ body.page-template-page-radar-demo .ba-radar-search-row{flex-wrap:nowrap}
+ body.page-template-page-radar-demo .ba-radar-search-row input{flex:1 1 auto;min-width:60px}
+ body.page-template-page-radar-demo .ba-radar-controls>label:not(.ba-radar-search){font-size:0}
+ body.page-template-page-radar-demo .ba-radar-controls>label:not(.ba-radar-search)>select{font-size:12px;min-width:85px}
+}
+@media(min-width:861px) and (max-height:650px){
+ body.page-template-page-radar-demo .ba-radar-demo{height:calc(100dvh - 68px - var(--wp-admin--admin-bar--height, 0px))}
+}
+@media(max-width:860px){
+ body.page-template-page-radar-demo{overflow:hidden}
+ body.page-template-page-radar-demo .ba-radar-demo{
+  display:flex;flex-direction:column;
+  height:calc(100dvh - 68px - var(--wp-admin--admin-bar--height, 0px));
+  min-height:0;overflow:hidden;
+ }
+ body.page-template-page-radar-demo .ba-radar-controls{
+  flex:0 0 auto;max-height:138px;overflow-y:auto;overflow-x:hidden;
+  padding:7px 9px;gap:6px;
+ }
+ body.page-template-page-radar-demo .ba-radar-controls .ba-radar-search{
+  flex:1 1 290px;width:auto;max-width:none;min-width:0;
+ }
+ body.page-template-page-radar-demo .ba-radar-workspace{
+  display:block;flex:1 1 auto;min-height:0;height:auto;overflow:hidden;
+  padding:0;margin:0;
+ }
+ body.page-template-page-radar-demo .ba-radar-map{
+  width:100%;height:100%;min-height:0;max-height:none;
+  border:0;border-radius:0;
+ }
+ body.page-template-page-radar-demo .ba-radar-panel{
+  position:fixed;z-index:999;left:0;right:0;bottom:0;
+  height:auto;max-height:78dvh;overflow-y:auto;
+  border-radius:22px 22px 0 0;
+  transform:translateY(110%);
+ }
+ body.page-template-page-radar-demo .ba-radar-panel.is-open{transform:translateY(0)}
+ body.page-template-page-radar-demo #rad-drawer{display:block}
+ body.page-template-page-radar-demo .ba-radar-foot{display:none}
+}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
