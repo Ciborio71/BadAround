@@ -1,0 +1,1 @@
+Radar aligns Mappe toolbar, 420px sidebar, full viewport map, mobile drawer.
