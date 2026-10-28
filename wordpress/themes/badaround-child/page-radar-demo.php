@@ -25,16 +25,16 @@ get_header();
    <div id="rad-google-map" class="ba-radar-google-map" role="application" aria-label="Google Maps — geometrie delle segnalazioni pubblicate"></div>
    
    <div id="rad-map-message" class="ba-radar-map-message" role="status" aria-live="polite">Caricamento cartografia Google Maps…</div>
-   <div class="ba-radar-map-disclaimer">DISTRIBUZIONE INDICATIVA DELLE SEGNALAZIONI · NON È UN INDICE DI RISCHIO</div>
-   <div class="ba-radar-visual-key" aria-label="Legenda informazioni cartografiche"><strong>Radar territoriale</strong><span>Colori per tipologia, sovrapposizioni per maggiore presenza nel campione</span><small>Visualizzazione indicativa basata sulle sole posizioni pubbliche. Nessuna stima della criminalità.</small></div><div class="ba-radar-map-title" id="rad-map-title">Area dimostrativa · 1 km</div>
+   
+   <div class="ba-radar-visual-key" aria-label="Legenda informazioni cartografiche"><strong>Radar territoriale</strong><span>Colori per tipologia, sovrapposizioni per maggiore presenza nel campione</span><small>Aloni tematici illustrativi dalle segnalazioni pubbliche: non rappresentano l’estensione reale degli episodi.</small></div>
 
   </section>
   <aside class="ba-radar-panel" id="rad-panel">
    <span class="ba-radar-tag">Radar · Problematiche territoriali</span>
    <h2 id="rad-title">Panoramica territoriale</h2>
    <p id="rad-copy" role="status" aria-live="polite">Caricamento delle segnalazioni pubbliche…</p>
-   <p class="ba-radar-note">I risultati non sono un indice di sicurezza. Le segnalazioni prive della data dell'episodio compaiono solo selezionando «Tutti i periodi». Le aree approssimate non identificano il luogo esatto dell'evento.</p>
-   <div id="rad-reports" class="ba-radar-reports" aria-label="Problematiche segnalate nella zona"></div>
+   
+   <div id="rad-reports" class="ba-radar-reports" aria-label="Problematiche segnalate nella zona"></div><p class="ba-radar-note ba-radar-final-note">Statistiche delle segnalazioni pubbliche della community, non dati ufficiali su reati o sicurezza. Le segnalazioni senza data sono escluse dai confronti temporali e le aree approssimate non identificano un punto esatto.</p>
    <a class="ba-radar-back" href="<?php echo esc_url(home_url('/mappa/')); ?>">Apri la mappa delle segnalazioni reali →</a>
   </aside>
  </div>
@@ -326,6 +326,12 @@ body.page-template-page-radar-demo .ba-radar-back-drill:hover,
 body.page-template-page-radar-demo .ba-radar-back-drill:focus-visible{
  background:#06485c!important;color:#fff!important;outline:2px solid #89d9e4;outline-offset:2px
 }
+
+/* RADAR-PRESENTATION-02: compact observatory content and final notes. */
+body.page-template-page-radar-demo .ba-radar-panel{display:flex;flex-direction:column;gap:10px}
+body.page-template-page-radar-demo .ba-radar-panel .ba-radar-final-note{order:2;margin-top:auto}
+body.page-template-page-radar-demo .ba-radar-panel .ba-radar-back{order:3}
+body.page-template-page-radar-demo .ba-radar-visual-key{max-width:250px}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -523,10 +529,10 @@ function showPublishedDistribution(items){
  for(const e of items.slice(0,100)){
   const g=e.public_geo;if(!validGeo(g))continue;
   const theme=category(e);
-  const radius=g.mode==='approximate_area'?g.radius_meters:300;
+  const radius=chosenCenter?(g.mode==='approximate_area'?g.radius_meters:180):Math.max(g.mode==='approximate_area'?g.radius_meters:0,8500);
   const circle=new google.maps.Circle({
    map,center:{lat:g.lat,lng:g.lng},radius,strokeWeight:0,
-   fillColor:palette[theme]||'#748b9a',fillOpacity:g.mode==='approximate_area'?.12:.19,
+   fillColor:palette[theme]||'#748b9a',fillOpacity:chosenCenter?.12:.22,
    clickable:false,zIndex:1
   });
   geometryLayers.push(circle);
@@ -535,7 +541,6 @@ function showPublishedDistribution(items){
 function render(){
  const filtered=reports.filter(eligible);
  $('rad-title').textContent=chosenCenter?($('rad-place').value.trim()||'Zona selezionata'):'Panoramica territoriale';
- $('rad-map-title').textContent=chosenCenter?'Area di ricerca · '+$('rad-radius').value+' km':'Distribuzione delle segnalazioni pubbliche';
  const host=$('rad-reports');host.replaceChildren();
  clearGeometry();
  if(loadError){$('rad-copy').textContent='Impossibile consultare le segnalazioni pubbliche.';return;}
@@ -547,7 +552,6 @@ function render(){
    const back=document.createElement('button');back.type='button';back.className='ba-radar-back-drill';
    back.textContent='← Torna indietro';back.addEventListener('click',backDrill);host.appendChild(back);
   }
-  $('rad-map-title').textContent='Distribuzione indicativa delle segnalazioni · Italia';
   $('rad-copy').textContent='Una panoramica delle segnalazioni pubblicate, non delle denunce o degli episodi complessivamente avvenuti. Seleziona un fenomeno o un territorio per approfondire.';
   const insight=document.createElement('div');insight.className='ba-observatory-head';
   const heading=document.createElement('h3');heading.textContent='Il territorio raccontato dalla community';
@@ -670,7 +674,7 @@ async function loadMap(){
   geocoder=new google.maps.Geocoder();
   try{placesApi=await google.maps.importLibrary('places');}
   catch(error){console.warn('Radar autocomplete unavailable; manual address search remains enabled.',error);}
-  if(!restoreArea()){status('');render();}
+  status('');render();
  }catch(error){status('Google Maps non disponibile: verifica configurazione, autorizzazione del dominio o console del browser.');console.error('Radar map:',error);}
 }
 function focusLocation(position,address,save=true){
@@ -684,8 +688,8 @@ function focusLocation(position,address,save=true){
  chosenCenter={lat:pos.lat instanceof Function?pos.lat():pos.lat,lng:pos.lng instanceof Function?pos.lng():pos.lng};
  map.fitBounds(searchCircle.getBounds(),60);
  input.value=address;
- if(save)rememberArea(chosenCenter,address);
- status('Area individuata. Eventi pubblici filtrati senza analisi di rischio.');
+
+ status('');
  render();
 }
 async function choosePrediction(prediction){
@@ -782,6 +786,7 @@ $('rad-reset').addEventListener('click',()=>{
  status('');render();
 });
 $('rad-drawer').addEventListener('click',()=>{const open=$('rad-panel').classList.toggle('is-open');$('rad-drawer').textContent=open?'Chiudi analisi':'Mostra analisi zona';$('rad-drawer').setAttribute('aria-expanded',String(open))});
+try{window.localStorage.removeItem(LAST_AREA_KEY);}catch(e){}
 render();loadMap();fetchReports();
 })();
 </script>
