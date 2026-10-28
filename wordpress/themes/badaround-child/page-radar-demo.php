@@ -26,7 +26,7 @@ get_header();
    
    <div id="rad-map-message" class="ba-radar-map-message" role="status" aria-live="polite">Caricamento cartografia Google Maps…</div>
    
-   <div class="ba-radar-visual-key" aria-label="Legenda informazioni cartografiche"><strong>Radar territoriale</strong><span>Colori per tipologia, sovrapposizioni per maggiore presenza nel campione</span><small>Aloni tematici illustrativi dalle segnalazioni pubbliche: non rappresentano l’estensione reale degli episodi.</small></div>
+   <div class="ba-radar-visual-key" aria-label="Legenda informazioni cartografiche"><strong>Radar territoriale</strong><span>Densità visiva delle segnalazioni pubbliche</span><div class="ba-radar-heat-legend" aria-hidden="true"></div><small>Minore densità → maggiore densità</small><small>Aloni tematici illustrativi dalle segnalazioni pubbliche: non rappresentano l’estensione reale degli episodi.</small></div>
 
   </section>
   <aside class="ba-radar-panel" id="rad-panel">
@@ -333,6 +333,14 @@ body.page-template-page-radar-demo .ba-radar-panel #rad-reports{order:-1;max-hei
 body.page-template-page-radar-demo .ba-radar-panel .ba-radar-final-note{order:2;margin-top:auto}
 body.page-template-page-radar-demo .ba-radar-panel .ba-radar-back{order:3}
 body.page-template-page-radar-demo .ba-radar-visual-key{max-width:250px}
+
+/* RADAR-HEATMAP-01: custom canvas KDE visual layer, no deprecated Google Heatmap API. */
+.ba-radar-heat-canvas{position:absolute;pointer-events:none;mix-blend-mode:multiply;opacity:.9}
+body.page-template-page-radar-demo .ba-radar-back:hover,
+body.page-template-page-radar-demo .ba-radar-back:focus-visible{background:#05566a!important;color:#fff!important}
+body.page-template-page-radar-demo .ba-radar-back,body.page-template-page-radar-demo .ba-radar-back:visited{color:#fff!important}
+.ba-radar-visual-key{display:grid;gap:7px}
+.ba-radar-heat-legend{height:9px;border-radius:999px;background:linear-gradient(90deg,#19afc5,#25b5ac,#f5bc47,#ef6d30,#cf2732)}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -439,22 +447,16 @@ function matchesDrill(e){
  return (!drill.region||path[0]===drill.region)&&(!drill.province||path[1]===drill.province)&&(!drill.comune||path[2]===drill.comune);
 }
 function zoomToDrill(){
- if(!map||!window.google?.maps)return;
+ if(!map)return;
  if(drill.level===0){map.setCenter({lat:41.9028,lng:12.4964});map.setZoom(7);return;}
- const items=reports.filter(e=>validGeo(e.public_geo)&&matchesDrill(e));
- if(!items.length)return;
- const bounds=new google.maps.LatLngBounds();
- for(const e of items){
-  const g=e.public_geo;
-  // Only geometries from the already-published public Discovery projection.
-  const lat=g.lat,lng=g.lng,delta=g.mode==='approximate_area'?Math.max(0,g.radius_meters||0)/111000:0;
-  bounds.extend({lat:Math.max(-90,lat-delta),lng:Math.max(-180,lng-delta)});
-  bounds.extend({lat:Math.min(90,lat+delta),lng:Math.min(180,lng+delta)});
- }
- if(bounds.isEmpty())return;
- map.fitBounds(bounds,75);
- // Never imply a precise municipal boundary: zoom is based on available public reports.
- google.maps.event.addListenerOnce(map,'idle',()=>{if(map.getZoom()>12)map.setZoom(12);});
+ const parts=[drill.comune,drill.province,drill.region,'Italia'].filter(Boolean);
+ if(!geocoder||!parts.length)return;
+ geocoder.geocode({address:parts.join(', '),region:'IT'},(results,status)=>{
+  if(status!=='OK'||!results?.length)return;
+  const result=results[0];
+  if(result.geometry?.viewport)map.fitBounds(result.geometry.viewport,30);
+  else if(result.geometry?.location){map.setCenter(result.geometry.location);map.setZoom(drill.level===1?8:drill.level===2?10:12);}
+ });
 }
 function backDrill(){
  if(drill.level===3){drill.comune=null;drill.level=2;}
@@ -524,20 +526,58 @@ function showObservatory(items,host){
  quality.textContent=numberIT.format(undated)+' segnalazioni senza data valida, escluse dal grafico mensile. Le graduatorie riguardano solo il campione pubblico disponibile: non misurano criminalità, rischio o copertura totale del territorio. Eventuali duplicati non certificati possono incidere sui conteggi.';
  host.append(quality);
 }
-function showPublishedDistribution(items){
- if(!map)return;
- const palette={'Veicoli':'#2878d6','Case e attività':'#963d57','Pericoli':'#d08025','Spazi pubblici':'#078f99','Animali':'#8c62af','Oggetti e documenti':'#aa832d'};
- for(const e of items.slice(0,100)){
-  const g=e.public_geo;if(!validGeo(g))continue;
-  const theme=category(e);
-  const radius=chosenCenter?(g.mode==='approximate_area'?g.radius_meters:180):Math.max(g.mode==='approximate_area'?g.radius_meters:0,8500);
-  const circle=new google.maps.Circle({
-   map,center:{lat:g.lat,lng:g.lng},radius,strokeWeight:0,
-   fillColor:palette[theme]||'#748b9a',fillOpacity:chosenCenter?.12:.22,
-   clickable:false,zIndex:1
-  });
-  geometryLayers.push(circle);
+let heatOverlay=null,heatItems=[];
+function ensureHeatOverlay(){
+ if(!map||heatOverlay)return;
+ class RadarHeatOverlay extends google.maps.OverlayView {
+  onAdd(){
+   this.canvas=document.createElement('canvas');this.canvas.className='ba-radar-heat-canvas';
+   this.canvas.setAttribute('aria-hidden','true');
+   this.getPanes().overlayLayer.appendChild(this.canvas);
+   this.listeners=['bounds_changed','zoom_changed','idle'].map(event=>map.addListener(event,()=>this.draw()));
+  }
+  draw(){
+   if(!this.canvas||!this.getProjection())return;
+   const div=this.getProjection(),bounds=map.getBounds();
+   if(!bounds)return;
+   const sw=div.fromLatLngToDivPixel(bounds.getSouthWest()),ne=div.fromLatLngToDivPixel(bounds.getNorthEast());
+   if(!sw||!ne)return;
+   const left=Math.min(sw.x,ne.x),top=Math.min(sw.y,ne.y);
+   const width=Math.abs(sw.x-ne.x),height=Math.abs(sw.y-ne.y);
+   if(width<1||height<1)return;
+   this.canvas.style.left=left+'px';this.canvas.style.top=top+'px';
+   this.canvas.style.width=width+'px';this.canvas.style.height=height+'px';
+   const scale=Math.min(window.devicePixelRatio||1,2);
+   this.canvas.width=Math.ceil(width*scale);this.canvas.height=Math.ceil(height*scale);
+   const context=this.canvas.getContext('2d');if(!context)return;
+   context.setTransform(scale,0,0,scale,0,0);
+   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+   // An organic density field: overlapping radial kernels; no per-episode severity score.
+   for(const item of heatItems){
+    const pixel=div.fromLatLngToDivPixel(new google.maps.LatLng(item.lat,item.lng));
+    if(!pixel)continue;
+    const x=pixel.x-left,y=pixel.y-top;
+    const radius=clamp(item.mode==='approximate_area'?48:38,28,72);
+    if(x+radius<0||y+radius<0||x-radius>width||y-radius>height)continue;
+    const gradient=context.createRadialGradient(x,y,0,x,y,radius);
+    gradient.addColorStop(0,'rgba(207,39,50,.52)');
+    gradient.addColorStop(.28,'rgba(233,92,42,.4)');
+    gradient.addColorStop(.55,'rgba(245,173,58,.3)');
+    gradient.addColorStop(.8,'rgba(32,181,172,.16)');
+    gradient.addColorStop(1,'rgba(20,175,197,0)');
+    context.fillStyle=gradient;context.fillRect(x-radius,y-radius,2*radius,2*radius);
+   }
+  }
+  onRemove(){(this.listeners||[]).forEach(l=>l.remove());this.canvas?.remove();this.canvas=null;}
  }
+ heatOverlay=new RadarHeatOverlay();heatOverlay.setMap(map);
+}
+function showPublishedDistribution(items){
+ heatItems=items.filter(e=>validGeo(e.public_geo)).slice(0,100).map(e=>({
+  lat:e.public_geo.lat,lng:e.public_geo.lng,mode:e.public_geo.mode
+ }));
+ ensureHeatOverlay();
+ heatOverlay?.draw();
 }
 function render(){
  const filtered=reports.filter(eligible);
