@@ -1,0 +1,1 @@
+Radar: match Mappe autocomplete layout and remove misleading fake hotspots.
