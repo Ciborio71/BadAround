@@ -1,0 +1,1 @@
+Radar adopts Home and Mappe Google native fullscreen and zoom controls positions.
