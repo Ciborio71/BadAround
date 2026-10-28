@@ -329,6 +329,7 @@ body.page-template-page-radar-demo .ba-radar-back-drill:focus-visible{
 
 /* RADAR-PRESENTATION-02: compact observatory content and final notes. */
 body.page-template-page-radar-demo .ba-radar-panel{display:flex;flex-direction:column;gap:10px}
+body.page-template-page-radar-demo .ba-radar-panel #rad-reports{order:-1;max-height:none;overflow:visible}
 body.page-template-page-radar-demo .ba-radar-panel .ba-radar-final-note{order:2;margin-top:auto}
 body.page-template-page-radar-demo .ba-radar-panel .ba-radar-back{order:3}
 body.page-template-page-radar-demo .ba-radar-visual-key{max-width:250px}
