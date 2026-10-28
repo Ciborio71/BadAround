@@ -25,7 +25,6 @@ final class BadAround_Intelligence_Public_Report_Summary {
    if(!$d||$d->format('Y-m-d')!==$date||$d>$asOf->setTime(23,59,59)){$missing++;continue;}
    $dated++;$month=$d->format('Y-m');$byMonth[$month]=($byMonth[$month]??0)+1;
   }
-  foreach([$byType,$byTerritory,$byMonth] as &$unused){} // no implicit mutation
   ksort($byType);ksort($byTerritory);ksort($byMonth);
   // A single page can never be certified as a complete population if its
   // reported total differs or pagination announces additional pages.
