@@ -1,0 +1,1 @@
+Radar: clear overlay text, no remembered location, sidebar insights first, thematic public visualization.
