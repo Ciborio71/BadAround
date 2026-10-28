@@ -272,6 +272,15 @@ body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestio
 .ba-radar-area-shortcuts p{font-size:11px;color:#61778b;line-height:1.4}
 .ba-radar-area-buttons{display:flex;gap:7px;flex-wrap:wrap}
 .ba-radar-area-buttons button{border:1px solid #bcdde3;border-radius:999px;background:#eff9fb;padding:8px 11px;color:#085e6b;font-weight:750;font-size:12px;cursor:pointer}
+
+/* RADAR-TYPO-PARITY-01 — match Mappe controls, avoid inherited over-bold weights. */
+body.page-template-page-radar-demo .ba-radar-controls{font-size:12px;font-weight:400}
+body.page-template-page-radar-demo .ba-radar-controls>label{font-size:11px;font-weight:600;color:#65798c}
+body.page-template-page-radar-demo .ba-radar-controls select{font-family:inherit;font-size:12px!important;font-weight:500!important;color:#071a38}
+body.page-template-page-radar-demo .ba-radar-search-row #rad-place{font-family:inherit;font-weight:400!important}
+body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestion{font-family:inherit;font-weight:400!important;color:#071a38!important}
+body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestion strong{font-size:12px;font-weight:650!important;color:#071a38}
+body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestion small{font-size:11px;font-weight:400!important;color:#526d83}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
