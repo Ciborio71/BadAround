@@ -41,6 +41,11 @@ final class BadAround_Intelligence_Discovery_Bridge {
    };
    if($ids($again['items'])!==$ids($first['items']))
       throw new RuntimeException('Discovery event IDs changed during snapshot');
+   // Stable IDs alone are insufficient: a moderation/publication update may
+   // change type, territory, occurrence date or public precision in place.
+   // Compare the entire canonical public projection to fail closed on such drift.
+   if($again['items']!==$first['items'])
+      throw new RuntimeException('Discovery public projection changed during snapshot');
   }
   $result=BadAround_Intelligence_Report_Read_Model::fromPages($pages,$asOf);
   $result['bridge']='existing_discovery_read_only';
