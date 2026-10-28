@@ -25,6 +25,23 @@ final class BadAround_Intelligence_Discovery_Bridge {
    $pages[]=$chunk;
    if($n===$expected)break;
   }
+  // Re-read the same public pages and require identical ID order. This detects
+  // common concurrent publication/withdrawal races between paginated reads,
+  // while remaining explicitly non-transactional.
+  foreach($pages as $first){
+   $again=$discover(['page'=>$first['page'],'per_page'=>100,'period'=>0,
+     'territory'=>'','category'=>'','event_type'=>'','search'=>'']);
+   if(!is_array($again)||($again['page']??null)!==$first['page']||
+      ($again['total']??null)!==$first['total']||
+      ($again['pages']??null)!==$first['pages']||
+      !isset($again['items'])||!is_array($again['items']))
+      throw new RuntimeException('Discovery changed during snapshot');
+   $ids=static function(array $rows):array{
+    return array_map(static function($row){return is_array($row)?($row['id']??null):null;},$rows);
+   };
+   if($ids($again['items'])!==$ids($first['items']))
+      throw new RuntimeException('Discovery event IDs changed during snapshot');
+  }
   $result=BadAround_Intelligence_Report_Read_Model::fromPages($pages,$asOf);
   $result['bridge']='existing_discovery_read_only';
   return $result;
