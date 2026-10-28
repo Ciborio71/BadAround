@@ -315,6 +315,17 @@ body.page-template-page-radar-demo .ba-observatory-rank:hover{background:#eaf7fa
 /* RADAR-MAP-CONTROLS-PARITY-01: Home/Mappe native fullscreen+zoom in right-top rail. */
 body.page-template-page-radar-demo .ba-radar-map .ba-map-pan{display:none!important}
 body.page-template-page-radar-demo .ba-radar-map.ba-map-navigation-shell .ba-map-visual-key{left:15px;right:auto}
+
+/* RADAR-DRILL-ZOOM-01: unmistakable back action. */
+body.page-template-page-radar-demo .ba-radar-back-drill{
+ background:#0a7286!important;color:#fff!important;border:2px solid #07596d!important;
+ border-radius:10px;min-height:44px;font-size:13px;font-weight:800;
+ box-shadow:0 5px 14px rgba(7,26,56,.16)
+}
+body.page-template-page-radar-demo .ba-radar-back-drill:hover,
+body.page-template-page-radar-demo .ba-radar-back-drill:focus-visible{
+ background:#06485c!important;color:#fff!important;outline:2px solid #89d9e4;outline-offset:2px
+}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -420,11 +431,29 @@ function matchesDrill(e){
  const path=territoryPath(e);
  return (!drill.region||path[0]===drill.region)&&(!drill.province||path[1]===drill.province)&&(!drill.comune||path[2]===drill.comune);
 }
+function zoomToDrill(){
+ if(!map||!window.google?.maps)return;
+ if(drill.level===0){map.setCenter({lat:41.9028,lng:12.4964});map.setZoom(7);return;}
+ const items=reports.filter(e=>validGeo(e.public_geo)&&matchesDrill(e));
+ if(!items.length)return;
+ const bounds=new google.maps.LatLngBounds();
+ for(const e of items){
+  const g=e.public_geo;
+  // Only geometries from the already-published public Discovery projection.
+  const lat=g.lat,lng=g.lng,delta=g.mode==='approximate_area'?Math.max(0,g.radius_meters||0)/111000:0;
+  bounds.extend({lat:Math.max(-90,lat-delta),lng:Math.max(-180,lng-delta)});
+  bounds.extend({lat:Math.min(90,lat+delta),lng:Math.min(180,lng+delta)});
+ }
+ if(bounds.isEmpty())return;
+ map.fitBounds(bounds,75);
+ // Never imply a precise municipal boundary: zoom is based on available public reports.
+ google.maps.event.addListenerOnce(map,'idle',()=>{if(map.getZoom()>12)map.setZoom(12);});
+}
 function backDrill(){
  if(drill.level===3){drill.comune=null;drill.level=2;}
  else if(drill.level===2){drill.province=null;drill.level=1;}
  else if(drill.level===1){drill.region=null;drill.level=0;}
- render();
+ render();zoomToDrill();
 }
 
 function showObservatory(items,host){
@@ -479,7 +508,7 @@ function showObservatory(items,host){
   else if(drill.level===1){drill.province=label;drill.level=2;}
   else if(drill.level===2){drill.comune=label;drill.level=3;}
   else{input.value=label;locate();return;}
-  render();
+  render();zoomToDrill();
  });
  if(dated){
   createRanking('Mesi con episodi datati',months,5,null);
