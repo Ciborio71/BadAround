@@ -22,8 +22,8 @@ get_header();
    <div id="rad-google-map" class="ba-radar-google-map" role="application" aria-label="Google Maps — geometrie delle segnalazioni pubblicate"></div>
    
    <div id="rad-map-message" class="ba-radar-map-message" role="status" aria-live="polite">Caricamento cartografia Google Maps…</div>
-   <div class="ba-radar-map-disclaimer">PROBLEMATICHE SEGNALATE · NESSUN INDICE DI RISCHIO</div>
-   <div class="ba-radar-visual-key" aria-label="Legenda informazioni cartografiche"><strong>Radar territoriale</strong><span>Esplora le problematiche documentate nella community</span><small>La mappa non mostra ancora concentrazioni certificate. Scegli una località per esplorare i fenomeni pubblicati.</small></div><div class="ba-radar-map-title" id="rad-map-title">Area dimostrativa · 1 km</div>
+   <div class="ba-radar-map-disclaimer">DISTRIBUZIONE INDICATIVA DELLE SEGNALAZIONI · NON È UN INDICE DI RISCHIO</div>
+   <div class="ba-radar-visual-key" aria-label="Legenda informazioni cartografiche"><strong>Radar territoriale</strong><span>Colori per tipologia, sovrapposizioni per maggiore presenza nel campione</span><small>Visualizzazione indicativa basata sulle sole posizioni pubbliche. Nessuna stima della criminalità.</small></div><div class="ba-radar-map-title" id="rad-map-title">Area dimostrativa · 1 km</div>
 
   </section>
   <aside class="ba-radar-panel" id="rad-panel">
@@ -481,21 +481,37 @@ function showObservatory(items,host){
  quality.textContent=numberIT.format(undated)+' segnalazioni senza data valida, escluse dal grafico mensile. Le graduatorie riguardano solo il campione pubblico disponibile: non misurano criminalità, rischio o copertura totale del territorio. Eventuali duplicati non certificati possono incidere sui conteggi.';
  host.append(quality);
 }
+function showPublishedDistribution(items){
+ if(!map)return;
+ const palette={'Veicoli':'#2878d6','Case e attività':'#963d57','Pericoli':'#d08025','Spazi pubblici':'#078f99','Animali':'#8c62af','Oggetti e documenti':'#aa832d'};
+ for(const e of items.slice(0,100)){
+  const g=e.public_geo;if(!validGeo(g))continue;
+  const theme=category(e);
+  const radius=g.mode==='approximate_area'?g.radius_meters:300;
+  const circle=new google.maps.Circle({
+   map,center:{lat:g.lat,lng:g.lng},radius,strokeWeight:0,
+   fillColor:palette[theme]||'#748b9a',fillOpacity:g.mode==='approximate_area'?.12:.19,
+   clickable:false,zIndex:1
+  });
+  geometryLayers.push(circle);
+ }
+}
 function render(){
  const filtered=reports.filter(eligible);
  $('rad-title').textContent=chosenCenter?($('rad-place').value.trim()||'Zona selezionata'):'Panoramica territoriale';
- $('rad-map-title').textContent=chosenCenter?'Area di ricerca · '+$('rad-radius').value+' km':'Radar · seleziona una zona';
+ $('rad-map-title').textContent=chosenCenter?'Area di ricerca · '+$('rad-radius').value+' km':'Distribuzione delle segnalazioni pubbliche';
  const host=$('rad-reports');host.replaceChildren();
  clearGeometry();
  if(loadError){$('rad-copy').textContent='Impossibile consultare le segnalazioni pubbliche.';return;}
  if(loadingReports){$('rad-copy').textContent='Caricamento dei dati pubblici…';return;}
+ showPublishedDistribution(filtered);
  if(!chosenCenter){
   $('rad-title').textContent='Osservatorio BadAround';
   if(drill.level>0){
    const back=document.createElement('button');back.type='button';back.className='ba-radar-back-drill';
    back.textContent='← Torna indietro';back.addEventListener('click',backDrill);host.appendChild(back);
   }
-  $('rad-map-title').textContent='Segnalazioni della community · Italia';
+  $('rad-map-title').textContent='Distribuzione indicativa delle segnalazioni · Italia';
   $('rad-copy').textContent='Una panoramica delle segnalazioni pubblicate, non delle denunce o degli episodi complessivamente avvenuti. Seleziona un fenomeno o un territorio per approfondire.';
   const insight=document.createElement('div');insight.className='ba-observatory-head';
   const heading=document.createElement('h3');heading.textContent='Il territorio raccontato dalla community';
@@ -508,6 +524,11 @@ function render(){
   $('rad-copy').textContent='Non sono disponibili segnalazioni geograficamente compatibili con i filtri. Questo non significa che la zona sia sicura.';
   return;
  }
+ const back=document.createElement('button');back.type='button';back.className='ba-radar-back-drill';
+ back.textContent='← Torna all’Osservatorio';back.addEventListener('click',()=>{
+  chosenCenter=null;searchCircle?.setMap(null);searchCircle=null;centerMarker?.setMap(null);centerMarker=null;
+  input.value='';if(map){map.setCenter({lat:42,lng:12.5});map.setZoom(7);}render();
+ });host.appendChild(back);
  const groups=new Map();
  for(const e of filtered){
   const key=category(e)||'Altre problematiche';
@@ -529,7 +550,7 @@ function render(){
   const caption=document.createElement('p');caption.textContent='Tipologie segnalate (senza valutazione di frequenza):';
   const ul=document.createElement('ul');
   for(const name of [...groups.get(key)].sort((a,b)=>a.localeCompare(b,'it'))){
-   const li=document.createElement('li');li.textContent=name;ul.appendChild(li);
+   const li=document.createElement('li');li.textContent=sentenceCase(name);ul.appendChild(li);
   }
   card.append(heading,caption,ul);host.appendChild(card);
  }
