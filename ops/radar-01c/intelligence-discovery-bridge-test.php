@@ -21,4 +21,16 @@ try{BadAround_Intelligence_Discovery_Bridge::build(static fn(array $f):array=>
 try{BadAround_Intelligence_Discovery_Bridge::build(static fn(array $f):array=>
  ['items'=>[],'total'=>1,'page'=>$f['page'],'pages'=>1],new DateTimeImmutable('2026-10-28'));
  throw new RuntimeException('Incomplete read accepted');}catch(InvalidArgumentException $expected){}
+$counter=0;
+try{
+ BadAround_Intelligence_Discovery_Bridge::build(static function(array $filters)use(&$counter):array{
+  $counter++;
+  return ['items'=>[['id'=>$counter===1?42:43,'event_type'=>['name'=>'Veicolo rubato'],
+     'territory'=>['name'=>'Roma'],'occurred_date'=>'','public_geo'=>null]],
+     'page'=>1,'pages'=>1,'total'=>1];
+ },new DateTimeImmutable('2026-10-28'));
+ throw new RuntimeException('Concurrent drift accepted');
+}catch(RuntimeException $expected){
+ if($expected->getMessage()==='Concurrent drift accepted')throw $expected;
+}
 echo "INTELLIGENCE-01H read-only bridge PASS\n";
