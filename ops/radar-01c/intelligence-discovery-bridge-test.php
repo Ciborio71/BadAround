@@ -12,7 +12,7 @@ $provider=static function(array $filters)use($events,&$pagesCalled):array{
    'total'=>count($events),'page'=>$filters['page'],'pages'=>2];
 };
 $out=BadAround_Intelligence_Discovery_Bridge::build($provider,new DateTimeImmutable('2026-10-28'));
-if($pagesCalled!==[1,2]||$out['totals']['observed_reports']!==103||
+if($pagesCalled!==[1,2,1,2]||$out['totals']['observed_reports']!==103||
  $out['totals']['snapshot_complete']!==true||
  $out['source_is_transactionally_consistent']!==false)throw new RuntimeException('bridge contract');
 try{BadAround_Intelligence_Discovery_Bridge::build(static fn(array $f):array=>
