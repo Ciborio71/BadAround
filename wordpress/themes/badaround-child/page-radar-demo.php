@@ -318,7 +318,7 @@ $radar_maps_url = $radar_maps_key ? add_query_arg(array('key'=>$radar_maps_key,'
 <?php
 /* Public taxonomy labels only. No raw report metadata or private coordinates. */
 $radar_territory_tree = array();
-$radar_terms = get_terms(array('taxonomy'=>'ba_territorio','hide_empty'=>false));
+$radar_terms = get_terms(array('taxonomy'=>'ba_territorio','hide_empty'=>true));
 if (!is_wp_error($radar_terms)) {
  foreach ($radar_terms as $radar_term) {
   $ancestors = array_reverse(get_ancestors($radar_term->term_id,'ba_territorio','taxonomy'));
