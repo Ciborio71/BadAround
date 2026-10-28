@@ -366,7 +366,7 @@ function render(){
  if(loadingReports){$('rad-copy').textContent='Caricamento dei dati pubblici…';return;}
  if(!chosenCenter){
   $('rad-title').textContent='Cosa segnala la community';
-  $('rad-map-title').textContent='Radar · seleziona un'area tematica';
+  $('rad-map-title').textContent="Radar · seleziona un’area tematica";
   const topics=new Map();
   for(const e of filtered){
    const theme=category(e)||'Altre problematiche';
