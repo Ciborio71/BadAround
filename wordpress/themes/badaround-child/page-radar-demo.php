@@ -299,6 +299,15 @@ button.ba-observatory-rank:hover,button.ba-observatory-rank:focus-visible{backgr
 .ba-observatory-rank-top strong{font-variant-numeric:tabular-nums;color:#075d6d}
 .ba-observatory-track{display:block;width:100%;height:7px;border-radius:999px;background:#e6edf1;overflow:hidden}
 .ba-observatory-track>span{display:block;height:100%;background:#078f9c;border-radius:999px}
+
+/* RADAR-REGION-01: territory drill and readable hover states. */
+body.page-template-page-radar-demo .ba-observatory-rank:hover,
+body.page-template-page-radar-demo .ba-observatory-rank:focus-visible,
+body.page-template-page-radar-demo .ba-observatory-rank:hover *,
+body.page-template-page-radar-demo .ba-observatory-rank:focus-visible *{color:#071a38!important}
+body.page-template-page-radar-demo .ba-observatory-rank:hover{background:#eaf7fa!important}
+.ba-radar-back-drill{display:inline-flex;align-items:center;justify-content:center;width:100%;padding:10px;border:1px solid #a8d8df;border-radius:9px;background:#eaf7f9;color:#075e6d!important;font-weight:700;cursor:pointer}
+.ba-radar-back-drill:hover{background:#d8f0f3!important;color:#075e6d!important}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -306,6 +315,23 @@ $radar_maps_key = is_array($radar_maps_settings) && !empty($radar_maps_settings[
  ? trim((string)$radar_maps_settings['geolocation-google-places-api-key']) : '';
 $radar_maps_url = $radar_maps_key ? add_query_arg(array('key'=>$radar_maps_key,'v'=>'weekly','loading'=>'async'),'https://maps.googleapis.com/maps/api/js') : '';
 ?>
+<?php
+/* Public taxonomy labels only. No raw report metadata or private coordinates. */
+$radar_territory_tree = array();
+$radar_terms = get_terms(array('taxonomy'=>'ba_territorio','hide_empty'=>false));
+if (!is_wp_error($radar_terms)) {
+ foreach ($radar_terms as $radar_term) {
+  $ancestors = array_reverse(get_ancestors($radar_term->term_id,'ba_territorio','taxonomy'));
+  $chain = array();
+  foreach (array_merge($ancestors,array($radar_term->term_id)) as $term_id) {
+   $term = get_term($term_id,'ba_territorio');
+   if ($term instanceof WP_Term) $chain[] = $term->name;
+  }
+  $radar_territory_tree[(string)$radar_term->term_id] = $chain;
+ }
+}
+?>
+<script>window.BadAroundRadarTerritories=<?php echo wp_json_encode($radar_territory_tree); ?>;</script>
 <script>window.BadAroundRadarMaps=<?php echo wp_json_encode(array('mapsUrl'=>$radar_maps_url)); ?>;</script>
 <script>
 (()=>{
@@ -375,14 +401,34 @@ function eligible(e){
 }
 function clearGeometry(){for(const g of geometryLayers)g.setMap(null);geometryLayers=[];}
 const numberIT=new Intl.NumberFormat('it-IT');
+const sentenceCase=value=>{const text=String(value||'').trim().toLocaleLowerCase('it-IT');return text?text[0].toLocaleUpperCase('it-IT')+text.slice(1):'';};
+const territoryTree=window.BadAroundRadarTerritories||{};
+let drill={level:0,region:null,province:null,comune:null};
+const depthLabels=['Regioni','Province','Comuni','Località'];
+function territoryPath(event){
+ const id=String(event.territory?.id||'');
+ return Array.isArray(territoryTree[id])?territoryTree[id]:[];
+}
+function matchesDrill(e){
+ const path=territoryPath(e);
+ return (!drill.region||path[0]===drill.region)&&(!drill.province||path[1]===drill.province)&&(!drill.comune||path[2]===drill.comune);
+}
+function backDrill(){
+ if(drill.level===3){drill.comune=null;drill.level=2;}
+ else if(drill.level===2){drill.province=null;drill.level=1;}
+ else if(drill.level===1){drill.region=null;drill.level=0;}
+ render();
+}
+
 function showObservatory(items,host){
  const types=new Map(),places=new Map(),months=new Map();
  let dated=0,undated=0;
  for(const e of items){
-  const type=e.event_type?.name||'Altro';
+  const type=sentenceCase(e.event_type?.name||'Altro');
   types.set(type,(types.get(type)||0)+1);
-  const name=e.territory?.name||'Territorio non specificato';
-  places.set(name,(places.get(name)||0)+1);
+  const chain=territoryPath(e);
+  const name=chain[drill.level]||null;
+  if(name)places.set(name,(places.get(name)||0)+1);
   if(/^\\d{4}-\\d{2}-\\d{2}$/.test(e.occurred_date||'')){
    const dt=new Date(e.occurred_date+'T12:00:00');
    if(Number.isFinite(dt.getTime())){dated++;const month=e.occurred_date.slice(0,7);months.set(month,(months.get(month)||0)+1);}
@@ -411,7 +457,7 @@ function showObservatory(items,host){
    const control=document.createElement(onPick?'button':'div');control.className='ba-observatory-rank';
    if(onPick){control.type='button';control.addEventListener('click',()=>onPick(label));}
    const top=document.createElement('span');top.className='ba-observatory-rank-top';
-   const name=document.createElement('span');name.textContent=label;
+   const name=document.createElement('span');name.textContent=sentenceCase(label);
    const quantity=document.createElement('strong');quantity.textContent=numberIT.format(count);
    top.append(name,quantity);
    const track=document.createElement('span');track.className='ba-observatory-track';
@@ -421,7 +467,13 @@ function showObservatory(items,host){
   host.append(section);
  };
  createRanking('Fenomeni più segnalati',types,5,null);
- createRanking('Territori più rappresentati',places,5,label=>{input.value=label;locate();});
+ createRanking(depthLabels[drill.level]+' per segnalazioni',places,6,label=>{
+  if(drill.level===0){drill.region=label;drill.level=1;}
+  else if(drill.level===1){drill.province=label;drill.level=2;}
+  else if(drill.level===2){drill.comune=label;drill.level=3;}
+  else{input.value=label;locate();return;}
+  render();
+ });
  if(dated){
   createRanking('Mesi con episodi datati',months,5,null);
  }
@@ -439,13 +491,17 @@ function render(){
  if(loadingReports){$('rad-copy').textContent='Caricamento dei dati pubblici…';return;}
  if(!chosenCenter){
   $('rad-title').textContent='Osservatorio BadAround';
+  if(drill.level>0){
+   const back=document.createElement('button');back.type='button';back.className='ba-radar-back-drill';
+   back.textContent='← Torna indietro';back.addEventListener('click',backDrill);host.appendChild(back);
+  }
   $('rad-map-title').textContent='Segnalazioni della community · Italia';
   $('rad-copy').textContent='Una panoramica delle segnalazioni pubblicate, non delle denunce o degli episodi complessivamente avvenuti. Seleziona un fenomeno o un territorio per approfondire.';
   const insight=document.createElement('div');insight.className='ba-observatory-head';
   const heading=document.createElement('h3');heading.textContent='Il territorio raccontato dalla community';
   const sub=document.createElement('p');sub.textContent='Indicatori delle segnalazioni disponibili nel feed pubblico BadAround.';
   insight.append(heading,sub);host.appendChild(insight);
-  showObservatory(filtered,host);
+  showObservatory(filtered.filter(matchesDrill),host);
   return;
  }
  if(!filtered.length){
