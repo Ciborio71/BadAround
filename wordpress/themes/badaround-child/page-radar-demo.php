@@ -11,7 +11,7 @@ get_header();
 <main class="ba-radar-demo" id="main-content">
  
  <div class="ba-radar-controls" aria-label="Filtri dimostrativi Radar">
-  <div class="ba-radar-search"><label for="rad-place">Cerca un luogo reale</label><div class="ba-radar-search-row"><input id="rad-place" value="" placeholder="Indirizzo, quartiere o località" aria-label="Cerca un luogo reale" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="rad-suggestions" /><button id="rad-search" type="button">Cerca</button><button id="rad-nearby" type="button" aria-label="Esplora la zona attorno alla mia posizione">⌖ Vicino a me</button></div><div id="rad-suggestions" class="ba-radar-suggestions" role="listbox" aria-label="Suggerimenti indirizzi" hidden></div></div>
+  <div class="ba-radar-search"><label for="rad-place">Cerca un luogo reale</label><div class="ba-radar-search-row"><input id="rad-place" type="search" value="" placeholder="Cerca evento o luogo" aria-label="Cerca evento o luogo" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="rad-suggestions" /><button id="rad-nearby" type="button" aria-label="Esplora la zona attorno alla mia posizione">⌖ Vicino a me</button></div><div id="rad-suggestions" class="ba-radar-suggestions" role="listbox" aria-label="Suggerimenti indirizzi" hidden></div></div>
   <label>Categoria<select id="rad-cat"><option>Tutte le categorie</option><option>Veicoli</option><option>Pericoli</option><option>Spazi pubblici</option><option>Animali</option><option>Case e attività</option><option>Oggetti e documenti</option></select></label>
   <label>Periodo<select id="rad-period"><option value="all" selected>Tutti i periodi</option><option value="30">30 giorni</option><option value="7">7 giorni</option><option value="90">90 giorni</option><option value="365">12 mesi</option></select></label>
   <label>Raggio<select id="rad-radius"><option value="1">1 km</option><option value="0.5">500 m</option><option value="2">2 km</option><option value="5">5 km</option></select></label>
@@ -23,7 +23,7 @@ get_header();
    
    <div id="rad-map-message" class="ba-radar-map-message" role="status" aria-live="polite">Caricamento cartografia Google Maps…</div>
    <div class="ba-radar-map-disclaimer">PROBLEMATICHE SEGNALATE · NESSUN INDICE DI RISCHIO</div>
-   <div class="ba-radar-visual-key" aria-label="Legenda informazioni cartografiche"><strong>Radar territoriale</strong><span>Esplora le problematiche documentate nella community</span><small>Le aree colorate indicano temi pubblicati: non sono hotspot o indici di rischio</small></div><div class="ba-radar-map-title" id="rad-map-title">Area dimostrativa · 1 km</div>
+   <div class="ba-radar-visual-key" aria-label="Legenda informazioni cartografiche"><strong>Radar territoriale</strong><span>Esplora le problematiche documentate nella community</span><small>La mappa non mostra ancora concentrazioni certificate. Scegli una località per esplorare i fenomeni pubblicati.</small></div><div class="ba-radar-map-title" id="rad-map-title">Area dimostrativa · 1 km</div>
 
   </section>
   <aside class="ba-radar-panel" id="rad-panel">
@@ -255,6 +255,23 @@ body.page-template-page-radar-demo .ba-radar-controls #rad-reset:hover{backgroun
 .ba-radar-metrics-preview strong{font-size:24px;line-height:1;color:#075d77}
 .ba-radar-metrics-preview small{font-size:10px;line-height:1.35;color:#486c7b}
 @media(max-width:1040px){body.page-template-page-radar-demo .ba-radar-controls{flex-wrap:wrap;max-height:none;height:auto!important;min-height:56px}body.page-template-page-radar-demo .ba-radar-demo{grid-template-rows:auto minmax(0,1fr)}}
+
+/* RADAR-SEARCH-PARITY-03 — compact Mappe search and two-line Places prediction display. */
+body.page-template-page-radar-demo .ba-radar-search-row{display:flex!important;align-items:center!important;flex-wrap:nowrap!important;gap:7px!important}
+body.page-template-page-radar-demo .ba-radar-search-row #rad-place{height:40px;flex:1 1 auto!important;min-width:90px!important;border:1px solid #d4e3eb;border-radius:10px;background:#f8fbfd;padding:0 14px;font-size:14px}
+body.page-template-page-radar-demo .ba-radar-search-row #rad-nearby{flex:none!important;min-width:0!important;min-height:38px;padding:7px 10px;background:#fff!important;border:1px solid #078e99!important;color:#087c89!important;font-size:12px}
+@media(min-width:931px){body.page-template-page-radar-demo .ba-radar-controls .ba-radar-search{flex:0 0 460px!important;width:460px!important;max-width:460px!important}}
+@media(max-width:930px){body.page-template-page-radar-demo .ba-radar-search-row #rad-place{flex-basis:auto!important}}
+body.page-template-page-radar-demo .ba-radar-suggestions{top:calc(100% + 6px);left:0;right:0;z-index:120;border-radius:14px;border:1px solid #d9e4eb;box-shadow:0 14px 32px rgba(7,26,56,.16)}
+body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestion{display:grid;gap:2px;height:auto;width:100%;padding:10px 13px;border:0;border-bottom:1px solid #edf2f5;border-radius:0;background:#fff;text-align:left}
+body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestion:hover{background:#f2f9fa}
+body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestion strong{font-size:12px;line-height:1.25;color:#071a38}
+body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestion small{font-size:11px;color:#74889a;line-height:1.25}
+.ba-radar-area-shortcuts{padding:13px;border:1px solid #d6e6ed;border-radius:11px;background:#fff}
+.ba-radar-area-shortcuts h3{font-size:14px;margin:0 0 6px}
+.ba-radar-area-shortcuts p{font-size:11px;color:#61778b;line-height:1.4}
+.ba-radar-area-buttons{display:flex;gap:7px;flex-wrap:wrap}
+.ba-radar-area-buttons button{border:1px solid #bcdde3;border-radius:999px;background:#eff9fb;padding:8px 11px;color:#085e6b;font-weight:750;font-size:12px;cursor:pointer}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -330,32 +347,6 @@ function eligible(e){
  return true;
 }
 function clearGeometry(){for(const g of geometryLayers)g.setMap(null);geometryLayers=[];}
-function showExplorationAreas(items){
- if(!map||chosenCenter)return;
- const grouped=new Map();
- for(const e of items){
-  const g=e.public_geo;
-  if(!validGeo(g))continue;
-  const theme=category(e);
-  if(!['Veicoli','Case e attività','Pericoli','Spazi pubblici'].includes(theme))continue;
-  // Broad grid for visual navigation, NOT a statistical cell, count or hotspot.
-  const lat=Math.floor(g.lat*10)/10+0.05,lng=Math.floor(g.lng*10)/10+0.05;
-  const key=theme+'|'+lat.toFixed(2)+'|'+lng.toFixed(2);
-  if(!grouped.has(key))grouped.set(key,{theme,lat,lng});
- }
- const colors={'Veicoli':'#2778d5','Case e attività':'#993c60','Pericoli':'#d08025','Spazi pubblici':'#078f98'};
- for(const item of [...grouped.values()].slice(0,30)){
-  const circle=new google.maps.Circle({map,center:{lat:item.lat,lng:item.lng},radius:6500,
-   fillColor:colors[item.theme],fillOpacity:.16,strokeColor:colors[item.theme],strokeOpacity:.72,strokeWeight:2,
-   clickable:true,zIndex:2});
-  circle.addListener('click',()=>{
-   $('rad-cat').value=item.theme;
-   focusLocation({lat:item.lat,lng:item.lng},'Area da esplorare — '+item.theme,false);
-   status('Area tematica selezionata: visualizzazione indicativa, non una concentrazione o valutazione di rischio.');
-  });
-  geometryLayers.push(circle);
- }
-}
 function render(){
  const filtered=reports.filter(eligible);
  $('rad-title').textContent=chosenCenter?($('rad-place').value.trim()||'Zona selezionata'):'Panoramica territoriale';
@@ -366,7 +357,7 @@ function render(){
  if(loadingReports){$('rad-copy').textContent='Caricamento dei dati pubblici…';return;}
  if(!chosenCenter){
   $('rad-title').textContent='Cosa segnala la community';
-  $('rad-map-title').textContent="Radar · seleziona un’area tematica";
+  $('rad-map-title').textContent="Radar · scegli un territorio";
   const topics=new Map();
   for(const e of filtered){
    const theme=category(e)||'Altre problematiche';
@@ -404,7 +395,19 @@ function render(){
   const note=document.createElement('p');note.className='ba-radar-note';
   note.textContent='Panoramica delle sole tipologie pubblicate nel campione consultabile, non una classifica delle zone. Nessuna zona viene definita sicura o pericolosa.';
   host.appendChild(note);
-  showExplorationAreas(filtered);
+  const names=[...new Set(filtered.map(e=>e.territory?.name).filter(n=>typeof n==='string'&&n.length>2))].slice(0,6);
+  if(names.length){
+   const region=document.createElement('section');region.className='ba-radar-area-shortcuts';
+   const heading=document.createElement('h3');heading.textContent='Esplora un territorio';
+   const explanation=document.createElement('p');explanation.textContent='Località con segnalazioni pubbliche: non sono zone classificate a rischio.';
+   const buttons=document.createElement('div');buttons.className='ba-radar-area-buttons';
+   for(const name of names){
+    const button=document.createElement('button');button.type='button';button.textContent=name;
+    button.addEventListener('click',()=>{input.value=name;locate();});
+    buttons.appendChild(button);
+   }
+   region.append(heading,explanation,buttons);host.appendChild(region);
+  }
   return;
  }
  if(!filtered.length){
@@ -502,7 +505,7 @@ async function loadMap(){
  try{
   await readyMaps();
   map=new google.maps.Map($('rad-google-map'),{
-   center:{lat:42.2,lng:12.5},zoom:6,mapTypeControl:false,streetViewControl:false,
+   center:{lat:42.0,lng:12.5},zoom:7,mapTypeControl:false,streetViewControl:false,
    styles:[{featureType:'poi',elementType:'all',stylers:[{visibility:'off'}]},{featureType:'transit',elementType:'all',stylers:[{visibility:'off'}]},{featureType:'road',elementType:'labels.icon',stylers:[{visibility:'off'}]}],
    fullscreenControl:true,zoomControl:true,gestureHandling:'cooperative'
   });
@@ -538,18 +541,22 @@ async function choosePrediction(prediction){
  }catch(error){console.warn('Radar place selection failed:',error);status('Impossibile selezionare il luogo. Prova con il pulsante Cerca.');}
 }
 async function autocomplete(query){
- if(!placesApi?.AutocompleteSuggestion || query.length<3){clearSuggestions();return;}
+ if(!placesApi?.AutocompleteSuggestion || query.length<2){clearSuggestions();return;}
  const id=++requestId;
  try{
   if(!sessionToken)sessionToken=new placesApi.AutocompleteSessionToken();
-  const {suggestions:results}=await placesApi.AutocompleteSuggestion.fetchAutocompleteSuggestions({input:query,sessionToken,region:'it',language:'it'});
+  const {suggestions:results}=await placesApi.AutocompleteSuggestion.fetchAutocompleteSuggestions({input:query,sessionToken,includedRegionCodes:['it']});
   if(id!==requestId)return;
   clearSuggestions();
   for(const item of (results||[]).slice(0,6)){
    if(!item.placePrediction)continue;
    const prediction=item.placePrediction;
    const b=document.createElement('button');b.type='button';b.setAttribute('role','option');
-   b.textContent=prediction.text?.text||prediction.mainText?.text||query;
+   b.className='ba-map-place-suggestion';
+   const strong=document.createElement('strong');strong.textContent=prediction.mainText?.text||prediction.text?.text||query;
+   const small=document.createElement('small');small.textContent=prediction.secondaryText?.text||'';
+   b.append(strong,small);
+   b.addEventListener('mousedown',event=>event.preventDefault());
    b.addEventListener('click',()=>choosePrediction(prediction));
    suggestions.appendChild(b);
   }
@@ -570,8 +577,8 @@ function locate(){
 input.addEventListener('input',()=>{
  selectedPrediction=null;requestId++;clearTimeout(debounce);
  const query=input.value.trim();render();
- if(query.length<3){clearSuggestions();return;}
- debounce=setTimeout(()=>autocomplete(query),300);
+ if(query.length<2){clearSuggestions();return;}
+ debounce=setTimeout(()=>autocomplete(query),180);
 });
 input.addEventListener('keydown',e=>{
  if(e.key==='Escape'){requestId++;clearSuggestions();}
@@ -582,7 +589,7 @@ input.addEventListener('keydown',e=>{
  }
 });
 document.addEventListener('click',e=>{if(!e.target.closest('.ba-radar-search')){requestId++;clearSuggestions();}});
-$('rad-search').addEventListener('click',locate);
+
 $('rad-nearby').addEventListener('click',()=>{
  if(!navigator.geolocation){status('Il browser non supporta la geolocalizzazione.');return;}
  if(!map){status('La mappa non è ancora disponibile.');return;}
@@ -613,7 +620,7 @@ $('rad-reset').addEventListener('click',()=>{
  chosenCenter=null;
  try{window.localStorage.removeItem(LAST_AREA_KEY);}catch(e){}
  searchCircle?.setMap(null);searchCircle=null;centerMarker?.setMap(null);centerMarker=null;
- if(map){map.setCenter({lat:42.2,lng:12.5});map.setZoom(6);}
+ if(map){map.setCenter({lat:42.0,lng:12.5});map.setZoom(7);}
  status('');render();
 });
 $('rad-drawer').addEventListener('click',()=>{const open=$('rad-panel').classList.toggle('is-open');$('rad-drawer').textContent=open?'Chiudi analisi':'Mostra analisi zona';$('rad-drawer').setAttribute('aria-expanded',String(open))});
