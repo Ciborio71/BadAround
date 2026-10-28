@@ -23,7 +23,7 @@ get_header();
    
    <div id="rad-map-message" class="ba-radar-map-message" role="status" aria-live="polite">Caricamento cartografia Google Maps…</div>
    <div class="ba-radar-map-disclaimer">PROBLEMATICHE SEGNALATE · NESSUN INDICE DI RISCHIO</div>
-   <div class="ba-radar-visual-key" aria-label="Legenda informazioni cartografiche"><strong>Radar territoriale</strong><span>Esplora le problematiche documentate nella community</span><small>La heatmap aggregata sarà attiva solo dopo la validazione dei dati</small></div><div class="ba-radar-map-title" id="rad-map-title">Area dimostrativa · 1 km</div>
+   <div class="ba-radar-visual-key" aria-label="Legenda informazioni cartografiche"><strong>Radar territoriale</strong><span>Esplora le problematiche documentate nella community</span><small>Le aree colorate indicano temi pubblicati: non sono hotspot o indici di rischio</small></div><div class="ba-radar-map-title" id="rad-map-title">Area dimostrativa · 1 km</div>
 
   </section>
   <aside class="ba-radar-panel" id="rad-panel">
@@ -330,6 +330,32 @@ function eligible(e){
  return true;
 }
 function clearGeometry(){for(const g of geometryLayers)g.setMap(null);geometryLayers=[];}
+function showExplorationAreas(items){
+ if(!map||chosenCenter)return;
+ const grouped=new Map();
+ for(const e of items){
+  const g=e.public_geo;
+  if(!validGeo(g))continue;
+  const theme=category(e);
+  if(!['Veicoli','Case e attività','Pericoli','Spazi pubblici'].includes(theme))continue;
+  // Broad grid for visual navigation, NOT a statistical cell, count or hotspot.
+  const lat=Math.floor(g.lat*10)/10+0.05,lng=Math.floor(g.lng*10)/10+0.05;
+  const key=theme+'|'+lat.toFixed(2)+'|'+lng.toFixed(2);
+  if(!grouped.has(key))grouped.set(key,{theme,lat,lng});
+ }
+ const colors={'Veicoli':'#2778d5','Case e attività':'#993c60','Pericoli':'#d08025','Spazi pubblici':'#078f98'};
+ for(const item of [...grouped.values()].slice(0,30)){
+  const circle=new google.maps.Circle({map,center:{lat:item.lat,lng:item.lng},radius:6500,
+   fillColor:colors[item.theme],fillOpacity:.16,strokeColor:colors[item.theme],strokeOpacity:.72,strokeWeight:2,
+   clickable:true,zIndex:2});
+  circle.addListener('click',()=>{
+   $('rad-cat').value=item.theme;
+   focusLocation({lat:item.lat,lng:item.lng},'Area da esplorare — '+item.theme,false);
+   status('Area tematica selezionata: visualizzazione indicativa, non una concentrazione o valutazione di rischio.');
+  });
+  geometryLayers.push(circle);
+ }
+}
 function render(){
  const filtered=reports.filter(eligible);
  $('rad-title').textContent=chosenCenter?($('rad-place').value.trim()||'Zona selezionata'):'Panoramica territoriale';
@@ -340,7 +366,7 @@ function render(){
  if(loadingReports){$('rad-copy').textContent='Caricamento dei dati pubblici…';return;}
  if(!chosenCenter){
   $('rad-title').textContent='Cosa segnala la community';
-  $('rad-map-title').textContent='Radar · esplora il territorio';
+  $('rad-map-title').textContent='Radar · seleziona un'area tematica';
   const topics=new Map();
   for(const e of filtered){
    const theme=category(e)||'Altre problematiche';
@@ -378,6 +404,7 @@ function render(){
   const note=document.createElement('p');note.className='ba-radar-note';
   note.textContent='Panoramica delle sole tipologie pubblicate nel campione consultabile, non una classifica delle zone. Nessuna zona viene definita sicura o pericolosa.';
   host.appendChild(note);
+  showExplorationAreas(filtered);
   return;
  }
  if(!filtered.length){
