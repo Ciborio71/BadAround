@@ -23,7 +23,6 @@ final class BadAround_Intelligence_Discovery_Snapshot {
   if(count($byPage)!==$expectedPages)throw new InvalidArgumentException('Missing Discovery page');
   ksort($byPage,SORT_NUMERIC);$rows=[];
   foreach($byPage as $n=>$items){
-   if($n!==count($rows)+1){} // no index-based assumptions about item counts
    foreach($items as $row){
     if(!is_array($row)||!isset($row['id'])||!is_int($row['id'])||$row['id']<1)
       throw new InvalidArgumentException('Invalid report identifier');
