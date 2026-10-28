@@ -9,6 +9,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 get_header();
 $report_url = home_url( '/segnala-un-evento/' );
 ?>
+<style id="ba-map-category-icons-v1">
+body.page-template-page-mappa .ba-map-category-filter{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:999px;transition:background-color .18s ease,box-shadow .18s ease,transform .18s ease}
+body.page-template-page-mappa .ba-map-category-filter .ba-map-category-icon{width:15px;height:15px;flex:0 0 15px;display:block;color:currentColor}
+body.page-template-page-mappa .ba-map-category-filter:hover{transform:translateY(-1px)}
+body.page-template-page-mappa .ba-map-category-filter:focus-visible{outline:3px solid #071a38;outline-offset:2px}
+@media(max-width:700px){body.page-template-page-mappa .ba-map-category-filter .ba-map-category-icon{width:14px;height:14px;flex-basis:14px}}
+@media(prefers-reduced-motion:reduce){body.page-template-page-mappa .ba-map-category-filter{transition:none}body.page-template-page-mappa .ba-map-category-filter:hover{transform:none}}
+</style>
 <main class="ba-map-page" id="main-content">
 	<section class="ba-map-commandbar" aria-label="Ricerca e filtri mappa">
 
