@@ -21,7 +21,7 @@ jobs:
       FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
       FTP_TLS_NAME: hostmld17.aziendeitalia.com
       EXPECTED_PARENT: a7beb37cad722739235c27c48e1ebb86cf3494dc
-      EXPECTED_HEAD: 45df33f24204c6aa64154d2c6319bc94a3011046
+      EXPECTED_HEAD: 561d030f447a258de96f83ac7b73e5ca664fb876
     steps:
       - uses: actions/checkout@v4
         with:
