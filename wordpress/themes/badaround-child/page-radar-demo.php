@@ -281,6 +281,24 @@ body.page-template-page-radar-demo .ba-radar-search-row #rad-place{font-family:i
 body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestion{font-family:inherit;font-weight:400!important;color:#071a38!important}
 body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestion strong{font-size:12px;font-weight:650!important;color:#071a38}
 body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestion small{font-size:11px;font-weight:400!important;color:#526d83}
+
+/* RADAR-OSSERVATORIO-01 — actual public feed indicators and accessible rankings. */
+.ba-observatory-head{padding:14px;border-radius:12px;background:#eaf7f8;border:1px solid #cde7ed}
+.ba-observatory-head h3{margin:0 0 6px;font-size:15px;color:#082b43}
+.ba-observatory-head p{margin:0;color:#516f80;font-size:11px;line-height:1.5}
+.ba-observatory-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.ba-observatory-kpi{display:grid;gap:7px;align-content:space-between;min-height:92px;padding:13px;border-radius:12px;border:1px solid #d3e5eb;background:#fff}
+.ba-observatory-kpi strong{font-size:28px;line-height:1;color:#077787;font-variant-numeric:tabular-nums}
+.ba-observatory-kpi small{font-size:11px;line-height:1.35;color:#577286}
+.ba-observatory-ranking{display:grid;gap:9px;padding:14px 13px;background:#fff;border:1px solid #dce6ec;border-radius:12px}
+.ba-observatory-ranking h3{font-size:14px;margin:0 0 3px;color:#071a38}
+.ba-observatory-rank{display:grid;gap:5px;border:0;border-radius:8px;background:transparent;width:100%;padding:4px;text-align:left;color:#244c62;font-family:inherit}
+button.ba-observatory-rank{cursor:pointer}
+button.ba-observatory-rank:hover,button.ba-observatory-rank:focus-visible{background:#eaf7f8;outline-offset:2px}
+.ba-observatory-rank-top{display:flex;justify-content:space-between;gap:10px;font-size:12px;line-height:1.3}
+.ba-observatory-rank-top strong{font-variant-numeric:tabular-nums;color:#075d6d}
+.ba-observatory-track{display:block;width:100%;height:7px;border-radius:999px;background:#e6edf1;overflow:hidden}
+.ba-observatory-track>span{display:block;height:100%;background:#078f9c;border-radius:999px}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -356,6 +374,61 @@ function eligible(e){
  return true;
 }
 function clearGeometry(){for(const g of geometryLayers)g.setMap(null);geometryLayers=[];}
+const numberIT=new Intl.NumberFormat('it-IT');
+function showObservatory(items,host){
+ const types=new Map(),places=new Map(),months=new Map();
+ let dated=0,undated=0;
+ for(const e of items){
+  const type=e.event_type?.name||'Altro';
+  types.set(type,(types.get(type)||0)+1);
+  const name=e.territory?.name||'Territorio non specificato';
+  places.set(name,(places.get(name)||0)+1);
+  if(/^\\d{4}-\\d{2}-\\d{2}$/.test(e.occurred_date||'')){
+   const dt=new Date(e.occurred_date+'T12:00:00');
+   if(Number.isFinite(dt.getTime())){dated++;const month=e.occurred_date.slice(0,7);months.set(month,(months.get(month)||0)+1);}
+   else undated++;
+  }else undated++;
+ }
+ const metrics=document.createElement('div');metrics.className='ba-observatory-kpis';
+ for(const [value,label] of [
+  [items.length,'Segnalazioni pubbliche geolocalizzate nel campione'],
+  [types.size,'Tipologie documentate'],
+  [places.size,'Territori rappresentati'],
+  [dated,'Episodi con data disponibile']
+ ]){
+  const card=document.createElement('div');card.className='ba-observatory-kpi';
+  const large=document.createElement('strong');large.textContent=numberIT.format(value);
+  const caption=document.createElement('small');caption.textContent=label;
+  card.append(large,caption);metrics.append(card);
+ }
+ host.append(metrics);
+ const createRanking=(title,records,cap,onPick)=>{
+  const section=document.createElement('section');section.className='ba-observatory-ranking';
+  const h=document.createElement('h3');h.textContent=title;section.append(h);
+  const ordered=[...records.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'it')).slice(0,cap);
+  const max=ordered[0]?.[1]||1;
+  for(const [label,count] of ordered){
+   const control=document.createElement(onPick?'button':'div');control.className='ba-observatory-rank';
+   if(onPick){control.type='button';control.addEventListener('click',()=>onPick(label));}
+   const top=document.createElement('span');top.className='ba-observatory-rank-top';
+   const name=document.createElement('span');name.textContent=label;
+   const quantity=document.createElement('strong');quantity.textContent=numberIT.format(count);
+   top.append(name,quantity);
+   const track=document.createElement('span');track.className='ba-observatory-track';
+   const bar=document.createElement('span');bar.style.width=(count/max*100).toFixed(2)+'%';track.append(bar);
+   control.append(top,track);section.append(control);
+  }
+  host.append(section);
+ };
+ createRanking('Fenomeni più segnalati',types,5,null);
+ createRanking('Territori più rappresentati',places,5,label=>{input.value=label;locate();});
+ if(dated){
+  createRanking('Mesi con episodi datati',months,5,null);
+ }
+ const quality=document.createElement('p');quality.className='ba-radar-note';
+ quality.textContent=numberIT.format(undated)+' segnalazioni senza data valida, escluse dal grafico mensile. Le graduatorie riguardano solo il campione pubblico disponibile: non misurano criminalità, rischio o copertura totale del territorio. Eventuali duplicati non certificati possono incidere sui conteggi.';
+ host.append(quality);
+}
 function render(){
  const filtered=reports.filter(eligible);
  $('rad-title').textContent=chosenCenter?($('rad-place').value.trim()||'Zona selezionata'):'Panoramica territoriale';
@@ -365,58 +438,14 @@ function render(){
  if(loadError){$('rad-copy').textContent='Impossibile consultare le segnalazioni pubbliche.';return;}
  if(loadingReports){$('rad-copy').textContent='Caricamento dei dati pubblici…';return;}
  if(!chosenCenter){
-  $('rad-title').textContent='Cosa segnala la community';
-  $('rad-map-title').textContent="Radar · scegli un territorio";
-  const topics=new Map();
-  for(const e of filtered){
-   const theme=category(e)||'Altre problematiche';
-   if(!topics.has(theme))topics.set(theme,new Set());
-   topics.get(theme).add(e.event_type?.name||'Tipologia non specificata');
-  }
-  $('rad-copy').textContent='Esplora i fenomeni presenti nelle segnalazioni pubbliche disponibili. Scegli una zona per una lettura territoriale: questa anteprima non rappresenta la diffusione nazionale né la frequenza dei fenomeni.';
-  const metrics=document.createElement('div');metrics.className='ba-radar-metrics-preview';
-  const metric=document.createElement('div');const metricValue=document.createElement('strong');metricValue.textContent=String(topics.size);
-  const metricLabel=document.createElement('small');metricLabel.textContent='Ambiti documentati nei dati disponibili';
-  metric.append(metricValue,metricLabel);metrics.appendChild(metric);
-  const second=document.createElement('div');const secondValue=document.createElement('strong');secondValue.textContent='—';
-  const secondLabel=document.createElement('small');secondLabel.textContent='Indice di rischio: non calcolato';
-  second.append(secondValue,secondLabel);metrics.appendChild(second);host.appendChild(metrics);
-  const intro=document.createElement('div');intro.className='ba-radar-welcome';
-  const h=document.createElement('h3');h.textContent='Scopri cosa è utile sapere di una zona';
-  const p=document.createElement('p');p.textContent='Cerca un indirizzo oppure usa «Vicino a me»: Radar collegherà le problematiche pubbliche all’area selezionata.';
-  intro.append(h,p);host.appendChild(intro);
-  const titles=['Veicoli','Case e attività','Pericoli','Spazi pubblici','Animali','Oggetti e documenti','Altre problematiche'];
-  const icons={'Veicoli':'🚗','Case e attività':'🏠','Pericoli':'⚠️','Spazi pubblici':'🏙️','Animali':'🐾','Oggetti e documenti':'📄','Altre problematiche':'◉'};
-  for(const key of titles){
-   if(!topics.has(key))continue;
-   const card=document.createElement('button');card.type='button';card.className='ba-radar-topic';
-   const icon=document.createElement('span');icon.className='ba-radar-topic-icon';icon.textContent=icons[key];
-   const body=document.createElement('span');body.className='ba-radar-topic-body';
-   const strong=document.createElement('strong');strong.textContent=key;
-   const sub=document.createElement('small');sub.textContent=[...topics.get(key)].sort((a,b)=>a.localeCompare(b,'it')).join(' · ');
-   body.append(strong,sub);card.append(icon,body);
-   card.addEventListener('click',()=>{
-    const select=$('rad-cat');if([...select.options].some(o=>o.value===key))select.value=key;
-    render();$('rad-place').focus();
-   });
-   host.appendChild(card);
-  }
-  const note=document.createElement('p');note.className='ba-radar-note';
-  note.textContent='Panoramica delle sole tipologie pubblicate nel campione consultabile, non una classifica delle zone. Nessuna zona viene definita sicura o pericolosa.';
-  host.appendChild(note);
-  const names=[...new Set(filtered.map(e=>e.territory?.name).filter(n=>typeof n==='string'&&n.length>2))].slice(0,6);
-  if(names.length){
-   const region=document.createElement('section');region.className='ba-radar-area-shortcuts';
-   const heading=document.createElement('h3');heading.textContent='Esplora un territorio';
-   const explanation=document.createElement('p');explanation.textContent='Località con segnalazioni pubbliche: non sono zone classificate a rischio.';
-   const buttons=document.createElement('div');buttons.className='ba-radar-area-buttons';
-   for(const name of names){
-    const button=document.createElement('button');button.type='button';button.textContent=name;
-    button.addEventListener('click',()=>{input.value=name;locate();});
-    buttons.appendChild(button);
-   }
-   region.append(heading,explanation,buttons);host.appendChild(region);
-  }
+  $('rad-title').textContent='Osservatorio BadAround';
+  $('rad-map-title').textContent='Segnalazioni della community · Italia';
+  $('rad-copy').textContent='Una panoramica delle segnalazioni pubblicate, non delle denunce o degli episodi complessivamente avvenuti. Seleziona un fenomeno o un territorio per approfondire.';
+  const insight=document.createElement('div');insight.className='ba-observatory-head';
+  const heading=document.createElement('h3');heading.textContent='Il territorio raccontato dalla community';
+  const sub=document.createElement('p');sub.textContent='Indicatori delle segnalazioni disponibili nel feed pubblico BadAround.';
+  insight.append(heading,sub);host.appendChild(insight);
+  showObservatory(filtered,host);
   return;
  }
  if(!filtered.length){
