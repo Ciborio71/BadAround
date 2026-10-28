@@ -341,6 +341,33 @@ body.page-template-page-radar-demo .ba-radar-back:focus-visible{background:#0556
 body.page-template-page-radar-demo .ba-radar-back,body.page-template-page-radar-demo .ba-radar-back:visited{color:#fff!important}
 .ba-radar-visual-key{display:grid;gap:7px}
 .ba-radar-heat-legend{height:9px;border-radius:999px;background:linear-gradient(90deg,#19afc5,#25b5ac,#f5bc47,#ef6d30,#cf2732)}
+
+/* UI-TOOLBAR-PARITY-02: match Mappe's horizontal sizing and rhythm. */
+@media(min-width:1041px){
+ body.page-template-page-radar-demo .ba-radar-controls{
+  display:flex!important;flex-wrap:nowrap!important;gap:10px!important;
+  padding:10px 12px!important;align-items:center!important;min-height:64px!important;
+ }
+ body.page-template-page-radar-demo .ba-radar-controls .ba-radar-search{
+  flex:0 0 355px!important;width:355px!important;max-width:355px!important;min-width:0!important;
+ }
+ body.page-template-page-radar-demo .ba-radar-controls .ba-radar-search-row{
+  display:flex!important;align-items:center!important;gap:7px!important;
+ }
+ body.page-template-page-radar-demo .ba-radar-controls #rad-place{flex:1 1 auto!important;min-width:0!important;width:0!important;}
+ body.page-template-page-radar-demo .ba-radar-controls #rad-nearby{flex:none!important;}
+}
+body.page-template-page-radar-demo .ba-radar-controls input,
+body.page-template-page-radar-demo .ba-radar-controls select,
+body.page-template-page-radar-demo .ba-radar-controls button{height:40px!important;border-radius:12px!important;}
+body.page-template-page-radar-demo .ba-radar-controls #rad-place{
+ background:#f8fbfc!important;border:1px solid #d7e3ea!important;
+ padding-inline:13px!important;box-shadow:0 2px 5px rgba(7,26,56,.035)!important;
+}
+body.page-template-page-radar-demo .ba-radar-controls #rad-nearby{
+ border:1px solid #0b8b99!important;color:#087889!important;background:#fff!important;
+}
+body.page-template-page-radar-demo .ba-radar-controls #rad-nearby:hover{background:#e8f8f9!important;color:#066f79!important}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
