@@ -6,6 +6,9 @@
 if (!defined('ABSPATH')) exit;
 // This validation-only synthetic experience must not be indexed.
 add_filter('wp_robots', static function ($robots) { $robots['noindex'] = true; $robots['nofollow'] = true; return $robots; });
+// Load the same certified navigation-control component used by Home and Mappe.
+$radar_navigation_file = get_stylesheet_directory() . '/assets/js/map-navigation.js';
+wp_enqueue_script('badaround-map-navigation',get_stylesheet_directory_uri().'/assets/js/map-navigation.js',array(),(string)filemtime($radar_navigation_file),true);
 get_header();
 ?>
 <main class="ba-radar-demo" id="main-content">
@@ -308,6 +311,10 @@ body.page-template-page-radar-demo .ba-observatory-rank:focus-visible *{color:#0
 body.page-template-page-radar-demo .ba-observatory-rank:hover{background:#eaf7fa!important}
 .ba-radar-back-drill{display:inline-flex;align-items:center;justify-content:center;width:100%;padding:10px;border:1px solid #a8d8df;border-radius:9px;background:#eaf7f9;color:#075e6d!important;font-weight:700;cursor:pointer}
 .ba-radar-back-drill:hover{background:#d8f0f3!important;color:#075e6d!important}
+
+/* RADAR-MAP-CONTROLS-PARITY-01: Home/Mappe native fullscreen+zoom in right-top rail. */
+body.page-template-page-radar-demo .ba-radar-map .ba-map-pan{display:none!important}
+body.page-template-page-radar-demo .ba-radar-map.ba-map-navigation-shell .ba-map-visual-key{left:15px;right:auto}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -620,10 +627,17 @@ async function loadMap(){
  try{
   await readyMaps();
   map=new google.maps.Map($('rad-google-map'),{
-   center:{lat:42.0,lng:12.5},zoom:7,mapTypeControl:false,streetViewControl:false,
+   center:{lat:41.9028,lng:12.4964},zoom:7,mapTypeControl:false,streetViewControl:false,
    styles:[{featureType:'poi',elementType:'all',stylers:[{visibility:'off'}]},{featureType:'transit',elementType:'all',stylers:[{visibility:'off'}]},{featureType:'road',elementType:'labels.icon',stylers:[{visibility:'off'}]}],
-   fullscreenControl:true,zoomControl:true,gestureHandling:'cooperative'
+   ...(window.BadAroundMapNavigation?.options?.()||{
+     zoomControl:true,zoomControlOptions:{position:google.maps.ControlPosition.RIGHT_TOP},
+     fullscreenControl:true,fullscreenControlOptions:{position:google.maps.ControlPosition.RIGHT_TOP},
+     gestureHandling:'cooperative'
+   })
   });
+  if(window.BadAroundMapNavigation?.mount){
+   window.BadAroundMapNavigation.mount(map,$('rad-google-map'));
+  }
   geocoder=new google.maps.Geocoder();
   try{placesApi=await google.maps.importLibrary('places');}
   catch(error){console.warn('Radar autocomplete unavailable; manual address search remains enabled.',error);}
@@ -735,7 +749,7 @@ $('rad-reset').addEventListener('click',()=>{
  chosenCenter=null;
  try{window.localStorage.removeItem(LAST_AREA_KEY);}catch(e){}
  searchCircle?.setMap(null);searchCircle=null;centerMarker?.setMap(null);centerMarker=null;
- if(map){map.setCenter({lat:42.0,lng:12.5});map.setZoom(7);}
+ if(map){map.setCenter({lat:41.9028,lng:12.4964});map.setZoom(7);}
  status('');render();
 });
 $('rad-drawer').addEventListener('click',()=>{const open=$('rad-panel').classList.toggle('is-open');$('rad-drawer').textContent=open?'Chiudi analisi':'Mostra analisi zona';$('rad-drawer').setAttribute('aria-expanded',String(open))});
