@@ -1,0 +1,1 @@
+Normalize Radar search suggestions and select typographic weights.
