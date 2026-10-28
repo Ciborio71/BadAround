@@ -1,0 +1,1 @@
+Deploy icon chips to Mappe and align Radar search toolbar.
