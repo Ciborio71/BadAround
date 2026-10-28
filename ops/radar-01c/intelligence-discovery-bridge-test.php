@@ -33,4 +33,16 @@ try{
 }catch(RuntimeException $expected){
  if($expected->getMessage()==='Concurrent drift accepted')throw $expected;
 }
+$readCount=0;
+try{
+ BadAround_Intelligence_Discovery_Bridge::build(static function(array $filters)use(&$readCount):array{
+  $readCount++;
+  return ['items'=>[['id'=>55,'title'=>'Same report','event_type'=>['name'=>$readCount===1?'Veicolo rubato':'Veicolo danneggiato'],
+    'territory'=>['name'=>'Roma'],'occurred_date'=>'','public_geo'=>null]],
+    'page'=>1,'pages'=>1,'total'=>1];
+ },new DateTimeImmutable('2026-10-28'));
+ throw new RuntimeException('In-place drift accepted');
+}catch(RuntimeException $expected){
+ if($expected->getMessage()==='In-place drift accepted')throw $expected;
+}
 echo "INTELLIGENCE-01H read-only bridge PASS\n";
