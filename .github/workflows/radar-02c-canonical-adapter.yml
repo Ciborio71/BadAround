@@ -1,0 +1,25 @@
+name: RADAR 02C canonical adapter
+on:
+  push:
+    branches:
+      - feature/radar-02c-canonical-adapter
+  pull_request:
+    branches:
+      - feature/radar-02b-private-preview-ui
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-radar-canonical-adapter.php
+          php -l tests/radar-02c-canonical-adapter.php
+          php tests/radar-02c-canonical-adapter.php
