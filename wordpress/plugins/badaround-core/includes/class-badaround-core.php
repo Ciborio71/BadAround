@@ -40,6 +40,8 @@ class BadAround_Core {
 		$native_report_api = new BadAround_Native_Report_REST_Controller();
 		$native_report_api->register_hooks();
 
+		(new BadAround_External_Report_Admin())->register_hooks();
+
 		$moderation_admin = new BadAround_Moderation_Admin();
 		$moderation_admin->register_hooks();
 	}
