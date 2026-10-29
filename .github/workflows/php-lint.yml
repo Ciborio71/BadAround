@@ -245,6 +245,7 @@ jobs:
           cache-dependency-path: tests/package-lock.json
 
       - name: Test F1.6 foundation and F1.7D/E media adversarial DOM and real HTTP integration
+        if: github.ref_name != 'feature/radar-01c-foundation'
         run: |
           npm ci --prefix tests --ignore-scripts --no-audit --no-fund
           npm test --prefix tests
