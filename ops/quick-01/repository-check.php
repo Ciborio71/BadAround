@@ -4,7 +4,7 @@ class QuickFixtureStore {
  public array $rows=[];
  public function insert($r){$this->rows[$r['id']]=$r;return true;}
  public function find($id){return $this->rows[$id]??null;}
- public function compareAndSwap($id,$rev,$next){if($this->rows[$id]['revision']!==$rev)return false;$this->rows[$id']=$next;return true;}
+ public function compareAndSwap($id,$rev,$next){if($this->rows[$id]['revision']!==$rev)return false;$this->rows[$id]=$next;return true;}
 }
 $db=new QuickFixtureStore();
 $repo=new BadAround_Quick_Draft_Repository($db);
