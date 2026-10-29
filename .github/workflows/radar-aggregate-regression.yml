@@ -1,0 +1,54 @@
+name: Radar Intelligence aggregate regression
+on:
+  push:
+    branches:
+      - qa/radar-full-stack-regression-20261029
+  pull_request:
+    branches:
+      - test/radar-02d-integrated-pipeline
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  full-stack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Lint isolated PHP modules
+        run: |
+          for file in wordpress/plugins/badaround-core/includes/class-badaround-intelligence-trends.php wordpress/plugins/badaround-core/includes/class-badaround-intelligence-peak-candidates.php wordpress/plugins/badaround-core/includes/class-badaround-intelligence-data-quality.php wordpress/plugins/badaround-core/includes/class-badaround-radar-view-model.php wordpress/plugins/badaround-core/includes/class-badaround-radar-canonical-adapter.php; do php -l "$file"; done
+      - name: Run all isolated feature and integrated tests
+        run: |
+          set -e
+          php tests/intelligence-02a-passive-trends.php
+          php tests/intelligence-02b-peak-candidates.php
+          php tests/intelligence-02c-data-quality.php
+          php tests/radar-02a-view-model.php
+          node tests/radar-02b-static-preview.cjs
+          php tests/radar-02c-canonical-adapter.php
+          php tests/radar-02d-integrated-pipeline.php
+      - name: Assert no WordPress runtime registration in proposed PHP modules
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          paths = [
+            'class-badaround-intelligence-trends.php',
+            'class-badaround-intelligence-peak-candidates.php',
+            'class-badaround-intelligence-data-quality.php',
+            'class-badaround-radar-view-model.php',
+            'class-badaround-radar-canonical-adapter.php',
+          ]
+          forbidden = ['add_action(', 'register_rest_route(', 'wp_insert_post(', 'update_post_meta(']
+          for name in paths:
+              text = (Path('wordpress/plugins/badaround-core/includes') / name).read_text()
+              assert not any(symbol in text for symbol in forbidden), name
+          print('Dormant runtime boundary PASS')
+          PY
