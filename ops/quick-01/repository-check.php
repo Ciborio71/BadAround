@@ -16,3 +16,5 @@ if($repo->update($draft['id'],$draft['token'],2,['publication_status'=>'publish'
 if($repo->update($draft['id'],str_repeat('0',64),2,['description'=>'Invalid token'],$now))throw new RuntimeException('Token guard failed');
 if($repo->update($draft['id'],$draft['token'],2,['description'=>'Expired'],$now->modify('+2 days')))throw new RuntimeException('Expiry guard failed');
 echo 'QUICK-02B PASS'.PHP_EOL;
+
+// End of QUICK-02B repository smoke assertions.
