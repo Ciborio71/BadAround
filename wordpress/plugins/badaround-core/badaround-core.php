@@ -69,6 +69,22 @@ require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-media-fence.
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-media-cleanup.php';
 require_once BADAROUND_CORE_PATH . 'includes/class-badaround-native-media-rest-controller.php';
 
+// Private Radar diagnostic is entirely absent unless explicitly enabled by server configuration.
+if ( defined( 'BADAROUND_RADAR_PRIVATE_QA_ENABLED' ) && BADAROUND_RADAR_PRIVATE_QA_ENABLED === true ) {
+    foreach ( array(
+        'class-badaround-intelligence-trends.php',
+        'class-badaround-intelligence-peak-candidates.php',
+        'class-badaround-intelligence-data-quality.php',
+        'class-badaround-radar-canonical-adapter.php',
+        'class-badaround-radar-view-model.php',
+        'class-badaround-radar-offline-bridge.php',
+        'class-badaround-radar-private-qa.php',
+    ) as $ba_radar_qa_module ) {
+        require_once BADAROUND_CORE_PATH . 'includes/' . $ba_radar_qa_module;
+    }
+    BadAround_Radar_Private_QA::register_hooks();
+}
+
 register_activation_hook( BADAROUND_CORE_FILE, array( 'BadAround_Installer', 'activate' ) );
 
 function badaround_core_run() {
