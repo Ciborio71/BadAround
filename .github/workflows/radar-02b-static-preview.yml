@@ -1,0 +1,22 @@
+name: RADAR 02B static prototype
+on:
+  push:
+    branches:
+      - feature/radar-02b-private-preview-ui
+  pull_request:
+    branches:
+      - feature/radar-02a-readonly-view-model
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  static-prototype:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --check tests/radar-02b-static-preview.cjs
+      - run: node tests/radar-02b-static-preview.cjs
