@@ -28,4 +28,4 @@
 5. Real-browser QA / privacy / concurrency / regression.
 6. Gradual production launch, with the detailed wizard as an always-available fallback.
 
-**Status:** pure PHP transition model + synthetic tests only. No new API, no private draft persistence, no email delivery, no production UI change.
+**Status (2026-10-29):** pure PHP transition model + synthetic tests only. No new API, no private draft persistence, no email delivery, no production UI change.
