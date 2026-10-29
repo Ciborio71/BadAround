@@ -16,5 +16,9 @@ jobs:
         run: |
           php -l ops/quick-01/quick-report-contract.php
           php -l ops/quick-01/quick-report-contract-test.php
+          php -l ops/quick-01/quick-draft-security.php
+          php -l ops/quick-01/quick-draft-security-test.php
       - name: Verify private draft transitions
-        run: php ops/quick-01/quick-report-contract-test.php
+        run: |
+          php ops/quick-01/quick-report-contract-test.php
+          php ops/quick-01/quick-draft-security-test.php
