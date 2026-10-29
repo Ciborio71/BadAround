@@ -1,0 +1,14 @@
+name: QUICK-02B repository verification
+on:
+  push:
+    branches: [feature/radar-01c-foundation]
+    paths: ['ops/quick-01/repository-check.php']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: php -l ops/quick-01/quick-draft-repository.php
+      - run: php ops/quick-01/repository-check.php
