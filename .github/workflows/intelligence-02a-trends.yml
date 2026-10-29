@@ -3,6 +3,13 @@ on:
   push:
     branches:
       - feature/intelligence-02-passive-trends
+  pull_request:
+    branches:
+      - release/production-mvp-01
+    paths:
+      - 'tests/intelligence-02a-passive-trends.php'
+      - 'wordpress/plugins/badaround-core/includes/class-badaround-intelligence-trends.php'
+      - '.github/workflows/intelligence-02a-trends.yml'
   workflow_dispatch:
 permissions:
   contents: read
