@@ -1,0 +1,25 @@
+name: Intelligence 02B isolated candidates
+on:
+  push:
+    branches:
+      - feature/intelligence-02b-peak-candidates
+  pull_request:
+    branches:
+      - feature/intelligence-02-passive-trends
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-intelligence-peak-candidates.php
+          php -l tests/intelligence-02b-peak-candidates.php
+          php tests/intelligence-02b-peak-candidates.php
