@@ -1,0 +1,23 @@
+name: Baseline manifest compare isolated tests
+on:
+  push:
+    branches:
+      - reconcile/live-approved-2026-10-29
+  pull_request:
+    branches:
+      - release/production-mvp-01
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m py_compile tools/live-baseline-sha256.py tools/compare-live-manifests.py tests/test-live-manifest-compare.py
+          python tests/test-live-manifest-compare.py
