@@ -1,0 +1,34 @@
+name: Intelligence 01K isolated PHP regression
+
+on:
+  push:
+    branches:
+      - test/intelligence-01k-read-model-regressions
+  pull_request:
+    branches:
+      - release/production-mvp-01
+    paths:
+      - 'tests/intelligence-01k-read-model.php'
+      - 'wordpress/plugins/badaround-core/includes/class-badaround-intelligence-read-model.php'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Syntax check
+        run: |
+          php -l tests/intelligence-01k-read-model.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-intelligence-read-model.php
+      - name: Standalone contract regression
+        run: php tests/intelligence-01k-read-model.php
