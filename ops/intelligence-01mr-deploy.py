@@ -6,7 +6,7 @@ e=pathlib.Path('evidence');e.mkdir(exist_ok=True)
 head=os.environ['EXPECTED_HEAD'];parent=os.environ['EXPECTED_PARENT']
 def sha(b):return hashlib.sha256(b).hexdigest()
 def gitfile(rev,p):return subprocess.check_output(['git','show',rev+':'+prefix+p])
-expected={'badaround-core.php':gitfile(parent,'badaround-core.php').replace(b"require_once BADAROUND_CORE_PATH . 'includes/class-badaround-moderation-admin.php';",b"require_once BADAROUND_CORE_PATH . 'includes/class-badaround-moderation-admin.php';\\nrequire_once BADAROUND_CORE_PATH . 'includes/class-badaround-external-report-intake.php';"),
+expected={'badaround-core.php':gitfile(parent,'badaround-core.php').replace(b"require_once BADAROUND_CORE_PATH . 'includes/class-badaround-moderation-admin.php';",b"require_once BADAROUND_CORE_PATH . 'includes/class-badaround-moderation-admin.php';\nrequire_once BADAROUND_CORE_PATH . 'includes/class-badaround-external-report-intake.php';"),
           'includes/class-badaround-intelligence-read-model.php':None}
 new={p:gitfile(head,p) for p in files}
 for p in files:
