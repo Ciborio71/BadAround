@@ -1,0 +1,25 @@
+name: RADAR 02A isolated view model
+on:
+  push:
+    branches:
+      - feature/radar-02a-readonly-view-model
+  pull_request:
+    branches:
+      - feature/intelligence-02c-data-quality
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-radar-view-model.php
+          php -l tests/radar-02a-view-model.php
+          php tests/radar-02a-view-model.php
