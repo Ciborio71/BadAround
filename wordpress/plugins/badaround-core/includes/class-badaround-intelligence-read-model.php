@@ -57,10 +57,14 @@ final class BadAround_Intelligence_Read_Model {
             $term=$item['territory']['name']??null;
             if (is_string($term) && $term!=='')$territories[$term]=($territories[$term]??0)+1;
             $date=$item['occurred_date']??null;
-            if (is_string($date) && preg_match('/^\\d{4}-\\d{2}-\\d{2}$/',$date)) {
-                $parsed=DateTimeImmutable::createFromFormat('!Y-m-d',$date,wp_timezone());
-                if ($parsed && $parsed->format('Y-m-d')===$date
-                    && $parsed<=new DateTimeImmutable('today',wp_timezone()))$dated++;
+            if (is_string($date)) {
+                $format = preg_match('/^\\d{4}-\\d{2}-\\d{2}$/', $date) ? 'Y-m-d'
+                    : (preg_match('/^\\d{2}\\/\\d{2}\\/\\d{4}$/', $date) ? 'd/m/Y' : null);
+                if ($format !== null) {
+                    $parsed=DateTimeImmutable::createFromFormat('!'.$format,$date,wp_timezone());
+                    if ($parsed && $parsed->format($format)===$date
+                        && $parsed<=new DateTimeImmutable('today',wp_timezone()))$dated++;
+                }
             }
         }
         ksort($types);ksort($territories);
