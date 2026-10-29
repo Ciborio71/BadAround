@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BadAround Radar — Anteprima interna non pubblica</title>
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#10283b;background:#f4f7f8}*{box-sizing:border-box}body{margin:0}main{max-width:1120px;margin:auto;padding:32px 20px 64px}
+.header{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}h1{font-size:clamp(28px,4vw,42px);margin:8px 0}p{line-height:1.55}
+.eyebrow{letter-spacing:.12em;font-size:12px;font-weight:750;color:#077d8d;text-transform:uppercase}.notice{background:#fff4dc;border-left:4px solid #c78c16;padding:12px 16px;border-radius:8px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:20px}.card{background:white;border:1px solid #dae4e8;border-radius:14px;padding:22px;box-shadow:0 3px 14px #1936440a}
+.kicker{font-size:14px;color:#496271;font-weight:600}.metric{font-size:36px;font-weight:760;margin:10px 0}.sub{font-size:13px;color:#516875}
+.track{height:12px;background:#e4edef;border-radius:8px;overflow:hidden;margin-top:16px}.fill{height:100%;background:#08899c;border-radius:8px}.comparison{display:flex;align-items:center;gap:14px;margin:12px 0}.muted{color:#566d79}.positive{color:#07685d;font-weight:750}
+button{background:#086b7b;color:#fff;padding:10px 16px;border:0;border-radius:8px;font:inherit;cursor:pointer}button[aria-pressed=true]{background:#092f46}button:focus-visible{outline:3px solid #e1a727;outline-offset:3px}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.chart{display:grid;grid-template-columns:1fr 1fr;align-items:end;gap:18px;max-width:260px;height:135px;margin-top:20px}
+.bar{border-radius:7px 7px 0 0;background:#8bc6d0;position:relative;min-height:3px}.bar.current{background:#087d91}.bar span{position:absolute;bottom:-24px;left:0;font-size:12px;white-space:nowrap;color:#516875}
+footer{margin-top:30px;font-size:13px;color:#526573}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.chart{margin-bottom:24px}}
+</style></head><body>
+<main data-radar-preview-only="true">
+  <div class="notice" role="status"><strong>ANTEPRIMA INTERNA — DATI DIMOSTRATIVI</strong> · Non collegata al sito, nessun indicatore pubblico o allarme automatico.</div>
+  <header class="header">
+   <div><div class="eyebrow">BadAround Intelligence / Radar 02B</div><h1>Andamento delle segnalazioni pubblicate</h1><p class="muted">Confronto descrittivo fra finestre consecutive di pari durata.</p></div>
+   <div class="controls" role="group" aria-label="Periodo di confronto"><button type="button" aria-pressed="true" data-window="7">7 giorni</button><button type="button" aria-pressed="false" data-window="30">30 giorni</button></div>
+  </header>
+  <section class="grid" aria-label="Indicatori dimostrativi">
+    <article class="card"><div class="kicker">Roma · Veicoli</div><div class="metric" data-current>10</div><div class="sub">Segnalazioni pubblicate nel periodo</div><div class="comparison"><span class="positive" data-delta>+100%</span><span class="muted">rispetto al periodo precedente</span></div><div class="chart" role="img" aria-label="Dati dimostrativi: 5 segnalazioni precedenti, 10 attuali"><div class="bar" style="height:50%" data-previous-bar><span>Prima: 5</span></div><div class="bar current" style="height:100%" data-current-bar><span>Ora: 10</span></div></div></article>
+    <article class="card"><div class="kicker">Pomezia · Animali</div><div class="metric">3</div><p class="sub">Segnalazioni pubblicate nel periodo</p><p class="muted"><strong>Dati insufficienti per un confronto affidabile</strong></p><div class="track" aria-hidden="true"><div class="fill" style="width:30%"></div></div></article>
+    <article class="card"><div class="kicker">Copertura delle date</div><div class="metric">90%</div><p class="sub">Segnalazioni con data valida nel campione dimostrativo</p><div class="track" aria-hidden="true"><div class="fill" style="width:90%"></div></div><p class="sub">Non misura la rappresentatività territoriale.</p></article>
+  </section>
+  <footer><strong>Nota metodologica:</strong> i conteggi riguardano segnalazioni pubblicate, non episodi distinti né livelli di rischio. Le variazioni non dimostrano significatività statistica. Tutti i numeri di questa anteprima sono sintetici.</footer>
+</main>
+<script>
+'use strict';
+const examples={'7':{current:10,previous:5},'30':{current:16,previous:12}};
+document.querySelectorAll('[data-window]').forEach(button=>button.addEventListener('click',()=>{
+ const selected=button.dataset.window;const values=examples[selected];
+ document.querySelectorAll('[data-window]').forEach(item=>item.setAttribute('aria-pressed',String(item===button)));
+ document.querySelector('[data-current]').textContent=values.current;
+ document.querySelector('[data-delta]').textContent='+'+Math.round((values.current-values.previous)*100/values.previous)+'%';
+ const max=Math.max(values.current,values.previous);
+ document.querySelector('[data-previous-bar]').style.height=(values.previous/max*100)+'%';
+ document.querySelector('[data-current-bar]').style.height=(values.current/max*100)+'%';
+ document.querySelector('[data-previous-bar] span').textContent='Prima: '+values.previous;
+ document.querySelector('[data-current-bar] span').textContent='Ora: '+values.current;
+ document.querySelector('.chart').setAttribute('aria-label','Dati dimostrativi: '+values.previous+' segnalazioni precedenti, '+values.current+' attuali');
+}));
+</script></body></html>
