@@ -1,0 +1,20 @@
+name: QUICK-01 private draft contract
+on:
+  push:
+    branches: [feature/radar-01c-foundation]
+    paths:
+      - 'ops/quick-01/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint private-draft contract
+        run: |
+          php -l ops/quick-01/quick-report-contract.php
+          php -l ops/quick-01/quick-report-contract-test.php
+      - name: Verify private draft transitions
+        run: php ops/quick-01/quick-report-contract-test.php
