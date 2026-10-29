@@ -1,0 +1,47 @@
+name: INTELLIGENCE-01MR guarded passive Core deploy
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths:
+      - 'ops/intelligence-01mr-deploy-trigger.txt'
+permissions:
+  contents: read
+concurrency:
+  group: badaround-targeted-production-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    env:
+      FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+      FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+      FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+      FTP_TLS_NAME: hostmld17.aziendeitalia.com
+      EXPECTED_PARENT: 8d27c7b662c96fc8e8f4c75c16c4f335561f55b0
+      EXPECTED_HEAD: 29ecbd610c23fd2d79080c6d655e7fc194bfb175
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install TLS trust bundle
+        run: |
+          set -euo pipefail
+          mkdir -p tls evidence
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/curl-chain.pem
+      - name: Validate passive Core PHP and bootstrap
+        run: |
+          php -l wordpress/plugins/badaround-core/badaround-core.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-intelligence-read-model.php
+          php -r '$s=file_get_contents("wordpress/plugins/badaround-core/badaround-core.php"); if(substr_count($s,"class-badaround-intelligence-read-model.php")!==1)exit(2);'
+      - name: Guarded two-file deploy
+        run: python3 ops/intelligence-01mr-deploy.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: intelligence-01mr-deployment-evidence
+          path: evidence/
+          retention-days: 30
