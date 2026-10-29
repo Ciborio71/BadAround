@@ -1,0 +1,16 @@
+name: INTELLIGENCE-01O verification
+on:
+  push:
+    branches: [release/production-mvp-01]
+    paths: ['tests/intelligence-01o-discovery-contract.php']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: php -l wordpress/plugins/badaround-core/includes/class-badaround-intelligence-read-model.php
+      - run: php tests/intelligence-01o-discovery-contract.php
+      - run: php tests/intelligence-01n-date-parity.php
