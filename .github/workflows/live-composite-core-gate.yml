@@ -15,6 +15,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
@@ -26,7 +28,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import subprocess
-          base='release/production-mvp-01'
+          base='origin/release/production-mvp-01'
           root=Path('wordpress/plugins/badaround-core')
           boot=(root/'badaround-core.php').read_text()
           core=(root/'includes/class-badaround-core.php').read_text()
