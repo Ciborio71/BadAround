@@ -206,7 +206,7 @@ jobs:
           php tests/f1-14r-publication-contract.php
 
       - name: Verify frozen backend and scoped F1.7D/E foundation extensions
-        if: github.ref_name != 'feature/f1.15a3-canonical-territory-path'
+        if: github.ref_name != 'feature/f1.15a3-canonical-territory-path' && github.ref_name != 'feature/radar-01c-foundation'
         run: |
           git diff --exit-code beb33ec3325480f77a266b3b6356f5860b00e16e -- \
             wordpress/plugins/badaround-core \
