@@ -29,3 +29,6 @@
 6. Gradual production launch, with the detailed wizard as an always-available fallback.
 
 **Status (2026-10-29):** pure PHP transition model + synthetic tests only. No new API, no private draft persistence, no email delivery, no production UI change.
+
+## QUICK-02A security foundation
+Continuation links use random opaque tokens; only token hashes belong in persistent storage. Expiry, revocation and post-submission rejection are enforced by the pure contract. The current code does not store drafts or email links. A production implementation must add rate limits, verified email ownership, server-side persistence, deletion policy and canonical moderation integration before release.
