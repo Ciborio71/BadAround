@@ -1,5 +1,5 @@
 <?php
-/** INTELLIGENCE-01O: regression using a sanitized public Discovery-shaped snapshot. */
+/** INTELLIGENCE-01O: CI-validated regression using a sanitized public Discovery-shaped snapshot. */
 declare(strict_types=1);
 define('ABSPATH', '/synthetic-test/');
 function wp_timezone(): DateTimeZone { return new DateTimeZone('Europe/Rome'); }
