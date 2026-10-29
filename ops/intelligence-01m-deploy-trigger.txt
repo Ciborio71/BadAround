@@ -1,0 +1,1 @@
+Deploy passive Intelligence Core model and bootstrap; guarded baseline.
