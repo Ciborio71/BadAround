@@ -85,6 +85,14 @@ if ( defined( 'BADAROUND_RADAR_PRIVATE_QA_ENABLED' ) && BADAROUND_RADAR_PRIVATE_
     BadAround_Radar_Private_QA::register_hooks();
 }
 
+// Separate read-only quality review queue; no write service is loaded or exposed.
+if ( defined( 'BADAROUND_RADAR_QUALITY_REVIEW_PREVIEW' ) && BADAROUND_RADAR_QUALITY_REVIEW_PREVIEW === true ) {
+    require_once BADAROUND_CORE_PATH . 'includes/class-badaround-radar-canonical-adapter.php';
+    require_once BADAROUND_CORE_PATH . 'includes/class-badaround-radar-quality-registry.php';
+    require_once BADAROUND_CORE_PATH . 'includes/class-badaround-radar-review-admin.php';
+    BadAround_Radar_Review_Admin::register();
+}
+
 register_activation_hook( BADAROUND_CORE_FILE, array( 'BadAround_Installer', 'activate' ) );
 
 function badaround_core_run() {
