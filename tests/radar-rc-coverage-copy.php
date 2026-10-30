@@ -7,6 +7,9 @@ $checks=array(
   'Insufficient coverage warning'=>str_contains($src,"Copertura temporale insufficiente"),
   'No substitution of publication date'=>str_contains($src,"Le date mancanti non vengono sostituite"),
   'Empty group fallback'=>str_contains($src,"Nessun gruppo con dati temporali sufficienti"),
+  'Admin period form'=>str_contains($src,'name="ba_radar_days"'),
+  'Valid period options'=>str_contains($src,'array(7,30)'),
+  'Admin tools destination'=>str_contains($src,"admin_url('tools.php')"),
   'Administrator guard'=>str_contains($src,"current_user_can('manage_options')"),
   'Default disabled feature gate'=>str_contains($src,"BADAROUND_RADAR_PRIVATE_QA_ENABLED"),
 );
