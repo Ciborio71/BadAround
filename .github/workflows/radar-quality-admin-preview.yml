@@ -1,0 +1,22 @@
+name: Radar quality admin preview safety
+on:
+  push:
+    branches:
+      - release/radar-quality-admin-preview-gated-20261031
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-radar-review-admin.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-radar-review-store.php
+          php tests/radar-quality-admin-preview.php
+          php tests/radar-review-store-gate.php
+          php tests/radar-quality-territory.php
