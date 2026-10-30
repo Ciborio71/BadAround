@@ -46,9 +46,14 @@ final class BadAround_Radar_Private_QA {
             if ($total===0 || $undated*5>$total) {
                 echo '<p role="status"><strong>Copertura temporale insufficiente:</strong> le variazioni non sono utilizzabili come indicatori di andamento. Le date mancanti non vengono sostituite con la data di pubblicazione.</p>';
             }
-            if (!$view['cards']) {
-                echo '<p>Nessun gruppo con dati temporali sufficienti per il periodo selezionato.</p>';
+            $current_total=0;
+            foreach ($view['cards'] as $card) {
+                $current_total+=(int)$card['current_reports'];
             }
+            echo '<p><strong>Segnalazioni con data nel periodo:</strong> '.esc_html((string)$current_total).'. Le segnalazioni senza data valida non sono attribuite al periodo.</p>';
+            if (!$view['cards']) {
+                echo '<p role="status">Nessuna segnalazione datata nel periodo selezionato oppure dati non sufficienti per costruire gruppi. Consulta anche il totale delle segnalazioni pubblicate sopra.</p>';
+            } else {
             echo '<table class="widefat striped"><thead><tr><th>Territorio</th><th>Tipo</th><th>Segnalazioni nel periodo</th><th>Confronto</th></tr></thead><tbody>';
             foreach($view['cards'] as $card) {
                 echo '<tr><td>'.esc_html($card['territory_slug']).'</td><td>'.esc_html($card['event_type_slug']).'</td><td>'.esc_html((string)$card['current_reports']).'</td><td>';
@@ -58,6 +63,7 @@ final class BadAround_Radar_Private_QA {
                 echo '</td></tr>';
             }
             echo '</tbody></table>';
+            }
         } catch (Throwable $error) {
             // Never leak internal diagnostics into public endpoints or the admin HTML.
             echo '<p role="status">Anteprima non disponibile: verifica necessaria.</p>';
