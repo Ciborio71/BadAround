@@ -1,0 +1,20 @@
+name: Radar Quality Territory Gate
+on:
+  push:
+    branches:
+      - feature/radar-quality-territory-20261030
+permissions:
+  contents: read
+jobs:
+  safe-aggregates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-radar-quality-registry.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-radar-territory-analysis.php
+          php tests/radar-quality-territory.php
