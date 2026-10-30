@@ -11,3 +11,8 @@ $html=BadAround_Radar_Window_Renderer::render($d);
 foreach(['<dl class="ba-radar-summary-stats">','<dt>Archivio</dt>','<dt>Senza data valida</dt>','Torvaianica — Veicolo rubato','Copertura delle date insufficiente'] as $needle)if(!str_contains($html,$needle))throw new RuntimeException('Missing '.$needle);
 if(str_contains($html,'veicolo-rubato'))throw new RuntimeException('Raw slug leaked');
 echo "RADAR-UX-08: PASS 6 checks\n";
+
+$tpl=file_get_contents(dirname(__DIR__).'/wordpress/themes/badaround-child/page-radar-demo.php');
+foreach (['.ba-radar-public-preview .ba-radar-summary-stats','.ba-radar-public-preview .ba-radar-window-groups','BADAROUND_RADAR_PUBLIC_COUNTS_PREVIEW_ENABLED'] as $marker)
+ if(!str_contains($tpl,$marker))throw new RuntimeException('Template preview missing: '.$marker);
+echo "RADAR-UX-08: PASS scoped preview layout\n";
