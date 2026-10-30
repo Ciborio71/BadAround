@@ -33,6 +33,14 @@ final class BadAround_Radar_Private_QA {
             $dated=(int)($quality['date_coverage_count'] ?? 0);
             $undated=(int)($quality['undated_or_invalid_count'] ?? 0);
             $total=$dated+$undated;
+            echo '<form method="get" action="'.esc_url(admin_url('tools.php')).'">';
+            echo '<input type="hidden" name="page" value="badaround-radar-private-qa">';
+            echo '<label for="ba-radar-days">Periodo di confronto: </label>';
+            echo '<select id="ba-radar-days" name="ba_radar_days">';
+            foreach (array(7,30) as $option_days) {
+                echo '<option value="'.esc_attr((string)$option_days).'"'.selected($days,$option_days,false).'>'.esc_html((string)$option_days).' giorni</option>';
+            }
+            echo '</select> <button type="submit" class="button">Aggiorna analisi</button></form>';
             echo '<p>Periodo: '.esc_html((string)$days).' giorni. Stato: anteprima interna.</p>';
             echo '<p><strong>Qualità dei dati temporali:</strong> '.esc_html((string)$dated).' segnalazioni con data, '.esc_html((string)$undated).' senza data valida, su '.esc_html((string)$total).' segnalazioni pubblicate.</p>';
             if ($total===0 || $undated*5>$total) {
