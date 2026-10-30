@@ -8,3 +8,13 @@ foreach (['update_post_meta(','add_post_meta(','register_rest_route(','wp_insert
  if(str_contains($s,$unsafe))throw new RuntimeException('Unexpected write');
 }
 echo "RADAR QUALITY ADMIN PREVIEW: PASS\n";
+
+$bootstrap=file_get_contents(dirname(__DIR__).'/wordpress/plugins/badaround-core/badaround-core.php');
+foreach (["BADAROUND_RADAR_QUALITY_REVIEW_PREVIEW === true",
+ "class-badaround-radar-quality-registry.php",
+ "class-badaround-radar-review-admin.php",
+ "BadAround_Radar_Review_Admin::register()"] as $needle)
+ if(!str_contains($bootstrap,$needle))throw new RuntimeException('Bootstrap missing '.$needle);
+if(str_contains($bootstrap,'class-badaround-radar-review-store.php'))
+ throw new RuntimeException('Write service included in live bootstrap');
+echo "RADAR QUALITY BOOTSTRAP: PASS\n";
