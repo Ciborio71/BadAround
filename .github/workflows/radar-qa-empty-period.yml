@@ -1,0 +1,20 @@
+name: Radar QA empty period
+on:
+  push:
+    branches:
+      - fix/radar-qa-empty-period-20261030
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-radar-private-qa.php
+          php tests/radar-qa-empty-period.php
+          php tests/radar-rc-coverage-copy.php
