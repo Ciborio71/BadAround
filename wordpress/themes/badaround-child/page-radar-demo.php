@@ -50,6 +50,8 @@ get_header();
           'class-badaround-radar-offline-bridge.php',
           'class-badaround-radar-public-counts.php',
           'class-badaround-radar-public-renderer.php',
+          'class-badaround-radar-window-counts.php',
+          'class-badaround-radar-window-renderer.php',
       );
       $ba_radar_dir = WP_PLUGIN_DIR . '/badaround-core/includes/';
       $ba_radar_ready = class_exists('BadAround_Discovery_Query');
@@ -70,7 +72,9 @@ get_header();
               $ba_radar_rows = BadAround_Radar_Canonical_Adapter::rows($ba_radar_discovery);
               $ba_radar_public = BadAround_Radar_Public_Counts::present($ba_radar_rows, $ba_radar_snapshot['quality']);
               echo '<div class="ba-radar-public-preview" aria-label="Anteprima riservata dei conteggi Radar">';
-              echo BadAround_Radar_Public_Renderer::render($ba_radar_public); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- renderer escapes validated fields.
+              $ba_radar_trends = BadAround_Intelligence_Trends::summarize($ba_radar_rows, $ba_radar_today, 30);
+              $ba_radar_window = BadAround_Radar_Window_Counts::present($ba_radar_public, $ba_radar_trends, $ba_radar_snapshot['quality']);
+              echo BadAround_Radar_Window_Renderer::render($ba_radar_window); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- validated escaped output.
               echo '</div>';
           } catch (Throwable $ba_radar_error) {
               echo '<p role="status">Anteprima Radar non disponibile: verifica dei dati necessaria.</p>';
