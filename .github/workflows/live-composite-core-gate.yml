@@ -1,0 +1,48 @@
+name: Live composite Core release safety gate
+on:
+  push:
+    branches:
+      - qa/live-composite-release-gate-20261029
+  pull_request:
+    branches:
+      - reconcile/live-approved-2026-10-29
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Lint all Core PHP
+        run: find wordpress/plugins/badaround-core -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Prove composite runtime dependencies and frozen theme
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          base='origin/release/production-mvp-01'
+          root=Path('wordpress/plugins/badaround-core')
+          boot=(root/'badaround-core.php').read_text()
+          core=(root/'includes/class-badaround-core.php').read_text()
+          ext=(root/'includes/class-badaround-external-report-intake.php').read_text()
+          pub=(root/'includes/class-badaround-publication-service.php').read_text()
+          assert "includes/class-badaround-external-report-intake.php" in boot
+          assert 'new BadAround_External_Report_Admin()' in core
+          assert 'class BadAround_External_Report_Admin' in ext
+          assert 'class BadAround_External_Report_Intake' in ext
+          assert 'function reopen_external_for_enrichment' in pub
+          changed=subprocess.check_output(['git','diff','--name-only',base,'HEAD','--','wordpress/'],text=True).splitlines()
+          allowed={'wordpress/plugins/badaround-core/includes/class-badaround-core.php',
+                   'wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php',
+                   'wordpress/plugins/badaround-core/includes/class-badaround-external-report-intake.php'}
+          assert set(changed)==allowed, 'Unexpected app changes: '+repr(changed)
+          print('COMPOSITE APP SCOPE AND DEPENDENCIES PASS')
+          PY
