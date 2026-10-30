@@ -89,6 +89,18 @@ get_header();
  <p class="ba-radar-foot">RADAR-PHENOMENA-01 · Problematiche da dati pubblici · Nessuna heatmap o valutazione di rischio</p>
 </main>
 <style>
+/* RADAR-UX-08 — scoped admin-only analytics summary, no changes to map/toolbar. */
+.ba-radar-public-preview{margin:14px 0;border:1px solid #d5e6ea;border-radius:12px;background:#f7fbfc;padding:13px}
+.ba-radar-public-preview .ba-radar-window-summary h3{margin:0 0 11px;color:#071a38;font-size:15px;line-height:1.35}
+.ba-radar-public-preview .ba-radar-summary-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:0 0 12px}
+.ba-radar-public-preview .ba-radar-summary-stats>div{min-width:0;padding:9px 6px;background:#fff;border:1px solid #e1edf0;border-radius:9px;text-align:center}
+.ba-radar-public-preview .ba-radar-summary-stats dt{font-size:10px;color:#577083;font-weight:700;line-height:1.3}
+.ba-radar-public-preview .ba-radar-summary-stats dd{margin:4px 0 0;font-size:22px;font-weight:800;line-height:1.2;color:#071a38;font-variant-numeric:tabular-nums}
+.ba-radar-public-preview .ba-radar-window-summary p{font-size:12px;line-height:1.5;margin:10px 0;color:#4b6579}
+.ba-radar-public-preview .ba-radar-window-summary p[role=status]{border-left:3px solid #c79039;padding-left:9px}
+.ba-radar-public-preview .ba-radar-window-groups{display:grid;gap:7px;list-style:none;padding:0;margin:10px 0}
+.ba-radar-public-preview .ba-radar-window-groups li{padding:9px;background:#fff;border:1px solid #e1edf0;border-radius:9px;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+@media(max-width:360px){.ba-radar-public-preview .ba-radar-summary-stats{grid-template-columns:1fr}}
 .ba-radar-demo{--navy:#071a38;--teal:#0798a8;--muted:#61778b;color:var(--navy);background:#f3f7fa;min-height:80vh}.ba-radar-demo *{box-sizing:border-box}
 .ba-radar-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px clamp(15px,3vw,44px);background:#fff}.ba-radar-heading h1{font-size:clamp(26px,3vw,38px);margin:0 0 3px}.ba-radar-heading p{margin:0;color:var(--muted)}.ba-radar-kicker{font-weight:850;font-size:11px;letter-spacing:.08em;color:var(--teal)!important}.ba-radar-demo-pill{font-size:10px;color:#865014;background:#fff2d8;border:1px solid #eed8b2;padding:10px 13px;border-radius:20px}
 .ba-radar-controls{display:flex;gap:9px;flex-wrap:wrap;align-items:end;background:#fff;padding:10px clamp(15px,3vw,44px);border-block:1px solid #e0e8ed}.ba-radar-controls label{display:grid;gap:4px;font-size:11px;font-weight:800;color:#50677c}.ba-radar-controls input,.ba-radar-controls select,.ba-radar-controls button{height:40px;min-width:110px;border:1px solid #cfdee5;border-radius:9px;background:#fff;color:var(--navy);padding:0 11px;font:inherit;font-size:13px}.ba-radar-controls .ba-radar-search{flex:1;min-width:210px}.ba-radar-search input{width:100%}.ba-radar-controls button{font-weight:800;cursor:pointer}

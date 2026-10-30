@@ -2,6 +2,13 @@
 /** RADAR-PUBLIC-06 — dormant, escaped current-period counts. */
 if (!defined('ABSPATH')) exit;
 final class BadAround_Radar_Window_Renderer {
+    private static function label($slug) {
+        $words = str_replace('-', ' ', $slug);
+        return function_exists('mb_convert_case')
+            ? mb_strtoupper(mb_substr($words, 0, 1, 'UTF-8'), 'UTF-8') . mb_substr($words, 1, null, 'UTF-8')
+            : ucfirst($words);
+    }
+
     public static function render(array $data) {
         if (($data['contract']??null)!=='badaround-radar-window-counts/v0.1'
             || ($data['unit']??null)!=='published_reports_not_unique_incidents'
@@ -19,7 +26,11 @@ final class BadAround_Radar_Window_Renderer {
             throw new InvalidArgumentException('Invalid archive split');
         $html='<section class="ba-radar-window-summary" aria-label="Riepilogo segnalazioni Radar">';
         $html.='<h3>Segnalazioni pubblicate</h3>';
-        $html.='<p>Archivio: <strong>'.esc_html((string)$data['archive_reports']).'</strong> · Con data valida: <strong>'.esc_html((string)$data['dated_archive_reports']).'</strong> · Senza data valida: <strong>'.esc_html((string)$data['undated_archive_reports']).'</strong></p>';
+        $html.='<dl class="ba-radar-summary-stats">';
+        $html.='<div><dt>Archivio</dt><dd>'.esc_html((string)$data['archive_reports']).'</dd></div>';
+        $html.='<div><dt>Con data valida</dt><dd>'.esc_html((string)$data['dated_archive_reports']).'</dd></div>';
+        $html.='<div><dt>Senza data valida</dt><dd>'.esc_html((string)$data['undated_archive_reports']).'</dd></div>';
+        $html.='</dl>';
         $html.='<p>Con data negli ultimi '.esc_html((string)$data['period_days']).' giorni: <strong>'.esc_html((string)$data['dated_reports_in_period']).'</strong></p>';
         if (!$data['date_coverage_sufficient']) {
             $html.='<p role="status">Copertura delle date insufficiente per confronti temporali attendibili.</p>';
@@ -37,7 +48,7 @@ final class BadAround_Radar_Window_Renderer {
                     ||!is_string($type)||!preg_match('/^[a-z0-9-]+$/D',$type))
                     throw new InvalidArgumentException('Invalid group');
                 $sum+=$n;
-                $html.='<li>'.esc_html($territory).' — '.esc_html($type).': <strong>'.esc_html((string)$n).'</strong></li>';
+                $html.='<li>'.esc_html(self::label($territory)).' — '.esc_html(self::label($type)).': <strong>'.esc_html((string)$n).'</strong></li>';
             }
             if ($sum!==$data['dated_reports_in_period']) throw new InvalidArgumentException('Mismatch between period and groups');
             $html.='</ul>';
