@@ -42,13 +42,17 @@ get_header();
       && BADAROUND_RADAR_PUBLIC_COUNTS_PREVIEW_ENABLED === true
       && is_user_logged_in() && current_user_can('manage_options')) {
       $ba_radar_files = array(
+          'class-badaround-intelligence-trends.php',
+          'class-badaround-intelligence-peak-candidates.php',
+          'class-badaround-intelligence-data-quality.php',
+          'class-badaround-radar-view-model.php',
+          'class-badaround-radar-canonical-adapter.php',
+          'class-badaround-radar-offline-bridge.php',
           'class-badaround-radar-public-counts.php',
           'class-badaround-radar-public-renderer.php',
       );
       $ba_radar_dir = WP_PLUGIN_DIR . '/badaround-core/includes/';
-      $ba_radar_ready = class_exists('BadAround_Radar_Offline_Bridge')
-          && class_exists('BadAround_Radar_Canonical_Adapter')
-          && class_exists('BadAround_Discovery_Query');
+      $ba_radar_ready = class_exists('BadAround_Discovery_Query');
       foreach ($ba_radar_files as $ba_radar_file) {
           if (!is_readable($ba_radar_dir . $ba_radar_file)) {
               $ba_radar_ready = false;
