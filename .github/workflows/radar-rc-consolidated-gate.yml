@@ -1,0 +1,48 @@
+name: Radar RC consolidated safety
+on:
+  push:
+    branches:
+      - qa/radar-rc-final-consolidation
+  pull_request:
+    branches:
+      - feature/radar-rc-snapshot-guard
+permissions:
+  contents: read
+jobs:
+  release-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: PHP regression suite
+        run: |
+          set -e
+          php -l wordpress/plugins/badaround-core/badaround-core.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-radar-private-qa.php
+          php tests/radar-rc-private-gate.php
+          php tests/radar-live-02-offline-bridge.php
+          php tests/radar-rc-coverage-copy.php
+          php tests/radar-rc-live-coverage-regression.php
+          php tests/radar-02d-integrated-pipeline.php
+      - name: Frozen approved theme and explicit opt-in verification
+        run: |
+          python3 - <<'PY'
+          import subprocess
+          from pathlib import Path
+          base='origin/reconcile/live-approved-2026-10-29'
+          changes=set(subprocess.check_output(['git','diff','--name-only',base,'HEAD','--','wordpress/'],text=True).splitlines())
+          assert not any(x.startswith('wordpress/themes/') for x in changes), 'Theme regression'
+          changed_existing={'wordpress/plugins/badaround-core/badaround-core.php'}
+          expected_new={f'wordpress/plugins/badaround-core/includes/class-badaround-{x}.php' for x in ['intelligence-trends','intelligence-peak-candidates','intelligence-data-quality','radar-canonical-adapter','radar-view-model','radar-offline-bridge','radar-private-qa']}
+          assert changes==changed_existing|expected_new, repr(changes^(changed_existing|expected_new))
+          boot=Path('wordpress/plugins/badaround-core/badaround-core.php').read_text()
+          assert "BADAROUND_RADAR_PRIVATE_QA_ENABLED" in boot
+          assert "=== true" in boot
+          print('RADAR RELEASE SCOPE AND OPT-IN: PASS')
+          PY

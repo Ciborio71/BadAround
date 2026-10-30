@@ -1,0 +1,25 @@
+name: Radar template preview opt-in safety
+on:
+  push:
+    branches:
+      - feature/radar-public-03-template-preview
+  pull_request:
+    branches:
+      - feature/radar-public-02-renderer
+permissions:
+  contents: read
+jobs:
+  template:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - run: |
+          php -l wordpress/themes/badaround-child/page-radar-demo.php
+          php -l tests/radar-public-03-template-preview.php
+          php tests/radar-public-03-template-preview.php
+          php tests/radar-public-02-renderer.php
+          php tests/radar-public-01-counts.php

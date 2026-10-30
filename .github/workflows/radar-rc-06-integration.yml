@@ -1,0 +1,38 @@
+name: RADAR RC06 integrated regression
+on:
+  push:
+    branches:
+      - release-candidate/radar-rc-06-integrated-20261030
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integrated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Integrated application syntax and regression
+        run: |
+          set -e
+          php -l wordpress/plugins/badaround-core/badaround-core.php
+          php -l wordpress/themes/badaround-child/page-radar-demo.php
+          for f in wordpress/plugins/badaround-core/includes/class-badaround-{intelligence-*,radar-*}.php; do php -l "$f"; done
+          for t in tests/radar-{rc-private-gate,live-02-offline-bridge,rc-coverage-copy,rc-live-coverage-regression,02d-integrated-pipeline,public-01-counts,public-02-renderer,public-03-template-preview,public-04-dependencies}.php; do php "$t"; done
+      - name: Approved live baseline scope
+        run: |
+          python3 - <<'PY'
+          import subprocess
+          root='origin/reconcile/live-approved-2026-10-29'
+          files=subprocess.check_output(['git','diff','--name-only',root,'HEAD','--','wordpress/'],text=True).splitlines()
+          expected={'wordpress/plugins/badaround-core/badaround-core.php','wordpress/themes/badaround-child/page-radar-demo.php'}
+          expected|={f'wordpress/plugins/badaround-core/includes/class-badaround-{x}.php' for x in ('intelligence-trends','intelligence-peak-candidates','intelligence-data-quality','radar-canonical-adapter','radar-offline-bridge','radar-private-qa','radar-public-counts','radar-public-renderer','radar-view-model')}
+          assert set(files)==expected,(set(files)^expected)
+          print('RC06 APPLICATION SCOPE PASS: '+str(len(files))+' expected files')
+          PY

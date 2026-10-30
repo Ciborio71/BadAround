@@ -1,0 +1,22 @@
+name: Radar public safe counts isolated
+on:
+  push:
+    branches:
+      - feature/radar-public-counts-safe-v1
+  pull_request:
+    branches:
+      - qa/radar-rc-final-consolidation
+permissions:
+  contents: read
+jobs:
+  counts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-radar-public-counts.php
+          php tests/radar-public-01-counts.php

@@ -34,7 +34,50 @@ get_header();
    <h2 id="rad-title">Panoramica territoriale</h2>
    <p id="rad-copy" role="status" aria-live="polite">Caricamento delle segnalazioni pubbliche…</p>
    
-   <div id="rad-reports" class="ba-radar-reports" aria-label="Problematiche segnalate nella zona"></div><p class="ba-radar-note ba-radar-final-note">Statistiche delle segnalazioni pubbliche della community, non dati ufficiali su reati o sicurezza. Le segnalazioni senza data sono escluse dai confronti temporali e le aree approssimate non identificano un punto esatto.</p>
+   <div id="rad-reports" class="ba-radar-reports" aria-label="Problematiche segnalate nella zona"></div>
+<?php
+  // RADAR-PUBLIC-03: administrator-only preview, no change to public behavior.
+  // Only explicitly opt-in on a server with the candidate Core modules installed.
+  if (defined('BADAROUND_RADAR_PUBLIC_COUNTS_PREVIEW_ENABLED')
+      && BADAROUND_RADAR_PUBLIC_COUNTS_PREVIEW_ENABLED === true
+      && is_user_logged_in() && current_user_can('manage_options')) {
+      $ba_radar_files = array(
+          'class-badaround-intelligence-trends.php',
+          'class-badaround-intelligence-peak-candidates.php',
+          'class-badaround-intelligence-data-quality.php',
+          'class-badaround-radar-view-model.php',
+          'class-badaround-radar-canonical-adapter.php',
+          'class-badaround-radar-offline-bridge.php',
+          'class-badaround-radar-public-counts.php',
+          'class-badaround-radar-public-renderer.php',
+      );
+      $ba_radar_dir = WP_PLUGIN_DIR . '/badaround-core/includes/';
+      $ba_radar_ready = class_exists('BadAround_Discovery_Query');
+      foreach ($ba_radar_files as $ba_radar_file) {
+          if (!is_readable($ba_radar_dir . $ba_radar_file)) {
+              $ba_radar_ready = false;
+              break;
+          }
+      }
+      if ($ba_radar_ready) {
+          foreach ($ba_radar_files as $ba_radar_file) {
+              require_once $ba_radar_dir . $ba_radar_file;
+          }
+          try {
+              $ba_radar_discovery = new BadAround_Discovery_Query();
+              $ba_radar_today = new DateTimeImmutable('today', wp_timezone());
+              $ba_radar_snapshot = BadAround_Radar_Offline_Bridge::snapshot($ba_radar_discovery, $ba_radar_today, 30);
+              $ba_radar_rows = BadAround_Radar_Canonical_Adapter::rows($ba_radar_discovery);
+              $ba_radar_public = BadAround_Radar_Public_Counts::present($ba_radar_rows, $ba_radar_snapshot['quality']);
+              echo '<div class="ba-radar-public-preview" aria-label="Anteprima riservata dei conteggi Radar">';
+              echo BadAround_Radar_Public_Renderer::render($ba_radar_public); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- renderer escapes validated fields.
+              echo '</div>';
+          } catch (Throwable $ba_radar_error) {
+              echo '<p role="status">Anteprima Radar non disponibile: verifica dei dati necessaria.</p>';
+          }
+      }
+  }
+?><p class="ba-radar-note ba-radar-final-note">Statistiche delle segnalazioni pubbliche della community, non dati ufficiali su reati o sicurezza. Le segnalazioni senza data sono escluse dai confronti temporali e le aree approssimate non identificano un punto esatto.</p>
    <a class="ba-radar-back" href="<?php echo esc_url(home_url('/mappa/')); ?>">Apri la mappa delle segnalazioni reali →</a>
   </aside>
  </div>

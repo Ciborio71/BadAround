@@ -1,0 +1,40 @@
+name: Radar RC private WordPress gate
+on:
+  push:
+    branches:
+      - release-candidate/radar-private-wordpress-qa-20261029
+  pull_request:
+    branches:
+      - feature/radar-live-runtime-bridge-disabled
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  private-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Lint and isolated invariants
+        run: |
+          php -l wordpress/plugins/badaround-core/badaround-core.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-radar-private-qa.php
+          php tests/radar-rc-private-gate.php
+          php tests/radar-live-02-offline-bridge.php
+      - name: Verify no public registration
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          qa=Path('wordpress/plugins/badaround-core/includes/class-badaround-radar-private-qa.php').read_text()
+          bootstrap=Path('wordpress/plugins/badaround-core/badaround-core.php').read_text()
+          assert "current_user_can('manage_options')" in qa
+          assert "add_management_page(" in qa
+          assert 'register_rest_route(' not in qa
+          assert 'BADAROUND_RADAR_PRIVATE_QA_ENABLED' in bootstrap
+          assert "=== true" in bootstrap
+          print('Private opt-in and no public endpoint: PASS')
+          PY

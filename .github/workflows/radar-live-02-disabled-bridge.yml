@@ -1,0 +1,25 @@
+name: Radar Live 02 disabled bridge checks
+on:
+  push:
+    branches:
+      - feature/radar-live-runtime-bridge-disabled
+  pull_request:
+    branches:
+      - integration/intelligence-radar-approved-baseline
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-radar-offline-bridge.php
+          php -l tests/radar-live-02-offline-bridge.php
+          php tests/radar-live-02-offline-bridge.php

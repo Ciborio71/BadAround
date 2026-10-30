@@ -1,0 +1,47 @@
+name: Approved baseline Radar integration preflight
+on:
+  push:
+    branches:
+      - integration/intelligence-radar-approved-baseline
+  pull_request:
+    branches:
+      - reconcile/live-approved-2026-10-29
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  safe-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Lint all new modules and run isolated integration
+        run: |
+          set -e
+          for file in wordpress/plugins/badaround-core/includes/class-badaround-intelligence-{trends,peak-candidates,data-quality}.php wordpress/plugins/badaround-core/includes/class-badaround-radar-{view-model,canonical-adapter}.php; do php -l "$file"; done
+          php tests/radar-02d-integrated-pipeline.php
+      - name: Guard approved application files
+        run: |
+          python3 - <<'PY'
+          import subprocess
+          base='origin/reconcile/live-approved-2026-10-29'
+          changed=set(subprocess.check_output(['git','diff','--name-only',base,'HEAD','--','wordpress/'],text=True).splitlines())
+          expected={f'wordpress/plugins/badaround-core/includes/class-badaround-{name}.php' for name in ['intelligence-trends','intelligence-peak-candidates','intelligence-data-quality','radar-view-model','radar-canonical-adapter']}
+          # This historical gate also runs for RC06 PRs targeting the baseline.
+          # Check the exact expanded scope instead of treating approved later modules as regressions.
+          import os
+          if os.environ.get('GITHUB_HEAD_REF')=='release-candidate/radar-rc-06-integrated-20261030':
+              expected|={'wordpress/plugins/badaround-core/badaround-core.php',
+                         'wordpress/themes/badaround-child/page-radar-demo.php'}
+              expected|={f'wordpress/plugins/badaround-core/includes/class-badaround-{name}.php'
+                         for name in ['radar-offline-bridge','radar-private-qa',
+                                      'radar-public-counts','radar-public-renderer']}
+          assert changed==expected, 'Unexpected application file modifications: '+repr(changed^expected)
+          print('APPROVED LIVE CODE PRESERVED: PASS')
+          PY
