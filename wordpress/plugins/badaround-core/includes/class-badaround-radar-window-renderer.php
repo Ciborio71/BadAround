@@ -5,8 +5,8 @@ final class BadAround_Radar_Window_Renderer {
     private static function label($slug) {
         $words = str_replace('-', ' ', $slug);
         return function_exists('mb_convert_case')
-            ? mb_convert_case($words, MB_CASE_TITLE, 'UTF-8')
-            : ucwords($words);
+            ? mb_strtoupper(mb_substr($words, 0, 1, 'UTF-8'), 'UTF-8') . mb_substr($words, 1, null, 'UTF-8')
+            : ucfirst($words);
     }
 
     public static function render(array $data) {
