@@ -1,0 +1,21 @@
+name: Radar public 06 window renderer
+on:
+  push:
+    branches:
+      - feature/radar-public-06-period-renderer
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-radar-window-renderer.php
+          php -l wordpress/themes/badaround-child/page-radar-demo.php
+          php tests/radar-public-05-window-counts.php
+          php tests/radar-public-06-window-renderer.php
