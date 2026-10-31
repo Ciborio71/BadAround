@@ -89,6 +89,7 @@ $home_categories = array(
 
 	<section class="ba-home-main ba-section--tight">
 		<div class="ba-container--wide">
+			<h2 class="ba-home-display-heading ba-home-display-heading--categories"><span>Cosa </span><span class="ba-home-display-heading__accent">Segnalare</span></h2>
 			<nav class="ba-home-categories" aria-label="Categorie principali">
 				<?php foreach ( $home_categories as $category ) : ?>
 					<a class="ba-home-category-card" href="<?php echo esc_url( add_query_arg( 'categoria', $category['slug'], home_url( '/segnalazioni/' ) ) ); ?>">
@@ -106,7 +107,7 @@ $home_categories = array(
 			</nav>
 
 			<div class="ba-home-sectionhead">
-				<h2>Segnalazioni vicino a te</h2>
+				<h2 class="ba-home-display-heading"><span>Ultime </span><span class="ba-home-display-heading__accent">Segnalazioni</span></h2>
 				<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Vedi tutte le segnalazioni <span aria-hidden="true">→</span></a>
 			</div>
 
@@ -183,7 +184,8 @@ $home_categories = array(
 							</span>
 							<span>Sentinella BadAround</span>
 						</div>
-						<h2>Vuoi aiutare a tenere d’occhio una zona?</h2>
+						<h2 class="ba-home-display-heading"><span>Diventa una </span><span class="ba-home-display-heading__accent">Sentinella</span></h2>
+						<p class="ba-home-sentinel__intro">Vuoi aiutare a tenere d’occhio una zona?</p>
 						<p>Diventa una <strong>Sentinella BadAround</strong>: ricevi aggiornamenti sulla zona che ti interessa e contribuisci alla community con segnalazioni e avvistamenti utili!</p>
 						<p class="ba-home-sentinel__privacy">La tua identità non viene resa pubblica.</p>
 						<a class="ba-button" href="<?php echo esc_url( home_url( '/sentinelle/' ) ); ?>">Attiva una Sentinella <span aria-hidden="true">→</span></a>
