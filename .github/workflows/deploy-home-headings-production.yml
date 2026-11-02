@@ -1,4 +1,4 @@
-name: Deploy HOME-HEADINGS-01 to production
+name: Deploy HOME-HEADINGS-03 spacing
 
 on:
   workflow_dispatch:
@@ -34,7 +34,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Validate script syntax
-        run: python3 -m py_compile .github/scripts/home_headings_live_patch.py
+        run: python3 -m py_compile .github/scripts/home_headings_03_spacing.py
       - name: Patch current live files (dry-run by default)
         env:
           FTP_HOST: "46.231.24.137"
@@ -42,4 +42,4 @@ jobs:
           FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
           DEPLOY_MODE: ${{ inputs.mode }}
           DEPLOY_CONFIRMATION: ${{ inputs.confirmation }}
-        run: python3 .github/scripts/home_headings_live_patch.py
+        run: python3 .github/scripts/home_headings_03_spacing.py
