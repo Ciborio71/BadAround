@@ -15,10 +15,10 @@ jobs:
     steps:
       - name: Verifica connessione e percorsi FTP
         env:
-          FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+          FTP_HOST: "46.231.24.137"
           FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
           FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
-          FTP_PORT: ${{ secrets.STAGING_SFTP_PORT }}
+          FTP_PORT: "21"
         run: |
           python3 - <<'PY'
           import os
