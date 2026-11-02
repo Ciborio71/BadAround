@@ -1,0 +1,71 @@
+
+name: BadAround - Verifica FTPS (sola lettura)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verifica-ftps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Verifica connessione e percorsi FTP
+        env:
+          FTP_HOST: ${{ secrets.STAGING_SFTP_HOST }}
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASS: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          FTP_PORT: ${{ secrets.STAGING_SFTP_PORT }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import ftplib
+          import sys
+
+          host = os.environ.get("FTP_HOST", "")
+          user = os.environ.get("FTP_USER", "")
+          password = os.environ.get("FTP_PASS", "")
+          port = int(os.environ.get("FTP_PORT") or "21")
+
+          if not all([host, user, password]):
+              sys.exit("ERRORE: Credenziali mancanti")
+
+          ftp = ftplib.FTP_TLS(timeout=20)
+
+          try:
+              ftp.connect(host, port)
+              ftp.login(user, password)
+              ftp.prot_p()
+
+              print("FTPS_CONNECTION=PASS")
+
+              root = ftp.pwd()
+              print("FTP_ROOT=" + root)
+
+              candidates = [
+                  "httpdocs/wp-content/themes/badaround-child",
+                  "/httpdocs/wp-content/themes/badaround-child",
+                  "wp-content/themes/badaround-child",
+                  "/wp-content/themes/badaround-child"
+              ]
+
+              for path in candidates:
+                  try:
+                      ftp.cwd(root)
+                      ftp.cwd(path)
+                      print("DIRECTORY_FOUND=" + path)
+                      print("RESOLVED_PATH=" + ftp.pwd())
+                  except ftplib.error_perm:
+                      print("DIRECTORY_NOT_FOUND=" + path)
+
+              print("READ_ONLY_CHECK=COMPLETE")
+
+          finally:
+              try:
+                  ftp.quit()
+              except Exception:
+                  ftp.close()
+          PY
