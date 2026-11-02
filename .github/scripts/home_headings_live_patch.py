@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Patch ONLY approved Home headings onto current production files via FTPS.
+"""HOME-HEADINGS-02: resize section headings and relocate Sentinel heading.
 
 Default dry run downloads and validates live content but never writes.
 Deploy mode requires an explicit GitHub Actions confirmation.
@@ -21,57 +21,44 @@ def replace_once(value, old, new, label):
     return value.replace(old, new, 1)
 
 def patch_php(source):
-    if "ba-home-display-heading" in source:
-        raise RuntimeError("Safety stop: headings already present or partially deployed")
+    heading = '<h2 class="ba-home-display-heading"><span>Diventa una </span><span class="ba-home-display-heading__accent">Sentinella</span></h2>'
+    if source.count(heading) != 1:
+        raise RuntimeError("Safety stop: existing Sentinel heading not found exactly once")
+
+    # Move the heading outside the colored Sentinel section, before the lower layout.
     source = replace_once(
         source,
-        '<nav class="ba-home-categories" aria-label="Categorie principali">',
-        '<h2 class="ba-home-display-heading ba-home-display-heading--categories"><span>Cosa </span><span class="ba-home-display-heading__accent">Segnalare</span></h2>\n\t\t\t<nav class="ba-home-categories" aria-label="Categorie principali">',
-        "categories insertion",
+        '\t\t\t<div class="ba-home-lower">',
+        '\t\t\t<h2 class="ba-home-display-heading ba-home-display-heading--sentinel">' +
+        '<span>Diventa una </span><span class="ba-home-display-heading__accent">Sentinella</span></h2>\\n' +
+        '\t\t\t<div class="ba-home-lower">',
+        "outside Sentinel box",
     )
-    source = replace_once(
-        source,
-        '<h2>Segnalazioni vicino a te</h2>',
-        '<h2 class="ba-home-display-heading"><span>Ultime </span><span class="ba-home-display-heading__accent">Segnalazioni</span></h2>',
-        "recent heading",
-    )
-    source = replace_once(
-        source,
-        '<h2>Vuoi aiutare a tenere d’occhio una zona?</h2>',
-        '<h2 class="ba-home-display-heading"><span>Diventa una </span><span class="ba-home-display-heading__accent">Sentinella</span></h2>\n\t\t\t\t<p class="ba-home-sentinel__intro">Vuoi aiutare a tenere d’occhio una zona?</p>',
-        "sentinel heading",
-    )
+    source = replace_once(source, heading + '\\n', '', "remove heading within Sentinel box")
+    if source.count('ba-home-display-heading--sentinel') != 1 or source.count(heading) != 0:
+        raise RuntimeError("Safety stop: heading relocation invariant failed")
     return source
 
-STYLE = """
-/* HOME-HEADINGS-01 — section headings aligned with the homepage wordmark. */
-.ba-home .ba-home-display-heading {
-  margin:0;
-  color:var(--ba-navy-950);
-  font-size:clamp(3rem,5vw,5rem);
-  font-weight:800;
-  line-height:.98;
-  letter-spacing:-.055em;
-  overflow-wrap:break-word;
-}
-.ba-home .ba-home-display-heading__accent { color:var(--ba-teal-600); }
-.ba-home .ba-home-display-heading--categories { margin:0 0 22px; }
-.ba-home .ba-home-sentinel__intro { font-weight:700; }
-@media (max-width:900px) {
-  .ba-home .ba-home-display-heading { font-size:clamp(2.25rem,6vw,4rem); }
-  .ba-home .ba-home-sectionhead { flex-wrap:wrap; align-items:flex-start; }
-}
-@media (max-width:560px) {
-  .ba-home .ba-home-display-heading { font-size:clamp(2rem,8vw,3rem); }
-}
-"""
+OLD_STYLE = """font-size:clamp(3rem,5vw,5rem);"""
+NEW_STYLE = """font-size:clamp(2rem,5vw,63px);"""
 
 def patch_css(source):
-    if "HOME-HEADINGS-01" in source or ".ba-home-display-heading" in source:
-        raise RuntimeError("Safety stop: heading stylesheet already present")
-    if ".ba-home-hero__content h1" not in source:
-        raise RuntimeError("Safety stop: expected live homepage CSS not found")
-    return source.rstrip() + "\n" + STYLE
+    if source.count("/* HOME-HEADINGS-01 — section headings aligned with the homepage wordmark. */") != 1:
+        raise RuntimeError("Safety stop: previously deployed section CSS missing")
+    # Strictly target the section heading rule; do not touch the H1 wordmark 80px.
+    match = re.search(r"(\\.ba-home \\.ba-home-display-heading \\{)(.*?)(\\n\\})", source, re.S)
+    if not match:
+        raise RuntimeError("Safety stop: heading style declaration missing")
+    block = match.group(2)
+    if block.count(OLD_STYLE) != 1:
+        raise RuntimeError("Safety stop: expected old section heading size missing")
+    updated_block = block.replace(OLD_STYLE, NEW_STYLE, 1)
+    source = source[:match.start(2)] + updated_block + source[match.end(2):]
+    # Sentinel heading now sits outside the panel; give it the same spacing as categories.
+    if ".ba-home .ba-home-display-heading--sentinel" in source:
+        raise RuntimeError("Safety stop: Sentinel layout adjustment already present")
+    source += "\\n.ba-home .ba-home-display-heading--sentinel { margin:0 0 22px; }\\n"
+    return source
 
 def retrieve(ftp, path):
     output = io.BytesIO()
