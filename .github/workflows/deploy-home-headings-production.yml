@@ -1,0 +1,80 @@
+name: Deploy HOME-HEADINGS-01 to production
+
+on:
+  workflow_dispatch:
+    inputs:
+      git_ref:
+        description: "Git ref to deploy"
+        required: true
+        default: "feature/home-headings-01-20261031"
+      confirmation:
+        description: "Type DEPLOY to continue"
+        required: true
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: badaround-home-headings-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ inputs.confirmation == 'DEPLOY' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout selected ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_ref }}
+
+      - name: Validate local files and expected headings
+        run: |
+          test -f wordpress/themes/badaround-child/front-page.php
+          test -f wordpress/themes/badaround-child/assets/css/home.css
+          grep -q 'Cosa </span><span class="ba-home-display-heading__accent">Segnalare' wordpress/themes/badaround-child/front-page.php
+          grep -q 'Ultime </span><span class="ba-home-display-heading__accent">Segnalazioni' wordpress/themes/badaround-child/front-page.php
+          grep -q 'Diventa una </span><span class="ba-home-display-heading__accent">Sentinella' wordpress/themes/badaround-child/front-page.php
+          grep -q 'ba-home-display-heading' wordpress/themes/badaround-child/assets/css/home.css
+
+      - name: Install lftp
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp
+
+      - name: Deploy front-page.php and home.css only
+        env:
+          FTP_HOST: 46.231.24.137
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          FTP_PORT: ${{ secrets.STAGING_SFTP_PORT }}
+        run: |
+          lftp -e "
+          set cmd:fail-exit yes;
+          set ftp:ssl-force true;
+          set ftp:ssl-protect-data true;
+          set ssl:verify-certificate no;
+          open -u \"$FTP_USER\",\"$FTP_PASSWORD\" -p \"$FTP_PORT\" \"$FTP_HOST\";
+          put -O /httpdocs/wp-content/themes/badaround-child wordpress/themes/badaround-child/front-page.php;
+          put -O /httpdocs/wp-content/themes/badaround-child/assets/css wordpress/themes/badaround-child/assets/css/home.css;
+          bye"
+
+      - name: Remote listing after deploy
+        env:
+          FTP_HOST: 46.231.24.137
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          FTP_PORT: ${{ secrets.STAGING_SFTP_PORT }}
+        run: |
+          lftp -e "
+          set cmd:fail-exit yes;
+          set ftp:ssl-force true;
+          set ftp:ssl-protect-data true;
+          set ssl:verify-certificate no;
+          open -u \"$FTP_USER\",\"$FTP_PASSWORD\" -p \"$FTP_PORT\" \"$FTP_HOST\";
+          cls -l /httpdocs/wp-content/themes/badaround-child/front-page.php;
+          cls -l /httpdocs/wp-content/themes/badaround-child/assets/css/home.css;
+          bye"
