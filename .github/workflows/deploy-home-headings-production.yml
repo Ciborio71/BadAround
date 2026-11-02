@@ -40,6 +40,11 @@ jobs:
           grep -q 'Diventa una </span><span class="ba-home-display-heading__accent">Sentinella' wordpress/themes/badaround-child/front-page.php
           grep -q 'ba-home-display-heading' wordpress/themes/badaround-child/assets/css/home.css
 
+      - name: Safety stop — historical theme files must not overwrite live production
+        run: |
+          echo "::error::Deployment blocked: GitHub theme files are not synchronized with the approved live baseline. Use a live-file patch and verified rollback instead."
+          exit 1
+
       - name: Install lftp
         run: |
           sudo apt-get update
