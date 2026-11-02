@@ -30,23 +30,23 @@ def patch_php(source):
         source,
         '\t\t\t<div class="ba-home-lower">',
         '\t\t\t<h2 class="ba-home-display-heading ba-home-display-heading--sentinel">' +
-        '<span>Diventa una </span><span class="ba-home-display-heading__accent">Sentinella</span></h2>\\n' +
+        '<span>Diventa una </span><span class="ba-home-display-heading__accent">Sentinella</span></h2>\n' +
         '\t\t\t<div class="ba-home-lower">',
         "outside Sentinel box",
     )
-    source = replace_once(source, heading + '\\n', '', "remove heading within Sentinel box")
+    source = replace_once(source, heading + '\n', '', "remove heading within Sentinel box")
     if source.count('ba-home-display-heading--sentinel') != 1 or source.count(heading) != 0:
         raise RuntimeError("Safety stop: heading relocation invariant failed")
     return source
 
 OLD_STYLE = """font-size:clamp(3rem,5vw,5rem);"""
-NEW_STYLE = """font-size:clamp(2rem,5vw,63px);"""
+NEW_STYLE = """font-size:63px;"""
 
 def patch_css(source):
     if source.count("/* HOME-HEADINGS-01 — section headings aligned with the homepage wordmark. */") != 1:
         raise RuntimeError("Safety stop: previously deployed section CSS missing")
     # Strictly target the section heading rule; do not touch the H1 wordmark 80px.
-    match = re.search(r"(\\.ba-home \\.ba-home-display-heading \\{)(.*?)(\\n\\})", source, re.S)
+    match = re.search(r"(\.ba-home \.ba-home-display-heading \{)(.*?)(\n\})", source, re.S)
     if not match:
         raise RuntimeError("Safety stop: heading style declaration missing")
     block = match.group(2)
@@ -57,7 +57,7 @@ def patch_css(source):
     # Sentinel heading now sits outside the panel; give it the same spacing as categories.
     if ".ba-home .ba-home-display-heading--sentinel" in source:
         raise RuntimeError("Safety stop: Sentinel layout adjustment already present")
-    source += "\\n.ba-home .ba-home-display-heading--sentinel { margin:0 0 22px; }\\n"
+    source += "\n.ba-home .ba-home-display-heading--sentinel { margin:0 0 22px; }\n"
     return source
 
 def retrieve(ftp, path):
