@@ -1,0 +1,22 @@
+name: BadAround - Verifica rete (sola lettura)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: TCP connectivity only (no authentication or writes)
+        run: |
+          python3 - <<'PY'
+          import socket
+          host = '46.231.24.137'
+          for port in (21, 22):
+              try:
+                  with socket.create_connection((host,port),timeout=8):
+                      print(f'TCP_PORT_{port}=OPEN')
+              except OSError as exc:
+                  print(f'TCP_PORT_{port}=UNREACHABLE ({type(exc).__name__})')
+          PY
