@@ -38,7 +38,7 @@ final class BadAround_Identity_WordPress_Portal {
         // External JavaScript only. Do not inline tokens, WP nonces, email,
         // raw passwordless bearer secrets or user profile data.
         $script=plugins_url('identity-dormant/identity-portal.js',BADAROUND_CORE_FILE);
-        wp_enqueue_script('badaround-identity-portal',$script,[], '0.1.0',true);
+        wp_enqueue_script('badaround-identity-portal',$script,[], '0.2.0',true);
         $privacy=esc_url(home_url('/privacy-policy/'));
         return '<section class="ba-identity-portal" data-ba-identity-portal aria-label="Accesso BadAround">'
             . '<h2>Accedi a BadAround</h2>'
@@ -64,6 +64,12 @@ final class BadAround_Identity_WordPress_Portal {
             . 'autocomplete="one-time-code" minlength="8" maxlength="8" required></label>'
             . '<button type="submit">Verifica</button>'
             . '</form>'
+            . '<section data-ba-activity hidden aria-labelledby="ba-identity-my-activity-title">'
+            . '<h3 id="ba-identity-my-activity-title">Le mie attività</h3>'
+            . '<p>Stato delle tue richieste di commento e modifica.</p>'
+            . '<button type="button" data-ba-refresh-activity>Aggiorna attività</button>'
+            . '<ul data-ba-activity-list></ul>'
+            . '</section>'
             . '<button type="button" data-ba-logout hidden>Esci</button>'
             . '</section>';
     }
