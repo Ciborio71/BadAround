@@ -35,3 +35,13 @@ Validate the newly added disposable-MySQL CI service and two-worker race test; t
 - Added negative tests for missing/expired/revoked sessions, cross-origin and malformed Origin, other-resource and other-identity attempts.
 - **The ownership record is explicitly server-loaded by contract; no request-provided ownership may be trusted.**
 - These are isolated policy tests, **not WordPress endpoint integration tests**. CI status still requires inspection.
+
+## Coordinator OTP → session (2026-11-03)
+
+- Added `verification-coordinator.php` and deterministic tests. It resolves an **existing, verified, non-revoked identity** from a trusted server-side email HMAC; rejects unknown identity before OTP consumption.
+- Requires successful **atomic** OTP consumption, rechecks verified identity, then creates a session. An OTP cannot issue a second session.
+- No HTTP response, cookie, WordPress login, email message, plugin bootstrap, or database migration is included. Caller must attach cookie after session persistence.
+- This is intentionally NOT the first-time identity enrollment flow: collecting mandatory name/surname/email, checking consent, sending OTP and creating the verified identity require separate privacy/atomicity work.
+- Future production coordinator must handle the race between verified-identity revocation and session creation with a transactional/locking strategy, plus session revocation on identity revocation.
+- A session issuance failure after OTP consumption requires a new OTP; do not retry the same consumed credential.
+- Fixed malformed extension-check command in GitHub Actions MySQL job; job execution results are **not confirmed** from connector.
