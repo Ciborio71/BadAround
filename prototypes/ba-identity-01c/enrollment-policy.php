@@ -63,8 +63,16 @@ final class BadAround_Identity_Enrollment {
             )) {
             throw new InvalidArgumentException('Invalid challenge metadata');
         }
-        // The lookup must match the validated email. The delivery coordinator
-        // must separately enforce expiry, quotas and purpose binding.
+        // Never stage against a fabricated or expired client-supplied challenge.
+        $stored = $this->challenges->load($challengeId);
+        if (!$stored || ($stored['email_lookup'] ?? null) !== $lookup
+            || ($stored['challenge_id'] ?? null) !== $challengeId
+            || ($stored['consumed_at'] ?? null) !== null
+            || !isset($stored['expires_at']) || $now >= (int)$stored['expires_at']) {
+            throw new InvalidArgumentException('Challenge unavailable for enrollment');
+        }
+        // Delivery coordinator must separately enforce rate limits,
+        // challenge purpose, privacy retention and consent validation.
         $this->enrollments->create_pending([
             'challenge_id'=>$challengeId,
             'email_lookup'=>$lookup,
