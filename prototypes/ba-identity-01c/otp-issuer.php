@@ -15,6 +15,8 @@ interface BadAround_Identity_Issue_Quota {
 interface BadAround_Identity_Challenge_Writer {
     /** Atomic unique insert, MUST NOT retain delivery_code or raw email. */
     public function insert(array $record): void;
+    /** Make a persisted but undelivered challenge unusable immediately. */
+    public function invalidate(string $challengeId, int $now): void;
 }
 
 interface BadAround_Identity_Otp_Transport {
@@ -65,7 +67,8 @@ final class BadAround_Identity_Otp_Issuer {
             );
             $this->writer->insert($created['record']);
             if (!$this->transport->send_code($normalized,$created['delivery_code'],$purpose)) {
-                return null; // unusable unsent challenge expires; cleanup by TTL
+                $this->writer->invalidate($created['record']['challenge_id'], $now);
+                return null;
             }
             return $created['record']['challenge_id'];
         } catch (Throwable $e) {
