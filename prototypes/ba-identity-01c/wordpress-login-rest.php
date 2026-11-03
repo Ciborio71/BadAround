@@ -78,16 +78,21 @@ final class BadAround_Identity_WordPress_Login_REST {
         if ($body===null) { return $this->error(403); }
         // Generic receipt even if email is unknown, malformed, throttled or
         // mail delivery is unavailable; never expose raw challenge or code.
+        $challengeId=bin2hex(random_bytes(16)); // indistinguishable decoy on every failure
         try {
             $email=$body['email']??null;
             if (is_string($email) && strlen($email)<=191) {
                 $ip=$_SERVER['REMOTE_ADDR']??'';
                 if (is_string($ip) && filter_var($ip,FILTER_VALIDATE_IP)) {
-                    $this->issuer->issue($email,'login',$ip,time());
+                    $issued=$this->issuer->issue($email,'login',$ip,time());
+                    if (is_string($issued) && preg_match('/^[a-f0-9]{32}$/D',$issued)) {
+                        $challengeId=$issued;
+                    }
                 }
             }
         } catch(Throwable $error) {}
-        return $this->response(['ok'=>true,'message'=>'Se il recapito è valido, riceverai istruzioni di accesso.']);
+        return $this->response(['ok'=>true,'challenge_id'=>$challengeId,
+            'message'=>'Se il recapito è valido, riceverai istruzioni di accesso.']);
     }
     public function verify($request) {
         $body=$this->accepted($request);
