@@ -53,7 +53,10 @@ final class BadAround_Identity_Mysql_Ownership_Recovery_Store {
     /** Optimistic CAS: last writer cannot overwrite a resolved request. */
     public function transition(string $operationId,int $expectedRevision,string $outcome,int $now): bool {
         $old=$this->load($operationId);
-        if ($old===null || $old['revision']!==$expectedRevision) { return false; }
+        if ($old===null || $old['revision']!==$expectedRevision
+            || $old['state']!==BadAround_Identity_Ownership_Recovery_Policy::PENDING) {
+            return false;
+        }
         $next=BadAround_Identity_Ownership_Recovery_Policy::transition($old,$outcome,$now);
         $stmt=$this->db->prepare("UPDATE `{$this->table}`
             SET state=:state,attempts=:attempts,resolved_at=:resolved,revision=revision+1
