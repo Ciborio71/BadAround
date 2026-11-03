@@ -87,3 +87,12 @@ Validate the newly added disposable-MySQL CI service and two-worker race test; t
 - **Release blocker:** `grant_creator()` is NOT an end-user endpoint. The caller must prove the identity is verified and associate ownership in the same controlled transaction that creates the report/comment. A future production adapter also needs owner revocation policies and per-resource authorizations.
 - The current implementation is isolated prototype code. No installed WordPress plugin includes or DB changes were made.
 - **GitHub CI:** workflow definitions have been updated, but live run results remain unverified because the available connector does not list push-triggered workflow run statuses. Do not merge or deploy without logs from both jobs.
+
+## 01D pre-integration tranche — 2026-11-03
+
+- Production source was read-only inspected: actual live intake is `BadAround_Report_Intake_Service::ingest`, with idempotent `report_id/event_id/duplicate` receipt; public contribution REST route is already operational, with email required but not approved first+last name and only 2 public display modes; email transport is existing `BadAround_Transactional_Mailer`. See `docs/BA-IDENTITY-01D-live-core-integration-gates.md`.
+- New `mysql-rate-limiter.php`: transactional fixed-window rate budget, purpose + opaque email/IP HMAC buckets, no raw PII in the table. Caller MUST derive client IP from a trusted origin and fail closed when database unavailable. Test covers limits, dimensions and resets; the real email sender is NOT wired.
+- New `post-intake-binder.php`: isolated boundary for **server-trusted canonical intake receipts**; refuses duplicates, wrong resource/event pair, unknown identity and second grants. A caller still MUST prove a verified session, and handle rollback/outbox across WordPress persistence and separate ownership storage. Tests use fixtures, not production APIs.
+- New `test-post-intake-binder.php`, `test-mysql-rate-limiter.php`, updated CI and review-only DDL.
+- **Release gates still open:** observed green CI, separate challenge purpose and per-IP/email quota wiring, transactional or recoverable ownership linkage after live intake, private review/moderation workflow for edits, revised mandatory name/surname/email on contributions and comments, public identity display modes, real session cookie/CSRF controllers, revocation, encrypted PII retention/deletion, WP live Core diff and explicit deploy authorization.
+- Absolutely no plugin bootstrap, production schema migration, live reset or deploy performed.
