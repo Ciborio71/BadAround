@@ -32,7 +32,7 @@ final class BadAround_Identity_WordPress_Session_REST {
     public function routes():void {
         if (!self::enabled() || !function_exists('register_rest_route')) {return;}
         register_rest_route('badaround/v1','/identity/session',[
-            'methods'=>'GET','callback'=>[$this,'session'],
+            'methods'=>'POST','callback'=>[$this,'session'],
             'permission_callback'=>'__return_true'
         ]);
         register_rest_route('badaround/v1','/identity/logout',[
