@@ -37,6 +37,8 @@ jobs:
           php -l prototypes/ba-identity-01c/mysql-enrollment-store.php
           php -l prototypes/ba-identity-01c/test-mysql-enrollment.php
           php -l prototypes/ba-identity-01c/test-mysql-enrollment-race.php
+          php -l prototypes/ba-identity-01c/mysql-ownership-store.php
+          php -l prototypes/ba-identity-01c/test-mysql-ownership.php
       - name: OTP state machine tests
         run: |
           php prototypes/ba-identity-01c/test-challenge-primitives.php
@@ -79,3 +81,4 @@ jobs:
           php prototypes/ba-identity-01c/test-mysql-concurrency.php
           php prototypes/ba-identity-01c/test-mysql-enrollment.php
           php prototypes/ba-identity-01c/test-mysql-enrollment-race.php
+          php prototypes/ba-identity-01c/test-mysql-ownership.php
