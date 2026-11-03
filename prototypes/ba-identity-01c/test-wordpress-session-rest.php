@@ -42,7 +42,7 @@ $controller=new BadAround_Identity_WordPress_Session_REST(
 sid_assert($controller->register_hooks() && $GLOBALS['sid_hook']==='rest_api_init',
     'explicit login flag registers session routes');
 $controller->routes();
-sid_assert(count($GLOBALS['sid_routes'])===2,'GET session and POST logout only');
+sid_assert(count($GLOBALS['sid_routes'])===2,'POST session recovery and POST logout only');
 $headers=['origin'=>'https://badaround.it','sec-fetch-site'=>'same-origin'];
 $state=$controller->session(new SidRequest($headers));
 sid_assert(($state['authenticated']??false)===true && isset($state['csrf'])
