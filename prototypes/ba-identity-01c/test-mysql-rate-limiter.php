@@ -1,7 +1,7 @@
 <?php
 /** Disposable MySQL only; test separate email/IP budgets and new windows. */
 declare(strict_types=1);
-require __DIR__ . '/mysql-rate-limiter.php';
+require __DIR__ . '/otp-adapters.php';
 $dsn=(string)getenv('BA_TEST_DB_DSN');
 if (!preg_match('/(?:^|;)dbname=ba_identity_ci(?:;|$)/',$dsn)) {
     throw new RuntimeException('Refusing non-CI database');
@@ -32,4 +32,17 @@ if (!$limiter->consume('login',$other,$now,3,900)) { throw new RuntimeException(
 if (!$limiter->consume('login',$ip,$now,3,900)) { throw new RuntimeException('Independent IP budget denied'); }
 if (!$limiter->consume('login',$bucket,$now+900,3,900)) { throw new RuntimeException('Window not reset'); }
 if (!$limiter->consume('enrollment',$bucket,$now,3,900)) { throw new RuntimeException('Purpose budget not independent'); }
+$issuanceQuota = new BadAround_Identity_Issuance_Quota_Adapter($limiter,$key);
+$lookup = BadAround_Identity_Challenge_Primitives::digest('email','lookup','quota@example.com',$key);
+for ($i=0; $i<3; ++$i) {
+    if (!$issuanceQuota->allow('enrollment',$lookup,'192.0.2.10',$now)) {
+        throw new RuntimeException('Combined email/IP quota unexpectedly denied');
+    }
+}
+if ($issuanceQuota->allow('enrollment',$lookup,'192.0.2.10',$now)) {
+    throw new RuntimeException('Combined quota allowed fourth email OTP');
+}
+if ($issuanceQuota->allow('enrollment','malformed','192.0.2.10',$now)) {
+    throw new RuntimeException('Invalid email lookup accepted');
+}
 echo "ALL_MYSQL_RATE_LIMIT_TESTS_PASS\n";
