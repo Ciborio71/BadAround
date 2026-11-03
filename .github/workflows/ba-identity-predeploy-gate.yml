@@ -22,5 +22,5 @@ jobs:
         run: python3 prototypes/ba-identity-01c/predeploy-gate.py
       - name: Report non-deployable state
         run: |
-          echo "Identity prototype is not deployable to production or staging."
-          echo "Approval requires checked live Core source, accessible staging, migration and rollback."
+          echo "Identity prototype is not yet deployable to production."
+          echo "Production-first approved; staging bypassed. Deployment still requires live Core parity, migration, rollback, runtime and QA gates."
