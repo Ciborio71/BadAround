@@ -65,6 +65,14 @@ $service->stage($profile,$c2['record'],$now);
 if ($service->verify_and_activate($c2['record']['challenge_id'],$c2['delivery_code'],$now+4)!==null) {
     throw new RuntimeException('Duplicate verified email must fail');
 }
+$rejectedChallenge = $challengeStore->load($c2['record']['challenge_id']);
+if ($rejectedChallenge['consumed_at'] !== null || $rejectedChallenge['attempts'] !== 0) {
+    throw new RuntimeException('Failed enrollment must rollback OTP consumption');
+}
+$first = $challengeStore->load($c['record']['challenge_id']);
+if ($first['consumed_at'] !== $now+2 || $first['attempts'] !== 2) {
+    throw new RuntimeException('Successful activation must commit OTP once');
+}
 $count=(int)$db->query('SELECT COUNT(*) FROM ba_identities_ci')->fetchColumn();
 if ($count!==1) { throw new RuntimeException('Expected one identity'); }
 echo "ALL_MYSQL_ENROLLMENT_TESTS_PASS\n";
