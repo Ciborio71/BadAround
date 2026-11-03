@@ -54,3 +54,12 @@ Validate the newly added disposable-MySQL CI service and two-worker race test; t
 - Existing login coordinator currently handles already verified identities only; do not treat the two prototype components as a complete public enrollment/login endpoint.
 - OTP purpose separation (login vs new enrollment), atomic identity activation and session issuance, email delivery, rate limits and revocation transactions remain explicit release blockers.
 - GitHub Actions was extended to lint/test enrollment; **pass/fail must still be checked**. No merge/deploy until a controlled integration review.
+
+## MySQL encrypted enrollment adapter (2026-11-03)
+
+- Added `mysql-enrollment-store.php`, which persists pending private profile fields encrypted with AES-256-GCM and creates one verified identity using an InnoDB transaction and a UNIQUE indexed email HMAC.
+- Added `test-mysql-enrollment.php` in disposable CI database. Covers encrypted pending storage, invalid OTP rejection, one-time activation, replay rejection, and duplicate verified-email rejection. More real concurrent enrollment and crash/recovery tests are still necessary.
+- Enrollment staging now requires a stored, matching, unconsumed and unexpired OTP challenge; fabricated challenge records cannot stage a profile.
+- Added a **review-only** draft of pending/identity schemas. No migration is shipped and no public WordPress handler is registered.
+- **Release blockers:** OTP consumption and identity activation are still in separate transactions and a crash can consume an OTP before activation. The final implementation must use a single database transaction or explicit recovery-safe state machine. The active-identity record currently contains encrypted PII, but key management/rotation, retention, consent proof, and deletion mechanisms are not implemented.
+- The draft CI workflow's MySQL job was reconstructed after malformed commands were found. **Do not assert CI success until GitHub run logs show passing tests.**
