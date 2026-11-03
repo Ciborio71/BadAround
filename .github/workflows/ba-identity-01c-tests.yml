@@ -82,6 +82,8 @@ jobs:
           php -l prototypes/ba-identity-01c/wordpress-community-rest-adapter.php
           php -l prototypes/ba-identity-01c/test-wordpress-community-rest-off.php
           php -l prototypes/ba-identity-01c/test-wordpress-community-rest-enabled.php
+          php -l prototypes/ba-identity-01c/mysql-community-budget.php
+          php -l prototypes/ba-identity-01c/test-mysql-community-budget.php
       - name: OTP state machine tests
         run: |
           php prototypes/ba-identity-01c/test-challenge-primitives.php
@@ -150,3 +152,4 @@ jobs:
           php prototypes/ba-identity-01c/test-wordpress-authority.php
           php prototypes/ba-identity-01c/test-mysql-wp-actor-binding.php
           php prototypes/ba-identity-01c/test-schema-candidate.php
+          php prototypes/ba-identity-01c/test-mysql-community-budget.php
