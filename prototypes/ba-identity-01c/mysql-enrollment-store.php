@@ -179,44 +179,10 @@ final class BadAround_Identity_Mysql_Enrollment_Store implements BadAround_Ident
     }
 
     /**
-     * Atomic activation within this database: lock pending row, verify unused,
-     * insert identity with UNIQUE email_lookup, mark consumed, then commit.
-     * OTP is consumed separately by the verifier before this transaction.
+     * Legacy two-phase activation is forbidden for MySQL. Always use
+     * verify_and_activate_atomic(), which owns the challenge transaction.
      */
     public function activate_once(string $challengeId, string $emailLookup, int $verifiedAt): ?string {
-        $this->pdo->beginTransaction();
-        try {
-            $query = $this->pdo->prepare("SELECT email_lookup,protected_profile,verified_at
-                FROM `{$this->pendingTable}` WHERE challenge_id=:id FOR UPDATE");
-            $query->execute([':id'=>$challengeId]);
-            $pending = $query->fetch(PDO::FETCH_ASSOC);
-            if (!$pending || $pending['verified_at'] !== null
-                || !hash_equals($pending['email_lookup'], $emailLookup)) {
-                $this->pdo->rollBack();
-                return null;
-            }
-            $id = 'identity_' . bin2hex(random_bytes(16));
-            $insert = $this->pdo->prepare("INSERT INTO `{$this->identityTable}`
-                (identity_id,email_lookup,protected_profile,verified_at,revoked_at)
-                VALUES (:id,:lookup,:profile,:verified,NULL)");
-            $insert->execute([
-                ':id'=>$id, ':lookup'=>$emailLookup,
-                ':profile'=>$pending['protected_profile'], ':verified'=>$verifiedAt
-            ]);
-            $update = $this->pdo->prepare("UPDATE `{$this->pendingTable}`
-                SET verified_at=:verified WHERE challenge_id=:id AND verified_at IS NULL");
-            $update->execute([':verified'=>$verifiedAt, ':id'=>$challengeId]);
-            if ($update->rowCount() !== 1) { throw new RuntimeException('Activation race'); }
-            $this->pdo->commit();
-            return $id;
-        } catch (PDOException $e) {
-            if ($this->pdo->inTransaction()) { $this->pdo->rollBack(); }
-            // Duplicate verified email or identity id: fail closed, never reassign.
-            if ($e->getCode() === '23000') { return null; }
-            throw $e;
-        } catch (Throwable $e) {
-            if ($this->pdo->inTransaction()) { $this->pdo->rollBack(); }
-            throw $e;
-        }
+        throw new LogicException('Use atomic verification and activation');
     }
 }
