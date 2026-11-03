@@ -25,8 +25,9 @@ assert_case($verifier->verify($id, $code, $now + 3) === 'invalid', 'reject secon
 assert_case($verifier->verify('not-a-valid-id', $code, $now + 3) === 'invalid', 'invalid ID fails closed');
 $another = BadAround_Identity_Challenge_Primitives::new_challenge('member@example.com', $key, $now);
 $store->insert($another['record']);
+$wrongCode = $another['delivery_code'] === '88888888' ? '77777777' : '88888888';
 for ($i = 0; $i < 5; $i++) {
-    assert_case($verifier->verify($another['record']['challenge_id'], '88888888', $now + 2) === 'invalid', 'bad OTP rejected');
+    assert_case($verifier->verify($another['record']['challenge_id'], $wrongCode, $now + 2) === 'invalid', 'bad OTP rejected');
 }
 assert_case($verifier->verify($another['record']['challenge_id'], $another['delivery_code'], $now + 3) === 'invalid', 'locked after 5 attempts');
 $third = BadAround_Identity_Challenge_Primitives::new_challenge('member@example.com', $key, $now, 60);
