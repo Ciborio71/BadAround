@@ -73,6 +73,8 @@ jobs:
           php -l prototypes/ba-identity-01c/community-gateway.php
           php -l prototypes/ba-identity-01c/test-community-gateway.php
           php -l prototypes/ba-identity-01c/test-gateway-mysql-e2e.php
+          php -l prototypes/ba-identity-01c/wordpress-authority.php
+          php -l prototypes/ba-identity-01c/test-wordpress-authority.php
       - name: OTP state machine tests
         run: |
           php prototypes/ba-identity-01c/test-challenge-primitives.php
@@ -136,3 +138,4 @@ jobs:
           php prototypes/ba-identity-01c/test-mysql-ownership-recovery.php
           php prototypes/ba-identity-01c/test-mysql-moderation-inbox.php
           php prototypes/ba-identity-01c/test-gateway-mysql-e2e.php
+          php prototypes/ba-identity-01c/test-wordpress-authority.php
