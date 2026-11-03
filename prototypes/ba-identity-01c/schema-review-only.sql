@@ -50,3 +50,29 @@ CREATE TABLE ba_identities_ci (
   verified_at BIGINT UNSIGNED NOT NULL,
   revoked_at BIGINT UNSIGNED NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- CI-only proposed rate-limit table, never production DDL.
+-- Prune expired windows with audited retention schedule.
+CREATE TABLE ba_identity_rate_ci (
+  purpose VARCHAR(24) NOT NULL,
+  bucket CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  window_start BIGINT UNSIGNED NOT NULL,
+  hits INT UNSIGNED NOT NULL DEFAULT 0,
+  expires_at BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY (purpose,bucket,window_start),
+  KEY idx_expires (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Explicit creator binding (review-only), UNIQUE resource prevents takeover.
+-- No email matching can grant ownership. WordPress intake transaction/recovery
+-- remains an integration requirement.
+CREATE TABLE ba_identity_ownership_ci (
+  identity_id VARCHAR(128) NOT NULL,
+  resource_kind VARCHAR(32) NOT NULL,
+  resource_id BIGINT UNSIGNED NOT NULL,
+  relation VARCHAR(32) NOT NULL,
+  verified_binding_at BIGINT UNSIGNED NOT NULL,
+  revoked_at BIGINT UNSIGNED NULL,
+  UNIQUE KEY uq_resource (resource_kind,resource_id),
+  KEY idx_identity (identity_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
