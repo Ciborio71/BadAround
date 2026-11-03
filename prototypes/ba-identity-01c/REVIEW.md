@@ -61,5 +61,14 @@ Validate the newly added disposable-MySQL CI service and two-worker race test; t
 - Added `test-mysql-enrollment.php` in disposable CI database. Covers encrypted pending storage, invalid OTP rejection, one-time activation, replay rejection, and duplicate verified-email rejection. More real concurrent enrollment and crash/recovery tests are still necessary.
 - Enrollment staging now requires a stored, matching, unconsumed and unexpired OTP challenge; fabricated challenge records cannot stage a profile.
 - Added a **review-only** draft of pending/identity schemas. No migration is shipped and no public WordPress handler is registered.
-- **Release blockers:** OTP consumption and identity activation are still in separate transactions and a crash can consume an OTP before activation. The final implementation must use a single database transaction or explicit recovery-safe state machine. The active-identity record currently contains encrypted PII, but key management/rotation, retention, consent proof, and deletion mechanisms are not implemented.
+- **Release blockers addressed in isolated MySQL path:** OTP consumption and activation now use a single InnoDB transaction. The memory-only test double still uses a two-phase flow, and no live WordPress integration has been tested. The active-identity record currently contains encrypted PII, but key management/rotation, retention, consent proof, and deletion mechanisms are not implemented.
 - The draft CI workflow's MySQL job was reconstructed after malformed commands were found. **Do not assert CI success until GitHub run logs show passing tests.**
+
+## Atomic identity enrollment transaction — 2026-11-03
+
+- `BadAround_Identity_Atomic_Enrollment_Store` allows the main enrollment policy to delegate OTP verification and profile activation to one database transaction.
+- The MySQL adapter locks the challenge row (`SELECT ... FOR UPDATE`), accounts for wrong-code attempts, checks pending profile binding, creates identity under a unique email key, updates OTP and pending flags, and commits all together. A uniqueness exception rolls back the OTP as well.
+- The old `activate_once` method in the MySQL adapter throws `LogicException` to prevent bypassing OTP verification.
+- Integration assertions cover successful OTP consumption, wrong-code attempts and rollback after duplicate-email rejection. Existing two-worker challenge test remains in CI.
+- **CI execution has not yet been observed as PASS**; do not merge/deploy based on file creation alone.
+- **Important remaining gates:** transactional concurrent enrollment test across independent challenge IDs for same email, verified purpose binding to challenge, deletion/retention policies, audit logs, real delivery/retries, database-backed session revocation on identity revocation, key rotation, public error normalization, and integration with WordPress/Core.
