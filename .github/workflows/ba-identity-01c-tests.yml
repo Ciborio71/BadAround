@@ -70,6 +70,8 @@ jobs:
           php -l prototypes/ba-identity-01c/test-mysql-ownership-recovery.php
           php -l prototypes/ba-identity-01c/mysql-moderation-inbox.php
           php -l prototypes/ba-identity-01c/test-mysql-moderation-inbox.php
+          php -l prototypes/ba-identity-01c/community-gateway.php
+          php -l prototypes/ba-identity-01c/test-community-gateway.php
       - name: OTP state machine tests
         run: |
           php prototypes/ba-identity-01c/test-challenge-primitives.php
@@ -88,6 +90,7 @@ jobs:
           php prototypes/ba-identity-01c/test-ownership-recovery-policy.php
           php prototypes/ba-identity-01c/test-revision-request-policy.php
           php prototypes/ba-identity-01c/test-comment-moderation-policy.php
+          php prototypes/ba-identity-01c/test-community-gateway.php
 
   identity-mysql:
     runs-on: ubuntu-latest
