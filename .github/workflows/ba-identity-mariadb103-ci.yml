@@ -50,4 +50,5 @@ jobs:
           php prototypes/ba-identity-01c/test-mysql-verified-resolver.php
           php prototypes/ba-identity-01c/test-wordpress-login-composition.php
           php prototypes/ba-identity-01c/test-registration-mysql.php
+          php prototypes/ba-identity-01c/test-wordpress-registration-composition.php
           php prototypes/ba-identity-01c/test-wordpress-registration-rest.php
