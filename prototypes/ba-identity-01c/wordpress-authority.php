@@ -9,11 +9,20 @@ declare(strict_types=1);
 require_once __DIR__.'/community-gateway.php';
 require_once __DIR__.'/mysql-ownership-store.php';
 
+/**
+ * Must be backed by a server-verified WP-account-to-BadAround-identity mapping.
+ * Never infer equality from email address or request-submitted identifiers.
+ */
+interface BadAround_Identity_WP_Actor_Binding {
+    public function matches_current_user(int $wpUserId,string $identityId): bool;
+}
+
 final class BadAround_Identity_WordPress_Authority implements BadAround_Identity_Community_Authority {
     public function __construct(
         private BadAround_Identity_Sessions $sessions,
         private BadAround_Identity_Active_Status $status,
-        private BadAround_Identity_Mysql_Ownership_Store $ownership
+        private BadAround_Identity_Mysql_Ownership_Store $ownership,
+        private BadAround_Identity_WP_Actor_Binding $actorBinding
     ) {}
 
     public function active_identity(?string $sessionToken,int $now): ?string {
@@ -53,11 +62,15 @@ final class BadAround_Identity_WordPress_Authority implements BadAround_Identity
 
     public function may_moderate(string $moderatorIdentityId): bool {
         if (!function_exists('current_user_can') ||
-            !function_exists('is_user_logged_in') || !is_user_logged_in()) {
+            !function_exists('is_user_logged_in') || !is_user_logged_in()
+            || !function_exists('get_current_user_id')) {
             return false;
         }
         try {
-            return $this->status->is_active_verified($moderatorIdentityId)
+            $wpUserId=(int)get_current_user_id();
+            return $wpUserId>0
+                && $this->status->is_active_verified($moderatorIdentityId)
+                && $this->actorBinding->matches_current_user($wpUserId,$moderatorIdentityId)
                 && current_user_can('ba_moderate_contributions');
         } catch (Throwable $error) { return false; }
     }
