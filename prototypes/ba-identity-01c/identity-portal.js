@@ -27,7 +27,10 @@
     const login = portal.querySelector('[data-ba-form="login"]');
     const otp = portal.querySelector('[data-ba-form="otp"]');
     const logout = portal.querySelector("[data-ba-logout]");
-    if (!status || !register || !login || !otp || !logout) continue;
+    const activity = portal.querySelector("[data-ba-activity]");
+    const activityList = portal.querySelector("[data-ba-activity-list]");
+    const activityRefresh = portal.querySelector("[data-ba-refresh-activity]");
+    if (!status || !register || !login || !otp || !logout || !activity || !activityList || !activityRefresh) continue;
     let challenge = null;
     let stage = null;
     let csrf = null;
@@ -37,6 +40,8 @@
       login.hidden = value;
       otp.hidden = true;
       logout.hidden = !value;
+      activity.hidden = !value;
+      if (!value) activityList.replaceChildren();
     }
     async function busy(form, task) {
       const buttons = [...form.querySelectorAll("button")];
@@ -47,12 +52,52 @@
         buttons.forEach(button => { button.disabled = false; });
       }
     }
+    async function loadActivity() {
+      if (!csrf) return;
+      const response = await fetch(api + "identity/my-activity", {
+        method: "POST",
+        mode: "same-origin",
+        credentials: "same-origin",
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Badaround-CSRF": csrf
+        },
+        body: "{}"
+      });
+      if (!response.ok) throw new Error("activity_unavailable");
+      const result = await response.json();
+      if (!Array.isArray(result.items)) throw new Error("invalid_activity");
+      const fragment = document.createDocumentFragment();
+      for (const item of result.items.slice(0, 20)) {
+        if (!item || !["comment", "revision"].includes(item.kind)
+            || !["pending", "approved", "rejected"].includes(item.status)) continue;
+        const li = document.createElement("li");
+        const kind = item.kind === "comment" ? "Commento" : "Richiesta di modifica";
+        const state = {pending: "In moderazione", approved: "Approvata", rejected: "Non approvata"}[item.status];
+        li.textContent = kind + " — " + state;
+        fragment.append(li);
+      }
+      activityList.replaceChildren(fragment);
+      if (!fragment.childNodes.length && !activityList.childNodes.length) {
+        const li = document.createElement("li");
+        li.textContent = "Non ci sono richieste da mostrare.";
+        activityList.append(li);
+      }
+    }
+    activityRefresh.addEventListener("click", () => {
+      busy(activity, async () => {
+        await loadActivity();
+        notice("Elenco delle attività aggiornato.");
+      });
+    });
     async function refresh() {
       try {
         const data = await send("identity/session");
         csrf = data.authenticated === true && typeof data.csrf === "string"
           ? data.csrf : null;
         showSignedIn(!!csrf);
+        if (csrf) await loadActivity().catch(() => { activityList.replaceChildren(); });
       } catch {
         csrf = null;
         showSignedIn(false);
