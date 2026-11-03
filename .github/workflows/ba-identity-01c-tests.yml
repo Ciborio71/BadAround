@@ -65,7 +65,11 @@ jobs:
           BA_TEST_DB_USER: ba_ci
           BA_TEST_DB_PASS: local-ci-only-password
         run: |
-          php -m | grep -E '^(pcntl|pdo_mysql)
+          php -m | grep -Eq '^pcntl          php prototypes/ba-identity-01c/test-mysql-integration.php
+          php prototypes/ba-identity-01c/test-mysql-concurrency.php
+
+          php -m | grep -Eiq '^pdo_mysql          php prototypes/ba-identity-01c/test-mysql-integration.php
+          php prototypes/ba-identity-01c/test-mysql-concurrency.php
 
           php prototypes/ba-identity-01c/test-mysql-integration.php
           php prototypes/ba-identity-01c/test-mysql-concurrency.php
