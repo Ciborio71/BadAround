@@ -19,14 +19,19 @@ function bind_check(bool $pass,string $name): void {
     echo "PASS: ".$name."\n";
 }
 $grant=new GrantFixture();
-$binder=new BadAround_Identity_Post_Intake_Binder(new ReceiptFixture(),$grant);
+$sessionStore=new BadAround_Identity_Session_Memory_Store();
+$sessions=new BadAround_Identity_Sessions($sessionStore,str_repeat('S',32));
+$session=$sessions->issue('identity_12345678',1762156800);
+$otherSession=$sessions->issue('identity_87654321',1762156800);
+$binder=new BadAround_Identity_Post_Intake_Binder(new ReceiptFixture(),$grant,$sessions);
 $receipt=['report_id'=>701,'event_id'=>801,'duplicate'=>false];
 $now=1762156800;
 bind_check(!$binder->bind_created_report(null,$receipt,$now),'anonymous cannot claim report');
-bind_check(!$binder->bind_created_report('identity_12345678',['report_id'=>701,'event_id'=>801,'duplicate'=>true],$now),'idempotent duplicate cannot claim');
-bind_check(!$binder->bind_created_report('identity_12345678',['report_id'=>701,'event_id'=>802,'duplicate'=>false],$now),'untrusted report event pair rejected');
-bind_check(!$binder->bind_created_report('identity_12345678',['report_id'=>701,'event_id'=>801],$now),'missing duplicate indicator denied');
-bind_check($binder->bind_created_report('identity_12345678',$receipt,$now),'verified owner bound to fresh intake report');
-bind_check(!$binder->bind_created_report('identity_87654321',$receipt,$now),'second identity cannot take ownership');
+bind_check(!$binder->bind_created_report($session,['report_id'=>701,'event_id'=>801,'duplicate'=>true],$now),'idempotent duplicate cannot claim');
+bind_check(!$binder->bind_created_report($session,['report_id'=>701,'event_id'=>802,'duplicate'=>false],$now),'untrusted report event pair rejected');
+bind_check(!$binder->bind_created_report($session,['report_id'=>701,'event_id'=>801],$now),'missing duplicate indicator denied');
+bind_check($binder->bind_created_report($session,$receipt,$now),'verified owner bound to fresh intake report');
+bind_check(!$binder->bind_created_report($otherSession,$receipt,$now),'second identity cannot take ownership');
+bind_check(!$binder->bind_created_report('identity_12345678',$receipt,$now),'spoofed identity id is not bearer session');
 bind_check(count($grant->granted)===1,'exactly one ownership grant');
 echo "ALL_POST_INTAKE_BINDER_TESTS_PASS\n";
