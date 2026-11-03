@@ -24,6 +24,20 @@ final class BadAround_Identity_WordPress_Privacy_Notice {
                 || trim($page->post_content)==='') {
                 return null;
             }
+            // A published post can still be an editorial draft. The live
+            // notice currently contains an explicit pre-publication warning.
+            // Never accept it as a reviewed user-facing privacy statement.
+            $plain=mb_strtolower(html_entity_decode(strip_tags(
+                $page->post_content
+            ),ENT_QUOTES|ENT_HTML5,'UTF-8'),'UTF-8');
+            foreach ([
+                'bozza pre-pubblicazione',
+                'da sottoporre a revisione',
+                'devono essere completati',
+                'versione definitiva dell’informativa'
+            ] as $marker) {
+                if (str_contains($plain,$marker)) { return null; }
+            }
             return self::VERSION;
         } catch(Throwable $error) { return null; }
     }
