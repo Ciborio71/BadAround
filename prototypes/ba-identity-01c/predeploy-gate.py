@@ -35,7 +35,9 @@ SAFE_EXACT = (".github/workflows/ba-identity-01c-tests.yml",
               ".github/workflows/ba-identity-private-bootstrap-append.yml",
               ".github/scripts/ba_identity_private_bootstrap_append.py",
               ".github/workflows/ba-identity-core-private-seam.yml",
-              ".github/scripts/ba_identity_core_private_seam.py")
+              ".github/scripts/ba_identity_core_private_seam.py",
+              ".github/workflows/ba-identity-registration-composition-custody.yml",
+              ".github/scripts/ba_identity_registration_composition_custody.py")
 
 def main():
     missing = [str(path) for path in REQUIRED if not (ROOT / path).is_file()]
