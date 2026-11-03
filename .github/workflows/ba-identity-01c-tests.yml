@@ -79,6 +79,8 @@ jobs:
           php -l prototypes/ba-identity-01c/test-mysql-wp-actor-binding.php
           php -l prototypes/ba-identity-01c/schema-candidate.php
           php -l prototypes/ba-identity-01c/test-schema-candidate.php
+          php -l prototypes/ba-identity-01c/schema-recovery-policy.php
+          php -l prototypes/ba-identity-01c/test-schema-recovery.php
           php -l prototypes/ba-identity-01c/wordpress-community-rest-adapter.php
           php -l prototypes/ba-identity-01c/test-wordpress-community-rest-off.php
           php -l prototypes/ba-identity-01c/test-wordpress-community-rest-enabled.php
@@ -154,5 +156,6 @@ jobs:
           php prototypes/ba-identity-01c/test-wordpress-authority.php
           php prototypes/ba-identity-01c/test-mysql-wp-actor-binding.php
           php prototypes/ba-identity-01c/test-schema-candidate.php
+          php prototypes/ba-identity-01c/test-schema-recovery.php
           php prototypes/ba-identity-01c/test-mysql-community-budget.php
           php prototypes/ba-identity-01c/test-wordpress-composition.php
