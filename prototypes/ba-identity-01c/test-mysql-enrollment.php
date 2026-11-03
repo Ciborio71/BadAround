@@ -3,6 +3,7 @@
 declare(strict_types=1);
 require __DIR__ . '/mysql-enrollment-store.php';
 require_once __DIR__ . '/mysql-challenge-store.php';
+require_once __DIR__ . '/purpose-keys.php';
 if (!extension_loaded('pdo_mysql')) { throw new RuntimeException('pdo_mysql unavailable'); }
 $dsn = (string)getenv('BA_TEST_DB_DSN');
 if (!preg_match('/(?:^|;)dbname=ba_identity_ci(?:;|$)/', $dsn)) {
@@ -79,4 +80,37 @@ if ($first['consumed_at'] !== $now+2 || $first['attempts'] !== 2) {
 }
 $count=(int)$db->query('SELECT COUNT(*) FROM ba_identities_ci')->fetchColumn();
 if ($count!==1) { throw new RuntimeException('Expected one identity'); }
+// End-to-end purpose-bound enrollment on a *different* email: root HMAC
+// keeps stable lookup, but verification requires the enrollment-only OTP key.
+$enrollmentKey = BadAround_Identity_Purpose_Keys::for_purpose('enrollment', $key);
+$loginKey = BadAround_Identity_Purpose_Keys::for_purpose('login', $key);
+$profile2 = BadAround_Identity_Enrollment::validate_profile('Mario','Bianchi','mario@example.com');
+$purposeChallenge = BadAround_Identity_Purpose_Keys::new_challenge_for_purpose(
+    $profile2['email'],'enrollment',$key,$now
+);
+$challengeStore->insert($purposeChallenge['record']);
+$purposeVerifier = new BadAround_Identity_Challenge_Verifier($challengeStore,$enrollmentKey);
+$purposeService = new BadAround_Identity_Enrollment(
+    $pending,$challengeStore,$purposeVerifier,$key,$enrollmentKey
+);
+$purposeService->stage($profile2,$purposeChallenge['record'],$now);
+$wrongPurposeService = new BadAround_Identity_Enrollment(
+    $pending,$challengeStore,
+    new BadAround_Identity_Challenge_Verifier($challengeStore,$loginKey),
+    $key,$loginKey
+);
+if ($wrongPurposeService->verify_and_activate(
+    $purposeChallenge['record']['challenge_id'],$purposeChallenge['delivery_code'],$now+7
+) !== null) {
+    throw new RuntimeException('Enrollment OTP accepted under login-purpose key');
+}
+$newIdentity = $purposeService->verify_and_activate(
+    $purposeChallenge['record']['challenge_id'],$purposeChallenge['delivery_code'],$now+8
+);
+if (!is_string($newIdentity) || !str_starts_with($newIdentity,'identity_')) {
+    throw new RuntimeException('Purpose-bound MySQL enrollment did not activate');
+}
+if ((int)$db->query('SELECT COUNT(*) FROM ba_identities_ci')->fetchColumn() !== 2) {
+    throw new RuntimeException('Purpose-bound identity count mismatch');
+}
 echo "ALL_MYSQL_ENROLLMENT_TESTS_PASS\n";
