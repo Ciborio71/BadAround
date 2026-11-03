@@ -39,4 +39,45 @@ bind_check(!$binder->bind_created_report('identity_12345678',$receipt,$now),'spo
 $status->active['identity_12345678']=false;
 bind_check(!$binder->bind_created_report($session,['report_id'=>701,'event_id'=>801,'duplicate'=>false],$now),'revoked identity cannot claim resource');
 bind_check(count($grant->granted)===1,'exactly one ownership grant');
+
+// Failure injection: infrastructure errors must never be treated as grants.
+final class FailingReceiptFixture implements BadAround_Identity_Intake_Receipt {
+    public function is_new_canonical_report(int $reportId,int $eventId): bool {
+        throw new RuntimeException('DB unavailable');
+    }
+}
+final class FailingGrantFixture implements BadAround_Identity_Ownership_Grant {
+    public function grant_creator(string $identityId,string $resourceKind,int $resourceId,int $now): bool {
+        throw new RuntimeException('Grant write unavailable');
+    }
+}
+final class RevokingStatusFixture implements BadAround_Identity_Active_Status {
+    public int $checks=0;
+    public function is_active_verified(string $identityId): bool {
+        ++$this->checks;
+        return $this->checks===1;
+    }
+}
+$failureGrant=new GrantFixture();
+$failureBinder=new BadAround_Identity_Post_Intake_Binder(
+    new FailingReceiptFixture(),$failureGrant,$sessions,$status
+);
+$status->active['identity_12345678']=true;
+bind_check(!$failureBinder->bind_created_report($session,$receipt,$now),
+    'receipt storage outage denied');
+bind_check(count($failureGrant->granted)===0,'receipt outage cannot grant ownership');
+$failureBinder=new BadAround_Identity_Post_Intake_Binder(
+    new ReceiptFixture(),new FailingGrantFixture(),$sessions,$status
+);
+bind_check(!$failureBinder->bind_created_report($session,$receipt,$now),
+    'grant storage outage returns failure');
+$revocation=new RevokingStatusFixture();
+$revokeGrant=new GrantFixture();
+$revocationBinder=new BadAround_Identity_Post_Intake_Binder(
+    new ReceiptFixture(),$revokeGrant,$sessions,$revocation
+);
+bind_check(!$revocationBinder->bind_created_report($session,$receipt,$now),
+    'revocation between checks denied');
+bind_check(count($revokeGrant->granted)===0,
+    'revoked identity never reaches grant writer');
 echo "ALL_POST_INTAKE_BINDER_TESTS_PASS\n";
