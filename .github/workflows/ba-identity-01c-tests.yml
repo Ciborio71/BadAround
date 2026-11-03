@@ -92,6 +92,8 @@ jobs:
           php -l prototypes/ba-identity-01c/test-mysql-verified-resolver.php
           php -l prototypes/ba-identity-01c/wordpress-login-composition.php
           php -l prototypes/ba-identity-01c/test-wordpress-login-composition.php
+          php -l prototypes/ba-identity-01c/wordpress-session-cookie.php
+          php -l prototypes/ba-identity-01c/test-wordpress-session-cookie.php
       - name: OTP state machine tests
         run: |
           php prototypes/ba-identity-01c/test-challenge-primitives.php
@@ -113,6 +115,7 @@ jobs:
           php prototypes/ba-identity-01c/test-community-gateway.php
           php prototypes/ba-identity-01c/test-wordpress-community-rest-off.php
           php prototypes/ba-identity-01c/test-wordpress-community-rest-enabled.php
+          php prototypes/ba-identity-01c/test-wordpress-session-cookie.php
 
   identity-mysql:
     runs-on: ubuntu-latest
