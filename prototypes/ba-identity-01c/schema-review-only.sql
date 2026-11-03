@@ -29,3 +29,24 @@ CREATE TABLE ba_identity_sessions (
 -- Future addition: verified ownership, identity lifecycle, and revision tables
 -- need a separate detailed privacy/retention and rollback review.
 -- This DDL is intentionally NOT included by BadAround_Installer.
+
+-- Proposed first-time identity enrollment — CI prototype, NOT a production migration.
+-- encrypted profile uses AES-256-GCM with an external 32-byte key; needs key
+-- versioning/rotation, data retention policy and audited deletion before launch.
+CREATE TABLE ba_identity_pending (
+  challenge_id CHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL PRIMARY KEY,
+  email_lookup CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  protected_profile TEXT NOT NULL,
+  created_at BIGINT UNSIGNED NOT NULL,
+  verified_at BIGINT UNSIGNED NULL,
+  KEY idx_pending_email (email_lookup),
+  KEY idx_pending_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE ba_identities_ci (
+  identity_id VARCHAR(128) NOT NULL PRIMARY KEY,
+  email_lookup CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL UNIQUE,
+  protected_profile TEXT NOT NULL,
+  verified_at BIGINT UNSIGNED NOT NULL,
+  revoked_at BIGINT UNSIGNED NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
