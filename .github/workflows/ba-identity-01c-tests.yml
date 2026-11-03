@@ -98,6 +98,8 @@ jobs:
           php -l prototypes/ba-identity-01c/test-wordpress-login-rest.php
           php -l prototypes/ba-identity-01c/wordpress-registration-rest.php
           php -l prototypes/ba-identity-01c/test-wordpress-registration-rest.php
+          php -l prototypes/ba-identity-01c/wordpress-registration-composition.php
+          php -l prototypes/ba-identity-01c/test-wordpress-registration-composition.php
           php -l prototypes/ba-identity-01c/registration-service.php
           php -l prototypes/ba-identity-01c/test-registration-mysql.php
       - name: OTP state machine tests
@@ -177,3 +179,4 @@ jobs:
           php prototypes/ba-identity-01c/test-mysql-verified-resolver.php
           php prototypes/ba-identity-01c/test-wordpress-login-composition.php
           php prototypes/ba-identity-01c/test-registration-mysql.php
+          php prototypes/ba-identity-01c/test-wordpress-registration-composition.php
