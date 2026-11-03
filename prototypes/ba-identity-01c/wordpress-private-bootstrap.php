@@ -55,7 +55,6 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
             $registration=BadAround_Identity_WordPress_Registration_Composition::assemble(
                 $db,$prefix,$key,$privacy,$mailer,$origin
             );
-            $registration->register_hooks();
             $challengeStore=new BadAround_Identity_Mysql_Challenge_Store(
                 $db,$prefix.'ba_identity_challenges'
             );
@@ -80,10 +79,14 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
                     new BadAround_Identity_Native_Cookie_Writer()
                 ),$csrf,$origin
             );
-            $login->register_hooks();
             $community=BadAround_Identity_WordPress_Composition::assemble(
                 $db,$prefix,$key,$origin
             );
+            // Assemble the complete graph before registering ANY hook:
+            // partial initialization must never expose a functioning route.
+            // Individual REST controllers still require their own flags.
+            $registration->register_hooks();
+            $login->register_hooks();
             $community->register_hooks();
             return true;
         } catch(Throwable $error) {
