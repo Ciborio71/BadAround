@@ -23,8 +23,11 @@ final class BadAround_Identity_Enrollment {
     public function __construct(
         private BadAround_Identity_Pending_Enrollment_Store $enrollments,
         private BadAround_Identity_Challenge_Store $challenges,
-        private BadAround_Identity_Challenge_Verifier $verifier
-    ) {}
+        private BadAround_Identity_Challenge_Verifier $verifier,
+        private string $serverKey
+    ) {
+        if (strlen($serverKey) < 32) { throw new InvalidArgumentException('Server key too short'); }
+    }
 
     public static function validate_profile(string $firstName, string $lastName, string $email): array {
         $firstName = trim($firstName);
@@ -53,11 +56,15 @@ final class BadAround_Identity_Enrollment {
         $challengeId = $challengeRecord['challenge_id'] ?? '';
         $lookup = $challengeRecord['email_lookup'] ?? '';
         if (!preg_match('/^[a-f0-9]{32}$/D', $challengeId)
-            || !preg_match('/^[a-f0-9]{64}$/D', $lookup)) {
+            || !preg_match('/^[a-f0-9]{64}$/D', $lookup)
+            || !hash_equals(
+                BadAround_Identity_Challenge_Primitives::digest('email', 'lookup', $profile['email'], $this->serverKey),
+                $lookup
+            )) {
             throw new InvalidArgumentException('Invalid challenge metadata');
         }
-        // Caller must validate email/lookup consistency with its own server key
-        // and enforce expiry, quotas, and single active OTP per purpose.
+        // The lookup must match the validated email. The delivery coordinator
+        // must separately enforce expiry, quotas and purpose binding.
         $this->enrollments->create_pending([
             'challenge_id'=>$challengeId,
             'email_lookup'=>$lookup,
