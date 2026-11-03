@@ -13,7 +13,7 @@ $db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
 $prefix='ba_regcompose_ci_';
 $ddl=BadAround_Identity_Schema_Candidate::statements($prefix);
 foreach (['ba_identity_challenges','ba_identity_pending','ba_identities',
-    'ba_identity_rate_limits'] as $name) {
+    'ba_identity_rate_limits','ba_identity_moderation'] as $name) {
     $db->exec($ddl[$name]);
     $db->exec('DELETE FROM `'.$prefix.$name.'`');
 }
