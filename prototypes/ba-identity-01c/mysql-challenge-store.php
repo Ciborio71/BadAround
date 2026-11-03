@@ -6,8 +6,9 @@
  */
 declare(strict_types=1);
 require_once __DIR__ . '/challenge-store.php';
+require_once __DIR__ . '/otp-issuer.php';
 
-final class BadAround_Identity_Mysql_Challenge_Store implements BadAround_Identity_Challenge_Store {
+final class BadAround_Identity_Mysql_Challenge_Store implements BadAround_Identity_Challenge_Store, BadAround_Identity_Challenge_Writer {
     private PDO $db;
     private string $table;
 
@@ -33,6 +34,18 @@ final class BadAround_Identity_Mysql_Challenge_Store implements BadAround_Identi
             ':created'=>(int)$record['created_at'],
             ':expires'=>(int)$record['expires_at'],
         ]);
+    }
+
+    /** Expire an unsent OTP. Idempotent: a missing/already-consumed row stays unusable. */
+    public function invalidate(string $challengeId, int $now): void {
+        if (!preg_match('/^[a-f0-9]{32}$/D', $challengeId) || $now <= 0) {
+            throw new InvalidArgumentException('Invalid challenge invalidation');
+        }
+        $statement = $this->db->prepare(
+            "UPDATE `{$this->table}` SET consumed_at=:now, version=version+1
+             WHERE challenge_id=:id AND consumed_at IS NULL"
+        );
+        $statement->execute([':now'=>$now, ':id'=>$challengeId]);
     }
 
     public function load(string $challengeId): ?array {
