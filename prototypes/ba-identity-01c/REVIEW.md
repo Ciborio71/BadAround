@@ -26,4 +26,12 @@
 
 ## Next gate
 
-Validate the newly added disposable-MySQL CI service and two-worker race test; then implement challenge expiry cleanup, retry logic and secure controller integration. The isolated session-bound CSRF policy is present, but middleware integration and rotation remain outstanding. Prepare installer migrations only after comparing live schema and obtaining approval.
+Validate the newly added disposable-MySQL CI service and two-worker race test; then implement challenge expiry cleanup, retry logic and secure controller integration. The isolated session-bound CSRF policy and fail-closed edit-guard policy are present, but WordPress middleware integration, CSRF rotation and authenticated resource lookups remain outstanding. Prepare installer migrations only after comparing live schema and obtaining approval.
+
+## Security hardening — 2026-11-03
+
+- Tightened the Origin policy to reject paths, query strings, fragments and user-info in an Origin header, in addition to HTTPS host/port matching.
+- Added `edit-guard.php` (prototype only) requiring all three checks for modifying a resource: valid unrevoked session, session-bound CSRF token with strict Origin, and verified ownership for exactly the requested resource.
+- Added negative tests for missing/expired/revoked sessions, cross-origin and malformed Origin, other-resource and other-identity attempts.
+- **The ownership record is explicitly server-loaded by contract; no request-provided ownership may be trusted.**
+- These are isolated policy tests, **not WordPress endpoint integration tests**. CI status still requires inspection.
