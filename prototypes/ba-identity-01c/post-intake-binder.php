@@ -36,8 +36,7 @@ final class BadAround_Identity_Post_Intake_Binder {
     public function bind_created_report(
         ?string $sessionToken, array $receipt, int $now
     ): bool {
-        $verifiedIdentity = $sessionToken === null ? null : $this->sessions->identity_for($sessionToken,$now);
-        if (!$verifiedIdentity || !$this->identityStatus->is_active_verified($verifiedIdentity) || $now <= 0
+        if ($now <= 0 || $sessionToken === null
             || !array_key_exists('duplicate', $receipt)
             || $receipt['duplicate'] !== false) {
             return false;
@@ -45,10 +44,26 @@ final class BadAround_Identity_Post_Intake_Binder {
         $reportId = $receipt['report_id'] ?? null;
         $eventId = $receipt['event_id'] ?? null;
         if (!is_int($reportId) || !is_int($eventId)
-            || $reportId <= 0 || $eventId <= 0
-            || !$this->receipts->is_new_canonical_report($reportId,$eventId)) {
+            || $reportId <= 0 || $eventId <= 0) {
             return false;
         }
-        return $this->grants->grant_creator($verifiedIdentity,'report',$reportId,$now);
+        try {
+            $verifiedIdentity = $this->sessions->identity_for($sessionToken,$now);
+            if (!$verifiedIdentity || !$this->identityStatus->is_active_verified($verifiedIdentity)
+                || !$this->receipts->is_new_canonical_report($reportId,$eventId)) {
+                return false;
+            }
+            // A second status read closes ordinary sequential revocation before
+            // granting. This is NOT a transactional guarantee against a race.
+            if (!$this->identityStatus->is_active_verified($verifiedIdentity)) {
+                return false;
+            }
+            return $this->grants->grant_creator($verifiedIdentity,'report',$reportId,$now) === true;
+        } catch (Throwable $e) {
+            // Never grant or report success on unavailable session, status,
+            // receipt or ownership infrastructure. Controllers may audit a
+            // non-sensitive failure code outside this dormant policy class.
+            return false;
+        }
     }
 }
