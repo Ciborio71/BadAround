@@ -39,6 +39,10 @@ $pending = new BadAround_Identity_Mysql_Enrollment_Store($db, 'ba_identity_pendi
 $challengeStore = new BadAround_Identity_Mysql_Challenge_Store($db, 'ba_identity_challenges');
 $verifier = new BadAround_Identity_Challenge_Verifier($challengeStore,$key);
 $service = new BadAround_Identity_Enrollment($pending,$challengeStore,$verifier,$key);
+$legacyBlocked = false;
+try { $pending->activate_once(str_repeat('0',32),str_repeat('a',64),$now); }
+catch (LogicException $e) { $legacyBlocked = true; }
+if (!$legacyBlocked) { throw new RuntimeException('Legacy non-atomic activation must be blocked'); }
 $profile = BadAround_Identity_Enrollment::validate_profile('Anna','Rossi','anna@example.com');
 $c = BadAround_Identity_Challenge_Primitives::new_challenge($profile['email'],$key,$now);
 $challengeStore->insert($c['record']);
