@@ -8,12 +8,23 @@
 declare(strict_types=1);
 require_once __DIR__.'/community-gateway.php';
 
+interface BadAround_Identity_Community_Rest_Budget {
+    /**
+     * Persistent server-side request quota. Must not use request headers as
+     * trusted IP identity; fail closed on storage errors.
+     */
+    public function consume(string $sessionToken,string $kind,int $now): bool;
+}
+
 final class BadAround_Identity_Community_Rest_Adapter {
     public const REST_NAMESPACE = 'badaround/v1';
     public const COOKIE_NAME = 'ba_identity_session';
     public const MAX_BODY_BYTES = 8192;
 
-    public function __construct(private BadAround_Identity_Community_Gateway $gateway) {}
+    public function __construct(
+        private BadAround_Identity_Community_Gateway $gateway,
+        private ?BadAround_Identity_Community_Rest_Budget $budget = null
+    ) {}
 
     public function register_hooks(): bool {
         if (!defined('BADAROUND_IDENTITY_COMMUNITY_ENABLED')
@@ -69,6 +80,12 @@ final class BadAround_Identity_Community_Rest_Adapter {
         if (!is_string($csrf) || !is_string($origin)) { return $this->error(403); }
         $now=time();
         try {
+            // Public write routes cannot be enabled without a persistent,
+            // server-trusted quota service. Never default to allow.
+            if ($this->budget===null) { return $this->error(503); }
+            if (!$this->budget->consume($token,$kind,$now)) {
+                return $this->error(429);
+            }
             if ($kind==='comment') {
                 $event=$payload['event_id'] ?? null;
                 $text=$payload['body'] ?? null;
