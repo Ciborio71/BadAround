@@ -34,6 +34,10 @@ final class BadAround_Identity_Csrf_Policy {
         $actual = parse_url($origin);
         $expected = parse_url($expectedOrigin);
         if (!is_array($actual) || !is_array($expected)) { return false; }
+        // Origin is an origin tuple only; reject user-info, paths, queries, fragments.
+        foreach (['user', 'pass', 'path', 'query', 'fragment'] as $component) {
+            if (array_key_exists($component, $actual)) { return false; }
+        }
         if (strtolower((string)($actual['scheme'] ?? '')) !== 'https'
             || strtolower((string)($expected['scheme'] ?? '')) !== 'https') { return false; }
         $portActual = (int)($actual['port'] ?? 443);
