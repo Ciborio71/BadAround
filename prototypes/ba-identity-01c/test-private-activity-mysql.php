@@ -3,6 +3,7 @@
 declare(strict_types=1);
 require __DIR__.'/schema-candidate.php';
 require __DIR__.'/mysql-private-activity.php';
+require_once __DIR__.'/mysql-session-store.php';
 $dsn=(string)getenv('BA_TEST_DB_DSN');
 if(!preg_match('/(?:^|;)dbname=ba_identity_ci(?:;|$)/',$dsn)) {
     throw new RuntimeException('CI database required');
