@@ -54,17 +54,32 @@ final class BadAround_Identity_Mysql_Enrollment_Store implements BadAround_Ident
     }
 
     public function create_pending(array $pending): void {
+        $private = [
+            'first_name'=>$pending['first_name'],
+            'last_name'=>$pending['last_name'],
+            'email'=>$pending['email'],
+        ];
+        if (isset($pending['privacy_consent'])) {
+            $consent = $pending['privacy_consent'];
+            if (!is_array($consent)
+                || ($consent['accepted'] ?? null) !== true
+                || !is_string($consent['notice_version'] ?? null)
+                || !preg_match('/^[A-Za-z0-9._-]{1,64}$/D', $consent['notice_version'])
+                || !is_int($consent['accepted_at'] ?? null)
+                || $consent['accepted_at'] <= 0
+                || !is_string($consent['method'] ?? null)
+                || $consent['method'] !== 'explicit_checkbox') {
+                throw new InvalidArgumentException('Invalid private consent evidence');
+            }
+            $private['privacy_consent']=$consent;
+        }
         $stmt = $this->pdo->prepare("INSERT INTO `{$this->pendingTable}`
             (challenge_id,email_lookup,protected_profile,created_at,verified_at)
             VALUES (:challenge,:lookup,:profile,:created,NULL)");
         $stmt->execute([
             ':challenge'=>$pending['challenge_id'],
             ':lookup'=>$pending['email_lookup'],
-            ':profile'=>$this->encrypt([
-                'first_name'=>$pending['first_name'],
-                'last_name'=>$pending['last_name'],
-                'email'=>$pending['email'],
-            ]),
+            ':profile'=>$this->encrypt($private),
             ':created'=>(int)$pending['created_at'],
         ]);
     }
@@ -83,6 +98,7 @@ final class BadAround_Identity_Mysql_Enrollment_Store implements BadAround_Ident
             'first_name'=>$profile['first_name'],
             'last_name'=>$profile['last_name'],
             'email'=>$profile['email'],
+            'privacy_consent'=>$profile['privacy_consent'] ?? null,
             'created_at'=>(int)$row['created_at'],
             'verified_at'=>$row['verified_at'] === null ? null : (int)$row['verified_at'],
         ];
