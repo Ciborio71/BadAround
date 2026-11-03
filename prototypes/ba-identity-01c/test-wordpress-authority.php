@@ -1,7 +1,7 @@
 <?php
 /** CI-only WordPress authority seam test; no WordPress runtime or live DB. */
 declare(strict_types=1);
-require __DIR__.'/wordpress-authority.php';
+require __DIR__.'/mysql-wp-actor-binding.php';
 $dsn=getenv('BA_TEST_DB_DSN');
 if (!$dsn || !str_contains($dsn,'dbname=ba_identity_ci')) {
     throw new RuntimeException('Safety stop: disposable ba_identity_ci required');
@@ -37,12 +37,6 @@ function get_current_user_id() { return $GLOBALS['wp_authority_mock']['wp_id']; 
 function current_user_can($cap) {
     return $cap==='ba_moderate_contributions' && $GLOBALS['wp_authority_mock']['cap'];
 }
-final class WPActorBindingFixture implements BadAround_Identity_WP_Actor_Binding {
-    public bool $matched=false;
-    public function matches_current_user(int $wpUserId,string $identityId):bool {
-        return $this->matched && $wpUserId===42 && $identityId==='identity_12345678';
-    }
-}
 function check_wp_authority(bool $ok,string $label):void {
     if (!$ok) { throw new RuntimeException('FAIL '.$label); }
     echo 'PASS '.$label.PHP_EOL;
@@ -52,7 +46,15 @@ $sessions=new BadAround_Identity_Sessions(new BadAround_Identity_Session_Memory_
 $session=$sessions->issue('identity_12345678',$now);
 $status=new BadAround_Identity_Active_Memory_Status();
 $status->active['identity_12345678']=true;
-$binding=new WPActorBindingFixture();
+$db->exec("CREATE TABLE IF NOT EXISTS ba_identity_wp_authority_binding_ci (
+ wp_user_id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
+ identity_id VARCHAR(128) NOT NULL UNIQUE,
+ verified_at BIGINT UNSIGNED NOT NULL,
+ revoked_at BIGINT UNSIGNED NULL,
+ version INT UNSIGNED NOT NULL DEFAULT 0
+) ENGINE=InnoDB");
+$db->exec('DELETE FROM ba_identity_wp_authority_binding_ci');
+$binding=new BadAround_Identity_Mysql_WP_Actor_Binding($db,'ba_identity_wp_authority_binding_ci');
 $authority=new BadAround_Identity_WordPress_Authority($sessions,$status,$ownerStore,$binding);
 check_wp_authority($authority->active_identity($session,$now)==='identity_12345678',
     'session verified against active identity');
@@ -80,7 +82,8 @@ check_wp_authority(!$authority->may_moderate('identity_12345678'),
 $GLOBALS['wp_authority_mock']['cap']=true;
 check_wp_authority(!$authority->may_moderate('identity_12345678'),
     'WP administrator and unrelated identity cannot combine permissions');
-$binding->matched=true;
+check_wp_authority($binding->grant_verified(42,'identity_12345678',$now),
+    'explicit persisted WP actor association required');
 check_wp_authority($authority->may_moderate('identity_12345678'),
     'WP capability plus verified identity required');
 $status->active['identity_12345678']=false;
