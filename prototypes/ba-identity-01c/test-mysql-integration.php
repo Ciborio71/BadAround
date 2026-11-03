@@ -44,6 +44,25 @@ $stale = $old;
 $stale['version'] = 1;
 $stale['consumed_at'] = $now+1;
 check_sql(!$store->compare_and_swap($old['challenge_id'],0,$stale),'stale CAS rejected');
+// A failed email delivery must invalidate a persisted challenge atomically.
+$undelivered=BadAround_Identity_Challenge_Primitives::new_challenge('unsent@example.com',$key,$now);
+$store->insert($undelivered['record']);
+$undeliveredId=$undelivered['record']['challenge_id'];
+$beforeInvalidation=$store->load($undeliveredId);
+$store->invalidate($undeliveredId,$now+3);
+$afterInvalidation=$store->load($undeliveredId);
+check_sql($afterInvalidation['consumed_at']===$now+3 && $afterInvalidation['version']===1,
+    'Undelivered OTP is invalidated in MySQL');
+check_sql($v->verify($undeliveredId,$undelivered['delivery_code'],$now+4)==='invalid',
+    'Undelivered OTP cannot authenticate');
+$store->invalidate($undeliveredId,$now+5);
+check_sql($store->load($undeliveredId)['version']===1,
+    'OTP invalidation is idempotent');
+$staleUndelivered=$beforeInvalidation;
+$staleUndelivered['version']=1;
+$staleUndelivered['consumed_at']=$now+4;
+check_sql(!$store->compare_and_swap($undeliveredId,0,$staleUndelivered),
+    'Stale OTP verifier cannot undo invalidation');
 $sessionStore = new BadAround_Identity_Mysql_Session_Store($db,'ba_identity_sessions');
 $sessions = new BadAround_Identity_Sessions($sessionStore,$key);
 $secret = $sessions->issue('identity_87654321',$now);
