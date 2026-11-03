@@ -60,6 +60,10 @@ jobs:
           php -l prototypes/ba-identity-01c/test-otp-issuer.php
           php -l prototypes/ba-identity-01c/otp-adapters.php
           php -l prototypes/ba-identity-01c/test-otp-adapters.php
+          php -l prototypes/ba-identity-01c/ownership-recovery-policy.php
+          php -l prototypes/ba-identity-01c/test-ownership-recovery-policy.php
+          php -l prototypes/ba-identity-01c/revision-request-policy.php
+          php -l prototypes/ba-identity-01c/test-revision-request-policy.php
       - name: OTP state machine tests
         run: |
           php prototypes/ba-identity-01c/test-challenge-primitives.php
@@ -75,6 +79,8 @@ jobs:
           php prototypes/ba-identity-01c/test-purpose-keys.php
           php prototypes/ba-identity-01c/test-otp-issuer.php
           php prototypes/ba-identity-01c/test-otp-adapters.php
+          php prototypes/ba-identity-01c/test-ownership-recovery-policy.php
+          php prototypes/ba-identity-01c/test-revision-request-policy.php
 
   identity-mysql:
     runs-on: ubuntu-latest
