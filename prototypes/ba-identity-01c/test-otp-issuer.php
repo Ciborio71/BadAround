@@ -24,8 +24,10 @@ final class ChallengeFixture implements BadAround_Identity_Challenge_Writer {
 final class MailFixture implements BadAround_Identity_Otp_Transport {
     public array $messages=[];
     public bool $succeed=true;
+    public bool $throwError=false;
     public function send_code(string $email,string $code,string $purpose): bool {
         $this->messages[]=['email'=>$email,'code'=>$code,'purpose'=>$purpose];
+        if ($this->throwError) { throw new RuntimeException('Simulated provider outage'); }
         return $this->succeed;
     }
 }
@@ -64,4 +66,15 @@ $failedId=$w->invalidated[0];
 assert_issuer(!BadAround_Identity_Challenge_Primitives::verify(
     $w->records[$failedId],$m->messages[1]['code'],$loginKey,$now+1
 )['ok'],'undelivered OTP cannot be consumed');
-echo "ALL_OTP_ISSUER_TESTS_PASS\n";
+$m->succeed=true;
+$m->throwError=true;
+assert_issuer($issuer->issue('anna@example.com','verification','127.0.0.1',$now)===null,
+    'delivery exception returns generic failure');
+assert_issuer(count($w->invalidated)===2,
+    'delivery exception also invalidates persisted challenge');
+$exceptionId=$w->invalidated[1];
+$verifyKey=BadAround_Identity_Purpose_Keys::for_purpose('verification',$key);
+assert_issuer(!BadAround_Identity_Challenge_Primitives::verify(
+    $w->records[$exceptionId],$m->messages[2]['code'],$verifyKey,$now+1
+)['ok'],'provider exception leaves no usable OTP');
+echo "ALL_OTP_ISSUER_TESTS_PASS\\n";
