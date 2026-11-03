@@ -1,0 +1,20 @@
+name: BA-IDENTITY-01C isolated primitive tests
+on:
+  push:
+    branches:
+      - feature/ba-identity-01c-dormant-20261103
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  identity-primitives:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP syntax
+        run: |
+          php -l prototypes/ba-identity-01c/challenge-primitives.php
+          php -l prototypes/ba-identity-01c/test-challenge-primitives.php
+      - name: OTP state machine tests
+        run: php prototypes/ba-identity-01c/test-challenge-primitives.php
