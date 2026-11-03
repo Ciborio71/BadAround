@@ -11,8 +11,14 @@ final class QuotaFixture implements BadAround_Identity_Issue_Quota {
 }
 final class ChallengeFixture implements BadAround_Identity_Challenge_Writer {
     public array $records=[];
+    public array $invalidated=[];
     public function insert(array $record): void {
         $this->records[$record['challenge_id']]=$record;
+    }
+    public function invalidate(string $challengeId, int $now): void {
+        $this->invalidated[]=$challengeId;
+        if (!isset($this->records[$challengeId])) { throw new RuntimeException('Missing challenge'); }
+        $this->records[$challengeId]['consumed_at']=$now;
     }
 }
 final class MailFixture implements BadAround_Identity_Otp_Transport {
@@ -53,4 +59,9 @@ assert_issuer($issuer->issue('anna@example.com','enrollment','not-an-ip',$now)==
 $m->succeed=false;
 assert_issuer($issuer->issue('anna@example.com','login','127.0.0.1',$now)===null,'failed transport returns generic failure');
 assert_issuer(count($m->messages)===2,'transport called only after quota');
+assert_issuer(count($w->invalidated)===1,'failed transport invalidates persisted challenge');
+$failedId=$w->invalidated[0];
+assert_issuer(!BadAround_Identity_Challenge_Primitives::verify(
+    $w->records[$failedId],$m->messages[1]['code'],$loginKey,$now+1
+)['ok'],'undelivered OTP cannot be consumed');
 echo "ALL_OTP_ISSUER_TESTS_PASS\n";
