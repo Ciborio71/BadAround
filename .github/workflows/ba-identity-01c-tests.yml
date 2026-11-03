@@ -41,6 +41,8 @@ jobs:
           php -l prototypes/ba-identity-01c/test-mysql-ownership.php
           php -l prototypes/ba-identity-01c/mysql-rate-limiter.php
           php -l prototypes/ba-identity-01c/test-mysql-rate-limiter.php
+          php -l prototypes/ba-identity-01c/post-intake-binder.php
+          php -l prototypes/ba-identity-01c/test-post-intake-binder.php
       - name: OTP state machine tests
         run: |
           php prototypes/ba-identity-01c/test-challenge-primitives.php
@@ -51,6 +53,7 @@ jobs:
           php prototypes/ba-identity-01c/test-edit-guard.php
           php prototypes/ba-identity-01c/test-verification-coordinator.php
           php prototypes/ba-identity-01c/test-enrollment-policy.php
+          php prototypes/ba-identity-01c/test-post-intake-binder.php
 
   identity-mysql:
     runs-on: ubuntu-latest
