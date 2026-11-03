@@ -18,7 +18,7 @@ interface BadAround_Identity_Community_Rest_Budget {
 
 final class BadAround_Identity_Community_Rest_Adapter {
     public const REST_NAMESPACE = 'badaround/v1';
-    public const COOKIE_NAME = 'ba_identity_session';
+    public const COOKIE_NAME = '__Host-ba_identity';
     public const MAX_BODY_BYTES = 8192;
 
     public function __construct(
