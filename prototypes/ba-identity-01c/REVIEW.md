@@ -72,3 +72,10 @@ Validate the newly added disposable-MySQL CI service and two-worker race test; t
 - Integration assertions cover successful OTP consumption, wrong-code attempts and rollback after duplicate-email rejection. Existing two-worker challenge test remains in CI.
 - **CI execution has not yet been observed as PASS**; do not merge/deploy based on file creation alone.
 - **Important remaining gates:** transactional concurrent enrollment test across independent challenge IDs for same email, verified purpose binding to challenge, deletion/retention policies, audit logs, real delivery/retries, database-backed session revocation on identity revocation, key rotation, public error normalization, and integration with WordPress/Core.
+
+## Parallel same-email enrollment gate — 2026-11-03
+
+- `test-mysql-enrollment-race.php` uses **two independent PDO connections**, two OTPs for the *same* normalized email and a two-worker barrier. The test requires exactly one activated identity and one committed OTP consumption; the losing transaction must roll back its OTP.
+- The test runs against a disposable `ba_identity_ci` MySQL service only; no production database access or secrets.
+- Added to the GitHub Actions `identity-mysql` job. **No passing CI logs have been independently observed in this session**, so the gate remains **unverified**, not PASS.
+- Remaining before public WordPress integration: OTP purpose binding, server-side throttling and email delivery, transactional ownership grants, verified-identity revocation/session invalidation, identity key rotation, retention/deletion controls, audit and CSRF middleware, and private area UX.
