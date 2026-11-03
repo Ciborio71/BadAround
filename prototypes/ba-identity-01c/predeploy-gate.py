@@ -27,7 +27,9 @@ SAFE_EXACT = (".github/workflows/ba-identity-01c-tests.yml",
               ".github/workflows/ba-identity-mariadb103-ci.yml",
               ".github/workflows/ba-identity-dormant-cookie-patch.yml",
               ".github/scripts/ba_identity_dormant_cookie_patch.py",
-              ".github/scripts/ba_identity_dormant_upload.py")
+              ".github/scripts/ba_identity_dormant_upload.py",
+              ".github/workflows/ba-identity-login-append.yml",
+              ".github/scripts/ba_identity_login_append.py")
 
 def main():
     missing = [str(path) for path in REQUIRED if not (ROOT / path).is_file()]
@@ -54,7 +56,7 @@ def main():
     print(f"PASS: {len(changed)} changed files limited to dormant prototype/docs/CI.")
     print("HOLD: Dormant files may be transferred with the dedicated guarded workflow only; no runtime activation.")
     print("HOLD: Live Core byte parity and production rollback not certified. Staging bypass approved.")
-    print("HOLD: Schema migration, outbox, API integration, audit, browser QA and rollback not certified.")
+    print("HOLD: Live schema exists; runtime bootstrap, audit, consent, private QA and rollback still require review.")
     print("HOLD: Full-plugin FTPS workflow MUST NOT be used for Identity; use scoped production patch only after runtime gates.")
     return 0
 
