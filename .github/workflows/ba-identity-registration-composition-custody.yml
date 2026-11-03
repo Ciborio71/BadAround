@@ -1,0 +1,32 @@
+name: BA-IDENTITY append registration composition to dormant Core
+on:
+  push:
+    branches:
+      - feature/ba-identity-01c-dormant-20261103
+    paths:
+      - .github/workflows/ba-identity-registration-composition-custody.yml
+permissions:
+  contents: read
+concurrency:
+  group: badaround-production-scoped-ftps
+  cancel-in-progress: false
+jobs:
+  append-composition:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, openssl, pdo_mysql
+          coverage: none
+      - name: Verify isolated registration integration
+        run: php -l prototypes/ba-identity-01c/wordpress-registration-composition.php
+      - name: Append inert registration dependency with Core SHA guard
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 .github/scripts/ba_identity_registration_composition_custody.py
