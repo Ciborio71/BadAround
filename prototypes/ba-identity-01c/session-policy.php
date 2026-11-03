@@ -7,6 +7,8 @@ interface BadAround_Identity_Session_Store {
     public function insert(array $record): void;
     public function find(string $digest): ?array;
     public function revoke(string $digest, int $now): bool;
+    /** Atomically revoke every non-revoked session for this verified identity. */
+    public function revoke_all_for_identity(string $identityId, int $now): int;
 }
 
 final class BadAround_Identity_Sessions {
@@ -53,6 +55,18 @@ final class BadAround_Identity_Sessions {
         return $this->store->revoke($this->digest($secret), $now);
     }
 
+    /**
+     * Bulk revoke on identity disable, suspicious activity or privacy request.
+     * Caller MUST also mark identity revoked in a controlled transaction and
+     * enforce identity status on every subsequent authenticated write.
+     */
+    public function revoke_all(string $identityId, int $now): int {
+        if (!preg_match('/^[a-zA-Z0-9_-]{8,128}$/D', $identityId) || $now <= 0) {
+            throw new InvalidArgumentException('Invalid revocation context');
+        }
+        return $this->store->revoke_all_for_identity($identityId, $now);
+    }
+
     public static function cookie_options(int $expiresAt): array {
         return ['expires'=>$expiresAt,'path'=>'/','secure'=>true,
                 'httponly'=>true,'samesite'=>'Lax'];
@@ -73,6 +87,17 @@ final class BadAround_Identity_Session_Memory_Store implements BadAround_Identit
     }
     public function find(string $digest): ?array {
         return $this->rows[$digest] ?? null;
+    }
+    public function revoke_all_for_identity(string $identityId, int $now): int {
+        $count = 0;
+        foreach ($this->rows as &$row) {
+            if ($row['identity_id'] === $identityId && $row['revoked_at'] === null) {
+                $row['revoked_at'] = $now;
+                ++$count;
+            }
+        }
+        unset($row);
+        return $count;
     }
     public function revoke(string $digest, int $now): bool {
         if (!isset($this->rows[$digest]) || $this->rows[$digest]['revoked_at'] !== null) {
