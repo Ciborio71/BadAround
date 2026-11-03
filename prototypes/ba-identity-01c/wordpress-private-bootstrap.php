@@ -6,6 +6,7 @@
  */
 declare(strict_types=1);
 require_once __DIR__.'/wordpress-privacy-notice.php';
+require_once __DIR__.'/wordpress-private-access.php';
 
 final class BadAround_Identity_WordPress_Private_Bootstrap {
     public static function enabled():bool {
@@ -18,7 +19,7 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
      * Caller supplies already trusted PDO and the canonical WP prefix.
      */
     public static function install(PDO $db,string $prefix):bool {
-        if (!self::enabled()) {return false;}
+        if (!self::enabled() || !BadAround_Identity_Private_Access::authorized()) {return false;}
         if (!defined('BADAROUND_IDENTITY_ROOT_SECRET')
             || !is_string(BADAROUND_IDENTITY_ROOT_SECRET)
             || strlen(BADAROUND_IDENTITY_ROOT_SECRET)<48
