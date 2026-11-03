@@ -25,8 +25,11 @@ final class BadAround_Identity_Community_Policy {
         }
         $first = trim($firstName);
         $last = trim($lastName);
-        if ($first === '' || $last === '') {
-            throw new InvalidArgumentException('Mandatory private identity missing');
+        if ($first === '' || $last === ''
+            || mb_strlen($first,'UTF-8') > 191 || mb_strlen($last,'UTF-8') > 191
+            || preg_match('/[<>\\x00-\\x1f]/u',$first)
+            || preg_match('/[<>\\x00-\\x1f]/u',$last)) {
+            throw new InvalidArgumentException('Mandatory private identity invalid');
         }
         if ($mode === 'first_name') { return $first; }
         return $first.' '.mb_substr($last,0,1,'UTF-8').'.';
