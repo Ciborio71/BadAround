@@ -43,4 +43,15 @@ $badBinding = false;
 try { $service->stage($profile, $mismatched['record'], $now); }
 catch (InvalidArgumentException $e) { $badBinding = true; }
 enroll_check($badBinding, 'mismatched challenge/email HMAC rejected');
+$unregistered = BadAround_Identity_Challenge_Primitives::new_challenge($profile['email'], $key, $now);
+$unregisteredDenied = false;
+try { $service->stage($profile, $unregistered['record'], $now); }
+catch (InvalidArgumentException $e) { $unregisteredDenied = true; }
+enroll_check($unregisteredDenied, 'unregistered challenge rejected');
+$expiredStage = BadAround_Identity_Challenge_Primitives::new_challenge($profile['email'], $key, $now, 60);
+$challengeStore->insert($expiredStage['record']);
+$expiredDenied = false;
+try { $service->stage($profile, $expiredStage['record'], $now+60); }
+catch (InvalidArgumentException $e) { $expiredDenied = true; }
+enroll_check($expiredDenied, 'expired challenge cannot stage profile');
 echo "ALL_ENROLLMENT_TESTS_PASS\n";
