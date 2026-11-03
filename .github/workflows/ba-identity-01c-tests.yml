@@ -12,6 +12,12 @@ jobs:
     timeout-minutes: 7
     steps:
       - uses: actions/checkout@v4
+      - name: Prepare PHP 8.3 with required extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, openssl, pdo_mysql, pcntl
+          coverage: none
       - name: PHP syntax
         run: |
           php -l prototypes/ba-identity-01c/challenge-primitives.php
@@ -84,13 +90,19 @@ jobs:
           --health-retries=15
     steps:
       - uses: actions/checkout@v4
+      - name: Prepare PHP 8.3 with MySQL support
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, openssl, pdo_mysql, pcntl
+          coverage: none
       - name: Ephemeral MySQL integration
         env:
           BA_TEST_DB_DSN: "mysql:host=127.0.0.1;port=3306;dbname=ba_identity_ci;charset=utf8mb4"
           BA_TEST_DB_USER: ba_ci
           BA_TEST_DB_PASS: local-ci-only-password
         run: |
-          php -m
+          php -r 'foreach (["mbstring", "openssl", "pdo_mysql", "pcntl"] as $e) { if (!extension_loaded($e)) { fwrite(STDERR, "Missing ".$e.PHP_EOL); exit(1); } }'
           php prototypes/ba-identity-01c/test-mysql-integration.php
           php prototypes/ba-identity-01c/test-mysql-concurrency.php
           php prototypes/ba-identity-01c/test-mysql-enrollment.php
