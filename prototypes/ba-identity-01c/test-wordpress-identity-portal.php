@@ -48,6 +48,8 @@ portal_assert(str_contains($html,'name="first_name"')
 portal_assert(str_contains($html,'data-ba-form="login"')
     && str_contains($html,'data-ba-form="otp"')
     && str_contains($html,'data-ba-logout')
+    && str_contains($html,'data-ba-activity')
+    && str_contains($html,'data-ba-activity-list')
     && count($GLOBALS['portal_enqueue'])===1,
     'login/OTP/logout private JS enqueued');
 $GLOBALS['portal_page']->post_modified_gmt='2026-11-04 01:00:00';
