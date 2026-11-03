@@ -28,6 +28,8 @@ jobs:
           php -l prototypes/ba-identity-01c/test-csrf-policy.php
           php -l prototypes/ba-identity-01c/test-mysql-integration.php
           php -l prototypes/ba-identity-01c/test-mysql-concurrency.php
+          php -l prototypes/ba-identity-01c/edit-guard.php
+          php -l prototypes/ba-identity-01c/test-edit-guard.php
       - name: OTP state machine tests
         run: |
           php prototypes/ba-identity-01c/test-challenge-primitives.php
@@ -35,6 +37,7 @@ jobs:
           php prototypes/ba-identity-01c/test-ownership-policy.php
           php prototypes/ba-identity-01c/test-session-policy.php
           php prototypes/ba-identity-01c/test-csrf-policy.php
+          php prototypes/ba-identity-01c/test-edit-guard.php
 
   identity-mysql:
     runs-on: ubuntu-latest
