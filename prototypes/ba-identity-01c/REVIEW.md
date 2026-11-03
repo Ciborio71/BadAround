@@ -96,3 +96,10 @@ Validate the newly added disposable-MySQL CI service and two-worker race test; t
 - New `test-post-intake-binder.php`, `test-mysql-rate-limiter.php`, updated CI and review-only DDL.
 - **Release gates still open:** observed green CI, separate challenge purpose and per-IP/email quota wiring, transactional or recoverable ownership linkage after live intake, private review/moderation workflow for edits, revised mandatory name/surname/email on contributions and comments, public identity display modes, real session cookie/CSRF controllers, revocation, encrypted PII retention/deletion, WP live Core diff and explicit deploy authorization.
 - Absolutely no plugin bootstrap, production schema migration, live reset or deploy performed.
+
+## Community and proposed revisions, 2026-11-03
+
+- Added `community-policy.php`: all four approved public identity modes (anonymous, pseudonym, first name, first name + surname initial), pending-only comment intents, one-level replies only to an approved top-level comment of the SAME event, and owner-checked private description revision intents.
+- Added `test-community-policy.php` to isolated primitive CI. Moderation is immutable at request creation (`pending`), and an edit request cannot directly mutate a published event.
+- This is **not** the live comments UI, persistence, real ownership lookup, comment abuse report, notification system, or publication workflow; these remain separate integration tasks. The caller must escape public text on rendering and keep private identity fields outside the public projection.
+- Live contribution form still differs from contract; WordPress changes require a separate controlled review and no regression to existing contributions and Radar/maps.
