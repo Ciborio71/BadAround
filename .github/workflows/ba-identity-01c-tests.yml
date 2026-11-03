@@ -32,6 +32,8 @@ jobs:
           php -l prototypes/ba-identity-01c/test-edit-guard.php
           php -l prototypes/ba-identity-01c/verification-coordinator.php
           php -l prototypes/ba-identity-01c/test-verification-coordinator.php
+          php -l prototypes/ba-identity-01c/enrollment-policy.php
+          php -l prototypes/ba-identity-01c/test-enrollment-policy.php
       - name: OTP state machine tests
         run: |
           php prototypes/ba-identity-01c/test-challenge-primitives.php
@@ -41,6 +43,7 @@ jobs:
           php prototypes/ba-identity-01c/test-csrf-policy.php
           php prototypes/ba-identity-01c/test-edit-guard.php
           php prototypes/ba-identity-01c/test-verification-coordinator.php
+          php prototypes/ba-identity-01c/test-enrollment-policy.php
 
   identity-mysql:
     runs-on: ubuntu-latest
