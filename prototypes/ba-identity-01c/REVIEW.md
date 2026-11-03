@@ -13,7 +13,7 @@
 
 ## Important limitations
 
-1. **No MySQL integration test** yet; CI runs syntax and pure/in-memory tests, not MySQL transactions, row-lock concurrency or rollback.
+1. **MySQL integration and parallel-CAS tests have been added** to GitHub Actions using a disposable MySQL 8 service; **CI success is not yet verified**. The two-process barrier test checks exactly one winner for the same OTP. Transaction rollback, deadlocks and crash recovery remain untested.
 2. **Session idle refresh** is not implemented. For now 24h from issue/last_seen set at creation, notwithstanding the 7-day maximum absolute lifetime. Do not claim sliding inactivity window.
 3. No WordPress bootstrap, CSRF middleware, real cookie issuance, rate-limiting application layer, OTP delivery, user lifecycle or public endpoints.
 4. No table creation, migration, schema version bump or live install.
@@ -21,9 +21,9 @@
 6. Challenge `delivery_code` is intentionally returned to a future delivery coordinator; never persist or include in logs, API responses or exceptions.
 7. Challenge consumption must commit before session issuance. Cross-system transactional handoff and failure-recovery remain to be designed/tested.
 8. Public alias selection and ownership authorization require separate verified bindings and complete moderation integration.
-9. CI push workflow status should be inspected before any PR review; green CI does not establish production readiness.
+9. CI push workflow status must be inspected: both the pure-test job and the disposable-MySQL job must pass. Green CI does not establish production readiness.
 10. Since GitHub is not aligned byte-for-byte with live production Core, no broad theme/plugin deploy is allowed.
 
 ## Next gate
 
-Add a temporary **MySQL CI service** (isolated test database) and run concurrent claim attempts; implement revision request ownership checks, CSRF protection, challenges store expiry cleanup, retry logic and secure controller. Prepare installer migrations only after comparing live schema and obtaining approval.
+Validate the newly added disposable-MySQL CI service and two-worker race test; then implement challenge expiry cleanup, retry logic and secure controller integration. The isolated session-bound CSRF policy is present, but middleware integration and rotation remain outstanding. Prepare installer migrations only after comparing live schema and obtaining approval.
