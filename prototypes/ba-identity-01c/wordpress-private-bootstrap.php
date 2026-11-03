@@ -48,6 +48,7 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
             require_once __DIR__.'/wordpress-registration-composition.php';
             require_once __DIR__.'/wordpress-login-composition.php';
             require_once __DIR__.'/wordpress-login-rest.php';
+            require_once __DIR__.'/wordpress-session-rest.php';
             require_once __DIR__.'/wordpress-composition.php';
             $key=BADAROUND_IDENTITY_ROOT_SECRET;
             $mailer=new BadAround_Transactional_Mailer();
@@ -83,11 +84,17 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
             $community=BadAround_Identity_WordPress_Composition::assemble(
                 $db,$prefix,$key,$origin
             );
+            $sessionApi=new BadAround_Identity_WordPress_Session_REST(
+                $sessions,new BadAround_Identity_Mysql_Active_Status($db,$prefix.'ba_identities'),
+                new BadAround_Identity_WordPress_Session_Cookie(new BadAround_Identity_Native_Cookie_Writer()),
+                $csrf,$origin
+            );
             // Assemble the complete graph before registering ANY hook:
             // partial initialization must never expose a functioning route.
             // Individual REST controllers still require their own flags.
             $registration->register_hooks();
             $login->register_hooks();
+            $sessionApi->register_hooks();
             $community->register_hooks();
             return true;
         } catch(Throwable $error) {
