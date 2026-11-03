@@ -9,7 +9,7 @@ permissions:
 jobs:
   identity-primitives:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 7
     steps:
       - uses: actions/checkout@v4
       - name: PHP syntax
@@ -24,9 +24,40 @@ jobs:
           php -l prototypes/ba-identity-01c/session-policy.php
           php -l prototypes/ba-identity-01c/test-session-policy.php
           php -l prototypes/ba-identity-01c/mysql-session-store.php
+          php -l prototypes/ba-identity-01c/csrf-policy.php
+          php -l prototypes/ba-identity-01c/test-csrf-policy.php
+          php -l prototypes/ba-identity-01c/test-mysql-integration.php
       - name: OTP state machine tests
         run: |
           php prototypes/ba-identity-01c/test-challenge-primitives.php
           php prototypes/ba-identity-01c/test-challenge-store.php
           php prototypes/ba-identity-01c/test-ownership-policy.php
           php prototypes/ba-identity-01c/test-session-policy.php
+          php prototypes/ba-identity-01c/test-csrf-policy.php
+
+  identity-mysql:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: ba_identity_ci
+          MYSQL_USER: ba_ci
+          MYSQL_PASSWORD: local-ci-only-password
+          MYSQL_ROOT_PASSWORD: local-ci-root-only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -plocal-ci-root-only"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ephemeral MySQL integration
+        env:
+          BA_TEST_DB_DSN: mysql:host=127.0.0.1;port=3306;dbname=ba_identity_ci;charset=utf8mb4
+          BA_TEST_DB_USER: ba_ci
+          BA_TEST_DB_PASS: local-ci-only-password
+        run: php prototypes/ba-identity-01c/test-mysql-integration.php
