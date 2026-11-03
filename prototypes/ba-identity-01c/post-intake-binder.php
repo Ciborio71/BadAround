@@ -5,6 +5,7 @@
  * report receipt may request a binding. No WordPress hooks are registered.
  */
 declare(strict_types=1);
+require_once __DIR__ . '/session-policy.php';
 
 interface BadAround_Identity_Intake_Receipt {
     /** Called only using a server-sourced receipt, not browser JSON. */
@@ -19,21 +20,22 @@ interface BadAround_Identity_Ownership_Grant {
 final class BadAround_Identity_Post_Intake_Binder {
     public function __construct(
         private BadAround_Identity_Intake_Receipt $receipts,
-        private BadAround_Identity_Ownership_Grant $grants
+        private BadAround_Identity_Ownership_Grant $grants,
+        private BadAround_Identity_Sessions $sessions
     ) {}
 
     /**
-     * Accepts trusted server-side receipt (report_id,event_id,duplicate).
+     * Accepts a bearer session from the verified cookie and a trusted server-side
+     * receipt (report_id,event_id,duplicate). Never accepts a claimed identity id.
      * Never assigns ownership to a duplicate or pre-existing report.
      * Caller is responsible for transaction/outbox integration; a false
      * result MUST NOT be presented as a successful ownership grant.
      */
     public function bind_created_report(
-        ?string $verifiedIdentity, array $receipt, int $now
+        ?string $sessionToken, array $receipt, int $now
     ): bool {
-        if (!$verifiedIdentity
-            || !preg_match('/^[a-zA-Z0-9_-]{8,128}$/D', $verifiedIdentity)
-            || $now <= 0
+        $verifiedIdentity = $sessionToken === null ? null : $this->sessions->identity_for($sessionToken,$now);
+        if (!$verifiedIdentity || $now <= 0
             || !array_key_exists('duplicate', $receipt)
             || $receipt['duplicate'] !== false) {
             return false;
