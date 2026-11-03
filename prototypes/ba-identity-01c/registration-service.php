@@ -8,7 +8,15 @@ declare(strict_types=1);
 require_once __DIR__.'/enrollment-policy.php';
 require_once __DIR__.'/otp-issuer.php';
 
-final class BadAround_Identity_Registration_Service {
+interface BadAround_Identity_Registration_Actions {
+    public function start(
+        string $firstName,string $lastName,string $email,
+        bool $privacyAcknowledged,string $trustedIp,int $now
+    ): ?string;
+    public function verify(string $challengeId,string $code,int $now):?string;
+}
+
+final class BadAround_Identity_Registration_Service implements BadAround_Identity_Registration_Actions {
     public function __construct(
         private BadAround_Identity_Enrollment $enrollment,
         private BadAround_Identity_Issue_Quota $quota,
