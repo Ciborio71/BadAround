@@ -9,7 +9,8 @@ final class BadAround_Identity_Schema_Candidate {
     public const SUFFIXES = [
         'ba_identity_challenges','ba_identity_pending','ba_identities',
         'ba_identity_sessions','ba_identity_rate_limits','ba_identity_ownership',
-        'ba_identity_recovery','ba_identity_moderation','ba_identity_wp_actors'
+        'ba_identity_recovery','ba_identity_moderation','ba_identity_wp_actors',
+        'ba_identity_community_budget'
     ];
     public static function statements(string $prefix): array {
         if (!preg_match('/^[A-Za-z0-9_]{1,48}$/D',$prefix)) {
@@ -60,7 +61,12 @@ final class BadAround_Identity_Schema_Candidate {
             'ba_identity_wp_actors' => 'wp_user_id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
               identity_id VARCHAR(128) NOT NULL, verified_at BIGINT UNSIGNED NOT NULL,
               revoked_at BIGINT UNSIGNED NULL, version INT UNSIGNED NOT NULL DEFAULT 0,
-              UNIQUE KEY identity (identity_id)'
+              UNIQUE KEY identity (identity_id)',
+            'ba_identity_community_budget' => 'kind VARCHAR(16) NOT NULL,
+              bucket CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+              window_start BIGINT UNSIGNED NOT NULL, hits INT UNSIGNED NOT NULL DEFAULT 0,
+              expires_at BIGINT UNSIGNED NOT NULL,
+              PRIMARY KEY (kind,bucket,window_start), KEY expires (expires_at)'
         ];
         $sql=[];
         foreach (self::SUFFIXES as $suffix) {
