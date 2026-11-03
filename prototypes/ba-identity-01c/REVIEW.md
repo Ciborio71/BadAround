@@ -119,3 +119,12 @@ Validate the newly added disposable-MySQL CI service and two-worker race test; t
 - A dedicated disposable-MySQL test covers active, pending, revoked and missing identities, plus immediate revocation visibility; included in the isolated CI workflow.
 - **Local runtime observation:** PHP CLI is available but lacks `pdo_mysql` and `mbstring`, so the full suite cannot be executed here without an isolated CI runner with the required extensions. GitHub Actions results remain **not independently inspected**.
 - No production Core/plugin/theme or schema changes. Remaining deployment gates include verified CI run logs, purpose-bound controller integration, email delivery, fail-closed quotas, consent/retention, transactional ownership reconciliation and review-only migration testing.
+
+## OTP issuance integration tranche — 2026-11-03
+
+- CI jobs now explicitly install PHP 8.3 extensions `mbstring`, `openssl`, `pdo_mysql` and `pcntl`. A MySQL integration regression uses a **purpose-derived enrollment OTP key**, preserving the stable root-key HMAC email lookup.
+- Added `otp-issuer.php` with dependency injection for shared pre-send quota, persistent challenge insert and outbound email; raw OTP is delivered to the adapter but never included in the persisted record or returned receipt. No real mail was sent.
+- Added `otp-adapters.php`: compatibility adapter for existing `BadAround_Transactional_Mailer::send()`; composite shared MySQL per-email (3/15 minutes) and per-IP (8/15 minutes) budgets, applied before transport. Failure denies issuance, no fallback.
+- Added pure tests `test-otp-issuer.php`, `test-otp-adapters.php` and an integrated MySQL quota check; added to the workflow.
+- **Critical integration gates still open:** the HTTP controller must issue a single generic response (avoid account enumeration), securely stage the required first/last name and consent, bind challenge to purpose and pending enrollment, and use a configured trusted proxy for client IP. Transport failure leaves a persisted unconsumed challenge until expiry; add safe cleanup and resend/recovery. The PHP adapters are **not** WordPress-bootstrapped.
+- **No GitHub Actions green run has been independently verified**. Until logs are checked, code is not certified. No live migration/deploy/reset.
