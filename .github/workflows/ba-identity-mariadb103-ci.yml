@@ -41,6 +41,7 @@ jobs:
         run: |
           php -r '$pdo=new PDO(getenv("BA_TEST_DB_DSN"),getenv("BA_TEST_DB_USER"),getenv("BA_TEST_DB_PASS")); $v=$pdo->query("SELECT VERSION()")->fetchColumn(); echo "CI_DB_ENGINE=".$v.PHP_EOL; if (!str_contains(strtolower($v),"mariadb") || !str_starts_with($v,"10.3.")) exit(9);'
           php prototypes/ba-identity-01c/test-schema-candidate.php
+          php prototypes/ba-identity-01c/test-schema-recovery.php
           php prototypes/ba-identity-01c/test-mysql-community-budget.php
           php prototypes/ba-identity-01c/test-mysql-ownership.php
           php prototypes/ba-identity-01c/test-mysql-wp-actor-binding.php
