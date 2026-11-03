@@ -15,18 +15,18 @@ function migration_assert(bool $ok,string $name):void {
 }
 $prefix='ba_migration_ci_';
 $statements=BadAround_Identity_Schema_Candidate::statements($prefix);
-migration_assert(count($statements)===9,'nine additive identity tables defined');
+migration_assert(count($statements)===10,'ten additive identity tables defined');
 foreach ($statements as $suffix=>$sql) {
     migration_assert(str_starts_with($sql,'CREATE TABLE IF NOT EXISTS'),
         'additive statement for '.$suffix);
     $db->exec($sql);
 }
 foreach ($statements as $sql) { $db->exec($sql); }
-migration_assert(count($statements)===9,'second migration pass is idempotent');
+migration_assert(count($statements)===10,'second migration pass is idempotent');
 $statement=$db->prepare("SELECT COUNT(*) FROM information_schema.TABLES
  WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME LIKE :prefix");
 $statement->execute([':prefix'=>$prefix.'%']);
-migration_assert((int)$statement->fetchColumn()===9,'all nine prefixed tables exist');
+migration_assert((int)$statement->fetchColumn()===10,'all ten prefixed tables exist');
 $actor=new BadAround_Identity_Mysql_WP_Actor_Binding($db,
     $prefix.'ba_identity_wp_actors');
 $now=1762156800;
