@@ -18,7 +18,10 @@ jobs:
           php -l prototypes/ba-identity-01c/test-challenge-primitives.php
           php -l prototypes/ba-identity-01c/challenge-store.php
           php -l prototypes/ba-identity-01c/test-challenge-store.php
+          php -l prototypes/ba-identity-01c/ownership-policy.php
+          php -l prototypes/ba-identity-01c/test-ownership-policy.php
       - name: OTP state machine tests
         run: |
           php prototypes/ba-identity-01c/test-challenge-primitives.php
           php prototypes/ba-identity-01c/test-challenge-store.php
+          php prototypes/ba-identity-01c/test-ownership-policy.php
