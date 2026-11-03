@@ -104,6 +104,8 @@ jobs:
           php -l prototypes/ba-identity-01c/test-wordpress-privacy-notice.php
           php -l prototypes/ba-identity-01c/wordpress-private-bootstrap.php
           php -l prototypes/ba-identity-01c/test-wordpress-private-bootstrap.php
+          php -l prototypes/ba-identity-01c/wordpress-runtime-loader.php
+          php -l prototypes/ba-identity-01c/test-wordpress-runtime-loader.php
           php -l prototypes/ba-identity-01c/registration-service.php
           php -l prototypes/ba-identity-01c/test-registration-mysql.php
       - name: OTP state machine tests
@@ -132,6 +134,7 @@ jobs:
           php prototypes/ba-identity-01c/test-wordpress-registration-rest.php
           php prototypes/ba-identity-01c/test-wordpress-privacy-notice.php
           php prototypes/ba-identity-01c/test-wordpress-private-bootstrap.php
+          php prototypes/ba-identity-01c/test-wordpress-runtime-loader.php
 
   identity-mysql:
     runs-on: ubuntu-latest
