@@ -25,6 +25,8 @@ SAFE_EXACT = (".github/workflows/ba-identity-01c-tests.yml",
               ".github/workflows/ba-identity-live-ftps-preflight.yml",
               ".github/workflows/ba-identity-dormant-upload.yml",
               ".github/workflows/ba-identity-mariadb103-ci.yml",
+              ".github/workflows/ba-identity-dormant-cookie-patch.yml",
+              ".github/scripts/ba_identity_dormant_cookie_patch.py",
               ".github/scripts/ba_identity_dormant_upload.py")
 
 def main():
