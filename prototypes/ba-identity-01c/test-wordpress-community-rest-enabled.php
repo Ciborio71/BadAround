@@ -34,6 +34,16 @@ final class RestEnabledInbox implements BadAround_Identity_Community_Inbox_Write
         return false;
     }
 }
+final class RestBudgetFixture implements BadAround_Identity_Community_Rest_Budget {
+    public bool $allow=true;
+    public bool $throwError=false;
+    public int $calls=0;
+    public function consume(string $sessionToken,string $kind,int $now):bool {
+        $this->calls++;
+        if ($this->throwError) { throw new RuntimeException('Quota unavailable'); }
+        return $this->allow;
+    }
+}
 function rest_assert(bool $ok,string $label):void {
     if (!$ok) { throw new RuntimeException('FAIL '.$label); }
     echo 'PASS '.$label.PHP_EOL;
@@ -49,7 +59,8 @@ $guard=new BadAround_Identity_Edit_Guard($sessions,$key,'https://badaround.it',$
 $authority=new RestEnabledAuthority();$authority->token=$token;
 $inbox=new RestEnabledInbox();
 $gateway=new BadAround_Identity_Community_Gateway($authority,$inbox,$guard,$key,'https://badaround.it');
-$rest=new BadAround_Identity_Community_Rest_Adapter($gateway);
+$quota=new RestBudgetFixture();
+$rest=new BadAround_Identity_Community_Rest_Adapter($gateway,$quota);
 rest_assert($rest->register_hooks(),'feature flag permits hook registration in isolated test');
 $rest->register_routes();
 rest_assert(isset($GLOBALS['ba_test_routes']['/community-comments'])
@@ -75,4 +86,17 @@ $revision=$rest->submit(new RestEnabledRequest($headers,['report_id'=>701,
     'snapshot_digest'=>str_repeat('a',64)]),'revision');
 rest_assert(($revision['status']??null)===503 && count($inbox->entries)===1,
  'untrusted revision snapshot cannot be promoted');
+$quota->allow=false;
+$blocked=$rest->submit(new RestEnabledRequest($headers,$payload),'comment');
+rest_assert(($blocked['status']??null)===429 && count($inbox->entries)===1,
+ 'rate-limited comment cannot enter moderation');
+$quota->allow=true;
+$quota->throwError=true;
+$failure=$rest->submit(new RestEnabledRequest($headers,$payload),'comment');
+rest_assert(($failure['status']??null)===503 && count($inbox->entries)===1,
+ 'quota backend failure fails closed');
+$unwired=new BadAround_Identity_Community_Rest_Adapter($gateway);
+$failure=$unwired->submit(new RestEnabledRequest($headers,$payload),'comment');
+rest_assert(($failure['status']??null)===503 && count($inbox->entries)===1,
+ 'missing quota adapter prevents writes');
 echo "ALL_ENABLED_REST_BOUNDARY_TESTS_PASS\n";
