@@ -27,6 +27,7 @@ jobs:
           php -l prototypes/ba-identity-01c/csrf-policy.php
           php -l prototypes/ba-identity-01c/test-csrf-policy.php
           php -l prototypes/ba-identity-01c/test-mysql-integration.php
+          php -l prototypes/ba-identity-01c/test-mysql-concurrency.php
       - name: OTP state machine tests
         run: |
           php prototypes/ba-identity-01c/test-challenge-primitives.php
@@ -60,4 +61,8 @@ jobs:
           BA_TEST_DB_DSN: mysql:host=127.0.0.1;port=3306;dbname=ba_identity_ci;charset=utf8mb4
           BA_TEST_DB_USER: ba_ci
           BA_TEST_DB_PASS: local-ci-only-password
-        run: php prototypes/ba-identity-01c/test-mysql-integration.php
+        run: |
+          php -m | grep -E '^(pcntl|pdo_mysql)
+
+          php prototypes/ba-identity-01c/test-mysql-integration.php
+          php prototypes/ba-identity-01c/test-mysql-concurrency.php
