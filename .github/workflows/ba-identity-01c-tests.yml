@@ -29,6 +29,8 @@ jobs:
           php -l prototypes/ba-identity-01c/test-mysql-integration.php
           php -l prototypes/ba-identity-01c/test-mysql-concurrency.php
           php -l prototypes/ba-identity-01c/identity-active-status.php
+          php -l prototypes/ba-identity-01c/mysql-identity-active-status.php
+          php -l prototypes/ba-identity-01c/test-mysql-active-status.php
           php -l prototypes/ba-identity-01c/edit-guard.php
           php -l prototypes/ba-identity-01c/test-edit-guard.php
           php -l prototypes/ba-identity-01c/verification-coordinator.php
@@ -95,3 +97,4 @@ jobs:
           php prototypes/ba-identity-01c/test-mysql-enrollment-race.php
           php prototypes/ba-identity-01c/test-mysql-ownership.php
           php prototypes/ba-identity-01c/test-mysql-rate-limiter.php
+          php prototypes/ba-identity-01c/test-mysql-active-status.php
