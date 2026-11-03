@@ -57,7 +57,7 @@ final class BadAround_Identity_Enrollment {
      * Caller must deliver OTP separately; no identity is active before verify.
      * Do not return private fields in public JSON responses.
      */
-    public function stage(array $profile, array $challengeRecord, int $now): void {
+    public function stage(array $profile, array $challengeRecord, int $now, ?array $privacyConsent = null): void {
         foreach (['first_name', 'last_name', 'email'] as $field) {
             if (!array_key_exists($field, $profile) || !is_string($profile[$field])) {
                 throw new InvalidArgumentException('Missing mandatory profile data');
@@ -82,8 +82,18 @@ final class BadAround_Identity_Enrollment {
             || !isset($stored['expires_at']) || $now >= (int)$stored['expires_at']) {
             throw new InvalidArgumentException('Challenge unavailable for enrollment');
         }
-        // Delivery coordinator must separately enforce rate limits,
-        // challenge purpose, privacy retention and consent validation.
+        // No implicit consent: the caller must get affirmative user action.
+        // Legacy stage() remains available to old CI callers, but the only
+        // new public controller uses consent-required registration service.
+        if ($privacyConsent !== null
+            && (($privacyConsent['accepted'] ?? null) !== true
+                || ($privacyConsent['method'] ?? null) !== 'explicit_checkbox'
+                || !preg_match('/^[A-Za-z0-9._-]{1,64}$/D',
+                    (string)($privacyConsent['notice_version'] ?? ''))
+                || !is_int($privacyConsent['accepted_at'] ?? null)
+                || $privacyConsent['accepted_at'] !== $now)) {
+            throw new InvalidArgumentException('Invalid consent evidence');
+        }
         $this->enrollments->create_pending([
             'challenge_id'=>$challengeId,
             'email_lookup'=>$lookup,
@@ -92,6 +102,7 @@ final class BadAround_Identity_Enrollment {
             'email'=>$profile['email'],
             'created_at'=>$now,
             'verified_at'=>null,
+            'privacy_consent'=>$privacyConsent,
         ]);
     }
 
