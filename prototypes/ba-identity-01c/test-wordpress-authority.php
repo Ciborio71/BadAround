@@ -23,7 +23,7 @@ $now=1762156800;
 $ownerStore->grant_creator('identity_12345678','report',701,$now);
 $GLOBALS['wp_authority_mock']=[
     'post'=>['post_type'=>'ba_evento','post_status'=>'publish'],
-    'moderation'=>'published', 'logged_in'=>false,'cap'=>false
+    'moderation'=>'published', 'logged_in'=>false,'cap'=>false,'wp_id'=>42
 ];
 function get_post($id) {
     return $id===801 ? (object)$GLOBALS['wp_authority_mock']['post'] : null;
@@ -33,8 +33,15 @@ function get_post_meta($id,$key,$single) {
         ?$GLOBALS['wp_authority_mock']['moderation']:'';
 }
 function is_user_logged_in() { return $GLOBALS['wp_authority_mock']['logged_in']; }
+function get_current_user_id() { return $GLOBALS['wp_authority_mock']['wp_id']; }
 function current_user_can($cap) {
     return $cap==='ba_moderate_contributions' && $GLOBALS['wp_authority_mock']['cap'];
+}
+final class WPActorBindingFixture implements BadAround_Identity_WP_Actor_Binding {
+    public bool $matched=false;
+    public function matches_current_user(int $wpUserId,string $identityId):bool {
+        return $this->matched && $wpUserId===42 && $identityId==='identity_12345678';
+    }
 }
 function check_wp_authority(bool $ok,string $label):void {
     if (!$ok) { throw new RuntimeException('FAIL '.$label); }
@@ -45,7 +52,8 @@ $sessions=new BadAround_Identity_Sessions(new BadAround_Identity_Session_Memory_
 $session=$sessions->issue('identity_12345678',$now);
 $status=new BadAround_Identity_Active_Memory_Status();
 $status->active['identity_12345678']=true;
-$authority=new BadAround_Identity_WordPress_Authority($sessions,$status,$ownerStore);
+$binding=new WPActorBindingFixture();
+$authority=new BadAround_Identity_WordPress_Authority($sessions,$status,$ownerStore,$binding);
 check_wp_authority($authority->active_identity($session,$now)==='identity_12345678',
     'session verified against active identity');
 check_wp_authority($authority->active_identity('spoofed-identity',$now)===null,
@@ -70,6 +78,9 @@ $GLOBALS['wp_authority_mock']['logged_in']=true;
 check_wp_authority(!$authority->may_moderate('identity_12345678'),
     'logged in WordPress user without capability denied');
 $GLOBALS['wp_authority_mock']['cap']=true;
+check_wp_authority(!$authority->may_moderate('identity_12345678'),
+    'WP administrator and unrelated identity cannot combine permissions');
+$binding->matched=true;
 check_wp_authority($authority->may_moderate('identity_12345678'),
     'WP capability plus verified identity required');
 $status->active['identity_12345678']=false;
