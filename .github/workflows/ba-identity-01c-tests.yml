@@ -28,6 +28,7 @@ jobs:
           php -l prototypes/ba-identity-01c/test-csrf-policy.php
           php -l prototypes/ba-identity-01c/test-mysql-integration.php
           php -l prototypes/ba-identity-01c/test-mysql-concurrency.php
+          php -l prototypes/ba-identity-01c/identity-active-status.php
           php -l prototypes/ba-identity-01c/edit-guard.php
           php -l prototypes/ba-identity-01c/test-edit-guard.php
           php -l prototypes/ba-identity-01c/verification-coordinator.php
