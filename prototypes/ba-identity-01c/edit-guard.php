@@ -8,6 +8,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/session-policy.php';
 require_once __DIR__ . '/csrf-policy.php';
 require_once __DIR__ . '/ownership-policy.php';
+require_once __DIR__ . '/identity-active-status.php';
 
 final class BadAround_Identity_Edit_Guard {
     private BadAround_Identity_Sessions $sessions;
@@ -17,7 +18,8 @@ final class BadAround_Identity_Edit_Guard {
     public function __construct(
         BadAround_Identity_Sessions $sessions,
         string $serverKey,
-        string $siteOrigin
+        string $siteOrigin,
+        private BadAround_Identity_Active_Status $identityStatus
     ) {
         if (strlen($serverKey) < 32 || !str_starts_with($siteOrigin, 'https://')) {
             throw new InvalidArgumentException('Guard configuration invalid');
@@ -48,6 +50,7 @@ final class BadAround_Identity_Edit_Guard {
         }
         $identity = $this->sessions->identity_for($sessionToken, $now);
         if ($identity === null
+            || !$this->identityStatus->is_active_verified($identity)
             || !BadAround_Identity_Csrf_Policy::verify($csrfToken, $sessionToken, $this->serverKey)) {
             return false;
         }
