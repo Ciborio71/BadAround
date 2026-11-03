@@ -19,6 +19,14 @@ interface BadAround_Identity_Pending_Enrollment_Store {
     public function activate_once(string $challengeId, string $emailLookup, int $verifiedAt): ?string;
 }
 
+/**
+ * Transactional enrollment adapter: OTP verification, attempts, consumption
+ * and identity creation commit together in one database transaction.
+ */
+interface BadAround_Identity_Atomic_Enrollment_Store extends BadAround_Identity_Pending_Enrollment_Store {
+    public function verify_and_activate_atomic(string $challengeId, string $code, string $serverKey, int $now): ?string;
+}
+
 final class BadAround_Identity_Enrollment {
     public function __construct(
         private BadAround_Identity_Pending_Enrollment_Store $enrollments,
@@ -90,6 +98,9 @@ final class BadAround_Identity_Enrollment {
      * reports based solely on email.
      */
     public function verify_and_activate(string $challengeId, string $code, int $now): ?string {
+        if ($this->enrollments instanceof BadAround_Identity_Atomic_Enrollment_Store) {
+            return $this->enrollments->verify_and_activate_atomic($challengeId, $code, $this->serverKey, $now);
+        }
         $pending = $this->enrollments->find_by_challenge($challengeId);
         $challenge = $this->challenges->load($challengeId);
         if (!$pending || !$challenge || ($pending['challenge_id'] ?? null) !== $challengeId
