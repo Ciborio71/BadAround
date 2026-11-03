@@ -79,3 +79,11 @@ Validate the newly added disposable-MySQL CI service and two-worker race test; t
 - The test runs against a disposable `ba_identity_ci` MySQL service only; no production database access or secrets.
 - Added to the GitHub Actions `identity-mysql` job. **No passing CI logs have been independently observed in this session**, so the gate remains **unverified**, not PASS.
 - Remaining before public WordPress integration: OTP purpose binding, server-side throttling and email delivery, transactional ownership grants, verified-identity revocation/session invalidation, identity key rotation, retention/deletion controls, audit and CSRF middleware, and private area UX.
+
+## Explicit ownership and CI gate — 2026-11-03
+
+- Added `mysql-ownership-store.php`, a dormant repository with explicit creator bindings keyed by resource type and ID. The SQL schema in the ephemeral test uses UNIQUE(resource_kind,resource_id) to prevent competing creators from taking ownership.
+- Added `test-mysql-ownership.php`: owner access, other-identity denial, wrong-resource denial, wrong-kind denial, duplicate-grant denial and revocation checks. CI syntax and MySQL jobs include these files.
+- **Release blocker:** `grant_creator()` is NOT an end-user endpoint. The caller must prove the identity is verified and associate ownership in the same controlled transaction that creates the report/comment. A future production adapter also needs owner revocation policies and per-resource authorizations.
+- The current implementation is isolated prototype code. No installed WordPress plugin includes or DB changes were made.
+- **GitHub CI:** workflow definitions have been updated, but live run results remain unverified because the available connector does not list push-triggered workflow run statuses. Do not merge or deploy without logs from both jobs.
