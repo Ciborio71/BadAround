@@ -1,0 +1,37 @@
+name: BA-IDENTITY 02D block live privacy draft in private QA
+on:
+  push:
+    branches:
+      - feature/ba-identity-01c-dormant-20261103
+    paths:
+      - .github/workflows/ba-identity-02d-privacy-guard.yml
+permissions:
+  contents: read
+concurrency:
+  group: badaround-production-scoped-ftps
+  cancel-in-progress: false
+jobs:
+  legal-draft-fence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, openssl, pdo_mysql
+          coverage: none
+      - name: Confirm no draft policy qualifies for onboarding
+        run: |
+          python3 -m py_compile .github/scripts/ba_identity_02d_privacy_draft_guard.py
+          php prototypes/ba-identity-01c/test-wordpress-privacy-notice.php
+          php prototypes/ba-identity-01c/test-wordpress-identity-portal.php
+      - name: Exact-match dormant policy guard with original backup
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 .github/scripts/ba_identity_02d_privacy_draft_guard.py
