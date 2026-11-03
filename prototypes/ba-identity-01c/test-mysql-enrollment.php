@@ -2,6 +2,7 @@
 /** MySQL-only enrollment integration; requires disposable ba_identity_ci DB. */
 declare(strict_types=1);
 require __DIR__ . '/mysql-enrollment-store.php';
+require_once __DIR__ . '/mysql-challenge-store.php';
 if (!extension_loaded('pdo_mysql')) { throw new RuntimeException('pdo_mysql unavailable'); }
 $dsn = (string)getenv('BA_TEST_DB_DSN');
 if (!preg_match('/(?:^|;)dbname=ba_identity_ci(?:;|$)/', $dsn)) {
