@@ -66,7 +66,15 @@ final class BadAround_Identity_Otp_Issuer {
                 $normalized,$purpose,$this->rootKey,$now
             );
             $this->writer->insert($created['record']);
-            if (!$this->transport->send_code($normalized,$created['delivery_code'],$purpose)) {
+            $delivered = false;
+            try {
+                $delivered = $this->transport->send_code(
+                    $normalized, $created['delivery_code'], $purpose
+                );
+            } catch (Throwable $deliveryError) {
+                // Treat provider exceptions exactly as a rejected delivery.
+            }
+            if (!$delivered) {
                 $this->writer->invalidate($created['record']['challenge_id'], $now);
                 return null;
             }
