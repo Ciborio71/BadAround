@@ -1,0 +1,38 @@
+name: BA-IDENTITY 02C private portal custody
+on:
+  push:
+    branches:
+      - feature/ba-identity-01c-dormant-20261103
+    paths:
+      - .github/workflows/ba-identity-02c-portal-custody.yml
+permissions:
+  contents: read
+concurrency:
+  group: badaround-production-scoped-ftps
+  cancel-in-progress: false
+jobs:
+  portal-custody:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, openssl, pdo_mysql, pdo_sqlite
+          coverage: none
+      - name: Verify QA-only privacy gate and portal forms
+        run: |
+          python3 -m py_compile .github/scripts/ba_identity_02c_portal_custody.py
+          php prototypes/ba-identity-01c/test-wordpress-identity-portal.php
+          php prototypes/ba-identity-01c/test-wordpress-session-rest.php
+          node --check prototypes/ba-identity-01c/identity-portal.js
+      - name: Exact-match dormant portal upload with rollback
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 .github/scripts/ba_identity_02c_portal_custody.py
