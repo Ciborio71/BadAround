@@ -103,3 +103,11 @@ Validate the newly added disposable-MySQL CI service and two-worker race test; t
 - Added `test-community-policy.php` to isolated primitive CI. Moderation is immutable at request creation (`pending`), and an edit request cannot directly mutate a published event.
 - This is **not** the live comments UI, persistence, real ownership lookup, comment abuse report, notification system, or publication workflow; these remain separate integration tasks. The caller must escape public text on rendering and keep private identity fields outside the public projection.
 - Live contribution form still differs from contract; WordPress changes require a separate controlled review and no regression to existing contributions and Radar/maps.
+
+## Release security progress — 2026-11-03
+
+- Added **bulk session revocation** to memory and MySQL session stores, plus tests ensuring only the targeted identity's sessions are revoked. Identity revocation must call this and future guards must independently check the identity remains verified, to avoid revocation races.
+- Added `purpose-keys.php` to derive domain-separated OTP keys for enrollment/login/verification while keeping the identity email lookup stable under the root key; `test-purpose-keys.php` covers cross-purpose rejection. Integrators MUST create challenges using `new_challenge_for_purpose()` and configure each verifier with `for_purpose()`. The current generic prototype calls are **not yet automatically wired**, so purpose separation is a release blocker until controller integration.
+- Hardened `post-intake-binder.php` to resolve identity strictly from a live session bearer, not a caller-supplied identity identifier. Added spoofing rejection test.
+- Both isolated PHP and MySQL test workflows include updated code/test files, but **no independently verified passing workflow logs** are available in the linked connector.
+- No production plugin, theme, WordPress identity table or database was changed.
