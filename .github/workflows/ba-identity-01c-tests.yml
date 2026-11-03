@@ -67,15 +67,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Ephemeral MySQL integration
         env:
-          BA_TEST_DB_DSN: mysql:host=127.0.0.1;port=3306;dbname=ba_identity_ci;charset=utf8mb4
+          BA_TEST_DB_DSN: "mysql:host=127.0.0.1;port=3306;dbname=ba_identity_ci;charset=utf8mb4"
           BA_TEST_DB_USER: ba_ci
           BA_TEST_DB_PASS: local-ci-only-password
         run: |
-          php -m | grep -Eq '^pcntl          php prototypes/ba-identity-01c/test-mysql-integration.php
-          php prototypes/ba-identity-01c/test-mysql-concurrency.php
-
-          php -m | grep -Eiq '^pdo_mysql          php prototypes/ba-identity-01c/test-mysql-integration.php
-          php prototypes/ba-identity-01c/test-mysql-concurrency.php
-
+          php -m
           php prototypes/ba-identity-01c/test-mysql-integration.php
           php prototypes/ba-identity-01c/test-mysql-concurrency.php
