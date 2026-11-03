@@ -45,3 +45,12 @@ Validate the newly added disposable-MySQL CI service and two-worker race test; t
 - Future production coordinator must handle the race between verified-identity revocation and session creation with a transactional/locking strategy, plus session revocation on identity revocation.
 - A session issuance failure after OTP consumption requires a new OTP; do not retry the same consumed credential.
 - Fixed malformed extension-check command in GitHub Actions MySQL job; job execution results are **not confirmed** from connector.
+
+## First-time enrollment (2026-11-03)
+
+- Added `enrollment-policy.php`: mandatory first/last name/email validation, normalized email bound cryptographically to the OTP challenge, private pending state and one-time post-verification activation. No WordPress user creation.
+- Added `test-enrollment-policy.php`: missing name, invalid email, wrong OTP, OTP replay, duplicate verified email and cross-email challenge mismatch cases.
+- **Current adapter is memory-only.** The real identity/pending repositories, uniqueness constraint on email HMAC, expiry/deletion of pending PII, simultaneous enrollment race handling and privacy notice/consent integration are NOT yet implemented.
+- Existing login coordinator currently handles already verified identities only; do not treat the two prototype components as a complete public enrollment/login endpoint.
+- OTP purpose separation (login vs new enrollment), atomic identity activation and session issuance, email delivery, rate limits and revocation transactions remain explicit release blockers.
+- GitHub Actions was extended to lint/test enrollment; **pass/fail must still be checked**. No merge/deploy until a controlled integration review.
