@@ -1,0 +1,38 @@
+name: BA-IDENTITY 02B dormant session lifecycle custody
+on:
+  push:
+    branches:
+      - feature/ba-identity-01c-dormant-20261103
+    paths:
+      - .github/workflows/ba-identity-02b-session-custody.yml
+permissions:
+  contents: read
+concurrency:
+  group: badaround-production-scoped-ftps
+  cancel-in-progress: false
+jobs:
+  session-custody:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: PHP runtime
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, openssl, pdo_mysql, pdo_sqlite
+          coverage: none
+      - name: Verify guards and custody script
+        run: |
+          python3 -m py_compile .github/scripts/ba_identity_02b_session_custody.py
+          php prototypes/ba-identity-01c/test-wordpress-session-rest.php
+          php prototypes/ba-identity-01c/test-wordpress-private-access.php
+          php prototypes/ba-identity-01c/test-wordpress-private-bootstrap.php
+      - name: Exact-match dormant update only
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 .github/scripts/ba_identity_02b_session_custody.py
