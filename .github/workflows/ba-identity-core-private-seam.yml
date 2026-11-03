@@ -1,0 +1,35 @@
+name: BA-IDENTITY production Core private QA seam
+on:
+  push:
+    branches:
+      - feature/ba-identity-01c-dormant-20261103
+    paths:
+      - .github/workflows/ba-identity-core-private-seam.yml
+permissions:
+  contents: read
+concurrency:
+  group: badaround-production-scoped-ftps
+  cancel-in-progress: false
+jobs:
+  guarded-core-seam:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, openssl, pdo_mysql, pdo_sqlite
+          coverage: none
+      - name: Verify all default-off bootstrap gates
+        run: |
+          php prototypes/ba-identity-01c/test-wordpress-privacy-notice.php
+          php prototypes/ba-identity-01c/test-wordpress-private-bootstrap.php
+          php prototypes/ba-identity-01c/test-wordpress-runtime-loader.php
+      - name: Exact baseline Core patch, backup, rollback
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 .github/scripts/ba_identity_core_private_seam.py
