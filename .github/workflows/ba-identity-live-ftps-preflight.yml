@@ -1,0 +1,50 @@
+name: BA-IDENTITY live FTPS preflight (read-only)
+on:
+  push:
+    branches:
+      - feature/ba-identity-01c-dormant-20261103
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ba-identity-live-custody
+  cancel-in-progress: false
+jobs:
+  verify-live-target:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify live Core marker and disabled deployment target
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import ftplib,io,os,hashlib
+          host=os.environ["FTP_HOST"]; user=os.environ["FTP_USER"]; secret=os.environ["FTP_PASSWORD"]
+          if not host or not user or not secret:
+              raise RuntimeError("Missing FTPS configuration")
+          ftp=ftplib.FTP_TLS(timeout=25)
+          try:
+              ftp.connect(host,21);ftp.login(user,secret);ftp.prot_p()
+              base="/httpdocs/wp-content/plugins/badaround-core"
+              raw=io.BytesIO()
+              ftp.retrbinary("RETR "+base+"/badaround-core.php",raw.write)
+              data=raw.getvalue()
+              if not 3000 <=len(data)<=25000 or b"Plugin Name: BadAround Core" not in data or b"Version: 0.18.0" not in data:
+                  raise RuntimeError("Production plugin baseline not recognized")
+              print("LIVE_CORE_MARKER=PASS")
+              print("LIVE_CORE_SHA256="+hashlib.sha256(data).hexdigest())
+              try:
+                  ftp.cwd(base+"/identity-dormant")
+              except ftplib.error_perm:
+                  print("DORMANT_DIRECTORY=ABSENT (expected before first deploy)")
+              else:
+                  print("DORMANT_DIRECTORY=EXISTS (inspect before deploying)")
+              print("READ_ONLY_FTPS_PREFLIGHT=PASS")
+          finally:
+              try:ftp.quit()
+              except Exception:ftp.close()
+          PY
