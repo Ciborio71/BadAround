@@ -3,7 +3,7 @@
 declare(strict_types=1);
 define('BADAROUND_IDENTITY_LOGIN_ENABLED',true);
 require __DIR__.'/wordpress-login-rest.php';
-require __DIR__.'/purpose-keys.php';
+require_once __DIR__.'/purpose-keys.php';
 $GLOBALS['ba_ssl']=true;
 $GLOBALS['ba_routes']=[];
 function is_ssl(){return $GLOBALS['ba_ssl'];}
