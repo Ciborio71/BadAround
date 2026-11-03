@@ -17,4 +17,9 @@ check_csrf(BadAround_Identity_Csrf_Policy::origin_allowed('https://badaround.it'
 check_csrf(!BadAround_Identity_Csrf_Policy::origin_allowed('https://evil.example','https://badaround.it'),'foreign origin rejected');
 check_csrf(!BadAround_Identity_Csrf_Policy::origin_allowed('http://badaround.it','https://badaround.it'),'insecure origin rejected');
 check_csrf(!BadAround_Identity_Csrf_Policy::origin_allowed(null,'https://badaround.it'),'missing origin rejected');
+check_csrf(!BadAround_Identity_Csrf_Policy::origin_allowed('https://badaround.it/path','https://badaround.it'),'origin path rejected');
+check_csrf(!BadAround_Identity_Csrf_Policy::origin_allowed('https://badaround.it?x=1','https://badaround.it'),'origin query rejected');
+check_csrf(!BadAround_Identity_Csrf_Policy::origin_allowed('https://badaround.it#fragment','https://badaround.it'),'origin fragment rejected');
+check_csrf(!BadAround_Identity_Csrf_Policy::origin_allowed('https://u@badaround.it','https://badaround.it'),'origin user-info rejected');
+check_csrf(!BadAround_Identity_Csrf_Policy::origin_allowed('https://badaround.it:444','https://badaround.it'),'origin alternate port rejected');
 echo "ALL_CSRF_TESTS_PASS\n";
