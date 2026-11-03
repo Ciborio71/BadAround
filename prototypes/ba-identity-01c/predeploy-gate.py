@@ -47,9 +47,9 @@ def main():
         return 2
     print(f"PASS: {len(changed)} changed files limited to dormant prototype/docs/CI.")
     print("HOLD: Not a deployable WordPress Core package.")
-    print("HOLD: Live Core byte parity and staging accessibility not certified.")
+    print("HOLD: Live Core byte parity and production rollback not certified. Staging bypass approved.")
     print("HOLD: Schema migration, outbox, API integration, audit, browser QA and rollback not certified.")
-    print("HOLD: Full-plugin FTPS workflow MUST NOT be used for Identity.")
+    print("HOLD: Full-plugin FTPS workflow MUST NOT be used for Identity; use scoped production patch only after runtime gates.")
     return 0
 
 if __name__ == "__main__":
