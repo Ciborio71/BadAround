@@ -6,6 +6,7 @@
  */
 declare(strict_types=1);
 require_once __DIR__ . '/session-policy.php';
+require_once __DIR__ . '/identity-active-status.php';
 
 interface BadAround_Identity_Intake_Receipt {
     /** Called only using a server-sourced receipt, not browser JSON. */
@@ -21,7 +22,8 @@ final class BadAround_Identity_Post_Intake_Binder {
     public function __construct(
         private BadAround_Identity_Intake_Receipt $receipts,
         private BadAround_Identity_Ownership_Grant $grants,
-        private BadAround_Identity_Sessions $sessions
+        private BadAround_Identity_Sessions $sessions,
+        private BadAround_Identity_Active_Status $identityStatus
     ) {}
 
     /**
@@ -35,7 +37,7 @@ final class BadAround_Identity_Post_Intake_Binder {
         ?string $sessionToken, array $receipt, int $now
     ): bool {
         $verifiedIdentity = $sessionToken === null ? null : $this->sessions->identity_for($sessionToken,$now);
-        if (!$verifiedIdentity || $now <= 0
+        if (!$verifiedIdentity || !$this->identityStatus->is_active_verified($verifiedIdentity) || $now <= 0
             || !array_key_exists('duplicate', $receipt)
             || $receipt['duplicate'] !== false) {
             return false;
