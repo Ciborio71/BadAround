@@ -36,7 +36,7 @@ def main():
     ftp=ftplib.FTP_TLS(timeout=35)
     backup=DEST+"/"+EXISTING+TAG+".bak"
     stage=DEST+"/"+EXISTING+TAG+".tmp"
-    oldpath=DEST+"/"+EXISTING"
+    oldpath=DEST+"/"+EXISTING
     newpath=DEST+"/"+NEW
     backed=False
     staged=False
