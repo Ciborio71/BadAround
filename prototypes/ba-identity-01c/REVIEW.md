@@ -111,3 +111,11 @@ Validate the newly added disposable-MySQL CI service and two-worker race test; t
 - Hardened `post-intake-binder.php` to resolve identity strictly from a live session bearer, not a caller-supplied identity identifier. Added spoofing rejection test.
 - Both isolated PHP and MySQL test workflows include updated code/test files, but **no independently verified passing workflow logs** are available in the linked connector.
 - No production plugin, theme, WordPress identity table or database was changed.
+
+## Revoked-identity enforcement — 2026-11-03
+
+- Introduced `BadAround_Identity_Active_Status` and dormant `BadAround_Identity_Mysql_Active_Status` to confirm `verified_at IS NOT NULL AND revoked_at IS NULL` using trusted persistence, independent of a still-live session bearer.
+- Both edit authorization and post-intake ownership binding now demand current verified active identity status as well as the session; revoked identity access fails closed. Negative tests added for a still-live session after identity revocation.
+- A dedicated disposable-MySQL test covers active, pending, revoked and missing identities, plus immediate revocation visibility; included in the isolated CI workflow.
+- **Local runtime observation:** PHP CLI is available but lacks `pdo_mysql` and `mbstring`, so the full suite cannot be executed here without an isolated CI runner with the required extensions. GitHub Actions results remain **not independently inspected**.
+- No production Core/plugin/theme or schema changes. Remaining deployment gates include verified CI run logs, purpose-bound controller integration, email delivery, fail-closed quotas, consent/retention, transactional ownership reconciliation and review-only migration testing.
