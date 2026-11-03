@@ -21,7 +21,10 @@ REQUIRED = (
 )
 SAFE_PREFIXES = ("prototypes/ba-identity-01c/", "docs/BA-IDENTITY-")
 SAFE_EXACT = (".github/workflows/ba-identity-01c-tests.yml",
-              ".github/workflows/ba-identity-predeploy-gate.yml")
+              ".github/workflows/ba-identity-predeploy-gate.yml",
+              ".github/workflows/ba-identity-live-ftps-preflight.yml",
+              ".github/workflows/ba-identity-dormant-upload.yml",
+              ".github/scripts/ba_identity_dormant_upload.py")
 
 def main():
     missing = [str(path) for path in REQUIRED if not (ROOT / path).is_file()]
@@ -46,7 +49,7 @@ def main():
         print("FAIL: No change set identified")
         return 2
     print(f"PASS: {len(changed)} changed files limited to dormant prototype/docs/CI.")
-    print("HOLD: Not a deployable WordPress Core package.")
+    print("HOLD: Dormant files may be transferred with the dedicated guarded workflow only; no runtime activation.")
     print("HOLD: Live Core byte parity and production rollback not certified. Staging bypass approved.")
     print("HOLD: Schema migration, outbox, API integration, audit, browser QA and rollback not certified.")
     print("HOLD: Full-plugin FTPS workflow MUST NOT be used for Identity; use scoped production patch only after runtime gates.")
