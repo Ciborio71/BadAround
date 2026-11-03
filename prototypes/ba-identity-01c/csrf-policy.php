@@ -40,6 +40,6 @@ final class BadAround_Identity_Csrf_Policy {
         $portExpected = (int)($expected['port'] ?? 443);
         return strtolower((string)($actual['host'] ?? '')) === strtolower((string)($expected['host'] ?? ''))
             && $portActual === $portExpected
-            && !isset($actual['user'], $actual['pass']);
+            && !isset($actual['user']) && !isset($actual['pass']);
     }
 }
