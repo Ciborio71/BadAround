@@ -29,6 +29,11 @@ privacy_check(
     'unpublished privacy notice blocks registration'
 );
 $GLOBALS['privacy_fixture']->post_status='publish';
+$GLOBALS['privacy_fixture']->post_content='<strong>BOZZA PRE-PUBBLICAZIONE — da sottoporre a revisione.</strong>';
+privacy_check(
+    BadAround_Identity_WordPress_Privacy_Notice::verified_version()===null,
+    'published legal draft is rejected even with matching metadata'
+);
 $GLOBALS['privacy_fixture']->post_content='';
 privacy_check(
     BadAround_Identity_WordPress_Privacy_Notice::verified_version()===null,
