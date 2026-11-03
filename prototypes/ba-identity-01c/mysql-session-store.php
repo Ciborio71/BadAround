@@ -47,6 +47,14 @@ final class BadAround_Identity_Mysql_Session_Store implements BadAround_Identity
         return $row;
     }
 
+    public function revoke_all_for_identity(string $identityId, int $now): int {
+        $stmt = $this->pdo->prepare("UPDATE `{$this->table}`
+            SET revoked_at=:now
+            WHERE identity_id=:identity AND revoked_at IS NULL");
+        $stmt->execute([':now'=>$now,':identity'=>$identityId]);
+        return $stmt->rowCount();
+    }
+
     public function revoke(string $digest, int $now): bool {
         $stmt = $this->pdo->prepare("UPDATE `{$this->table}`
             SET revoked_at=:now WHERE session_digest=:digest AND revoked_at IS NULL");
