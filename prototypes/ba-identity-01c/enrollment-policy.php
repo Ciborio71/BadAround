@@ -32,9 +32,12 @@ final class BadAround_Identity_Enrollment {
         private BadAround_Identity_Pending_Enrollment_Store $enrollments,
         private BadAround_Identity_Challenge_Store $challenges,
         private BadAround_Identity_Challenge_Verifier $verifier,
-        private string $serverKey
+        private string $serverKey,
+        private ?string $otpPurposeKey = null
     ) {
-        if (strlen($serverKey) < 32) { throw new InvalidArgumentException('Server key too short'); }
+        if (strlen($serverKey) < 32 || ($otpPurposeKey !== null && strlen($otpPurposeKey) < 32)) {
+            throw new InvalidArgumentException('Server key too short');
+        }
     }
 
     public static function validate_profile(string $firstName, string $lastName, string $email): array {
@@ -99,7 +102,7 @@ final class BadAround_Identity_Enrollment {
      */
     public function verify_and_activate(string $challengeId, string $code, int $now): ?string {
         if ($this->enrollments instanceof BadAround_Identity_Atomic_Enrollment_Store) {
-            return $this->enrollments->verify_and_activate_atomic($challengeId, $code, $this->serverKey, $now);
+            return $this->enrollments->verify_and_activate_atomic($challengeId, $code, $this->otpPurposeKey ?? $this->serverKey, $now);
         }
         $pending = $this->enrollments->find_by_challenge($challengeId);
         $challenge = $this->challenges->load($challengeId);
