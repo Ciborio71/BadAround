@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 require_once __DIR__.'/wordpress-qa-report-rest.php';
 require_once __DIR__.'/wordpress-pre-intake-recovery-composition.php';
+require_once __DIR__.'/locked-canonical-reader.php';
 require_once __DIR__.'/mysql-session-store.php';
 require_once __DIR__.'/mysql-identity-active-status.php';
 
@@ -50,8 +51,11 @@ final class BadAround_Identity_WordPress_QA_Report_Composition {
             $intake=new BadAround_Identity_Pre_Reserved_Intake(
                 new BadAround_Identity_Native_Intake_Gate($sessions,$active),
                 new BadAround_Identity_Pre_Intake_Reservation($preStore),
-                new BadAround_Identity_Canonical_Submission_Bridge(
-                    new BadAround_Report_Otp_Canonical_Reader($db,$prefix)
+                new BadAround_Identity_Locked_Canonical_Reader(
+                    new BadAround_Report_Otp_WordPress_Native_Lock($nativeRepository),
+                    new BadAround_Identity_Canonical_Submission_Bridge(
+                        new BadAround_Report_Otp_Canonical_Reader($db,$prefix)
+                    )
                 ),
                 new BadAround_Identity_Durable_Ownership_Handoff(
                     $sessions,$active,$receiptProof,
