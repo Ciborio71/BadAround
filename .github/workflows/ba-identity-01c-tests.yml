@@ -123,6 +123,8 @@ jobs:
           php -l prototypes/ba-identity-01c/report-otp-schema-candidate.php
           php -l prototypes/ba-identity-01c/report-otp-store.php
           php -l prototypes/ba-identity-01c/test-report-otp-mysql.php
+          php -l prototypes/ba-identity-01c/report-otp-reservation-policy.php
+          php -l prototypes/ba-identity-01c/test-report-otp-reservation-policy.php
           node --check prototypes/ba-identity-01c/identity-portal.js
           php -l prototypes/ba-identity-01c/wordpress-runtime-loader.php
           php -l prototypes/ba-identity-01c/test-wordpress-runtime-loader.php
@@ -154,6 +156,7 @@ jobs:
           php prototypes/ba-identity-01c/test-wordpress-registration-rest.php
           php prototypes/ba-identity-01c/test-wordpress-privacy-notice.php
           php prototypes/ba-identity-01c/test-report-submission-verification-policy.php
+          php prototypes/ba-identity-01c/test-report-otp-reservation-policy.php
           php prototypes/ba-identity-01c/test-wordpress-private-bootstrap.php
           php prototypes/ba-identity-01c/test-wordpress-private-access.php
           php prototypes/ba-identity-01c/test-wordpress-session-rest.php
