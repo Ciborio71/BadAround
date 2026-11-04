@@ -39,7 +39,9 @@ jobs:
           python3 -m unittest discover -s tests -p "test_ba_identity_readonly_inventory.py" -v
 
   compare-live-only-on-manual-dispatch:
-    if: github.event_name == 'workflow_dispatch'
+    # One-time read-only production custody, triggered on this workflow update.
+    # Revert to manual dispatch immediately after collecting the result.
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/reconcile/identity-production-baseline-20261104')
     needs: offline-tests
     runs-on: ubuntu-latest
     timeout-minutes: 8
