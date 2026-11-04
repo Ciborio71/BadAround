@@ -13,6 +13,7 @@ on:
       - tests/test-ba-ownership-recovery-reconciler.php
       - tests/test-ba-native-intake-gate.php
       - tests/test-ba-native-intake-orchestrator.php
+      - tests/test-ba-pre-intake-mysql.php
   workflow_dispatch:
 concurrency:
   group: ba-identity-functional-${{ github.ref }}
@@ -46,7 +47,7 @@ jobs:
             cp "$file" "$dest/"
             count=$((count+1))
           done
-          test "$count" -eq 69
+          test "$count" -eq 71
           echo "PRODUCTION_SOURCE_TEST_OVERLAY=PASS count=$count"
       - name: Prepare PHP 8.3 with required extensions
         uses: shivammathur/setup-php@v2
@@ -278,7 +279,7 @@ jobs:
             cp "$file" "$dest/"
             count=$((count+1))
           done
-          test "$count" -eq 69
+          test "$count" -eq 71
           echo "PRODUCTION_SOURCE_TEST_OVERLAY=PASS count=$count"
       - name: Prepare PHP 8.3 with MySQL support
         uses: shivammathur/setup-php@v2
@@ -321,3 +322,7 @@ jobs:
           php prototype-source/prototypes/ba-identity-01c/test-wordpress-registration-composition.php
           php -l tests/test-ba-durable-ownership-mysql.php
           php tests/test-ba-durable-ownership-mysql.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/pre-intake-reservation.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/mysql-pre-intake-store.php
+          php -l tests/test-ba-pre-intake-mysql.php
+          php tests/test-ba-pre-intake-mysql.php
