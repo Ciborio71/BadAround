@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   backup-db:
-    if: "github.event.head_commit.message == 'ops: run one-shot private production DB backup'"
+    if: "github.event.head_commit.message == 'ops: retry guarded production DB backup with trusted CA chain'"
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -23,12 +23,20 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq mariadb-client
+      - name: Prepare verified FTPS certificate chain
+        run: |
+          set -euo pipefail
+          mkdir -p tls
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/root.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/root.pem > tls/chain.pem
       - name: Compile backup controller
         run: python3 -m py_compile tools/ba_fresh_db_backup.py
       - name: Dump and securely upload production DB outside public root
         env:
           FTP_HOST: '46.231.24.137'
           FTP_TLS_NAME: 'hostmld17.aziendeitalia.com'
+          FTP_TLS_CA_FILE: 'tls/chain.pem'
           FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
         run: python3 tools/ba_fresh_db_backup.py
