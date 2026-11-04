@@ -2,14 +2,15 @@
 /**
  * BA-IDENTITY-WIZARD-09: dormant private recovery worker.
  *
- * A trusted backend must hold a per-submission native lock while invoking
- * recover(). No hook, route, scheduled job or SQL is registered on inclusion.
+ * The worker acquires and releases the canonical native submission lock.
+ * No hook, route, scheduled job or SQL is registered on inclusion.
  * It NEVER replays native submission. All identities come from the durable
  * pre-intake row, not HTTP input. No public success on uncertain state.
  */
 declare(strict_types=1);
 require_once __DIR__.'/pre-reserved-native-intake.php';
 require_once __DIR__.'/ownership-recovery-reconciler.php';
+require_once __DIR__.'/report-otp-wordpress-reconciler.php';
 
 interface BadAround_Identity_Pre_Intake_Recovery_Reader {
     public function find_by_submission(string $submissionId):?array;
@@ -22,6 +23,7 @@ final class BadAround_Identity_Pre_Intake_Recovery_Worker {
     public const UNAVAILABLE='unavailable';
 
     public function __construct(
+        private BadAround_Report_Otp_Native_Lock $lock,
         private BadAround_Identity_Pre_Intake_Recovery_Reader $preIntake,
         private BadAround_Identity_Pre_Intake_Canonical_Reader $canonical,
         private BadAround_Identity_Active_Status $identityStatus,
@@ -31,14 +33,14 @@ final class BadAround_Identity_Pre_Intake_Recovery_Worker {
         private BadAround_Identity_Intake_Receipt $receiptProof
     ) {}
 
-    /**
-     * MUST be called under a server-held native submission lock.
-     * Returns LINKED only when canonical ownership has been confirmed.
-     */
+    /** Returns LINKED only when canonical ownership has been confirmed. */
     public function recover(string $submissionId,int $now):string {
         if (!BadAround_Identity_Pre_Intake_Reservation::valid_submission($submissionId)
             || $now<=0) return self::UNAVAILABLE;
+        $locked=false;
         try {
+            $locked=$this->lock->acquire($submissionId);
+            if (!$locked) return self::PENDING;
             $row=$this->preIntake->find_by_submission($submissionId);
             if (!self::valid_row($row,$submissionId))return self::UNAVAILABLE;
             if (!$this->identityStatus->is_active_verified($row['identity_id']))return self::REVIEW;
@@ -83,6 +85,12 @@ final class BadAround_Identity_Pre_Intake_Recovery_Worker {
                 : ($state===BadAround_Identity_Ownership_Recovery_Reconciler::REVIEW
                     ? self::REVIEW:self::PENDING);
         } catch(Throwable $error) {return self::UNAVAILABLE;}
+        finally {
+            if ($locked) {
+                try { $this->lock->release($submissionId); }
+                catch(Throwable $ignored) {}
+            }
+        }
     }
 
     private static function valid_row(?array $r,string $submission):bool {
