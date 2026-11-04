@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   restore-reviewed-source:
-    if: github.event.head_commit.message == 'ci: approved one-shot exact live source reconciliation'
+    if: "github.event.head_commit.message == 'ci: retry guarded one-shot live source reconciliation'"
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
