@@ -36,7 +36,7 @@ qa_comment_check(BadAround_Identity_WordPress_Comment_Form::register_hooks()
 $html=BadAround_Identity_WordPress_Comment_Form::render();
 qa_comment_check(str_contains($html,'data-event-id="123"')
     && str_contains($html,'maxlength="2500"')
-    && str_contains($html,'prima della pubblicazione')
+    && str_contains($html,'soltanto dopo approvazione')
     && str_contains($GLOBALS['qa_script'],'identity-comment-form.js'),
     'canonical published event form queues moderated text-only comments');
 $GLOBALS['qa_status']='pending';
