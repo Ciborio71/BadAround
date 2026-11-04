@@ -5,15 +5,18 @@ require_once __DIR__ . '/../wordpress/plugins/badaround-core/identity-dormant/na
 final class OrchestratorReceipt implements BadAround_Identity_Intake_Receipt {
     public bool $valid = true;
     public function is_new_canonical_report(int $reportId, int $eventId): bool {
-        return $this->valid && $reportId === 17 && $eventId === 27;
+        return $this->valid && (($reportId === 17 && $eventId === 27) || ($reportId === 18 && $eventId === 28));
     }
 }
 final class OrchestratorGrant implements BadAround_Identity_Ownership_Grant {
     public int $grants = 0;
     public bool $success = true;
+    private array $written = [];
     public function grant_creator(string $identityId, string $kind, int $resourceId, int $now): bool {
         ++$this->grants;
-        return $this->success && $kind === 'report' && $resourceId === 17;
+        if (!$this->success || $kind !== 'report' || isset($this->written[$resourceId])) return false;
+        $this->written[$resourceId] = true;
+        return true;
     }
 }
 final class OrchestratorJournal implements BadAround_Identity_Recovery_Journal {
@@ -59,11 +62,17 @@ $success = static function() use (&$submitCalls):array {
 assertOrchestrator($flow->submit(null,$success,1010)['state']==='denied','anonymous denied before submit');
 assertOrchestrator($flow->submit('bogus',$success,1010)['state']==='denied','invalid cookie denied before submit');
 assertOrchestrator($submitCalls===0,'unauthorized flows did not persist anything');
-foreach (['regular','media'] as $transport) {
-    $result=$flow->submit($token,$success,1011);
-    assertOrchestrator($result['state']==='owner_confirmed' && $result['event_id']===27,
-        $transport.' canonical success confirms owner');
-}
+$regular=$flow->submit($token,$success,1011);
+assertOrchestrator($regular['state']==='owner_confirmed' && $regular['event_id']===27,
+    'regular canonical success confirms owner');
+$media = static function() use (&$submitCalls):array {
+    ++$submitCalls;
+    return ['status'=>'success','report_id'=>18,'event_id'=>28,'duplicate'=>false,
+        'persistence'=>['completed'=>true,'duplicate'=>false,'recovered'=>false]];
+};
+$mediaResult=$flow->submit($token,$media,1011);
+assertOrchestrator($mediaResult['state']==='owner_confirmed' && $mediaResult['event_id']===28,
+    'media canonical success confirms separate owner');
 assertOrchestrator($submitCalls===2 && $grants->grants===2,'both transports traverse same coordinator');
 $journal->allowInsert=false;
 assertOrchestrator($flow->submit($token,$success,1012)['state']==='owner_pending','journal outage never confirms ownership');
