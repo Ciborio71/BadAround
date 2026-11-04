@@ -27,7 +27,7 @@ def sha(data):
 def main():
     host=os.environ['FTP_HOST']; tlsname=os.environ['FTP_TLS_NAME']
     username=os.environ['FTP_USER'];password=os.environ['FTP_PASSWORD']
-    ctx=ssl.create_default_context()
+    ctx=ssl.create_default_context(cafile=os.environ['FTP_TLS_CA_FILE'])
     ftp=ftplib.FTP_TLS(context=ctx,timeout=55)
     remote_new=None
     remote_temp=None
