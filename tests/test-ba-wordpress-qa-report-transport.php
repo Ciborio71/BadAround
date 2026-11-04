@@ -115,7 +115,8 @@ $rest=new BadAround_Identity_QA_Report_REST(
         return ['status'=>'success','submission_id'=>$raw['submission_id'],
             'report_id'=>21,'event_id'=>31,'duplicate'=>false,
             'persistence'=>['completed'=>true,'duplicate'=>false,'recovered'=>false]];
-    }
+    },
+    static fn():int=>106
 );
 $headers=['x-badaround-intake'=>'badaround-report/v1','content-type'=>'application/json',
     'origin'=>'https://badaround.it','sec-fetch-site'=>'same-origin'];
