@@ -40,3 +40,5 @@ jobs:
           path: ba-fresh-db-backup-evidence.json
           retention-days: 7
           if-no-files-found: ignore
+
+# Execute once for fresh private database safety checkpoint.
