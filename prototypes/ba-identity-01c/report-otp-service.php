@@ -12,6 +12,8 @@ require_once __DIR__.'/challenge-primitives.php';
 interface BadAround_Report_Otp_Proof_Store {
     /** Store a report-specific challenge keyed by opaque ID, with an HMAC email lookup. */
     public function stage(array $record):bool;
+    /** Disable a staged code when delivery is refused or throws. */
+    public function invalidate(string $id,int $now):void;
     /** Atomically increment failed attempts OR consume the correct code once.
      *  A trusted implementation must lock and check purpose, email, report
      *  submission ID and version in a single serializable transaction.
@@ -63,7 +65,15 @@ final class BadAround_Report_Otp_Service {
             ];
             if(!$this->store->stage($record))return null;
             // Only the transport sees plaintext recipient/code.
-            if(!$this->mailer->send_report_code($profile['email'],$code))return null;
+            try {
+                if(!$this->mailer->send_report_code($profile['email'],$code)) {
+                    $this->store->invalidate($id,$now);
+                    return null;
+                }
+            } catch(Throwable $deliveryError) {
+                $this->store->invalidate($id,$now);
+                return null;
+            }
             return $id;
         }catch(Throwable $error){return null;}
     }
