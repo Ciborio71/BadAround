@@ -110,6 +110,9 @@ jobs:
           php -l prototypes/ba-identity-01c/test-wordpress-session-rest.php
           php -l prototypes/ba-identity-01c/wordpress-identity-portal.php
           php -l prototypes/ba-identity-01c/test-wordpress-identity-portal.php
+          php -l prototypes/ba-identity-01c/wordpress-comment-form.php
+          php -l prototypes/ba-identity-01c/test-wordpress-comment-form.php
+          node --check prototypes/ba-identity-01c/identity-comment-form.js
           php -l prototypes/ba-identity-01c/mysql-private-activity.php
           php -l prototypes/ba-identity-01c/wordpress-activity-rest.php
           php -l prototypes/ba-identity-01c/test-private-activity-mysql.php
@@ -147,6 +150,7 @@ jobs:
           php prototypes/ba-identity-01c/test-wordpress-private-access.php
           php prototypes/ba-identity-01c/test-wordpress-session-rest.php
           php prototypes/ba-identity-01c/test-wordpress-identity-portal.php
+          php prototypes/ba-identity-01c/test-wordpress-comment-form.php
           php prototypes/ba-identity-01c/test-wordpress-runtime-loader.php
 
   identity-mysql:
