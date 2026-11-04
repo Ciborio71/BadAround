@@ -1,4 +1,4 @@
-name: BA-IDENTITY read-only live reconciliation
+name: BA-IDENTITY read-only reconciliation
 
 on:
   push:
@@ -18,32 +18,45 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  compare-source-hashes:
+  offline-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout reconciliation sources
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check syntax and read-only behavior without credentials
+        run: |
+          python3 -m py_compile tools/ba_identity_readonly_inventory.py
+          python3 -m unittest discover -s tests -p "test_ba_identity_readonly_inventory.py" -v
+
+  compare-live-only-on-manual-dispatch:
+    if: github.event_name == 'workflow_dispatch'
+    needs: offline-tests
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
       - name: Checkout release-based reconciliation branch
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Checkout Identity prototype separately
         uses: actions/checkout@v4
         with:
           ref: feature/ba-identity-01c-dormant-20261103
           path: prototype-source
           persist-credentials: false
-      - name: Validate inventory offline (no network or credentials)
-        run: |
-          python3 -m py_compile tools/ba_identity_readonly_inventory.py
-          python3 -m unittest discover -s tests -p "test_ba_identity_readonly_inventory.py" -v
-      - name: Build live checksum inventory (FTPS read-only)
+      - name: Read live file checksums without writing to FTPS
         env:
           FTP_HOST: "46.231.24.137"
           FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
         run: python3 tools/ba_identity_readonly_inventory.py
-      - name: Upload reconciliation hashes only
-        if: success()
+      - name: Publish SHA256 diagnostic inventory only
         uses: actions/upload-artifact@v4
         with:
           name: ba-identity-readonly-sha256-inventory
           path: identity-reconciliation-inventory.json
+          if-no-files-found: error
           retention-days: 7
