@@ -9,6 +9,7 @@ on:
       - tests/test-ba-native-report-receipt.php
       - tests/test-ba-native-ownership-coordinator.php
       - tests/test-ba-durable-ownership-handoff.php
+      - tests/test-ba-durable-ownership-mysql.php
   pull_request:
     branches:
       - release/production-mvp-01
@@ -305,3 +306,5 @@ jobs:
           php prototype-source/prototypes/ba-identity-01c/test-report-otp-canonical-reader-mysql.php
           php prototype-source/prototypes/ba-identity-01c/test-public-comment-schema.php
           php prototype-source/prototypes/ba-identity-01c/test-wordpress-registration-composition.php
+          php -l tests/test-ba-durable-ownership-mysql.php
+          php tests/test-ba-durable-ownership-mysql.php
