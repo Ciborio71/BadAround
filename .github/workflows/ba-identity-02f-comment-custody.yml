@@ -1,0 +1,38 @@
+name: BA-IDENTITY 02F private comment form custody
+on:
+  push:
+    branches:
+      - feature/ba-identity-01c-dormant-20261103
+    paths:
+      - .github/workflows/ba-identity-02f-comment-custody.yml
+permissions:
+  contents: read
+concurrency:
+  group: badaround-production-scoped-ftps
+  cancel-in-progress: false
+jobs:
+  comment-custody:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: PHP runtime
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, openssl, pdo_mysql
+          coverage: none
+      - name: Test private consent gate, event validation and script
+        run: |
+          python3 -m py_compile .github/scripts/ba_identity_02f_comment_custody.py
+          php prototypes/ba-identity-01c/test-wordpress-comment-form.php
+          php prototypes/ba-identity-01c/test-wordpress-privacy-notice.php
+          node --check prototypes/ba-identity-01c/identity-comment-form.js
+      - name: Guarded dormant comment form upload
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 .github/scripts/ba_identity_02f_comment_custody.py
