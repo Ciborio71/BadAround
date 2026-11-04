@@ -1,0 +1,17 @@
+name: BadAround full source inventory validation
+on:
+  push:
+    branches:
+      - reconcile/identity-production-baseline-20261104
+    paths:
+      - tools/ba_full_source_readonly_inventory.py
+      - .github/workflows/ba-full-source-parity.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile tools/ba_full_source_readonly_inventory.py
