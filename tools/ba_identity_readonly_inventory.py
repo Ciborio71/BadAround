@@ -16,7 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 LIVE_PLUGIN = "/httpdocs/wp-content/plugins/badaround-core"
 LOCAL_PLUGIN = ROOT / "wordpress/plugins/badaround-core"
-PROTOTYPE = ROOT / "prototypes/ba-identity-01c"
+PROTOTYPE = ROOT / "prototype-source/prototypes/ba-identity-01c"
 
 def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
