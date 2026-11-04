@@ -17,6 +17,7 @@ on:
       - tests/test-ba-pre-reserved-native-intake.php
       - tests/test-ba-pre-intake-recovery-worker.php
       - tests/test-ba-pre-intake-schema-mysql.php
+      - tests/test-ba-wordpress-recovery-composition-mysql.php
   workflow_dispatch:
 concurrency:
   group: ba-identity-functional-${{ github.ref }}
@@ -50,7 +51,7 @@ jobs:
             cp "$file" "$dest/"
             count=$((count+1))
           done
-          test "$count" -eq 75
+          test "$count" -eq 76
           echo "PRODUCTION_SOURCE_TEST_OVERLAY=PASS count=$count"
       - name: Prepare PHP 8.3 with required extensions
         uses: shivammathur/setup-php@v2
@@ -289,7 +290,7 @@ jobs:
             cp "$file" "$dest/"
             count=$((count+1))
           done
-          test "$count" -eq 75
+          test "$count" -eq 76
           echo "PRODUCTION_SOURCE_TEST_OVERLAY=PASS count=$count"
       - name: Prepare PHP 8.3 with MySQL support
         uses: shivammathur/setup-php@v2
@@ -339,3 +340,6 @@ jobs:
           php -l wordpress/plugins/badaround-core/identity-dormant/pre-intake-schema-candidate.php
           php -l tests/test-ba-pre-intake-schema-mysql.php
           php tests/test-ba-pre-intake-schema-mysql.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-pre-intake-recovery-composition.php
+          php -l tests/test-ba-wordpress-recovery-composition-mysql.php
+          php tests/test-ba-wordpress-recovery-composition-mysql.php
