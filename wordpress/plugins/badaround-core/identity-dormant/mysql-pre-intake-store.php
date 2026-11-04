@@ -51,8 +51,15 @@ final class BadAround_Identity_Mysql_Pre_Intake_Store implements BadAround_Ident
             SET state='linked',report_id=:report,event_id=:event,linked_at=:now,revision=revision+1
             WHERE operation_id=:op AND submission_id=:submission
                 AND state='reserved' AND report_id IS NULL AND event_id IS NULL");
-        $q->execute([':report'=>$report,':event'=>$event,':now'=>$now,
-            ':op'=>$op,':submission'=>$submission]);
-        return $q->rowCount()===1;
+        try {
+            $q->execute([':report'=>$report,':event'=>$event,':now'=>$now,
+                ':op'=>$op,':submission'=>$submission]);
+            return $q->rowCount()===1;
+        } catch (PDOException $error) {
+            // A unique canonical report already linked elsewhere is an
+            // ownership conflict, never an uncaught HTTP 500 or a success.
+            if ($error->getCode()==='23000') return false;
+            throw $error;
+        }
     }
 }
