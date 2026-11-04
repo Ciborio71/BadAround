@@ -1,0 +1,52 @@
+name: BA-IDENTITY exact source reconciliation (one-shot)
+on:
+  push:
+    branches:
+      - reconcile/identity-production-baseline-20261104
+    paths:
+      - .github/workflows/ba-live-source-import.yml
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  restore-reviewed-source:
+    if: github.event.head_commit.message == 'ci: approved one-shot exact live source reconciliation'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout reconciliation branch
+        uses: actions/checkout@v4
+        with:
+          ref: reconcile/identity-production-baseline-20261104
+          fetch-depth: 1
+          persist-credentials: true
+      - name: Download previously audited source artifact
+        uses: actions/download-artifact@v4
+        with:
+          artifact-ids: 13335718925
+          github-token: ${{ github.token }}
+          path: custody
+      - name: Restore only approved exact-sha files into repository
+        run: python3 .github/scripts/ba_restore_live_source.py
+      - name: Verify PHP syntax of recovered files
+        run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-core.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+          php -l wordpress/themes/badaround-child/front-page.php
+          php -l wordpress/themes/badaround-child/page-radar-demo.php
+          find wordpress/plugins/badaround-core/includes -maxdepth 1 -name 'class-badaround-radar-*.php' -print0 | xargs -0 -n1 php -l
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-external-report-intake.php
+      - name: Commit reviewed files to reconciliation branch only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- wordpress/plugins/badaround-core/includes wordpress/themes/badaround-child/assets/css/home.css wordpress/themes/badaround-child/front-page.php wordpress/themes/badaround-child/page-radar-demo.php
+          git diff --cached --stat
+          if git diff --cached --quiet; then
+            echo "SOURCE_ALREADY_IN_SYNC=1"
+          else
+            git commit -m "reconcile: restore SHA256-audited live Core Radar Home source"
+            git push origin HEAD:reconcile/identity-production-baseline-20261104
+          fi
