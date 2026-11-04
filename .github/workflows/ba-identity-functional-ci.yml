@@ -27,7 +27,7 @@ jobs:
           ref: feature/ba-identity-01c-dormant-20261103
           path: prototype-source
           persist-credentials: false
-      - name: Overlay the 61 SHA256-verified production modules
+      - name: Overlay verified production modules and new dormant bridge
         run: |
           set -eu
           src=wordpress/plugins/badaround-core/identity-dormant
@@ -40,7 +40,7 @@ jobs:
             cp "$file" "$dest/"
             count=$((count+1))
           done
-          test "$count" -eq 61
+          test "$count" -eq 62
           echo "PRODUCTION_SOURCE_TEST_OVERLAY=PASS count=$count"
       - name: Prepare PHP 8.3 with required extensions
         uses: shivammathur/setup-php@v2
@@ -242,7 +242,7 @@ jobs:
           ref: feature/ba-identity-01c-dormant-20261103
           path: prototype-source
           persist-credentials: false
-      - name: Overlay the 61 SHA256-verified production modules
+      - name: Overlay verified production modules and new dormant bridge
         run: |
           set -eu
           src=wordpress/plugins/badaround-core/identity-dormant
@@ -255,7 +255,7 @@ jobs:
             cp "$file" "$dest/"
             count=$((count+1))
           done
-          test "$count" -eq 61
+          test "$count" -eq 62
           echo "PRODUCTION_SOURCE_TEST_OVERLAY=PASS count=$count"
       - name: Prepare PHP 8.3 with MySQL support
         uses: shivammathur/setup-php@v2
