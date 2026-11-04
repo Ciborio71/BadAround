@@ -30,3 +30,10 @@ Date: 04/11/2026. Status: **implementation and disposable CI complete; no public
 - No user data generated or copied.
 - Existing published Privacy Policy still visibly states `BOZZA PRE-PUBBLICAZIONE`, so no real account/OTP onboarding.
 - PR #80 draft, issue #82 open. NO-GO for public activation.
+
+## Live architecture finding (read-only inspection, 04/11)
+Production native Golden Path uses BadAround_Report_Persistence_Service, which creates events with wp_insert_post(), updates reports with WordPress $wpdb and holds a named submission lock. This is NOT a documented single PDO transaction with the new ba_report_otp table.
+
+Therefore DO NOT call claim_in_transaction() on a distinct PDO connection after WordPress report persistence and assume atomicity. Such an implementation risks consuming an OTP without a report or writing a report without consuming the proof.
+
+The next integration must use a reviewed shared transactional boundary OR a durable report-reservation/outbox state machine under the existing submission lock. Required tests: PHP process interruption, database failure, duplicated calls, retries and recovery. No live enforcement until this is implemented and accepted.
