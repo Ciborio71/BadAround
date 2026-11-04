@@ -9,22 +9,14 @@ on:
       - tools/ba_identity_readonly_inventory.py
       - tests/test_ba_identity_readonly_inventory.py
       - .github/workflows/ba-identity-readonly-inventory.yml
-  pull_request:
-    branches:
-      - release/production-mvp-01
-    paths:
-      - wordpress/plugins/badaround-core/badaround-core.php
-      - tools/ba_identity_readonly_inventory.py
-      - tests/test_ba_identity_readonly_inventory.py
-      - .github/workflows/ba-identity-readonly-inventory.yml
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ba-identity-readonly-inventory
-  cancel-in-progress: false
+  group: ba-identity-readonly-inventory-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   offline-tests:
