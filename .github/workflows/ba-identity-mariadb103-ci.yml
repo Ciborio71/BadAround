@@ -1,0 +1,60 @@
+name: BA-IDENTITY MariaDB 10.3 production parity (disposable)
+on:
+  push:
+    branches:
+      - feature/ba-identity-01c-dormant-20261103
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mariadb-103:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      mariadb:
+        image: mariadb:10.3
+        env:
+          MYSQL_DATABASE: ba_identity_ci
+          MYSQL_USER: ba_ci
+          MYSQL_PASSWORD: local-ci-only-password
+          MYSQL_ROOT_PASSWORD: local-ci-root-only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -plocal-ci-root-only"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP 8.3 / PDO MySQL
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, openssl, pdo_mysql, pcntl
+          coverage: none
+      - name: Exact engine family and additive schema compatibility
+        env:
+          BA_TEST_DB_DSN: "mysql:host=127.0.0.1;port=3306;dbname=ba_identity_ci;charset=utf8mb4"
+          BA_TEST_DB_USER: ba_ci
+          BA_TEST_DB_PASS: local-ci-only-password
+        run: |
+          php -r '$pdo=new PDO(getenv("BA_TEST_DB_DSN"),getenv("BA_TEST_DB_USER"),getenv("BA_TEST_DB_PASS")); $v=$pdo->query("SELECT VERSION()")->fetchColumn(); echo "CI_DB_ENGINE=".$v.PHP_EOL; if (!str_contains(strtolower($v),"mariadb") || !str_starts_with($v,"10.3.")) exit(9);'
+          php prototypes/ba-identity-01c/test-schema-candidate.php
+          php prototypes/ba-identity-01c/test-schema-recovery.php
+          php prototypes/ba-identity-01c/test-mysql-community-budget.php
+          php prototypes/ba-identity-01c/test-mysql-ownership.php
+          php prototypes/ba-identity-01c/test-mysql-wp-actor-binding.php
+          php prototypes/ba-identity-01c/test-gateway-mysql-e2e.php
+          php prototypes/ba-identity-01c/test-wordpress-composition.php
+          php prototypes/ba-identity-01c/test-mysql-verified-resolver.php
+          php prototypes/ba-identity-01c/test-wordpress-login-composition.php
+          php prototypes/ba-identity-01c/test-registration-mysql.php
+          php prototypes/ba-identity-01c/test-private-activity-mysql.php
+          php prototypes/ba-identity-01c/test-report-otp-mysql.php
+          php prototypes/ba-identity-01c/test-report-otp-atomic-intake-mysql.php
+          php prototypes/ba-identity-01c/test-report-otp-outbox-mysql.php
+          php prototypes/ba-identity-01c/test-report-otp-canonical-reader-mysql.php
+          php prototypes/ba-identity-01c/test-public-comment-schema.php
+          php prototypes/ba-identity-01c/test-wordpress-registration-composition.php
+          php prototypes/ba-identity-01c/test-wordpress-registration-rest.php

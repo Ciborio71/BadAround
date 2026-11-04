@@ -1,0 +1,240 @@
+name: BA-IDENTITY-01C isolated primitive tests
+on:
+  push:
+    branches:
+      - feature/ba-identity-01c-dormant-20261103
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  identity-primitives:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare PHP 8.3 with required extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, openssl, pdo_mysql, pcntl
+          coverage: none
+      - name: PHP syntax
+        run: |
+          php -l prototypes/ba-identity-01c/challenge-primitives.php
+          php -l prototypes/ba-identity-01c/test-challenge-primitives.php
+          php -l prototypes/ba-identity-01c/challenge-store.php
+          php -l prototypes/ba-identity-01c/test-challenge-store.php
+          php -l prototypes/ba-identity-01c/ownership-policy.php
+          php -l prototypes/ba-identity-01c/test-ownership-policy.php
+          php -l prototypes/ba-identity-01c/mysql-challenge-store.php
+          php -l prototypes/ba-identity-01c/session-policy.php
+          php -l prototypes/ba-identity-01c/test-session-policy.php
+          php -l prototypes/ba-identity-01c/mysql-session-store.php
+          php -l prototypes/ba-identity-01c/csrf-policy.php
+          php -l prototypes/ba-identity-01c/test-csrf-policy.php
+          php -l prototypes/ba-identity-01c/test-mysql-integration.php
+          php -l prototypes/ba-identity-01c/test-mysql-concurrency.php
+          php -l prototypes/ba-identity-01c/identity-active-status.php
+          php -l prototypes/ba-identity-01c/mysql-identity-active-status.php
+          php -l prototypes/ba-identity-01c/test-mysql-active-status.php
+          php -l prototypes/ba-identity-01c/edit-guard.php
+          php -l prototypes/ba-identity-01c/test-edit-guard.php
+          php -l prototypes/ba-identity-01c/verification-coordinator.php
+          php -l prototypes/ba-identity-01c/test-verification-coordinator.php
+          php -l prototypes/ba-identity-01c/enrollment-policy.php
+          php -l prototypes/ba-identity-01c/test-enrollment-policy.php
+          php -l prototypes/ba-identity-01c/mysql-enrollment-store.php
+          php -l prototypes/ba-identity-01c/test-mysql-enrollment.php
+          php -l prototypes/ba-identity-01c/test-mysql-enrollment-race.php
+          php -l prototypes/ba-identity-01c/mysql-ownership-store.php
+          php -l prototypes/ba-identity-01c/test-mysql-ownership.php
+          php -l prototypes/ba-identity-01c/mysql-rate-limiter.php
+          php -l prototypes/ba-identity-01c/test-mysql-rate-limiter.php
+          php -l prototypes/ba-identity-01c/post-intake-binder.php
+          php -l prototypes/ba-identity-01c/test-post-intake-binder.php
+          php -l prototypes/ba-identity-01c/community-policy.php
+          php -l prototypes/ba-identity-01c/test-community-policy.php
+          php -l prototypes/ba-identity-01c/purpose-keys.php
+          php -l prototypes/ba-identity-01c/test-purpose-keys.php
+          php -l prototypes/ba-identity-01c/otp-issuer.php
+          php -l prototypes/ba-identity-01c/test-otp-issuer.php
+          php -l prototypes/ba-identity-01c/otp-adapters.php
+          php -l prototypes/ba-identity-01c/test-otp-adapters.php
+          php -l prototypes/ba-identity-01c/ownership-recovery-policy.php
+          php -l prototypes/ba-identity-01c/test-ownership-recovery-policy.php
+          php -l prototypes/ba-identity-01c/revision-request-policy.php
+          php -l prototypes/ba-identity-01c/test-revision-request-policy.php
+          php -l prototypes/ba-identity-01c/comment-moderation-policy.php
+          php -l prototypes/ba-identity-01c/test-comment-moderation-policy.php
+          php -l prototypes/ba-identity-01c/mysql-ownership-recovery-store.php
+          php -l prototypes/ba-identity-01c/test-mysql-ownership-recovery.php
+          php -l prototypes/ba-identity-01c/mysql-moderation-inbox.php
+          php -l prototypes/ba-identity-01c/test-mysql-moderation-inbox.php
+          php -l prototypes/ba-identity-01c/community-gateway.php
+          php -l prototypes/ba-identity-01c/test-community-gateway.php
+          php -l prototypes/ba-identity-01c/test-gateway-mysql-e2e.php
+          php -l prototypes/ba-identity-01c/wordpress-authority.php
+          php -l prototypes/ba-identity-01c/test-wordpress-authority.php
+          php -l prototypes/ba-identity-01c/mysql-wp-actor-binding.php
+          php -l prototypes/ba-identity-01c/test-mysql-wp-actor-binding.php
+          php -l prototypes/ba-identity-01c/schema-candidate.php
+          php -l prototypes/ba-identity-01c/test-schema-candidate.php
+          php -l prototypes/ba-identity-01c/schema-recovery-policy.php
+          php -l prototypes/ba-identity-01c/test-schema-recovery.php
+          php -l prototypes/ba-identity-01c/wordpress-community-rest-adapter.php
+          php -l prototypes/ba-identity-01c/test-wordpress-community-rest-off.php
+          php -l prototypes/ba-identity-01c/test-wordpress-community-rest-enabled.php
+          php -l prototypes/ba-identity-01c/mysql-community-budget.php
+          php -l prototypes/ba-identity-01c/test-mysql-community-budget.php
+          php -l prototypes/ba-identity-01c/wordpress-composition.php
+          php -l prototypes/ba-identity-01c/test-wordpress-composition.php
+          php -l prototypes/ba-identity-01c/mysql-verified-resolver.php
+          php -l prototypes/ba-identity-01c/test-mysql-verified-resolver.php
+          php -l prototypes/ba-identity-01c/wordpress-login-composition.php
+          php -l prototypes/ba-identity-01c/test-wordpress-login-composition.php
+          php -l prototypes/ba-identity-01c/wordpress-session-cookie.php
+          php -l prototypes/ba-identity-01c/test-wordpress-session-cookie.php
+          php -l prototypes/ba-identity-01c/wordpress-login-rest.php
+          php -l prototypes/ba-identity-01c/test-wordpress-login-rest.php
+          php -l prototypes/ba-identity-01c/wordpress-registration-rest.php
+          php -l prototypes/ba-identity-01c/test-wordpress-registration-rest.php
+          php -l prototypes/ba-identity-01c/wordpress-registration-composition.php
+          php -l prototypes/ba-identity-01c/test-wordpress-registration-composition.php
+          php -l prototypes/ba-identity-01c/wordpress-privacy-notice.php
+          php -l prototypes/ba-identity-01c/test-wordpress-privacy-notice.php
+          php -l prototypes/ba-identity-01c/wordpress-private-bootstrap.php
+          php -l prototypes/ba-identity-01c/test-wordpress-private-bootstrap.php
+          php -l prototypes/ba-identity-01c/wordpress-private-access.php
+          php -l prototypes/ba-identity-01c/test-wordpress-private-access.php
+          php -l prototypes/ba-identity-01c/wordpress-session-rest.php
+          php -l prototypes/ba-identity-01c/test-wordpress-session-rest.php
+          php -l prototypes/ba-identity-01c/wordpress-identity-portal.php
+          php -l prototypes/ba-identity-01c/test-wordpress-identity-portal.php
+          php -l prototypes/ba-identity-01c/wordpress-comment-form.php
+          php -l prototypes/ba-identity-01c/test-wordpress-comment-form.php
+          node --check prototypes/ba-identity-01c/identity-comment-form.js
+          php -l prototypes/ba-identity-01c/mysql-private-activity.php
+          php -l prototypes/ba-identity-01c/wordpress-activity-rest.php
+          php -l prototypes/ba-identity-01c/test-private-activity-mysql.php
+          php -l prototypes/ba-identity-01c/public-comment-schema-candidate.php
+          php -l prototypes/ba-identity-01c/test-public-comment-schema.php
+          php -l prototypes/ba-identity-01c/report-submission-verification-policy.php
+          php -l prototypes/ba-identity-01c/test-report-submission-verification-policy.php
+          php -l prototypes/ba-identity-01c/report-otp-service.php
+          php -l prototypes/ba-identity-01c/test-report-otp-service.php
+          php -l prototypes/ba-identity-01c/report-otp-schema-candidate.php
+          php -l prototypes/ba-identity-01c/report-otp-store.php
+          php -l prototypes/ba-identity-01c/test-report-otp-mysql.php
+          php -l prototypes/ba-identity-01c/report-otp-atomic-intake.php
+          php -l prototypes/ba-identity-01c/test-report-otp-atomic-intake-mysql.php
+          php -l prototypes/ba-identity-01c/report-otp-outbox-schema.php
+          php -l prototypes/ba-identity-01c/report-otp-wordpress-reconciler.php
+          php -l prototypes/ba-identity-01c/report-otp-wordpress-adapters.php
+          php -l prototypes/ba-identity-01c/test-report-otp-wordpress-reconciler.php
+          php -l prototypes/ba-identity-01c/report-otp-outbox-store.php
+          php -l prototypes/ba-identity-01c/report-otp-outbox-coordinator.php
+          php -l prototypes/ba-identity-01c/test-report-otp-outbox-mysql.php
+          php -l prototypes/ba-identity-01c/report-otp-canonical-reader.php
+          php -l prototypes/ba-identity-01c/test-report-otp-canonical-reader-mysql.php
+          php -l prototypes/ba-identity-01c/report-otp-reservation-policy.php
+          php -l prototypes/ba-identity-01c/test-report-otp-reservation-policy.php
+          node --check prototypes/ba-identity-01c/identity-portal.js
+          php -l prototypes/ba-identity-01c/wordpress-runtime-loader.php
+          php -l prototypes/ba-identity-01c/test-wordpress-runtime-loader.php
+          php -l prototypes/ba-identity-01c/registration-service.php
+          php -l prototypes/ba-identity-01c/test-registration-mysql.php
+      - name: OTP state machine tests
+        run: |
+          php prototypes/ba-identity-01c/test-challenge-primitives.php
+          php prototypes/ba-identity-01c/test-challenge-store.php
+          php prototypes/ba-identity-01c/test-ownership-policy.php
+          php prototypes/ba-identity-01c/test-session-policy.php
+          php prototypes/ba-identity-01c/test-csrf-policy.php
+          php prototypes/ba-identity-01c/test-edit-guard.php
+          php prototypes/ba-identity-01c/test-verification-coordinator.php
+          php prototypes/ba-identity-01c/test-enrollment-policy.php
+          php prototypes/ba-identity-01c/test-post-intake-binder.php
+          php prototypes/ba-identity-01c/test-community-policy.php
+          php prototypes/ba-identity-01c/test-purpose-keys.php
+          php prototypes/ba-identity-01c/test-otp-issuer.php
+          php prototypes/ba-identity-01c/test-otp-adapters.php
+          php prototypes/ba-identity-01c/test-ownership-recovery-policy.php
+          php prototypes/ba-identity-01c/test-revision-request-policy.php
+          php prototypes/ba-identity-01c/test-comment-moderation-policy.php
+          php prototypes/ba-identity-01c/test-community-gateway.php
+          php prototypes/ba-identity-01c/test-wordpress-community-rest-off.php
+          php prototypes/ba-identity-01c/test-wordpress-community-rest-enabled.php
+          php prototypes/ba-identity-01c/test-wordpress-session-cookie.php
+          php prototypes/ba-identity-01c/test-wordpress-login-rest.php
+          php prototypes/ba-identity-01c/test-wordpress-registration-rest.php
+          php prototypes/ba-identity-01c/test-wordpress-privacy-notice.php
+          php prototypes/ba-identity-01c/test-report-submission-verification-policy.php
+          php prototypes/ba-identity-01c/test-report-otp-service.php
+          php prototypes/ba-identity-01c/test-report-otp-reservation-policy.php
+          php prototypes/ba-identity-01c/test-report-otp-wordpress-reconciler.php
+          php prototypes/ba-identity-01c/test-wordpress-private-bootstrap.php
+          php prototypes/ba-identity-01c/test-wordpress-private-access.php
+          php prototypes/ba-identity-01c/test-wordpress-session-rest.php
+          php prototypes/ba-identity-01c/test-wordpress-identity-portal.php
+          php prototypes/ba-identity-01c/test-wordpress-comment-form.php
+          php prototypes/ba-identity-01c/test-wordpress-runtime-loader.php
+
+  identity-mysql:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: ba_identity_ci
+          MYSQL_USER: ba_ci
+          MYSQL_PASSWORD: local-ci-only-password
+          MYSQL_ROOT_PASSWORD: local-ci-root-only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -plocal-ci-root-only"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare PHP 8.3 with MySQL support
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, openssl, pdo_mysql, pcntl
+          coverage: none
+      - name: Ephemeral MySQL integration
+        env:
+          BA_TEST_DB_DSN: "mysql:host=127.0.0.1;port=3306;dbname=ba_identity_ci;charset=utf8mb4"
+          BA_TEST_DB_USER: ba_ci
+          BA_TEST_DB_PASS: local-ci-only-password
+        run: |
+          php -r 'foreach (["mbstring", "openssl", "pdo_mysql", "pcntl"] as $e) { if (!extension_loaded($e)) { fwrite(STDERR, "Missing ".$e.PHP_EOL); exit(1); } }'
+          php prototypes/ba-identity-01c/test-mysql-integration.php
+          php prototypes/ba-identity-01c/test-mysql-concurrency.php
+          php prototypes/ba-identity-01c/test-mysql-enrollment.php
+          php prototypes/ba-identity-01c/test-mysql-enrollment-race.php
+          php prototypes/ba-identity-01c/test-mysql-ownership.php
+          php prototypes/ba-identity-01c/test-mysql-rate-limiter.php
+          php prototypes/ba-identity-01c/test-mysql-active-status.php
+          php prototypes/ba-identity-01c/test-mysql-ownership-recovery.php
+          php prototypes/ba-identity-01c/test-mysql-moderation-inbox.php
+          php prototypes/ba-identity-01c/test-gateway-mysql-e2e.php
+          php prototypes/ba-identity-01c/test-wordpress-authority.php
+          php prototypes/ba-identity-01c/test-mysql-wp-actor-binding.php
+          php prototypes/ba-identity-01c/test-schema-candidate.php
+          php prototypes/ba-identity-01c/test-schema-recovery.php
+          php prototypes/ba-identity-01c/test-mysql-community-budget.php
+          php prototypes/ba-identity-01c/test-wordpress-composition.php
+          php prototypes/ba-identity-01c/test-mysql-verified-resolver.php
+          php prototypes/ba-identity-01c/test-wordpress-login-composition.php
+          php prototypes/ba-identity-01c/test-registration-mysql.php
+          php prototypes/ba-identity-01c/test-private-activity-mysql.php
+          php prototypes/ba-identity-01c/test-report-otp-mysql.php
+          php prototypes/ba-identity-01c/test-report-otp-atomic-intake-mysql.php
+          php prototypes/ba-identity-01c/test-report-otp-outbox-mysql.php
+          php prototypes/ba-identity-01c/test-report-otp-canonical-reader-mysql.php
+          php prototypes/ba-identity-01c/test-public-comment-schema.php
+          php prototypes/ba-identity-01c/test-wordpress-registration-composition.php

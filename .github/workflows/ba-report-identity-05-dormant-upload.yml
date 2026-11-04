@@ -1,0 +1,37 @@
+name: BA-REPORT-IDENTITY 05 dormant OTP module delivery
+on:
+  push:
+    branches:
+      - feature/ba-identity-01c-dormant-20261103
+    paths:
+      - .github/workflows/ba-report-identity-05-dormant-upload.yml
+permissions:
+  contents: read
+concurrency:
+  group: badaround-production-scoped-ftps
+  cancel-in-progress: false
+jobs:
+  report-otp-custody:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, openssl, pdo_mysql
+          coverage: none
+      - name: Check source syntax and QA harness
+        run: |
+          python3 -m py_compile .github/scripts/ba_report_identity_05_dormant_upload.py
+          php prototypes/ba-identity-01c/test-report-submission-verification-policy.php
+          php prototypes/ba-identity-01c/test-report-otp-service.php
+          php prototypes/ba-identity-01c/test-report-otp-reservation-policy.php
+          php -l prototypes/ba-identity-01c/report-otp-canonical-reader.php
+      - name: Add audited dormant modules (no activation)
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 .github/scripts/ba_report_identity_05_dormant_upload.py

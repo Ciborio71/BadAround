@@ -1,0 +1,26 @@
+name: BA-IDENTITY pre-deploy safety gate (read-only)
+on:
+  push:
+    branches:
+      - feature/ba-identity-01c-dormant-20261103
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  predeploy-scope:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch explicit comparison baseline
+        run: git fetch --no-tags origin main
+      - name: Refuse unsafe runtime changes and report release holds
+        env:
+          BA_PREFLIGHT_BASE: origin/main
+        run: python3 prototypes/ba-identity-01c/predeploy-gate.py
+      - name: Report non-deployable state
+        run: |
+          echo "Identity prototype is not yet deployable to production."
+          echo "Production-first approved; staging bypassed. Deployment still requires live Core parity, migration, rollback, runtime and QA gates."

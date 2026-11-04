@@ -1,0 +1,32 @@
+name: BA-REPORT-IDENTITY 06 dormant reconciliation modules
+on:
+  push:
+    branches: [feature/ba-identity-01c-dormant-20261103]
+    paths: [.github/workflows/ba-report-identity-06-reconciler-upload.yml]
+permissions:
+  contents: read
+concurrency:
+  group: badaround-production-scoped-ftps
+  cancel-in-progress: false
+jobs:
+  reconciler-custody:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Verify fail closed
+        run: |
+          python3 -m py_compile .github/scripts/ba_report_identity_06_reconciler_upload.py
+          php prototypes/ba-identity-01c/test-report-otp-wordpress-reconciler.php
+          php -l prototypes/ba-identity-01c/report-otp-wordpress-adapters.php
+      - name: Append dormant modules only
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 .github/scripts/ba_report_identity_06_reconciler_upload.py

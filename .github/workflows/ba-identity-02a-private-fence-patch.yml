@@ -1,0 +1,37 @@
+name: BA-IDENTITY 02A dormant QA network fence patch
+on:
+  push:
+    branches:
+      - feature/ba-identity-01c-dormant-20261103
+    paths:
+      - .github/workflows/ba-identity-02a-private-fence-patch.yml
+permissions:
+  contents: read
+concurrency:
+  group: badaround-production-scoped-ftps
+  cancel-in-progress: false
+jobs:
+  fenced-bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Prepare PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, openssl, pdo_mysql, pdo_sqlite
+          coverage: none
+      - name: Security and default-off regression
+        run: |
+          php prototypes/ba-identity-01c/test-wordpress-private-access.php
+          php prototypes/ba-identity-01c/test-wordpress-private-bootstrap.php
+          php prototypes/ba-identity-01c/test-wordpress-runtime-loader.php
+      - name: Exact-source dormant QA security update
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 .github/scripts/ba_identity_02a_private_fence_patch.py

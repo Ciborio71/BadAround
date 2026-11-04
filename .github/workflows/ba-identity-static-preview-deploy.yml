@@ -1,0 +1,28 @@
+name: BA-IDENTITY visual demo upload (static, fake data)
+on:
+  push:
+    branches:
+      - feature/ba-identity-01c-dormant-20261103
+    paths:
+      - .github/workflows/ba-identity-static-preview-deploy.yml
+permissions:
+  contents: read
+concurrency:
+  group: badaround-production-scoped-ftps
+  cancel-in-progress: false
+jobs:
+  visual-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static preview safety and Python syntax
+        run: |
+          python3 -m py_compile .github/scripts/ba_identity_static_preview_deploy.py
+          python3 -c "from pathlib import Path; p=Path('prototypes/ba-identity-01c/identity-demo-static-20261104.html').read_text(); assert '<script' not in p.lower() and '<form' not in p.lower(); assert 'ANTEPRIMA VISIVA' in p and 'noindex,nofollow,noarchive' in p"
+      - name: Deploy one standalone HTML demo, no PHP
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 .github/scripts/ba_identity_static_preview_deploy.py
