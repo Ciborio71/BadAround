@@ -46,3 +46,5 @@ jobs:
           name: ba-identity-dormant-addonly-release-evidence
           path: ba-identity-dormant-deploy-evidence.json
           retention-days: 30
+
+# Explicit one-shot trigger; public Identity runtime remains disabled.
