@@ -29,7 +29,7 @@ final class BadAround_Identity_WordPress_QA_Report_Composition {
             || !class_exists('BadAround_Report_Version_Registry')
             || !class_exists('BadAround_Native_Report_Golden_Path_Service')
             || !class_exists('BadAround_Native_Media_Report_Adapter')
-            || !class_exists('BadAround_Native_Report_Repository')) {
+            || !class_exists('BadAround_Report_Repository')) {
             return null;
         }
         try {
