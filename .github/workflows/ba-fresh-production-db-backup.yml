@@ -1,0 +1,42 @@
+name: BadAround fresh private production DB backup
+on:
+  push:
+    branches:
+      - reconcile/identity-production-baseline-20261104
+    paths:
+      - .github/workflows/ba-fresh-production-db-backup.yml
+permissions:
+  contents: read
+concurrency:
+  group: badaround-private-production-backup
+  cancel-in-progress: false
+jobs:
+  backup-db:
+    if: "github.event.head_commit.message == 'ops: run one-shot private production DB backup'"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install MariaDB client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq mariadb-client
+      - name: Compile backup controller
+        run: python3 -m py_compile tools/ba_fresh_db_backup.py
+      - name: Dump and securely upload production DB outside public root
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_TLS_NAME: 'hostmld17.aziendeitalia.com'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 tools/ba_fresh_db_backup.py
+      - name: Publish metadata only — never SQL, config or database credentials
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ba-fresh-production-db-backup-metadata
+          path: ba-fresh-db-backup-evidence.json
+          retention-days: 7
+          if-no-files-found: ignore
