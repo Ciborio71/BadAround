@@ -1,0 +1,44 @@
+name: BA-IDENTITY read-only live reconciliation
+
+on:
+  push:
+    branches:
+      - reconcile/identity-production-baseline-20261104
+    paths:
+      - tools/ba_identity_readonly_inventory.py
+      - .github/workflows/ba-identity-readonly-inventory.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ba-identity-readonly-inventory
+  cancel-in-progress: false
+
+jobs:
+  compare-source-hashes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout release-based reconciliation branch
+        uses: actions/checkout@v4
+      - name: Checkout Identity prototype separately
+        uses: actions/checkout@v4
+        with:
+          ref: feature/ba-identity-01c-dormant-20261103
+          path: prototype-source
+          persist-credentials: false
+      - name: Build live checksum inventory (FTPS read-only)
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 tools/ba_identity_readonly_inventory.py
+      - name: Upload reconciliation hashes only
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ba-identity-readonly-sha256-inventory
+          path: identity-reconciliation-inventory.json
+          retention-days: 7
