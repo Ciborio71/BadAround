@@ -12,8 +12,8 @@ import re
 import zipfile
 
 ROOT=Path(__file__).resolve().parents[2]
-PAYLOAD=ROOT/"custody"/"ba-live-source-recovery.zip"
-MANIFEST=ROOT/"custody"/"ba-live-source-recovery-manifest.json"
+PAYLOAD=ROOT/"custody"/"ba-live-source-recovery"/"ba-live-source-recovery.zip"
+MANIFEST=ROOT/"custody"/"ba-live-source-recovery"/"ba-live-source-recovery-manifest.json"
 SOURCE_PREFIX="wordpress/"
 APPROVED = {
   "plugins/badaround-core/includes/class-badaround-core.php",
