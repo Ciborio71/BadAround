@@ -15,6 +15,7 @@ final class BadAround_Identity_QA_Report_REST {
     public const ROUTE='/reports';
     private Closure $validate;
     private Closure $native;
+    private Closure $clock;
 
     /**
      * $validate: callable(array): array|WP_Error (canonical schema validator)
@@ -23,10 +24,11 @@ final class BadAround_Identity_QA_Report_REST {
      */
     public function __construct(
         private BadAround_Identity_QA_Report_Transport $transport,
-        callable $validate,callable $native
+        callable $validate,callable $native,?callable $clock=null
     ) {
         $this->validate=Closure::fromCallable($validate);
         $this->native=Closure::fromCallable($native);
+        $this->clock=$clock===null ? static fn():int=>time() : Closure::fromCallable($clock);
     }
 
     public static function enabled():bool {
@@ -96,7 +98,7 @@ final class BadAround_Identity_QA_Report_REST {
                 $canonical,
                 fn()=>($this->native)($raw,$request,$hasMedia),
                 $_COOKIE,
-                time()
+                (int)($this->clock)()
             );
             $state=$result['state']??'unavailable';
             $status=['owner_confirmed'=>201,'pending'=>202,'conflict'=>409,
