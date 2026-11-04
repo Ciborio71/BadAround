@@ -12,7 +12,7 @@ Scope: seven Identity files under `wp-content/plugins/badaround-core/identity-do
 | wordpress-identity-portal.php | 77 | 76 | 0 | 39 (text rewritten by safe redaction) |
 | wordpress-community-rest-adapter.php | 126 | 125 | 0 | 74 |
 
-Total: **601 unmasked lines match**. The live reader redacts or rewrites 3 lines. No functional divergence was observed in visible source; this is **not byte-exact attestation**.
+Total: **598 unmasked lines match out of 601 source lines**. The live reader redacts or rewrites 3 lines. No functional divergence was observed in visible source; this is **not byte-exact attestation**.
 
 ## Interpretation
 
