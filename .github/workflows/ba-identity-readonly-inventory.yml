@@ -57,7 +57,7 @@ jobs:
           python3 -m unittest discover -s tests -p "test_ba_identity_readonly_inventory.py" -v
 
   compare-live-only-on-manual-dispatch:
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+    if: github.event_name == 'workflow_dispatch'
     needs: offline-tests
     runs-on: ubuntu-latest
     timeout-minutes: 8
