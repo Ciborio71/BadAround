@@ -2,7 +2,6 @@
 """Offline smoke tests for the read-only Identity SHA256 inventory."""
 from __future__ import annotations
 import importlib.util
-import io
 import json
 import os
 from pathlib import Path
@@ -19,6 +18,8 @@ spec.loader.exec_module(module)
 
 class FakeFTP:
     last = None
+    missing = set()
+    changed = {}
     def __init__(self, timeout):
         self.read_paths = []
         self.connected = False
@@ -34,19 +35,23 @@ class FakeFTP:
         assert command.startswith("RETR "), "Only read commands permitted"
         path = command[len("RETR "):]
         self.read_paths.append(path)
+        if path in self.missing:
+            import ftplib
+            raise ftplib.error_perm("550 No such file")
         if path.endswith("/badaround-core.php"):
-            writer(b"<?php /* Plugin Name: BadAround Core */")
-        elif path.endswith("/identity-dormant/demo.php"):
-            writer(b"<?php // same")
+            data = b"<?php /* Plugin Name: BadAround Core */"
+        elif "/identity-dormant/" in path and path.endswith(".php"):
+            data = b"<?php // fixture"
         else:
             raise AssertionError("Unexpected remote read: " + path)
+        writer(self.changed.get(path, data))
     def quit(self):
         self.closed = True
 
 class InventoryTests(unittest.TestCase):
     def test_fetch_digest(self):
         self.assertEqual(module.digest(b"abc"), __import__("hashlib").sha256(b"abc").hexdigest())
-        self.assertEqual(module.fetch(FakeFTP(5), "/httpdocs/wp-content/plugins/badaround-core/identity-dormant/demo.php"), b"<?php // same")
+        self.assertEqual(module.fetch(FakeFTP(5), "/httpdocs/wp-content/plugins/badaround-core/identity-dormant/demo.php"), b"<?php // fixture")
 
     def test_sandboxed_inventory(self):
         with tempfile.TemporaryDirectory() as td:
@@ -56,19 +61,29 @@ class InventoryTests(unittest.TestCase):
             local_plugin.mkdir(parents=True)
             proto.mkdir(parents=True)
             (local_plugin / "badaround-core.php").write_bytes(b"<?php /* Plugin Name: BadAround Core */")
-            (proto / "demo.php").write_bytes(b"<?php // same")
+            (proto / "demo.php").write_bytes(b"<?php // fixture")
             # Provide sufficient fixtures to satisfy minimum candidate count
             for i in range(44):
                 (proto / f"extra-{i}.php").write_bytes(b"<?php // fixture")
             with patch.object(module, "ROOT", root), patch.object(module, "LOCAL_PLUGIN", local_plugin), \
                  patch.object(module, "PROTOTYPE", proto), patch.object(module.ftplib, "FTP_TLS", FakeFTP), \
                  patch.dict(os.environ, {"FTP_HOST":"unit.test", "FTP_USER":"fake", "FTP_PASSWORD":"fake"}):
-                # FakeFTP intentionally fails for unlisted fixtures; this proves
-                # an inventory cannot silently omit unchecked remote files.
-                with self.assertRaises(AssertionError):
-                    module.main()
+                module.main()
                 self.assertTrue(FakeFTP.last.closed)
                 self.assertIn(module.LIVE_PLUGIN + "/badaround-core.php", FakeFTP.last.read_paths)
+                self.assertEqual(len(FakeFTP.last.read_paths), 47)
+                result = json.loads((root / "identity-reconciliation-inventory.json").read_text())
+                self.assertEqual(result["matches"], 46)
+                self.assertEqual(result["mismatches"], [])
+                self.assertEqual(result["mode"], "read-only")
+
+    def test_missing_remote_file_does_not_count_as_match(self):
+        target = module.LIVE_PLUGIN + "/identity-dormant/missing.php"
+        FakeFTP.missing = {target}
+        try:
+            self.assertIsNone(module.fetch(FakeFTP(5), target))
+        finally:
+            FakeFTP.missing = set()
 
     def test_missing_prototype_fails_closed(self):
         with tempfile.TemporaryDirectory() as td:
