@@ -8,6 +8,13 @@ on:
       - tools/ba_identity_readonly_inventory.py
       - tests/test_ba_identity_readonly_inventory.py
       - .github/workflows/ba-identity-readonly-inventory.yml
+  pull_request:
+    branches:
+      - release/production-mvp-01
+    paths:
+      - tools/ba_identity_readonly_inventory.py
+      - tests/test_ba_identity_readonly_inventory.py
+      - .github/workflows/ba-identity-readonly-inventory.yml
   workflow_dispatch:
 
 permissions:
