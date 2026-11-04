@@ -128,6 +128,9 @@ jobs:
           php -l prototypes/ba-identity-01c/report-otp-atomic-intake.php
           php -l prototypes/ba-identity-01c/test-report-otp-atomic-intake-mysql.php
           php -l prototypes/ba-identity-01c/report-otp-outbox-schema.php
+          php -l prototypes/ba-identity-01c/report-otp-wordpress-reconciler.php
+          php -l prototypes/ba-identity-01c/report-otp-wordpress-adapters.php
+          php -l prototypes/ba-identity-01c/test-report-otp-wordpress-reconciler.php
           php -l prototypes/ba-identity-01c/report-otp-outbox-store.php
           php -l prototypes/ba-identity-01c/report-otp-outbox-coordinator.php
           php -l prototypes/ba-identity-01c/test-report-otp-outbox-mysql.php
@@ -168,6 +171,7 @@ jobs:
           php prototypes/ba-identity-01c/test-report-submission-verification-policy.php
           php prototypes/ba-identity-01c/test-report-otp-service.php
           php prototypes/ba-identity-01c/test-report-otp-reservation-policy.php
+          php prototypes/ba-identity-01c/test-report-otp-wordpress-reconciler.php
           php prototypes/ba-identity-01c/test-wordpress-private-bootstrap.php
           php prototypes/ba-identity-01c/test-wordpress-private-access.php
           php prototypes/ba-identity-01c/test-wordpress-session-rest.php
