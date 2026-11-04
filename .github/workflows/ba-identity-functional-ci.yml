@@ -6,6 +6,7 @@ on:
     paths:
       - wordpress/plugins/badaround-core/identity-dormant/**
       - .github/workflows/ba-identity-functional-ci.yml
+      - tests/test-ba-native-report-receipt.php
   pull_request:
     branches:
       - release/production-mvp-01
@@ -47,6 +48,11 @@ jobs:
           php-version: '8.3'
           extensions: mbstring, openssl, pdo_mysql, pcntl
           coverage: none
+      - name: Verify fail-closed wizard receipt bridge
+        run: |
+          php -l wordpress/plugins/badaround-core/identity-dormant/native-report-receipt.php
+          php -l tests/test-ba-native-report-receipt.php
+          php tests/test-ba-native-report-receipt.php
       - name: PHP syntax
         run: |
           php -l prototype-source/prototypes/ba-identity-01c/challenge-primitives.php
