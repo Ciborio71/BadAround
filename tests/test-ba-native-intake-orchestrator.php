@@ -84,6 +84,13 @@ $duplicate = static function():array {
 $before=$grants->grants;
 assertOrchestrator($flow->submit($token,$duplicate,1013)['state']==='duplicate','recovered or duplicate report never assigns owner');
 assertOrchestrator($grants->grants===$before,'duplicate did not grant');
+assertOrchestrator($flow->submit($token,static fn():array=>[
+    'status'=>'success','report_id'=>19,'event_id'=>29,'duplicate'=>false
+],1013)['state']==='owner_pending',
+    'missing persistence metadata remains ambiguous, never duplicate or confirmed');
+assertOrchestrator($grants->grants===$before,
+    'ambiguous receipt cannot grant');
+
 assertOrchestrator($flow->submit($token,static fn():array=>['status'=>'error'],1013)['state']==='submission_failed','failed canonical intake never grants');
 assertOrchestrator($flow->submit($token,static function(){throw new RuntimeException('simulated');},1013)['state']==='submission_failed','exception does not disclose internal details');
 $status->active[$identity]=false;
