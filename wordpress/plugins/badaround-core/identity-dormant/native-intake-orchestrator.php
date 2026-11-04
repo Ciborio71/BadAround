@@ -50,10 +50,18 @@ final class BadAround_Identity_Native_Intake_Orchestrator {
             return ['state' => self::SUBMISSION_FAILED];
         }
         // A duplicate or recovered report cannot create a new owner grant.
+        if (($result['duplicate'] ?? null) === true ||
+            ($result['persistence']['duplicate'] ?? null) === true ||
+            ($result['persistence']['recovered'] ?? null) === true) {
+            return ['state' => self::DUPLICATE];
+        }
+        // Missing persistence evidence is ambiguous, never a confirmed
+        // duplicate or a confirmed owner link.
         if (($result['duplicate'] ?? null) !== false ||
+            ($result['persistence']['completed'] ?? null) !== true ||
             ($result['persistence']['duplicate'] ?? null) !== false ||
             ($result['persistence']['recovered'] ?? null) !== false) {
-            return ['state' => self::DUPLICATE];
+            return ['state' => self::OWNER_PENDING];
         }
 
         $eventId = $result['event_id'] ?? null;
