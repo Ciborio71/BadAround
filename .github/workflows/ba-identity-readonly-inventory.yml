@@ -29,6 +29,10 @@ jobs:
           ref: feature/ba-identity-01c-dormant-20261103
           path: prototype-source
           persist-credentials: false
+      - name: Validate inventory offline (no network or credentials)
+        run: |
+          python3 -m py_compile tools/ba_identity_readonly_inventory.py
+          python3 -m unittest discover -s tests -p "test_ba_identity_readonly_inventory.py" -v
       - name: Build live checksum inventory (FTPS read-only)
         env:
           FTP_HOST: "46.231.24.137"
