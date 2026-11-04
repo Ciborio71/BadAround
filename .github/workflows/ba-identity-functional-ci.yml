@@ -10,10 +10,11 @@ on:
       - tests/test-ba-native-ownership-coordinator.php
       - tests/test-ba-durable-ownership-handoff.php
       - tests/test-ba-durable-ownership-mysql.php
-  pull_request:
-    branches:
-      - release/production-mvp-01
+      - tests/test-ba-ownership-recovery-reconciler.php
   workflow_dispatch:
+concurrency:
+  group: ba-identity-functional-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
@@ -43,7 +44,7 @@ jobs:
             cp "$file" "$dest/"
             count=$((count+1))
           done
-          test "$count" -eq 65
+          test "$count" -eq 67
           echo "PRODUCTION_SOURCE_TEST_OVERLAY=PASS count=$count"
       - name: Prepare PHP 8.3 with required extensions
         uses: shivammathur/setup-php@v2
@@ -63,6 +64,10 @@ jobs:
           php -l wordpress/plugins/badaround-core/identity-dormant/recovery-store-bridge.php
           php -l tests/test-ba-durable-ownership-handoff.php
           php tests/test-ba-durable-ownership-handoff.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/ownership-recovery-reconciler.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/recovery-owner-bridge.php
+          php -l tests/test-ba-ownership-recovery-reconciler.php
+          php tests/test-ba-ownership-recovery-reconciler.php
       - name: PHP syntax
         run: |
           php -l prototype-source/prototypes/ba-identity-01c/challenge-primitives.php
