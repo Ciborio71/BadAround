@@ -1,4 +1,5 @@
 name: BA-IDENTITY 02F private comment form custody
+# Verify exact moderation-before-publication copy before dormant delivery.
 on:
   push:
     branches:
