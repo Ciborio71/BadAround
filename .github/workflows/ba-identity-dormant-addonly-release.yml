@@ -1,0 +1,48 @@
+name: BA Identity dormant modules additive production release
+on:
+  push:
+    branches:
+      - reconcile/identity-production-baseline-20261104
+    paths:
+      - .github/workflows/ba-identity-dormant-addonly-release.yml
+permissions:
+  contents: read
+concurrency:
+  group: badaround-targeted-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-dormant:
+    if: "github.event.head_commit.message == 'release: run guarded add-only dormant Identity deployment'"
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Lint new dormant Identity PHP source
+        run: |
+          python3 -m py_compile tools/ba_identity_dormant_addonly_deploy.py
+          for file in native-report-receipt.php native-ownership-coordinator.php durable-ownership-handoff.php recovery-store-bridge.php ownership-recovery-reconciler.php recovery-owner-bridge.php native-intake-gate.php native-intake-orchestrator.php pre-intake-reservation.php mysql-pre-intake-store.php pre-reserved-native-intake.php pre-intake-recovery-worker.php pre-intake-recovery-store-bridge.php pre-intake-schema-candidate.php wordpress-pre-intake-recovery-composition.php wordpress-qa-report-transport.php wordpress-qa-report-rest.php wordpress-qa-report-composition.php; do
+            php -l "wordpress/plugins/badaround-core/identity-dormant/$file"
+          done
+      - name: Verify production baseline and new file conflicts read only
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          BA_DEPLOY_MODE: preflight
+        run: python3 tools/ba_identity_dormant_addonly_deploy.py
+      - name: Deploy only absent dormant source files
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          BA_DEPLOY_MODE: deploy
+        run: python3 tools/ba_identity_dormant_addonly_deploy.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ba-identity-dormant-addonly-release-evidence
+          path: ba-identity-dormant-deploy-evidence.json
+          retention-days: 30
