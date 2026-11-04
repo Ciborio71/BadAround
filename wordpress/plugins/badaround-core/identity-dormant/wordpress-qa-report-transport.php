@@ -8,7 +8,7 @@
  * cookie; never from JSON, headers, or the submitted email.
  *
  * IMPORTANT: Public/native controller remains unchanged. This class may be
- * wired ONLY after staging pre-intake schema, private QA and SMTP sandbox
+ * wired ONLY after a reviewed production pre-intake schema, private QA and synthetic email
  * readiness. Does not expose an endpoint by itself.
  */
 declare(strict_types=1);
