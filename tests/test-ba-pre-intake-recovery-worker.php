@@ -3,6 +3,14 @@
 declare(strict_types=1);
 require_once __DIR__.'/../wordpress/plugins/badaround-core/identity-dormant/pre-intake-recovery-worker.php';
 function verify_worker(bool $v,string $s):void {if(!$v)throw new RuntimeException('FAIL '.$s);echo 'PASS '.$s.PHP_EOL;}
+final class WorkerLock implements BadAround_Report_Otp_Native_Lock {
+    public bool $allowed=true;public int $acquired=0;public int $released=0;
+    public function acquire(string $id):bool {
+        if (!$this->allowed)return false;
+        ++$this->acquired;return true;
+    }
+    public function release(string $id):void {++$this->released;}
+}
 final class WorkerPre implements BadAround_Identity_Pre_Intake_Recovery_Reader {
     public array $rows=[];public bool $allowLink=true;public int $links=0;
     public function find_by_submission(string $id):?array{return $this->rows[$id]??null;}
@@ -58,10 +66,10 @@ final class WorkerJournal implements BadAround_Identity_Recovery_Journal {
 $submission='123e4567-e89b-42d3-a456-426614174000';
 $op=str_repeat('a',32);
 $identity='identity_12345678';
-$p=new WorkerPre();$canonical=new WorkerCanonical();$active=new WorkerStatus();
+$lock=new WorkerLock();$p=new WorkerPre();$canonical=new WorkerCanonical();$active=new WorkerStatus();
 $owners=new WorkerOwners();$grants=new WorkerGrants($owners);$journal=new WorkerJournal();
 $worker=new BadAround_Identity_Pre_Intake_Recovery_Worker(
-    $p,$canonical,$active,$owners,$journal,$grants,new WorkerReceipt()
+    $lock,$p,$canonical,$active,$owners,$journal,$grants,new WorkerReceipt()
 );
 $base=['submission_id'=>$submission,'operation_id'=>$op,'identity_id'=>$identity,
     'state'=>'reserved','created_at'=>100,'report_id'=>null,'event_id'=>null];
@@ -90,4 +98,8 @@ verify_worker($journal->rows[$op]['state']==='pending','grant failure journal pe
 $grants->ok=true;
 verify_worker($worker->recover($submission,116)==='linked','retry safely resolves original pending intent');
 verify_worker($worker->recover('not-a-uuid',117)==='unavailable','malformed UUID rejected');
+verify_worker($lock->acquired===$lock->released,'all acquired locks released');
+$lock->allowed=false;
+verify_worker($worker->recover($submission,118)==='pending','unavailable native lock prevents recovery');
+verify_worker($lock->acquired===$lock->released,'failed lock acquisition never releases another worker lock');
 echo 'ALL_PRE_INTAKE_RECOVERY_WORKER_TESTS_PASS'.PHP_EOL;
