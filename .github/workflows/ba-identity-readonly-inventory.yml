@@ -47,10 +47,9 @@ jobs:
           if actual != expected:
               raise SystemExit("Reconciliation Core hash differs from live production")
           PY
-      - name: PHP syntax check for reconciled runtime sources
+      - name: PHP syntax check for full reconciled plugin and child theme
         run: |
-          php -l wordpress/plugins/badaround-core/badaround-core.php
-          find wordpress/plugins/badaround-core/identity-dormant -maxdepth 1 -type f -name '*.php' -print0 | xargs -0 -n 1 php -l
+          find wordpress/plugins/badaround-core wordpress/themes/badaround-child -type f -name '*.php' -print0 | xargs -0 -n 1 php -l
       - name: Check syntax and read-only behavior without credentials
         run: |
           python3 -m py_compile tools/ba_identity_readonly_inventory.py
