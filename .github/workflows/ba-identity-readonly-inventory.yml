@@ -5,6 +5,7 @@ on:
     branches:
       - reconcile/identity-production-baseline-20261104
     paths:
+      - wordpress/plugins/badaround-core/badaround-core.php
       - tools/ba_identity_readonly_inventory.py
       - tests/test_ba_identity_readonly_inventory.py
       - .github/workflows/ba-identity-readonly-inventory.yml
@@ -12,6 +13,7 @@ on:
     branches:
       - release/production-mvp-01
     paths:
+      - wordpress/plugins/badaround-core/badaround-core.php
       - tools/ba_identity_readonly_inventory.py
       - tests/test_ba_identity_readonly_inventory.py
       - .github/workflows/ba-identity-readonly-inventory.yml
@@ -33,6 +35,18 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Verify reconciled Core matches live production SHA256
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from hashlib import sha256
+          source = Path("wordpress/plugins/badaround-core/badaround-core.php").read_bytes()
+          expected = "18cb9ad21a63e08449eb85b7cb9233846bb02e2c472d05f118cd7d5764b7d175"
+          actual = sha256(source).hexdigest()
+          print("CORE_SHA256_MATCH=" + ("PASS" if actual == expected else "FAIL"))
+          if actual != expected:
+              raise SystemExit("Reconciliation Core hash differs from live production")
+          PY
       - name: Check syntax and read-only behavior without credentials
         run: |
           python3 -m py_compile tools/ba_identity_readonly_inventory.py
