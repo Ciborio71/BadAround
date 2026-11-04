@@ -51,6 +51,7 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
             require_once __DIR__.'/wordpress-session-rest.php';
             require_once __DIR__.'/wordpress-identity-portal.php';
             require_once __DIR__.'/wordpress-activity-rest.php';
+            require_once __DIR__.'/wordpress-comment-form.php';
             require_once __DIR__.'/wordpress-composition.php';
             $key=BADAROUND_IDENTITY_ROOT_SECRET;
             $mailer=new BadAround_Transactional_Mailer();
@@ -107,6 +108,7 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
             $activityApi->register_hooks();
             $community->register_hooks();
             BadAround_Identity_WordPress_Portal::register_hooks();
+            BadAround_Identity_WordPress_Comment_Form::register_hooks();
             return true;
         } catch(Throwable $error) {
             // Never echo database errors or private key material.
