@@ -59,21 +59,35 @@ def main():
                 '--skip-comments',
                 dbname
             ]
-            with gzip.open(archive,'wb',compresslevel=6) as compressed:
-                proc=subprocess.Popen(command,stdout=subprocess.PIPE,
-                                      stderr=subprocess.DEVNULL,env=en)
-                total=0
-                assert proc.stdout is not None
-                for block in iter(lambda:proc.stdout.read(65536),b''):
-                    total+=len(block)
-                    if total>MAX_SQL_BYTES:
-                        proc.kill()
-                        raise RuntimeError('Backup exceeded size bound')
-                    compressed.write(block)
-                code=proc.wait(timeout=100)
-            del cfg,dbpass,config
+            stderr_file=pathlib.Path(wd)/'dump-stderr-private.log'
+            with stderr_file.open('wb') as err:
+                with gzip.open(archive,'wb',compresslevel=6) as compressed:
+                    proc=subprocess.Popen(command,stdout=subprocess.PIPE,
+                                          stderr=err,env=en)
+                    total=0
+                    assert proc.stdout is not None
+                    for block in iter(lambda:proc.stdout.read(65536),b''):
+                        total+=len(block)
+                        if total>MAX_SQL_BYTES:
+                            proc.kill()
+                            raise RuntimeError('Backup exceeded size bound')
+                        compressed.write(block)
+                    code=proc.wait(timeout=100)
             if code!=0 or total<8192:
-                raise RuntimeError('Database dump did not complete successfully')
+                message=stderr_file.read_text(errors='replace').lower()
+                if 'access denied' in message:
+                    reason='remote_db_access_denied'
+                elif 'connect' in message or '2003' in message or '2002' in message:
+                    reason='remote_db_unreachable'
+                elif 'unknown option' in message or 'unknown variable' in message:
+                    reason='dump_client_option_incompatible'
+                elif 'privilege' in message or 'permission' in message:
+                    reason='dump_privilege_missing'
+                else:
+                    reason='dump_failure_other'
+                print('BACKUP_FAILURE_CATEGORY='+reason)
+                raise RuntimeError('Safe backup stopped before valid SQL export')
+            del cfg,dbpass,config
             if archive.stat().st_size>MAX_GZIP_BYTES:
                 raise RuntimeError('Compressed backup exceeds size bound')
             sqlbytes=0
