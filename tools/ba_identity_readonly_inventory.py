@@ -73,10 +73,29 @@ def main() -> None:
                 "remote_sha256": digest(remote) if remote is not None else None,
                 "identical": local_bytes == remote if local_bytes is not None and remote is not None else False,
             })
+        # Detect deployed modules that do not exist in the checked-out prototype.
+        remote_dir = LIVE_PLUGIN + "/identity-dormant"
+        entries = ftp.nlst(remote_dir)
+        if not isinstance(entries, list):
+            raise RuntimeError("Remote Identity directory listing unavailable")
+        discovered = set()
+        for entry in entries:
+            if not isinstance(entry, str):
+                raise RuntimeError("Invalid remote entry")
+            name = entry.rstrip("/").rsplit("/", 1)[-1]
+            if not name or name in (".", "..") or "/" in name:
+                raise RuntimeError("Invalid remote filename")
+            if name.endswith((".php", ".js")):
+                discovered.add("identity-dormant/" + name)
+        expected = {name for name in seen if name.startswith("identity-dormant/")}
+        unexpected_remote = sorted(discovered - expected)
+        missing_remote = sorted(expected - discovered)
         result = {"mode": "read-only", "scope": "plugin-entrypoint-and-identity",
                   "total": len(rows), "matches": sum(r["identical"] for r in rows),
                   "mismatches": [r for r in rows if not r["identical"]],
-                  "verified": [r["path"] for r in rows if r["identical"]]}
+                  "verified": [r["path"] for r in rows if r["identical"]],
+                  "unexpected_remote_sources": unexpected_remote,
+                  "missing_remote_sources": missing_remote}
         output = ROOT / "identity-reconciliation-inventory.json"
         output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
         print(f"READ_ONLY_INVENTORY=PASS total={result['total']} matches={result['matches']} "
