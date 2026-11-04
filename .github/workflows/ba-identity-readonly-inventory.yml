@@ -6,6 +6,7 @@ on:
       - reconcile/identity-production-baseline-20261104
     paths:
       - tools/ba_identity_readonly_inventory.py
+      - tests/test_ba_identity_readonly_inventory.py
       - .github/workflows/ba-identity-readonly-inventory.yml
   workflow_dispatch:
 
