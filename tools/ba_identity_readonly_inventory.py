@@ -48,11 +48,14 @@ def main() -> None:
         if core is None or b"Plugin Name: BadAround Core" not in core:
             raise RuntimeError("Not the expected BadAround plugin; refusing inventory")
         rows = []
-        sources = [(Path("wordpress/plugins/badaround-core/badaround-core.php"), LOCAL_PLUGIN / "badaround-core.php", "release")]
-        if PROTOTYPE.is_dir():
-            for local in sorted(PROTOTYPE.glob("*")):
-                if local.suffix in (".php", ".js") and not local.name.startswith("test-"):
-                    sources.append((Path("identity-dormant") / local.name, local, "prototype"))
+        sources = [(Path("badaround-core.php"), LOCAL_PLUGIN / "badaround-core.php", "release")]
+        if not PROTOTYPE.is_dir():
+            raise RuntimeError("Identity prototype checkout missing; refusing partial inventory")
+        for local in sorted(PROTOTYPE.glob("*")):
+            if local.suffix in (".php", ".js") and not local.name.startswith("test-"):
+                sources.append((Path("identity-dormant") / local.name, local, "prototype"))
+        if len(sources) < 45:
+            raise RuntimeError("Identity prototype incomplete; refusing partial inventory")
         seen = set()
         for remote_relative, local, kind in sources:
             key = remote_relative.as_posix()
