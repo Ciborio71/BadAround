@@ -57,7 +57,7 @@ jobs:
           python3 -m unittest discover -s tests -p "test_ba_identity_readonly_inventory.py" -v
 
   compare-live-only-on-manual-dispatch:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     needs: offline-tests
     runs-on: ubuntu-latest
     timeout-minutes: 8
@@ -90,6 +90,21 @@ jobs:
           name: ba-full-source-readonly-parity
           path: full-production-parity.json
           retention-days: 7
+          if-no-files-found: error
+      - name: Recover exact live source candidates read-only
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 tools/ba_live_source_recovery.py
+      - name: Save source custody artifacts for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: ba-live-source-recovery
+          path: |
+            ba-live-source-recovery.zip
+            ba-live-source-recovery-manifest.json
+          retention-days: 2
           if-no-files-found: error
       - name: Publish SHA256 diagnostic inventory only
         uses: actions/upload-artifact@v4
