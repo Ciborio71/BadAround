@@ -45,6 +45,11 @@ class FakeFTP:
         else:
             raise AssertionError("Unexpected remote read: " + path)
         writer(self.changed.get(path, data))
+    def nlst(self, directory):
+        assert directory.endswith("/identity-dormant")
+        return [directory + "/demo.php"] + [
+            directory + f"/extra-{i}.php" for i in range(44)
+        ]
     def quit(self):
         self.closed = True
 
@@ -76,6 +81,8 @@ class InventoryTests(unittest.TestCase):
                 self.assertEqual(result["matches"], 46)
                 self.assertEqual(result["mismatches"], [])
                 self.assertEqual(result["mode"], "read-only")
+                self.assertEqual(result["unexpected_remote_sources"], [])
+                self.assertEqual(result["missing_remote_sources"], [])
 
     def test_missing_remote_file_does_not_count_as_match(self):
         target = module.LIVE_PLUGIN + "/identity-dormant/missing.php"
