@@ -19,7 +19,7 @@ REQUIRED = (
     "prototypes/ba-identity-01c/mysql-moderation-inbox.php",
     "docs/BA-IDENTITY-01E-live-schema-migration-release-gate.md",
 )
-SAFE_PREFIXES = ("prototypes/ba-identity-01c/", "docs/BA-IDENTITY-")
+SAFE_PREFIXES = ("prototypes/ba-identity-01c/", "docs/BA-IDENTITY-", "docs/BA-REPORT-IDENTITY-")
 SAFE_EXACT = (".github/workflows/ba-identity-01c-tests.yml",
               ".github/workflows/ba-identity-predeploy-gate.yml",
               ".github/workflows/ba-identity-live-ftps-preflight.yml",
