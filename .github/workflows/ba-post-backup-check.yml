@@ -27,3 +27,5 @@ jobs:
           name: ba-post-backup-evidence
           path: ba-backup-fresh-metadata.json
           retention-days: 3
+
+# One-shot current backup verification trigger.
