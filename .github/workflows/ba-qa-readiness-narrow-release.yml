@@ -1,0 +1,53 @@
+name: BadAround QA readiness narrow patch
+on:
+  push:
+    branches:
+      - reconcile/identity-production-baseline-20261104
+    paths:
+      - .github/workflows/ba-qa-readiness-narrow-release.yml
+permissions:
+  contents: read
+concurrency:
+  group: badaround-targeted-production-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: "github.event.head_commit.message == 'release: deploy guarded QA readiness email validation'"
+    runs-on: ubuntu-latest
+    timeout-minutes: 11
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 42078e111a53340aa31a69d510511fb80a34f2da
+          path: prior
+          persist-credentials: false
+      - name: Check pinned source and syntax
+        run: |
+          set -euo pipefail
+          cp prior/wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-readiness.php _ba_previous_qa_readiness.php
+          python3 -m py_compile tools/ba_readiness_allowlist_guarded_release.py
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-readiness.php
+      - name: Read-only source preflight
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          BA_QA_READINESS_MODE: preflight
+        run: python3 tools/ba_readiness_allowlist_guarded_release.py
+      - name: Private dormant-only readiness patch
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          BA_QA_READINESS_MODE: deploy
+        run: python3 tools/ba_readiness_allowlist_guarded_release.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ba-qa-readiness-allowlist-evidence
+          path: ba-readiness-release-evidence.json
+          retention-days: 10
+          if-no-files-found: ignore
