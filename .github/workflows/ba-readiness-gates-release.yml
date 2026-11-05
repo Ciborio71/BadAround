@@ -51,3 +51,5 @@ jobs:
           path: ba-readiness-release-evidence.json
           retention-days: 7
           if-no-files-found: ignore
+
+# One-time guarded production-only readiness patch.
