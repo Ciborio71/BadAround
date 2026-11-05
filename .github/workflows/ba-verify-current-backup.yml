@@ -1,0 +1,33 @@
+name: BadAround verify current backup archive
+on:
+  push:
+    branches:
+      - reconcile/identity-production-baseline-20261104
+    paths:
+      - .github/workflows/ba-verify-current-backup.yml
+permissions:
+  contents: read
+jobs:
+  verify:
+    if: "github.event.head_commit.message == 'audit: inspect new complete production backup'"
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check verifier syntax
+        run: python3 -m py_compile tools/ba_verify_recent_user_backup.py
+      - name: Verify ZIP contents and integrity without server writes
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 tools/ba_verify_recent_user_backup.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ba-current-backup-verification-metadata
+          path: ba-current-backup-validation.json
+          retention-days: 4
+          if-no-files-found: ignore
