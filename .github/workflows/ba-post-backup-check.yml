@@ -1,0 +1,29 @@
+name: BadAround post-backup read-only verification
+on:
+  push:
+    branches:
+      - reconcile/identity-production-baseline-20261104
+    paths:
+      - .github/workflows/ba-post-backup-check.yml
+permissions:
+  contents: read
+jobs:
+  verify:
+    if: "github.event.head_commit.message == 'audit: execute post-backup production inventory'"
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Read-only backup listing
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 tools/ba_backup_freshcheck_20261105.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ba-post-backup-evidence
+          path: ba-backup-fresh-metadata.json
+          retention-days: 3
