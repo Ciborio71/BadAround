@@ -1,0 +1,54 @@
+name: BA Identity guarded private QA bootstrap release
+on:
+  push:
+    branches:
+      - reconcile/identity-production-baseline-20261104
+    paths:
+      - .github/workflows/ba-private-qa-bootstrap-release.yml
+permissions:
+  contents: read
+concurrency:
+  group: badaround-targeted-production-deploy
+  cancel-in-progress: false
+jobs:
+  dormant-bootstrap:
+    if: "github.event.head_commit.message == 'release: run guarded dormant private QA bootstrap update'"
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: a5c4ed222b205ec7b206bdc88dcef74689be9fe4
+          path: previous
+          persist-credentials: false
+      - name: Validate pinned source and PHP syntax
+        run: |
+          set -euo pipefail
+          cp previous/wordpress/plugins/badaround-core/identity-dormant/wordpress-private-bootstrap.php _ba_prior_wordpress_private_bootstrap.php
+          python3 -m py_compile tools/ba_private_qa_bootstrap_guarded_deploy.py
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-private-bootstrap.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-report-bootstrap.php
+      - name: Production read-only baseline preflight
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          BA_BOOTSTRAP_RELEASE: preflight
+        run: python3 tools/ba_private_qa_bootstrap_guarded_deploy.py
+      - name: Update dormant bootstrap only
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          BA_BOOTSTRAP_RELEASE: deploy
+        run: python3 tools/ba_private_qa_bootstrap_guarded_deploy.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ba-private-qa-bootstrap-evidence
+          path: ba-private-qa-bootstrap-deploy-evidence.json
+          retention-days: 14
+          if-no-files-found: ignore
