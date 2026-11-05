@@ -1,0 +1,57 @@
+name: BA Identity recovery creation-order protected deploy
+on:
+  push:
+    branches:
+      - reconcile/identity-production-baseline-20261104
+    paths:
+      - .github/workflows/ba-recovery-order-release.yml
+permissions:
+  contents: read
+concurrency:
+  group: badaround-targeted-production-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: "github.event.head_commit.message == 'release: apply guarded Identity recovery creation order'"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 606895c999065acddda52356e7a305310f31411e
+          path: prior
+          persist-credentials: false
+      - name: Pin old files and lint
+        run: |
+          set -euo pipefail
+          mkdir prior-files
+          for f in pre-intake-recovery-worker.php wordpress-native-receipt-proof.php wordpress-pre-intake-recovery-composition.php; do
+            cp "prior/wordpress/plugins/badaround-core/identity-dormant/$f" "prior-files/$f"
+            php -l "wordpress/plugins/badaround-core/identity-dormant/$f"
+          done
+          python3 -m py_compile tools/ba_identity_recovery_order_guarded_release.py
+          php tests/test-ba-pre-intake-recovery-worker.php
+      - name: Read-only production source preflight
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          BA_ID_RECOVERY_MODE: preflight
+        run: python3 tools/ba_identity_recovery_order_guarded_release.py
+      - name: Deploy exactly three dormant recovery files
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          BA_ID_RECOVERY_MODE: deploy
+        run: python3 tools/ba_identity_recovery_order_guarded_release.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ba-recovery-order-evidence
+          path: ba-id-recovery-order-evidence.json
+          retention-days: 10
+          if-no-files-found: ignore
