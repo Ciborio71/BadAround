@@ -129,6 +129,10 @@ qaAssert(count($qaRoutes)===1 && $qaRoutes[0]['namespace']==='badaround-identity
 $badHeaders=$headers;$badHeaders['origin']='https://malicious.example';
 $denied=$rest->submit(new QA_HTTP_Request(json_encode(['submission_id'=>$next]),$badHeaders));
 qaAssert($denied->status===403 && $nativeCalls===0,'cross-origin rejected before native submit');
+$badHeaders=$headers;unset($badHeaders['origin']);
+$denied=$rest->submit(new QA_HTTP_Request(json_encode(['submission_id'=>$next]),$badHeaders));
+qaAssert($denied->status===403 && $nativeCalls===0,
+    'missing Origin rejected before any authenticated native action');
 $badHeaders=$headers;$badHeaders['sec-fetch-site']='cross-site';
 $denied=$rest->submit(new QA_HTTP_Request(json_encode(['submission_id'=>$next]),$badHeaders));
 qaAssert($denied->status===403 && $nativeCalls===0,'cross-site browser rejected');
