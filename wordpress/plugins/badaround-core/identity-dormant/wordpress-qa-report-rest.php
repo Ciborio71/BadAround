@@ -65,7 +65,10 @@ final class BadAround_Identity_QA_Report_REST {
         $fetch=strtolower(trim((string)$request->get_header('sec-fetch-site')));
         if ($fetch==='cross-site')return self::deny(403);
         $origin=trim((string)$request->get_header('origin'));
-        if ($origin!=='' && !self::same_origin($origin,home_url('/')))return self::deny(403);
+        // Private cookie-authenticated POSTs must carry an explicit,
+        // matching Origin. Never accept an absent origin by default.
+        if ($origin==='' || !self::same_origin($origin,home_url('/')))
+            return self::deny(403);
         $marker=strtolower(trim((string)$request->get_header('x-badaround-intake')));
         if ($marker!=='badaround-report/v1')return self::deny(403);
         return true;
