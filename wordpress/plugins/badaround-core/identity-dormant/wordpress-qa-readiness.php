@@ -19,6 +19,8 @@ final class BadAround_Identity_QA_Readiness {
             'runtime_enabled'=>false,
             'private_qa_enabled'=>false,
             'report_qa_enabled'=>false,
+            'registration_enabled'=>false,
+            'login_enabled'=>false,
             'network_allowlisted'=>false,
             'strong_secret_configured'=>false,
             'mail_configuration_present'=>false,
@@ -35,6 +37,10 @@ final class BadAround_Identity_QA_Readiness {
                 && BADAROUND_IDENTITY_PRIVATE_QA_ENABLED===true;
             $check['report_qa_enabled']=defined('BADAROUND_IDENTITY_QA_REPORTS_ENABLED')
                 && BADAROUND_IDENTITY_QA_REPORTS_ENABLED===true;
+            $check['registration_enabled']=defined('BADAROUND_IDENTITY_REGISTRATION_ENABLED')
+                && BADAROUND_IDENTITY_REGISTRATION_ENABLED===true;
+            $check['login_enabled']=defined('BADAROUND_IDENTITY_LOGIN_ENABLED')
+                && BADAROUND_IDENTITY_LOGIN_ENABLED===true;
             $check['network_allowlisted']=BadAround_Identity_Private_Access::authorized();
             $check['strong_secret_configured']=defined('BADAROUND_IDENTITY_ROOT_SECRET')
                 && is_string(BADAROUND_IDENTITY_ROOT_SECRET)
