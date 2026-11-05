@@ -11,6 +11,7 @@ require_once __DIR__.'/pre-intake-recovery-store-bridge.php';
 require_once __DIR__.'/recovery-owner-bridge.php';
 require_once __DIR__.'/recovery-store-bridge.php';
 require_once __DIR__.'/report-otp-wordpress-adapters.php';
+require_once __DIR__.'/mysql-report-creator-grant.php';
 
 final class BadAround_Identity_Canonical_Submission_Bridge
     implements BadAround_Identity_Pre_Intake_Canonical_Reader {
@@ -20,7 +21,7 @@ final class BadAround_Identity_Canonical_Submission_Bridge
     }
 }
 final class BadAround_Identity_Creator_Grant_Bridge implements BadAround_Identity_Ownership_Grant {
-    public function __construct(private BadAround_Identity_Mysql_Ownership_Store $store) {}
+    public function __construct(private BadAround_Identity_Mysql_Report_Creator_Grant $store) {}
     public function grant_creator(string $identityId,string $resourceKind,int $resourceId,int $now):bool {
         return $this->store->grant_creator($identityId,$resourceKind,$resourceId,$now);
     }
@@ -59,7 +60,11 @@ final class BadAround_Identity_WordPress_Recovery_Composition {
                 $status,
                 new BadAround_Identity_Recovery_Owner_Bridge($owner),
                 new BadAround_Identity_Recovery_Store_Bridge($journal),
-                new BadAround_Identity_Creator_Grant_Bridge($owner),
+                new BadAround_Identity_Creator_Grant_Bridge(
+                    new BadAround_Identity_Mysql_Report_Creator_Grant(
+                        $db,$prefix,new BadAround_Report_Otp_WordPress_Native_Lock($nativeRepository)
+                    )
+                ),
                 $receiptProof,
                 $receiptProof
             );

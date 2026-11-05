@@ -46,7 +46,6 @@ final class BadAround_Identity_WordPress_QA_Report_Composition {
             $preStore=new BadAround_Identity_Mysql_Pre_Intake_Store(
                 $db,BadAround_Identity_Pre_Intake_Schema::table($prefix)
             );
-            $owner=new BadAround_Identity_Mysql_Ownership_Store($db,$prefix.'ba_identity_ownership');
             $journal=new BadAround_Identity_Mysql_Ownership_Recovery_Store(
                 $db,$prefix.'ba_identity_recovery'
             );
@@ -61,7 +60,11 @@ final class BadAround_Identity_WordPress_QA_Report_Composition {
                 ),
                 new BadAround_Identity_Durable_Ownership_Handoff(
                     $sessions,$active,$receiptProof,
-                    new BadAround_Identity_Creator_Grant_Bridge($owner),
+                    new BadAround_Identity_Creator_Grant_Bridge(
+                        new BadAround_Identity_Mysql_Report_Creator_Grant(
+                            $db,$prefix,new BadAround_Report_Otp_WordPress_Native_Lock($nativeRepository)
+                        )
+                    ),
                     new BadAround_Identity_Recovery_Store_Bridge($journal)
                 )
             );
