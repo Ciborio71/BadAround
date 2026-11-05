@@ -52,3 +52,5 @@ jobs:
           path: ba-qa-security-release-evidence.json
           retention-days: 14
           if-no-files-found: ignore
+
+# One-time additive private QA safety rollout.
