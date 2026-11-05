@@ -10,6 +10,7 @@ declare(strict_types=1);
 require_once __DIR__.'/pre-intake-schema-candidate.php';
 require_once __DIR__.'/wordpress-private-access.php';
 require_once __DIR__.'/wordpress-privacy-notice.php';
+require_once __DIR__.'/wordpress-qa-mail-fence.php';
 
 final class BadAround_Identity_QA_Readiness {
     public static function inspect(PDO $db,string $prefix):array {
@@ -21,6 +22,7 @@ final class BadAround_Identity_QA_Readiness {
             'network_allowlisted'=>false,
             'strong_secret_configured'=>false,
             'mail_configuration_present'=>false,
+            'qa_mail_recipients_verified'=>false,
             'approved_privacy_notice'=>false,
             'pre_intake_schema_valid'=>false,
         ];
@@ -40,6 +42,8 @@ final class BadAround_Identity_QA_Readiness {
             $check['mail_configuration_present']=class_exists('BadAround_Transactional_Mailer')
                 && defined('BADAROUND_TURBOSMTP_CONSUMER_KEY')
                 && defined('BADAROUND_TURBOSMTP_FROM_EMAIL');
+            $check['qa_mail_recipients_verified']=
+                BadAround_Identity_QA_Mail_Fence::configured();
             $check['approved_privacy_notice']=
                 BadAround_Identity_WordPress_Privacy_Notice::verified_version()!==null;
             $check['pre_intake_schema_valid']=
