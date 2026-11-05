@@ -54,7 +54,11 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
             require_once __DIR__.'/wordpress-comment-form.php';
             require_once __DIR__.'/wordpress-composition.php';
             $key=BADAROUND_IDENTITY_ROOT_SECRET;
-            $mailer=new BadAround_Transactional_Mailer();
+            // QA traffic may ONLY deliver OTP to expressly allowlisted
+            // synthetic inboxes. Never invoke the production mailer directly.
+            require_once __DIR__.'/wordpress-qa-mail-fence.php';
+            if (!BadAround_Identity_QA_Mail_Fence::configured())return false;
+            $mailer=new BadAround_Identity_QA_Mail_Fence(new BadAround_Transactional_Mailer());
             // Private QA is independently gated per controller: any absent
             // flag leaves that REST component unregistered.
             $registration=BadAround_Identity_WordPress_Registration_Composition::assemble(
