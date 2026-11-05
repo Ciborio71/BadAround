@@ -12,13 +12,14 @@ declare(strict_types=1);
 require_once __DIR__.'/wordpress-qa-report-rest.php';
 require_once __DIR__.'/wordpress-pre-intake-recovery-composition.php';
 require_once __DIR__.'/locked-canonical-reader.php';
+require_once __DIR__.'/wordpress-native-receipt-proof.php';
 require_once __DIR__.'/mysql-session-store.php';
 require_once __DIR__.'/mysql-identity-active-status.php';
 
 final class BadAround_Identity_WordPress_QA_Report_Composition {
     public static function assemble(
         PDO $db,string $prefix,object $nativeRepository,
-        BadAround_Identity_Intake_Receipt $receiptProof
+        ?BadAround_Identity_Intake_Receipt $receiptProof=null
     ):?BadAround_Identity_QA_Report_REST {
         if (!BadAround_Identity_QA_Report_REST::enabled()
             || !defined('BADAROUND_IDENTITY_ROOT_SECRET')
@@ -35,6 +36,7 @@ final class BadAround_Identity_WordPress_QA_Report_Composition {
         }
         try {
             if (!BadAround_Identity_Pre_Intake_Schema::inspect($db,$prefix))return null;
+            $receiptProof ??= new BadAround_Identity_WordPress_Native_Receipt_Proof($db,$prefix);
 
             $key=hash_hmac('sha256','BA-ID-01H:sessions',BADAROUND_IDENTITY_ROOT_SECRET,true);
             $sessions=new BadAround_Identity_Sessions(
