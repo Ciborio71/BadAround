@@ -22,6 +22,8 @@ on:
       - tests/test-ba-wordpress-qa-report-composition-mysql.php
       - tests/test-ba-locked-canonical-reader.php
       - tests/test-ba-wordpress-native-receipt-proof-mysql.php
+      - tests/test-ba-qa-readiness-mysql.php
+      - tests/test-ba-qa-mail-fence.php
   workflow_dispatch:
 concurrency:
   group: ba-identity-functional-${{ github.ref }}
