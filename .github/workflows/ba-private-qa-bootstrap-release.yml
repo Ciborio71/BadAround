@@ -52,3 +52,5 @@ jobs:
           path: ba-private-qa-bootstrap-deploy-evidence.json
           retention-days: 14
           if-no-files-found: ignore
+
+# Authorized one-time dormant bootstrap rollout; no feature flags changed.
