@@ -1,0 +1,61 @@
+name: BA Identity QA mail readiness targeted production patch
+on:
+  push:
+    branches:
+      - reconcile/identity-production-baseline-20261104
+    paths:
+      - .github/workflows/ba-id-qa-config-release.yml
+permissions:
+  contents: read
+concurrency:
+  group: badaround-targeted-production-deploy
+  cancel-in-progress: false
+jobs:
+  patch:
+    if: "github.event.head_commit.message == 'release: apply guarded QA mail readiness patch'"
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 8b937035f05aae91c8b3abe4591fd30324c14d6f
+          path: prior-bootstrap
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: e19af754efcd454e3f64c32aebbfd1a11a119a57
+          path: prior-readiness
+          persist-credentials: false
+      - name: Prepare pinning and lint
+        run: |
+          set -euo pipefail
+          mkdir -p prior-files
+          cp prior-bootstrap/wordpress/plugins/badaround-core/identity-dormant/wordpress-private-bootstrap.php prior-files/wordpress-private-bootstrap.php
+          cp prior-readiness/wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-readiness.php prior-files/wordpress-qa-readiness.php
+          python3 -m py_compile tools/ba_id_qa_config_guarded_release.py
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-private-bootstrap.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-readiness.php
+      - name: Exact remote source parity preflight
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          BA_ID_QA_MODE: preflight
+        run: python3 tools/ba_id_qa_config_guarded_release.py
+      - name: Update only dormant QA configuration checks
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          BA_ID_QA_MODE: deploy
+        run: python3 tools/ba_id_qa_config_guarded_release.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ba-id-qa-config-patch-evidence
+          path: ba-id-qa-config-evidence.json
+          retention-days: 10
+          if-no-files-found: ignore
