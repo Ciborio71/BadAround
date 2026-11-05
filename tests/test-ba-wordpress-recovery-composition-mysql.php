@@ -21,8 +21,9 @@ final class QARepo {
     }
     public function release_native_lock(string $submission):void {++$this->released;}
 }
-final class QAProof implements BadAround_Identity_Intake_Receipt {
+final class QAProof implements BadAround_Identity_Intake_Receipt, BadAround_Identity_Pre_Intake_Creation_Order_Proof {
     public function is_new_canonical_report(int $report,int $event):bool{return false;}
+    public function created_after_reservation(int $report,int $event,int $reserved):bool{return false;}
 }
 $status=new BadAround_Identity_Active_Memory_Status();
 $repo=new QARepo();
