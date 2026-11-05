@@ -47,6 +47,7 @@ final class BadAround_Identity_QA_Readiness {
                 && strlen(BADAROUND_IDENTITY_ROOT_SECRET)>=48;
             $check['mail_configuration_present']=class_exists('BadAround_Transactional_Mailer')
                 && defined('BADAROUND_TURBOSMTP_CONSUMER_KEY')
+                && defined('BADAROUND_TURBOSMTP_CONSUMER_SECRET')
                 && defined('BADAROUND_TURBOSMTP_FROM_EMAIL');
             $check['qa_mail_recipients_verified']=
                 BadAround_Identity_QA_Mail_Fence::configured();
