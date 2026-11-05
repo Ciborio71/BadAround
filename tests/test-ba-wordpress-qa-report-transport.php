@@ -82,6 +82,19 @@ qaAssert($calls===1,'replay never duplicates native report');
 echo 'ALL_WORDPRESS_QA_REPORT_TRANSPORT_TESTS_PASS'.PHP_EOL;
 
 require_once __DIR__.'/../wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-report-rest.php';
+$qaNoticeReviewed=false;
+function get_post(int $id):object {
+    global $qaNoticeReviewed;
+    return (object)[
+        'ID'=>3,'post_type'=>'page','post_status'=>'publish',
+        'post_name'=>'privacy-policy',
+        'post_modified_gmt'=>BadAround_Identity_WordPress_Privacy_Notice::EXPECTED_MODIFIED_GMT,
+        'post_content'=>$qaNoticeReviewed
+            ? 'Synthetic approved fixture for isolated CI; not a live privacy notice.'
+            : 'Bozza pre-pubblicazione da sottoporre a revisione',
+    ];
+}
+
 final class QA_HTTP_Request {
     public function __construct(private string $body,private array $headers) {}
     public function get_header(string $name):string{return (string)($this->headers[strtolower($name)]??'');}
@@ -122,6 +135,10 @@ $headers=['x-badaround-intake'=>'badaround-report/v1','content-type'=>'applicati
     'origin'=>'https://badaround.it','sec-fetch-site'=>'same-origin'];
 $next='123e4567-e89b-42d3-a456-426614174011';
 $request=new QA_HTTP_Request(json_encode(['submission_id'=>$next]),$headers);
+qaAssert(!$rest->register_hooks(),'private REST refuses hook without runtime integration');
+define('BADAROUND_IDENTITY_RUNTIME_INTEGRATION_ENABLED',true);
+qaAssert(!$rest->register_hooks(),'private REST refuses unapproved live notice');
+$qaNoticeReviewed=true;
 qaAssert($rest->register_hooks()===true,'private QA controller registers hooks only when enabled');
 $rest->register_routes();
 qaAssert(count($qaRoutes)===1 && $qaRoutes[0]['namespace']==='badaround-identity-qa/v1'
