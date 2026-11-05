@@ -39,4 +39,4 @@ Le verifiche automatiche non costituiscono il collaudo browser end-to-end del si
 
 La protezione attuale rifiuta l'informativa pubblicata perché contiene marcatori di bozza. Non è stata modificata né aggirata. Il testo validato e l'indicazione della casella OTP sono necessari per proseguire con i collaudi che dipendono da questi prerequisiti.
 
-La schermata pubblica di manutenzione è gestita dal tema e rispondeva HTTP 503 già prima del deploy; il controllo nativo di manutenzione WordPress non la rileva. Prima e dopo il deploy l'API discovery risponde HTTP 200; la schermata di manutenzione mantiene HTTP 503 e lo stesso contenuto di 2093 byte. Nessuna certificazione visiva delle pagine protette è stata eseguita in questa sessione.
+La schermata pubblica di manutenzione è gestita dal tema e rispondeva HTTP 503 già prima del deploy; il controllo nativo di manutenzione WordPress non la rileva. Prima e dopo il deploy l'API discovery risponde HTTP 200; la schermata di manutenzione mantiene HTTP 503. Nessuna certificazione visiva delle pagine protette è stata eseguita in questa sessione.
