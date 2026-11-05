@@ -55,7 +55,7 @@ jobs:
             cp "$file" "$dest/"
             count=$((count+1))
           done
-          test "$count" -eq 81
+          test "$count" -eq 82
           echo "PRODUCTION_SOURCE_TEST_OVERLAY=PASS count=$count"
       - name: Prepare PHP 8.3 with required extensions
         uses: shivammathur/setup-php@v2
@@ -301,7 +301,7 @@ jobs:
             cp "$file" "$dest/"
             count=$((count+1))
           done
-          test "$count" -eq 81
+          test "$count" -eq 82
           echo "PRODUCTION_SOURCE_TEST_OVERLAY=PASS count=$count"
       - name: Prepare PHP 8.3 with MySQL support
         uses: shivammathur/setup-php@v2
@@ -354,6 +354,8 @@ jobs:
           php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-pre-intake-recovery-composition.php
           php -l tests/test-ba-wordpress-recovery-composition-mysql.php
           php tests/test-ba-wordpress-recovery-composition-mysql.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-report-bootstrap.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-private-bootstrap.php
           php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-report-composition.php
           php -l tests/test-ba-wordpress-qa-report-composition-mysql.php
           php tests/test-ba-wordpress-qa-report-composition-mysql.php
