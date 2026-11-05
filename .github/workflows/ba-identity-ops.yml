@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: 8a00bf02b14e67fdf81d2e04d776c7778ef972ec
+          ref: f65ecfb091dd1ab309190dd4a724bb5018250f85
           path: prior-source
           persist-credentials: false
       - run: php -l wordpress/mu-plugins/badaround-identity-ops.php
@@ -72,5 +72,14 @@ jobs:
                   ftp.rename(temp,target)
               if read(target)!=data:raise RuntimeError('Installed diagnostic differs')
               print('ADMINISTRATIVE_READ_ONLY_DIAGNOSTICS_DEPLOY_PASS')
+              import re
+              config=read('/httpdocs/wp-config.php')
+              if config is None:raise RuntimeError('Configuration unavailable')
+              for number,line in enumerate(config.decode('utf-8').splitlines(),1):
+                  names=re.findall(r"define\\s*\\(\\s*['\\\"]([A-Z][A-Z0-9_]+)['\\\"]",line)
+                  for name in names:
+                      if name.startswith('BADAROUND_TURBOSMTP_'):print('CONFIG_DEFINE_ORDER',number,name)
+                  if 'wp-settings.php' in line:print('CONFIG_SETTINGS_INCLUDE_ORDER',number)
+                  if 'ba-identity-private-qa.php' in line:print('CONFIG_IDENTITY_INCLUDE_ORDER',number)
           finally:ftp.quit()
           PY
