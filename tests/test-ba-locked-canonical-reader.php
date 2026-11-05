@@ -28,6 +28,15 @@ function checkLock(bool $condition,string $label):void{
     if(!$condition)throw new RuntimeException('FAIL '.$label);
     echo 'PASS '.$label.PHP_EOL;
 }
+checkLock(BadAround_Identity_Pre_Intake_Reservation::valid_submission(
+    '123e4567-e89b-42d3-a456-426614174000'
+),'native v4 submission accepted');
+checkLock(!BadAround_Identity_Pre_Intake_Reservation::valid_submission(
+    '123e4567-e89b-72d3-a456-426614174000'
+),'v7 submission rejected before reserving because native Core refuses it');
+checkLock(!BadAround_Identity_Pre_Intake_Reservation::valid_submission(
+    '123e4567-e89b-82d3-a456-426614174000'
+),'v8 submission rejected before reserving because native Core refuses it');
 $id='123e4567-e89b-42d3-a456-426614174000';
 $lock=new LockedReceiptLock();$source=new LockedReceiptSource();
 $reader=new BadAround_Identity_Locked_Canonical_Reader($lock,$source);
