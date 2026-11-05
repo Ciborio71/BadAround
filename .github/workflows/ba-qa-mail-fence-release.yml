@@ -1,0 +1,55 @@
+name: BadAround QA mail recipient fence dormant deployment
+on:
+  push:
+    branches:
+      - reconcile/identity-production-baseline-20261104
+    paths:
+      - .github/workflows/ba-qa-mail-fence-release.yml
+permissions:
+  contents: read
+concurrency:
+  group: badaround-targeted-production-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: "github.event.head_commit.message == 'release: run guarded private QA mail fence deployment'"
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 4c5f8bc088fb8370ac2f75c09485e099531aae1a
+          path: prior-version
+          persist-credentials: false
+      - name: Verify PHP syntax and prior source
+        run: |
+          set -euo pipefail
+          cp prior-version/wordpress/plugins/badaround-core/identity-dormant/wordpress-private-bootstrap.php _ba_qa_mail_prior_bootstrap.php
+          python3 -m py_compile tools/ba_qa_mail_fence_guarded_release.py
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-private-bootstrap.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-mail-fence.php
+          php tests/test-ba-qa-mail-fence.php
+      - name: Read-only production baseline check
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          BA_MAIL_QA_MODE: preflight
+        run: python3 tools/ba_qa_mail_fence_guarded_release.py
+      - name: Deploy exactly two private dormant PHP files
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          BA_MAIL_QA_MODE: deploy
+        run: python3 tools/ba_qa_mail_fence_guarded_release.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ba-qa-mail-fence-release-evidence
+          path: ba-identity-mail-fence-deploy.json
+          retention-days: 14
+          if-no-files-found: ignore
