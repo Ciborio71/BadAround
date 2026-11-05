@@ -52,3 +52,5 @@ jobs:
           path: ba-private-rest-policy-release.json
           retention-days: 14
           if-no-files-found: ignore
+
+# One-time private-only hardening, no activation flags.
