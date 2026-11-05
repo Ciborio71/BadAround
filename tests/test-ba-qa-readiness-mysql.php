@@ -12,6 +12,10 @@ function qaReadyCheck(bool $ok,string $name):void {
     echo 'PASS '.$name.PHP_EOL;
 }
 function home_url(string $path='/'):string{return 'https://badaround.it/';}
+class BadAround_Transactional_Mailer {}
+define('BADAROUND_TURBOSMTP_CONSUMER_KEY','synthetic-ci-key');
+define('BADAROUND_TURBOSMTP_FROM_EMAIL','qa-sender@example.test');
+
 $prefix='ci_readiness_';
 $table=BadAround_Identity_Pre_Intake_Schema::table($prefix);
 $db->exec("DROP TABLE IF EXISTS `{$table}`");
@@ -27,6 +31,8 @@ qaReadyCheck($initial['checks']['registration_enabled']===false,
     'registration must be explicitly enabled before QA can be ready');
 qaReadyCheck($initial['checks']['login_enabled']===false,
     'login must be explicitly enabled before QA can be ready');
+qaReadyCheck($initial['checks']['mail_configuration_present']===false,
+    'mailer configuration without provider credential cannot be ready');
 qaReadyCheck(count($initial['checks'])===12,
     'readiness returns only twelve non-sensitive boolean facts');
 $db->exec(BadAround_Identity_Pre_Intake_Schema::create_sql($prefix));
