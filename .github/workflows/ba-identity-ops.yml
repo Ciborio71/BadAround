@@ -76,9 +76,8 @@ jobs:
               config=read('/httpdocs/wp-config.php')
               if config is None:raise RuntimeError('Configuration unavailable')
               for number,line in enumerate(config.decode('utf-8').splitlines(),1):
-                  names=re.findall(r"define\\s*\\(\\s*['\\\"]([A-Z][A-Z0-9_]+)['\\\"]",line)
-                  for name in names:
-                      if name.startswith('BADAROUND_TURBOSMTP_'):print('CONFIG_DEFINE_ORDER',number,name)
+                  for name in ['BADAROUND_TURBOSMTP_CONSUMER_KEY','BADAROUND_TURBOSMTP_CONSUMER_SECRET','BADAROUND_TURBOSMTP_FROM_EMAIL']:
+                      if name in line:print('CONFIG_DEFINE_ORDER',number,name)
                   if 'wp-settings.php' in line:print('CONFIG_SETTINGS_INCLUDE_ORDER',number)
                   if 'ba-identity-private-qa.php' in line:print('CONFIG_IDENTITY_INCLUDE_ORDER',number)
           finally:ftp.quit()
