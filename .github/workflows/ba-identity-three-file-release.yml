@@ -1,0 +1,56 @@
+name: BA Identity dormant three-file guarded production update
+on:
+  push:
+    branches:
+      - reconcile/identity-production-baseline-20261104
+    paths:
+      - .github/workflows/ba-identity-three-file-release.yml
+permissions:
+  contents: read
+concurrency:
+  group: badaround-targeted-production-deploy
+  cancel-in-progress: false
+jobs:
+  dormant-update:
+    if: "github.event.head_commit.message == 'release: deploy guarded three-file dormant Identity update'"
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Load pinned prior deployed composition source
+        uses: actions/checkout@v4
+        with:
+          ref: 1695d4833b19a261c7ee8b010b43aa9ffd2dbaec
+          path: prior-ref
+          persist-credentials: false
+      - name: Validate source and pinned prior bytes
+        run: |
+          set -euo pipefail
+          cp prior-ref/wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-report-composition.php _ba_identity_predeploy_composition.php
+          python3 -m py_compile tools/ba_identity_three_file_guarded_release.py
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-report-composition.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/locked-canonical-reader.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-native-receipt-proof.php
+      - name: Compare production Core and dormant files without writing
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          BA_IDENTITY_DEPLOY_MODE: preflight
+        run: python3 tools/ba_identity_three_file_guarded_release.py
+      - name: Update exactly three dormant files with rollback
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          BA_IDENTITY_DEPLOY_MODE: deploy
+        run: python3 tools/ba_identity_three_file_guarded_release.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ba-identity-three-file-release-evidence
+          path: ba-identity-three-file-release.json
+          retention-days: 10
+          if-no-files-found: ignore
