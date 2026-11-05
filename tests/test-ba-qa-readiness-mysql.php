@@ -21,8 +21,10 @@ qaReadyCheck($initial['checks']['pre_intake_schema_valid']===false,
     'missing private outbox schema reported without mutations');
 qaReadyCheck($initial['checks']['approved_privacy_notice']===false,
     'missing approved privacy notice blocks readiness');
-qaReadyCheck(count($initial['checks'])===9,
-    'readiness returns only nine non-sensitive boolean facts');
+qaReadyCheck($initial['checks']['qa_mail_recipients_verified']===false,
+    'missing QA-only recipient allowlist blocks readiness');
+qaReadyCheck(count($initial['checks'])===10,
+    'readiness returns only ten non-sensitive boolean facts');
 $db->exec(BadAround_Identity_Pre_Intake_Schema::create_sql($prefix));
 try {
     $partial=BadAround_Identity_QA_Readiness::inspect($db,$prefix);
