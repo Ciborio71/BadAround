@@ -3,7 +3,7 @@
  * BA-IDENTITY-WIZARD-17: QA reports private bootstrap seam.
  *
  * Never registers hooks on inclusion. Requires all runtime AND individual QA
- * flags, IP fence and reviewed privacy binding. No automatic flag activation.
+ * flags, IP fence and scope-specific adopted privacy binding. No automatic flag activation.
  */
 declare(strict_types=1);
 
@@ -21,7 +21,7 @@ final class BadAround_Identity_WordPress_QA_Report_Bootstrap {
             || !class_exists('BadAround_Identity_Private_Access')
             || !BadAround_Identity_Private_Access::authorized()
             || !class_exists('BadAround_Identity_WordPress_Privacy_Notice')
-            || BadAround_Identity_WordPress_Privacy_Notice::verified_version()===null
+            || BadAround_Identity_WordPress_Privacy_Notice::runtime_version()===null
             || !class_exists('BadAround_Report_Repository')
             || !function_exists('home_url')
             || rtrim((string)home_url('/'),'/')!=='https://badaround.it') {

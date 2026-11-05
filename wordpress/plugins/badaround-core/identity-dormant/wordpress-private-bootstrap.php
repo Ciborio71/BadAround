@@ -30,7 +30,7 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
             || !defined('BADAROUND_TURBOSMTP_CONSUMER_KEY')
             || !defined('BADAROUND_TURBOSMTP_CONSUMER_SECRET')
             || !defined('BADAROUND_TURBOSMTP_FROM_EMAIL')) {return false;}
-        $privacy=BadAround_Identity_WordPress_Privacy_Notice::verified_version();
+        $privacy=BadAround_Identity_WordPress_Privacy_Notice::runtime_version();
         if ($privacy===null) {return false;}
         try {
             $db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);

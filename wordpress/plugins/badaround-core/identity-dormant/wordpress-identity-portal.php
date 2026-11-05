@@ -13,10 +13,12 @@ final class BadAround_Identity_WordPress_Portal {
     public const SHORTCODE='badaround_identity_portal';
 
     public static function enabled():bool {
-        return defined('BADAROUND_IDENTITY_PORTAL_ENABLED')
-            && BADAROUND_IDENTITY_PORTAL_ENABLED===true
-            && BadAround_Identity_Private_Access::authorized()
-            && defined('BADAROUND_IDENTITY_PRIVACY_APPROVED_VERSION')
+        if (!defined('BADAROUND_IDENTITY_PORTAL_ENABLED')
+            || BADAROUND_IDENTITY_PORTAL_ENABLED!==true
+            || !BadAround_Identity_Private_Access::authorized())return false;
+        if (BadAround_Identity_WordPress_Privacy_Notice::qa_mode())
+            return BadAround_Identity_WordPress_Privacy_Notice::runtime_version()!==null;
+        return defined('BADAROUND_IDENTITY_PRIVACY_APPROVED_VERSION')
             && BADAROUND_IDENTITY_PRIVACY_APPROVED_VERSION
                 ===BadAround_Identity_WordPress_Privacy_Notice::verified_version();
     }
@@ -40,9 +42,18 @@ final class BadAround_Identity_WordPress_Portal {
         $script=plugins_url('identity-dormant/identity-portal.js',BADAROUND_CORE_FILE);
         wp_enqueue_script('badaround-identity-portal',$script,[], '0.2.0',true);
         $privacy=esc_url(home_url('/privacy-policy/'));
+        $notice='';
+        if (BadAround_Identity_WordPress_Privacy_Notice::qa_mode()) {
+            $record=BadAround_Identity_WordPress_Privacy_Notice::qa_record();
+            if ($record===null || !function_exists('wp_kses_post'))return '';
+            $privacy='#ba-identity-qa-notice';
+            $notice='<details id="ba-identity-qa-notice"><summary>Informativa del collaudo riservato</summary>'
+                . wp_kses_post($record['content']).'</details>';
+        }
         return '<section class="ba-identity-portal" data-ba-identity-portal aria-label="Accesso BadAround">'
             . '<h2>Accedi a BadAround</h2>'
             . '<p>Utilizziamo un codice temporaneo inviato via email. Non occorre una password.</p>'
+            . $notice
             . '<div role="status" data-ba-result aria-live="polite"></div>'
             . '<form data-ba-form="register" autocomplete="on">'
             . '<h3>Registrati</h3>'
@@ -50,7 +61,7 @@ final class BadAround_Identity_WordPress_Portal {
             . '<label>Cognome <input name="last_name" autocomplete="family-name" maxlength="191" required></label>'
             . '<label>Email <input name="email" type="email" autocomplete="email" maxlength="191" required></label>'
             . '<label><input name="privacy_acknowledged" type="checkbox" required> '
-            . 'Dichiaro di aver letto l\' <a href="'.$privacy.'" target="_blank" rel="noopener noreferrer">informativa privacy</a>.</label>'
+            . 'Dichiaro di aver letto l\' <a href="'.$privacy.'">informativa privacy</a>.</label>'
             . '<button type="submit">Ricevi il codice di registrazione</button>'
             . '</form>'
             . '<form data-ba-form="login" autocomplete="on">'

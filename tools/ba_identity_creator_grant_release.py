@@ -43,7 +43,7 @@ def release(ftp, prior, candidate, run, deploy):
     for name, original in prior.items():
         if read(ftp, BASE + name) != original:
             raise RuntimeError('Live module differs from pinned baseline: ' + name)
-    if read(ftp, BASE + FILES[0]) is not None:
+    if FILES[0] not in prior and read(ftp, BASE + FILES[0]) is not None:
         raise RuntimeError('New module destination occupied')
     for name in FILES:
         for suffix in ('.prior', '.part'):

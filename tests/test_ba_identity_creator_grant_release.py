@@ -65,6 +65,21 @@ class ReleaseTests(unittest.TestCase):
             self.assertEqual(self.ftp.files[release.BASE+name], data)
         for name, data in self.prior.items():
             self.assertEqual(self.ftp.files[release.PRIVATE+'ba-creator-123-'+name+'.prior'], data)
+    def test_existing_first_module_can_be_replaced(self):
+        name = release.FILES[0]
+        self.prior[name] = b'<?php previous first module'
+        self.ftp.files[release.BASE+name] = self.prior[name]
+        result = release.release(self.ftp, self.prior, self.candidate, '123', True)
+        self.assertEqual(result['modified'], release.FILES)
+        self.assertEqual(self.ftp.files[release.PRIVATE+'ba-creator-123-'+name+'.prior'], self.prior[name])
+    def test_existing_first_module_restored_on_swap_failure(self):
+        name = release.FILES[0]
+        self.prior[name] = b'<?php previous first module'
+        self.ftp.files[release.BASE+name] = self.prior[name]
+        self.ftp.fail_target = release.BASE+name
+        with self.assertRaises(RuntimeError):
+            release.release(self.ftp, self.prior, self.candidate, '123', True)
+        self.assertEqual(self.ftp.files[release.BASE+name], self.prior[name])
     def test_partial_release_restores_all_runtime_bytes(self):
         self.ftp.fail_target = release.BASE+release.FILES[2]
         with self.assertRaises(RuntimeError):

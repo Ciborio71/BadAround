@@ -54,7 +54,7 @@ final class BadAround_Identity_QA_Readiness {
             $check['qa_mail_recipients_verified']=
                 BadAround_Identity_QA_Mail_Fence::configured();
             $check['approved_privacy_notice']=
-                BadAround_Identity_WordPress_Privacy_Notice::verified_version()!==null;
+                BadAround_Identity_WordPress_Privacy_Notice::runtime_version()!==null;
             $check['pre_intake_schema_valid']=
                 BadAround_Identity_Pre_Intake_Schema::inspect($db,$prefix);
         } catch (Throwable $error) {
