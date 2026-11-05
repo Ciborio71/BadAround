@@ -1,0 +1,33 @@
+name: BadAround secure latest backup location
+on:
+  push:
+    branches:
+      - reconcile/identity-production-baseline-20261104
+    paths:
+      - .github/workflows/ba-secure-current-backup.yml
+permissions:
+  contents: read
+jobs:
+  relocate-archive:
+    if: "github.event.head_commit.message == 'security: relocate verified backup outside public root'"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check script syntax
+        run: python3 -m py_compile tools/ba_secure_backup_location.py
+      - name: Move verified ZIP to private directory and verify SHA256
+        env:
+          FTP_HOST: '46.231.24.137'
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 tools/ba_secure_backup_location.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ba-secure-backup-relocation-evidence
+          path: ba-secure-backup-location.json
+          retention-days: 4
+          if-no-files-found: ignore
