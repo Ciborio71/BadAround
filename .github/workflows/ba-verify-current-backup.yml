@@ -31,3 +31,5 @@ jobs:
           path: ba-current-backup-validation.json
           retention-days: 4
           if-no-files-found: ignore
+
+# One-time read-only current archive verification.
