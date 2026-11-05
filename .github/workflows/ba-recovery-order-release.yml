@@ -55,3 +55,5 @@ jobs:
           path: ba-id-recovery-order-evidence.json
           retention-days: 10
           if-no-files-found: ignore
+
+# Single-use dormant recovery hardening only.
