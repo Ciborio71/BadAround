@@ -10,6 +10,7 @@ final class BadAround_Identity_Ownership_Chronology_Gate {
     public static function eligible(
         ?array $reservation,
         ?array $canonical,
+        string $verifiedIdentity,
         callable $newReceiptProof,
         callable $creationOrderProof
     ): bool {
@@ -24,6 +25,7 @@ final class BadAround_Identity_Ownership_Chronology_Gate {
             '/^[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/D', $submission
         ) || !is_string($operation) || !preg_match('/^[a-f0-9]{32}$/D', $operation)
             || !is_string($identity) || !preg_match('/^[A-Za-z0-9_-]{8,128}$/D', $identity)
+            || !is_string($verifiedIdentity) || $verifiedIdentity !== $identity
             || !is_int($reservedAt) || $reservedAt <= 0
             || !in_array($reservation['state'] ?? null, ['reserved', 'linked'], true)
             || !is_int($report) || $report <= 0 || !is_int($event) || $event <= 0
