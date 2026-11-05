@@ -1,14 +1,10 @@
 <?php
 /**
  * Plugin Name: BadAround Identity administrative diagnostics
- * Description: Read-only Identity prerequisites for administrators. No activation or email.
+ * Description: Administrative observations only. Never enables QA or sends OTP.
  */
 if (!defined('ABSPATH')) { exit; }
-add_action('rest_api_init', static function() {
-    register_rest_route('badaround-ops/v1','/identity-readiness',[
-        'methods'=>'GET',
-        'permission_callback'=>static function(){return current_user_can('manage_options');},
-        'callback'=>static function() {
+function badaround_identity_ops_facts() {
             global $wpdb;
             $root=dirname(rtrim(ABSPATH,'/\\'));
             $private=$root.'/ba-identity-private-qa.php';
@@ -60,19 +56,68 @@ add_action('rest_api_init', static function() {
                 'private_file_permissions'=>@is_file($private)?substr(sprintf('%o',@fileperms($private)),-4):null,
                 'private_owner_matches_php'=>function_exists('posix_geteuid')&&@is_file($private)?@fileowner($private)===posix_geteuid():null,
                 'request_peer'=>$_SERVER['REMOTE_ADDR']??null,
+                'x_real_ip_observed_not_trusted'=>filter_var($_SERVER['HTTP_X_REAL_IP']??'',FILTER_VALIDATE_IP)?:null,
+                'x_forwarded_for_observed_not_trusted'=>array_values(array_filter(array_slice(array_map('trim',explode(',',(string)($_SERVER['HTTP_X_FORWARDED_FOR']??''))),0,5),static fn($v)=>filter_var($v,FILTER_VALIDATE_IP)!==false)),
                 'configured_peer_matches_request'=>is_array($ips)&&in_array($_SERVER['REMOTE_ADDR']??null,$ips,true),
                 'ip_option_is_single_list'=>is_array($ips)&&array_is_list($ips)&&count($ips)===1,
                 'mail_option_is_single_list'=>is_array($emails)&&array_is_list($emails)&&count($emails)===1,
                 'notice_integrity_valid'=>$notice,'flags_for_this_request'=>$flags,
                 'root_key_present'=>defined('BADAROUND_IDENTITY_ROOT_SECRET'),
                 'mail_credentials_present'=>$mail,'missing_innodb_tables'=>$missing,
+                'bootstrap_classes'=>array_map(static fn($v)=>class_exists($v,false),['BadAround_Identity_WordPress_Private_Bootstrap','BadAround_Identity_WordPress_Registration_Composition','BadAround_Identity_WordPress_Login_Composition','BadAround_Identity_WordPress_QA_Report_Composition','BadAround_Identity_QA_Report_REST']),
                 'portal_class_loaded'=>class_exists('BadAround_Identity_WordPress_Portal',false),
                 'portal_shortcode_registered'=>shortcode_exists('badaround_identity_portal'),
                 'recent_successful_tester_page_requests'=>array_slice($recent,-5),
             ];
+
+            return $facts;
+
+}
+add_action('template_redirect',static function(){
+    if (is_page(389) && current_user_can('manage_options')) {
+        $facts=badaround_identity_ops_facts();
+        $facts['captured_at_gmt']=gmdate('c');
+        set_transient('badaround_identity_last_admin_qa_view',$facts,600);
+    }
+},1);
+add_action('init',static function(){
+    $nonce=$_SERVER['HTTP_X_BADAROUND_OPS_PROBE']??null;
+    $expected=get_transient('badaround_identity_ops_probe_hash');
+    if(!is_string($nonce)||!preg_match('/^[a-f0-9]{32}$/D',$nonce)
+        ||!is_string($expected)||!hash_equals($expected,hash('sha256',$nonce)))return;
+    $facts=badaround_identity_ops_facts();
+    $facts['captured_at_gmt']=gmdate('c');
+    set_transient('badaround_identity_ops_probe_result',$facts,30);
+},1);
+add_action('rest_api_init',static function(){
+    $admin=static function(){return current_user_can('manage_options');};
+    register_rest_route('badaround-ops/v1','/identity-readiness',[
+        'methods'=>'GET','permission_callback'=>$admin,'callback'=>static function(){
+            $facts=badaround_identity_ops_facts();
+            $facts['last_administrator_qa_page_view']=get_transient('badaround_identity_last_admin_qa_view')?:null;
             $response=new WP_REST_Response($facts,200);
-            $response->header('Cache-Control','private, no-store, max-age=0');
-            return $response;
+            $response->header('Cache-Control','private, no-store, max-age=0');return $response;
+        },
+    ]);
+    register_rest_route('badaround-ops/v1','/identity-proxy-probe',[
+        'methods'=>'POST','permission_callback'=>$admin,'callback'=>static function(){
+            $nonce=bin2hex(random_bytes(16));
+            delete_transient('badaround_identity_ops_probe_result');
+            set_transient('badaround_identity_ops_probe_hash',hash('sha256',$nonce),30);
+            $result=wp_remote_get(home_url('/?ba_ops_probe=1&ba_ops_run='.time()),[
+                'timeout'=>10,'redirection'=>0,'headers'=>[
+                    'X-Badaround-Ops-Probe'=>$nonce,'X-Real-IP'=>'198.51.100.77',
+                    'X-Forwarded-For'=>'198.51.100.88','Cache-Control'=>'no-cache',
+                ],
+            ]);
+            $capture=get_transient('badaround_identity_ops_probe_result')?:null;
+            delete_transient('badaround_identity_ops_probe_hash');
+            delete_transient('badaround_identity_ops_probe_result');
+            $response=new WP_REST_Response([
+                'probe_http_status'=>is_wp_error($result)?null:wp_remote_retrieve_response_code($result),
+                'capture'=>$capture,'note'=>'Observation only; forwarding headers never authorize this probe.',
+            ],200);
+            $response->header('Cache-Control','private, no-store, max-age=0');return $response;
         },
     ]);
 });

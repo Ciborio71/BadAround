@@ -13,6 +13,11 @@ jobs:
     timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 8a00bf02b14e67fdf81d2e04d776c7778ef972ec
+          path: prior-source
+          persist-credentials: false
       - run: php -l wordpress/mu-plugins/badaround-identity-ops.php
       - name: Prepare verified FTPS trust chain
         run: |
@@ -42,7 +47,21 @@ jobs:
               target='/httpdocs/wp-content/mu-plugins/badaround-identity-ops.php'
               data=Path('wordpress/mu-plugins/badaround-identity-ops.php').read_bytes()
               old=read(target)
-              if old is not None and old!=data:raise RuntimeError('Existing diagnostic source differs')
+              expected=Path('prior-source/wordpress/mu-plugins/badaround-identity-ops.php').read_bytes()
+              if old is not None and old not in (data,expected):raise RuntimeError('Existing diagnostic source differs')
+              if old==expected:
+                  backup='/wordpress-backups/ba-identity-ops-'+os.environ['GITHUB_RUN_ID']+'.prior'
+                  if read(backup) is not None:raise RuntimeError('Backup destination occupied')
+                  ftp.storbinary('STOR '+backup,io.BytesIO(old))
+                  if read(backup)!=old:raise RuntimeError('Backup verification failed')
+                  temp='/wordpress-backups/ba-identity-ops-'+os.environ['GITHUB_RUN_ID']+'.part'
+                  if read(temp) is not None:raise RuntimeError('Temporary destination occupied')
+                  ftp.storbinary('STOR '+temp,io.BytesIO(data))
+                  if read(temp)!=data or read(target)!=old:raise RuntimeError('Source changed before swap')
+                  ftp.rename(temp,target)
+                  if read(target)!=data:
+                      if read(backup)==old:ftp.rename(backup,target)
+                      raise RuntimeError('Diagnostic swap verification failed')
               if old is None:
                   try:ftp.cwd('/httpdocs/wp-content/mu-plugins')
                   except ftplib.error_perm:ftp.mkd('/httpdocs/wp-content/mu-plugins')
