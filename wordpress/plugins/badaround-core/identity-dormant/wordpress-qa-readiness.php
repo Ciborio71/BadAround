@@ -48,7 +48,9 @@ final class BadAround_Identity_QA_Readiness {
             $check['mail_configuration_present']=class_exists('BadAround_Transactional_Mailer')
                 && defined('BADAROUND_TURBOSMTP_CONSUMER_KEY')
                 && defined('BADAROUND_TURBOSMTP_CONSUMER_SECRET')
-                && defined('BADAROUND_TURBOSMTP_FROM_EMAIL');
+                && defined('BADAROUND_TURBOSMTP_FROM_EMAIL')
+                && is_string(BADAROUND_TURBOSMTP_FROM_EMAIL)
+                && filter_var(BADAROUND_TURBOSMTP_FROM_EMAIL,FILTER_VALIDATE_EMAIL)!==false;
             $check['qa_mail_recipients_verified']=
                 BadAround_Identity_QA_Mail_Fence::configured();
             $check['approved_privacy_notice']=
