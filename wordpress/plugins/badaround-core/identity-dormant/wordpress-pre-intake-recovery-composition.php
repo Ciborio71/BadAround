@@ -39,7 +39,8 @@ final class BadAround_Identity_WordPress_Recovery_Composition {
         BadAround_Identity_Intake_Receipt $receiptProof
     ): ?BadAround_Identity_Pre_Intake_Recovery_Worker {
         if (!defined('BADAROUND_IDENTITY_PRIVATE_QA_ENABLED')
-            || BADAROUND_IDENTITY_PRIVATE_QA_ENABLED !== true) return null;
+            || BADAROUND_IDENTITY_PRIVATE_QA_ENABLED !== true
+            || !$receiptProof instanceof BadAround_Identity_Pre_Intake_Creation_Order_Proof) return null;
         try {
             if (!BadAround_Identity_Pre_Intake_Schema::inspect($db,$prefix))return null;
             $pre=new BadAround_Identity_Mysql_Pre_Intake_Store(
@@ -59,6 +60,7 @@ final class BadAround_Identity_WordPress_Recovery_Composition {
                 new BadAround_Identity_Recovery_Owner_Bridge($owner),
                 new BadAround_Identity_Recovery_Store_Bridge($journal),
                 new BadAround_Identity_Creator_Grant_Bridge($owner),
+                $receiptProof,
                 $receiptProof
             );
         } catch (Throwable $error) {
