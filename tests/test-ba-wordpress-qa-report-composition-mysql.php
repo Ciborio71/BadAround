@@ -53,6 +53,12 @@ try {
     );
     qa_comp_check($controller instanceof BadAround_Identity_QA_Report_REST,
         'protected production-private QA dependencies composed');
+    qa_comp_check(
+        BadAround_Identity_WordPress_QA_Report_Composition::assemble(
+            $db,$prefix,$repository
+        ) instanceof BadAround_Identity_QA_Report_REST,
+        'default persistent canonical proof composes without client-supplied receipt'
+    );
     $_SERVER['REMOTE_ADDR']='192.0.2.4';
     qa_comp_check(BadAround_Identity_WordPress_QA_Report_Composition::assemble(
         $db,$prefix,$repository,$proof
