@@ -9,6 +9,7 @@
  */
 declare(strict_types=1);
 require_once __DIR__.'/wordpress-qa-report-transport.php';
+require_once __DIR__.'/wordpress-privacy-notice.php';
 
 final class BadAround_Identity_QA_Report_REST {
     public const NAMESPACE='badaround-identity-qa/v1';
@@ -32,11 +33,14 @@ final class BadAround_Identity_QA_Report_REST {
     }
 
     public static function enabled():bool {
-        return defined('BADAROUND_IDENTITY_PRIVATE_QA_ENABLED')
+        return defined('BADAROUND_IDENTITY_RUNTIME_INTEGRATION_ENABLED')
+            && BADAROUND_IDENTITY_RUNTIME_INTEGRATION_ENABLED===true
+            && defined('BADAROUND_IDENTITY_PRIVATE_QA_ENABLED')
             && BADAROUND_IDENTITY_PRIVATE_QA_ENABLED===true
             && defined('BADAROUND_IDENTITY_QA_REPORTS_ENABLED')
             && BADAROUND_IDENTITY_QA_REPORTS_ENABLED===true
-            && BadAround_Identity_Private_Access::authorized();
+            && BadAround_Identity_Private_Access::authorized()
+            && BadAround_Identity_WordPress_Privacy_Notice::verified_version()!==null;
     }
 
     /** No automatic hooks; must be called from independently authorized QA. */
