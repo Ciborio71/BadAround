@@ -12,6 +12,10 @@ require_once __DIR__.'/pre-reserved-native-intake.php';
 require_once __DIR__.'/ownership-recovery-reconciler.php';
 require_once __DIR__.'/report-otp-wordpress-reconciler.php';
 
+interface BadAround_Identity_Pre_Intake_Creation_Order_Proof {
+    /** Canonical persisted report created at or after this reserved timestamp. */
+    public function created_after_reservation(int $reportId,int $eventId,int $reservedAt):bool;
+}
 interface BadAround_Identity_Pre_Intake_Recovery_Reader {
     public function find_by_submission(string $submissionId):?array;
     public function link(string $operationId,string $submissionId,int $reportId,int $eventId,int $now):bool;
@@ -30,7 +34,8 @@ final class BadAround_Identity_Pre_Intake_Recovery_Worker {
         private BadAround_Identity_Recovery_Owner_Reader $owners,
         private BadAround_Identity_Recovery_Journal $journal,
         private BadAround_Identity_Ownership_Grant $grants,
-        private BadAround_Identity_Intake_Receipt $receiptProof
+        private BadAround_Identity_Intake_Receipt $receiptProof,
+        private BadAround_Identity_Pre_Intake_Creation_Order_Proof $creationOrder
     ) {}
 
     /** Returns LINKED only when canonical ownership has been confirmed. */
@@ -53,6 +58,8 @@ final class BadAround_Identity_Pre_Intake_Recovery_Worker {
             }
             $report=$canonical['report_id'];$event=$canonical['event_id'];
             if (!$this->receiptProof->is_new_canonical_report($report,$event))return self::REVIEW;
+            if (!$this->creationOrder->created_after_reservation(
+                $report,$event,$row['created_at']))return self::REVIEW;
             if ($row['state']==='reserved') {
                 if (!$this->preIntake->link($row['operation_id'],$submissionId,$report,$event,$now)) {
                     return self::PENDING;
