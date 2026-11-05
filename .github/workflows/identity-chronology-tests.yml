@@ -1,0 +1,20 @@
+name: Identity chronology gate (isolated QA)
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'security/identity/**'
+      - '.github/workflows/identity-chronology-tests.yml'
+permissions:
+  contents: read
+jobs:
+  chronology:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PHP syntax
+        run: |
+          php -l security/identity/ownership-chronology-gate.php
+          php -l security/identity/test-ownership-chronology-gate.php
+      - name: Run isolated security tests
+        run: php security/identity/test-ownership-chronology-gate.php
