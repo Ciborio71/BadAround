@@ -28,11 +28,17 @@ class BadAround_Native_Report_Golden_Path_Service {
 class BadAround_Native_Media_Report_Adapter {
     public function submit(array $raw,string $cap):array {throw new RuntimeException('Never submit media in CI smoke');}
 }
-class BadAround_Identity_WordPress_Privacy_Notice {
-    public static bool $verified=false;
-    public static function verified_version():?string {
-        return self::$verified?'synthetic-qa-only':null;
-    }
+$qaNoticeReviewed=false;
+function get_post(int $id):object {
+    global $qaNoticeReviewed;
+    return (object)[
+        'ID'=>3,'post_type'=>'page','post_status'=>'publish',
+        'post_name'=>'privacy-policy',
+        'post_modified_gmt'=>BadAround_Identity_WordPress_Privacy_Notice::EXPECTED_MODIFIED_GMT,
+        'post_content'=>$qaNoticeReviewed
+            ? 'Synthetic reviewed CI fixture, never real consent.'
+            : 'Bozza pre-pubblicazione da sottoporre a revisione',
+    ];
 }
 $qaRegisteredHooks=[];
 function add_action(string $hook,$callback):void {
@@ -74,7 +80,7 @@ try {
         BadAround_Identity_WordPress_QA_Report_Bootstrap::prepare($db,$prefix)===null,
         'pre-intake schema alone never bypasses privacy gate'
     );
-    BadAround_Identity_WordPress_Privacy_Notice::$verified=true;
+    $qaNoticeReviewed=true;
     $qaController=BadAround_Identity_WordPress_QA_Report_Bootstrap::prepare($db,$prefix);
     qa_comp_check($qaController instanceof BadAround_Identity_QA_Report_REST,
         'private bootstrap assembles controller with all flags and synthetic notice');
