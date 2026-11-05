@@ -34,6 +34,14 @@ final class WorkerStatus implements BadAround_Identity_Active_Status {
 final class WorkerReceipt implements BadAround_Identity_Intake_Receipt {
     public function is_new_canonical_report(int $r,int $e):bool{return $r===71 && $e===81;}
 }
+final class WorkerCreationOrder implements BadAround_Identity_Pre_Intake_Creation_Order_Proof {
+    public bool $allowed=true;
+    public int $calls=0;
+    public function created_after_reservation(int $report,int $event,int $reserved):bool {
+        ++$this->calls;
+        return $this->allowed && $report===71 && $event===81 && $reserved===100;
+    }
+}
 final class WorkerOwners implements BadAround_Identity_Recovery_Owner_Reader {
     public ?array $value=null;
     public function find_for_report(int $r):?array{return $this->value;}
@@ -68,8 +76,9 @@ $op=str_repeat('a',32);
 $identity='identity_12345678';
 $lock=new WorkerLock();$p=new WorkerPre();$canonical=new WorkerCanonical();$active=new WorkerStatus();
 $owners=new WorkerOwners();$grants=new WorkerGrants($owners);$journal=new WorkerJournal();
+$created=new WorkerCreationOrder();
 $worker=new BadAround_Identity_Pre_Intake_Recovery_Worker(
-    $lock,$p,$canonical,$active,$owners,$journal,$grants,new WorkerReceipt()
+    $lock,$p,$canonical,$active,$owners,$journal,$grants,new WorkerReceipt(),$created
 );
 $base=['submission_id'=>$submission,'operation_id'=>$op,'identity_id'=>$identity,
     'state'=>'reserved','created_at'=>100,'report_id'=>null,'event_id'=>null];
@@ -78,6 +87,12 @@ $canonical->exists=false;
 verify_worker($worker->recover($submission,110)==='pending','missing canonical event remains pending');
 verify_worker($p->links===0 && $grants->attempts===0,'no grant without canonical event');
 $canonical->exists=true;
+$created->allowed=false;
+verify_worker($worker->recover($submission,111)==='needs_review',
+    'preexisting canonical report cannot be assigned through later reservation');
+verify_worker($p->links===0 && $grants->attempts===0,
+    'out-of-order recovery never links or grants creator');
+$created->allowed=true;
 verify_worker($worker->recover($submission,111)==='linked','reserved crash recovered and owned');
 verify_worker($p->links===1 && $grants->attempts===1,'single pre-intake link and owner grant');
 verify_worker($worker->recover($submission,112)==='linked','replay reads bound owner without duplicate grant');
