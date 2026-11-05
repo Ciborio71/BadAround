@@ -127,10 +127,36 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
             $community->register_hooks();
             BadAround_Identity_WordPress_Portal::register_hooks();
             BadAround_Identity_WordPress_Comment_Form::register_hooks();
+            // Community authentication has its own cookie and CSRF checks.
+            // Its private QA requests must not require an admin REST nonce.
+            // Keep the public maintenance gate in place everywhere else.
+            if (function_exists('add_filter'))add_filter('rest_pre_dispatch',
+                [self::class,'private_qa_maintenance_request'],6,3);
             return true;
         } catch(Throwable $error) {
             // Never echo database errors or private key material.
             return false;
         }
+    }
+
+    public static function private_qa_maintenance_request($result,$server,$request) {
+        if (!function_exists('is_wp_error') || !is_wp_error($result)
+            || $result->get_error_codes()!==['badaround_maintenance']
+            || ($result->get_error_data()['status']??null)!==503
+            || !is_object($request) || !method_exists($request,'get_route')
+            || !method_exists($request,'get_method') || $request->get_method()!=='POST'
+            || !defined('BADAROUND_IDENTITY_RUNTIME_INTEGRATION_ENABLED')
+            || BADAROUND_IDENTITY_RUNTIME_INTEGRATION_ENABLED!==true
+            || !BadAround_Identity_Private_Access::authorized()
+            || !BadAround_Identity_WordPress_Privacy_Notice::qa_mode()
+            || BadAround_Identity_WordPress_Privacy_Notice::runtime_version()===null)return $result;
+        $routes=[
+            '/badaround/v1/identity/register/start','/badaround/v1/identity/register/verify',
+            '/badaround/v1/identity/login/start','/badaround/v1/identity/login/verify',
+            '/badaround/v1/identity/session','/badaround/v1/identity/logout',
+            '/badaround/v1/identity/my-activity','/badaround/v1/community-comments',
+            '/badaround/v1/community-revisions','/badaround-identity-qa/v1/reports',
+        ];
+        return in_array($request->get_route(),$routes,true)?null:$result;
     }
 }

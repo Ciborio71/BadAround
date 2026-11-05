@@ -36,6 +36,10 @@ qa_notice_check(BadAround_Identity_WordPress_Privacy_Notice::verified_version()=
 qa_notice_check(BadAround_Identity_WordPress_Privacy_Notice::qa_record()['legal_review_verified']===false,
     'owner adoption never fabricates legal review');
 qa_notice_check(BadAround_Identity_WordPress_Portal::enabled(),'private portal uses the adopted QA scope');
+require_once __DIR__.'/../wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-report-rest.php';
+define('BADAROUND_IDENTITY_QA_REPORTS_ENABLED',true);
+qa_notice_check(BadAround_Identity_QA_Report_REST::enabled(),
+    'private report endpoint uses the same adopted QA notice without approving the public policy');
 foreach(['scope'=>'public','state'=>'draft','approval_source'=>'request_input','version'=>'foreign-version',
     'page_id'=>'388','sha256'=>str_repeat('0',64),'legal_review_verified'=>'true'] as $field=>$bad) {
     $options['badaround_identity_qa_notice_adoption']=array_replace($record,[$field=>$bad]);
@@ -44,6 +48,7 @@ foreach(['scope'=>'public','state'=>'draft','approval_source'=>'request_input','
 $options['badaround_identity_qa_notice_adoption']=$record;
 $pages[388]->post_content.=' changed';
 qa_notice_check(!BadAround_Identity_WordPress_Portal::enabled(),'content change requires new adoption');
+qa_notice_check(!BadAround_Identity_QA_Report_REST::enabled(),'changed QA notice also disables report endpoint');
 $pages[388]->post_content=$text;$pages[388]->post_status='publish';
 qa_notice_check(!BadAround_Identity_WordPress_Portal::enabled(),'public page cannot be used as private QA adoption');
 $pages[388]->post_status='private';$_SERVER['REMOTE_ADDR']='203.0.113.8';

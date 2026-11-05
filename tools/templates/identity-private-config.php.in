@@ -1,0 +1,68 @@
+<?php
+/** Private Identity QA configuration. Outside webroot. No output or sends. */
+return (static function():bool {
+    if (!extension_loaded('pdo_mysql') || !defined('DB_HOST') || !defined('DB_NAME')
+        || !defined('DB_USER') || !defined('DB_PASSWORD'))return false;
+    global $table_prefix;
+    if (!is_string($table_prefix) || !preg_match('/^[A-Za-z0-9_]{1,48}$/D',$table_prefix))return false;
+    try {
+        $host=(string)DB_HOST;
+        if (!preg_match('/^[A-Za-z0-9._-]+(?::[0-9]{1,5})?$/D',$host))return false;
+        $parts=explode(':',$host,2);
+        $dsn='mysql:host='.$parts[0];
+        if (isset($parts[1])) {
+            $port=(int)$parts[1];
+            if ($port<1 || $port>65535)return false;
+            $dsn.=';port='.$port;
+        }
+        $db=new PDO($dsn.';dbname='.DB_NAME.';charset=utf8mb4',DB_USER,DB_PASSWORD,[
+            PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_EMULATE_PREPARES=>false,PDO::ATTR_TIMEOUT=>2,
+        ]);
+        $q=$db->query("SELECT option_name,option_value FROM `{$table_prefix}options`
+            WHERE option_name IN ('badaround_identity_qa_ip_allowlist',
+                'badaround_identity_qa_email_allowlist','badaround_identity_qa_notice_adoption')");
+        $options=$q->fetchAll(PDO::FETCH_KEY_PAIR);
+        $load=static function(string $key)use($options) {
+            $raw=$options[$key]??null;
+            if (!is_string($raw) || strlen($raw)>8192)return null;
+            return @unserialize($raw,['allowed_classes'=>false]);
+        };
+        $ips=$load('badaround_identity_qa_ip_allowlist');
+        if (!is_array($ips) || !array_is_list($ips) || count($ips)!==1
+            || !is_string($ips[0]) || !filter_var($ips[0],FILTER_VALIDATE_IP))return false;
+        // Use the server peer. Never trust forwarding headers or a form input.
+        $peer=$_SERVER['REMOTE_ADDR']??null;
+        if (!is_string($peer) || !in_array($peer,$ips,true))return false;
+        $emails=$load('badaround_identity_qa_email_allowlist');
+        if (!is_array($emails) || !array_is_list($emails) || count($emails)!==1
+            || !is_string($emails[0]) || !filter_var($emails[0],FILTER_VALIDATE_EMAIL)
+            || $emails[0]!==strtolower($emails[0]) || $emails[0]!==trim($emails[0]))return false;
+        $notice=$load('badaround_identity_qa_notice_adoption');
+        if (!is_array($notice) || ($notice['scope']??null)!=='private_identity_qa'
+            || ($notice['state']??null)!=='owner_adopted')return false;
+        $flags=[
+            'BADAROUND_IDENTITY_RUNTIME_INTEGRATION_ENABLED','BADAROUND_IDENTITY_PRIVATE_QA_ENABLED',
+            'BADAROUND_IDENTITY_QA_NOTICE_ENABLED','BADAROUND_IDENTITY_REGISTRATION_ENABLED',
+            'BADAROUND_IDENTITY_LOGIN_ENABLED','BADAROUND_IDENTITY_PORTAL_ENABLED',
+            'BADAROUND_IDENTITY_COMMUNITY_ENABLED','BADAROUND_IDENTITY_QA_REPORTS_ENABLED',
+        ];
+        foreach($flags as $flag)if(defined($flag) && constant($flag)!==true)return false;
+        if (defined('BADAROUND_IDENTITY_QA_IP_ALLOWLIST')
+            && BADAROUND_IDENTITY_QA_IP_ALLOWLIST!==$ips)return false;
+        // Preserve an existing key. Never rotate protected Identity data here.
+        if (defined('BADAROUND_IDENTITY_ROOT_SECRET')) {
+            if (!is_string(BADAROUND_IDENTITY_ROOT_SECRET)
+                || strlen(BADAROUND_IDENTITY_ROOT_SECRET)<48)return false;
+        } else {
+            define('BADAROUND_IDENTITY_ROOT_SECRET','__GENERATED_ROOT_SECRET__');
+        }
+        if (!defined('BADAROUND_IDENTITY_QA_IP_ALLOWLIST'))
+            define('BADAROUND_IDENTITY_QA_IP_ALLOWLIST',$ips);
+        foreach($flags as $flag)if(!defined($flag))define($flag,true);
+        return true;
+    } catch(Throwable $error) {
+        // Fail closed without leaking credentials, addresses or database errors.
+        return false;
+    }
+})();

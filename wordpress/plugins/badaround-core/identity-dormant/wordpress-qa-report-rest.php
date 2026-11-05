@@ -40,7 +40,7 @@ final class BadAround_Identity_QA_Report_REST {
             && defined('BADAROUND_IDENTITY_QA_REPORTS_ENABLED')
             && BADAROUND_IDENTITY_QA_REPORTS_ENABLED===true
             && BadAround_Identity_Private_Access::authorized()
-            && BadAround_Identity_WordPress_Privacy_Notice::verified_version()!==null;
+            && BadAround_Identity_WordPress_Privacy_Notice::runtime_version()!==null;
     }
 
     /** No automatic hooks; must be called from independently authorized QA. */
