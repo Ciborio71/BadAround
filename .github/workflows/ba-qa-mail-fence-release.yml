@@ -53,3 +53,5 @@ jobs:
           path: ba-identity-mail-fence-deploy.json
           retention-days: 14
           if-no-files-found: ignore
+
+# One-time guarded release, no runtime flags touched.
