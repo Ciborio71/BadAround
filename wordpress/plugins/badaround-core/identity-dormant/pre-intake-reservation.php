@@ -62,7 +62,8 @@ final class BadAround_Identity_Pre_Intake_Reservation {
     public static function valid_operation(string $id):bool {
         return preg_match('/^[a-f0-9]{32}$/D',$id)===1;
     }
+    /** Match the frozen native WP Core UUID contract exactly (versions 1–5). */
     public static function valid_submission(string $id):bool {
-        return preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/D',$id)===1;
+        return preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/D',$id)===1;
     }
 }
