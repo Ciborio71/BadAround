@@ -52,3 +52,5 @@ jobs:
           path: ba-intake-contract-release-evidence.json
           retention-days: 10
           if-no-files-found: ignore
+
+# Explicit one-time dormant compatibility fix only.
