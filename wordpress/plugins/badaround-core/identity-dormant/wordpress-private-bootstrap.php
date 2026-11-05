@@ -99,9 +99,22 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
                     $csrf,$origin
                 )
             );
+            // Private report QA cannot be registered unless the entire
+            // passwordless runtime, IP fence, notice and dedicated schema
+            // pass independently. When disabled, not even the composer loads.
+            $qaReport=null;
+            if (defined('BADAROUND_IDENTITY_QA_REPORTS_ENABLED')
+                && BADAROUND_IDENTITY_QA_REPORTS_ENABLED===true) {
+                require_once __DIR__.'/wordpress-qa-report-bootstrap.php';
+                $qaReport=BadAround_Identity_WordPress_QA_Report_Bootstrap::prepare($db,$prefix);
+                if ($qaReport===null) return false;
+            }
             // Assemble the complete graph before registering ANY hook:
             // partial initialization must never expose a functioning route.
             // Individual REST controllers still require their own flags.
+            if ($qaReport!==null
+                && !BadAround_Identity_WordPress_QA_Report_Bootstrap::register($qaReport))
+                return false;
             $registration->register_hooks();
             $login->register_hooks();
             $sessionApi->register_hooks();
