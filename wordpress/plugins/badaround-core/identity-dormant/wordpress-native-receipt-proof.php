@@ -9,9 +9,10 @@
 declare(strict_types=1);
 require_once __DIR__.'/post-intake-binder.php';
 require_once __DIR__.'/report-otp-canonical-reader.php';
+require_once __DIR__.'/pre-intake-recovery-worker.php';
 
 final class BadAround_Identity_WordPress_Native_Receipt_Proof
-    implements BadAround_Identity_Intake_Receipt {
+    implements BadAround_Identity_Intake_Receipt, BadAround_Identity_Pre_Intake_Creation_Order_Proof {
     private string $reports;
     private BadAround_Report_Otp_Canonical_Reader $canonical;
 
@@ -48,4 +49,25 @@ final class BadAround_Identity_WordPress_Native_Receipt_Proof
             return false;
         }
     }
+    /** Reject attempts to recover ownership for a pre-existing native report.
+     *  The native repository stores created_at in UTC as a MySQL datetime.
+     *  Compare only verified database metadata; never trust HTTP timestamps.
+     */
+    public function created_after_reservation(int $reportId,int $eventId,int $reservedAt):bool {
+        if($reportId<=0 || $eventId<=0 || $reservedAt<=0)return false;
+        try {
+            $q=$this->db->prepare("SELECT created_at FROM `{$this->reports}`
+                WHERE id=:report AND event_id=:event AND status='validated'
+                  AND source_type='native' LIMIT 2");
+            $q->execute([':report'=>$reportId,':event'=>$eventId]);
+            $dates=$q->fetchAll(PDO::FETCH_COLUMN);
+            if(count($dates)!==1 || !is_string($dates[0]))return false;
+            $created=DateTimeImmutable::createFromFormat(
+                '!Y-m-d H:i:s',$dates[0],new DateTimeZone('UTC')
+            );
+            if($created===false || $created->format('Y-m-d H:i:s')!==$dates[0])return false;
+            return $created->getTimestamp()>=$reservedAt;
+        }catch(Throwable $error){return false;}
+    }
+
 }
