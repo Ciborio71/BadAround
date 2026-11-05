@@ -2,6 +2,7 @@
 /** Disposable QA composition test. No production SQL or report writes. */
 declare(strict_types=1);
 require_once __DIR__.'/../wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-report-composition.php';
+require_once __DIR__.'/../wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-report-bootstrap.php';
 
 $dsn=(string)getenv('BA_TEST_DB_DSN');
 if (!str_contains($dsn,'dbname=ba_identity_ci'))
@@ -27,6 +28,17 @@ class BadAround_Native_Report_Golden_Path_Service {
 class BadAround_Native_Media_Report_Adapter {
     public function submit(array $raw,string $cap):array {throw new RuntimeException('Never submit media in CI smoke');}
 }
+class BadAround_Identity_WordPress_Privacy_Notice {
+    public static bool $verified=false;
+    public static function verified_version():?string {
+        return self::$verified?'synthetic-qa-only':null;
+    }
+}
+$qaRegisteredHooks=[];
+function add_action(string $hook,$callback):void {
+    global $qaRegisteredHooks;
+    $qaRegisteredHooks[]=$hook;
+}
 final class QAComposerReceipt implements BadAround_Identity_Intake_Receipt {
     public function is_new_canonical_report(int $report,int $event):bool{return false;}
 }
@@ -43,11 +55,37 @@ define('BADAROUND_IDENTITY_QA_REPORTS_ENABLED',true);
 define('BADAROUND_IDENTITY_QA_IP_ALLOWLIST',['127.0.0.1']);
 define('BADAROUND_IDENTITY_ROOT_SECRET',str_repeat('q',64));
 $_SERVER['REMOTE_ADDR']='127.0.0.1';
+qa_comp_check(
+    BadAround_Identity_WordPress_QA_Report_Bootstrap::prepare($db,'qa_composer_')===null,
+    'private report bootstrap requires independent full runtime flag'
+);
+define('BADAROUND_IDENTITY_RUNTIME_INTEGRATION_ENABLED',true);
+qa_comp_check(
+    BadAround_Identity_WordPress_QA_Report_Bootstrap::prepare($db,'qa_composer_')===null,
+    'unreviewed notice blocks report bootstrap'
+);
+
 qa_comp_check(BadAround_Identity_WordPress_QA_Report_Composition::assemble(
     $db,$prefix,$repository,$proof
 )===null,'missing pre-intake table never auto-created');
 $db->exec(BadAround_Identity_Pre_Intake_Schema::create_sql($prefix));
 try {
+    qa_comp_check(
+        BadAround_Identity_WordPress_QA_Report_Bootstrap::prepare($db,$prefix)===null,
+        'pre-intake schema alone never bypasses privacy gate'
+    );
+    BadAround_Identity_WordPress_Privacy_Notice::$verified=true;
+    $qaController=BadAround_Identity_WordPress_QA_Report_Bootstrap::prepare($db,$prefix);
+    qa_comp_check($qaController instanceof BadAround_Identity_QA_Report_REST,
+        'private bootstrap assembles controller with all flags and synthetic notice');
+    qa_comp_check($qaRegisteredHooks===[], 'controller composition alone does not register routes');
+    qa_comp_check(
+        BadAround_Identity_WordPress_QA_Report_Bootstrap::register($qaController),
+        'private bootstrap registers only QA REST hook'
+    );
+    qa_comp_check($qaRegisteredHooks===['rest_api_init'],
+        'only REST initialization registered for private report QA');
+
     $controller=BadAround_Identity_WordPress_QA_Report_Composition::assemble(
         $db,$prefix,$repository,$proof
     );
@@ -60,6 +98,10 @@ try {
         'default persistent canonical proof composes without client-supplied receipt'
     );
     $_SERVER['REMOTE_ADDR']='192.0.2.4';
+    qa_comp_check(
+        !BadAround_Identity_WordPress_QA_Report_Bootstrap::register($qaController),
+        'registration rechecks allowlisted peer'
+    );
     qa_comp_check(BadAround_Identity_WordPress_QA_Report_Composition::assemble(
         $db,$prefix,$repository,$proof
     )===null,'non-allowlisted peer denied even with schema');
