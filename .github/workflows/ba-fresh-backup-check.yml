@@ -28,3 +28,5 @@ jobs:
           name: ba-fresh-backup-presence
           path: ba-production-backup-preflight.json
           retention-days: 3
+
+# One-shot read-only check following user backup confirmation.
