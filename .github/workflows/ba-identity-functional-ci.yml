@@ -21,6 +21,7 @@ on:
       - tests/test-ba-wordpress-qa-report-transport.php
       - tests/test-ba-wordpress-qa-report-composition-mysql.php
       - tests/test-ba-locked-canonical-reader.php
+      - tests/test-ba-wordpress-native-receipt-proof-mysql.php
   workflow_dispatch:
 concurrency:
   group: ba-identity-functional-${{ github.ref }}
@@ -54,7 +55,7 @@ jobs:
             cp "$file" "$dest/"
             count=$((count+1))
           done
-          test "$count" -eq 80
+          test "$count" -eq 81
           echo "PRODUCTION_SOURCE_TEST_OVERLAY=PASS count=$count"
       - name: Prepare PHP 8.3 with required extensions
         uses: shivammathur/setup-php@v2
@@ -300,7 +301,7 @@ jobs:
             cp "$file" "$dest/"
             count=$((count+1))
           done
-          test "$count" -eq 80
+          test "$count" -eq 81
           echo "PRODUCTION_SOURCE_TEST_OVERLAY=PASS count=$count"
       - name: Prepare PHP 8.3 with MySQL support
         uses: shivammathur/setup-php@v2
@@ -356,3 +357,6 @@ jobs:
           php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-report-composition.php
           php -l tests/test-ba-wordpress-qa-report-composition-mysql.php
           php tests/test-ba-wordpress-qa-report-composition-mysql.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-native-receipt-proof.php
+          php -l tests/test-ba-wordpress-native-receipt-proof-mysql.php
+          php tests/test-ba-wordpress-native-receipt-proof-mysql.php
