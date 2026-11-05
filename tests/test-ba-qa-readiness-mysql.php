@@ -23,8 +23,12 @@ qaReadyCheck($initial['checks']['approved_privacy_notice']===false,
     'missing approved privacy notice blocks readiness');
 qaReadyCheck($initial['checks']['qa_mail_recipients_verified']===false,
     'missing QA-only recipient allowlist blocks readiness');
-qaReadyCheck(count($initial['checks'])===10,
-    'readiness returns only ten non-sensitive boolean facts');
+qaReadyCheck($initial['checks']['registration_enabled']===false,
+    'registration must be explicitly enabled before QA can be ready');
+qaReadyCheck($initial['checks']['login_enabled']===false,
+    'login must be explicitly enabled before QA can be ready');
+qaReadyCheck(count($initial['checks'])===12,
+    'readiness returns only twelve non-sensitive boolean facts');
 $db->exec(BadAround_Identity_Pre_Intake_Schema::create_sql($prefix));
 try {
     $partial=BadAround_Identity_QA_Readiness::inspect($db,$prefix);
