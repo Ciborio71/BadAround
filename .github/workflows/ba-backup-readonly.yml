@@ -1,4 +1,4 @@
-name: BadAround private backup read-only verification
+name: BadAround backup verification and private supplement
 on:
   push:
     branches: [reconcile/identity-production-baseline-20261104]
@@ -13,7 +13,16 @@ jobs:
   inspect:
     if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[backup-readonly]')
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
+    services:
+      restore:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: ba-restore-ephemeral-only
+          MARIADB_DATABASE: ba_restore_verification
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=12
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,9 +35,11 @@ jobs:
           curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
           curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
           cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/chain.pem
-      - name: Check archive without modifying the site
+      - name: Verify archive and preserve missing private configuration
         env:
           FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
           FTP_TLS_CA_FILE: tls/chain.pem
+          BACKUP_SUPPLEMENT: '1'
+          RESTORE_CONTAINER_ID: ${{ job.services.restore.id }}
         run: python3 tools/ba_backup_readonly.py
