@@ -21,10 +21,14 @@ final class BadAround_Identity_Community_Rest_Adapter {
     public const COOKIE_NAME = '__Host-ba_identity';
     public const MAX_BODY_BYTES = 8192;
 
+    private ?Closure $revisionSnapshot;
     public function __construct(
         private BadAround_Identity_Community_Gateway $gateway,
-        private ?BadAround_Identity_Community_Rest_Budget $budget = null
-    ) {}
+        private ?BadAround_Identity_Community_Rest_Budget $budget = null,
+        ?callable $revisionSnapshot = null
+    ) {
+        $this->revisionSnapshot=$revisionSnapshot===null?null:Closure::fromCallable($revisionSnapshot);
+    }
 
     public function register_hooks(): bool {
         if (!defined('BADAROUND_IDENTITY_COMMUNITY_ENABLED')
@@ -100,9 +104,20 @@ final class BadAround_Identity_Community_Rest_Adapter {
                 $ok=$this->gateway->submit_comment($token,$csrf,$origin,
                     $event,$text,$mode,null,$now);
             } else {
-                // Server-loaded canonical snapshot is not wired. Do not take
-                // a user-supplied snapshot digest as trusted evidence.
-                return $this->error(503);
+                // Optional server composition only. Client report IDs and
+                // snapshot digests can never become ownership evidence.
+                if ($this->revisionSnapshot===null)return $this->error(503);
+                if (array_diff(array_keys($payload),['event_id','description','reason'])!==[]
+                    || !is_int($payload['event_id']??null) || $payload['event_id']<=0
+                    || !is_string($payload['description']??null)
+                    || !is_string($payload['reason']??null))return $this->error(400);
+                $snapshot=($this->revisionSnapshot)($payload['event_id']);
+                if (!is_array($snapshot) || !is_int($snapshot['report_id']??null)
+                    || $snapshot['report_id']<=0 || !is_string($snapshot['digest']??null)
+                    || !preg_match('/^[a-f0-9]{64}$/D',$snapshot['digest']))return $this->error(403);
+                $ok=$this->gateway->submit_revision($token,$csrf,$origin,
+                    $snapshot['report_id'],$payload['description'],$payload['reason'],
+                    $snapshot['digest'],$now);
             }
             return $ok ? $this->receipt() : $this->error(403);
         } catch(Throwable $error) {

@@ -47,6 +47,14 @@ final class BadAround_Identity_WordPress_Comment_Form {
             . '<p>La tua identità rimane privata. In questa fase i commenti sono anonimi.</p>'
             . '<button type="submit">Invia per moderazione</button>'
             . '</form>'
+            . '<details data-ba-revision><summary>Proponi una modifica alla tua segnalazione</summary>'
+            . '<p>Solo chi ha creato la segnalazione può richiederne una modifica. La proposta sarà sottoposta a moderazione.</p>'
+            . '<div role="status" data-ba-revision-status aria-live="polite"></div>'
+            . '<form data-ba-revision-form>'
+            . '<label>Descrizione aggiornata <textarea name="description" required minlength="10" maxlength="5000" rows="5"></textarea></label>'
+            . '<label>Motivo della modifica <textarea name="reason" maxlength="500" rows="2"></textarea></label>'
+            . '<button type="submit">Invia modifica per moderazione</button>'
+            . '</form></details>'
             . '</section>';
     }
 }
