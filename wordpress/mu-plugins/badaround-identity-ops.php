@@ -121,3 +121,31 @@ add_action('rest_api_init',static function(){
         },
     ]);
 });
+
+/** Administrative media observations; no configuration, upload or admission writes. */
+add_action('rest_api_init',static function(){
+ register_rest_route('badaround-ops/v1','/media-readiness',[
+  'methods'=>'GET','permission_callback'=>static function(){return current_user_can('manage_options');},
+  'callback'=>static function(){
+   global $wpdb;
+   $facts=['config_defined'=>defined('BADAROUND_NATIVE_MEDIA_CONFIG'),'classes_loaded'=>class_exists('BadAround_Native_Media_Config')];
+   if($facts['classes_loaded']){
+    $c=new BadAround_Native_Media_Config();
+    $s=new BadAround_Native_Media_Storage($c);
+    $facts['enabled']=$c->enabled();
+    foreach(['enabled','hosting_verified','temporary_budget','archive_budget'] as $k)$facts['settings'][$k]=$c->get($k);
+    $facts['active_key_valid']=(bool)$c->key($c->get('active_key_id'));
+    $facts['private_root_valid']=(bool)$s->root();
+    $legacy=defined('BADAROUND_PRIVATE_MEDIA_PATH')?BADAROUND_PRIVATE_MEDIA_PATH:dirname(rtrim(ABSPATH,'/')).'/badaround-private-media';
+    $legacy=apply_filters('badaround_private_media_path',$legacy);
+    $facts['legacy_archive_matches']=is_string($legacy)&&$s->root()&&realpath($legacy)===$s->root();
+    $facts['upload_limits']=['upload_max_filesize'=>ini_get('upload_max_filesize'),'post_max_size'=>ini_get('post_max_size'),'max_file_uploads'=>ini_get('max_file_uploads')];
+    $facts['process_functions']=['proc_open'=>function_exists('proc_open'),'proc_terminate'=>function_exists('proc_terminate')];
+    foreach(['decoder_php_binary','decoder_gd_extension','decoder_posix_extension'] as $k){$p=$c->get($k);$facts['decoder_files'][$k]=is_string($p)&&is_file($p)&&((fileperms($p)&0022)===0);}
+    $facts['supported_codecs']=(new BadAround_Native_Media_Validator($c))->codecs();
+    $facts['ready']=(new BadAround_Native_Media_Service($c))->ready();
+   }
+   $r=new WP_REST_Response($facts,200);$r->header('Cache-Control','private, no-store, max-age=0');return $r;
+  }
+ ]);
+});
