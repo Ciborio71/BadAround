@@ -384,3 +384,12 @@ a.ba-home-category-card:hover,a.ba-home-category-card:focus-visible { transform:
 }
 
 .ba-home .ba-home-display-heading--sentinel { margin:48px 0 22px; }
+
+/* HOME-H1-02 — larger wordmark on wide desktops; existing tablet/mobile rules retained. */
+@media (min-width:1440px) {
+  .ba-home-hero__content h1 { font-size:108px; }
+  @supports (font-size:1cqi) {
+    .ba-home-hero__content { container-type:inline-size; }
+    .ba-home-hero__content h1 { font-size:clamp(3rem,20cqi,108px); }
+  }
+}
