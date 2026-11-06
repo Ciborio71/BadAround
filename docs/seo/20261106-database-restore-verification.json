@@ -1,0 +1,23 @@
+{
+  "restore_exit_code": 0,
+  "live_database_modified": false,
+  "transport": "MariaDB offline bootstrap; no network",
+  "restored_tables": 59,
+  "tables_row_counts_match": true,
+  "row_count_mismatches": 0,
+  "total_restored_rows": 44578,
+  "literal_chunk_semantics": true,
+  "event_status_counts": {
+    "publish": 23,
+    "pending": 62
+  },
+  "counts": {
+    "reports": 85,
+    "report_media": 5,
+    "identities": 1,
+    "identity_sessions": 1,
+    "identity_intents": 3
+  },
+  "dump_sha256": "1ee92d07380d0a81b9835ac1ae0ee57a5203ff38d51caae0fb762b5b793a902c",
+  "restore_result": "PASS"
+}

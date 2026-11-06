@@ -36,3 +36,7 @@ Prima del reset occorrono:
 
 Stato live riconfermato: branch e rilascio SEO precedenti coerenti; 62 eventi pending e 23 pubblicati; zero invii media nel nuovo flusso Identity e zero eventi già marcati con il nuovo contratto SEO.
 Nessun reset è stato eseguito.
+
+
+## Aggiornamento — dump separato ricevuto e ripristino verificato
+Il blocco relativo al dump separato è risolto: prova di ripristino isolata PASS, 59 tabelle e 44.578 righe con zero differenze nei conteggi. Vedere [rapporto di ripristino](20261106-database-restore-verification.md). Il collaudo live e il reset restano fasi successive.
