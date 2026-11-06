@@ -40,3 +40,12 @@ Questa consegna aggiorna il precedente stato del 6 novembre: sono stati implemen
 - Il browser automatizzato non è stato usato per certificare questa versione: il collaudo browser è stato rinviato esplicitamente all'utente.
 - La policy adottata resta quella per il collaudo. Prima dell'apertura al pubblico occorre l'informativa definitiva con la revisione già prevista dal titolare.
 - Nessuna cancellazione o reset dei dati reali, nessuna nuova tabella e nessuna attivazione pubblica sono richiesti dal deploy di sviluppo.
+
+## Esito del rilascio di sviluppo
+
+- Codice: `d2d451376f495d2e770fc7476f24674f491d15c3`.
+- [CI e deploy 42143621658](https://github.com/Ciborio71/BadAround/actions/runs/42143621658): PASS, inclusi i job PHP, MySQL e deploy protetto.
+- Confrontata la baseline di 85 moduli, installato il candidato con 86 moduli e l'estensione del Publication Service. Entrypoint Core, configurazione di attivazione e schema DB invariati; backup verificati.
+- Verifica dopo il deploy: report #85 ancora `validated`, evento #392 ancora `pending`, associazione `linked` e un solo creatore attivo.
+- Smoke esterno: Home, wizard e pagina QA restano in manutenzione (503); discovery risponde 200; il nuovo endpoint personale rimane bloccato dall'esterno. Nessun errore PHP fatale rilevato nelle risposte controllate.
+- Nessun collaudo browser di questa versione viene dichiarato eseguito.
