@@ -142,6 +142,8 @@ add_action('rest_api_init',static function(){
     $facts['upload_limits']=['upload_max_filesize'=>ini_get('upload_max_filesize'),'post_max_size'=>ini_get('post_max_size'),'max_file_uploads'=>ini_get('max_file_uploads')];
     $facts['process_functions']=['proc_open'=>function_exists('proc_open'),'proc_terminate'=>function_exists('proc_terminate')];
     foreach(['decoder_php_binary','decoder_gd_extension','decoder_posix_extension'] as $k){$p=$c->get($k);$facts['decoder_files'][$k]=is_string($p)&&is_file($p)&&((fileperms($p)&0022)===0);}
+    $facts['runtime_paths']=['php_binary'=>PHP_BINARY,'extension_dir'=>ini_get('extension_dir'),'open_basedir'=>ini_get('open_basedir')];
+    foreach(['/opt/plesk/php/8.3/bin/php','/opt/plesk/php/8.3/lib/php/modules/gd.so','/opt/plesk/php/8.3/lib/php/modules/posix.so','/usr/bin/php','/usr/bin/php8.3'] as $p)$facts['candidate_paths'][$p]=is_file($p);
     $facts['supported_codecs']=(new BadAround_Native_Media_Validator($c))->codecs();
     $facts['ready']=(new BadAround_Native_Media_Service($c))->ready();
    }
