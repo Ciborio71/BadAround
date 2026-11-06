@@ -19,13 +19,19 @@ final class BadAround_Performance_Observer {
                 $request=new WP_REST_Request('GET','/badaround-ops/v1/event-details/'.$id);$request->set_query_params(['render'=>'1']);
                 $render=rest_do_request($request);$data=$render->get_data();
                 $elapsed=round((microtime(true)-$start)*1000,1);$plugins=self::$plugins;usort($plugins,static fn($a,$b)=>$b['interval_ms']<=>$a['interval_ms']);
+                $opcache=function_exists('opcache_get_status')?@opcache_get_status(false):null;
+                $opcache_ini=ini_get('opcache.enable');
                 $response=new WP_REST_Response([
                     'scope'=>'Authenticated diagnostic request; body-render timing excludes initial bootstrap and browser/network rendering.',
                     'stages'=>self::$stages,'plugin_load_intervals'=>array_slice($plugins,0,8),'external_requests'=>self::$http,
                     'body_render_ms'=>$elapsed,'body_render_queries'=>$wpdb->num_queries-$before,'body_bytes'=>strlen($data['public_html']??''),'render_status'=>$render->get_status(),
                     'query_monitor_loaded'=>class_exists('QueryMonitor',false),'savequeries'=>defined('SAVEQUERIES')&&SAVEQUERIES,
-                    'external_object_cache'=>wp_using_ext_object_cache(),'wp_cache_flag'=>defined('WP_CACHE')&&WP_CACHE,
-                    'opcache_enabled'=>function_exists('opcache_get_status')&&(bool)(opcache_get_status(false)['opcache_enabled']??false),
+                    'external_object_cache'=>(bool)wp_using_ext_object_cache(),'wp_cache_flag'=>defined('WP_CACHE')&&WP_CACHE,
+                    'opcache_extension_loaded'=>extension_loaded('Zend OPcache'),
+                    'opcache_ini_enabled'=>$opcache_ini===false?null:(bool)(int)$opcache_ini,
+                    'opcache_status_available'=>is_array($opcache),
+                    'opcache_restrict_api_configured'=>(string)ini_get('opcache.restrict_api')!=='',
+                    'opcache_enabled'=>is_array($opcache)?(bool)($opcache['opcache_enabled']??false):null,
                 ],200);$response->header('Cache-Control','private, no-store');return $response;
             }
         ]);});
