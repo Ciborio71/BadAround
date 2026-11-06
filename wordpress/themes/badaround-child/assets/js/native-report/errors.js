@@ -2,7 +2,7 @@
   'use strict';
   const ns = root.BadAroundNative = root.BadAroundNative || {};
   const messages = {
-    identity_required:'Accedi al tuo account nel modulo in alto, poi riprova lo stesso invio.',
+    identity_required:'Riprova l’invio per confermare la tua email. I dati inseriti sono conservati.',
     identity_pending:'La verifica dell’invio è ancora in corso. Attendi e riprova lo stesso invio, senza crearne uno nuovo.',
     identity_submission_failed:'Non è possibile confermare l’invio. Se il problema persiste, contatta BadAround prima di crearne un altro.',
     invalid_public_radius:'Scegli un raggio tra 50 m, 100 m, 250 m, 500 m e 1 km.',

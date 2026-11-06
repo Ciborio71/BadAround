@@ -49,7 +49,8 @@ final class BadAround_Identity_Pre_Intake_Schema {
         if ($name->fetchColumn()!=='InnoDB')return false;
         $columns=$db->prepare("SELECT COLUMN_NAME,DATA_TYPE,IS_NULLABLE
             FROM information_schema.COLUMNS
-            WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=:table");
+            WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=:table
+            ORDER BY ORDINAL_POSITION");
         $columns->execute([':table'=>$table]);
         $actual=[];
         foreach($columns->fetchAll(PDO::FETCH_ASSOC) as $row)
