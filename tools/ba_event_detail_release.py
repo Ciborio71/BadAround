@@ -9,12 +9,13 @@ FILES=['plugins/badaround-core/includes/class-badaround-event-public-details.php
        'plugins/badaround-core/includes/class-badaround-publication-service.php',
        'plugins/badaround-core/includes/class-badaround-event-seo.php',
        'themes/badaround-child/template-parts/single-event-layout.php',
-       'themes/badaround-child/assets/css/pages.css']
+       'themes/badaround-child/assets/css/pages.css',
+       'plugins/badaround-core/includes/class-badaround-contribution-service.php']
 guard.FILES=FILES
 def main():
     prior={n:(ROOT/'prior-source/wordpress'/n).read_bytes() if (ROOT/'prior-source/wordpress'/n).exists() else None for n in FILES}
     candidate={n:(ROOT/'wordpress'/n).read_bytes() for n in FILES}
-    css=FILES[-1]
+    css='themes/badaround-child/assets/css/pages.css'
     if not candidate[css].startswith(prior[css]):raise RuntimeError('Unscoped CSS rewrite')
     ftp=ftplib.FTP_TLS(context=ssl.create_default_context(cafile=os.environ['FTP_TLS_CA_FILE']),timeout=45)
     try:

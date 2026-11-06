@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: 55b4078ab8247c18cfbc7c7629682fb0e0a15014
+          ref: 7759688cdf7033e7b7798856e2630e636a492ea7
           path: prior-source
           persist-credentials: false
       - name: Verify publication, GEO, privacy and detail projection
@@ -34,6 +34,7 @@ jobs:
           php -l wordpress/plugins/badaround-core/includes/class-badaround-event-public-details.php
           php -l wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
           php -l wordpress/plugins/badaround-core/includes/class-badaround-event-seo.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-contribution-service.php
           php -l wordpress/themes/badaround-child/template-parts/single-event-layout.php
           python3 -m unittest discover -s tests -p test_ba_event_seo_release.py
           python3 -m py_compile tools/ba_event_detail_release.py

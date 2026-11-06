@@ -79,12 +79,13 @@ final class BadAround_Event_Public_Details {
     }
     private static function render_preview($id){
         if(get_post_status($id)!=='publish')return '';
-        global $wp_query,$post;$saved_query=$wp_query;$saved_post=$post;
+        global $wp_query,$post;$saved_query=$wp_query;$saved_post=$post;$buffer_level=ob_get_level();
         ob_start();
         try{$wp_query=new WP_Query(['post_type'=>'ba_evento','p'=>$id,'post_status'=>'publish']);get_template_part('template-parts/single-event-layout');return ob_get_clean();}
-        finally{$wp_query=$saved_query;$post=$saved_post;}
+        finally{while(ob_get_level()>$buffer_level)ob_end_clean();$wp_query=$saved_query;$post=$saved_post;}
     }
     public static function register_hooks(){
+        add_filter('badaround_event_contribution_heading',static function($heading,$id){$p=self::view($id);if(!empty($p['seeking_witnesses'])&&!in_array(get_post_meta($id,'_ba_event_status',true),['resolved','closed','archived','expired'],true)){ $seo=BadAround_Event_SEO::project($id);if(!is_wp_error($seo))return $seo['witness_heading'];}return $heading;},10,2);
         add_action('badaround_event_published',static function($id){add_action('shutdown',static function()use($id){self::published($id);});});
         add_action('add_meta_boxes_ba_evento',static function(){add_meta_box('ba-public-details','Dettagli pubblici del wizard',[__CLASS__,'box'],'ba_evento','normal','default');});
         add_action('admin_post_ba_public_details',static function(){

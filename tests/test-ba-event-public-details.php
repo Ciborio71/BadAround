@@ -20,6 +20,7 @@ check(!is_wp_error($result)&&$result['address']===''&&$result['seeking_witnesses
 $result=BadAround_Event_Public_Details::approve(9300,$p['source_hash'],true,true,true);
 check(!is_wp_error($result)&&$result['address']==='Private Address 99'&&isset($result['facts']['vehicle.distinctive_features']),'explicit exact address and reviewed text approved');
 check($svc->apply_public_details(9300,get_post_meta(9300,BadAround_Event_Public_Details::META,true),$p['source_hash'])===true,'authorized structured address passes owning publication validator');
+check(apply_filters('badaround_event_contribution_heading','generic',9300)!=='generic','witness request uses the existing contribution heading');
 $GLOBALS['posts'][9300]->post_content.=' Private Address 99';
 check(is_wp_error($svc->apply_public_details(9300,get_post_meta(9300,BadAround_Event_Public_Details::META,true),$p['source_hash'])),'address authorization does not allow private address in prose');
 $GLOBALS['posts'][9300]->post_content=str_replace(' Private Address 99','',$GLOBALS['posts'][9300]->post_content);

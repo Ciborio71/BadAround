@@ -69,7 +69,7 @@ class BadAround_Contribution_Service {
 		);
 
 		echo '<section class="ba-card ba-event-section ba-contribution-box" id="contribuisci">';
-		echo '<div class="ba-contribution-cta"><div><h2>Sai qualcosa su questa segnalazione?</h2>';
+		echo '<div class="ba-contribution-cta"><div><h2>'.esc_html(apply_filters('badaround_event_contribution_heading','Sai qualcosa su questa segnalazione?',$event_id)).'</h2>';
 		echo '<p>Anche un piccolo dettaglio può essere utile. Puoi contribuire pubblicamente oppure inviare informazioni in forma riservata.</p></div>';
 		echo '<button type="button" class="ba-button ba-button--primary" data-ba-contribution-open aria-expanded="false">Condividi un’informazione</button></div>';
 

@@ -139,6 +139,7 @@ final class BadAround_Event_SEO {
         if($detail){$intro.=' Veicolo: '.$detail.'.';}
         $color=self::text(get_post_meta($id,'_ba_vehicle_color',true));
         if($detail&&$color){$intro.=' Colore: '.lcfirst($color).'.';}
+        if($key==='vehicle_stolen'){$intro=($detail?$detail.($color?', colore '.lcfirst($color):'').': segnalazione di furto':'Segnalazione di furto di un veicolo').' a '.$municipality.'.';}
         if(!empty($public_details['seeking_witnesses'])&&!in_array($state,array('resolved','closed','archived','expired'),true)){$intro.=' L’autore cerca testimoni o informazioni utili.';}
         $date = (string)get_post_meta($id,'_ba_occurred_date',true);
         if ( preg_match('/^\d{4}-\d{2}-\d{2}$/D',$date) ) {
@@ -148,7 +149,7 @@ final class BadAround_Event_SEO {
         return array('h1'=>$h1, 'title'=>$h1.' | BadAround',
             'description'=>$intro.' Consulta i dettagli pubblici della segnalazione su BadAround.',
             'intro'=>$intro, 'heading'=>$detail?'Caratteristiche del veicolo '.$detail:$template[2],
-            'prose_heading'=>'Dettagli della segnalazione',
+            'prose_heading'=>in_array($key,array('vehicle_stolen','vehicle_parts_stolen','property_theft'),true)?'Dettagli della segnalazione di furto':'Dettagli: '.lcfirst($template[0]),
             'location_heading'=>'Luogo e periodo della segnalazione a '.$municipality,
             'witness_heading'=>$detail?'Hai visto questo '.$detail.'?':'Hai informazioni su questa segnalazione?',
             'slug'=>sanitize_title($template[1].'-'.$municipality.($detail?'-'.$detail:'')));

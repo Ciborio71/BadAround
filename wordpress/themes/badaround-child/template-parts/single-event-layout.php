@@ -76,6 +76,7 @@ if(!$event_when && !empty($time_details['date']))$event_when=implode('/',array_r
 if(($time_details['knowledge']??'')==='range'&&!empty($time_details['range_start'])&&!empty($time_details['range_end']))$event_when.=' · tra le '.$time_details['range_start'].' e le '.$time_details['range_end'];
 if(!$event_when && !empty($time_details['approximate_period']))$event_when=$time_details['approximate_period']==='unknown'?'Periodo non specificato':(function_exists('badaround_native_report_option_label')?badaround_native_report_option_label('time.approximate_period',$time_details['approximate_period']):'Periodo indicativo');
 if(!empty($time_details['approximate_period'])&&$time_details['approximate_period']!=='unknown'&&!empty($time_details['reference_date'])&&preg_match('/^\d{4}-\d{2}-\d{2}$/D',$time_details['reference_date']))$event_when.=' (rispetto alla segnalazione del '.implode('/',array_reverse(explode('-',$time_details['reference_date']))).')';
+if(!$event_when&&($time_details['mode']??'')==='unknown')$event_when='Data e orario non specificati';
 $seeking_witnesses=!empty($public_details['seeking_witnesses'])&&!in_array($event_status,array('resolved','closed','archived','expired'),true);
 $public_address=$public_details['address']??'';
 
@@ -272,7 +273,6 @@ if ( $status ) {
 						</dl>
 					</section>
 				<?php endif; ?>
-				<?php if($seeking_witnesses): ?><section class="ba-card ba-event-section ba-event-witness-callout"><h2><?php echo esc_html($event_seo['witness_heading']??'Hai informazioni su questa segnalazione?'); ?></h2><p>L’autore cerca testimoni. Se hai assistito all’evento o disponi di informazioni utili, puoi inviare un contributo tramite BadAround.</p><a class="ba-button" href="#contribuisci">Fornisci informazioni utili</a><p>Non inserire recapiti o altri dati personali nei commenti pubblici.</p></section><?php endif; ?>
                 <?php if ( class_exists( 'BadAround_Contribution_Service' ) ) { BadAround_Contribution_Service::render_event_contribution_block( $post_id ); } ?>
 			</div>
 
