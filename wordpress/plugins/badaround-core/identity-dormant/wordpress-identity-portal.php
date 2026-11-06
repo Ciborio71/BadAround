@@ -75,6 +75,7 @@ final class BadAround_Identity_WordPress_Portal {
             . '<h2 data-ba-portal-title>Accedi a BadAround</h2>'
             . '<p data-ba-portal-intro>Un solo codice numerico a 6 cifre per accedere o completare il primo accesso. Non occorre una password.</p>'
             . $notice
+            . '<p><a href="'.$privacy.'">Leggi l’informativa privacy</a></p>'
             . '<div role="status" data-ba-result aria-live="polite"></div>'
             . '<div data-ba-access-entry></div>'
             . '<section data-ba-activity hidden aria-labelledby="ba-identity-my-activity-title">'
