@@ -79,7 +79,7 @@ final class BadAround_Report_Otp_Service {
     }
     public function confirm(string $challengeId,string $code,int $now):bool {
         if(!preg_match('/^[a-f0-9]{32}$/D',$challengeId)
-            || !preg_match('/^[0-9]{8}$/D',$code)||$now<=0)return false;
+            || !preg_match('/^(?:[0-9]{6}|[0-9]{8})$/D',$code)||$now<=0)return false;
         try {
             return $this->store->verify_once(
                 $challengeId,

@@ -17,7 +17,10 @@ require_once __DIR__.'/wordpress-private-access.php';
 require_once __DIR__.'/wordpress-session-cookie.php';
 
 final class BadAround_Identity_QA_Report_Transport {
-    public function __construct(private BadAround_Identity_Pre_Reserved_Intake $intake) {}
+    private ?Closure $matchesEmail;
+    public function __construct(private BadAround_Identity_Pre_Reserved_Intake $intake,?callable $matchesEmail=null) {
+        $this->matchesEmail=$matchesEmail===null?null:Closure::fromCallable($matchesEmail);
+    }
 
     /** Return opaque state only; never private IDs, identity, email or token. */
     public function process(
@@ -40,6 +43,10 @@ final class BadAround_Identity_QA_Report_Transport {
         $name=BadAround_Identity_WordPress_Session_Cookie::NAME;
         $token=$serverCookies[$name]??null;
         if (!is_string($token))return ['state'=>'denied'];
+        if ($this->matchesEmail!==null) {
+            $email=$validatedCanonical['reporter']['email']??null;
+            if (!is_string($email)||($this->matchesEmail)($token,$email,$now)!==true)return ['state'=>'denied'];
+        }
 
         $outcome=$this->intake->execute($token,$submission,$trustedNativeSubmit,$now);
         $state=$outcome['state']??'pending';

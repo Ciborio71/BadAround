@@ -81,6 +81,14 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
                     $db,$prefix.'ba_identity_sessions'
                 ),hash_hmac('sha256','BA-ID-01H:sessions',$key,true)
             );
+            require_once __DIR__.'/wordpress-access-rest.php';
+            $accessQuota=new BadAround_Identity_Issuance_Quota_Adapter(
+                new BadAround_Identity_Mysql_Rate_Limiter($db,$prefix.'ba_identity_rate_limits'),
+                hash_hmac('sha256','BA-ID-ACCESS:quota',$key,true));
+            $accessService=new BadAround_Identity_Unified_Access($db,$prefix,$key,$privacy,$accessQuota,
+                new BadAround_Identity_Transport_Adapter($mailer),$sessions);
+            $accessApi=new BadAround_Identity_WordPress_Access_REST($accessService,$sessions,
+                new BadAround_Identity_WordPress_Session_Cookie(new BadAround_Identity_Native_Cookie_Writer()),$origin);
             $csrf=hash_hmac('sha256','BA-ID-01H:csrf',$key,true);
             $login=new BadAround_Identity_WordPress_Login_REST(
                 $issuer,
@@ -121,6 +129,7 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
             if ($qaReport!==null
                 && !BadAround_Identity_WordPress_QA_Report_Bootstrap::register($qaReport))
                 return false;
+            $accessApi->register_hooks();
             $registration->register_hooks();
             $login->register_hooks();
             $sessionApi->register_hooks();
@@ -155,6 +164,7 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
         $routes=[
             '/badaround/v1/identity/register/start','/badaround/v1/identity/register/verify',
             '/badaround/v1/identity/login/start','/badaround/v1/identity/login/verify',
+            '/badaround/v1/identity/access/start','/badaround/v1/identity/access/verify','/badaround/v1/identity/access/check',
             '/badaround/v1/identity/session','/badaround/v1/identity/logout',
             '/badaround/v1/identity/my-activity','/badaround/v1/identity/my-reports','/badaround/v1/community-comments',
             '/badaround/v1/community-revisions','/badaround-identity-qa/v1/reports',

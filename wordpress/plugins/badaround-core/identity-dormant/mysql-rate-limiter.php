@@ -26,7 +26,7 @@ final class BadAround_Identity_Mysql_Rate_Limiter {
      * Bucket must be an opaque SHA-256 digest, never PII.
      */
     public function consume(string $purpose, string $bucket, int $now, int $limit, int $window): bool {
-        if (!in_array($purpose, ['login','enrollment','verification'], true)
+        if (!in_array($purpose, ['login','enrollment','verification','access'], true)
             || !preg_match('/^[a-f0-9]{64}$/D', $bucket)
             || $now <= 0 || $limit < 1 || $limit > 100 || $window < 60 || $window > 86400) {
             throw new InvalidArgumentException('Invalid rate-limit input');
@@ -65,7 +65,7 @@ final class BadAround_Identity_Mysql_Rate_Limiter {
     }
 
     public static function bucket(string $purpose, string $type, string $value, string $serverKey): string {
-        if (!in_array($purpose, ['login','enrollment','verification'],true)
+        if (!in_array($purpose, ['login','enrollment','verification','access'],true)
             || !in_array($type, ['email','ip'],true) || $value === '') {
             throw new InvalidArgumentException('Invalid rate limit dimensions');
         }

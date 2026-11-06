@@ -83,7 +83,14 @@ final class BadAround_Identity_WordPress_QA_Report_Composition {
                 return (new BadAround_Native_Report_Golden_Path_Service())->submit($raw);
             };
             return new BadAround_Identity_QA_Report_REST(
-                new BadAround_Identity_QA_Report_Transport($intake),$validate,$native
+                new BadAround_Identity_QA_Report_Transport($intake,static function(string $token,string $email,int $now) use($db,$prefix,$sessions,$active):bool {
+                    $identity=$sessions->identity_for($token,$now);
+                    if($identity===null||!$active->is_active_verified($identity))return false;
+                    try{$email=BadAround_Identity_Challenge_Primitives::normalize_email($email);}catch(Throwable $e){return false;}
+                    $lookup=BadAround_Identity_Challenge_Primitives::digest('email','lookup',$email,BADAROUND_IDENTITY_ROOT_SECRET);
+                    $q=$db->prepare("SELECT identity_id FROM `{$prefix}ba_identities` WHERE identity_id=? AND email_lookup=? AND verified_at>0 AND revoked_at IS NULL");
+                    $q->execute([$identity,$lookup]);return $q->fetchColumn()===$identity;
+                }),$validate,$native
             );
         } catch(Throwable $error) {
             return null;

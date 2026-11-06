@@ -15,8 +15,8 @@ final class BadAround_Identity_Transport_Adapter implements BadAround_Identity_O
         }
     }
     public function send_code(string $email,string $code,string $purpose): bool {
-        if (!in_array($purpose,['enrollment','login','verification'],true)
-            || !preg_match('/^[0-9]{8}$/D',$code)
+        if (!in_array($purpose,['enrollment','login','verification','access'],true)
+            || !preg_match('/^(?:[0-9]{6}|[0-9]{8})$/D',$code)
             || !filter_var($email,FILTER_VALIDATE_EMAIL)) {
             return false;
         }

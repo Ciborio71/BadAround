@@ -9,7 +9,7 @@ const html = execFileSync(process.env.BA_PHP || 'php',[path.join(__dirname,'nati
 function create(responseFactory) {
   const dom = new JSDOM(html,{url:'https://staging.badaround.it/segnala-un-evento/?native_report=1',runScripts:'outside-only'});
   const {window} = dom, requests = [];
-  window.AbortController = AbortController;
+  window.AbortController = AbortController;window.scrollTo=()=>{};
   window.fetch = async (url,options) => { requests.push({url,options});return responseFactory(JSON.parse(options.body),requests.length); };
   for (const file of ['model','api','errors','wizard']) window.eval(fs.readFileSync(path.join(__dirname,'../wordpress/themes/badaround-child/assets/js/native-report',file+'.js'),'utf8'));
   const doc=window.document, root=doc.querySelector('[data-native-report]');
@@ -44,12 +44,13 @@ for (const [mode,label] of [['exact_point','Punto esatto'],['approximate_area','
     assert.equal(h.model.step,5);
     const review=h.doc.querySelector('[data-native-review]');
     const request=[...review.querySelectorAll('dt')].find(node=>node.textContent==='Posizione pubblica richiesta');
-    assert(request);assert.equal(request.nextElementSibling.textContent,label);
+    assert(request);assert.equal(request.nextElementSibling.textContent,label+(mode==='approximate_area'?' — circa 500 m':''));
     assert(review.textContent.includes('Indirizzo e civico restano riservati. La rappresentazione pubblica della posizione sarà valutata dalla moderazione.'));
     assert(!/La posizione pubblica sarà approssimata|La posizione sarà pubblicata esattamente/i.test(review.textContent));
     assert.equal(h.model.publicLocationRequest,mode);
-    assert.equal(h.model.payload().location.public_location_request,mode);
-    assert.equal(h.model.payload().location.public_location_request_version,'public-location-request-v1');
+    assert.equal(h.model.payload().location.public_location_request.mode,mode);
+    if(mode==='approximate_area')assert.equal(h.model.payload().location.public_location_request.radius_m,500);
+    assert.equal(h.model.payload().location.public_location_request_version,'public-location-request-v2');
     assert.equal(JSON.stringify(h.model.values),values);
     assert.equal(JSON.stringify(h.model.payload()),before);
     assert.equal(h.requests.length,0);h.dom.window.close();

@@ -40,7 +40,7 @@ $sessionStore=new BadAround_Identity_Session_Memory_Store();
 $sessions=new BadAround_Identity_Sessions($sessionStore,str_repeat('K',32));
 $identity='identity_12345678';$token=$sessions->issue($identity,100);
 $status=new BadAround_Identity_Active_Memory_Status();$status->active[$identity]=true;
-$transport=new BadAround_Identity_QA_Report_Transport(new BadAround_Identity_Pre_Reserved_Intake(
+$transport=new BadAround_Identity_QA_Report_Transport($intake=new BadAround_Identity_Pre_Reserved_Intake(
     new BadAround_Identity_Native_Intake_Gate($sessions,$status),
     new BadAround_Identity_Pre_Intake_Reservation(new QaPreStore()),
     new QaCanonical(),
@@ -171,5 +171,11 @@ qaAssert($repeat->status===409 && $nativeCalls===1,'replay does not re-submit ca
 $_SERVER['REMOTE_ADDR']='192.0.2.22';
 $blocked=$rest->submit($request);
 qaAssert($blocked->status===403 && $nativeCalls===1,'IP allowlist rechecked per request');
+// Use the fixture's explicitly authorized peer, not a forwarded header.
+$_SERVER['REMOTE_ADDR']=BADAROUND_IDENTITY_QA_IP_ALLOWLIST[0];
+$strictTransport=new BadAround_Identity_QA_Report_Transport($intake,static fn($secret,$email,$now)=>false);
+$before=$nativeCalls;
+$strict=$strictTransport->process(['submission_id'=>'123e4567-e89b-42d3-a456-426614174088','reporter'=>['email'=>'other@example.invalid']],static function()use(&$nativeCalls){$nativeCalls++;return [];},[BadAround_Identity_WordPress_Session_Cookie::NAME=>$token],106);
+qaAssert($strict===['state'=>'denied']&&$nativeCalls===$before,'different verified mailbox rejected before native write');
 echo 'ALL_WORDPRESS_QA_REPORT_REST_TESTS_PASS'.PHP_EOL;
 

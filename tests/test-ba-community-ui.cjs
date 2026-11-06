@@ -6,7 +6,7 @@ const source=name=>fs.readFileSync(path.join(__dirname,'../wordpress/plugins/bad
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 const json=(body,status=200)=>({ok:status>=200&&status<300,status,json:async()=>body});
 const portal=`<section data-ba-identity-portal><div data-ba-result></div>
-<form data-ba-form="register"></form><form data-ba-form="login"></form><form data-ba-form="otp"><input name="code"></form>
+<h2 data-ba-portal-title></h2><p data-ba-portal-intro></p><div data-ba-access-entry></div>
 <button data-ba-logout>Esci</button><section data-ba-activity><button data-ba-refresh-activity>Aggiorna</button>
 <ul data-ba-activity-list></ul><ul data-ba-reports-list></ul></section></section>`;
 test('personal reports are rendered as text, foreign links are discarded and revision sends only intent data',async()=>{
@@ -19,6 +19,7 @@ test('personal reports are rendered as text, foreign links are discarded and rev
    {event_id:393,title:'Titolo pubblico',status:'published',url:'https://example.invalid/foreign',can_propose_revision:false}]});
   if(url.endsWith('/community-revisions'))return json({status:'pending_moderation'});
   throw new Error('Unexpected endpoint');};
+ w.BadAroundAccess={mount:()=>{},updateSession:()=>{}};
  w.eval(source('identity-portal.js'));await tick();await tick();
  const list=w.document.querySelector('[data-ba-reports-list]');
  assert.match(list.textContent,/<img/);assert.equal(list.querySelectorAll('img,a').length,0);

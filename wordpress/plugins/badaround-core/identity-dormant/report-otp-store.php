@@ -46,7 +46,7 @@ final class BadAround_Report_Otp_Store {
         }
         $lookup=$this->lookup($email);
         $id=bin2hex(random_bytes(16));
-        $code=str_pad((string)random_int(0,99999999),8,'0',STR_PAD_LEFT);
+        $code=str_pad((string)random_int(0,999999),6,'0',STR_PAD_LEFT);
         $q=$this->db->prepare("INSERT INTO `{$this->table}`
             (challenge_id,submission_id,email_lookup,code_digest,purpose,
              created_at,expires_at,attempts,verified_at,consumed_at,version)
@@ -75,7 +75,7 @@ final class BadAround_Report_Otp_Store {
                 || $now>=(int)$row['expires_at'] || (int)$row['attempts']>=5) {
                 $this->db->rollBack();return false;
             }
-            $valid=preg_match('/^[0-9]{8}$/D',$code)===1
+            $valid=preg_match('/^(?:[0-9]{6}|[0-9]{8})$/D',$code)===1
                 && hash_equals($row['code_digest'],$this->digest($challengeId,$code));
             $stmt=$this->db->prepare("UPDATE `{$this->table}`
                 SET attempts=attempts+1,verified_at=:verified,version=version+1

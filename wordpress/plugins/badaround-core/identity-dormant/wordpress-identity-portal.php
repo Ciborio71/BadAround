@@ -36,11 +36,18 @@ final class BadAround_Identity_WordPress_Portal {
     public static function enqueue_feedback():void {
         if (!self::enabled() || !defined('BADAROUND_CORE_FILE')
             || !function_exists('wp_enqueue_style') || !function_exists('plugins_url'))return;
+        wp_enqueue_script('badaround-identity-access',plugins_url('identity-dormant/identity-access.js',BADAROUND_CORE_FILE),[],'1.0.0',true);
         wp_enqueue_style('badaround-identity-feedback',
-            plugins_url('identity-dormant/identity-feedback.css',BADAROUND_CORE_FILE),[],'0.1.0');
+            plugins_url('identity-dormant/identity-feedback.css',BADAROUND_CORE_FILE),[],'1.0.0');
     }
     public static function enqueue_admin_feedback():void {
         if (($_GET['page']??null)==='ba-identity-review')self::enqueue_feedback();
+    }
+
+    public static function render_notice():string {
+        if (!self::enabled() || !BadAround_Identity_WordPress_Privacy_Notice::qa_mode())return '';
+        $record=BadAround_Identity_WordPress_Privacy_Notice::qa_record();
+        return $record===null?'':'<details id="ba-identity-qa-notice"><summary>Informativa del collaudo riservato</summary>'.wp_kses_post($record['content']).'</details>';
     }
 
     public static function render():string {
@@ -54,7 +61,7 @@ final class BadAround_Identity_WordPress_Portal {
         // External JavaScript only. Do not inline tokens, WP nonces, email,
         // raw passwordless bearer secrets or user profile data.
         $script=plugins_url('identity-dormant/identity-portal.js',BADAROUND_CORE_FILE);
-        wp_enqueue_script('badaround-identity-portal',$script,[], '0.3.0',true);
+        wp_enqueue_script('badaround-identity-portal',$script,['badaround-identity-access'], '1.0.0',true);
         $privacy=esc_url(home_url('/privacy-policy/'));
         $notice='';
         if (BadAround_Identity_WordPress_Privacy_Notice::qa_mode()) {
@@ -65,30 +72,11 @@ final class BadAround_Identity_WordPress_Portal {
                 . wp_kses_post($record['content']).'</details>';
         }
         return '<section class="ba-identity-portal" data-ba-identity-portal aria-label="Accesso BadAround">'
-            . '<h2>Accedi a BadAround</h2>'
-            . '<p>Utilizziamo un codice temporaneo inviato via email. Non occorre una password.</p>'
+            . '<h2 data-ba-portal-title>Accedi a BadAround</h2>'
+            . '<p data-ba-portal-intro>Un solo codice numerico a 6 cifre per accedere o completare il primo accesso. Non occorre una password.</p>'
             . $notice
             . '<div role="status" data-ba-result aria-live="polite"></div>'
-            . '<form data-ba-form="register" autocomplete="on">'
-            . '<h3>Registrati</h3>'
-            . '<label>Nome <input name="first_name" autocomplete="given-name" maxlength="191" required></label>'
-            . '<label>Cognome <input name="last_name" autocomplete="family-name" maxlength="191" required></label>'
-            . '<label>Email <input name="email" type="email" autocomplete="email" maxlength="191" required></label>'
-            . '<label><input name="privacy_acknowledged" type="checkbox" required> '
-            . 'Dichiaro di aver letto l\' <a href="'.$privacy.'">informativa privacy</a>.</label>'
-            . '<button type="submit">Ricevi il codice di registrazione</button>'
-            . '</form>'
-            . '<form data-ba-form="login" autocomplete="on">'
-            . '<h3>Hai già un account?</h3>'
-            . '<label>Email <input name="email" type="email" autocomplete="email" maxlength="191" required></label>'
-            . '<button type="submit">Ricevi il codice di accesso</button>'
-            . '</form>'
-            . '<form data-ba-form="otp" hidden>'
-            . '<h3>Verifica il codice</h3>'
-            . '<label>Codice a 8 cifre <input name="code" inputmode="numeric" pattern="[0-9]{8}" '
-            . 'autocomplete="one-time-code" minlength="8" maxlength="8" required></label>'
-            . '<button type="submit">Verifica</button>'
-            . '</form>'
+            . '<div data-ba-access-entry></div>'
             . '<section data-ba-activity hidden aria-labelledby="ba-identity-my-activity-title">'
             . '<h3 id="ba-identity-my-activity-title">Le mie attività</h3>'
             . '<p>Stato delle tue richieste di commento e modifica.</p>'

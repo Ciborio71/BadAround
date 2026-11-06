@@ -100,7 +100,7 @@ final class BadAround_Identity_WordPress_Login_REST {
         $id=$body['challenge_id']??null;
         $code=$body['code']??null;
         if (!is_string($id) || !preg_match('/^[a-f0-9]{32}$/D',$id)
-            || !is_string($code) || !preg_match('/^[0-9]{8}$/D',$code)) {
+            || !is_string($code) || !preg_match('/^(?:[0-9]{6}|[0-9]{8})$/D',$code)) {
             return $this->error(403);
         }
         $now=time(); $secret=null;

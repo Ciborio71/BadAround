@@ -19,8 +19,8 @@ final class BadAround_Identity_Challenge_Primitives {
     }
 
     public static function generate_code(): string {
-        // 8 decimal digits = 100 million possibilities; always use CSPRNG.
-        return str_pad((string) random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
+        // Six decimal digits; CSPRNG, short TTL, five attempts and shared issuance quotas.
+        return str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
     }
 
     public static function generate_session_secret(): string {
@@ -77,7 +77,7 @@ final class BadAround_Identity_Challenge_Primitives {
             return ['ok' => false, 'reason' => 'locked', 'record' => $record];
         }
         $record['attempts'] = (int)$record['attempts'] + 1;
-        $valid_format = preg_match('/^[0-9]{8}$/D', $code) === 1;
+        $valid_format = preg_match('/^(?:[0-9]{6}|[0-9]{8})$/D', $code) === 1;
         $candidate = $valid_format
             ? self::digest('otp', (string)$record['challenge_id'], $code, $server_key)
             : str_repeat('0', 64);

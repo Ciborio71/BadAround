@@ -23,23 +23,20 @@
   }
   for (const portal of portals) {
     const status = portal.querySelector("[data-ba-result]");
-    const register = portal.querySelector('[data-ba-form="register"]');
-    const login = portal.querySelector('[data-ba-form="login"]');
-    const otp = portal.querySelector('[data-ba-form="otp"]');
+    const entry=portal.querySelector('[data-ba-access-entry]');
     const logout = portal.querySelector("[data-ba-logout]");
     const activity = portal.querySelector("[data-ba-activity]");
     const activityList = portal.querySelector("[data-ba-activity-list]");
     const activityRefresh = portal.querySelector("[data-ba-refresh-activity]");
     const reportsList = portal.querySelector('[data-ba-reports-list]');
-    if (!status || !register || !login || !otp || !logout || !activity || !activityList || !activityRefresh) continue;
-    let challenge = null;
-    let stage = null;
+    if (!status || !entry || !window.BadAroundAccess || !logout || !activity || !activityList || !activityRefresh) continue;
     let csrf = null;
     function notice(text) { status.textContent = text; }
     function showSignedIn(value) {
-      register.hidden = value;
-      login.hidden = value;
-      otp.hidden = true;
+      entry.hidden=value;
+      portal.querySelector('[data-ba-portal-title]').textContent=value?'Il mio profilo':'Accedi a BadAround';
+      portal.querySelector('[data-ba-portal-intro]').hidden=value;
+      window.BadAroundAccess.updateSession(value);
       logout.hidden = !value;
       activity.hidden = !value;
       if (!value) activityList.replaceChildren();
@@ -155,71 +152,7 @@
         showSignedIn(false);
       }
     }
-    register.addEventListener("submit", event => {
-      event.preventDefault();
-      if (!register.reportValidity()) return;
-      busy(register, async () => {
-        const f = new FormData(register);
-        const data = await send("identity/register/start", {
-          first_name: String(f.get("first_name") || ""),
-          last_name: String(f.get("last_name") || ""),
-          email: String(f.get("email") || ""),
-          privacy_acknowledged: f.get("privacy_acknowledged") === "on"
-        });
-        if (!/^[a-f0-9]{32}$/.test(data.challenge_id || "")) throw new Error();
-        challenge = data.challenge_id;
-        stage = "register";
-        otp.hidden = false;
-        notice("Se i dati sono validi, riceverai un codice di verifica via email.");
-        otp.querySelector('[name="code"]')?.focus();
-      });
-    });
-    login.addEventListener("submit", event => {
-      event.preventDefault();
-      if (!login.reportValidity()) return;
-      busy(login, async () => {
-        const f = new FormData(login);
-        const data = await send("identity/login/start", {
-          email: String(f.get("email") || "")
-        });
-        if (!/^[a-f0-9]{32}$/.test(data.challenge_id || "")) throw new Error();
-        challenge = data.challenge_id;
-        stage = "login";
-        otp.hidden = false;
-        notice("Se il recapito è valido, riceverai un codice temporaneo via email.");
-        otp.querySelector('[name="code"]')?.focus();
-      });
-    });
-    otp.addEventListener("submit", event => {
-      event.preventDefault();
-      if (!otp.reportValidity() || !challenge || !stage) return;
-      busy(otp, async () => {
-        const code = String(new FormData(otp).get("code") || "");
-        if (!/^[0-9]{8}$/.test(code)) throw new Error();
-        const kind = stage;
-        const result = await send("identity/" + kind + "/verify", {
-          challenge_id: challenge,
-          code
-        });
-        otp.reset();
-        challenge = null;
-        stage = null;
-        if (kind === "register" && result.status === "verified") {
-          otp.hidden = true;
-          notice("Registrazione verificata. Ora richiedi il codice di accesso.");
-          login.querySelector('[name="email"]')?.focus();
-          return;
-        }
-        if (kind === "login" && result.ok === true) {
-          await refresh();
-          if (csrf) {
-            notice("Accesso effettuato.");
-            return;
-          }
-        }
-        throw new Error("verification_failed");
-      });
-    });
+    window.BadAroundAccess.mount(entry,{onVerified:async()=>{await refresh();if(!csrf)throw new Error();notice('Accesso effettuato.');}});
     logout.addEventListener("click", () => {
       busy(portal, async () => {
         if (!csrf) throw new Error();

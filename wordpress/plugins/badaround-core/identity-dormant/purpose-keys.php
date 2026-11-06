@@ -8,7 +8,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/challenge-primitives.php';
 
 final class BadAround_Identity_Purpose_Keys {
-    private const ALLOWED = ['enrollment','login','verification'];
+    private const ALLOWED = ['enrollment','login','verification','access'];
     /**
      * Keep the identity email lookup stable across authentication purposes.
      * Only OTP digest uses the purpose-derived key; never use the derived
