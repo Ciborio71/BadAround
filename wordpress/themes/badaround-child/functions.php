@@ -598,3 +598,10 @@ add_action('wp_enqueue_scripts', static function(){
     if(!is_front_page())return;
     wp_enqueue_script('badaround-home-proximity',get_stylesheet_directory_uri().'/assets/js/home-proximity.js',[],(string)filemtime(__DIR__.'/assets/js/home-proximity.js'),true);
 });
+
+require_once __DIR__ . '/inc/event-gallery.php';
+add_action('wp_enqueue_scripts',static function(){
+    if(!is_singular('ba_evento'))return;
+    wp_enqueue_script('badaround-event-gallery',get_stylesheet_directory_uri().'/assets/js/event-gallery.js',[],(string)filemtime(__DIR__.'/assets/js/event-gallery.js'),true);
+    wp_script_add_data('badaround-event-gallery','strategy','defer');
+});

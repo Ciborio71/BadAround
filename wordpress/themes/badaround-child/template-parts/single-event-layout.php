@@ -82,8 +82,7 @@ $public_address=$public_details['address']??'';
 
 $content_text = trim( wp_strip_all_tags( get_post_field( 'post_content', $post_id ) ) );
 $has_content  = '' !== $content_text;
-$has_thumb    = has_post_thumbnail( $post_id );
-$detail_image = function_exists( 'badaround_child_event_image_url' ) ? badaround_child_event_image_url( $post_id, 'detail' ) : ( $has_thumb ? get_the_post_thumbnail_url( $post_id, 'large' ) : '' );
+$gallery_ids = function_exists('badaround_event_gallery_ids') ? badaround_event_gallery_ids($post_id) : array();
 $public_lat   = get_post_meta( $post_id, '_ba_public_lat', true );
 $public_lng   = get_post_meta( $post_id, '_ba_public_lng', true );
 $public_mode = '';
@@ -205,12 +204,22 @@ if ( $status ) {
 	<section class="ba-event-body">
 		<div class="ba-container ba-event-layout">
 			<div class="ba-event-main">
-				<?php if ( $detail_image ) : ?>
-					<?php if ($event_seo && $has_thumb) : ?><h2>Immagini della segnalazione</h2><?php endif; ?>
-                    <figure class="ba-event-media">
-						<img src="<?php echo esc_url( $detail_image ); ?>" alt="<?php echo esc_attr( $has_thumb ? $title : 'BadAround — immagine segnalazione non disponibile' ); ?>" loading="eager" decoding="async">
-					</figure>
+                <div class="ba-event-overview<?php echo !$gallery_ids?' ba-event-overview--empty':''; ?>">
+                    <?php if(function_exists('badaround_render_event_gallery'))badaround_render_event_gallery($gallery_ids,$title); ?>
+				<?php if ( ! empty( $public_specific ) ) : ?>
+					<section class="ba-card ba-event-section">
+						<div class="ba-event-section__head">
+							<h2><?php echo esc_html($event_seo ? $event_seo['heading'] : 'Dettagli utili'); ?></h2>
+							<span class="ba-event-section__eyebrow">Dati pubblicabili</span>
+						</div>
+						<dl class="ba-event-facts">
+							<?php foreach ( $public_specific as $label => $value ) : ?>
+								<div><dt><?php echo esc_html( $label ); ?></dt><dd><?php echo esc_html( $value ); ?></dd></div>
+							<?php endforeach; ?>
+						</dl>
+					</section>
 				<?php endif; ?>
+                </div>
 
 				<?php if ( $has_content ) : ?>
 					<section class="ba-card ba-event-section">
@@ -245,6 +254,7 @@ if ( $status ) {
 						<?php endif; ?>
 
 						<?php if ( is_numeric( $public_lat ) && is_numeric( $public_lng ) ) : ?>
+<div class="ba-event-map-tools"><button class="ba-button ba-button--outline" type="button" data-ba-detail-map-load>Carica la mappa</button><span data-ba-detail-map-status role="status" aria-live="polite">La mappa si carica quando è vicina all’area visibile.</span></div>
 							<div class="ba-event-location-map" id="ba-event-google-map" data-ba-map data-ba-map-context="detail" data-ba-event-lat="<?php echo esc_attr( $public_lat ); ?>" data-ba-event-lng="<?php echo esc_attr( $public_lng ); ?>" data-ba-event-radius="<?php echo esc_attr( $public_radius ); ?>" data-ba-event-id="<?php echo esc_attr( $post_id ); ?>" data-ba-event-mode="<?php echo esc_attr( $public_mode ); ?>" data-ba-event-category="<?php echo esc_attr( $category_term ? $category_term->slug : '' ); ?>" data-ba-event-status="<?php echo esc_attr( $event_status ); ?>" aria-label="<?php echo esc_attr( 'Mappa: ' . $location_label ); ?>"></div>
 						<?php endif; ?>
 
@@ -260,19 +270,7 @@ if ( $status ) {
 					</section>
 				<?php endif; ?>
 
-				<?php if ( ! empty( $public_specific ) ) : ?>
-					<section class="ba-card ba-event-section">
-						<div class="ba-event-section__head">
-							<h2><?php echo esc_html($event_seo ? $event_seo['heading'] : 'Dettagli utili'); ?></h2>
-							<span class="ba-event-section__eyebrow">Dati pubblicabili</span>
-						</div>
-						<dl class="ba-event-facts">
-							<?php foreach ( $public_specific as $label => $value ) : ?>
-								<div><dt><?php echo esc_html( $label ); ?></dt><dd><?php echo esc_html( $value ); ?></dd></div>
-							<?php endforeach; ?>
-						</dl>
-					</section>
-				<?php endif; ?>
+
                 <?php if ( class_exists( 'BadAround_Contribution_Service' ) ) { BadAround_Contribution_Service::render_event_contribution_block( $post_id ); } ?>
 			</div>
 

@@ -1046,6 +1046,30 @@
 	};
 
 	const load = async () => {
+        // Detail geometry is already in the public DOM: avoid downloading the national catalog.
+        if(mapNodes.every((node)=>(node.dataset.baMapContext||'full')==='detail')){
+            let started=false;
+            const button=document.querySelector('[data-ba-detail-map-load]'), status=document.querySelector('[data-ba-detail-map-status]');
+            let observer;
+            const start=async()=>{
+                if(started)return;started=true;observer?.disconnect();
+                if(button){button.disabled=true;button.textContent='Caricamento mappa…';}
+                try{
+                    if(!await loadGoogleMaps())throw new Error('Maps unavailable');
+                    mapNodes.forEach((node)=>initMap(node,[]));
+                    if(button)button.hidden=true;
+                    if(status)status.textContent='Mappa della posizione pubblica caricata.';
+                }catch(error){
+                    started=false;googleMapsPromise=undefined;
+                    document.querySelector('script[data-ba-google-maps]')?.remove();
+                    if(button){button.disabled=false;button.textContent='Riprova a caricare la mappa';}
+                    if(status)status.textContent='Mappa non disponibile. Indirizzo e dettagli restano consultabili.';
+                }
+            };
+            button?.addEventListener('click',start);
+            if('IntersectionObserver' in window){observer=new IntersectionObserver((entries)=>{if(entries.some((entry)=>entry.isIntersecting))start();},{rootMargin:'200px'});mapNodes.forEach((node)=>observer.observe(node));}
+            return;
+        }
 		let payload;
 		try {
 			payload = await loadDiscovery();
