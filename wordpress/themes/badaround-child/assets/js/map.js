@@ -804,68 +804,19 @@
 			if (requestedArea?.area && searchField) searchField.value = requestedArea.area;
 		}
 
-		const geoButton = document.querySelector('[data-ba-geolocate]');
-		const geoStatus = document.querySelector('[data-ba-geolocation-status]');
-		if (geoButton && context === 'home') {
-			const setGeoStatus = (message) => {
-				if (geoStatus) geoStatus.textContent = message || '';
-			};
-
-			geoButton.addEventListener('click', () => {
-				if (!navigator.geolocation) {
-					setGeoStatus('La geolocalizzazione non è disponibile in questo browser. Usa la ricerca manuale.');
-					return;
-				}
-				if (geoButton.dataset.baGeoDenied === '1') return;
-
-				geoButton.disabled = true;
-				setGeoStatus('Richiesta della posizione in corso…');
-
-				navigator.geolocation.getCurrentPosition(
-					(position) => {
-						const current = {
-							lat: Number(position.coords.latitude),
-							lng: Number(position.coords.longitude),
-						};
-						if (!userMarker) {
-							userMarker = new google.maps.Marker({
-								map,
-								position: current,
-								title: 'La tua posizione attuale',
-								icon: userDotSvg(),
-								zIndex: 400,
-							});
-						} else {
-							userMarker.setPosition(current);
-							userMarker.setMap(map);
-						}
-						map.panTo(current);
-						if (map.getZoom() < 14) map.setZoom(14);
-						setGeoStatus('Posizione mostrata sulla mappa. Non viene salvata da BadAround.');
-						geoButton.disabled = false;
-					},
-					(error) => {
-						let message = 'Non è stato possibile determinare la posizione. Puoi usare la ricerca manuale.';
-						if (error.code === error.PERMISSION_DENIED) {
-							message = 'Permesso posizione non concesso. La mappa resta disponibile con la ricerca manuale.';
-							geoButton.dataset.baGeoDenied = '1';
-							geoButton.textContent = 'Posizione non disponibile';
-						} else if (error.code === error.TIMEOUT) {
-							message = 'La richiesta della posizione è scaduta. Puoi riprovare o usare la ricerca manuale.';
-						} else if (error.code === error.POSITION_UNAVAILABLE) {
-							message = 'Posizione temporaneamente non disponibile. Puoi usare la ricerca manuale.';
-						}
-						setGeoStatus(message);
-						geoButton.disabled = error.code === error.PERMISSION_DENIED;
-					},
-					{
-						enableHighAccuracy: false,
-						timeout: 10000,
-						maximumAge: 60000,
-					}
-				);
-			});
-		}
+		if (context === 'home') {
+            const showHomeArea = (event) => {
+                const current = event.detail?.position;
+                if (!current || !Number.isFinite(current.lat) || !Number.isFinite(current.lng)) return;
+                map.panTo(current); map.setZoom(14);
+                if (event.detail?.source === 'geolocation') {
+                    if (!userMarker) userMarker = new google.maps.Marker({map,position:current,title:'La tua posizione attuale',icon:userDotSvg(),zIndex:400});
+                    else { userMarker.setPosition(current); userMarker.setMap(map); }
+                } else if (userMarker) userMarker.setMap(null);
+            };
+            document.addEventListener('badaround:home-area', showHomeArea);
+            document.dispatchEvent(new CustomEvent('badaround:home-map-ready'));
+        }
 
 		window.addEventListener('resize', () => {
 			if (selected) positionPreview(selected);
@@ -1050,6 +1001,7 @@
 
 		await setupPlacesAutocomplete(input, (detail) => {
 			clearResolvedPlace();
+            document.dispatchEvent(new CustomEvent('badaround:home-area-selected', {detail}));
 			setValue('[data-ba-home-place-id]', detail?.placeId || '');
 			setValue('[data-ba-home-place-lat]', detail?.position?.lat ?? '');
 			setValue('[data-ba-home-place-lng]', detail?.position?.lng ?? '');

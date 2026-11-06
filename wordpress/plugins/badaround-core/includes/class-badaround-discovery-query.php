@@ -102,6 +102,10 @@ class BadAround_Discovery_Query {
 			'order'               => 'DESC',
 			'meta_query'          => BadAround_Discovery_Contract::public_gate_meta_query(),
 		);
+		// Home pagination needs deterministic ties; other consumers keep their existing ordering.
+		if ( ! empty( $filters['home_stable_order'] ) ) {
+			$args['orderby'] = array( 'date' => 'DESC', 'ID' => 'DESC' );
+		}
 
 		if ( '' !== $search ) {
 			$resolved = $this->resolve_search( $search );

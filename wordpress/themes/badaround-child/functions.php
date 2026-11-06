@@ -304,6 +304,7 @@ function badaround_child_enqueue_assets() {
 			'window.BadAroundMap=' . wp_json_encode(
 				array(
 					'endpoint'       => esc_url_raw( rest_url( 'badaround/v1/discovery' ) ),
+                    'homeEndpoint'   => esc_url_raw( rest_url( 'badaround/v1/discovery/home' ) ),
 					'limit'          => 100,
 					'hasMaps'        => (bool) $google_maps_key,
 					'mapsUrl'        => $google_maps_key
@@ -590,3 +591,10 @@ function badaround_search_robots( $robots ) {
 	return $robots;
 }
 add_filter( 'wp_robots', 'badaround_search_robots', 20 );
+
+require_once __DIR__ . '/inc/home-proximity.php';
+
+add_action('wp_enqueue_scripts', static function(){
+    if(!is_front_page())return;
+    wp_enqueue_script('badaround-home-proximity',get_stylesheet_directory_uri().'/assets/js/home-proximity.js',[],(string)filemtime(__DIR__.'/assets/js/home-proximity.js'),true);
+});

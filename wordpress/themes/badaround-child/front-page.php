@@ -47,8 +47,9 @@ $home_categories = array(
 				<button class="ba-button" type="submit">Cerca</button>
 			</form>
 
-			<button class="ba-button ba-button--outline ba-home-position" type="button" data-ba-geolocate aria-describedby="ba-home-geo-status"><svg class="ba-home-position__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg><span>Esplora l’area attorno a te</span></button>
-			<p class="ba-home-privacy">La posizione pubblica degli eventi può essere approssimata in base alla richiesta dell’utente e alla moderazione. La tua posizione non viene salvata.</p>
+			<p class="ba-home-geo-intro"><strong>Scopri cosa succede vicino a te</strong><br>Usa la tua posizione per vedere le segnalazioni nella tua zona.</p>
+			<button class="ba-button ba-button--outline ba-home-position" type="button" data-ba-geolocate aria-describedby="ba-home-geo-status"><svg class="ba-home-position__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg><span>Usa la mia posizione</span></button>
+			<p class="ba-home-privacy">Oppure cerca un comune, un quartiere o un indirizzo. La posizione serve a esplorare la zona; non viene salvata da BadAround né usata per compilare una segnalazione.</p>
 			<p id="ba-home-geo-status" class="ba-home-geo-status" data-ba-geolocation-status role="status" aria-live="polite"></p>
 		</div>
 
@@ -111,7 +112,8 @@ $home_categories = array(
 				<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Vedi tutte le segnalazioni <span aria-hidden="true">→</span></a>
 			</div>
 
-			<div class="ba-home-events" id="segnalazioni">
+			<p data-ba-home-feed-status role="status" aria-live="polite">Ultime segnalazioni in Italia. Scegli una zona per vedere quelle pertinenti.</p>
+			<div class="ba-home-events" id="segnalazioni" data-ba-home-feed>
 				<?php if ( ! empty( $recent_events['items'] ) ) : ?>
 					<?php foreach ( $recent_events['items'] as $item ) : ?>
 						<?php
