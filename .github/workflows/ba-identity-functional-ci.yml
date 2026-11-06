@@ -720,7 +720,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: a1e3338e9ac0fa71c56f0b4a587127eb30dff57f
+          ref: 45bd99735420b4a70f85f90c573dab52562c2a39
           path: prior-source
           persist-credentials: false
       - uses: shivammathur/setup-php@v2

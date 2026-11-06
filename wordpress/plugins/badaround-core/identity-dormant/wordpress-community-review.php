@@ -277,7 +277,9 @@ final class BadAround_Identity_Community_Review {
         if (!self::enabled()||self::$runtime===null||self::snapshot($event)===null)return '';
         global $wpdb;$self=self::$runtime;
         $ids=$wpdb->get_col($wpdb->prepare("SELECT intent_id FROM `{$self->table}` WHERE kind='comment' AND state='approved' AND resource_id=%d ORDER BY created_at DESC,intent_id DESC LIMIT 50",$event));
-        $out='<section aria-label="Commenti approvati"><h3>Commenti della community</h3>';
+        $seo=class_exists('BadAround_Event_SEO') && BadAround_Event_SEO::active($event);
+        if ($seo && !$ids)return '';
+        $out='<section aria-label="Commenti approvati">'.($seo?'<h2>Commenti della community</h2>':'<h3>Commenti della community</h3>');
         if (!$ids)$out.='<p>Non ci sono ancora commenti approvati.</p>';
         foreach(array_reverse($ids??[]) as $id) {
             try {$row=$self->inbox->load_private($id);}catch(Throwable $e){continue;}
@@ -289,7 +291,7 @@ final class BadAround_Identity_Community_Review {
             $parent=$p['parent_id']??null;
             if ($parent!==null && (!is_string($parent)||$self->parent($parent,$event)===null))continue;
             $out.='<article id="ba-comment-'.esc_attr($id).'" class="ba-community-comment'.($parent!==null?' ba-community-comment--reply':'').'">';
-            $out.='<h4>'.esc_html($p['label']).'</h4>';
+            $out.=($seo?'<h3>':'<h4>').esc_html($p['label']).($seo?'</h3>':'</h4>');
             if ($parent!==null)$out.='<p><a href="#ba-comment-'.esc_attr($parent).'">Risposta a un commento</a></p>';
             $out.='<p>'.nl2br(esc_html($p['body'])).'</p>';
             if ($parent===null)$out.='<button type="button" data-ba-reply="'.esc_attr($id).'">Rispondi</button>';

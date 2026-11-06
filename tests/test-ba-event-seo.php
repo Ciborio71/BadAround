@@ -40,3 +40,19 @@ $map=BadAround_Event_SEO::templates();
 check(count($map)===33,'all current canonical subtypes covered');
 foreach($map as $key=>$entry){$GLOBALS['term_meta'][11]['_ba_canonical_event_key']=$key;$p=BadAround_Event_SEO::project(9003);check(!is_wp_error($p)&&$p['heading']!==''&&str_ends_with($p['title'],' | BadAround'),'valid template '.$key);}
 echo "EVENT_SEO_SUITE_PASS\n";
+
+function register_rest_route($namespace,$route,$args){$GLOBALS['seo_route']=$args;}
+function get_post_type($id){return get_post($id)->post_type??null;}
+function get_permalink($id){return 'https://example.test/eventi/'.(get_post($id)->post_name??'draft').'/';}
+class WP_REST_Response {public $data,$headers=[];function __construct($data){$this->data=$data;}function header($k,$v){$this->headers[$k]=$v;}}
+BadAround_Event_SEO::register_preview();
+$route=$GLOBALS['seo_route'];
+check($route['methods']==='GET'&&$route['permission_callback'](['id'=>9000]),'SEO preview is read-only and available to authorized moderator');
+$GLOBALS['denied']=['ba_moderate_events'];
+check(!$route['permission_callback'](['id'=>9000]),'SEO preview denied without moderation capability');
+$GLOBALS['denied']=['edit_post'];
+check(!$route['permission_callback'](['id'=>9000]),'SEO preview denied without event edit permission');
+$GLOBALS['denied']=[];
+check(!$route['permission_callback'](['id'=>99999]),'SEO preview rejects missing event');
+$response=$route['callback'](['id'=>9000]);
+check($response->headers['Cache-Control']==='private, no-store'&&!str_contains(json_encode($response->data),'Private Address'),'SEO preview avoids caches and private report values');

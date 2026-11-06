@@ -9,6 +9,43 @@ final class BadAround_Event_SEO {
 
     public static function register_hooks() {
         add_filter( 'wp_insert_post_data', array( __CLASS__, 'preserve_slug' ), 999, 2 );
+        add_action('rest_api_init', array(__CLASS__, 'register_preview'));
+        add_action('add_meta_boxes_ba_evento', array(__CLASS__, 'register_preview_box'));
+    }
+    public static function register_preview() {
+        register_rest_route('badaround-ops/v1','/event-seo/(?P<id>\\d+)',array(
+            'methods'=>'GET',
+            'permission_callback'=>static function($request) {
+                $id=(int)$request['id'];
+                return current_user_can('ba_moderate_events') && current_user_can('edit_post',$id) && 'ba_evento'===get_post_type($id);
+            },
+            'callback'=>static function($request) {
+                $id=(int)$request['id'];$seo=self::project($id);
+                if (is_wp_error($seo)) { return $seo; }
+                $response=new WP_REST_Response(array('contract'=>self::VERSION,'active'=>self::active($id),
+                    'current_url'=>get_permalink($id),'frozen'=>(bool)get_post_meta($id,'_ba_seo_frozen',true),'preview'=>$seo));
+                $response->header('Cache-Control','private, no-store');return $response;
+            },
+        ));
+    }
+    public static function register_preview_box() {
+        if (current_user_can('ba_moderate_events')) {
+            add_meta_box('ba-event-seo','Anteprima SEO BadAround',array(__CLASS__,'preview_box'),'ba_evento','normal','default');
+        }
+    }
+    public static function preview_box($post) {
+        if (!current_user_can('ba_moderate_events') || !current_user_can('edit_post',$post->ID)) { return; }
+        $seo=self::project($post->ID);
+        if (is_wp_error($seo)) { echo '<p>Completa tipologia e Comune per vedere l’anteprima.</p>';return; }
+        echo '<p>Generata dai dati pubblici salvati. Aggiorna la scheda per ricalcolarla. Il controllo privacy rimane obbligatorio alla pubblicazione.</p>';
+        foreach(array('title'=>'Title','description'=>'Description','h1'=>'H1','heading'=>'Heading dei dettagli') as $key=>$label) {
+            echo '<p><strong>'.esc_html($label).'</strong><br>'.esc_html($seo[$key]).'</p>';
+        }
+        $frozen=get_post_meta($post->ID,'_ba_seo_frozen',true);
+        $published='publish'===$post->post_status || 'published'===get_post_meta($post->ID,'_ba_moderation_status',true);
+        if ($frozen || $published) { echo '<p><strong>URL conservato</strong><br>'.esc_html(get_permalink($post->ID)).'</p>'; }
+        else { echo '<p><strong>Slug proposto</strong><br>'.esc_html($seo['slug']).'</p><p>Assegnato alla pubblicazione; eventuali omonimie ricevono un identificativo stabile.</p>'; }
+        if ($published && !self::active($post->ID)) { echo '<p>Evento precedente al contratto: questa anteprima non modifica title, contenuti o URL esistenti.</p>'; }
     }
     public static function preserve_slug( $data, $input ) {
         $id = (int) ( $input['ID'] ?? 0 );

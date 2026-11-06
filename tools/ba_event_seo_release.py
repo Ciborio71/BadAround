@@ -6,7 +6,8 @@ ROOT=Path(__file__).resolve().parents[1]
 FILES=['plugins/badaround-core/includes/class-badaround-event-seo.php',
        'plugins/badaround-core/includes/class-badaround-publication-service.php',
        'themes/badaround-child/functions.php',
-       'themes/badaround-child/template-parts/single-event-layout.php']
+       'themes/badaround-child/template-parts/single-event-layout.php',
+       'plugins/badaround-core/identity-dormant/wordpress-community-review.php']
 CORE='plugins/badaround-core/badaround-core.php'
 def read(ftp,path):
     buf=io.BytesIO()

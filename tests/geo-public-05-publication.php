@@ -36,6 +36,7 @@ $GLOBALS['filters']=[];
 function add_filter($name,$fn,$priority=10,$args=1){$GLOBALS['filters'][$name][$priority][]=$fn;}
 function remove_filter($name,$fn,$priority=10){foreach($GLOBALS['filters'][$name][$priority]??[] as $k=>$f)if($fn===$f)unset($GLOBALS['filters'][$name][$priority][$k]);}
 function apply_filters($name,$v,...$args){$groups=$GLOBALS['filters'][$name]??[];ksort($groups);foreach($groups as $fns)foreach($fns as $fn)$v=$fn($v,...$args);return $v;}
+if (!function_exists('add_action')) { function add_action($name,$fn,$priority=10,$args=1){add_filter($name,$fn,$priority,$args);} }
 function do_action($name,...$args){$GLOBALS['actions'][]=$name;}
 function clean_post_cache($id){} function wp_json_encode($x){return json_encode($x);}
 function has_post_thumbnail(){return false;} function set_post_thumbnail(){}
