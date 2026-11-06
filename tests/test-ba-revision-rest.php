@@ -52,4 +52,14 @@ $quota->allow=false;$result=$rest->submit(new RevisionRequest($payload,$csrf),'r
 $blocked=new BadAround_Identity_Community_Rest_Adapter($gateway,$quota);
 $result=$blocked->submit(new RevisionRequest($payload,$csrf),'revision');verify(($result['status']??null)===503,'unwired snapshot adapter remains fail closed');
 verify(count($inbox->entries)===1,'rejected requests add no moderation intent');
+$parentId=str_repeat('b',32);
+$wired=new BadAround_Identity_Community_Rest_Adapter($gateway,$quota,$reader,
+    static fn(string $id,int $event):?array=>$id===str_repeat('b',32)&&$event===801
+        ?['event_id'=>801,'comment_id'=>$id,'moderation_status'=>'approved','parent_id'=>null]:null);
+$reply=['event_id'=>801,'body'=>'Risposta di prova','display_mode'=>'pseudonym','alias'=>'Sentinella QA','parent_id'=>$parentId];
+$result=$wired->submit(new RevisionRequest($reply,$csrf),'comment');
+verify(($result['status']??null)==='pending_moderation'&&$inbox->entries[1]['parent_id']===$parentId
+    &&$inbox->entries[1]['public_alias']==='Sentinella QA','reply parent is resolved server-side and explicit alias stays in private intent');
+$result=$wired->submit(new RevisionRequest(array_replace($reply,['parent_id'=>str_repeat('c',32)]),$csrf),'comment');
+verify(($result['status']??null)===403&&count($inbox->entries)===2,'unapproved or foreign reply parent is rejected');
 echo "ALL_REVISION_REST_TESTS_PASS\n";

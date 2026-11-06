@@ -40,7 +40,7 @@ final class BadAround_Identity_WordPress_Portal {
         // External JavaScript only. Do not inline tokens, WP nonces, email,
         // raw passwordless bearer secrets or user profile data.
         $script=plugins_url('identity-dormant/identity-portal.js',BADAROUND_CORE_FILE);
-        wp_enqueue_script('badaround-identity-portal',$script,[], '0.2.0',true);
+        wp_enqueue_script('badaround-identity-portal',$script,[], '0.3.0',true);
         $privacy=esc_url(home_url('/privacy-policy/'));
         $notice='';
         if (BadAround_Identity_WordPress_Privacy_Notice::qa_mode()) {
@@ -80,6 +80,7 @@ final class BadAround_Identity_WordPress_Portal {
             . '<p>Stato delle tue richieste di commento e modifica.</p>'
             . '<button type="button" data-ba-refresh-activity>Aggiorna attività</button>'
             . '<ul data-ba-activity-list></ul>'
+            . '<h3>Le mie segnalazioni</h3><ul data-ba-reports-list></ul>'
             . '</section>'
             . '<button type="button" data-ba-logout hidden>Esci</button>'
             . '</section>';

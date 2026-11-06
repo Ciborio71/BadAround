@@ -37,14 +37,19 @@ final class BadAround_Identity_WordPress_Comment_Form {
             return '';
         }
         $script=plugins_url('identity-dormant/identity-comment-form.js',BADAROUND_CORE_FILE);
-        wp_enqueue_script('badaround-identity-comment-form',$script,[], '0.1.0',true);
+        wp_enqueue_script('badaround-identity-comment-form',$script,[], '0.2.0',true);
         return '<section class="ba-identity-community" data-ba-comment-form data-event-id="'.(int)$eventId.'">'
+            . (class_exists('BadAround_Identity_Community_Review',false)?BadAround_Identity_Community_Review::render_comments($eventId):'')
             . '<h2>Commenta la segnalazione</h2>'
             . '<p>Il commento sarà visibile soltanto dopo approvazione.</p>'
             . '<div role="status" data-ba-comment-status aria-live="polite"></div>'
             . '<form>'
             . '<label>Commento <textarea name="body" required minlength="3" maxlength="2500" rows="4"></textarea></label>'
-            . '<p>La tua identità rimane privata. In questa fase i commenti sono anonimi.</p>'
+            . '<input type="hidden" name="parent_id" value="">'
+            . '<p data-ba-reply-status></p><button type="button" data-ba-cancel-reply hidden>Annulla risposta</button>'
+            . '<label>Come vuoi comparire? <select name="display_mode"><option value="anonymous">Anonimo</option><option value="pseudonym">Pseudonimo</option></select></label>'
+            . '<label data-ba-alias-field hidden>Pseudonimo pubblico <input name="alias" maxlength="80"></label>'
+            . '<p>Nome, cognome ed email del tuo account rimangono privati.</p>'
             . '<button type="submit">Invia per moderazione</button>'
             . '</form>'
             . '<details data-ba-revision><summary>Proponi una modifica alla tua segnalazione</summary>'

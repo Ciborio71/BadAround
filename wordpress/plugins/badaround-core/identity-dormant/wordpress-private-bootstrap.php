@@ -92,6 +92,7 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
             $community=BadAround_Identity_WordPress_Composition::assemble(
                 $db,$prefix,$key,$origin
             );
+            $review=new BadAround_Identity_Community_Review($db,$prefix,$key);
             $sessionApi=new BadAround_Identity_WordPress_Session_REST(
                 $sessions,new BadAround_Identity_Mysql_Active_Status($db,$prefix.'ba_identities'),
                 new BadAround_Identity_WordPress_Session_Cookie(new BadAround_Identity_Native_Cookie_Writer()),
@@ -102,7 +103,7 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
                     $db,$prefix.'ba_identity_moderation',$sessions,
                     new BadAround_Identity_Mysql_Active_Status($db,$prefix.'ba_identities'),
                     $csrf,$origin
-                )
+                ),[$review,'my_reports']
             );
             // Private report QA cannot be registered unless the entire
             // passwordless runtime, IP fence, notice and dedicated schema
@@ -125,6 +126,7 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
             $sessionApi->register_hooks();
             $activityApi->register_hooks();
             $community->register_hooks();
+            $review->register_hooks();
             BadAround_Identity_WordPress_Portal::register_hooks();
             BadAround_Identity_WordPress_Comment_Form::register_hooks();
             // Community authentication has its own cookie and CSRF checks.
@@ -154,7 +156,7 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
             '/badaround/v1/identity/register/start','/badaround/v1/identity/register/verify',
             '/badaround/v1/identity/login/start','/badaround/v1/identity/login/verify',
             '/badaround/v1/identity/session','/badaround/v1/identity/logout',
-            '/badaround/v1/identity/my-activity','/badaround/v1/community-comments',
+            '/badaround/v1/identity/my-activity','/badaround/v1/identity/my-reports','/badaround/v1/community-comments',
             '/badaround/v1/community-revisions','/badaround-identity-qa/v1/reports',
         ];
         $route=$request->get_route();$method=$request->get_method();

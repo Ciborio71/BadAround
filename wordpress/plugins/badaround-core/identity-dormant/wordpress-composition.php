@@ -69,20 +69,9 @@ final class BadAround_Identity_WordPress_Composition {
         $budget=new BadAround_Identity_Mysql_Community_Budget(
             $db,$wpPrefix.'ba_identity_community_budget',$budgetKey
         );
-        $snapshot=static function(int $eventId) use($authority):?array {
-            if (!$authority->canonical_event_is_published($eventId)
-                || !class_exists('BadAround_Report_Repository')
-                || !function_exists('get_post_meta'))return null;
-            $raw=get_post_meta($eventId,'_ba_primary_report_id',true);
-            if ((!is_int($raw) && !is_string($raw))
-                || !preg_match('/^[1-9][0-9]{0,17}$/D',(string)$raw))return null;
-            $report=(int)$raw;
-            $repository=new BadAround_Report_Repository();
-            if ((int)$repository->event_id_for_report($report)!==$eventId)return null;
-            $digest=$repository->payload_hash_for_report($report);
-            if (!is_string($digest) || !preg_match('/^[a-f0-9]{64}$/D',$digest))return null;
-            return ['report_id'=>$report,'digest'=>$digest];
-        };
-        return new BadAround_Identity_Community_Rest_Adapter($gateway,$budget,$snapshot);
+        require_once __DIR__.'/wordpress-community-review.php';
+        $review=new BadAround_Identity_Community_Review($db,$wpPrefix,$rootSecret);
+        return new BadAround_Identity_Community_Rest_Adapter($gateway,$budget,
+            static fn(int $event):?array=>BadAround_Identity_Community_Review::snapshot($event,true),[$review,'parent']);
     }
 }

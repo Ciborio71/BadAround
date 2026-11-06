@@ -55,8 +55,8 @@ final class BadAround_Identity_Community_Policy {
         if ($parent !== null) {
             if (($parent['event_id'] ?? null) !== $eventId
                 || ($parent['moderation_status'] ?? null) !== 'approved'
-                || !is_int($parent['comment_id'] ?? null)
-                || $parent['comment_id'] <= 0
+                || !(is_int($parent['comment_id'] ?? null) && $parent['comment_id']>0
+                    || is_string($parent['comment_id']??null) && preg_match('/^[a-f0-9]{32}$/D',$parent['comment_id']))
                 || ($parent['parent_id'] ?? null) !== null) {
                 throw new InvalidArgumentException('Invalid reply parent');
             }

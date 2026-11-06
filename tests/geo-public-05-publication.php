@@ -101,5 +101,13 @@ foreach(['territory_only','municipality'] as $mode){g5seed(520,'exact_point',$mo
 g5seed(521,'approximate_area','approximate_area');check(BadAround_Publication_Service::guard_geo_write(null,521,'_ba_public_lat',41.8991622)===false,'moderation/intake/REST cannot write versioned mirrors');check(BadAround_Publication_Service::guard_geo_write(null,521,'_ba_public_geo',[])===false,'only B3 owns versioned projection writes');check(update_post_meta(521,'_ba_public_lat',41.8991622)===false&&g5none(521),'registered metadata hook blocks actual unauthorized write');
 foreach(['f32-c4'=>150,'f32-c5'=>300,'f32-c6'=>1000,'f32-c7'=>3000,'unknown'=>750] as $precision=>$radius){$l=['exact_lat'=>89.9999,'exact_lng'=>179.9999];$d=['mode'=>'approximate_area'];$p=BadAround_Public_Geo_Projection::build(530,$l,$d,$precision);check($p['radius_meters']===$radius&&BadAround_Public_Geo_Projection::pair($p['lat'],$p['lng']),'versioned radius and valid spherical jitter '.$precision);}
 unset($GLOBALS['private_fixture']);seed(540);check($svc->prepare_public_projection(540)===true&&$svc->validate_public_projection(540)===true,'legacy territory-only unchanged');
+$candidateBefore=get_post(540)->post_content;
+$GLOBALS['private_fixture']=['author_email'=>'private@example.invalid'];
+$candidateResult=$svc->validate_public_projection(540,false,'Contatto riservato private@example.invalid');
+check(is_wp_error($candidateResult)&&$candidateResult->get_error_code()==='ba_publication_private_data_detected'
+ &&get_post(540)->post_content===$candidateBefore,'Identity candidate privacy validation rejects private data without writing the post');
+check($svc->validate_public_projection(540,false,'Descrizione pubblica revisionata sicura')===true
+ &&get_post(540)->post_content===$candidateBefore,'safe Identity candidate uses existing publication validation without mutation');
+unset($GLOBALS['private_fixture']);
 $discovery=file_get_contents(dirname(__DIR__).'/wordpress/plugins/badaround-core/includes/class-badaround-discovery-query.php');$segment=explode('private function public_geo( $event_id ) {',$discovery)[1];$segment=explode('private function deepest_term',$segment)[0];check(!str_contains($segment,'exact_lat')&&!str_contains($segment,'ba_reports'),'Discovery never reads private coordinates');
 echo "GEO_PUBLIC_05_PUBLICATION=PASS\n";

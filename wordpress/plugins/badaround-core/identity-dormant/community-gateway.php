@@ -40,7 +40,7 @@ final class BadAround_Identity_Community_Gateway {
     /** Submits a private comment intent only; no publication. */
     public function submit_comment(
         ?string $session,?string $csrf,?string $origin,int $eventId,
-        string $body,string $mode,?array $serverLoadedParent,int $now
+        string $body,string $mode,?array $serverLoadedParent,int $now,string $alias=''
     ): bool {
         try {
             $identity=$this->actor($session,$csrf,$origin,$now);
@@ -50,6 +50,10 @@ final class BadAround_Identity_Community_Gateway {
             $intent=BadAround_Identity_Comment_Moderation_Policy::propose(
                 $identity,$eventId,$body,$mode,$serverLoadedParent,$now
             );
+            // Public names must be expressly supplied aliases, never private profile data.
+            if (!in_array($mode,['anonymous','pseudonym'],true))return false;
+            $intent['public_alias']=$mode==='pseudonym'
+                ? BadAround_Identity_Community_Policy::public_identity('','',$mode,$alias):'';
             return $this->inbox->submit(bin2hex(random_bytes(16)),'comment',$identity,
                 $eventId,$intent,$now)===true;
         } catch (Throwable $error) { return false; }

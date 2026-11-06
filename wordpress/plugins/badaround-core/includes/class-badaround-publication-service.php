@@ -217,7 +217,7 @@ class BadAround_Publication_Service {
 		return true;
 	}
 
-	public function validate_public_projection( $event_id, $allow_published_recovery = false ) {
+	public function validate_public_projection( $event_id, $allow_published_recovery = false, $candidate_content = null ) {
 		global $wpdb;
 
 		$event_id = absint( $event_id );
@@ -236,7 +236,7 @@ class BadAround_Publication_Service {
 		}
 
 		$title   = trim( wp_strip_all_tags( (string) $post->post_title ) );
-		$content = trim( wp_strip_all_tags( (string) $post->post_content ) );
+		$content = trim( wp_strip_all_tags( null === $candidate_content ? (string) $post->post_content : (string) $candidate_content ) );
 		if ( '' === $title || preg_match( '/^Segnalazione da moderare\s*#/i', $title ) ) {
 			return new WP_Error( 'ba_publication_title_missing', __( 'Il titolo pubblico deve essere completato prima della pubblicazione.', 'badaround-core' ) );
 		}
@@ -883,6 +883,61 @@ class BadAround_Publication_Service {
 		}
 		if ( ! $was_published ) { do_action( 'badaround_event_published', $event_id ); }
 		return true;
+	}
+
+	/** Identity review owns the surrounding transaction and the intent CAS.
+	 * Validate a candidate before any public write; never change canonical intake or GEO.
+	 */
+	public function apply_identity_revision( $event_id, $description, $expected_snapshot ) {
+		global $wpdb;
+		$event_id = absint( $event_id );
+		if ( ! class_exists( 'BadAround_Identity_Community_Review', false )
+			|| ! BadAround_Identity_Community_Review::enabled()
+			|| ! BadAround_Identity_Community_Review::is_moderator()
+			|| ! current_user_can( 'ba_moderate_events' ) || ! current_user_can( 'publish_ba_eventi' )
+			|| ! current_user_can( 'edit_post', $event_id ) || ! current_user_can( 'ba_view_private_reports' )
+			|| ! BadAround_Identity_Community_Review::owns_transaction()
+			|| ! is_string( $description ) || mb_strlen( $description, 'UTF-8' ) < 10
+			|| mb_strlen( $description, 'UTF-8' ) > 5000 || ! is_string( $expected_snapshot ) ) {
+			return $this->geo_error( 'identity_revision_forbidden' );
+		}
+		$snapshot = BadAround_Identity_Community_Review::snapshot( $event_id, true );
+		if ( ! $snapshot || ! hash_equals( $snapshot['digest'], $expected_snapshot ) ) {
+			return $this->geo_error( 'identity_revision_stale' );
+		}
+		$previous = $this->b3_event;
+		$this->b3_event = self::uses_versioned_geo( $event_id ) ? $event_id : 0;
+		$allow = static function( $allowed, $candidate_id ) use ( $event_id ) {
+			return absint( $candidate_id ) === $event_id ? true : $allowed;
+		};
+		try {
+			$was_pending = in_array( get_post_status( $event_id ), array( 'pending', 'draft' ), true );
+			$pending_moderation = get_post_meta( $event_id, '_ba_moderation_status', true );
+			if ( $was_pending ) {
+				if ( ! in_array( $pending_moderation, array( 'new', 'in_review', 'needs_information' ), true ) ) {
+					return $this->geo_error( 'identity_revision_state' );
+				}
+				$result = wp_update_post( array( 'ID' => $event_id, 'post_content' => wp_kses_post( $description ) ), true );
+				if ( is_wp_error( $result ) ) { return $result; }
+				return in_array( get_post_status( $event_id ), array( 'pending', 'draft' ), true )
+					&& get_post_meta( $event_id, '_ba_moderation_status', true ) === $pending_moderation
+					? true : $this->geo_error( 'identity_revision_state' );
+			}
+			if ( class_exists( 'BadAround_Native_Media_Fence' ) ) {
+				$fence = BadAround_Native_Media_Fence::check( $event_id );
+				if ( is_wp_error( $fence ) ) { return $fence; }
+			}
+			$valid = $this->validate_public_projection( $event_id, true, $description );
+			if ( is_wp_error( $valid ) ) { return $valid; }
+			add_filter( 'badaround_allow_event_publish', $allow, 999, 2 );
+			try {
+				$result = wp_update_post( array( 'ID' => $event_id, 'post_content' => wp_kses_post( $description ) ), true );
+			} finally { remove_filter( 'badaround_allow_event_publish', $allow, 999 ); }
+			if ( is_wp_error( $result ) ) { return $result; }
+			return 'publish' === get_post_status( $event_id )
+				&& self::STATUS_PUBLISHED === get_post_meta( $event_id, '_ba_moderation_status', true )
+				? true : $this->geo_error( 'identity_revision_state' );
+		} finally { $this->b3_event = $previous; }
 	}
 
 	private function geo_error( $code ) { return new WP_Error( 'ba_publication_geo_' . $code, __( 'Pubblicazione geografica non autorizzata o non verificabile.', 'badaround-core' ) ); }

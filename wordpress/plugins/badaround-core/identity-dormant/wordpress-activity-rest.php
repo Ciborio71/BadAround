@@ -4,7 +4,10 @@ declare(strict_types=1);
 require_once __DIR__.'/mysql-private-activity.php';
 
 final class BadAround_Identity_WordPress_Activity_REST {
-    public function __construct(private BadAround_Identity_Private_Activity $activity) {}
+    private ?Closure $reports;
+    public function __construct(private BadAround_Identity_Private_Activity $activity,?callable $reports=null) {
+        $this->reports=$reports===null?null:Closure::fromCallable($reports);
+    }
     public function register_hooks():bool {
         if (!defined('BADAROUND_IDENTITY_COMMUNITY_ENABLED')
             || BADAROUND_IDENTITY_COMMUNITY_ENABLED!==true
@@ -20,6 +23,22 @@ final class BadAround_Identity_WordPress_Activity_REST {
             'methods'=>'POST','callback'=>[$this,'mine'],
             'permission_callback'=>'__return_true'
         ]);
+        if ($this->reports!==null)register_rest_route('badaround/v1','/identity/my-reports',[
+            'methods'=>'POST','callback'=>[$this,'my_reports'],'permission_callback'=>'__return_true'
+        ]);
+    }
+    public function my_reports($request) {
+        if ($this->reports===null || !defined('BADAROUND_IDENTITY_COMMUNITY_ENABLED')
+            || BADAROUND_IDENTITY_COMMUNITY_ENABLED!==true || !function_exists('is_ssl') || !is_ssl()
+            || !is_object($request)||!method_exists($request,'get_header'))return $this->deny();
+        $site=$request->get_header('sec-fetch-site');
+        if (is_string($site)&&$site!==''&&!in_array($site,['same-origin','none'],true))return $this->deny();
+        $token=$_COOKIE['__Host-ba_identity']??null;$csrf=$request->get_header('x-badaround-csrf');$origin=$request->get_header('origin');
+        if (!is_string($token)||!is_string($csrf)||!is_string($origin))return $this->deny();
+        try {$rows=($this->reports)($token,$csrf,$origin);}catch(Throwable $e){$rows=null;}
+        if (!is_array($rows))return $this->deny();
+        $response=new WP_REST_Response(['items'=>$rows],200);
+        $response->header('Cache-Control','no-store, private');return $response;
     }
     public function mine($request) {
         if (!defined('BADAROUND_IDENTITY_COMMUNITY_ENABLED')

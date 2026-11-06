@@ -22,12 +22,15 @@ final class BadAround_Identity_Community_Rest_Adapter {
     public const MAX_BODY_BYTES = 8192;
 
     private ?Closure $revisionSnapshot;
+    private ?Closure $commentParent;
     public function __construct(
         private BadAround_Identity_Community_Gateway $gateway,
         private ?BadAround_Identity_Community_Rest_Budget $budget = null,
-        ?callable $revisionSnapshot = null
+        ?callable $revisionSnapshot = null,
+        ?callable $commentParent = null
     ) {
         $this->revisionSnapshot=$revisionSnapshot===null?null:Closure::fromCallable($revisionSnapshot);
+        $this->commentParent=$commentParent===null?null:Closure::fromCallable($commentParent);
     }
 
     public function register_hooks(): bool {
@@ -97,12 +100,21 @@ final class BadAround_Identity_Community_Rest_Adapter {
                 // Parent lookup and reply checks must be wired to trusted
                 // server storage. Until then reject replies, never trust
                 // parent metadata from JSON.
-                if (array_key_exists('parent_id',$payload)
-                    || !is_int($event) || !is_string($text) || !is_string($mode)) {
+                if (!is_int($event) || !is_string($text) || !is_string($mode)) {
                     return $this->error(400);
                 }
+                $parent=null;
+                if (array_key_exists('parent_id',$payload)) {
+                    $id=$payload['parent_id'];
+                    if ($this->commentParent===null || !is_string($id)
+                        || !preg_match('/^[a-f0-9]{32}$/D',$id))return $this->error(400);
+                    $parent=($this->commentParent)($id,$event);
+                    if (!is_array($parent))return $this->error(403);
+                }
+                $alias=$payload['alias']??'';
+                if (!is_string($alias))return $this->error(400);
                 $ok=$this->gateway->submit_comment($token,$csrf,$origin,
-                    $event,$text,$mode,null,$now);
+                    $event,$text,$mode,$parent,$now,$alias);
             } else {
                 // Optional server composition only. Client report IDs and
                 // snapshot digests can never become ownership evidence.
