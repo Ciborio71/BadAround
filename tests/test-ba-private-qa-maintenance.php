@@ -27,6 +27,8 @@ function maintenanceCheck(bool $ok,string $label):void {
 }
 $request=new class {
     public string $route='/badaround/v1/identity/session';public string $method='POST';
+    public string $marker='badaround-report-media/v1';
+    public function get_header($key){return $key==='x-badaround-media'?$this->marker:null;}
     public function get_route(){return $this->route;}
     public function get_method(){return $this->method;}
 };
@@ -50,4 +52,21 @@ foreach([new WP_Error(['rest_forbidden'],403),new WP_Error(['badaround_maintenan
     new WP_Error(['badaround_maintenance'],403)] as $protected)
     maintenanceCheck($filter($protected,null,$request)===$protected,'other security errors are never cleared');
 maintenanceCheck($filter(null,null,$request)===null,'normal null dispatch remains untouched');
+define('BADAROUND_IDENTITY_QA_REPORTS_ENABLED',true);
+$base='/badaround/v1/report-media-sessions';$id='12345678-1234-4123-8123-123456789abc';
+foreach([[$base,'POST'],[$base.'/'.$id,'GET'],[$base.'/'.$id.'/items','POST'],
+    [$base.'/'.$id.'/items/'.$id,'GET'],[$base.'/'.$id.'/items/'.$id,'DELETE']] as [$route,$method]) {
+    $request->route=$route;$request->method=$method;
+    maintenanceCheck($filter($error,null,$request)===null,'exact private media path/method clears only maintenance');
+    $security=new WP_Error(['media_capability_invalid'],401);
+    maintenanceCheck($filter($security,null,$request)===$security,'media authorization errors remain intact');
+}
+foreach([[$base.'/extra','POST'],[$base.'/'.$id,'DELETE'],[$base.'/'.$id.'/items/'.$id.'/extra','GET']] as [$route,$method]) {
+    $request->route=$route;$request->method=$method;
+    maintenanceCheck($filter($error,null,$request)===$error,'media route/method mismatch remains blocked');
+}
+$request->route=$base;$request->method='POST';$request->marker='';
+maintenanceCheck($filter($error,null,$request)===$error,'missing media request marker remains blocked');
+$request->marker='badaround-report-media/v1';$_SERVER['REMOTE_ADDR']='203.0.113.43';
+maintenanceCheck($filter($error,null,$request)===$error,'media QA cannot open other peers');
 echo "ALL_PRIVATE_QA_MAINTENANCE_TESTS_PASS\n";

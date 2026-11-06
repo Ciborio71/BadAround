@@ -144,7 +144,7 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
             || $result->get_error_codes()!==['badaround_maintenance']
             || ($result->get_error_data()['status']??null)!==503
             || !is_object($request) || !method_exists($request,'get_route')
-            || !method_exists($request,'get_method') || $request->get_method()!=='POST'
+            || !method_exists($request,'get_method')
             || !defined('BADAROUND_IDENTITY_RUNTIME_INTEGRATION_ENABLED')
             || BADAROUND_IDENTITY_RUNTIME_INTEGRATION_ENABLED!==true
             || !BadAround_Identity_Private_Access::authorized()
@@ -157,6 +157,21 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
             '/badaround/v1/identity/my-activity','/badaround/v1/community-comments',
             '/badaround/v1/community-revisions','/badaround-identity-qa/v1/reports',
         ];
-        return in_array($request->get_route(),$routes,true)?null:$result;
+        $route=$request->get_route();$method=$request->get_method();
+        if ($method==='POST' && in_array($route,$routes,true))return null;
+        // Private media QA still runs the native origin/marker/capability
+        // checks. Only the maintenance response is cleared, never a denial.
+        if (!defined('BADAROUND_IDENTITY_QA_REPORTS_ENABLED')
+            || BADAROUND_IDENTITY_QA_REPORTS_ENABLED!==true
+            || !method_exists($request,'get_header')
+            || $request->get_header('x-badaround-media')!=='badaround-report-media/v1')return $result;
+        $uuid='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
+        $base='/badaround/v1/report-media-sessions';
+        $allowed=($route===$base && $method==='POST')
+            || ($method==='GET' && preg_match('~^'.$base.'/'.$uuid.'$~D',$route))
+            || ($method==='POST' && preg_match('~^'.$base.'/'.$uuid.'/items$~D',$route))
+            || (in_array($method,['GET','DELETE'],true)
+                && preg_match('~^'.$base.'/'.$uuid.'/items/'.$uuid.'$~D',$route));
+        return $allowed?null:$result;
     }
 }
