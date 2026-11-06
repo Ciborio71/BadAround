@@ -25,3 +25,21 @@ Suite del servizio su SQLite e MySQL: nuovi utenti, utenti esistenti, nomi obbli
 DOM: accesso unico, completamento nomi senza secondo codice, tastiera numerica, incolla/autocomplete, annullamento, retry e cooldown; dati e snapshot del wizard preservati.
 Regressioni: suite Identity, wizard/media, pubblicazione/GEO/SEO e driver di deploy con drift-stop e rollback.
 Il collaudo browser effettivo sulla connessione QA autorizzata resta necessario; i test automatici non lo sostituiscono.
+
+## Rilascio verificato
+- Candidato finale: `2a17dc0a62f1efc0ca38013df3caeb619a7d67d0`.
+- [CI e deploy 42251289239](https://github.com/Ciborio71/BadAround/actions/runs/42251289239): identity-primitives PASS, identity-mysql PASS, identity-access-release PASS.
+- Confrontati prima del rilascio tutti gli 86 moduli PHP/JS precedenti e il CSS Identity; verificato l'entrypoint Core congelato.
+- 22 file del candidato installati con backup verificati fuori webroot, permessi preservati, sostituzioni atomiche e lettura successiva coincidente. Tre nuovi moduli portano l'inventario PHP/JS a 89.
+- Suite remota JavaScript: 41 + 19 test, tutti PASS (60 complessivi).
+- Suite PHP Identity e integrazione MySQL PASS; nuova suite accesso superata su SQLite e MySQL. In locale superati tutti i 54 script PHP corrispondenti alla CI primitive.
+- Driver di deploy: successo, stop prima delle scritture in caso di drift e rollback dopo errore di sostituzione, PASS.
+- Corretta la gestione degli errori finali del server su campi di step precedenti, preservando il controllo dei campi effettivamente attivi.
+- Ordinata esplicitamente l'introspezione delle colonne per posizione, eliminando la dipendenza da un ordine non garantito di information_schema; nessuna modifica dello schema.
+- Dopo il rilascio: Home, wizard e pagina QA restano in manutenzione 503 per l'esterno; nuovo asset JS disponibile 200; discovery 200. Nessun errore PHP fatale nelle risposte verificate.
+- Conteggi online conservati: 85 report, 1 identità, 1 sessione, 23 eventi pubblicati. Nessun reset eseguito.
+
+## Collaudo live ancora necessario
+La consegna certifica codice, test automatici e file installati. Non dichiara completata la prova browser autenticata o una nuova consegna reale di OTP.
+Dalla connessione QA autorizzata: ricaricare la pagina, uscire dall'Identity, compilare il wizard con immagine, verificare l'unico codice a sei cifre richiesto al riepilogo e completare invio, moderazione e pubblicazione SEO. Provare anche errore/reinvio del codice e modifica concorrente.
+Fuori dal perimetro QA resta tutto disabilitato come prima; prima dell'apertura pubblica rimangono i gate già concordati, compresa l'informativa definitiva.
