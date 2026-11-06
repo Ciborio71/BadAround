@@ -17,11 +17,14 @@ def main():
     candidate={n:(ROOT/'wordpress'/n).read_bytes() for n in FILES}
     css='themes/badaround-child/assets/css/pages.css'
     if not candidate[css].startswith(prior[css]):raise RuntimeError('Unscoped CSS rewrite')
+    selected=[n for n in FILES if prior[n]!=candidate[n]]
+    if not selected:raise RuntimeError('No changed runtime files')
+    guard.FILES=selected
     ftp=ftplib.FTP_TLS(context=ssl.create_default_context(cafile=os.environ['FTP_TLS_CA_FILE']),timeout=45)
     try:
         ftp.connect('46.231.24.137',21);ftp.host='hostmld17.aziendeitalia.com'
         ftp.login(os.environ['FTP_USER'],os.environ['FTP_PASSWORD']);ftp.prot_p()
-        evidence=guard.release(ftp,prior,candidate,os.environ['GITHUB_RUN_ID'])
+        evidence=guard.release(ftp,{n:prior[n] for n in selected},{n:candidate[n] for n in selected},os.environ['GITHUB_RUN_ID'])
         print('EVENT_DETAIL_RELEASE_PASS');print(json.dumps(evidence,sort_keys=True))
     finally:
         try:ftp.quit()

@@ -121,12 +121,13 @@ final class BadAround_Event_SEO {
         $templates = self::templates();
         $template = $templates[$key] ?? array($fallback, sanitize_title($fallback), 'Dettagli della segnalazione');
         $subject = $template[0]; $detail = '';
+        $color=self::text(get_post_meta($id,'_ba_vehicle_color',true));
         if ( 0 === strpos((string)$key, 'vehicle_') ) {
             $make = self::text(get_post_meta($id,'_ba_vehicle_make',true));
             $model = self::text(get_post_meta($id,'_ba_vehicle_model',true));
             $detail = trim(ucfirst($make).' '.ucfirst($model));
-            if ( $detail && 'vehicle_stolen' === $key ) { $subject = $detail.' — veicolo segnalato rubato'; }
-            elseif ( $detail ) { $subject = $detail.' — '.lcfirst($subject); }
+            if ( $detail && 'vehicle_stolen' === $key ) { $subject = $detail.($color?', colore '.lcfirst($color):'').' — veicolo segnalato rubato'; }
+            elseif ( $detail ) { $subject = $detail.($color?', colore '.lcfirst($color):'').' — '.lcfirst($subject); }
         }
         $zone='';
         foreach($places as $term){$chain=get_ancestors($term->term_id,'ba_territorio','taxonomy');if(get_post_status($id)==='publish'&&count($chain)>=3&&self::text($term->name)!==$municipality){$zone=self::text($term->name);break;}}

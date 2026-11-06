@@ -34,4 +34,8 @@ $GLOBALS['denied']=['ba_view_private_reports'];check(is_wp_error(BadAround_Event
 g5seed(9301,'approximate_area','approximate_area');check($svc->publish(9301)===true,'approximate fixture published');
 $p=BadAround_Event_Public_Details::candidate(9301);
 check(is_wp_error(BadAround_Event_Public_Details::approve(9301,$p['source_hash'],true,true)),'approximate area cannot disclose exact address');
+$GLOBALS['term_meta'][11]['_ba_canonical_event_key']='vehicle_stolen';
+$GLOBALS['meta'][9300]['_ba_vehicle_make']='Honda';$GLOBALS['meta'][9300]['_ba_vehicle_model']='SH';$GLOBALS['meta'][9300]['_ba_vehicle_color']='Bianco';
+$frozen=get_post_meta(9300,'_ba_seo_slug',true);$seo=BadAround_Event_SEO::project(9300);
+check(str_contains($seo['h1'],'colore bianco')&&get_post_meta(9300,'_ba_seo_slug',true)===$frozen,'public color enriches H1 without changing frozen URL');
 echo "EVENT_PUBLIC_DETAILS_SUITE_PASS\n";

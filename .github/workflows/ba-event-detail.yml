@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: 7759688cdf7033e7b7798856e2630e636a492ea7
+          ref: 12dad5863dae7864752ac1e0886a6789e8ebf0b5
           path: prior-source
           persist-credentials: false
       - name: Verify publication, GEO, privacy and detail projection
