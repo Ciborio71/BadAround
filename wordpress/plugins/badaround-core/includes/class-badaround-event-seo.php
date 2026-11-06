@@ -128,11 +128,18 @@ final class BadAround_Event_SEO {
             if ( $detail && 'vehicle_stolen' === $key ) { $subject = $detail.' — veicolo segnalato rubato'; }
             elseif ( $detail ) { $subject = $detail.' — '.lcfirst($subject); }
         }
-        $h1 = $subject.' a '.$municipality;
+        $zone='';
+        foreach($places as $term){$chain=get_ancestors($term->term_id,'ba_territorio','taxonomy');if(get_post_status($id)==='publish'&&count($chain)>=3&&self::text($term->name)!==$municipality){$zone=self::text($term->name);break;}}
+        $h1 = $subject.' a '.$municipality.($zone?' — zona '.$zone:'');
         $state = get_post_meta($id,'_ba_event_status',true);
         $state_labels = array('resolved'=>'Risolto','closed'=>'Chiuso','archived'=>'Archiviato','expired'=>'Scaduto');
         if ( isset($state_labels[$state]) ) { $h1 .= ' — '.$state_labels[$state]; }
-        $intro = $h1.'.';
+        $public_details=class_exists('BadAround_Event_Public_Details')?BadAround_Event_Public_Details::view($id):array();
+        $intro = 'Segnalazione relativa a '.lcfirst($template[0]).' nel comune di '.$municipality.'.';
+        if($detail){$intro.=' Veicolo: '.$detail.'.';}
+        $color=self::text(get_post_meta($id,'_ba_vehicle_color',true));
+        if($detail&&$color){$intro.=' Colore: '.lcfirst($color).'.';}
+        if(!empty($public_details['seeking_witnesses'])&&!in_array($state,array('resolved','closed','archived','expired'),true)){$intro.=' L’autore cerca testimoni o informazioni utili.';}
         $date = (string)get_post_meta($id,'_ba_occurred_date',true);
         if ( preg_match('/^\d{4}-\d{2}-\d{2}$/D',$date) ) {
             $parts=explode('-',$date);
@@ -140,7 +147,10 @@ final class BadAround_Event_SEO {
         }
         return array('h1'=>$h1, 'title'=>$h1.' | BadAround',
             'description'=>$intro.' Consulta i dettagli pubblici della segnalazione su BadAround.',
-            'intro'=>$intro, 'heading'=>$template[2],
+            'intro'=>$intro, 'heading'=>$detail?'Caratteristiche del veicolo '.$detail:$template[2],
+            'prose_heading'=>'Dettagli della segnalazione',
+            'location_heading'=>'Luogo e periodo della segnalazione a '.$municipality,
+            'witness_heading'=>$detail?'Hai visto questo '.$detail.'?':'Hai informazioni su questa segnalazione?',
             'slug'=>sanitize_title($template[1].'-'.$municipality.($detail?'-'.$detail:'')));
     }
     public static function freeze( $id ) {

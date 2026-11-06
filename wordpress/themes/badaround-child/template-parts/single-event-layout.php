@@ -5,6 +5,7 @@ the_post();
 
 $post_id = get_the_ID();
 $title   = get_the_title();
+$public_details=class_exists('BadAround_Event_Public_Details')?BadAround_Event_Public_Details::view($post_id):array();
 $event_seo = class_exists('BadAround_Event_SEO') && BadAround_Event_SEO::active($post_id) ? BadAround_Event_SEO::project($post_id) : null;
 if (is_wp_error($event_seo)) { $event_seo=null; }
 if ($event_seo) { $title=$event_seo['h1']; }
@@ -69,6 +70,14 @@ $status = isset( $status_labels[ $event_status ] ) ? $status_labels[ $event_stat
 $event_date = sanitize_text_field( (string) get_post_meta( $post_id, '_ba_occurred_date', true ) );
 $event_time = sanitize_text_field( (string) get_post_meta( $post_id, '_ba_occurred_time', true ) );
 $event_when = trim( $event_date . ( $event_time ? ' · ' . $event_time : '' ) );
+if($event_date && preg_match('/^\d{4}-\d{2}-\d{2}$/D',$event_date)){$event_when=implode('/',array_reverse(explode('-',$event_date))).($event_time?' · '.$event_time:'');}
+$time_details=$public_details['time']??array();
+if(!$event_when && !empty($time_details['date']))$event_when=implode('/',array_reverse(explode('-',$time_details['date'])));
+if(($time_details['knowledge']??'')==='range'&&!empty($time_details['range_start'])&&!empty($time_details['range_end']))$event_when.=' · tra le '.$time_details['range_start'].' e le '.$time_details['range_end'];
+if(!$event_when && !empty($time_details['approximate_period']))$event_when=$time_details['approximate_period']==='unknown'?'Periodo non specificato':(function_exists('badaround_native_report_option_label')?badaround_native_report_option_label('time.approximate_period',$time_details['approximate_period']):'Periodo indicativo');
+if(!empty($time_details['approximate_period'])&&$time_details['approximate_period']!=='unknown'&&!empty($time_details['reference_date'])&&preg_match('/^\d{4}-\d{2}-\d{2}$/D',$time_details['reference_date']))$event_when.=' (rispetto alla segnalazione del '.implode('/',array_reverse(explode('-',$time_details['reference_date']))).')';
+$seeking_witnesses=!empty($public_details['seeking_witnesses'])&&!in_array($event_status,array('resolved','closed','archived','expired'),true);
+$public_address=$public_details['address']??'';
 
 $content_text = trim( wp_strip_all_tags( get_post_field( 'post_content', $post_id ) ) );
 $has_content  = '' !== $content_text;
@@ -121,6 +130,12 @@ if ( $plate_masked ) {
 	$public_specific['Targa'] = $plate_masked;
 }
 
+foreach(($public_details['facts']??array()) as $path=>$fact){
+    $value=$fact['value'];
+    if(function_exists('badaround_native_report_option_label'))$value=badaround_native_report_option_label($path,$value);
+    $public_specific[$fact['label']]=$value;
+}
+
 $summary_facts = array();
 if ( $category ) {
 	$summary_facts['Categoria'] = $category;
@@ -163,6 +178,7 @@ if ( $status ) {
 				</div>
 
 				<h1><?php echo esc_html( $title ); ?></h1>
+                <?php if($seeking_witnesses): ?><p class="ba-event-witness-badge"><strong>Si cercano testimoni</strong> · Hai visto qualcosa o hai informazioni utili?</p><?php endif; ?>
                 <?php if ($event_seo) : ?><p class="ba-event-intro"><?php echo esc_html($event_seo['intro']); ?></p><?php endif; ?>
 
 				<?php if ( $public_location || $event_when ) : ?>
@@ -198,7 +214,7 @@ if ( $status ) {
 				<?php if ( $has_content ) : ?>
 					<section class="ba-card ba-event-section">
 						<div class="ba-event-section__head">
-							<h2><?php echo $event_seo ? 'Cosa è stato segnalato' : 'Che cosa è successo'; ?></h2>
+							<h2><?php echo esc_html($event_seo['prose_heading'] ?? 'Che cosa è successo'); ?></h2>
 							<span class="ba-event-section__eyebrow">Informazione pubblica moderata</span>
 						</div>
 						<div class="ba-event-prose"><?php the_content(); ?></div>
@@ -209,12 +225,13 @@ if ( $status ) {
 					<section class="ba-card ba-event-section ba-event-territory">
 						<div class="ba-event-section__head">
 							<div>
-								<h2><?php echo $event_seo ? 'Dove e quando' : 'Dove è successo'; ?></h2>
-								<p>BadAround mostra solo la posizione destinata alla pubblicazione. L'indirizzo preciso, quando riservato, non viene esposto.</p>
+								<h2><?php echo esc_html($event_seo['location_heading'] ?? 'Dove è successo'); ?></h2>
+								<p><?php echo $public_address?'Indirizzo e posizione destinati alla pubblicazione.':'BadAround mostra solo la posizione destinata alla pubblicazione. L’indirizzo preciso, quando riservato, non viene esposto.'; ?></p>
 							</div>
 						</div>
 
-						<?php if ($event_seo && $event_when) : ?><p><?php echo esc_html($event_when); ?></p><?php endif; ?>
+						<?php if ($public_address) : ?><p class="ba-event-public-address"><strong>Indirizzo:</strong> <?php echo esc_html($public_address); ?></p><?php endif; ?>
+                        <?php if ($event_when) : ?><p><?php echo esc_html($event_when); ?></p><?php endif; ?>
 						<?php if ( ! empty( $territory_path ) ) : ?>
 							<ol class="ba-territory-path" aria-label="Gerarchia territoriale">
 								<?php foreach ( $territory_path as $index => $territory_item ) : ?>
@@ -255,7 +272,8 @@ if ( $status ) {
 						</dl>
 					</section>
 				<?php endif; ?>
-				<?php if ( class_exists( 'BadAround_Contribution_Service' ) ) { BadAround_Contribution_Service::render_event_contribution_block( $post_id ); } ?>
+				<?php if($seeking_witnesses): ?><section class="ba-card ba-event-section ba-event-witness-callout"><h2><?php echo esc_html($event_seo['witness_heading']??'Hai informazioni su questa segnalazione?'); ?></h2><p>L’autore cerca testimoni. Se hai assistito all’evento o disponi di informazioni utili, puoi inviare un contributo tramite BadAround.</p><a class="ba-button" href="#contribuisci">Fornisci informazioni utili</a><p>Non inserire recapiti o altri dati personali nei commenti pubblici.</p></section><?php endif; ?>
+                <?php if ( class_exists( 'BadAround_Contribution_Service' ) ) { BadAround_Contribution_Service::render_event_contribution_block( $post_id ); } ?>
 			</div>
 
 			<aside class="ba-event-aside" aria-label="Riepilogo evento">

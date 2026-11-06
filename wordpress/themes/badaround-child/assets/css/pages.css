@@ -192,3 +192,13 @@
 /* B4 public approximate map */
 .ba-event-location-map{position:relative;width:100%;height:320px;margin:0 0 14px;overflow:hidden;border:1px solid #dce8ed;border-radius:16px;background:#e8f1f4}
 @media(max-width:720px){.ba-event-location-map{height:260px;border-radius:13px}}
+
+/* EVENT-DETAIL-02 — wide hero and visible witness request. */
+.ba-event-hero > .ba-container{width:calc(100% - 48px);max-width:none;margin-inline:auto}
+.ba-event-hero__copy{width:100%;min-width:0}
+.ba-event-hero h1{width:100%;max-width:none;word-break:normal;overflow-wrap:break-word;text-wrap:wrap}
+.ba-event-witness-badge{display:block;width:fit-content;max-width:100%;margin:18px 0 12px;padding:12px 16px;border:1px solid #a8dde3;border-left:5px solid #0798a8;border-radius:10px;background:#eef9fa;color:#071a38;font-size:1rem;line-height:1.5}
+.ba-event-witness-callout{border-left:5px solid #0798a8}
+.ba-event-witness-callout h2{margin-top:0}
+.ba-event-public-address{font-size:1.08rem;line-height:1.6}
+@media(max-width:720px){.ba-event-hero > .ba-container{width:calc(100% - 32px)}}

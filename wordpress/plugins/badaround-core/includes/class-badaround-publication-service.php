@@ -5,6 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once __DIR__ . '/class-badaround-event-seo.php';
+require_once __DIR__ . '/class-badaround-event-public-details.php';
 require_once __DIR__ . '/class-badaround-public-geo-contract.php';
 require_once __DIR__ . '/class-badaround-public-geo-projection.php';
 
@@ -43,6 +44,7 @@ class BadAround_Publication_Service {
 
 	public static function register_geo_guards() {
 		BadAround_Event_SEO::register_hooks();
+        BadAround_Event_Public_Details::register_hooks();
 		foreach ( array( 'add_post_metadata', 'update_post_metadata', 'delete_post_metadata' ) as $hook ) {
 			add_filter( $hook, array( __CLASS__, 'guard_geo_write' ), 999, 5 );
 		}
@@ -353,8 +355,12 @@ class BadAround_Publication_Service {
 
 		$seo_projection = BadAround_Event_SEO::active( $event_id ) ? BadAround_Event_SEO::project( $event_id ) : array();
         if ( is_wp_error( $seo_projection ) ) { return $seo_projection; }
+        $public_details=BadAround_Event_Public_Details::view($event_id);
+        $approved_address=$public_details['address']??'';
+        $detail_text=implode(' ',array_column($public_details['facts']??[],'value'));
 		$public_text = strtolower( implode( "\n", array_filter( array(
 			$title,
+            $detail_text,
 			implode( ' ', $seo_projection ),
 			$content,
 			$place_name,
@@ -362,13 +368,21 @@ class BadAround_Publication_Service {
 			(string) get_post_meta( $event_id, '_ba_vehicle_plate_masked', true ),
 		) ) ) );
 
+        $public_text_without_address=$public_text;
+        $public_text .= '\n'.strtolower($approved_address);
 		$private_identity = trim( strtolower( trim( (string) $report->author_name . ' ' . (string) $report->author_surname ) ) );
-		foreach ( array( $private_identity, $report->author_email, $report->author_phone, $report->exact_address ) as $private_value ) {
+		foreach ( array( $private_identity, $report->author_email, $report->author_phone ) as $private_value ) {
 			$private_value = trim( strtolower( (string) $private_value ) );
 			if ( strlen( $private_value ) >= 5 && false !== strpos( $public_text, $private_value ) ) {
 				return new WP_Error( 'ba_publication_private_data_detected', __( 'La proiezione pubblica contiene dati del report riservato.', 'badaround-core' ) );
 			}
 		}
+
+        // Explicit authorization applies only to the sealed address field, never to prose, SEO or other data.
+        $private_address=trim(strtolower((string)$report->exact_address));
+        if(strlen($private_address)>=5 && strpos($public_text_without_address,$private_address)!==false){
+            return new WP_Error('ba_publication_private_data_detected',__('La proiezione pubblica contiene dati del report riservato.','badaround-core'));
+        }
 
 		if ( $explicit_exact ) {
 			$verified = BadAround_Public_Geo_Projection::verified( $event_id );
@@ -894,6 +908,33 @@ class BadAround_Publication_Service {
 		if ( ! $was_published ) { do_action( 'badaround_event_published', $event_id ); }
 		return true;
 	}
+
+    /** Atomic, capability-checked public detail review. No intake, GEO, slug or status writes. */
+    public function apply_public_details($id,$stored,$expected_source) {
+        global $wpdb;$id=absint($id);
+        if(!current_user_can('ba_moderate_events')||!current_user_can('publish_ba_eventi')||!current_user_can('ba_view_private_reports')||!current_user_can('edit_post',$id))return $this->geo_error('detail_forbidden');
+        foreach([$wpdb->posts,$wpdb->postmeta,$wpdb->prefix.'ba_reports',$wpdb->prefix.'ba_audit_log'] as $table){
+            if($wpdb->get_var($wpdb->prepare('SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=%s',$table))!=='InnoDB')return $this->geo_error('detail_transaction_unavailable');
+        }
+        if(false===$wpdb->query('START TRANSACTION'))return $this->geo_error('detail_storage');
+        $committed=false;$previous=$this->b3_event;
+        try {
+            $post=$wpdb->get_row($wpdb->prepare("SELECT ID,post_type,post_status FROM {$wpdb->posts} WHERE ID=%d FOR UPDATE",$id));
+            clean_post_cache($id);
+            if(!$post||$post->post_type!=='ba_evento'||$post->post_status!=='publish'||get_post_meta($id,'_ba_moderation_status',true)!=='published')return $this->geo_error('detail_state');
+            $primary=absint(get_post_meta($id,'_ba_primary_report_id',true));
+            $report=$wpdb->get_row($wpdb->prepare("SELECT content_original FROM {$wpdb->prefix}ba_reports WHERE id=%d AND event_id=%d AND deleted_at IS NULL FOR UPDATE",$primary,$id));
+            if(!$report||!is_string($expected_source)||!hash_equals(hash('sha256',$report->content_original),$expected_source))return $this->geo_error('detail_stale');
+            $this->b3_event=self::uses_versioned_geo($id)?$id:0;
+            update_post_meta($id,BadAround_Event_Public_Details::META,$stored);
+            if(get_post_meta($id,BadAround_Event_Public_Details::META,true)!==$stored||BadAround_Event_Public_Details::view($id)!==($stored['data']??null))return $this->geo_error('detail_signature');
+            $valid=$this->validate_public_projection($id,true);if(is_wp_error($valid))return $valid;
+            if(false===BadAround_Audit_Log::record('event',$id,'public_details_approved','moderation',empty($stored['data']['address'])?'public_facts_only':'explicit_address_authorization'))return $this->geo_error('detail_audit');
+            if(false===$wpdb->query('COMMIT'))return $this->geo_error('detail_storage');
+            $committed=true;return true;
+        } catch(Throwable $e){return $this->geo_error('detail_storage');}
+        finally{$this->b3_event=$previous;if(!$committed)$wpdb->query('ROLLBACK');clean_post_cache($id);}
+    }
 
 	/** Identity review owns the surrounding transaction and the intent CAS.
 	 * Validate a candidate before any public write; never change canonical intake or GEO.
