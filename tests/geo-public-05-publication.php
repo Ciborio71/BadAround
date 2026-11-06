@@ -7,6 +7,10 @@ function sanitize_key($v){return strtolower(preg_replace('/[^a-z0-9_\\-]/i','',(
 function sanitize_text_field($v){return trim(strip_tags((string)$v));}
 function wp_strip_all_tags($v){return strip_tags((string)$v);}
 function wp_kses_post($v){return $v;}
+function sanitize_title($v){return trim(strtolower(preg_replace('/[^a-zA-Z0-9]+/','-',iconv('UTF-8','ASCII//TRANSLIT',$v))),'-');}
+function wp_generate_uuid4(){return bin2hex(random_bytes(16));}
+function wp_unique_post_slug($slug,$id,$status,$type,$parent){foreach($GLOBALS['posts'] as $p){if($p->ID!==$id&&($p->post_name??'')===$slug)return $slug.'-2';}return $slug;}
+
 function is_wp_error($v){return $v instanceof WP_Error;}
 class WP_Error {private $c;function __construct($c,$m=''){$this->c=$c;}function get_error_code(){return $this->c;}}
 class WP_Term {public $term_id,$parent,$slug,$name,$taxonomy='ba_territorio';function __construct($id,$parent,$name,$taxonomy='ba_territorio'){$this->term_id=$id;$this->parent=$parent;$this->name=$name;$this->slug=strtolower($name);$this->taxonomy=$taxonomy;}}
@@ -49,7 +53,7 @@ function seed($id,$territory=4,$mode='f16-c8',$date='',$coords=[]){
 class Geo05DB extends DB {
  public $posts='wp_posts',$term_relationships='wp_term_relationships',$last_error='',$snapshot;
  function prepare($sql,...$args){foreach($args as $arg){$v=is_int($arg)?(string)$arg:"'".str_replace("'","''",$arg)."'";$sql=preg_replace('/%[ds]/',$v,$sql,1);}return $sql;}
- function get_var($sql){if(str_contains($sql,'information_schema'))return 'InnoDB';if(str_contains($sql,'JSON_CONTAINS_PATH')){ $l=json_decode($GLOBALS['private_fixture']['content_original']??'',true)['canonical']['location']??[];return (int)(isset($l['public_location_request'])||isset($l['public_location_request_version']));}return 0;}
+ function get_var($sql){if(str_contains($sql,'GET_LOCK')||str_contains($sql,'RELEASE_LOCK'))return 1;if(str_contains($sql,'information_schema'))return 'InnoDB';if(str_contains($sql,'JSON_CONTAINS_PATH')){ $l=json_decode($GLOBALS['private_fixture']['content_original']??'',true)['canonical']['location']??[];return (int)(isset($l['public_location_request'])||isset($l['public_location_request_version']));}return 0;}
  function get_row($sql){if(str_contains($sql,'FROM wp_posts')){preg_match('/ID=(\d+)/',$sql,$m);return get_post((int)$m[1]);}return parent::get_row($sql);}
  function query($sql){if($sql==='START TRANSACTION')$this->snapshot=serialize([$GLOBALS['meta'],$GLOBALS['posts'],$GLOBALS['object_terms'],$GLOBALS['geo_audits']]);if($sql==='ROLLBACK')[$GLOBALS['meta'],$GLOBALS['posts'],$GLOBALS['object_terms'],$GLOBALS['geo_audits']]=unserialize($this->snapshot);if($sql==='COMMIT'&&($GLOBALS['commit_fail']??false))return false;return 1;}
 }

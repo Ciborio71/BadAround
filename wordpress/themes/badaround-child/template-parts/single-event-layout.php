@@ -5,6 +5,9 @@ the_post();
 
 $post_id = get_the_ID();
 $title   = get_the_title();
+$event_seo = class_exists('BadAround_Event_SEO') && BadAround_Event_SEO::active($post_id) ? BadAround_Event_SEO::project($post_id) : null;
+if (is_wp_error($event_seo)) { $event_seo=null; }
+if ($event_seo) { $title=$event_seo['h1']; }
 
 $deepest_term = static function ( $terms, $taxonomy ) {
 	if ( is_wp_error( $terms ) || empty( $terms ) ) {
@@ -160,6 +163,7 @@ if ( $status ) {
 				</div>
 
 				<h1><?php echo esc_html( $title ); ?></h1>
+                <?php if ($event_seo) : ?><p class="ba-event-intro"><?php echo esc_html($event_seo['intro']); ?></p><?php endif; ?>
 
 				<?php if ( $public_location || $event_when ) : ?>
 					<div class="ba-event-meta">
@@ -185,7 +189,8 @@ if ( $status ) {
 		<div class="ba-container ba-event-layout">
 			<div class="ba-event-main">
 				<?php if ( $detail_image ) : ?>
-					<figure class="ba-event-media">
+					<?php if ($event_seo && $has_thumb) : ?><h2>Immagini della segnalazione</h2><?php endif; ?>
+                    <figure class="ba-event-media">
 						<img src="<?php echo esc_url( $detail_image ); ?>" alt="<?php echo esc_attr( $has_thumb ? $title : 'BadAround — immagine segnalazione non disponibile' ); ?>" loading="eager" decoding="async">
 					</figure>
 				<?php endif; ?>
@@ -193,7 +198,7 @@ if ( $status ) {
 				<?php if ( $has_content ) : ?>
 					<section class="ba-card ba-event-section">
 						<div class="ba-event-section__head">
-							<h2>Che cosa è successo</h2>
+							<h2><?php echo $event_seo ? 'Cosa è stato segnalato' : 'Che cosa è successo'; ?></h2>
 							<span class="ba-event-section__eyebrow">Informazione pubblica moderata</span>
 						</div>
 						<div class="ba-event-prose"><?php the_content(); ?></div>
@@ -204,11 +209,12 @@ if ( $status ) {
 					<section class="ba-card ba-event-section ba-event-territory">
 						<div class="ba-event-section__head">
 							<div>
-								<h2>Dove è successo</h2>
+								<h2><?php echo $event_seo ? 'Dove e quando' : 'Dove è successo'; ?></h2>
 								<p>BadAround mostra solo la posizione destinata alla pubblicazione. L'indirizzo preciso, quando riservato, non viene esposto.</p>
 							</div>
 						</div>
 
+						<?php if ($event_seo && $event_when) : ?><p><?php echo esc_html($event_when); ?></p><?php endif; ?>
 						<?php if ( ! empty( $territory_path ) ) : ?>
 							<ol class="ba-territory-path" aria-label="Gerarchia territoriale">
 								<?php foreach ( $territory_path as $index => $territory_item ) : ?>
@@ -239,7 +245,7 @@ if ( $status ) {
 				<?php if ( ! empty( $public_specific ) ) : ?>
 					<section class="ba-card ba-event-section">
 						<div class="ba-event-section__head">
-							<h2>Dettagli utili</h2>
+							<h2><?php echo esc_html($event_seo ? $event_seo['heading'] : 'Dettagli utili'); ?></h2>
 							<span class="ba-event-section__eyebrow">Dati pubblicabili</span>
 						</div>
 						<dl class="ba-event-facts">

@@ -4,6 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/class-badaround-event-seo.php';
 require_once __DIR__ . '/class-badaround-public-geo-contract.php';
 require_once __DIR__ . '/class-badaround-public-geo-projection.php';
 
@@ -41,6 +42,7 @@ class BadAround_Publication_Service {
 	}
 
 	public static function register_geo_guards() {
+		BadAround_Event_SEO::register_hooks();
 		foreach ( array( 'add_post_metadata', 'update_post_metadata', 'delete_post_metadata' ) as $hook ) {
 			add_filter( $hook, array( __CLASS__, 'guard_geo_write' ), 999, 5 );
 		}
@@ -349,8 +351,11 @@ class BadAround_Publication_Service {
 			return new WP_Error( 'ba_publication_private_report_missing', __( 'Il report riservato collegato non è disponibile.', 'badaround-core' ) );
 		}
 
+		$seo_projection = BadAround_Event_SEO::active( $event_id ) ? BadAround_Event_SEO::project( $event_id ) : array();
+        if ( is_wp_error( $seo_projection ) ) { return $seo_projection; }
 		$public_text = strtolower( implode( "\n", array_filter( array(
 			$title,
+			implode( ' ', $seo_projection ),
 			$content,
 			$place_name,
 			(string) get_post_meta( $event_id, '_ba_public_address', true ),
@@ -697,6 +702,8 @@ class BadAround_Publication_Service {
 			return new WP_Error( 'ba_publication_transition_not_allowed', __( 'La pubblicazione è consentita solo dallo stato Approvato.', 'badaround-core' ) );
 		}
 
+		$seo = BadAround_Event_SEO::prepare( $event_id );
+		if ( is_wp_error( $seo ) ) { return $seo; }
 		$valid = $this->validate_public_projection( $event_id );
 		if ( is_wp_error( $valid ) ) {
 			return $valid;
@@ -744,6 +751,9 @@ class BadAround_Publication_Service {
 		if ( ! get_post_meta( $event_id, '_ba_event_status', true ) ) {
 			update_post_meta( $event_id, '_ba_event_status', 'open' );
 		}
+
+		$seo_frozen = BadAround_Event_SEO::freeze( $event_id );
+		if ( is_wp_error($seo_frozen) ) { wp_update_post(array('ID'=>$event_id,'post_status'=>'pending')); return $seo_frozen; }
 
 		$publication_audit = BadAround_Audit_Log::transition(
 			'event',
