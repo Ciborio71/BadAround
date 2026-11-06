@@ -31,7 +31,7 @@ class ReviewReleaseTests(TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
         prior_names = [p.name for p in (ROOT/release.guard.MODULES).iterdir()
-                       if p.suffix in ('.php','.js') and p.name != 'wordpress-community-review.php']
+                       if p.suffix in ('.php','.js') and p.name not in {'wordpress-community-review.php','unified-access.php','wordpress-access-rest.php','identity-access.js'}]
         self.assertEqual(len(prior_names),85)
         self.prior = {name: b'old-module-'+name.encode() for name in prior_names}
         self.candidate = {name:b'new-module-'+name.encode() for name in release.guard.FILES}
