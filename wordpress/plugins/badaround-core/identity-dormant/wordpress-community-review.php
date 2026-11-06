@@ -100,7 +100,7 @@ final class BadAround_Identity_Community_Review {
         if (!self::enabled() || !current_user_can('ba_moderate_contributions')
             || !current_user_can('ba_view_private_reports'))wp_die('Accesso non disponibile.');
         nocache_headers();
-        echo '<div class="wrap"><h1>Proposte Identity</h1>';
+        echo '<div class="wrap ba-identity-review"><h1>Proposte Identity</h1>';
         if (isset($_GET['result']))echo '<p role="status">'.esc_html($_GET['result']==='ok'
             ?'Operazione completata.':'Operazione non completata. Controlla accesso, versione e dati pubblicabili.').'</p>';
         if ($this->moderator()===null) {

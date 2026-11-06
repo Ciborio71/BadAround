@@ -1,0 +1,40 @@
+/* Identity feedback only; no global typography or form changes. */
+.ba-identity-portal [role="status"]:not(:empty),
+.ba-identity-community [role="status"]:not(:empty),
+.ba-identity-review [role="status"]:not(:empty) {
+  display: block;
+  box-sizing: border-box;
+  max-width: 100%;
+  margin: 18px 0;
+  padding: 16px 20px;
+  border: 1px solid #99dce3;
+  border-left: 5px solid #0799aa;
+  border-radius: 10px;
+  background: #ecf8fa !important;
+  color: #102443 !important;
+  font-size: 18px !important;
+  font-weight: 650;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.ba-identity-portal [role="status"]:empty,
+.ba-identity-community [role="status"]:empty,
+.ba-identity-review [role="status"]:empty { display: none; }
+.ba-identity-review .card {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1100px;
+}
+.ba-identity-review textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  resize: vertical;
+}
+@media (max-width: 600px) {
+  .ba-identity-portal [role="status"]:not(:empty),
+  .ba-identity-community [role="status"]:not(:empty),
+  .ba-identity-review [role="status"]:not(:empty) { padding: 14px 16px; }
+}

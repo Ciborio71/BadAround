@@ -26,7 +26,21 @@ final class BadAround_Identity_WordPress_Portal {
     public static function register_hooks():bool {
         if (!self::enabled() || !function_exists('add_shortcode')) {return false;}
         add_shortcode(self::SHORTCODE,[self::class,'render']);
+        if (function_exists('add_action')) {
+            add_action('wp_enqueue_scripts',[self::class,'enqueue_feedback']);
+            add_action('admin_enqueue_scripts',[self::class,'enqueue_admin_feedback']);
+        }
         return true;
+    }
+
+    public static function enqueue_feedback():void {
+        if (!self::enabled() || !defined('BADAROUND_CORE_FILE')
+            || !function_exists('wp_enqueue_style') || !function_exists('plugins_url'))return;
+        wp_enqueue_style('badaround-identity-feedback',
+            plugins_url('identity-dormant/identity-feedback.css',BADAROUND_CORE_FILE),[],'0.1.0');
+    }
+    public static function enqueue_admin_feedback():void {
+        if (($_GET['page']??null)==='ba-identity-review')self::enqueue_feedback();
     }
 
     public static function render():string {
