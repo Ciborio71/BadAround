@@ -275,3 +275,9 @@
 
 /* Comment submit follows its label width on desktop and mobile. */
 .ba-event-detail #commenti[data-ba-comment-form]>form>button[type=submit]{width:fit-content;max-width:100%;justify-self:start;padding-inline:22px}
+
+/* Visible heading hierarchy on event detail pages. */
+.ba-event-detail .ba-event-section__head h2,.ba-event-detail .ba-event-summary h2,.ba-event-detail .ba-event-gallery h2,.ba-event-detail .ba-event-photo-panel>h2,.ba-event-detail .ba-contribution-cta h2{font-size:clamp(1.3rem,1vw + 1rem,1.55rem);font-weight:800;line-height:1.25}
+.ba-event-detail .ba-event-main>#commenti>h2{font-size:clamp(1.6rem,1.2vw + 1rem,2rem);font-weight:850;line-height:1.2;color:#071a38;margin:0 0 22px;padding-bottom:14px;border-bottom:2px solid #a5d1d8;overflow-wrap:anywhere}
+.ba-event-detail h3.ba-event-subheading{font-size:1.05rem;line-height:1.5}
+.ba-event-detail #commenti .ba-community-discussion>h3,.ba-event-detail #commenti>h3{font-size:1.15rem;font-weight:750;line-height:1.35}
