@@ -23,6 +23,12 @@ get_header();
 
 		</header>
 
+		<?php
+		if ( class_exists( 'BadAround_Identity_WordPress_Portal', false )
+			&& BadAround_Identity_WordPress_Portal::enabled() ) {
+			echo BadAround_Identity_WordPress_Portal::render_notice(); // Escaped by the Identity presenter.
+		}
+		?>
 		<div class="ba-report-stage"><?php get_template_part( 'template-parts/native-report/shell' ); ?></div>
 		
 		<footer class="ba-report-trust">

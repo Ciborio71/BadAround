@@ -1,0 +1,116 @@
+{
+  "date": "2026-11-06",
+  "scope": "production private QA only",
+  "public_release_complete": false,
+  "identity_php_scripts": {
+    "passed": 82,
+    "total": 82
+  },
+  "revision_authorization_checks": 12,
+  "private_maintenance_checks": 26,
+  "javascript_tests": {
+    "passed": 41,
+    "total": 41
+  },
+  "public_boundary_smoke": [
+    {
+      "path": "/",
+      "method": "GET",
+      "status": 503,
+      "cache_control": "no-cache, must-revalidate, max-age=0, no-store, private",
+      "content_type": "text/html; charset=UTF-8",
+      "has_identity_form": false,
+      "has_fatal_error": false
+    },
+    {
+      "path": "/mappa/",
+      "method": "GET",
+      "status": 503,
+      "cache_control": "no-cache, must-revalidate, max-age=0, no-store, private",
+      "content_type": "text/html; charset=UTF-8",
+      "has_identity_form": false,
+      "has_fatal_error": false
+    },
+    {
+      "path": "/radar/",
+      "method": "GET",
+      "status": 503,
+      "cache_control": "no-cache, must-revalidate, max-age=0, no-store, private",
+      "content_type": "text/html; charset=UTF-8",
+      "has_identity_form": false,
+      "has_fatal_error": false
+    },
+    {
+      "path": "/identity-qa/",
+      "method": "GET",
+      "status": 503,
+      "cache_control": "no-cache, must-revalidate, max-age=0, no-store, private",
+      "content_type": "text/html; charset=UTF-8",
+      "has_identity_form": false,
+      "has_fatal_error": false
+    },
+    {
+      "path": "/wp-json/badaround/v1/discovery",
+      "method": "GET",
+      "status": 200,
+      "cache_control": null,
+      "content_type": "application/json; charset=UTF-8",
+      "has_identity_form": false,
+      "has_fatal_error": false
+    },
+    {
+      "path": "/wp-json/badaround/v1/identity/session",
+      "method": "POST",
+      "status": 503,
+      "cache_control": null,
+      "content_type": "application/json; charset=UTF-8",
+      "has_identity_form": false,
+      "has_fatal_error": false
+    },
+    {
+      "path": "/wp-json/badaround-identity-qa/v1/reports",
+      "method": "POST",
+      "status": 503,
+      "cache_control": null,
+      "content_type": "application/json; charset=UTF-8",
+      "has_identity_form": false,
+      "has_fatal_error": false
+    }
+  ],
+  "public_discovery_identity_field_check": {
+    "check": "known private identity fields absent from public discovery",
+    "passed": true,
+    "unexpected_paths": []
+  },
+  "live_browser_registration_and_login": "verified identity and active session observed after user test",
+  "live_browser_new_report_comments_revisions_media": "not yet executed",
+  "public_moderation_projection_and_threads": "not certified",
+  "public_privacy_legal_review": "not verified",
+  "real_data_deletions": false,
+  "secrets_exported": false,
+  "external_forwarding_header_probes": [
+    {
+      "case": "baseline",
+      "http_status": 503,
+      "error_code": "badaround_maintenance",
+      "authenticated": null,
+      "private_session_route_blocked": true
+    },
+    {
+      "case": "forwarded_header",
+      "http_status": 503,
+      "error_code": "badaround_maintenance",
+      "authenticated": null,
+      "private_session_route_blocked": true
+    },
+    {
+      "case": "real_ip_header",
+      "http_status": 503,
+      "error_code": "badaround_maintenance",
+      "authenticated": null,
+      "private_session_route_blocked": true
+    }
+  ],
+  "community_ci_and_deploy": "PASS",
+  "media_ci_and_deploy": "PASS"
+}

@@ -1,6 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 $report_url = home_url( '/segnala-un-evento/' );
+$identity_ui = class_exists('BadAround_Identity_WordPress_Portal',false) && BadAround_Identity_WordPress_Portal::enabled();
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?>>
@@ -13,7 +14,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 <?php wp_body_open(); ?>
 <a class="ba-skip-link" href="#main-content"><?php esc_html_e( 'Vai al contenuto', 'badaround-child' ); ?></a>
 
-<header class="ba-site-header" data-ba-header>
+<header class="ba-site-header<?php echo $identity_ui ? ' ba-site-header--identity' : ''; ?>" data-ba-header>
 	<div class="ba-site-header__inner ba-container--wide">
 		<a class="ba-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php esc_attr_e( 'BadAround — Home', 'badaround-child' ); ?>">
 			<span class="ba-brand__mark" aria-hidden="true">
@@ -37,6 +38,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 		</nav>
 
 		<div class="ba-header-actions">
+            <?php if ($identity_ui) : ?><a class="ba-header-login" data-ba-account-link href="<?php echo esc_url(home_url('/identity-qa/')); ?>">Accedi</a><?php endif; ?>
 			<a class="ba-button ba-button--urgent ba-header-report" href="<?php echo esc_url( $report_url ); ?>">
 				<span class="ba-header-report__plus" aria-hidden="true">+</span>
 				Segnala un evento
@@ -49,6 +51,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 
 	<div class="ba-mobile-menu" id="ba-mobile-menu" hidden>
 		<nav aria-label="<?php esc_attr_e( 'Navigazione mobile', 'badaround-child' ); ?>">
+            <?php if ($identity_ui) : ?><a data-ba-account-link href="<?php echo esc_url(home_url('/identity-qa/')); ?>">Accedi</a><?php endif; ?>
 			<a href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Mappa</a>
 			<a href="<?php echo esc_url( home_url( '/radar-demo/' ) ); ?>"<?php echo is_page( 'radar-demo' ) ? ' aria-current="page"' : ''; ?>>Radar</a>
 			<a href="<?php echo esc_url( home_url( '/cerca/' ) ); ?>">Cerca</a>

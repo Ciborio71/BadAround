@@ -493,7 +493,7 @@
       back.disabled = model.step === 0 || model.busy || !!model.snapshot;
       next.hidden = current === 'review'; next.disabled = model.busy || !!model.snapshot;
       submit.hidden = current !== 'review'; submit.disabled = model.busy || model.completed || !!model.blocked;
-      submit.textContent = model.busy ? 'Invio in corso…' : model.snapshot ? 'Riprova invio' : 'Invia segnalazione';
+      submit.textContent = model.busy ? 'Invio in corso…' : model.snapshot ? 'Riprova invio' : config.identityQa===true ? 'Conferma e invia' : 'Invia segnalazione';
       form.setAttribute('aria-busy', String(model.busy));
       syncSubmissionFeedback();
       smartAddress?.syncVisibility?.();
@@ -526,7 +526,7 @@
         catch (_) { window.scrollTo(0,top); }
       }
     }
-    function displayErrors(errors) {
+    function displayErrors(errors, trustedServer = false) {
       // Keep the canonical validator untouched, but do not surface errors for
       // questions that progressive disclosure has not shown to the user yet.
       errors=errors.filter(error=>{
@@ -534,6 +534,7 @@
         if(!model.active(error.field))return false;
         if(declarationPaths.includes(error.field))return true;
         if(error.field==='location.public_location_request.radius_m')return model.publicLocationRequest==='approximate_area';
+        if(trustedServer)return true; // Final server validation may target an earlier, currently hidden step.
         const wrapper=wrappers.find(w=>w.dataset.nativeField===error.field);
         return !wrapper || (!wrapper.hidden && !wrapper.closest('[hidden]'));
       });
@@ -613,7 +614,21 @@
       if (!model.snapshot) {
         const mediaErrors=mediaView?.media.errors() || []; if (mediaErrors.length) return displayErrors(mediaErrors);
         const errors = model.validate(); if (errors.length) return displayErrors(errors);
-        const payload=model.payload();
+      }
+      const pendingPayload=model.snapshot || model.payload();
+      if(config.identityQa===true) {
+        model.busy=true;render();let authorized=false;
+        try {authorized=await window.BadAroundAccess?.ensureIdentity({...pendingPayload.reporter,
+          privacy_acknowledged:pendingPayload.consents?.privacy===true,can_edit_email:!model.snapshot});} catch {authorized=false;}
+        if(disposed)return;model.busy=false;
+        if(authorized!==true) {
+          if(authorized?.editEmail===true&&!model.snapshot){model.step=steps.indexOf('contact');render(true);wrappers.find(w=>w.dataset.nativeField==='reporter.email')?.querySelector('[data-native-input]')?.focus();}
+          else {render();displayErrors([{code:'identity_required',retryable:true,field:null}]);}
+          return;
+        }
+      }
+      if (!model.snapshot) {
+        const payload=pendingPayload;
         const descriptors=mediaView ? mediaView.media.freeze() : [];
         if (descriptors.length) { payload.media.items=descriptors;model.snapshot=ns.freezeMediaPayload(payload); }
         else model.snapshot=payload;
@@ -652,7 +667,7 @@
         } else if (validationRejection) { model.snapshot = null;mediaView?.media.unlock(); }
         else if (!result.error.retryable) model.blocked = true;
         // A locked snapshot must stay on review, where an allowed retry is reachable.
-        displayErrors([model.snapshot ? {...result.error, field:null} : editableMedia ? {...result.error,field:config.fields[result.error.field] ? result.error.field : 'media.availability'} : result.error]);
+        displayErrors([model.snapshot ? {...result.error, field:null} : editableMedia ? {...result.error,field:config.fields[result.error.field] ? result.error.field : 'media.availability'} : result.error], true);
       }
     });
     listen(container.querySelector('[data-native-new]'),'click', () => {

@@ -1,0 +1,106 @@
+name: BA-IDENTITY read-only reconciliation
+
+on:
+  push:
+    branches:
+      - reconcile/identity-production-baseline-20261104
+    paths:
+      - wordpress/plugins/badaround-core/badaround-core.php
+      - tools/ba_identity_readonly_inventory.py
+      - tests/test_ba_identity_readonly_inventory.py
+      - .github/workflows/ba-identity-readonly-inventory.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ba-identity-readonly-inventory-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout reconciliation sources
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify reconciled Core matches live production SHA256
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from hashlib import sha256
+          source = Path("wordpress/plugins/badaround-core/badaround-core.php").read_bytes()
+          expected = "18cb9ad21a63e08449eb85b7cb9233846bb02e2c472d05f118cd7d5764b7d175"
+          actual = sha256(source).hexdigest()
+          print("CORE_SHA256_MATCH=" + ("PASS" if actual == expected else "FAIL"))
+          if actual != expected:
+              raise SystemExit("Reconciliation Core hash differs from live production")
+          PY
+      - name: PHP syntax check for full reconciled plugin and child theme
+        run: |
+          find wordpress/plugins/badaround-core wordpress/themes/badaround-child -type f -name '*.php' -print0 | xargs -0 -n 1 php -l
+      - name: Check syntax and read-only behavior without credentials
+        run: |
+          python3 -m py_compile tools/ba_identity_readonly_inventory.py
+          python3 -m unittest discover -s tests -p "test_ba_identity_readonly_inventory.py" -v
+
+  compare-live-only-on-manual-dispatch:
+    if: github.event_name == 'workflow_dispatch'
+    needs: offline-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout release-based reconciliation branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout Identity prototype separately
+        uses: actions/checkout@v4
+        with:
+          ref: feature/ba-identity-01c-dormant-20261103
+          path: prototype-source
+          persist-credentials: false
+      - name: Read live file checksums without writing to FTPS
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 tools/ba_identity_readonly_inventory.py
+      - name: Compare full deployable plugin and child-theme source (read-only)
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 tools/ba_full_source_readonly_inventory.py
+      - name: Upload full source parity report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ba-full-source-readonly-parity
+          path: full-production-parity.json
+          retention-days: 7
+          if-no-files-found: error
+      - name: Recover exact live source candidates read-only
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: python3 tools/ba_live_source_recovery.py
+      - name: Save source custody artifacts for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: ba-live-source-recovery
+          path: |
+            ba-live-source-recovery.zip
+            ba-live-source-recovery-manifest.json
+          retention-days: 2
+          if-no-files-found: error
+      - name: Publish SHA256 diagnostic inventory only
+        uses: actions/upload-artifact@v4
+        with:
+          name: ba-identity-readonly-sha256-inventory
+          path: identity-reconciliation-inventory.json
+          if-no-files-found: error
+          retention-days: 7

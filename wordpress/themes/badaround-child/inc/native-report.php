@@ -207,7 +207,7 @@ function badaround_native_report_config() {
 		}
 	}
 	$fields = $ordered_fields;
-	return array(
+	$config = array(
 		'conditional' => array( 'sha256' => BadAround_Report_Conditional_Contract::SHA256, 'profiles' => $profiles ),
 		'emergencyNotice' => array( 'subtypes' => $emergency_subtypes, 'dangerValues' => array_values( array_unique( $danger_values ) ) ),
 		'smartAddress' => $smart_key ? array( 'key' => $smart_key, 'territories' => $territories, 'country' => 'IT' ) : null,
@@ -224,6 +224,14 @@ function badaround_native_report_config() {
 		'timezone' => wp_timezone_string(), 'fields' => $fields, 'categories' => $categories,
 		'steps' => array( 'event' => 'Cosa è successo', 'location' => 'Dove e quando', 'details' => 'Dettagli', 'media' => 'Immagini', 'contact' => 'Informazioni di contatto', 'review' => 'Riepilogo e invio' ),
 	);
+	// Identity private QA uses the existing wizard and canonical validator.
+	// Outside the server-authorized QA context the baseline stays unchanged.
+	if ( class_exists( 'BadAround_Identity_QA_Report_REST', false )
+		&& BadAround_Identity_QA_Report_REST::enabled() ) {
+		$config['endpoint'] = rest_url( 'badaround-identity-qa/v1/reports' );
+		$config['identityQa'] = true;
+	}
+	return $config;
 }
 
 function badaround_native_report_field( $path, $field ) {

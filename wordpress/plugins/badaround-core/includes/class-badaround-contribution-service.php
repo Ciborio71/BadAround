@@ -31,13 +31,13 @@ class BadAround_Contribution_Service {
 			'badaround-contributions',
 			plugins_url( 'assets/css/contributions.css', BADAROUND_CORE_FILE ),
 			array(),
-			BADAROUND_CORE_VERSION
+			(string) filemtime(__DIR__ . '/../assets/css/contributions.css')
 		);
 		wp_enqueue_script(
 			'badaround-contributions',
 			plugins_url( 'assets/js/contributions.js', BADAROUND_CORE_FILE ),
 			array(),
-			BADAROUND_CORE_VERSION,
+			(string) filemtime(__DIR__ . '/../assets/js/contributions.js'),
 			true
 		);
 	}
@@ -69,20 +69,21 @@ class BadAround_Contribution_Service {
 		);
 
 		echo '<section class="ba-card ba-event-section ba-contribution-box" id="contribuisci">';
-		echo '<div class="ba-contribution-cta"><div><h2>Sai qualcosa su questa segnalazione?</h2>';
+		echo '<div class="ba-contribution-cta"><div><h2>'.esc_html(apply_filters('badaround_event_contribution_heading','Sai qualcosa su questa segnalazione?',$event_id)).'</h2>';
 		echo '<p>Anche un piccolo dettaglio può essere utile. Puoi contribuire pubblicamente oppure inviare informazioni in forma riservata.</p></div>';
-		echo '<button type="button" class="ba-button ba-button--primary" data-ba-contribution-open aria-expanded="false">Condividi un’informazione</button></div>';
+		echo '<button type="button" class="ba-button ba-button--primary" data-ba-contribution-open aria-controls="ba-contribution-panel" aria-expanded="false">Condividi un’informazione</button></div>';
 
 		if ( $status && isset( $messages[ $status ] ) ) {
 			echo '<p class="ba-contribution-status" role="status">' . esc_html( $messages[ $status ] ) . '</p>';
 		}
 
-		echo '<div class="ba-contribution-panel" data-ba-contribution-panel hidden>';
+		echo '<div id="ba-contribution-panel" class="ba-contribution-panel" data-ba-contribution-panel hidden>';
 		echo '<form class="ba-contribution-form" data-ba-contribution-form method="post" enctype="multipart/form-data" action="' . esc_url( rest_url( self::REST_NAMESPACE . self::REST_ROUTE ) ) . '">';
 		echo '<input type="hidden" name="event_id" value="' . absint( $event_id ) . '">';
 		echo '<input type="hidden" name="consent_version" value="community-contribution-v1.0">';
 
-		echo '<label>Che tipo di informazione vuoi condividere?<select name="contribution_type" required>';
+		echo '<p class="ba-contribution-help">Descrivi ciò che sai. I campi indicati come obbligatori servono per gestire il contributo; gli altri sono facoltativi.</p><fieldset><legend>1. La tua informazione</legend>';
+		echo '<label>Tipo di informazione (obbligatorio)<select name="contribution_type" required>';
 		echo '<option value="">Seleziona…</option>';
 		echo '<option value="sighting">Ho visto qualcosa</option>';
 		echo '<option value="information">Ho informazioni utili</option>';
@@ -91,9 +92,9 @@ class BadAround_Contribution_Service {
 		echo '<option value="detail">Voglio aggiungere un dettaglio</option>';
 		echo '</select></label>';
 
-		echo '<label>Che cosa sai o hai osservato?<textarea name="content" rows="5" minlength="10" maxlength="5000" required></textarea></label>';
+		echo '<label>Che cosa sai o hai osservato? (obbligatorio)<textarea name="content" rows="5" minlength="10" maxlength="5000" placeholder="Descrivi ciò che hai visto o le informazioni utili, senza inserire dati personali nel testo." required></textarea></label>';
 
-		echo '<div class="ba-contribution-grid">';
+		echo '</fieldset><details class="ba-contribution-additional"><summary>Aggiungi luogo, orario o foto (facoltativo)</summary><div class="ba-contribution-grid">';
 		echo '<label>Quando? <input type="datetime-local" name="observed_at"></label>';
 		echo '<label>Dove? <input type="text" name="exact_location_text" maxlength="300" placeholder="Indica il luogo solo se utile"></label>';
 		echo '</div>';
@@ -102,7 +103,7 @@ class BadAround_Contribution_Service {
 		echo '<label>Foto <input type="file" name="media[]" accept="image/jpeg,image/png,image/webp" multiple></label>';
 		echo '<p class="ba-contribution-help">Puoi allegare fino a 5 immagini da 5 MB ciascuna. Gli originali restano privati e non vengono pubblicati automaticamente.</p>';
 
-		echo '<fieldset><legend>Come vuoi apparire se il contributo verrà pubblicato?</legend>';
+		echo '</details><div class="ba-contribution-preferences"><fieldset><legend>2. Come vuoi comparire?</legend>';
 		echo '<label><input type="radio" name="public_identity_mode" value="public_anonymous" checked> Contributo anonimo</label>';
 		echo '<label><input type="radio" name="public_identity_mode" value="public_alias"> Nome o alias</label>';
 		echo '<div data-ba-contribution-alias hidden><label>Nome o alias <input type="text" name="public_display_name" maxlength="80"></label></div>';
@@ -113,11 +114,12 @@ class BadAround_Contribution_Service {
 		echo '<label><input type="radio" name="visibility_requested" value="reserved"> Informazione riservata, non visibile alla community</label>';
 		echo '</fieldset>';
 
-		echo '<label>Email <input type="email" name="email" required autocomplete="email"></label>';
+		echo '</div><fieldset><legend>3. Contatto e conferma</legend><p class="ba-contribution-help">L’email resta privata e serve per confermare il contributo.</p>';
+		echo '<label>Email (obbligatoria) <input type="email" name="email" required autocomplete="email"></label>';
 		echo '<label><input type="checkbox" name="contact_allowed" value="1"> BadAround può ricontattarmi per chiarimenti</label>';
 		echo '<label><input type="checkbox" name="consent_privacy" value="1" required> Acconsento al trattamento dei dati per la gestione del contributo</label>';
-		echo '<p class="ba-contribution-help"><strong>Sicurezza:</strong> condividi soltanto informazioni che possiedi già. Non seguire persone o veicoli, non affrontare nessuno e non esporti a rischi.</p>';
-		echo '<button type="submit" class="ba-button ba-button--primary">Invia contributo</button>';
+		echo '</fieldset><p class="ba-contribution-help ba-contribution-safety"><strong>Sicurezza:</strong> condividi soltanto informazioni che possiedi già. Non seguire persone o veicoli, non affrontare nessuno e non esporti a rischi.</p>';
+		echo '<button type="submit" class="ba-button ba-button--primary">Invia il contributo</button>';
 		echo '<p class="ba-contribution-status" data-ba-contribution-status role="status" aria-live="polite"></p>';
 		echo '</form></div>';
 
