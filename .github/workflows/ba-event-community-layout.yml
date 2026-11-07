@@ -26,7 +26,11 @@ jobs:
         run: |
           php -l wordpress/themes/badaround-child/template-parts/single-event-layout.php
           php -l wordpress/plugins/badaround-core/includes/class-badaround-event-dates.php
-          php tests/test-ba-event-community-layout.php
+          php tests/test-ba-event-dates.php
+          php tests/event-gallery.php
+          php tests/test-ba-community-review.php
+          php -l wordpress/themes/badaround-child/single-ba_evento.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-comment-form.php
           php tests/test-ba-event-public-details.php
           python3 -m py_compile tools/ba_event_community_layout_release.py
           python3 -m unittest discover -s tests -p test_ba_event_seo_release.py
