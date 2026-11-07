@@ -4,6 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 the_post();
 
 $post_id = get_the_ID();
+require_once dirname(__DIR__).'/inc/event-heading.php';
 $title   = get_the_title();
 $public_details=class_exists('BadAround_Event_Public_Details')?BadAround_Event_Public_Details::view($post_id):array();
 $event_seo = class_exists('BadAround_Event_SEO') && BadAround_Event_SEO::active($post_id) ? BadAround_Event_SEO::project($post_id) : null;
@@ -172,7 +173,7 @@ if ( $status ) {
                     <?php endforeach; ?>
 				</div>
 
-				<h1><?php echo esc_html( $title ); ?></h1>
+				<h1><?php echo esc_html( badaround_event_heading($title) ); ?></h1>
                 <?php if($seeking_witnesses): ?><p class="ba-event-witness-badge"><a href="#contribuisci"><strong>Si cercano testimoni</strong> · Hai visto qualcosa o hai informazioni utili?</a></p><?php endif; ?>
                 <?php if ($event_seo) : ?><p class="ba-event-intro"><?php echo esc_html($event_seo['intro']); ?></p><?php endif; ?>
 
