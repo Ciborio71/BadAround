@@ -256,3 +256,7 @@
 .ba-event-detail .ba-identity-community textarea,.ba-event-detail .ba-identity-community select,.ba-event-detail .ba-identity-community input{max-width:100%;box-sizing:border-box}
 .ba-event-detail .ba-event-safety{background:#fff}
 @media(max-width:720px){.ba-event-detail .ba-event-gallery{padding:18px}}
+
+/* Hidden controls must remain hidden despite theme button/layout declarations. */
+.ba-event-detail [data-ba-detail-map-load][hidden],.ba-event-detail [data-ba-contribution-panel][hidden],.ba-event-detail [data-ba-contribution-alias][hidden]{display:none!important}
+.ba-event-detail .ba-map-status--complete{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}

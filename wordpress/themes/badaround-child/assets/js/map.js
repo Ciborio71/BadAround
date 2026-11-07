@@ -1054,11 +1054,12 @@
             const start=async()=>{
                 if(started)return;started=true;observer?.disconnect();
                 if(button){button.disabled=true;button.textContent='Caricamento mappa…';}
+                status?.classList.remove('ba-map-status--complete');
                 try{
                     if(!await loadGoogleMaps())throw new Error('Maps unavailable');
                     mapNodes.forEach((node)=>initMap(node,[]));
-                    if(button)button.hidden=true;
-                    if(status)status.textContent='Mappa della posizione pubblica caricata.';
+                    if(button){button.hidden=true;button.textContent='Mappa caricata';}
+                    if(status){status.textContent='Mappa della posizione pubblica caricata.';status.classList.add('ba-map-status--complete');}
                 }catch(error){
                     started=false;googleMapsPromise=undefined;
                     document.querySelector('script[data-ba-google-maps]')?.remove();
