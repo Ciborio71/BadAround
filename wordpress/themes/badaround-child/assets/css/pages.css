@@ -281,3 +281,20 @@
 .ba-event-detail .ba-event-main>#commenti>h2{font-size:clamp(1.6rem,1.2vw + 1rem,2rem);font-weight:850;line-height:1.2;color:#071a38;margin:0 0 22px;padding-bottom:14px;border-bottom:2px solid #a5d1d8;overflow-wrap:anywhere}
 .ba-event-detail h3.ba-event-subheading{font-size:1.05rem;line-height:1.5}
 .ba-event-detail #commenti .ba-community-discussion>h3,.ba-event-detail #commenti>h3{font-size:1.15rem;font-weight:750;line-height:1.35}
+
+/* One interaction entry, with explicit public and reserved destinations. */
+.ba-event-detail .ba-contribution-cta{display:block}
+.ba-event-detail .ba-contribution-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:20px}
+.ba-event-detail .ba-interaction-choice{display:grid;gap:8px;align-content:start;text-align:left;width:100%;min-width:0;min-height:110px;padding:18px;border:1px solid #a5d1d8;border-radius:12px;background:#f0f8fa;color:#153b50;text-decoration:none;white-space:normal;line-height:1.5;font:inherit;box-sizing:border-box;cursor:pointer}
+.ba-event-detail .ba-interaction-choice strong{font-size:1.1rem;color:#071a38}
+.ba-event-detail .ba-interaction-choice span{font-size:.94rem;font-weight:400}
+.ba-event-detail .ba-interaction-choice:hover{background:#e4f3f6;border-color:#0798a8}
+.ba-event-detail .ba-interaction-choice:focus-visible{outline:3px solid #0798a8;outline-offset:3px}
+.ba-event-detail #commenti [hidden]{display:none!important}
+.ba-event-detail #commenti [data-ba-comment-status][data-state]{margin:14px 0;padding:14px;border:1px solid #a5d1d8;border-radius:10px;background:#edf8fb;line-height:1.6}
+.ba-event-detail #commenti [data-ba-comment-status][data-state=error]{background:#fff1f2;border-color:#e7aeb1;color:#9a1e28}
+.ba-event-detail #commenti [data-ba-comment-status][data-state=success]{background:#effaf4;border-color:#9ad4ba;color:#11613e}
+.ba-event-detail #commenti [data-ba-comment-status]:empty{display:none}
+.ba-event-detail #commenti [data-ba-comment-access]{margin:18px 0;padding:18px;border:1px solid #a5d1d8;border-radius:12px;background:#fff}
+.ba-event-detail #commenti button{max-width:100%;white-space:normal}
+@media(max-width:720px){.ba-event-detail .ba-contribution-choices{grid-template-columns:1fr}.ba-event-detail .ba-interaction-choice{min-height:0}.ba-event-detail #commenti [data-ba-comment-access]{padding:14px}}

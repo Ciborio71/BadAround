@@ -22,12 +22,12 @@ e5_assert( false === strpos( $template, 'ba_contributions' ), 'B4 template does 
 e5_assert( false === strpos( $template, 'author_email' ), 'B4 template does not access reporter email' );
 
 e5_assert( false !== strpos( $service, 'Sai qualcosa su questa segnalazione?' ), 'B4 shows approved E0 contribution CTA' );
-e5_assert( false !== strpos( $service, 'Condividi un’informazione' ), 'B4 provides single primary contribution CTA' );
+e5_assert( false !== strpos( $service, 'Commento pubblico' ) && false !== strpos( $service, 'Informazione riservata' ), 'B4 distinguishes public discussion and staff-only information' );
 e5_assert( false !== strpos( $service, 'data-ba-contribution-form' ), 'E5 uses native badaround-core contribution form' );
 e5_assert( false !== strpos( $service, 'rest_url( self::REST_NAMESPACE . self::REST_ROUTE )' ), 'native form submits to E1 REST contract' );
 e5_assert( false !== strpos( $service, 'multipart/form-data' ), 'native form supports private image uploads' );
-e5_assert( false !== strpos( $service, 'public_anonymous' ) && false !== strpos( $service, 'public_alias' ), 'identity modes are exposed without account requirement' );
-e5_assert( false !== strpos( $service, 'visibility_requested' ) && false !== strpos( $service, 'reserved' ), 'public vs reserved contribution choice is exposed' );
+e5_assert( false !== strpos( $service, 'name="public_identity_mode" value="public_anonymous"' ), 'reserved form preserves the anonymous contribution contract' );
+e5_assert( false !== strpos( $service, 'name="visibility_requested" value="reserved"' ), 'staff-only form explicitly requests reserved visibility' );
 e5_assert( false !== strpos( $service, 'Non seguire persone o veicoli' ), 'B4 includes safety microcopy' );
 e5_assert( false !== strpos( $service, 'ba_contribution_status' ), 'verification status returns to B4 UX' );
 

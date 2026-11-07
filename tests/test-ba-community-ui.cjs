@@ -52,3 +52,13 @@ test('comment reply preserves the selected approved parent and the explicit pseu
  assert.match(w.document.querySelector('[data-ba-comment-status]').textContent,/Commento ricevuto/);
  dom.window.close();
 });
+test('unauthenticated comment keeps draft and permits explicit inline access without submitting it',async()=>{
+ const dom=new JSDOM(`<section data-ba-comment-form data-event-id="801"><div data-ba-comment-status></div><button data-ba-comment-login hidden>Accedi</button><div data-ba-comment-access hidden></div><form><textarea name="body">Informazione di prova</textarea><select name="display_mode"><option value="anonymous">Anonimo</option></select><label data-ba-alias-field hidden><input name="alias"></label><button type="submit">Invia</button></form></section>`,{url:'https://badaround.it/eventi/fixture/',runScripts:'outside-only'}),w=dom.window;let calls=0,verified;
+ w.fetch=async()=>{calls++;return json({authenticated:false});};w.BadAroundAccess={mount:(host,options)=>{verified=options.onVerified;host.innerHTML='<input name="email">';return {};}};
+ w.eval(source('identity-comment-form.js'));const form=w.document.querySelector('form');form.dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));await tick();await tick();
+ assert.equal(form.querySelector('textarea').value,'Informazione di prova');const login=w.document.querySelector('[data-ba-comment-login]');assert.equal(login.hidden,false);assert.equal(calls,1);
+ login.click();assert.equal(w.document.querySelector('[data-ba-comment-access]').hidden,false);verified();assert.equal(login.hidden,true);assert.equal(calls,1);assert.match(w.document.querySelector('[data-ba-comment-status]').textContent,/Puoi inviare/);dom.window.close();
+});
+test('comment network error preserves draft and does not claim the account needs login',async()=>{
+ const dom=new JSDOM('<section data-ba-comment-form data-event-id="801"><div data-ba-comment-status></div><form><textarea name="body">Testo conservato</textarea><button type="submit">Invia</button></form></section>',{url:'https://badaround.it/eventi/fixture/',runScripts:'outside-only'}),w=dom.window;w.fetch=async()=>{throw Error('offline');};w.eval(source('identity-comment-form.js'));const f=w.document.querySelector('form');f.dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));await tick();assert.match(w.document.querySelector('[data-ba-comment-status]').textContent,/Invio non confermato/);assert.equal(f.querySelector('textarea').value,'Testo conservato');assert.equal(f.querySelector('button').disabled,false);dom.window.close();
+});

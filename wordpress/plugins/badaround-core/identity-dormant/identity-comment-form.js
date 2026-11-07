@@ -7,6 +7,18 @@
     const form = root.querySelector("form");
     const status = root.querySelector("[data-ba-comment-status]");
     if (!Number.isSafeInteger(eventId) || eventId < 1 || !form || !status) continue;
+    const loginButton=root.querySelector('[data-ba-comment-login]');
+    const accessHost=root.querySelector('[data-ba-comment-access]');
+    let accessWidget=null;
+    loginButton?.addEventListener('click',()=>{
+      if(!accessHost||!window.BadAroundAccess?.mount){status.textContent='Usa Accedi nella navigazione per accedere al tuo account. Il testo del commento è ancora nel modulo.';return;}
+      accessHost.hidden=false;
+      if(!accessWidget)accessWidget=window.BadAroundAccess.mount(accessHost,{onVerified:()=>{
+        accessHost.hidden=true;loginButton.hidden=true;status.dataset.state='success';status.textContent='Accesso riuscito. Puoi inviare il commento già compilato.';
+        form.querySelector('button[type="submit"]')?.focus();
+      }});
+      accessHost.querySelector('input')?.focus();
+    });
     const mode = form.querySelector('[name="display_mode"]');
     const alias = form.querySelector('[name="alias"]');
     const aliasField = form.querySelector('[data-ba-alias-field]');
@@ -70,12 +82,13 @@
       const button = form.querySelector('button[type="submit"]');
       if (button?.disabled) return;
       if (button) button.disabled = true;
+      form.setAttribute('aria-busy','true');status.dataset.state='pending';status.textContent='Invio in corso…';
       try {
         const sessionResponse = await fetch(base + "identity/session", {
           method: "POST", credentials: "same-origin", mode: "same-origin",
           cache: "no-store", headers: {"Content-Type":"application/json"}, body: "{}"
         });
-        if (!sessionResponse.ok) throw new Error("unauthenticated");
+        if (!sessionResponse.ok) throw new Error(sessionResponse.status===401||sessionResponse.status===403?"unauthenticated":sessionResponse.status===429?"rate_limit":"session_unavailable");
         const session = await sessionResponse.json();
         if (session.authenticated !== true || typeof session.csrf !== "string") {
           throw new Error("unauthenticated");
@@ -95,14 +108,20 @@
         });
         const result = await request.json().catch(() => ({}));
         if (!request.ok || result.status !== "pending_moderation") {
-          throw new Error("moderation_not_accepted");
+          throw new Error(request.status===429?"rate_limit":"moderation_not_accepted");
         }
         form.reset();
         syncAlias();clearReply();
+        status.dataset.state='success';if(loginButton)loginButton.hidden=true;
         status.textContent = "Commento ricevuto: sarà valutato prima della pubblicazione.";
-      } catch {
-        status.textContent = "Per commentare devi accedere al tuo account. Riprova dopo l'accesso.";
+      } catch(error) {
+        status.dataset.state='error';
+        if(error?.message==='unauthenticated'){
+          if(loginButton)loginButton.hidden=false;
+          status.textContent='Accedi per inviare il commento. Il testo compilato rimane nel modulo.';
+        }else status.textContent=error?.message==='rate_limit'?'Troppi tentativi ravvicinati. Attendi e riprova: il testo rimane nel modulo.':'Invio non confermato. Riprova più tardi: il testo rimane nel modulo.';
       } finally {
+        form.removeAttribute('aria-busy');
         if (button) button.disabled = false;
       }
     });
