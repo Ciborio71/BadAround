@@ -1,5 +1,5 @@
 <?php
-define('ABSPATH',__DIR__);$GLOBALS['status']='publish';$GLOBALS['cover']=11;
+define('ABSPATH',__DIR__);function esc_html($s){return htmlspecialchars($s,ENT_QUOTES,'UTF-8');}$GLOBALS['status']='publish';$GLOBALS['cover']=11;
 function get_post_status($id){return $GLOBALS['status'];}function get_post_meta($id,$key,$single=true){return 'published';}
 function get_post_thumbnail_id($id){return $GLOBALS['cover'];}function wp_attachment_is_image($id){return true;}function get_post_mime_type($id){return $id===99?'image/svg+xml':'image/jpeg';}
 function wp_get_attachment_image_src($id,$size){return ['https://example.test/public/'.$id.'.jpg',1024,768];}

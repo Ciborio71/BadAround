@@ -25,7 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify contribution interaction and map regressions
+      - name: Verify semantic headings and regression fixtures
         run: |
           npm ci --prefix tests --ignore-scripts
           php -l wordpress/plugins/badaround-core/includes/class-badaround-contribution-service.php
