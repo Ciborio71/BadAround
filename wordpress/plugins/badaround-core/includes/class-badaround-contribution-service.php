@@ -70,8 +70,8 @@ class BadAround_Contribution_Service {
 
 		echo '<section class="ba-card ba-event-section ba-contribution-box" id="contribuisci">';
 		echo '<div class="ba-contribution-cta"><div><h2>'.esc_html(apply_filters('badaround_event_contribution_heading','Sai qualcosa su questa segnalazione?',$event_id)).'</h2>';
-		echo '<p>Anche un piccolo dettaglio può essere utile. Scegli se scrivere alla community o inviare informazioni riservate allo staff.</p></div>';
-		echo '</div><div class="ba-contribution-choices"><a class="ba-interaction-choice" href="#commenti"><strong>Commento pubblico</strong><span>Condividi un aggiornamento con la community. Accesso richiesto e pubblicazione dopo moderazione.</span></a><button type="button" class="ba-interaction-choice" data-ba-contribution-open aria-controls="ba-contribution-panel" aria-expanded="false"><strong data-ba-contribution-label>Informazione riservata</strong><span>Avvistamenti, luoghi o altri dettagli destinati solo allo staff. Conferma via email.</span></button></div>';
+		echo '<p>Anche un piccolo dettaglio può essere utile. Scegli se scrivere alla community o inviare informazioni in forma riservata.</p></div>';
+		echo '</div><div class="ba-contribution-choices"><a class="ba-interaction-choice" href="#commenti"><strong>Commento pubblico</strong><span>Condividi un aggiornamento con la community. Accesso richiesto e pubblicazione dopo moderazione.</span></a><button type="button" class="ba-interaction-choice" data-ba-contribution-open aria-controls="ba-contribution-panel" aria-expanded="false"><strong data-ba-contribution-label>Informazione riservata</strong><span>Dettagli non pubblici, verificati dallo staff e condivisibili con l’autore della segnalazione. Conferma via email.</span></button></div>';
 
 		if ( $status && isset( $messages[ $status ] ) ) {
 			echo '<p class="ba-contribution-status" role="status">' . esc_html( $messages[ $status ] ) . '</p>';
@@ -82,7 +82,7 @@ class BadAround_Contribution_Service {
 		echo '<input type="hidden" name="event_id" value="' . absint( $event_id ) . '">';
 		echo '<input type="hidden" name="consent_version" value="community-contribution-v1.0">';
 
-		echo '<p class="ba-contribution-help">Modulo riservato allo staff: descrivi ciò che sai. Non usare questo modulo per un commento pubblico.</p><fieldset><legend>1. La tua informazione</legend>';
+		echo '<p class="ba-contribution-help">Modulo riservato: descrivi ciò che sai. Non usare questo modulo per un commento pubblico.</p><fieldset><legend>1. La tua informazione</legend>';
 		echo '<label>Tipo di informazione (obbligatorio)<select name="contribution_type" required>';
 		echo '<option value="">Seleziona…</option>';
 		echo '<option value="sighting">Ho visto qualcosa</option>';
@@ -103,13 +103,13 @@ class BadAround_Contribution_Service {
 		echo '<label>Foto <input type="file" name="media[]" accept="image/jpeg,image/png,image/webp" multiple></label>';
 		echo '<p class="ba-contribution-help">Puoi allegare fino a 5 immagini da 5 MB ciascuna. Gli originali restano privati e non vengono pubblicati automaticamente.</p>';
 
-		echo '</details><input type="hidden" name="public_identity_mode" value="public_anonymous"><input type="hidden" name="visibility_requested" value="reserved"><fieldset><legend>2. Contatto e conferma</legend><p class="ba-contribution-help">Queste informazioni restano riservate allo staff. L’email serve per confermare il tuo invio.</p>';
+		echo '</details><input type="hidden" name="public_identity_mode" value="public_anonymous"><input type="hidden" name="visibility_requested" value="reserved"><fieldset><legend>2. Contatto e conferma</legend><p class="ba-contribution-help">Queste informazioni non sono pubbliche. Dopo verifica possono essere condivise con l’autore della segnalazione. L’email serve per confermare il tuo invio.</p>';
 		echo '<label>Email (obbligatoria) <input type="email" name="email" required autocomplete="email"></label>';
 		echo '<label><input type="checkbox" name="contact_allowed" value="1"> BadAround può ricontattarmi per chiarimenti</label>';
 		echo '<label><input type="checkbox" name="consent_privacy" value="1" required> Acconsento al trattamento dei dati per la gestione del contributo</label>';
 		echo '</fieldset><p class="ba-contribution-help ba-contribution-safety"><strong>Sicurezza:</strong> condividi soltanto informazioni che possiedi già. Non seguire persone o veicoli, non affrontare nessuno e non esporti a rischi.</p>';
 		echo '<button type="submit" class="ba-button ba-button--primary">Invia informazioni riservate</button>';
-		echo '<p class="ba-contribution-help ba-moderation-note">Le informazioni saranno verificate dallo staff e non saranno visibili alla community. Controlla la tua email per confermare l’invio.</p>';
+		echo '<p class="ba-contribution-help ba-moderation-note">Le informazioni saranno verificate dallo staff e potranno essere condivise con l’autore della segnalazione. Non saranno visibili alla community. Controlla la tua email per confermare l’invio.</p>';
 		echo '<p class="ba-contribution-status" data-ba-contribution-status role="status" aria-live="polite"></p>';
 		echo '</form></div>';
 
