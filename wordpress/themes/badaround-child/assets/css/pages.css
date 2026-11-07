@@ -272,3 +272,6 @@
 .ba-event-detail h3.ba-event-subheading{display:inline;margin:0;padding:0;font-family:inherit;font-size:inherit;line-height:inherit;font-weight:700;letter-spacing:normal;color:inherit}
 .ba-event-detail .ba-event-subsection{margin:0 0 1.6em}
 .ba-event-detail h3.ba-event-map-heading{display:block;margin:0 0 12px}
+
+/* Comment submit follows its label width on desktop and mobile. */
+.ba-event-detail #commenti[data-ba-comment-form]>form>button[type=submit]{width:fit-content;max-width:100%;justify-self:start;padding-inline:22px}
