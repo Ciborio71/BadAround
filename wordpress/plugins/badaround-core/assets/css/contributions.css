@@ -30,3 +30,9 @@
 .ba-contribution-status[data-state=success]{border-color:#9ad4ba;background:#effaf4;color:#11613e}
 .ba-contribution-status:empty{display:none}
 @media(max-width:720px){.ba-contribution-preferences{grid-template-columns:1fr}.ba-contribution-form fieldset{padding:14px}.ba-contribution-form>button[type=submit],.ba-contribution-cta>button{width:100%;max-width:none}}
+
+/* Override inherited fixed field heights that clip native select text. */
+.ba-contribution-form select,.ba-contribution-form input:not([type=radio]):not([type=checkbox]):not([type=hidden]){height:auto;min-height:50px;max-height:none;line-height:1.5;padding-block:10px;font-size:16px}
+.ba-contribution-form select{padding-inline-end:38px}
+.ba-contribution-form textarea{height:auto;max-height:none;line-height:1.5;font-size:16px}
+.ba-contribution-form .ba-moderation-note{margin-top:-8px;font-size:.92rem;color:#50677d}

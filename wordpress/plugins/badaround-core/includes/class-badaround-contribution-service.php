@@ -119,7 +119,8 @@ class BadAround_Contribution_Service {
 		echo '<label><input type="checkbox" name="contact_allowed" value="1"> BadAround può ricontattarmi per chiarimenti</label>';
 		echo '<label><input type="checkbox" name="consent_privacy" value="1" required> Acconsento al trattamento dei dati per la gestione del contributo</label>';
 		echo '</fieldset><p class="ba-contribution-help ba-contribution-safety"><strong>Sicurezza:</strong> condividi soltanto informazioni che possiedi già. Non seguire persone o veicoli, non affrontare nessuno e non esporti a rischi.</p>';
-		echo '<button type="submit" class="ba-button ba-button--primary">Invia il contributo</button>';
+		echo '<button type="submit" class="ba-button ba-button--primary">Invia il commento</button>';
+		echo '<p class="ba-contribution-help ba-moderation-note">I commenti sono soggetti a moderazione e vengono pubblicati solo dopo approvazione. Le informazioni inviate come riservate non sono visibili alla community.</p>';
 		echo '<p class="ba-contribution-status" data-ba-contribution-status role="status" aria-live="polite"></p>';
 		echo '</form></div>';
 

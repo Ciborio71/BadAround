@@ -11,6 +11,11 @@ document.addEventListener('click',function(e){
  if(opening){panel.scrollIntoView({behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});panel.querySelector('select')?.focus({preventScroll:true});}
 });
 document.addEventListener('change',function(e){
+ if(e.target.matches('[name="visibility_requested"]')){
+  const submit=e.target.closest('form')?.querySelector('[type="submit"]');
+  if(submit)submit.textContent=e.target.value==='reserved'?'Invia informazioni riservate':'Invia il commento';
+  return;
+ }
  if(!e.target.matches('[name="public_identity_mode"]'))return;
  const alias=e.target.closest('form')?.querySelector('[data-ba-contribution-alias]');
  if(alias)alias.hidden=e.target.value!=='public_alias';
@@ -27,7 +32,7 @@ document.addEventListener('submit',async function(e){
   const res=await fetch(form.action,{method:'POST',body:data,credentials:'same-origin'});
   const json=await res.json();
   if(!res.ok)throw new Error((json&&json.message)||'Errore durante l’invio.');
-  form.reset();const alias=form.querySelector('[data-ba-contribution-alias]');if(alias)alias.hidden=true;
+  form.reset();if(button)button.textContent='Invia il commento';const alias=form.querySelector('[data-ba-contribution-alias]');if(alias)alias.hidden=true;
   status.dataset.state='success';status.textContent=(json&&json.message)||'Controlla la tua email per confermare il contributo.';
  }catch(err){status.dataset.state='error';status.textContent=err.message||'Errore durante l’invio. I dati inseriti restano nel modulo.';}
  finally{delete form.dataset.submitting;form.removeAttribute('aria-busy');if(button)button.disabled=false;}
