@@ -173,7 +173,7 @@ if ( $status ) {
 				</div>
 
 				<h1><?php echo esc_html( $title ); ?></h1>
-                <?php if($seeking_witnesses): ?><p class="ba-event-witness-badge"><strong>Si cercano testimoni</strong> · Hai visto qualcosa o hai informazioni utili?</p><?php endif; ?>
+                <?php if($seeking_witnesses): ?><p class="ba-event-witness-badge"><a href="#contribuisci"><strong>Si cercano testimoni</strong> · Hai visto qualcosa o hai informazioni utili?</a></p><?php endif; ?>
                 <?php if ($event_seo) : ?><p class="ba-event-intro"><?php echo esc_html($event_seo['intro']); ?></p><?php endif; ?>
 
 				<?php if ( $public_location || $report_receipt ) : ?>
@@ -267,6 +267,11 @@ if ( $status ) {
 
 
                 <?php if ( class_exists( 'BadAround_Contribution_Service' ) ) { BadAround_Contribution_Service::render_event_contribution_block( $post_id ); } ?>
+                <?php if (class_exists('BadAround_Identity_WordPress_Comment_Form', false) && BadAround_Identity_WordPress_Comment_Form::enabled()) : ?>
+                    <?php echo BadAround_Identity_WordPress_Comment_Form::render(); // Escaped by the Identity presenter. ?>
+                <?php else : ?>
+                    <section class="ba-card ba-event-section ba-event-community-unavailable" id="commenti"><h2>Commenti della community</h2><p>I commenti sono disponibili nell’area di collaudo riservata, dalla connessione autorizzata.</p></section>
+                <?php endif; ?>
 			</div>
 
 			<aside class="ba-event-aside" aria-label="Riepilogo evento">

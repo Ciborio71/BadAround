@@ -238,3 +238,21 @@
 .ba-event-territory-chip{display:inline-flex;align-items:baseline;gap:4px;max-width:100%;padding:4px 8px;border:1px solid #dce8ed;border-radius:8px;background:#f3f8fa;color:#30465c;font-size:.75rem;font-weight:750;overflow-wrap:anywhere}
 .ba-event-territory-chip__level{color:#50677d;font-weight:500}
 @media(max-width:820px){.ba-event-hero > .ba-container{width:min(100% - 24px,var(--ba-container))}}
+
+/* Event sections: consistent cards, witness jump and moderated discussion. */
+.ba-event-detail .ba-event-main>.ba-card,.ba-event-detail .ba-event-overview>.ba-card,.ba-event-detail .ba-event-aside>.ba-card{background:#fff;border:1px solid var(--ba-border);border-radius:18px;min-width:0}
+.ba-event-detail .ba-event-gallery{padding:24px;box-sizing:border-box}
+.ba-event-photo-panel h2,.ba-event-community-unavailable h2,.ba-identity-community>h2{margin:0 0 18px;font-size:1.15rem;color:var(--ba-navy-950)}
+.ba-event-witness-badge a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+.ba-event-witness-badge a:focus-visible{outline:3px solid var(--ba-teal-600);outline-offset:4px}
+.ba-event-detail #contribuisci,.ba-event-detail #commenti{scroll-margin-top:120px}
+.ba-event-detail .ba-community-discussion{margin:18px 0 24px}
+.ba-event-detail .ba-community-discussion h3,.ba-event-detail .ba-identity-community>h3{font-size:1.05rem;color:var(--ba-navy-950)}
+.ba-event-detail .ba-community-comment{padding:18px;margin:12px 0;border:1px solid var(--ba-border);border-radius:12px;background:#f7fafc;overflow-wrap:anywhere}
+.ba-event-detail .ba-community-comment h4{margin:0 0 8px;font-size:1rem}
+.ba-event-detail .ba-community-comment--reply{margin-inline-start:clamp(8px,3vw,28px);border-inline-start:3px solid var(--ba-teal-600)}
+.ba-event-detail .ba-identity-community form{display:grid;gap:14px}
+.ba-event-detail .ba-identity-community label{display:grid;gap:6px}
+.ba-event-detail .ba-identity-community textarea,.ba-event-detail .ba-identity-community select,.ba-event-detail .ba-identity-community input{max-width:100%;box-sizing:border-box}
+.ba-event-detail .ba-event-safety{background:#fff}
+@media(max-width:720px){.ba-event-detail .ba-event-gallery{padding:18px}}

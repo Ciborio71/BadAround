@@ -85,6 +85,7 @@ try {
     $token=$sessions->issue($identity,time());$_COOKIE['__Host-ba_identity']=$token;
     $csrf=BadAround_Identity_Csrf_Policy::issue($token,hash_hmac('sha256','BA-ID-01H:csrf',$root,true));
     $review=new BadAround_Identity_Community_Review($db,$prefix,$root,static fn()=>new ReviewPublicationProbe());$review->register_hooks();
+    $empty=BadAround_Identity_Community_Review::render_comments(801);ok(str_contains($empty,'Non ci sono ancora commenti approvati.')&&str_contains($empty,'Commenti approvati'),'empty event retains an explicit discussion section');
     foreach(['handle_link','handle_decision'] as $handler) {
         try {$review->$handler();throw new RuntimeException('Nonce was not checked');}
         catch(RuntimeException $error){ok($error->getMessage()==='fixture-invalid-nonce','administrator action rejects invalid nonce before mutation');}
