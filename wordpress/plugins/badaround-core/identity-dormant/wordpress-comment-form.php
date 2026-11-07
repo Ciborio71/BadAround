@@ -42,7 +42,7 @@ final class BadAround_Identity_WordPress_Comment_Form {
             . '<h2>'.htmlspecialchars(class_exists('BadAround_Event_SEO')?BadAround_Event_SEO::section_headings($eventId)['comments']:'Commenti della community',ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8').'</h2>'
             . (class_exists('BadAround_Identity_Community_Review',false)?BadAround_Identity_Community_Review::render_comments($eventId):'')
             . '<h3>Commenta la segnalazione</h3>'
-            . '<p>Scrivi qui aggiornamenti destinati alla community. Per l’invio serve accedere; il testo sarà pubblicato solo dopo approvazione. Per dati personali o dettagli delicati usa il <a href="#contribuisci">modulo riservato</a>.</p>'
+            . '<p>Scrivi qui aggiornamenti destinati alla community. Per l’invio serve accedere; il testo sarà pubblicato soltanto dopo approvazione. Per dati personali o dettagli delicati usa il <a href="#contribuisci">modulo riservato</a>.</p>'
             . '<div role="status" data-ba-comment-status aria-live="polite"></div><button type="button" data-ba-comment-login hidden>Accedi per inviare il commento</button><div data-ba-comment-access hidden></div>'
             . '<form>'
             . '<label>Commento <textarea name="body" required minlength="3" maxlength="2500" rows="4"></textarea></label>'
