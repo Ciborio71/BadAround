@@ -10,6 +10,7 @@ $public_details=class_exists('BadAround_Event_Public_Details')?BadAround_Event_P
 $event_seo = class_exists('BadAround_Event_SEO') && BadAround_Event_SEO::active($post_id) ? BadAround_Event_SEO::project($post_id) : null;
 if (is_wp_error($event_seo)) { $event_seo=null; }
 if ($event_seo) { $title=$event_seo['h1']; }
+$section_headings=BadAround_Event_SEO::section_headings($post_id);
 
 $deepest_term = static function ( $terms, $taxonomy ) {
 	if ( is_wp_error( $terms ) || empty( $terms ) ) {
@@ -201,11 +202,11 @@ if ( $status ) {
 		<div class="ba-container ba-event-layout">
 			<div class="ba-event-main">
                 <div class="ba-event-overview<?php echo !$gallery_ids?' ba-event-overview--empty':''; ?>">
-                    <?php if(function_exists('badaround_render_event_gallery'))badaround_render_event_gallery($gallery_ids,$title); ?>
+                    <?php if(function_exists('badaround_render_event_gallery'))badaround_render_event_gallery($gallery_ids,$title,$section_headings['photos']); ?>
 				<?php if ( ! empty( $public_specific ) ) : ?>
 					<section class="ba-card ba-event-section">
 						<div class="ba-event-section__head">
-							<h2><?php echo esc_html($event_seo ? $event_seo['heading'] : 'Dettagli utili'); ?></h2>
+							<h2><?php echo esc_html($section_headings['facts']); ?></h2>
 							<span class="ba-event-section__eyebrow">Dati pubblicabili</span>
 						</div>
 						<dl class="ba-event-facts">
@@ -220,7 +221,7 @@ if ( $status ) {
 				<?php if ( $has_content ) : ?>
 					<section class="ba-card ba-event-section">
 						<div class="ba-event-section__head">
-							<h2><?php echo esc_html($event_seo['prose_heading'] ?? 'Che cosa è successo'); ?></h2>
+							<h2><?php echo esc_html($section_headings['prose']); ?></h2>
 							<span class="ba-event-section__eyebrow">Informazione pubblica moderata</span>
 						</div>
 						<div class="ba-event-prose"><?php the_content(); ?></div>
@@ -231,13 +232,13 @@ if ( $status ) {
 					<section class="ba-card ba-event-section ba-event-territory">
 						<div class="ba-event-section__head">
 							<div>
-								<h2><?php echo esc_html($event_seo['location_heading'] ?? 'Dove è successo'); ?></h2>
+								<h2><?php echo esc_html($section_headings['location']); ?></h2>
 								<p><?php echo $public_address?'Indirizzo e posizione destinati alla pubblicazione.':'BadAround mostra solo la posizione destinata alla pubblicazione. L’indirizzo preciso, quando riservato, non viene esposto.'; ?></p>
 							</div>
 						</div>
 
-						<?php if ($public_address) : ?><p class="ba-event-public-address"><strong>Indirizzo:</strong> <?php echo esc_html($public_address); ?></p><?php endif; ?>
-                        <?php if ($event_when) : ?><p><strong>Data/periodo dell’evento:</strong> <?php echo esc_html($event_when); ?></p><?php endif; ?>
+						<?php if ($public_address) : ?><div class="ba-event-public-address ba-event-subsection"><h3 class="ba-event-subheading"><?php echo esc_html($section_headings['address']); ?>:</h3> <?php echo esc_html($public_address); ?></div><?php endif; ?>
+                        <?php if ($event_when) : ?><div class="ba-event-subsection"><h3 class="ba-event-subheading"><?php echo esc_html($section_headings['occurrence']); ?>:</h3> <?php echo esc_html($event_when); ?></div><?php endif; ?>
 						<?php if ( ! empty( $territory_path ) ) : ?>
 							<ol class="ba-territory-path" aria-label="Gerarchia territoriale">
 								<?php foreach ( $territory_path as $index => $territory_item ) : ?>
@@ -250,7 +251,7 @@ if ( $status ) {
 						<?php endif; ?>
 
 						<?php if ( is_numeric( $public_lat ) && is_numeric( $public_lng ) ) : ?>
-<div class="ba-event-map-tools"><button class="ba-button ba-button--outline" type="button" data-ba-detail-map-load>Carica la mappa</button><span data-ba-detail-map-status role="status" aria-live="polite">La mappa si carica quando è vicina all’area visibile.</span></div>
+<h3 class="ba-event-subheading ba-event-map-heading"><?php echo esc_html($section_headings['map']); ?></h3><div class="ba-event-map-tools"><button class="ba-button ba-button--outline" type="button" data-ba-detail-map-load>Carica la mappa</button><span data-ba-detail-map-status role="status" aria-live="polite">La mappa si carica quando è vicina all’area visibile.</span></div>
 							<div class="ba-event-location-map" id="ba-event-google-map" data-ba-map data-ba-map-context="detail" data-ba-event-lat="<?php echo esc_attr( $public_lat ); ?>" data-ba-event-lng="<?php echo esc_attr( $public_lng ); ?>" data-ba-event-radius="<?php echo esc_attr( $public_radius ); ?>" data-ba-event-id="<?php echo esc_attr( $post_id ); ?>" data-ba-event-mode="<?php echo esc_attr( $public_mode ); ?>" data-ba-event-category="<?php echo esc_attr( $category_term ? $category_term->slug : '' ); ?>" data-ba-event-status="<?php echo esc_attr( $event_status ); ?>" aria-label="<?php echo esc_attr( 'Mappa: ' . $location_label ); ?>"></div>
 						<?php endif; ?>
 
@@ -271,14 +272,14 @@ if ( $status ) {
                 <?php if (class_exists('BadAround_Identity_WordPress_Comment_Form', false) && BadAround_Identity_WordPress_Comment_Form::enabled()) : ?>
                     <?php echo BadAround_Identity_WordPress_Comment_Form::render(); // Escaped by the Identity presenter. ?>
                 <?php else : ?>
-                    <section class="ba-card ba-event-section ba-event-community-unavailable" id="commenti"><h2>Commenti della community</h2><p>I commenti sono disponibili nell’area di collaudo riservata, dalla connessione autorizzata.</p></section>
+                    <section class="ba-card ba-event-section ba-event-community-unavailable" id="commenti"><h2><?php echo esc_html($section_headings['comments']); ?></h2><p>I commenti sono disponibili nell’area di collaudo riservata, dalla connessione autorizzata.</p></section>
                 <?php endif; ?>
 			</div>
 
 			<aside class="ba-event-aside" aria-label="Riepilogo evento">
 				<?php if ( ! empty( $summary_facts ) ) : ?>
 					<section class="ba-card ba-event-summary">
-						<h2>Informazioni evento</h2>
+						<h2><?php echo esc_html($section_headings['summary']); ?></h2>
 						<dl>
 							<?php foreach ( $summary_facts as $label => $value ) : ?>
 								<div><dt><?php echo esc_html( $label ); ?></dt><dd><?php echo esc_html( $value ); ?></dd></div>

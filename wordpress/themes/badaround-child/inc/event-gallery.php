@@ -24,13 +24,13 @@ function badaround_event_gallery_ids($id){
     }
     return $result;
 }
-function badaround_render_event_gallery($ids,$title){
+function badaround_render_event_gallery($ids,$title,$heading='Foto della segnalazione'){
     if(!$ids){
-        echo '<section class="ba-card ba-event-section ba-event-photo-panel"><h2>Foto della segnalazione</h2><div class="ba-event-no-photo"><svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m4 18 5-5 3 3 3-4 5 6"/></svg><div><strong>Nessuna foto disponibile</strong><span>Consulta i dettagli della segnalazione qui sotto.</span></div></div></section>';
+        echo '<section class="ba-card ba-event-section ba-event-photo-panel"><h2>'.esc_html($heading).'</h2><div class="ba-event-no-photo"><svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m4 18 5-5 3 3 3-4 5 6"/></svg><div><strong>Nessuna foto disponibile</strong><span>Consulta i dettagli della segnalazione qui sotto.</span></div></div></section>';
         return;
     }
     $count=count($ids);$full=wp_get_attachment_image_url($ids[0],'full');
-    echo '<section class="ba-card ba-event-section ba-event-gallery" data-ba-event-gallery aria-label="Foto della segnalazione"><h2>Foto della segnalazione</h2><div class="ba-event-gallery__stage" data-ba-gallery-stage>';
+    echo '<section class="ba-card ba-event-section ba-event-gallery" data-ba-event-gallery aria-label="Foto della segnalazione"><h2>'.esc_html($heading).'</h2><div class="ba-event-gallery__stage" data-ba-gallery-stage>';
     echo '<a data-ba-gallery-full href="'.esc_url($full).'" target="_blank" rel="noopener" aria-label="Apri la foto a dimensione intera (nuova scheda)">';
     echo wp_get_attachment_image($ids[0],'large',false,['class'=>'ba-event-gallery__main','data-ba-gallery-main'=>'','alt'=>$title.' — foto 1','loading'=>'eager','fetchpriority'=>'high','decoding'=>'async','sizes'=>'(max-width: 720px) calc(100vw - 64px), (max-width: 1279px) min(760px, calc(100vw - 80px)), 580px']);
     echo '</a><div class="ba-event-gallery__arrows"><button type="button" data-ba-gallery-prev aria-label="Foto precedente" hidden>‹</button><button type="button" data-ba-gallery-next aria-label="Foto successiva" hidden>›</button></div></div>';

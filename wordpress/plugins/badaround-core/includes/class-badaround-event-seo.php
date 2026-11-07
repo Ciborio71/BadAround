@@ -100,7 +100,7 @@ final class BadAround_Event_SEO {
         );
     }
     /** Resolve only canonical public taxonomy and the same public vehicle fields as the detail. */
-    public static function project( $id ) {
+    public static function project( $id, $headings_only = false ) {
         $types = wp_get_post_terms( $id, 'ba_tipo_evento' );
         $places = wp_get_post_terms( $id, 'ba_territorio' );
         if ( is_wp_error( $types ) || is_wp_error( $places ) ) { return new WP_Error('ba_seo_taxonomy','Tassonomia pubblica non disponibile.'); }
@@ -147,6 +147,21 @@ final class BadAround_Event_SEO {
             $parts=explode('-',$date);
             if ( checkdate((int)$parts[1],(int)$parts[2],(int)$parts[0]) ) { $intro .= ' Data indicata: '.$parts[2].'/'.$parts[1].'/'.$parts[0].'.'; }
         }
+        // Descriptive public section labels; no private wizard prose or inferred dates/locations.
+        $context=lcfirst($template[0]).($detail?' '.$detail:'').' a '.$municipality.($zone?', zona '.$zone:'');
+        $theft=$key==='vehicle_stolen';
+        $sections=array(
+            'photos'=>$theft?'Foto della segnalazione di furto'.($detail?' '.$detail:''):'Foto: '.$context,
+            'facts'=>$detail?'Caratteristiche del veicolo '.$detail:$template[2].' a '.$municipality,
+            'prose'=>$theft?'Dettagli del furto segnalato'.($detail?': '.$detail:'').' a '.$municipality:'Dettagli: '.$context,
+            'location'=>$theft?'Luogo e periodo del furto segnalato a '.$municipality:'Luogo e periodo: '.$context,
+            'summary'=>$theft?'Informazioni evento: '.($detail?$detail.' segnalato rubato':'veicolo segnalato rubato').' a '.$municipality:'Informazioni evento: '.$context,
+            'comments'=>$theft?'Commenti sulla segnalazione di furto'.($detail?' '.$detail:'').' a '.$municipality:'Commenti: '.$context,
+            'address'=>'Indirizzo della segnalazione a '.$municipality,
+            'occurrence'=>'Data o periodo dell’evento segnalato a '.$municipality,
+            'map'=>'Mappa della segnalazione a '.$municipality,
+        );
+        if($headings_only)return $sections;
         return array('h1'=>$h1, 'title'=>$h1.' | BadAround',
             'description'=>$intro.' Consulta i dettagli pubblici della segnalazione su BadAround.',
             'intro'=>$intro, 'heading'=>$detail?'Caratteristiche del veicolo '.$detail:$template[2],
@@ -154,6 +169,10 @@ final class BadAround_Event_SEO {
             'location_heading'=>'Luogo e periodo della segnalazione a '.$municipality,
             'witness_heading'=>$detail?'Hai visto questo '.$detail.'?':'Hai informazioni su questa segnalazione?',
             'slug'=>sanitize_title($template[1].'-'.$municipality.($detail?'-'.$detail:'')));
+    }
+    public static function section_headings($id){
+        $p=self::project($id,true);
+        return is_wp_error($p)?array('photos'=>'Foto della segnalazione','facts'=>'Dettagli utili','prose'=>'Che cosa è successo','location'=>'Luogo e periodo della segnalazione','summary'=>'Informazioni evento','comments'=>'Commenti della community','address'=>'Indirizzo della segnalazione','occurrence'=>'Data o periodo dell’evento','map'=>'Mappa della segnalazione'):$p;
     }
     public static function freeze( $id ) {
         if (!self::active($id)) { return true; }

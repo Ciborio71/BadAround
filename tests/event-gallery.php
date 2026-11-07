@@ -23,3 +23,5 @@ ob_start();badaround_render_event_gallery([],'Test');$html=ob_get_clean();check(
 ob_start();badaround_render_event_gallery([11],'Test');$html=ob_get_clean();check(str_contains($html,'fetchpriority="high"')&&str_contains($html,'width="1024"')&&!str_contains($html,'data-ba-gallery-thumb'),'single image has dimensions and priority, no false thumbnails');
 ob_start();badaround_render_event_gallery([11,22],'Test');$html=ob_get_clean();check(substr_count($html,'data-ba-gallery-thumb')===2&&str_contains($html,'data-srcset=')&&str_contains($html,'Foto 1 di 2'),'multiple public images include responsive navigation');
 echo "EVENT_GALLERY_SUITE_PASS\n";
+
+ob_start();badaround_render_event_gallery([],'Honda SH','Foto della segnalazione di furto Honda SH');$html=ob_get_clean();check(str_contains($html,'<h2>Foto della segnalazione di furto Honda SH</h2>'),'empty photo card accepts a descriptive heading');

@@ -267,3 +267,8 @@
 .ba-event-detail #commenti .ba-community-comment{background:#fff;border-color:#c2dde3}
 .ba-event-detail .ba-moderation-note{font-size:.92rem;line-height:1.6;color:#50677d;margin:8px 0 0}
 .ba-event-detail #commenti select,.ba-event-detail #commenti input:not([type=hidden]):not([type=radio]):not([type=checkbox]){height:auto;min-height:50px;max-height:none;line-height:1.5;padding:10px 12px;font-size:16px}
+
+/* Semantic H3 labels retain the former inline bold label typography. */
+.ba-event-detail h3.ba-event-subheading{display:inline;margin:0;padding:0;font-family:inherit;font-size:inherit;line-height:inherit;font-weight:700;letter-spacing:normal;color:inherit}
+.ba-event-detail .ba-event-subsection{margin:0 0 1.6em}
+.ba-event-detail h3.ba-event-map-heading{display:block;margin:0 0 12px}

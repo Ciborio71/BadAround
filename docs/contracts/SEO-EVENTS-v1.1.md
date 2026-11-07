@@ -66,3 +66,14 @@ Mantenere protezioni QA durante beta e reset. Informativa definitiva e revisione
 - https://developers.google.com/search/docs/appearance/title-link
 - https://developers.google.com/search/docs/appearance/snippet
 Le regole sono una scelta progettuale approvata, non una garanzia di posizionamento.
+
+
+## Addendum 7 novembre 2026 — titoli delle sezioni evento
+
+La pagina pubblica usa un solo H1 e H2 descrittivi per foto, caratteristiche, descrizione, luogo/periodo, riepilogo e commenti. I titoli combinano tipologia canonica, marca/modello pubblico e comune; quartiere/località solo se canonici e già pubblici. I campi del wizard alimentano il contenuto dopo approvazione, senza esporre dati riservati o dedurre fatti mancanti. Colore e segni distintivi restano nei dati pubblici e nell’H1 quando previsto: non si ripetono artificialmente tutti gli attributi in ogni titolo.
+
+H3 organizzano indirizzo, data/periodo e mappa sotto il relativo H2. Nella community H3 identificano discussione/composizione e H4 gli autori dei commenti approvati, quando presenti. Le label dei singoli attributi e le legend dei form conservano la loro semantica. Non si aggiungono heading vuoti, salti di livello o sezioni inventate solo per parole chiave.
+
+Esempio Honda SH: “Foto della segnalazione di furto Honda SH”, “Caratteristiche del veicolo Honda SH”, “Informazioni evento: Honda SH segnalato rubato a Roma”. Queste combinazioni rispondono a intenti plausibili; non rappresentano volumi di ricerca misurati o garanzie di posizionamento.
+
+La proiezione è in sola lettura e comprende anche eventi precedenti senza attivarne o riscriverne il contratto SEO. H1, title/description, URL congelati, dati originali, GEO e stile tipografico esistente non cambiano. I nuovi H3 ereditano dimensione e famiglia dei precedenti testi/label.

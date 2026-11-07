@@ -39,7 +39,7 @@ final class BadAround_Identity_WordPress_Comment_Form {
         $script=plugins_url('identity-dormant/identity-comment-form.js',BADAROUND_CORE_FILE);
         wp_enqueue_script('badaround-identity-comment-form',$script,[], '0.2.0',true);
         return '<section id="commenti" class="ba-card ba-event-section ba-identity-community" data-ba-comment-form data-event-id="'.(int)$eventId.'">'
-            . '<h2>Commenti della community</h2>'
+            . '<h2>'.esc_html(class_exists('BadAround_Event_SEO')?BadAround_Event_SEO::section_headings($eventId)['comments']:'Commenti della community').'</h2>'
             . (class_exists('BadAround_Identity_Community_Review',false)?BadAround_Identity_Community_Review::render_comments($eventId):'')
             . '<h3>Commenta la segnalazione</h3>'
             . '<p>Il commento sarà visibile soltanto dopo approvazione.</p>'
