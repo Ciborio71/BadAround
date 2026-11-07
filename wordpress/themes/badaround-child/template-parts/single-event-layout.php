@@ -67,16 +67,8 @@ $status_labels = array(
 );
 $status = isset( $status_labels[ $event_status ] ) ? $status_labels[ $event_status ] : '';
 
-$event_date = sanitize_text_field( (string) get_post_meta( $post_id, '_ba_occurred_date', true ) );
-$event_time = sanitize_text_field( (string) get_post_meta( $post_id, '_ba_occurred_time', true ) );
-$event_when = trim( $event_date . ( $event_time ? ' · ' . $event_time : '' ) );
-if($event_date && preg_match('/^\d{4}-\d{2}-\d{2}$/D',$event_date)){$event_when=implode('/',array_reverse(explode('-',$event_date))).($event_time?' · '.$event_time:'');}
-$time_details=$public_details['time']??array();
-if(!$event_when && !empty($time_details['date']))$event_when=implode('/',array_reverse(explode('-',$time_details['date'])));
-if(($time_details['knowledge']??'')==='range'&&!empty($time_details['range_start'])&&!empty($time_details['range_end']))$event_when.=' · tra le '.$time_details['range_start'].' e le '.$time_details['range_end'];
-if(!$event_when && !empty($time_details['approximate_period']))$event_when=$time_details['approximate_period']==='unknown'?'Periodo non specificato':(function_exists('badaround_native_report_option_label')?badaround_native_report_option_label('time.approximate_period',$time_details['approximate_period']):'Periodo indicativo');
-if(!empty($time_details['approximate_period'])&&$time_details['approximate_period']!=='unknown'&&!empty($time_details['reference_date'])&&preg_match('/^\d{4}-\d{2}-\d{2}$/D',$time_details['reference_date']))$event_when.=' (rispetto alla segnalazione del '.implode('/',array_reverse(explode('-',$time_details['reference_date']))).')';
-if(!$event_when&&($time_details['mode']??'')==='unknown')$event_when='Data e orario non specificati';
+$event_when = BadAround_Event_Dates::occurrence_label($post_id, $public_details);
+$report_receipt = BadAround_Event_Dates::receipt_label(BadAround_Event_Dates::view($post_id));
 $seeking_witnesses=!empty($public_details['seeking_witnesses'])&&!in_array($event_status,array('resolved','closed','archived','expired'),true);
 $public_address=$public_details['address']??'';
 
@@ -144,7 +136,7 @@ if ( $subcategory ) {
 	$summary_facts['Tipologia'] = $subcategory;
 }
 if ( $event_when ) {
-	$summary_facts['Quando'] = $event_when;
+	$summary_facts['Data/periodo dell’evento'] = $event_when;
 }
 if ( $public_location ) {
 	$summary_facts['Zona pubblica'] = $public_location;
@@ -184,7 +176,7 @@ if ( $status ) {
                 <?php if($seeking_witnesses): ?><p class="ba-event-witness-badge"><strong>Si cercano testimoni</strong> · Hai visto qualcosa o hai informazioni utili?</p><?php endif; ?>
                 <?php if ($event_seo) : ?><p class="ba-event-intro"><?php echo esc_html($event_seo['intro']); ?></p><?php endif; ?>
 
-				<?php if ( $public_location || $event_when ) : ?>
+				<?php if ( $public_location || $report_receipt ) : ?>
 					<div class="ba-event-meta">
 						<?php if ( $public_location ) : ?>
 							<span>
@@ -192,10 +184,10 @@ if ( $status ) {
 								<?php echo esc_html( $public_location ); ?>
 							</span>
 						<?php endif; ?>
-						<?php if ( $event_when ) : ?>
+						<?php if ( $report_receipt ) : ?>
 							<span>
 								<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-								<?php echo esc_html( $event_when ); ?>
+								<?php echo esc_html($report_receipt['prefix']); ?> <time datetime="<?php echo esc_attr($report_receipt['datetime']); ?>"><?php echo esc_html($report_receipt['text']); ?></time>
 							</span>
 						<?php endif; ?>
 					</div>
@@ -244,7 +236,7 @@ if ( $status ) {
 						</div>
 
 						<?php if ($public_address) : ?><p class="ba-event-public-address"><strong>Indirizzo:</strong> <?php echo esc_html($public_address); ?></p><?php endif; ?>
-                        <?php if ($event_when) : ?><p><?php echo esc_html($event_when); ?></p><?php endif; ?>
+                        <?php if ($event_when) : ?><p><strong>Data/periodo dell’evento:</strong> <?php echo esc_html($event_when); ?></p><?php endif; ?>
 						<?php if ( ! empty( $territory_path ) ) : ?>
 							<ol class="ba-territory-path" aria-label="Gerarchia territoriale">
 								<?php foreach ( $territory_path as $index => $territory_item ) : ?>

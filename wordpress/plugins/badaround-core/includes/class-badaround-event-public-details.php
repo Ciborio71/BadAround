@@ -1,6 +1,7 @@
 <?php
 /** Moderated public-only snapshot for detail pages. Never read reports while rendering. */
 if (!defined('ABSPATH')) { exit; }
+require_once __DIR__.'/class-badaround-event-dates.php';
 final class BadAround_Event_Public_Details {
     const META='_ba_detail_public_v1';
     private static function value($data,$path){foreach(explode('.',$path) as $part){if(!is_array($data)||!array_key_exists($part,$data))return null;$data=$data[$part];}return $data;}
@@ -85,6 +86,7 @@ final class BadAround_Event_Public_Details {
         finally{while(ob_get_level()>$buffer_level)ob_end_clean();$wp_query=$saved_query;$post=$saved_post;}
     }
     public static function register_hooks(){
+        BadAround_Event_Dates::register_hooks();
         add_filter('badaround_event_contribution_heading',static function($heading,$id){$p=self::view($id);if(!empty($p['seeking_witnesses'])&&!in_array(get_post_meta($id,'_ba_event_status',true),['resolved','closed','archived','expired'],true)){ $seo=BadAround_Event_SEO::project($id);if(!is_wp_error($seo))return $seo['witness_heading'];}return $heading;},10,2);
         add_action('badaround_event_published',static function($id){add_action('shutdown',static function()use($id){self::published($id);});});
         add_action('add_meta_boxes_ba_evento',static function(){add_meta_box('ba-public-details','Dettagli pubblici del wizard',[__CLASS__,'box'],'ba_evento','normal','default');});
