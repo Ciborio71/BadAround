@@ -175,6 +175,9 @@ if ( $status ) {
 					<?php if ( $subcategory ) : ?>
 						<span class="ba-event-subcategory"><?php echo esc_html( $subcategory ); ?></span>
 					<?php endif; ?>
+                    <?php foreach($territory_path as $level_index=>$public_territory): ?>
+                        <span class="ba-event-territory-chip"><span class="ba-event-territory-chip__level"><?php echo esc_html(array('Regione','Provincia','Comune','Zona')[$level_index]??'Zona'); ?>:</span> <?php echo esc_html($public_territory->name); ?></span>
+                    <?php endforeach; ?>
 				</div>
 
 				<h1><?php echo esc_html( $title ); ?></h1>
