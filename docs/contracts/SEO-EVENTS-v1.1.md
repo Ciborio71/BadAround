@@ -77,3 +77,7 @@ H3 organizzano indirizzo, data/periodo e mappa sotto il relativo H2. Nella commu
 Esempio Honda SH: “Foto della segnalazione di furto Honda SH”, “Caratteristiche del veicolo Honda SH”, “Informazioni evento: Honda SH segnalato rubato a Roma”. Queste combinazioni rispondono a intenti plausibili; non rappresentano volumi di ricerca misurati o garanzie di posizionamento.
 
 La proiezione è in sola lettura e comprende anche eventi precedenti senza attivarne o riscriverne il contratto SEO. H1, title/description, URL congelati, dati originali, GEO e stile tipografico esistente non cambiano. I nuovi H3 ereditano dimensione e famiglia dei precedenti testi/label.
+
+## Implementazione 8 novembre 2026 — dati strutturati
+
+Le pagine evento pubblicate, moderate e aderenti al contratto1.1 emettono WebPage e BreadcrumbList in JSON-LD, con canonical invariato e gerarchia visibile Home → Segnalazioni → scheda. Nessun tipo Event per i fatti segnalati, nessuna identità, posizione precisa, data dedotta o media non approvato. Gli eventi storici non vengono migrati automaticamente. Con Yoast/Rank Math attivi l’emettitore si ritira; manutenzione e noindex non vengono modificati. Validazione Google e crawl pubblico restano un gate di apertura.
