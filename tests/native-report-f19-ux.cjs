@@ -19,10 +19,11 @@ test('F1.9 typography and Astra isolation stay scoped to native wizard',()=>{
   ]) assert(!forbidden.test(f19),'F1.9 introduces an unscoped global selector');
   // Native location's canonical hidden fields must remain invisible even when
   // Astra / third-party styles attempt to override the HTML hidden attribute.
-  // Allow that single privacy fence, never arbitrary !important declarations.
+  // Allow only the canonical privacy fence and the approved visually-hidden live status.
   const importantRules=f19.split('}').filter(rule=>rule.includes('!important')).map(rule=>rule.trim());
-  assert.equal(importantRules.length,1);
-  assert(importantRules[0].includes('.ba-native [data-native-location-fields][hidden]{display:none!important'));
+  assert.equal(importantRules.length,2);
+  assert(importantRules.some(rule=>rule.includes('.ba-native [data-native-location-fields][hidden]{display:none!important')));
+  assert(importantRules.some(rule=>rule.includes('.ba-native-conditional-status{position:absolute!important')&&rule.includes('clip-path:inset(50%)')&&rule.includes('width:1px')&&rule.includes('height:1px')));
 });
 
 test('F1.9 step transition focuses heading and scrolls only when step is outside safe viewport',()=>{

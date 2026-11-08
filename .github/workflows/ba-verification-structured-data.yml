@@ -42,7 +42,7 @@ jobs:
           php tests/contributions-e2.php
           php tests/contributions-e3.php
           php tests/contributions-e5.php
-          npm test --prefix tests
+          BA_MEDIA_BASELINE_DIR="$GITHUB_WORKSPACE/prior-source/wordpress/themes/badaround-child/assets/js/native-report" npm test --prefix tests
           node --test tests/contribution-ux.cjs tests/event-detail-lazy-map.cjs tests/home-proximity.cjs tests/test-ba-community-ui.cjs
           python3 -m py_compile tools/ba_verification_structured_data_release.py
           python3 -m unittest discover -s tests -p test_ba_event_seo_release.py

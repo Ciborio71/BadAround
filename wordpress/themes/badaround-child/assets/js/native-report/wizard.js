@@ -612,7 +612,8 @@
       event.preventDefault();
       if (steps[model.step] !== 'review' || model.busy || model.completed || model.blocked) return;
       if (!model.snapshot) {
-        const mediaErrors=mediaView?.media.errors() || []; if (mediaErrors.length) return displayErrors(mediaErrors);
+        const mediaErrors=mediaView?.media.errors() || []; // The media step is intentionally hidden at review; its errors must remain actionable.
+        if (mediaErrors.length) return displayErrors(mediaErrors, true);
         const errors = model.validate(); if (errors.length) return displayErrors(errors);
       }
       const pendingPayload=model.snapshot || model.payload();
