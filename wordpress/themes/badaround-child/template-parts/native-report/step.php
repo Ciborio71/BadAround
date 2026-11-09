@@ -15,9 +15,12 @@ if ( 'event' === $key ) : ?>
   <p class="ba-native-help">Seleziona un suggerimento Google, anche usando le frecce e Invio. La posizione del dispositivo viene richiesta solo premendo il pulsante.</p>
   <p id="ba-smart-status" data-smart-status role="status" aria-live="polite">Seleziona il campo per cercare un luogo.</p>
   <div class="ba-native-location-layout" data-smart-location-layout hidden>
+  <div class="ba-native-location-card" data-smart-location-card hidden>
+  <div data-smart-confirmation hidden><strong>Posizione riconosciuta</strong><p data-smart-address-label></p><small>Questo è l’indirizzo indicato. La posizione pubblica dipende dalla scelta accanto alla mappa; l’indirizzo completo non viene pubblicato automaticamente.</small></div>
   <div data-smart-map-panel hidden>
     <div data-smart-map class="ba-native-location-map" role="region" aria-label="Mappa della posizione riservata dell’evento" aria-describedby="ba-smart-map-help"></div>
     <p id="ba-smart-map-help" class="ba-native-help">Il segnaposto indica la posizione precisa riservata dell’evento, anche se scegli di mostrare al pubblico un’area approssimata. Se necessario, spostalo nel punto esatto in cui è avvenuto l'evento. L’indirizzo viene verificato di nuovo. Da tastiera, seleziona il segnaposto e premi Alt e Invio (Option e Invio su Mac) per spostarlo con le frecce, poi Invio per confermare.</p>
+  </div>
   </div>
   <?php if ( ! empty( $config['publicLocationRequest'] ) ) : ?>
   <fieldset class="ba-native-public-location-choice" data-native-public-location-choice hidden aria-describedby="ba-native-public-location-help">
@@ -65,7 +68,6 @@ if ( 'event' === $key ) : ?>
   <?php endif; ?>
   </div>
   <p data-smart-map-status role="status" aria-live="polite"></p>
-  <div data-smart-confirmation hidden><strong>Posizione riconosciuta</strong><p data-smart-address-label></p><small>Questo è l’indirizzo indicato. La posizione pubblica dipende dalla scelta qui sopra; l’indirizzo completo non viene pubblicato automaticamente.</small></div>
   <button data-smart-manual type="button" class="ba-button" hidden>Inserisci manualmente</button>
 </div>
 <?php elseif ( 'time' === $key ) : ?>

@@ -190,6 +190,7 @@
       const choice=container.querySelector('[data-native-public-location-choice]');
       const ready=selected||(manual&&['region','province','municipality','exact_address'].every(key=>String(container.querySelector('[name="location.'+key+'"]')?.value||'').trim()));
       const layout=ui.querySelector('[data-smart-location-layout]');if(layout)layout.hidden=!ready;
+      const card=ui.querySelector('[data-smart-location-card]');if(card)card.hidden=!selected;
       if(choice){choice.hidden=!ready;choice.querySelectorAll('input[type=radio]').forEach(input=>{input.disabled=!ready||model.busy||!!model.snapshot||model.completed;});
         const radius=choice.querySelector('[name="ba-public-location-radius"]');if(radius)radius.disabled=!ready||model.publicLocationRequest!=='approximate_area'||model.busy||!!model.snapshot||model.completed;}
       mapView?.sync();

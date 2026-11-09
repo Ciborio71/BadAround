@@ -44,7 +44,9 @@ function setup(withMap=false){
   }
   const layout=dom.window.document.createElement('div');layout.dataset.smartLocationLayout='';layout.hidden=true;
   const ui=dom.window.document.querySelector('[data-native-smart-address]');ui.append(layout);
-  const panel=ui.querySelector('[data-smart-map-panel]');if(panel)layout.append(panel);
+  const card=dom.window.document.createElement('div');card.dataset.smartLocationCard='';card.hidden=true;layout.append(card);
+  card.append(ui.querySelector('[data-smart-confirmation]'));
+  const panel=ui.querySelector('[data-smart-map-panel]');if(panel)card.append(panel);
   layout.append(dom.window.document.querySelector('[data-native-public-location-choice]'));
   dom.window.eval(source);
   const win=dom.window,container=win.document.querySelector('[data-native-report]');
@@ -655,7 +657,9 @@ test('verified location decision layout reveals map and choices together and res
  assert(layout.hidden);const selected=h.select();assert(layout.hidden);selected.resolve();await settleMap();
  assert.equal(layout.hidden,false);assert(layout.classList.contains('has-map'));
  assert.equal(layout.querySelector('[data-native-public-location-choice]').hidden,false);
- assert.equal(layout.nextElementSibling,h.container.querySelector('[data-smart-confirmation]'));
+ const card=layout.querySelector('[data-smart-location-card]');assert.equal(card.hidden,false);
+ assert.equal(card.firstElementChild,h.container.querySelector('[data-smart-confirmation]'));
+ assert.equal(card.lastElementChild,h.panel);assert.equal(h.container.querySelectorAll('.ba-map-pan').length,0);
  h.widget.dispatchEvent(new h.win.Event('input',{bubbles:true}));assert(layout.hidden);assert(!layout.classList.contains('has-map'));h.close();
 });
 test('precision and radius changes redraw the circle without changing map zoom, viewport or private point',async()=>{
@@ -671,4 +675,17 @@ test('precision and radius changes redraw the circle without changing map zoom, 
  for(const r of [50,100,250,500,1000]){h.model.publicLocationRadius=r;update();assert.equal(circles[0].radius,r);}
  h.model.publicLocationRequest='exact_point';update();assert.equal(circles[0].map,null);
  assert.equal(fits,0);assert.equal(zooms,0);assert.equal(JSON.stringify(h.markers[0].position),point);assert.equal(JSON.stringify(h.model.values),values);h.close();
+});
+
+
+test('wizard preview retains native zoom/fullscreen and keyboard navigation without a directional pad',async()=>{
+ const h=await mapHarness();let options;
+ const load=h.win.google.maps.importLibrary;
+ h.win.google.maps.importLibrary=async name=>{
+  const api=await load(name);if(name!=='maps')return api;
+  return {Map:class extends api.Map{constructor(canvas,input){super(canvas,input);options=input;}}};
+ };
+ const selected=h.select();selected.resolve();await settleMap();
+ assert.equal(options.zoomControl,true);assert.equal(options.fullscreenControl,true);assert.equal(options.keyboardShortcuts,true);
+ assert.equal(h.container.querySelectorAll('.ba-map-pan').length,0);h.close();
 });

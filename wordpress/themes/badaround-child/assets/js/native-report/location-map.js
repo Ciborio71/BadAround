@@ -11,7 +11,8 @@
   const confirmation=ui.querySelector('[data-smart-confirmation]');
   // Keep the verified address next to the result, without changing its data source.
   const layout=ui.querySelector('[data-smart-location-layout]');
-  if(confirmation){(layout||panel).after(confirmation);confirmation.tabIndex=-1;}
+  const card=ui.querySelector('[data-smart-location-card]');
+  if(confirmation){if(card)card.prepend(confirmation);else (layout||panel).after(confirmation);confirmation.tabIndex=-1;}
   let disposed=false,map,marker,circle,dragListener,dragMoveListener,busy=false;
   let mapTask=Promise.resolve();
   const locked=()=>Boolean(disposed||model.busy||model.snapshot||model.completed);
@@ -44,7 +45,8 @@
     panel.hidden=false;
     if(!map){
      map=new GoogleMap(canvas,{center:position,zoom:17,mapId:config.smartAddress?.mapId||'DEMO_MAP_ID',mapTypeControl:false,streetViewControl:false,clickableIcons:false,...root.BadAroundMapNavigation.options()});
-     root.BadAroundMapNavigation.mount(map,canvas);
+     // Native zoom/fullscreen and keyboard gestures suffice for this small preview.
+     // Keep the directional pad on the other application maps only.
      marker=new AdvancedMarkerElement({map,position,title:'Posizione riservata dell’evento. Sposta per correggere.',gmpDraggable:true});
      marker.replaceChildren(glyph());
      dragListener=()=>{const p=marker.position;reverse({lat:typeof p.lat==='function'?p.lat():p.lat,lng:typeof p.lng==='function'?p.lng():p.lng});};

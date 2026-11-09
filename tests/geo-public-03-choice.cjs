@@ -65,7 +65,9 @@ test('HTML displays exactly two descriptive radio choices, no technical fields',
  const layout=doc.querySelector('[data-smart-location-layout]');
  assert(layout.hidden);assert(layout.querySelector('[data-smart-map-panel]'));
  assert(layout.querySelector('[data-native-public-location-choice]'));
- assert.equal(layout.parentElement.querySelector('[data-smart-confirmation]').parentElement,layout.parentElement);
+ const card=layout.querySelector('[data-smart-location-card]');
+ assert(card);assert(card.querySelector('[data-smart-confirmation]'));assert(card.querySelector('[data-smart-map-panel]'));
+ assert.equal(card.firstElementChild.hasAttribute('data-smart-confirmation'),true);
  assert(!html.includes('name="location.public_location_request_version"'));
  assert(!html.includes('name="location.public_location_request"'));
 });
