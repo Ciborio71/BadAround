@@ -52,7 +52,7 @@ if ( 'event' === $key ) : ?>
     </label>
     </div>
     <div class="ba-native-radius" data-native-radius-field hidden>
-      <label for="ba-public-location-radius">Raggio dell’area approssimativa (obbligatorio)</label>
+      <label for="ba-public-location-radius">Raggio dell’area approssimativa <span class="ba-required-marker" aria-hidden="true">*</span></label>
       <select id="ba-public-location-radius" name="ba-public-location-radius" aria-describedby="ba-public-radius-help ba-public-radius-error" disabled>
         <option value="50">50 m — area ridotta</option>
         <option value="100">100 m — piccola area</option>

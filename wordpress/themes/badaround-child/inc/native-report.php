@@ -249,7 +249,7 @@ function badaround_native_report_field( $path, $field ) {
 	<?php elseif ( 'bool' === $type ) : ?>
 		<label class="ba-native-choice" for="<?php echo esc_attr( $id ); ?>"><input id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $path ); ?>" type="checkbox" data-native-input aria-describedby="<?php echo esc_attr( $description ); ?>"><span><?php echo esc_html( $field['label'] ); ?><span data-native-required></span></span></label>
 	<?php else : ?>
-		<label for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $field['label'] ); ?><span data-native-required><?php echo $field['required'] ? ' (obbligatorio quando applicabile)' : ''; ?></span></label>
+		<label for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $field['label'] ); ?><span data-native-required aria-hidden="true"><?php echo $field['required'] ? ' *' : ''; ?></span></label>
 		<?php if ( 'enum' === $type ) : ?>
 		<select id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $path ); ?>" data-native-input aria-describedby="<?php echo esc_attr( $description ); ?>"><option value="">Seleziona…</option>
 		<?php foreach ( $field['options'] as $value => $label ) : ?><option value="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $label ); ?></option><?php endforeach; ?></select>

@@ -199,7 +199,7 @@
     }
     const declarationDetail=document.createElement('p');declarationDetail.id='ba-native-declarations-detail';declarationDetail.className='ba-native-declaration-detail';
     declarationDetail.append('Dichiaro di avere il diritto di condividere eventuali contenuti allegati, di aver letto e accettato le ',policyLink('regole di pubblicazione','/regole-di-pubblicazione/'),' e i ',policyLink('termini e le condizioni','/termini-e-condizioni/'),' di BadAround e di aver preso visione dell’',policyLink('informativa privacy','/privacy-policy/'),'.');
-    const declarationRequired=document.createElement('span');declarationRequired.dataset.nativeRequired='';declarationRequired.textContent=' (obbligatorio)';declarationCopy.append(declarationRequired);
+    const declarationRequired=document.createElement('span');declarationRequired.dataset.nativeRequired='';declarationRequired.textContent=' *';declarationRequired.dataset.nativeRequiredState='required';declarationRequired.setAttribute('aria-hidden','true');declarationInput.setAttribute('aria-required','true');declarationCopy.append(declarationRequired);
     declarationLabel.append(declarationInput,declarationCopy);declaration.append(declarationLabel,declarationDetail);
     const declarationError=document.createElement('p');declarationError.id='ba-native-declarations-error';declarationError.className='ba-native-error';declarationError.hidden=true;
     declarationInput.setAttribute('aria-describedby','ba-native-declarations-detail ba-native-declarations-help '+declarationError.id);declaration.append(declarationError);finalBox.append(declaration);
@@ -477,7 +477,13 @@
           const group = wrapper.querySelector('fieldset');
           if (group) group.setAttribute('aria-required', String(active && model.required(path)));
         });
-        const flag = wrapper.querySelector('[data-native-required]'); if (flag) flag.textContent = active && model.required(path) ? ' (obbligatorio)' : ' (facoltativo)';
+        const flag = wrapper.querySelector('[data-native-required]');
+        if (flag) {
+          const required = active && model.required(path);
+          flag.textContent = required ? ' *' : ' (facoltativo)';
+          flag.dataset.nativeRequiredState = required ? 'required' : 'optional';
+          if (required) flag.setAttribute('aria-hidden','true'); else flag.removeAttribute('aria-hidden');
+        }
         syncCards(wrapper, field);
       });
       form.querySelectorAll('[data-native-step]').forEach(step => { step.hidden = step.dataset.nativeStep !== current; });

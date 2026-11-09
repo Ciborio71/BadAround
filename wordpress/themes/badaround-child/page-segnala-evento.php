@@ -34,7 +34,7 @@ get_header();
 		<footer class="ba-report-trust">
 			<div>
 				<span aria-hidden="true">🔒</span>
-				<p><strong>Privacy by design.</strong> Dati personali, posizione precisa e informazioni riservate non vengono pubblicati automaticamente.</p>
+				<p><strong>Privacy by design.</strong> Dati personali, posizione precisa e informazioni riservate non vengono pubblicati automaticamente.<span class="ba-report-required-legend">I campi contrassegnati con <span class="ba-required-marker" aria-hidden="true">*</span><span class="screen-reader-text">asterisco</span> sono obbligatori.</span></p>
 			</div>
 			<a href="<?php echo esc_url( home_url( '/come-funziona/' ) ); ?>">Come funziona la moderazione</a>
 		</footer>
