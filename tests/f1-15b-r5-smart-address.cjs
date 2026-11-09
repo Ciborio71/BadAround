@@ -42,6 +42,10 @@ function setup(withMap=false){
     dom.window.document.querySelector('[data-native-smart-address]').insertAdjacentHTML('beforeend','<button data-smart-geolocate type="button"><svg data-test-gps-icon viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg><span data-smart-geolocate-label>Usa la mia posizione</span></button><div data-smart-map-panel hidden><div data-smart-map></div></div><p data-smart-map-status></p>');
     dom.window.eval(fs.readFileSync(path.join(__dirname,'../wordpress/themes/badaround-child/assets/js/native-report/location-map.js'),'utf8'));
   }
+  const layout=dom.window.document.createElement('div');layout.dataset.smartLocationLayout='';layout.hidden=true;
+  const ui=dom.window.document.querySelector('[data-native-smart-address]');ui.append(layout);
+  const panel=ui.querySelector('[data-smart-map-panel]');if(panel)layout.append(panel);
+  layout.append(dom.window.document.querySelector('[data-native-public-location-choice]'));
   dom.window.eval(source);
   const win=dom.window,container=win.document.querySelector('[data-native-report]');
   win.scrollTo=()=>{};
@@ -94,7 +98,7 @@ async function liveWidget(registry=territory,withMap=false){
   class Widget extends h.win.HTMLElement {}
   h.win.customElements.define('fake-r6-place-widget',Widget);
   const adapter=h.win.BadAroundNative.SmartAddress;
-  const controller=adapter.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:registry}},h.model);
+  const controller=adapter.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:registry},publicLocationRequest:{radii:[50,100,250,500,1000]}},h.model);
   h.button.click();
   h.win.google={maps:{importLibrary:async()=>({PlaceAutocompleteElement:class {constructor(){return h.win.document.createElement('fake-r6-place-widget');}}})}};
   h.win[new URL(h.win.document.querySelector('script[data-ba-smart-address]').src).searchParams.get('callback')]();
@@ -643,4 +647,28 @@ test('manual fallback reveals precision only after complete address and canonica
  h.container.querySelector('[data-smart-manual]').click();assert(choice.hidden);
  for(const [key,value] of Object.entries({region:'Lazio',province:'Roma',municipality:'Pomezia',exact_address:'Via di prova'})){const field=h.container.querySelector('[name="location.'+key+'"]');field.value=value;field.dispatchEvent(new h.win.Event('input',{bubbles:true}));adapter.syncVisibility();}
  assert.equal(choice.hidden,false);h.container.querySelector('[name="location.exact_address"]').value='';adapter.syncVisibility();assert(choice.hidden);adapter.dispose();h.dom.window.close();
+});
+
+
+test('verified location decision layout reveals map and choices together and resets on edited address',async()=>{
+ const h=await mapHarness(),layout=h.container.querySelector('[data-smart-location-layout]');
+ assert(layout.hidden);const selected=h.select();assert(layout.hidden);selected.resolve();await settleMap();
+ assert.equal(layout.hidden,false);assert(layout.classList.contains('has-map'));
+ assert.equal(layout.querySelector('[data-native-public-location-choice]').hidden,false);
+ assert.equal(layout.nextElementSibling,h.container.querySelector('[data-smart-confirmation]'));
+ h.widget.dispatchEvent(new h.win.Event('input',{bubbles:true}));assert(layout.hidden);assert(!layout.classList.contains('has-map'));h.close();
+});
+test('precision and radius changes redraw the circle without changing map zoom, viewport or private point',async()=>{
+ const h=await mapHarness(),circles=[];let fits=0,zooms=0;
+ h.model.publicLocationRequest='exact_point';h.model.publicLocationRadius=500;
+ h.win.google.maps.Circle=class{constructor(options){Object.assign(this,options);circles.push(this);}setCenter(p){this.center=p;}setRadius(r){this.radius=r;}setMap(m){this.map=m;}getBounds(){return {};}};
+ const selected=h.select();selected.resolve();await settleMap();
+ const map=h.maps[0],point=JSON.stringify(h.markers[0].position),values=JSON.stringify(h.model.values);
+ map.fitBounds=()=>fits++;map.setZoom=()=>zooms++;
+ const choice=h.container.querySelector('[data-native-public-location-choice] input');choice.name='ba-public-location-choice';
+ const update=()=>choice.dispatchEvent(new h.win.Event('change',{bubbles:true}));
+ h.model.publicLocationRequest='approximate_area';update();assert.equal(circles.length,1);
+ for(const r of [50,100,250,500,1000]){h.model.publicLocationRadius=r;update();assert.equal(circles[0].radius,r);}
+ h.model.publicLocationRequest='exact_point';update();assert.equal(circles[0].map,null);
+ assert.equal(fits,0);assert.equal(zooms,0);assert.equal(JSON.stringify(h.markers[0].position),point);assert.equal(JSON.stringify(h.model.values),values);h.close();
 });

@@ -662,3 +662,19 @@
  .ba-native [data-native-field="time.knowledge"] .ba-native-card-grid:not(.is-collapsed){grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
  .ba-native [data-native-field="time.knowledge"] .ba-native-card-grid:not(.is-collapsed) .ba-native-option-card{min-height:56px;padding:12px;gap:8px}
 }
+
+
+/* Verified position: map and public precision form one responsive decision block. */
+.ba-native .ba-native-location-layout{min-width:0;margin:20px 0;display:grid;gap:20px;align-items:start}
+.ba-native .ba-native-location-layout>.ba-native-public-location-choice{margin:0}
+.ba-native .ba-native-location-layout .ba-native-public-location-options{grid-template-columns:1fr}
+.ba-native .ba-native-location-layout .ba-native-public-location-visual{width:76px}
+.ba-native .ba-native-location-layout .ba-native-public-location-option{padding:12px}
+.ba-native .ba-native-location-layout [data-smart-map-panel]{min-width:0}
+.ba-native .ba-native-location-layout .ba-native-location-map{height:380px}
+.ba-native .ba-native-location-layout [data-smart-map-status]{margin-top:8px}
+@media(min-width:1025px){
+ .ba-native .ba-native-location-layout.has-map{grid-template-columns:minmax(0,1.85fr) minmax(260px,1fr)}
+ .ba-native .ba-native-location-layout>.ba-native-public-location-choice{padding:14px}
+}
+@media(max-width:600px){.ba-native .ba-native-location-layout .ba-native-location-map{height:280px}}
