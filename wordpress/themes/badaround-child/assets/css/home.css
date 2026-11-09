@@ -393,3 +393,10 @@ a.ba-home-category-card:hover,a.ba-home-category-card:focus-visible { transform:
     .ba-home-hero__content h1 { font-size:clamp(3rem,20cqi,108px); }
   }
 }
+
+/* The home dashboard uses the available screen width, with a 16px side gutter. */
+.ba-home .ba-container--wide{width:calc(100% - 32px);max-width:none}
+@media(min-width:1713px){
+ .ba-home-hero{grid-template-columns:minmax(0,760px) minmax(0,1fr)}
+ .ba-home-hero__content{padding-left:32px}
+}
