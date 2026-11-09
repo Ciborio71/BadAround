@@ -59,8 +59,13 @@ test('HTML displays exactly two descriptive radio choices, no technical fields',
  assert(html.includes('data-native-public-location-choice'));
  assert(html.includes('value="exact_point" checked'));
  assert(html.includes('value="approximate_area"'));
- assert(html.includes('Come vuoi che venga mostrata pubblicamente la posizione?'));
+ assert(html.includes('Come vuoi mostrare la posizione al pubblico?'));
  assert(html.includes('Se la segnalazione è approvata'));
+ const doc=new (require('jsdom').JSDOM)(html).window.document;
+ const layout=doc.querySelector('[data-smart-location-layout]');
+ assert(layout.hidden);assert(layout.querySelector('[data-smart-map-panel]'));
+ assert(layout.querySelector('[data-native-public-location-choice]'));
+ assert.equal(layout.parentElement.querySelector('[data-smart-confirmation]').parentElement,layout.parentElement);
  assert(!html.includes('name="location.public_location_request_version"'));
  assert(!html.includes('name="location.public_location_request"'));
 });
