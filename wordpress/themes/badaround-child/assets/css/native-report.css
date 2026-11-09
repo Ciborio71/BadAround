@@ -484,7 +484,7 @@
 .ba-native .ba-native-option-card:hover{border-color:var(--ba-card-accent);box-shadow:0 12px 26px rgba(7,26,56,.075)}
 .ba-native .ba-native-option-card:has(input:disabled){opacity:.6;cursor:not-allowed}
 .ba-native .ba-native-card-copy{display:block;min-width:0}
-.ba-native .ba-native-card-copy strong{display:block;font-size:1rem;line-height:1.3;color:var(--ba-navy-950);font-weight:800}
+.ba-native .ba-native-card-copy .ba-native-card-title{display:block;font-size:1rem;line-height:1.3;color:var(--ba-navy-950);font-weight:400}
 .ba-native .ba-native-card-copy small{display:block;margin-top:6px;font-size:.8rem;font-weight:500;line-height:1.4;color:#53677c}
 .ba-native .ba-native-card-icon{position:relative;display:grid;place-items:center;width:32px;height:32px;margin-left:0;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 4px 10px rgba(7,26,56,.20);background:var(--ba-card-accent);color:#fff}
 .ba-native .ba-native-card-icon svg{display:block;width:17px;height:17px;transform:rotate(45deg);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -492,7 +492,7 @@
 @media(max-width:480px){
  .ba-native .ba-native-field .ba-native-card-grid{grid-template-columns:1fr;gap:10px}
  .ba-native .ba-native-category-grid .ba-native-option-card{grid-template-columns:32px minmax(0,1fr);min-height:104px;padding:16px}
- .ba-native .ba-native-card-copy strong{font-size:1rem}
+ .ba-native .ba-native-card-copy .ba-native-card-title{font-size:1rem}
 }
 @media(prefers-reduced-motion:reduce){.ba-native .ba-native-option-card{transition:none}}
 
@@ -639,3 +639,6 @@
 .ba-native .ba-native-review-edit:hover,.ba-native .ba-native-review-edit:focus-visible{background:#eefafa;color:var(--ba-navy-950)}
 .ba-native .ba-native-review-edit:focus-visible{outline:3px solid #111827;outline-offset:2px}
 @media(max-width:480px){.ba-native .ba-native-review-section__head{align-items:flex-start}.ba-native .ba-native-review-edit{padding-inline:10px}}
+
+/* Choice emphasis follows the native radio state, including collapsed selections. */
+.ba-native .ba-native-option-card:has(input:checked) .ba-native-card-title{font-weight:800}

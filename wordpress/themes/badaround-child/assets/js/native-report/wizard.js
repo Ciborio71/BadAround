@@ -378,7 +378,7 @@
           radio.setAttribute('aria-describedby', select.getAttribute('aria-describedby'));
           const copy = document.createElement('span'); copy.className = 'ba-native-card-copy';
           const meta = category ? categoryCards[option.value] : null;
-          const title = document.createElement('strong'); title.textContent = meta?.title || option.textContent; copy.append(title);
+          const title = document.createElement('span'); title.className='ba-native-card-title'; title.textContent = meta?.title || option.textContent; copy.append(title);
           if (meta) {
             card.style.setProperty('--ba-card-accent',meta.color);
             const icon = document.createElement('span'); icon.className = 'ba-native-card-icon';
