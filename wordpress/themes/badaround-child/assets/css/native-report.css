@@ -655,3 +655,10 @@
 .ba-native .ba-native-public-location-copy strong{font-weight:400}
 .ba-native .ba-native-public-location-option:has(input:checked) .ba-native-public-location-copy strong{font-weight:800}
 @media(max-width:359px){.ba-native .ba-native-public-location-options{grid-template-columns:1fr}}
+
+/* Desktop: compact event date leaves room for the three time-knowledge choices. */
+@media(min-width:1025px){
+ .ba-native .ba-native-field-pair:has(>[data-native-field="time.date"]):has(>[data-native-field="time.knowledge"]){grid-template-columns:minmax(170px,190px) minmax(0,1fr)}
+ .ba-native [data-native-field="time.knowledge"] .ba-native-card-grid:not(.is-collapsed){grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+ .ba-native [data-native-field="time.knowledge"] .ba-native-card-grid:not(.is-collapsed) .ba-native-option-card{min-height:56px;padding:12px;gap:8px}
+}
