@@ -6,6 +6,7 @@
   const ui=container.querySelector('[data-native-smart-address]');
   const panel=ui?.querySelector('[data-smart-map-panel]'),canvas=ui?.querySelector('[data-smart-map]');
   const geo=ui?.querySelector('[data-smart-geolocate]'),status=ui?.querySelector('[data-smart-map-status]');
+  const geoLabel=geo?.querySelector('[data-smart-geolocate-label]')||geo;
   if(!panel||!canvas||!geo)return {hide(){},show(){},sync(){},dispose(){}};
   const confirmation=ui.querySelector('[data-smart-confirmation]');
   // Keep the verified address next to the result, without changing its data source.
@@ -88,7 +89,7 @@
     }
     else if(bridge.current(ticket))say('Punto non riconosciuto. Cerca e seleziona un indirizzo Google.');
    }catch(_){if(!disposed&&bridge.current(ticket))say('Non è stato possibile verificare il punto. Cerca e seleziona un indirizzo Google.');}
-   finally{if(!disposed){busy=false;geo.textContent='Usa la mia posizione';sync();}}
+   finally{if(!disposed){busy=false;geoLabel.textContent='Usa la mia posizione';sync();}}
   }
   function reverse(position){
    if(locked()||busy)return;
@@ -98,15 +99,15 @@
   function geolocate(){
    if(locked()||busy)return;
    if(root.isSecureContext===false||!root.navigator?.geolocation){say('La posizione del dispositivo non è disponibile in questo browser. Puoi cercare un indirizzo.');return;}
-   const ticket=bridge.reserve();busy=true;sync();geo.textContent='Ricerca della posizione…';say('Attendi la posizione del dispositivo e controlla che sia il luogo dell’evento.');
+   const ticket=bridge.reserve();busy=true;sync();geoLabel.textContent='Ricerca della posizione…';say('Attendi la posizione del dispositivo e controlla che sia il luogo dell’evento.');
    const failed=error=>{
-    if(disposed)return;busy=false;geo.textContent='Usa la mia posizione';sync();
+    if(disposed)return;busy=false;geoLabel.textContent='Usa la mia posizione';sync();
     if(!bridge.current(ticket))return;
     const messages={1:'Permesso alla posizione negato. Consenti l’accesso alla posizione nelle impostazioni del browser oppure cerca un indirizzo.',2:'Non è stato possibile rilevare la posizione del dispositivo. Riprova oppure cerca un indirizzo.',3:'La ricerca della posizione ha richiesto troppo tempo. Riprova oppure cerca un indirizzo.'};
     say(messages[error?.code]||'La posizione del dispositivo non è disponibile. Puoi cercare un indirizzo.');
    };
    try{root.navigator.geolocation.getCurrentPosition(p=>{
-    if(disposed||!bridge.current(ticket)){busy=false;geo.textContent='Usa la mia posizione';sync();return;}
+    if(disposed||!bridge.current(ticket)){busy=false;geoLabel.textContent='Usa la mia posizione';sync();return;}
     resolve({lat:p.coords.latitude,lng:p.coords.longitude},ticket,true);
    },failed,{enableHighAccuracy:true,timeout:12000,maximumAge:0});}catch(_){failed();}
   }

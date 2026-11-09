@@ -185,7 +185,14 @@
     const manualButton=ui.querySelector('[data-smart-manual]');
     const manualFields=container.querySelector('[data-native-location-fields]');
     let manual=false;
-    function syncVisibility(){if(manualFields)manualFields.hidden=!manual;mapView?.sync();}
+    function syncVisibility(){
+      if(manualFields)manualFields.hidden=!manual;
+      const choice=container.querySelector('[data-native-public-location-choice]');
+      const ready=selected||(manual&&['region','province','municipality','exact_address'].every(key=>String(container.querySelector('[name="location.'+key+'"]')?.value||'').trim()));
+      if(choice){choice.hidden=!ready;choice.querySelectorAll('input[type=radio]').forEach(input=>{input.disabled=!ready||model.busy||!!model.snapshot||model.completed;});
+        const radius=choice.querySelector('[name="ba-public-location-radius"]');if(radius)radius.disabled=!ready||model.publicLocationRequest!=='approximate_area'||model.busy||!!model.snapshot||model.completed;}
+      mapView?.sync();
+    }
     function offerManual(message){if(config.locationManualEntry===false){say('La ricerca del luogo non è disponibile per questo indirizzo. Riprova la ricerca o riprova più tardi.');if(confirmation)confirmation.hidden=true;return;}say(message+' Puoi utilizzare i campi manuali.');if(manualButton)manualButton.hidden=false;if(confirmation)confirmation.hidden=true;}
     const paths = LEVELS.map(v => 'location.' + v);
     const privatePaths = ['location.exact_address','location.exact_lat','location.exact_lng'];
@@ -228,6 +235,7 @@
     function invalidate(reason,territoryChanged=false) {
       requestId++;
       selected=false;
+      syncVisibility();
       mapView?.hide();
       if(confirmation)confirmation.hidden=true;
       // If a manually edited territory could disagree with the selected
@@ -235,7 +243,7 @@
       if (territoryChanged) assign('location.exact_address','');
       assign('location.exact_lat','');
       assign('location.exact_lng','');
-      say(reason);
+      syncVisibility();say(reason);
     }
     function changed(event) {
       if (disposed || applying || !event.target?.matches?.('[data-native-input]')) return;
@@ -250,10 +258,11 @@
       if (disposed || model.busy || model.snapshot || model.completed) return;
       const id=++requestId;
       selected=false;
+      syncVisibility();
       mapView?.hide();
       if(confirmation)confirmation.hidden=true;
       // Do not submit an old territory or exact coordinate while resolving a new Place.
-      clearLocation(true);
+      clearLocation(true);syncVisibility();
       try {
         const place=event.placePrediction?.toPlace?.();
         if (!place) throw new Error('place_unavailable');

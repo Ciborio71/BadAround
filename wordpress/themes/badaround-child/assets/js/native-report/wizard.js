@@ -429,6 +429,7 @@
       model.pruneInactive();
       const current = steps[model.step];
       if (publicLocationChoice) {
+        if(!smartAddress)publicLocationChoice.hidden=!['region','province','municipality','exact_address'].every(key=>String(model.effective('location.'+key)||'').trim());
         publicLocationChoice.querySelectorAll('input[type="radio"]').forEach(input=>{
           input.checked=input.value===model.publicLocationRequest;
           input.disabled=model.busy || !!model.snapshot || model.completed;

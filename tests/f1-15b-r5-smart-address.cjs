@@ -36,10 +36,10 @@ function setup(withMap=false){
   <div data-native-smart-address><input data-smart-start type="text" readonly><div data-smart-widget></div><p data-smart-status></p><div data-smart-confirmation hidden><p data-smart-address-label></p></div><button data-smart-manual hidden type="button">Inserisci manualmente</button></div><div data-native-location-fields hidden>
   <input data-native-input name="location.region"><input data-native-input name="location.province"><input data-native-input name="location.municipality"><input data-native-input name="location.locality">
   <input data-native-input name="location.exact_address"><input data-native-input name="location.exact_lat"><input data-native-input name="location.exact_lng"></div>
-  </section></body></html>`,{url:'https://staging.badaround.it/segnala-un-evento/',runScripts:'outside-only'});
+  <fieldset data-native-public-location-choice hidden><input type="radio" value="exact_point" checked><input type="radio" value="approximate_area"><select name="ba-public-location-radius" disabled><option value="500">500</option></select></fieldset></section></body></html>`,{url:'https://staging.badaround.it/segnala-un-evento/',runScripts:'outside-only'});
   if(withMap){
     dom.window.eval(fs.readFileSync(path.join(__dirname,'../wordpress/themes/badaround-child/assets/js/map-navigation.js'),'utf8'));
-    dom.window.document.querySelector('[data-native-smart-address]').insertAdjacentHTML('beforeend','<button data-smart-geolocate type="button">Usa la mia posizione</button><div data-smart-map-panel hidden><div data-smart-map></div></div><p data-smart-map-status></p>');
+    dom.window.document.querySelector('[data-native-smart-address]').insertAdjacentHTML('beforeend','<button data-smart-geolocate type="button"><svg data-test-gps-icon viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg><span data-smart-geolocate-label>Usa la mia posizione</span></button><div data-smart-map-panel hidden><div data-smart-map></div></div><p data-smart-map-status></p>');
     dom.window.eval(fs.readFileSync(path.join(__dirname,'../wordpress/themes/badaround-child/assets/js/native-report/location-map.js'),'utf8'));
   }
   dom.window.eval(source);
@@ -626,4 +626,21 @@ test('GEO-UX-01: device first, moved pin, address, moved pin, then device; lates
  assert.equal(h.model.values['location.public_precision'],'area');
  assert(!Object.keys(h.model.values).some(k=>/public_lat|public_lng|place_id/.test(k)));
  assert(h.container.querySelector('[data-native-location-fields]').hidden);h.close();
+});
+
+
+test('public precision is hidden until Place confirmation and hides again when search changes',async()=>{
+ const h=await liveWidget(),choice=h.container.querySelector('[data-native-public-location-choice]');assert(choice.hidden);
+ const pending=h.select();assert(choice.hidden);pending.resolve();await settleMap();assert.equal(choice.hidden,false);
+ h.widget.dispatchEvent(new h.win.Event('input',{bubbles:true}));assert(choice.hidden);assert([...choice.querySelectorAll('input')].every(x=>x.disabled));h.close();
+});
+test('GPS denial does not reveal precision; successful GPS confirms it and preserves button icon',async()=>{
+ const h=await mapHarness(),choice=h.container.querySelector('[data-native-public-location-choice]');assert(choice.hidden);h.geo.click();assert(choice.hidden);assert(h.geo.querySelector('svg'));
+ h.gps().fail({code:1});assert(choice.hidden);assert(h.geo.querySelector('svg'));h.geo.click();h.gps().ok({coords:{latitude:41.66,longitude:12.43}});await settleMap();assert.equal(choice.hidden,false);assert(h.geo.querySelector('svg'));assert.equal(h.geo.textContent,'Usa la mia posizione');h.close();
+});
+test('manual fallback reveals precision only after complete address and canonical hierarchy',()=>{
+ const h=setup(),adapter=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{territories:territory}},h.model),choice=h.container.querySelector('[data-native-public-location-choice]');
+ h.container.querySelector('[data-smart-manual]').click();assert(choice.hidden);
+ for(const [key,value] of Object.entries({region:'Lazio',province:'Roma',municipality:'Pomezia',exact_address:'Via di prova'})){const field=h.container.querySelector('[name="location.'+key+'"]');field.value=value;field.dispatchEvent(new h.win.Event('input',{bubbles:true}));adapter.syncVisibility();}
+ assert.equal(choice.hidden,false);h.container.querySelector('[name="location.exact_address"]').value='';adapter.syncVisibility();assert(choice.hidden);adapter.dispose();h.dom.window.close();
 });

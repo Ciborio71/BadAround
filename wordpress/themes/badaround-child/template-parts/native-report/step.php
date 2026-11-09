@@ -11,7 +11,7 @@ if ( 'event' === $key ) : ?>
   <input id="ba-smart-search" data-smart-start type="text" readonly autocomplete="off" placeholder="Cerca indirizzo o località" aria-describedby="ba-smart-privacy ba-smart-status">
   <p id="ba-smart-privacy" class="ba-native-help"><strong>L’indirizzo completo e il numero civico non vengono pubblicati automaticamente. La posizione pubblica seguirà la tua scelta se la segnalazione sarà approvata.</strong></p>
   <div data-smart-widget></div>
-  <button data-smart-geolocate type="button" class="ba-button ba-native-gps-button">Usa la mia posizione</button>
+  <button data-smart-geolocate type="button" class="ba-button ba-native-gps-button"><svg class="ba-native-gps-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg><span data-smart-geolocate-label>Usa la mia posizione</span></button>
   <p class="ba-native-help">Seleziona un suggerimento Google, anche usando le frecce e Invio. La posizione del dispositivo viene richiesta solo premendo il pulsante.</p>
   <p id="ba-smart-status" data-smart-status role="status" aria-live="polite">Seleziona il campo per cercare un luogo.</p>
   <div data-smart-confirmation hidden><strong>Posizione riconosciuta</strong><p data-smart-address-label></p><small>L'indirizzo preciso non sarà pubblicato automaticamente.</small></div>
@@ -23,8 +23,9 @@ if ( 'event' === $key ) : ?>
   <button data-smart-manual type="button" class="ba-button" hidden>Inserisci manualmente</button>
   </div>
   <?php if ( ! empty( $config['publicLocationRequest'] ) ) : ?>
-  <fieldset class="ba-native-public-location-choice" data-native-public-location-choice aria-describedby="ba-native-public-location-help">
+  <fieldset class="ba-native-public-location-choice" data-native-public-location-choice hidden aria-describedby="ba-native-public-location-help">
     <legend>Come vuoi che venga mostrata pubblicamente la posizione?</legend>
+    <div class="ba-native-public-location-options">
     <label class="ba-native-public-location-option">
       <input type="radio" name="ba-public-location-choice" value="exact_point" checked>
       <span class="ba-native-public-location-visual" aria-hidden="true">
@@ -49,6 +50,7 @@ if ( 'event' === $key ) : ?>
       </span>
       <span class="ba-native-public-location-copy"><strong>Area approssimata</strong><small>Richiedi di mostrare una zona approssimata intorno al luogo dell’evento.</small></span>
     </label>
+    </div>
     <div class="ba-native-radius" data-native-radius-field hidden>
       <label for="ba-public-location-radius">Raggio dell’area approssimativa (obbligatorio)</label>
       <select id="ba-public-location-radius" name="ba-public-location-radius" aria-describedby="ba-public-radius-help ba-public-radius-error" disabled>
