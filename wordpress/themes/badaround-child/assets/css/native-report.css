@@ -1,5 +1,5 @@
 /* Native reporting design system. Scoped to the native wizard; independent of WPForms markup. */
-.ba-native{max-width:880px;margin-inline:auto;color:var(--ba-text);overflow-wrap:anywhere}
+.ba-native{max-width:none;margin-inline:auto;color:var(--ba-text);overflow-wrap:anywhere}
 .ba-native [hidden]{display:none!important}
 .ba-native .ba-native-emergency-notice{box-sizing:border-box;max-width:100%;min-width:0;margin:12px 0 24px;padding:16px;border:1px solid #946000;border-inline-start-width:4px;border-radius:10px;background:#fff6df;color:#493400;font-size:1rem;line-height:1.5;overflow-wrap:anywhere}
 .ba-native h2{margin:24px 0 20px;font-size:clamp(1.3rem,4vw,1.9rem)}
@@ -360,7 +360,7 @@
 	background:var(--ba-surface-alt);
 }
 @media(max-width:1024px){
-	.ba-native{max-width:820px}
+	.ba-native{max-width:none}
 	.ba-native .ba-native-progress{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 @media(max-width:768px){
@@ -689,3 +689,13 @@
 .ba-native .ba-native-location-layout>.ba-native-public-location-choice>legend{float:left;width:100%;padding:0;margin:0 0 12px;line-height:1.35}
 .ba-native .ba-native-location-layout>.ba-native-public-location-choice>legend~*{clear:both}
 .ba-native .ba-native-location-layout .ba-native-public-location-options{margin-top:0}
+
+
+/* Wide wizard canvas; short controls and long copy keep a readable measure. */
+.ba-native{width:100%}
+.ba-native .ba-native-field input:is([type=text],[type=email]){max-width:42rem}
+.ba-native .ba-native-field textarea{max-width:80ch}
+.ba-native .ba-native-field select{max-width:32rem}
+.ba-native [data-native-field="reporter.first_name"] input,
+.ba-native [data-native-field="reporter.last_name"] input,
+.ba-native [data-native-field="reporter.email"] input{max-width:32rem}
