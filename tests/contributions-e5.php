@@ -22,7 +22,7 @@ e5_assert( false === strpos( $template, 'ba_contributions' ), 'B4 template does 
 e5_assert( false === strpos( $template, 'author_email' ), 'B4 template does not access reporter email' );
 
 e5_assert( false !== strpos( $service, 'Sai qualcosa su questa segnalazione?' ), 'B4 shows approved E0 contribution CTA' );
-e5_assert( false !== strpos( $service, 'Commento pubblico' ) && false !== strpos( $service, 'Informazione riservata' ), 'B4 distinguishes public discussion and staff-only information' );
+e5_assert( false !== strpos( $service, 'Commento pubblico' ) && false !== strpos( $service, 'Contatta l’autore della segnalazione' ), 'B4 distinguishes public discussion and staff-only information' );
 e5_assert( false !== strpos( $service, 'data-ba-contribution-form' ), 'E5 uses native badaround-core contribution form' );
 e5_assert( false !== strpos( $service, 'rest_url( self::REST_NAMESPACE . self::REST_ROUTE )' ), 'native form submits to E1 REST contract' );
 e5_assert( false !== strpos( $service, 'multipart/form-data' ), 'native form supports private image uploads' );

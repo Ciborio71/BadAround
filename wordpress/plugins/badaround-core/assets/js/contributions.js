@@ -7,7 +7,7 @@ document.addEventListener('click',function(e){
  if(!panel)return;
  const opening=panel.hidden;panel.hidden=!opening;
  btn.setAttribute('aria-expanded',String(opening));
- const label=btn.querySelector('[data-ba-contribution-label]')||btn;label.textContent=opening?'Chiudi il modulo riservato':'Informazione riservata';
+ const label=btn.querySelector('[data-ba-contribution-label]')||btn;label.textContent=opening?'Chiudi il modulo riservato':'Contatta l’autore della segnalazione';
  if(opening){panel.scrollIntoView({behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});panel.querySelector('select')?.focus({preventScroll:true});}
 });
 document.addEventListener('change',function(e){
