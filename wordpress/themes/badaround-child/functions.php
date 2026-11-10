@@ -435,7 +435,7 @@ function badaround_event_document_title( $parts ) {
 		$parts['site'] = 'BadAround';
 		if ( class_exists('BadAround_Event_SEO') && BadAround_Event_SEO::active(get_queried_object_id()) ) {
 			$seo = BadAround_Event_SEO::project(get_queried_object_id());
-			if ( ! is_wp_error($seo) ) { $parts['title']=$seo['h1']; unset($parts['tagline']); }
+			if ( ! is_wp_error($seo) ) { $parts['title']=preg_replace('/ \| BadAround$/D','',$seo['title']); unset($parts['tagline']); }
 		}
 	}
 	return $parts;

@@ -1,8 +1,9 @@
 <?php
-/** SEO-EVENTS v1.1: public fields only; no private report reads. */
+/** SEO-EVENTS URL v1.1 / editorial copy v1.2: public fields only; no private report reads. */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 final class BadAround_Event_SEO {
-    const VERSION = '1.1';
+    const VERSION = '1.1'; // URL/activation contract stays compatible with published events.
+    const COPY_VERSION = '1.2';
     const CONTRACT = '_ba_seo_contract';
     const SLUG = '_ba_seo_slug';
     const URL_ID = '_ba_public_url_id';
@@ -23,7 +24,7 @@ final class BadAround_Event_SEO {
                 $id=(int)$request['id'];$seo=self::project($id);
                 if (is_wp_error($seo)) { return $seo; }
                 $response=new WP_REST_Response(array('contract'=>self::VERSION,'active'=>self::active($id),
-                    'current_url'=>get_permalink($id),'frozen'=>(bool)get_post_meta($id,'_ba_seo_frozen',true),'preview'=>$seo));
+                    'copy_version'=>self::COPY_VERSION,'sections'=>self::section_headings($id),'current_url'=>get_permalink($id),'frozen'=>(bool)get_post_meta($id,'_ba_seo_frozen',true),'preview'=>$seo));
                 $response->header('Cache-Control','private, no-store');return $response;
             },
         ));
@@ -40,6 +41,9 @@ final class BadAround_Event_SEO {
         echo '<p>Generata dai dati pubblici salvati. Aggiorna la scheda per ricalcolarla. Il controllo privacy rimane obbligatorio alla pubblicazione.</p>';
         foreach(array('title'=>'Title','description'=>'Description','h1'=>'H1','heading'=>'Heading dei dettagli') as $key=>$label) {
             echo '<p><strong>'.esc_html($label).'</strong><br>'.esc_html($seo[$key]).'</p>';
+        }
+        foreach(self::section_headings($post->ID) as $key=>$heading){
+            echo '<p><strong>'.esc_html(in_array($key,array('address','occurrence','map'),true)?'H3':'H2').'</strong><br>'.esc_html($heading).'</p>';
         }
         $frozen=get_post_meta($post->ID,'_ba_seo_frozen',true);
         $published='publish'===$post->post_status || 'published'===get_post_meta($post->ID,'_ba_moderation_status',true);
@@ -129,47 +133,157 @@ final class BadAround_Event_SEO {
             if ( $detail && 'vehicle_stolen' === $key ) { $subject = $detail.($color?', colore '.lcfirst($color):'').' — veicolo segnalato rubato'; }
             elseif ( $detail ) { $subject = $detail.($color?', colore '.lcfirst($color):'').' — '.lcfirst($subject); }
         }
-        $zone='';
-        foreach($places as $term){$chain=get_ancestors($term->term_id,'ba_territorio','taxonomy');if(get_post_status($id)==='publish'&&count($chain)>=3&&self::text($term->name)!==$municipality){$zone=self::text($term->name);break;}}
-        $h1 = $subject.' a '.$municipality.($zone?' — zona '.$zone:'');
-        $state = get_post_meta($id,'_ba_event_status',true);
-        $state_labels = array('resolved'=>'Risolto','closed'=>'Chiuso','archived'=>'Archiviato','expired'=>'Scaduto');
-        if ( isset($state_labels[$state]) ) { $h1 .= ' — '.$state_labels[$state]; }
+        // Only approved, sealed facts may enrich animal/object copy or a street label.
         $public_details=class_exists('BadAround_Event_Public_Details')?BadAround_Event_Public_Details::view($id):array();
-        $intro = 'Segnalazione relativa a '.lcfirst($template[0]).' nel comune di '.$municipality.'.';
-        if($detail){$intro.=' Veicolo: '.$detail.'.';}
-        $color=self::text(get_post_meta($id,'_ba_vehicle_color',true));
-        if($detail&&$color){$intro.=' Colore: '.lcfirst($color).'.';}
-        if($key==='vehicle_stolen'){$intro=($detail?$detail.($color?', colore '.lcfirst($color):'').': segnalazione di furto':'Segnalazione di furto di un veicolo').' a '.$municipality.'.';}
-        if(!empty($public_details['seeking_witnesses'])&&!in_array($state,array('resolved','closed','archived','expired'),true)){$intro.=' L’autore cerca testimoni o informazioni utili.';}
-        $date = (string)get_post_meta($id,'_ba_occurred_date',true);
-        if ( preg_match('/^\d{4}-\d{2}-\d{2}$/D',$date) ) {
-            $parts=explode('-',$date);
-            if ( checkdate((int)$parts[1],(int)$parts[2],(int)$parts[0]) ) { $intro .= ' Data indicata: '.$parts[2].'/'.$parts[1].'/'.$parts[0].'.'; }
+        $zone='';$zone_depth=-1;
+        foreach($places as $term){
+            $chain=get_ancestors($term->term_id,'ba_territorio','taxonomy');
+            if(get_post_status($id)==='publish'&&count($chain)>=3&&count($chain)>$zone_depth&&self::text($term->name)!==$municipality){
+                $zone=self::text($term->name);$zone_depth=count($chain);
+            }
         }
-        // Descriptive public section labels; no private wizard prose or inferred dates/locations.
-        $context=lcfirst($template[0]).($detail?' '.$detail:'').' a '.$municipality.($zone?', zona '.$zone:'');
-        $theft=$key==='vehicle_stolen';
-        $sections=array(
-            'photos'=>$theft?'Foto della segnalazione di furto'.($detail?' '.$detail:''):'Foto: '.$context,
-            'facts'=>$detail?'Caratteristiche del veicolo '.$detail:$template[2].' a '.$municipality,
-            'prose'=>$theft?'Dettagli del furto segnalato'.($detail?': '.$detail:'').' a '.$municipality:'Dettagli: '.$context,
-            'location'=>$theft?'Luogo e periodo del furto segnalato a '.$municipality:'Luogo e periodo: '.$context,
-            'summary'=>$theft?'Informazioni evento: '.($detail?$detail.' segnalato rubato':'veicolo segnalato rubato').' a '.$municipality:'Informazioni evento: '.$context,
-            'comments'=>$theft?'Commenti sulla segnalazione di furto'.($detail?' '.$detail:'').' a '.$municipality:'Commenti: '.$context,
-            'address'=>'Indirizzo della segnalazione a '.$municipality,
-            'occurrence'=>'Data o periodo dell’evento segnalato a '.$municipality,
-            'map'=>'Mappa della segnalazione a '.$municipality,
-        );
+        $street=self::public_street($public_details['address']??'');
+        $area=$street!==''?$street:($zone!==''?'zona '.$zone:'');
+        $where=' a '.$municipality.($area!==''?', '.($street!==''?'in ':'').$area:'');
+        $animal_types=array('dog'=>'cane','cat'=>'gatto','bird'=>'uccello','rabbit'=>'coniglio','livestock'=>'animale da allevamento','wild'=>'animale selvatico','reptile'=>'rettile');
+        $animal=$animal_types[$public_details['facts']['animal.type']['value']??'']??'';
+        $object_status=$public_details['facts']['object.status']['value']??'';
+        $copy=self::editorial_copy($key,$template,$detail,$animal,$object_status,$municipality);
+        if($animal!=='' && str_starts_with((string)$key,'animal_')){
+            $animal_event=array('animal_missing'=>'smarrito','animal_sighted_or_found'=>'avvistato o trovato','animal_injured'=>'ferito o in difficoltà','animal_risk'=>'coinvolto in una situazione di rischio');
+            $subject=ucfirst($animal).' '.($animal_event[$key]??'segnalato');
+        }
+        if(isset($copy['subject']))$subject=$copy['subject'];
+        $h1=str_replace(' — ',' | ',$subject).$where;
+        $state=get_post_meta($id,'_ba_event_status',true);
+        $state_labels=array('resolved'=>'Risolto','closed'=>'Chiuso','archived'=>'Archiviato','expired'=>'Scaduto');
+        if(isset($state_labels[$state]))$h1.=' | '.$state_labels[$state];
+        $title_base=$copy['title'];
+        $with_color=$title_base.($detail&&$color?', colore '.lcfirst($color):'');
+        $state_prefix=isset($state_labels[$state])?$state_labels[$state].': ':'';
+        $title=self::choose_title(array(
+            $state_prefix.$with_color.$where,
+            $state_prefix.$title_base.$where,
+            $state_prefix.$with_color.' a '.$municipality,
+            $state_prefix.$title_base.' a '.$municipality,
+        ));
+        $intro=$copy['description'].$where.'.';
+        if($detail&&$color)$intro.=' Colore indicato: '.lcfirst($color).'.';
+        if(isset($state_labels[$state]))$intro.=' Stato: '.lcfirst($state_labels[$state]).'.';
+        elseif(!empty($public_details['seeking_witnesses']))$intro.=' Si cercano testimoni o informazioni utili.';
+        $date=(string)get_post_meta($id,'_ba_occurred_date',true);
+        if(preg_match('/^\d{4}-\d{2}-\d{2}$/D',$date)){
+            $parts=explode('-',$date);
+            if(checkdate((int)$parts[1],(int)$parts[2],(int)$parts[0]))$intro.=' Data indicata: '.$parts[2].'/'.$parts[1].'/'.$parts[0].'.';
+        }
+        $sections=$copy['sections'];
+        $sections+=array('address'=>'Indirizzo pubblico dell’evento','occurrence'=>'Data e periodo indicati nella segnalazione','map'=>'Mappa della zona di '.$municipality);
         if($headings_only)return $sections;
-        return array('h1'=>$h1, 'title'=>$h1.' | BadAround',
-            'description'=>$intro.' Consulta i dettagli pubblici della segnalazione su BadAround.',
-            'intro'=>$intro, 'heading'=>$detail?'Caratteristiche del veicolo '.$detail:$template[2],
-            'prose_heading'=>in_array($key,array('vehicle_stolen','vehicle_parts_stolen','property_theft'),true)?'Dettagli della segnalazione di furto':'Dettagli: '.lcfirst($template[0]),
-            'location_heading'=>'Luogo e periodo della segnalazione a '.$municipality,
-            'witness_heading'=>$detail?'Hai visto questo '.$detail.'?':'Hai informazioni su questa segnalazione?',
+        return array('h1'=>$h1,'title'=>$title,'description'=>self::limit_text($intro.' Leggi i dettagli e gli aggiornamenti su BadAround.',190),
+            'intro'=>$intro,'heading'=>$sections['facts'],'prose_heading'=>$sections['prose'],'location_heading'=>$sections['location'],
+            'witness_heading'=>$detail?'Hai visto questo '.$detail.'?':($animal?'Hai informazioni su questo '.$animal.'?':'Hai informazioni su questa segnalazione?'),
+            // This exact formula remains frozen, independently of editorial copy.
             'slug'=>sanitize_title($template[1].'-'.$municipality.($detail?'-'.$detail:'')));
     }
+
+    private static function length($value){return preg_match_all('/./us',$value);}
+    private static function limit_text($value,$max){
+        if(self::length($value)<=$max)return $value;
+        preg_match_all('/./us',$value,$chars);$cut=implode('',array_slice($chars[0],0,$max-1));
+        $words=preg_replace('/\s+\S*$/u','',$cut);
+        return rtrim($words!==''?$words:$cut,' ,;:.').'…';
+    }
+    private static function choose_title($candidates){
+        // Editorial budget, not a claim about a Google character limit. Never cut a URL or H1.
+        foreach($candidates as $candidate){if(self::length($candidate.' | BadAround')<=75)return $candidate.' | BadAround';}
+        return self::limit_text(end($candidates),77).' | BadAround';
+    }
+    private static function public_street($address){
+        // Input is already the signed public address; never inspect the private report.
+        $first=trim(preg_split('/[,;]/u',(string)$address)[0]);
+        if(!preg_match('/^(?:via|viale|piazza|piazzale|corso|largo|vicolo|strada|lungomare|lungotevere|circonvallazione)\s+/ui',$first))return '';
+        $street=preg_replace('/\s+(?:n[.°]?\s*)?\d+[a-z]?(?:\s*[\/-]\s*[a-z0-9]+)?\s*$/ui','',$first);
+        // Ambiguous numeric street names/civic formats are omitted, never guessed.
+        if(preg_match('/\d/u',$street)||self::length($street)>70)return '';
+        return self::text($street);
+    }
+    private static function editorial_copy($key,$template,$detail,$animal,$object_status,$town){
+        $topics=array(
+            'vehicle_stolen'=>'Furto di un veicolo','vehicle_parked_damage'=>'Danni a un veicolo in sosta',
+            'vehicle_hit_and_run'=>'Incidente con fuga','vehicle_parts_stolen'=>'Furto di parti o accessori',
+            'vehicle_observed'=>'Veicolo sospetto o abbandonato','vehicle_other'=>'Segnalazione su un veicolo',
+            'property_theft'=>'Furto in un immobile','property_attempted_breakin'=>'Tentato furto o scasso',
+            'property_intrusion'=>'Accesso abusivo o intrusione','property_vandalism'=>'Vandalismo o danneggiamento',
+            'property_observed_behavior'=>'Comportamento sospetto','property_other'=>'Segnalazione su un immobile',
+            'civic_waste'=>'Rifiuti abbandonati','civic_surface_damage'=>'Buca o marciapiede dissestato',
+            'civic_public_lighting'=>'Guasto all’illuminazione pubblica','civic_road_signage'=>'Segnaletica danneggiata',
+            'civic_public_furniture_green'=>'Degrado di arredo urbano o verde','civic_other'=>'Disservizio o degrado urbano',
+            'animal_missing'=>'Animale smarrito','animal_sighted_or_found'=>'Animale avvistato o trovato',
+            'animal_injured'=>'Animale ferito o in difficoltà','animal_risk'=>'Situazione di rischio con un animale',
+            'wallet_docs'=>'Documenti, portafoglio o borsa','keys'=>'Chiavi','electronics'=>'Dispositivo elettronico',
+            'valuables'=>'Oggetto di valore o accessorio','other'=>'Oggetto personale',
+            'hazard_falling_element'=>'Albero, ramo o elemento pericolante','hazard_road_disruption'=>'Strada interrotta o grave dissesto',
+            'hazard_flood_or_ice'=>'Allagamento o ghiaccio','hazard_road_obstruction'=>'Ostacolo sulla carreggiata',
+            'hazard_fire_or_smoke'=>'Fumo o incendio','hazard_other'=>'Situazione di pericolo',
+        );
+        $topic=$topics[$key]??$template[0];
+        $vehicle=str_starts_with((string)$key,'vehicle_');$animal_event=str_starts_with((string)$key,'animal_');
+        $object=in_array($key,array('wallet_docs','keys','electronics','valuables','other'),true);$status='';
+        $title=$topic;$description='Segnalazione relativa a '.lcfirst($topic);
+        $sections=array('photos'=>'Foto della segnalazione: '.lcfirst($topic),
+            'facts'=>$template[2],'prose'=>'Che cosa è stato segnalato: '.lcfirst($topic),
+            'location'=>'Luogo e periodo dell’evento a '.$town,'summary'=>'Riepilogo della segnalazione a '.$town,
+            'comments'=>'Commenti e aggiornamenti su questa segnalazione');
+        if($vehicle){
+            if($detail)$title=$topic.': '.$detail;
+            $description='Segnalazione di '.lcfirst($topic).($detail?', mezzo indicato: '.$detail:'');
+            $sections['photos']=$detail?'Foto della segnalazione: '.$detail:'Foto del veicolo segnalato';
+            $sections['facts']=$detail?'Caratteristiche e segni distintivi: '.$detail:'Caratteristiche del veicolo segnalato';
+            $sections['prose']=array('vehicle_stolen'=>'Come è avvenuto il furto segnalato','vehicle_parked_damage'=>'Quali danni sono stati segnalati durante la sosta','vehicle_hit_and_run'=>'Dinamica dell’incidente e informazioni disponibili','vehicle_parts_stolen'=>'Quali parti o accessori risultano coinvolti','vehicle_observed'=>'Circostanze dell’avvistamento del veicolo','vehicle_other'=>'Che cosa è successo al veicolo')[$key];
+            $sections['summary']='Informazioni utili'.($detail?' su '.$detail:' sul veicolo').' a '.$town;
+            if($key==='vehicle_stolen'){
+                $title=$detail?'Furto '.$detail:'Veicolo segnalato rubato';
+                $description=$detail?'Segnalato il furto di '.$detail:'Segnalato il furto di un veicolo';
+                $sections['location']='Luogo e periodo del furto a '.$town;
+                $sections['comments']='Commenti e aggiornamenti sul furto a '.$town;
+            }else $sections['comments']='Contributi della community sul veicolo a '.$town;
+        }elseif($animal_event){
+            if($animal){$title=str_replace('Animale',ucfirst($animal),$topic);$description='Segnalazione: '.lcfirst($title);}
+            $sections['photos']=$animal?'Foto dell’animale segnalato: '.$animal:'Foto per riconoscere l’animale';
+            $sections['facts']='Aspetto e segni di riconoscimento'.($animal?' del '.$animal:' dell’animale');
+            $sections['prose']=$key==='animal_missing'?'Circostanze dello smarrimento':'Circostanze e condizioni dell’animale segnalato';
+            $sections['location']=$key==='animal_missing'?'Ultima posizione segnalata e periodo a '.$town:'Luogo e periodo dell’avvistamento a '.$town;
+            $sections['comments']='Avvistamenti e aggiornamenti della community a '.$town;
+        }elseif($object){
+            $status=in_array($object_status,array('lost','found'),true)?($object_status==='lost'?'smarrimento':'ritrovamento'):'';
+            $title=$status?ucfirst($status).': '.lcfirst($topic):'Segnalazione: '.lcfirst($topic);
+            $description=$status?'Segnalazione di '.$status.' relativa a '.lcfirst($topic):'Informazioni su '.lcfirst($topic).' nella segnalazione';
+            $sections['facts']='Caratteristiche per riconoscere l’oggetto';
+            $sections['prose']=$status?($status==='smarrimento'?'Circostanze dello smarrimento':'Circostanze del ritrovamento'):'Informazioni disponibili sull’oggetto';
+            $sections['comments']='Informazioni e aggiornamenti sull’oggetto segnalato';
+        }elseif(str_starts_with((string)$key,'property_')){
+            $sections['photos']='Foto dei luoghi e degli eventuali danni segnalati';
+            $sections['prose']=$key==='property_theft'?'Circostanze del furto nell’immobile':($key==='property_attempted_breakin'?'Segni del tentativo di furto o scasso':'Che cosa è successo nell’immobile');
+            $sections['facts']='Dettagli utili sull’immobile e sull’evento';
+            $sections['comments']='Commenti della community sull’evento a '.$town;
+        }elseif(str_starts_with((string)$key,'civic_')){
+            $sections['photos']='Foto del problema segnalato: '.lcfirst($topic);
+            $sections['prose']='Descrizione del problema nello spazio pubblico';
+            $sections['facts']='Caratteristiche e condizioni segnalate';
+            $sections['location']='Area interessata e periodo della segnalazione a '.$town;
+            $sections['comments']='Aggiornamenti dalla zona di '.$town;
+        }elseif(str_starts_with((string)$key,'hazard_')){
+            $sections['photos']='Immagini della situazione segnalata';
+            $sections['prose']='Che cosa è stato osservato: '.lcfirst($topic);
+            $sections['facts']='Elementi utili per comprendere il pericolo segnalato';
+            $sections['location']='Zona interessata e periodo a '.$town;
+            $sections['comments']='Aggiornamenti della community sulla situazione';
+        }
+        $result=array('title'=>$title,'description'=>$description,'sections'=>$sections);
+        if($object&&$status!=='')$result['subject']=$topic.' | Segnalazione di '.$status;
+        return $result;
+    }
+
     public static function section_headings($id){
         $p=self::project($id,true);
         return is_wp_error($p)?array('photos'=>'Foto della segnalazione','facts'=>'Dettagli utili','prose'=>'Che cosa è successo','location'=>'Luogo e periodo della segnalazione','summary'=>'Informazioni evento','comments'=>'Commenti della community','address'=>'Indirizzo della segnalazione','occurrence'=>'Data o periodo dell’evento','map'=>'Mappa della segnalazione'):$p;

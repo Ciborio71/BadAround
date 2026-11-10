@@ -19,9 +19,10 @@ $wpdb->last_error='unavailable';check(badaround_event_gallery_ids(381)===[],'dat
 $GLOBALS['status']='pending';check(badaround_event_gallery_ids(381)===[],'unpublished event has no public gallery');$GLOBALS['status']='publish';
 $GLOBALS['cover']=99;$wpdb->rows=[];check(badaround_event_gallery_ids(381)===[],'unsupported image excluded');
 check(!str_contains($wpdb->query,'original_storage_key')&&!str_contains($wpdb->query,'original_filename'),'read query never retrieves private originals');
-ob_start();badaround_render_event_gallery([],'Test');$html=ob_get_clean();check(str_contains($html,'ba-card ba-event-section')&&str_contains($html,'<h2>Foto della segnalazione</h2>'),'empty gallery has a titled card');check(str_contains($html,'Nessuna foto disponibile')&&!str_contains($html,'<img'),'compact empty state avoids placeholder download');
+ob_start();badaround_render_event_gallery([],'Test');$html=ob_get_clean();check(str_contains($html,'ba-card ba-event-section')&&!str_contains($html,'<h2>')&&str_contains($html,'aria-label="Immagini della segnalazione"'),'empty gallery has an accessible compact card without an orphan photo heading');check(str_contains($html,'Nessuna foto disponibile')&&!str_contains($html,'<img'),'compact empty state avoids placeholder download');
 ob_start();badaround_render_event_gallery([11],'Test');$html=ob_get_clean();check(str_contains($html,'fetchpriority="high"')&&str_contains($html,'width="1024"')&&!str_contains($html,'data-ba-gallery-thumb'),'single image has dimensions and priority, no false thumbnails');
 ob_start();badaround_render_event_gallery([11,22],'Test');$html=ob_get_clean();check(substr_count($html,'data-ba-gallery-thumb')===2&&str_contains($html,'data-srcset=')&&str_contains($html,'Foto 1 di 2'),'multiple public images include responsive navigation');
 echo "EVENT_GALLERY_SUITE_PASS\n";
 
-ob_start();badaround_render_event_gallery([],'Honda SH','Foto della segnalazione di furto Honda SH');$html=ob_get_clean();check(str_contains($html,'<h2>Foto della segnalazione di furto Honda SH</h2>'),'empty photo card accepts a descriptive heading');
+ob_start();badaround_render_event_gallery([],'Honda SH','Foto della segnalazione di furto Honda SH');$html=ob_get_clean();check(!str_contains($html,'<h2>'),'no photo heading when no approved photos exist');
+ob_start();badaround_render_event_gallery([11],'Honda SH','Foto della segnalazione: Honda SH');$html=ob_get_clean();check(str_contains($html,'<h2>Foto della segnalazione: Honda SH</h2>'),'approved photos receive the dynamic heading');
