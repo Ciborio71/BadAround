@@ -44,12 +44,12 @@ for (const [mode,label] of [['exact_point','Punto esatto'],['approximate_area','
     assert.equal(h.model.step,5);
     const review=h.doc.querySelector('[data-native-review]');
     const request=[...review.querySelectorAll('dt')].find(node=>node.textContent==='Posizione pubblica richiesta');
-    assert(request);assert.equal(request.nextElementSibling.textContent,label+(mode==='approximate_area'?' — circa 500 m':''));
+    assert(request);assert.equal(request.nextElementSibling.textContent,label+(mode==='approximate_area'?' — circa 100 m':''));
     assert(review.textContent.includes('Indirizzo e civico restano riservati. La rappresentazione pubblica della posizione sarà valutata dalla moderazione.'));
     assert(!/La posizione pubblica sarà approssimata|La posizione sarà pubblicata esattamente/i.test(review.textContent));
     assert.equal(h.model.publicLocationRequest,mode);
     assert.equal(h.model.payload().location.public_location_request.mode,mode);
-    if(mode==='approximate_area')assert.equal(h.model.payload().location.public_location_request.radius_m,500);
+    if(mode==='approximate_area')assert.equal(h.model.payload().location.public_location_request.radius_m,100);
     assert.equal(h.model.payload().location.public_location_request_version,'public-location-request-v2');
     assert.equal(JSON.stringify(h.model.values),values);
     assert.equal(JSON.stringify(h.model.payload()),before);
