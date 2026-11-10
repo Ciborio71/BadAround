@@ -78,7 +78,7 @@
 	letter-spacing:-.02em;
 }
 .ba-native [data-native-step]>h2+p{
-	max-width:72ch;
+	max-width:none;
 	margin:0 0 24px;
 	color:var(--ba-muted);
 }
@@ -206,7 +206,7 @@
 	margin-top:1px;
 }
 .ba-native .ba-native-help{
-	max-width:72ch;
+	max-width:none;
 	margin:7px 0 0;
 	color:var(--ba-muted);
 	font-size:.875rem;
