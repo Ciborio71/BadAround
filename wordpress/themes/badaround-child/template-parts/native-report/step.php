@@ -29,7 +29,6 @@ if ( 'event' === $key ) : ?>
     <legend>Come vuoi mostrare la posizione al pubblico?</legend>
     <div class="ba-native-public-location-options">
     <label class="ba-native-public-location-option">
-      <input type="radio" name="ba-public-location-choice" value="exact_point" checked>
       <span class="ba-native-public-location-visual" aria-hidden="true">
         <svg viewBox="0 0 160 104" focusable="false">
           <rect x="6" y="6" width="148" height="92" rx="14" class="ba-geo-map-bg"/>
@@ -38,10 +37,9 @@ if ( 'event' === $key ) : ?>
           <circle cx="72" cy="38" r="7" class="ba-geo-pin-core"/>
         </svg>
       </span>
-      <span class="ba-native-public-location-copy"><strong>Punto esatto</strong><small>Richiedi di mostrare sulla mappa il punto che hai indicato.</small></span>
+      <span class="ba-native-public-location-copy"><input type="radio" name="ba-public-location-choice" value="exact_point" checked><strong>Punto esatto</strong><small>Richiedi di mostrare sulla mappa il punto che hai indicato.</small></span>
     </label>
     <label class="ba-native-public-location-option">
-      <input type="radio" name="ba-public-location-choice" value="approximate_area">
       <span class="ba-native-public-location-visual" aria-hidden="true">
         <svg viewBox="0 0 160 104" focusable="false">
           <rect x="6" y="6" width="148" height="92" rx="14" class="ba-geo-map-bg"/>
@@ -50,7 +48,7 @@ if ( 'event' === $key ) : ?>
           <circle cx="80" cy="52" r="5" class="ba-geo-area-core"/>
         </svg>
       </span>
-      <span class="ba-native-public-location-copy"><strong>Area approssimata</strong><small>Richiedi di mostrare una zona approssimata intorno al luogo dell’evento.</small></span>
+      <span class="ba-native-public-location-copy"><input type="radio" name="ba-public-location-choice" value="approximate_area"><strong>Area approssimata</strong><small>Richiedi di mostrare una zona approssimata intorno al luogo dell’evento.</small></span>
     </label>
     </div>
     <div class="ba-native-radius" data-native-radius-field hidden>
