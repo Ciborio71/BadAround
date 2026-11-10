@@ -49,3 +49,18 @@ test('final access cancellation keeps wizard values and media editable; authenti
  h.window.BadAroundAccess.ensureIdentity=async profile=>{assert.equal(profile.email,'qa@example.invalid');assert.equal(profile.privacy_acknowledged,true);return true;};
  h.submit();await tick();await tick();assert.equal(h.freezes(),1);assert.equal(h.requests.length,1);assert.equal(h.model.completed,true);h.dom.window.close();
 });
+
+
+test('email confirmation pauses report sending feedback and cancellation preserves the editable draft',async()=>{
+ const h=create(completed);try{
+  populate(h);for(let i=0;i<5;i++)h.click('next');
+  const before=JSON.stringify(h.model.values);
+  h.window.BadAroundAccess={ensureIdentity:async(profile,{onPhase})=>{
+   onPhase('confirming');assert.equal(h.doc.querySelector('[data-native-submit-feedback]').hidden,true);
+   assert.equal(h.doc.querySelector('[data-native-submit]').classList.contains('is-loading'),false);
+   assert.match(h.doc.querySelector('[data-native-submit]').textContent,/Conferma email/);
+   onPhase('cancelled');return false;
+  }};
+  h.submit();await tick();assert.equal(h.model.busy,false);assert.equal(h.model.snapshot,null);assert.equal(h.requests.length,0);assert.equal(JSON.stringify(h.model.values),before);assert.equal(h.doc.querySelector('[data-native-errors]').hidden,true);
+ }finally{h.dom.window.close();}
+});

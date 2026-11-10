@@ -3,7 +3,7 @@
   const ns = window.BadAroundNative;
   function boot(container) {
     if (container.nativeReport) return; // Reinitialization must retain the current logical wizard.
-    let disposed=false; const listeners=[]; let submitWaitTimer=null;
+    let disposed=false; const listeners=[]; let submitWaitTimer=null;let accessPhase=null;
     function listen(target,type,handler) { target.addEventListener(type,handler);listeners.push(()=>target.removeEventListener(type,handler)); }
     function teardown() { if(disposed)return; disposed=true;clearTimeout(submitWaitTimer);submissionFeedback.hidden=true;listeners.forEach(remove=>remove());mediaView?.dispose();smartAddress?.dispose(); }
     const config = JSON.parse(container.querySelector('[data-native-config]').textContent);
@@ -74,14 +74,15 @@
     submissionFeedback.setAttribute('role','status');submissionFeedback.setAttribute('aria-live','polite');submissionFeedback.setAttribute('aria-atomic','true');
     form.after(submissionFeedback);
     function syncSubmissionFeedback(){
+      if(accessPhase&&accessPhase!=='checking'){submit.classList.remove('is-loading');clearTimeout(submitWaitTimer);submitWaitTimer=null;submissionFeedback.hidden=true;return;}
       submit.classList.toggle('is-loading',model.busy);
       if(model.busy){
         if(submissionFeedback.hidden){
-          submissionFeedback.textContent='Invio in corso… Attendi la conferma prima di chiudere la pagina.';
+          submissionFeedback.textContent=accessPhase==='checking'?'Controllo dell’accesso in corso…':'Invio in corso… Attendi la conferma prima di chiudere la pagina.';
           submissionFeedback.hidden=false;
           submissionFeedback.scrollIntoView?.({block:'nearest',behavior:'instant'});
           submitWaitTimer=setTimeout(()=>{
-            if(!disposed&&model.busy)submissionFeedback.textContent='Stiamo elaborando la segnalazione. Attendi la conferma: non occorre premere di nuovo Invia.';
+            if(!disposed&&model.busy)submissionFeedback.textContent=accessPhase==='checking'?'Stiamo verificando l’accesso. Attendi: la segnalazione non è ancora stata inviata.':'Stiamo elaborando la segnalazione. Attendi la conferma: non occorre premere di nuovo Invia.';
           },6000);
         }
       }else{
@@ -529,7 +530,7 @@
       back.disabled = model.step === 0 || model.busy || !!model.snapshot;
       next.hidden = current === 'review'; next.disabled = model.busy || !!model.snapshot;
       submit.hidden = current !== 'review'; submit.disabled = model.busy || model.completed || !!model.blocked;
-      submit.textContent = model.busy ? 'Invio in corso…' : model.snapshot ? 'Riprova invio' : config.identityQa===true ? 'Conferma e invia' : 'Invia segnalazione';
+      submit.textContent = model.busy ? (accessPhase?(accessPhase==='checking'?'Controllo accesso…':'Conferma email…'):'Invio in corso…') : model.snapshot ? 'Riprova invio' : config.identityQa===true ? 'Conferma e invia' : 'Invia segnalazione';
       form.setAttribute('aria-busy', String(model.busy));
       syncSubmissionFeedback();
       smartAddress?.syncVisibility?.();
@@ -655,12 +656,13 @@
       }
       const pendingPayload=model.snapshot || model.payload();
       if(config.identityQa===true) {
-        model.busy=true;render();let authorized=false;
+        accessPhase='checking';model.busy=true;render();let authorized=false;
         try {authorized=await window.BadAroundAccess?.ensureIdentity({...pendingPayload.reporter,
-          privacy_acknowledged:pendingPayload.consents?.privacy===true,can_edit_email:!model.snapshot});} catch {authorized=false;}
-        if(disposed)return;model.busy=false;
+          privacy_acknowledged:pendingPayload.consents?.privacy===true,can_edit_email:!model.snapshot},{onPhase:phase=>{if(!disposed){accessPhase=phase;render();}}});} catch {authorized=false;}
+        if(disposed)return;const accessCancelled=accessPhase==='cancelled';accessPhase=null;model.busy=false;
         if(authorized!==true) {
           if(authorized?.editEmail===true&&!model.snapshot){model.step=steps.indexOf('contact');render(true);wrappers.find(w=>w.dataset.nativeField==='reporter.email')?.querySelector('[data-native-input]')?.focus();}
+          else if(accessCancelled){render();ns.presentErrors(container,[],config);conditionalStatus.textContent=model.snapshot?'La segnalazione è conservata. Puoi riprovare la conferma quando vuoi.':'La compilazione è conservata. Puoi continuare a modificarla.';submit.focus({preventScroll:true});}
           else {render();displayErrors([{code:'identity_required',retryable:true,field:null}]);}
           return;
         }

@@ -36,9 +36,9 @@ final class BadAround_Identity_WordPress_Portal {
     public static function enqueue_feedback():void {
         if (!self::enabled() || !defined('BADAROUND_CORE_FILE')
             || !function_exists('wp_enqueue_style') || !function_exists('plugins_url'))return;
-        wp_enqueue_script('badaround-identity-access',plugins_url('identity-dormant/identity-access.js',BADAROUND_CORE_FILE),[],'1.0.0',true);
+        wp_enqueue_script('badaround-identity-access',plugins_url('identity-dormant/identity-access.js',BADAROUND_CORE_FILE),[],'1.1.0',true);
         wp_enqueue_style('badaround-identity-feedback',
-            plugins_url('identity-dormant/identity-feedback.css',BADAROUND_CORE_FILE),[],'1.0.0');
+            plugins_url('identity-dormant/identity-feedback.css',BADAROUND_CORE_FILE),[],'1.1.0');
     }
     public static function enqueue_admin_feedback():void {
         if (($_GET['page']??null)==='ba-identity-review')self::enqueue_feedback();

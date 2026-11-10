@@ -44,3 +44,27 @@
 .ba-identity-access [role=status]:not(:empty){padding:16px;border-left:5px solid #0799aa;background:#ecf8fa;color:#102443;font-size:18px;line-height:1.5;overflow-wrap:anywhere}
 .ba-site-header--identity .ba-header-login{min-height:44px;display:inline-flex;align-items:center}
 @media(min-width:861px) and (max-width:1200px){.ba-site-header--identity .ba-primary-nav{display:none}.ba-site-header--identity .ba-menu-toggle{display:block}.ba-site-header--identity .ba-site-header__inner{grid-template-columns:auto 1fr}}
+
+
+/* Clear OTP action hierarchy and visible feedback for each network operation. */
+.ba-identity-access-dialog h2{margin:0 0 10px;font-size:1.5rem;line-height:1.2;color:#102443}
+.ba-identity-access-dialog .ba-access-intro{margin:0 0 18px;font-size:1rem;line-height:1.5;color:#40566d}
+.ba-identity-access form{gap:14px}
+.ba-identity-access label{font-size:1rem;line-height:1.4}
+.ba-identity-access .ba-access-help{margin:8px 0 0;font-size:.9rem;line-height:1.5;color:#52687c}
+.ba-identity-access input:not([type=checkbox]){padding:10px 12px;border:1px solid #bdcedd;border-radius:10px;background:#fff;color:#102443;font:inherit}
+.ba-identity-access input[name=code]{width:100%;max-width:16rem;min-height:54px;font-size:1.5rem;letter-spacing:.25em}
+.ba-identity-access [data-access-submit]{justify-self:start;width:auto;max-width:100%;display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:12px 20px;border:1px solid #087f8c;border-radius:10px;background:#087f8c;color:#fff;font:inherit;font-weight:700;line-height:1.4}
+.ba-identity-access .ba-access-secondary-actions{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+.ba-identity-access button.ba-access-secondary{width:auto;max-width:100%;min-height:44px;padding:8px 0;border:0;border-radius:4px;background:transparent;color:#087f8c;box-shadow:none;font:inherit;line-height:1.4;text-align:left;text-decoration:underline;text-underline-offset:3px}
+.ba-identity-access .ba-access-cancel{margin-top:12px}
+.ba-identity-access button:disabled{opacity:.6;cursor:wait}
+.ba-identity-access button.ba-access-secondary:disabled{cursor:default;color:#52687c;text-decoration:none}
+.ba-identity-access :is(input,button):focus-visible{outline:3px solid #087f8c;outline-offset:3px}
+.ba-identity-access [role=status]:empty{display:none}
+.ba-identity-access [role=status]:not(:empty){margin:0;padding:12px 14px;border:1px solid #b9dde0;border-radius:10px;font-size:1rem;line-height:1.5}
+.ba-identity-access [data-access-result][data-state=error]{border-color:#b44444;background:#fff4f4;color:#8f2222}
+.ba-identity-access button.is-loading::before{content:'';display:inline-block;flex:0 0 auto;width:18px;height:18px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:ba-access-spin .8s linear infinite}
+.ba-identity-access button.is-loading{display:inline-flex;align-items:center;gap:10px;opacity:1}
+@keyframes ba-access-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.ba-identity-access button.is-loading::before{animation:none}}
