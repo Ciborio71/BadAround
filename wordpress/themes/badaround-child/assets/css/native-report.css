@@ -709,3 +709,11 @@
 .ba-native .ba-native-location-card [data-smart-confirmation]>strong{font-size:1.1rem}
 /* Keep the textual step status for assistive technology without repeating the heading. */
 .ba-native .ba-native-position{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+
+
+/* One fixed search slot: swapping in Google must not reorder the privacy copy. */
+.ba-native .ba-native-address-slot{min-width:0;min-height:52px;width:100%}
+.ba-native .ba-native-address-slot>[data-smart-widget]{min-width:0;width:100%}
+.ba-native .ba-native-address-slot [data-smart-start],
+.ba-native .ba-native-address-slot gmp-place-autocomplete{display:block;box-sizing:border-box;width:100%;max-width:100%;height:52px;min-height:52px;margin:0;border:1px solid #c9d7e2;border-radius:12px;background-color:#fff;color:var(--ba-text);font:inherit;line-height:1.4;color-scheme:light}
+.ba-native .ba-native-address-slot:focus-within{border-radius:12px;outline:3px solid var(--ba-teal-700);outline-offset:3px}

@@ -334,10 +334,10 @@
         widget=new Element({includedRegionCodes:['it']});
         widget.includedRegionCodes=['it'];
         widget.setAttribute('aria-label', 'Posizione dell’evento');
-        widget.setAttribute('aria-describedby', 'ba-smart-status');
+        widget.setAttribute('aria-describedby', 'ba-smart-privacy ba-smart-status');
         widget.addEventListener('gmp-select',choose);
         holder.replaceChildren(widget);
-        start.hidden=true;
+        start.hidden=true;holder.hidden=false;
         say('Cerca un indirizzo italiano e seleziona un suggerimento.');
         try{widget.focus()}catch(_){}
       } catch (_) {
@@ -371,6 +371,7 @@
       // A new report must not retain free text or prediction state inside the
       // Google custom element. Recreate it lazily on the next explicit focus.
       if(widget){widget.removeEventListener('gmp-select',choose);holder.replaceChildren();widget=null;}
+      holder.hidden=true;
       start.value='';start.hidden=false;start.disabled=false;
       if(manualButton)manualButton.hidden=config.locationManualEntry===false || Boolean(config.smartAddress?.key);
       syncVisibility();

@@ -8,9 +8,11 @@ if ( 'event' === $key ) : ?>
 	<p>Indica il luogo più preciso possibile: il segnaposto finale viene acquisito privatamente. Scegli come mostrarlo al pubblico: punto esatto oppure area approssimativa. La segnalazione sarà esaminata prima della pubblicazione.</p>
 <div class="ba-native-smart-address" data-native-smart-address>
   <label for="ba-smart-search">Dove è successo?</label>
+  <div class="ba-native-address-slot" data-smart-search-slot>
   <input id="ba-smart-search" data-smart-start type="text" readonly autocomplete="off" placeholder="Cerca indirizzo o località" aria-describedby="ba-smart-privacy ba-smart-status">
+  <div data-smart-widget hidden></div>
+  </div>
   <p id="ba-smart-privacy" class="ba-native-help"><strong>L’indirizzo completo e il numero civico non vengono pubblicati automaticamente. La posizione pubblica seguirà la tua scelta se la segnalazione sarà approvata.</strong></p>
-  <div data-smart-widget></div>
   <button data-smart-geolocate type="button" class="ba-button ba-native-gps-button"><svg class="ba-native-gps-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg><span data-smart-geolocate-label>Usa la mia posizione</span></button>
   <p class="ba-native-help">Seleziona un suggerimento Google, anche usando le frecce e Invio. La posizione del dispositivo viene richiesta solo premendo il pulsante.</p>
   <p id="ba-smart-status" data-smart-status role="status" aria-live="polite">Seleziona il campo per cercare un luogo.</p>

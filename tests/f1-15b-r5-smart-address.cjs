@@ -33,7 +33,7 @@ test('country guard, omissions and homonymous ambiguous terms are fail-closed',(
 });
 function setup(withMap=false){
   const dom=new JSDOM(`<!doctype html><html><head></head><body><section data-native-report>
-  <div data-native-smart-address><input data-smart-start type="text" readonly><div data-smart-widget></div><p data-smart-status></p><div data-smart-confirmation hidden><p data-smart-address-label></p></div><button data-smart-manual hidden type="button">Inserisci manualmente</button></div><div data-native-location-fields hidden>
+  <div data-native-smart-address><div data-smart-search-slot><input data-smart-start type="text" readonly><div data-smart-widget hidden></div></div><p id="ba-smart-privacy">Informazioni privacy</p><p data-smart-status></p><div data-smart-confirmation hidden><p data-smart-address-label></p></div><button data-smart-manual hidden type="button">Inserisci manualmente</button></div><div data-native-location-fields hidden>
   <input data-native-input name="location.region"><input data-native-input name="location.province"><input data-native-input name="location.municipality"><input data-native-input name="location.locality">
   <input data-native-input name="location.exact_address"><input data-native-input name="location.exact_lat"><input data-native-input name="location.exact_lng"></div>
   <fieldset data-native-public-location-choice hidden><input type="radio" value="exact_point" checked><input type="radio" value="approximate_area"><select name="ba-public-location-radius" disabled><option value="500">500</option></select></fieldset></section></body></html>`,{url:'https://staging.badaround.it/segnala-un-evento/',runScripts:'outside-only'});
@@ -688,4 +688,21 @@ test('wizard preview retains native zoom/fullscreen and keyboard navigation with
  const selected=h.select();selected.resolve();await settleMap();
  assert.equal(options.zoomControl,true);assert.equal(options.fullscreenControl,true);assert.equal(options.keyboardShortcuts,true);
  assert.equal(h.container.querySelectorAll('.ba-map-pan').length,0);h.close();
+});
+
+
+test('search activation and reset keep both address controls in the same slot above privacy copy',async()=>{
+ const h=await liveWidget(),slot=h.container.querySelector('[data-smart-search-slot]'),holder=h.container.querySelector('[data-smart-widget]');
+ assert.equal(h.button.parentElement,slot);assert.equal(holder.parentElement,slot);
+ assert.equal(slot.nextElementSibling.id,'ba-smart-privacy');assert(h.button.hidden);assert.equal(holder.hidden,false);
+ assert.equal(h.widget.getAttribute('aria-describedby'),'ba-smart-privacy ba-smart-status');
+ h.controller.reset();assert.equal(h.button.hidden,false);assert.equal(holder.hidden,true);assert.equal(holder.children.length,0);
+ assert.equal(slot.nextElementSibling.id,'ba-smart-privacy');h.close();
+});
+test('failed search loading retains the original input slot and the privacy order',async()=>{
+ const h=setup(),controller=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:territory}},h.model);
+ const slot=h.container.querySelector('[data-smart-search-slot]'),holder=h.container.querySelector('[data-smart-widget]');
+ assert(holder.hidden);h.button.click();assert.equal(h.button.hidden,false);
+ h.win.document.querySelector('script[src*="maps.googleapis.com"]').onerror();await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(h.button.hidden,false);assert.equal(h.button.disabled,false);assert(holder.hidden);assert.equal(slot.nextElementSibling.id,'ba-smart-privacy');controller.dispose();h.dom.window.close();
 });
