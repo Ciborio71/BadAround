@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guarded dynamic event SEO copy release."""
+"""Guarded dynamic event SEO copy release; includes missing-model fallbacks."""
 from pathlib import Path
 import importlib.util,ftplib,ssl,os,json
 ROOT=Path(__file__).resolve().parents[1]

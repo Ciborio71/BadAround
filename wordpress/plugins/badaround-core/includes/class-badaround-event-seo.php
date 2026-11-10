@@ -242,7 +242,7 @@ final class BadAround_Event_SEO {
             $sections['prose']=array('vehicle_stolen'=>'Come è avvenuto il furto segnalato','vehicle_parked_damage'=>'Quali danni sono stati segnalati durante la sosta','vehicle_hit_and_run'=>'Dinamica dell’incidente e informazioni disponibili','vehicle_parts_stolen'=>'Quali parti o accessori risultano coinvolti','vehicle_observed'=>'Circostanze dell’avvistamento del veicolo','vehicle_other'=>'Che cosa è successo al veicolo')[$key];
             $sections['summary']='Informazioni utili'.($detail?' su '.$detail:' sul veicolo').' a '.$town;
             if($key==='vehicle_stolen'){
-                $title=$detail?'Furto '.$detail:'Veicolo segnalato rubato';
+                $title=$detail?'Furto '.$detail:'Furto di un veicolo';
                 $description=$detail?'Segnalato il furto di '.$detail:'Segnalato il furto di un veicolo';
                 $sections['location']='Luogo e periodo del furto a '.$town;
                 $sections['comments']='Commenti e aggiornamenti sul furto a '.$town;
