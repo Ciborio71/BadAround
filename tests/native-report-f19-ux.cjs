@@ -179,7 +179,10 @@ test('page heading follows every step and back navigation without duplicating th
   for(let i=0;i<steps.length;i++){
    const section=h.doc.querySelector('[data-native-step="'+steps[i]+'"]');
    assert.equal(title.textContent,h.root.nativeReport.config.steps[steps[i]]+(i===0?'?':''));
-   assert(section.querySelector('h2').hidden);assert(section.querySelector('h2').nextElementSibling.hidden);
+   assert(section.querySelector('h2').hidden);
+   // A contextual emergency notice may legitimately follow the hidden heading.
+   // Check the original introduction by its copied text, not by sibling position.
+   assert([...section.children].some(el=>el.tagName==='P'&&el.hidden&&el.textContent===intro.textContent));
    assert.equal(section.getAttribute('aria-labelledby'),title.id);
    if(i<steps.length-1){h.click('next');assert.equal(h.doc.activeElement,title);}
   }
