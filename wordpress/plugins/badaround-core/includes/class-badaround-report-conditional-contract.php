@@ -54,7 +54,7 @@ class BadAround_Report_Conditional_Contract {
 	public static function active( $path, $report, $row, $seen = array() ) {
 		// NF-UX-02A technical envelope overlay: questionnaire visibility cannot
 		// strip the explicit discriminator or the existing global UUID identity.
-		if ( in_array( $path, array( 'schema_version', 'submission_id' ), true ) ) { return true; }
+		if ( in_array( $path, array( 'schema_version', 'submission_id', 'consents.public_details_version' ), true ) ) { return true; }
 		if ( ! $row || isset( $seen[ $path ] ) || ! isset( $row['fields'][ $path ] ) ) { return false; }
 		$seen[ $path ] = true; $rule = $row['fields'][ $path ];
 		if ( 'HIDDEN' === $rule['state'] ) { return false; }

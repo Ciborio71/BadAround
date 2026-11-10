@@ -148,7 +148,7 @@
         if (field.help && !['Dato riservato: non viene pubblicato integralmente.','La pubblicazione avviene solo dopo moderazione.'].includes(field.help)) {
           const help = document.createElement('small');
           help.className = 'ba-native-review-help';
-          help.textContent = field.help;
+          help.textContent = path==='location.exact_address' ? (model.publicLocationRequest==='exact_point'?'Indirizzo completo destinato alla pubblicazione, dopo la moderazione.':'Indirizzo riservato: al pubblico sarà mostrata solo la zona approssimata.') : field.help;
           detail.append(help);
         }
         list.append(term, detail);
@@ -165,6 +165,8 @@
         }
         const term=document.createElement('dt');term.textContent='Posizione pubblica richiesta';
         const detail=document.createElement('dd');detail.textContent=model.publicLocationLabel();
+        const exposure=document.createElement('small');exposure.className='ba-native-review-help';
+        exposure.textContent=model.publicLocationRequest==='exact_point'?'Saranno pubblicati l’indirizzo completo e il civico indicati, dopo la moderazione.':'L’indirizzo completo e il civico restano riservati: sarà pubblicata solo la zona approssimata.';detail.append(exposure);
         locationSection.querySelector('dl').append(term,detail);
       }
       // Follow the seven-step sequence even when schema fields are ordered differently.
@@ -222,7 +224,7 @@
       link.setAttribute('aria-label',label+' (si apre in una nuova scheda)');return link;
     }
     const declarationDetail=document.createElement('p');declarationDetail.id='ba-native-declarations-detail';declarationDetail.className='ba-native-declaration-detail';
-    declarationDetail.append('Dichiaro di avere il diritto di condividere eventuali contenuti allegati, di aver letto e accettato le ',policyLink('regole di pubblicazione','/regole-di-pubblicazione/'),' e i ',policyLink('termini e le condizioni','/termini-e-condizioni/'),' di BadAround e di aver preso visione dell’',policyLink('informativa privacy','/privacy-policy/'),'.');
+    declarationDetail.append('Mi assumo la responsabilità dei contenuti inviati. Ho compreso che, dopo la moderazione, la targa inserita sarà pubblicata in chiaro e, scegliendo Punto esatto, saranno pubblicati anche l’indirizzo completo e il numero civico. Con Area approssimata sarà mostrata solo la zona. Dichiaro di avere il diritto di condividere eventuali contenuti allegati, di aver letto e accettato le ',policyLink('regole di pubblicazione','/regole-di-pubblicazione/'),' e i ',policyLink('termini e le condizioni','/termini-e-condizioni/'),' di BadAround e di aver preso visione dell’',policyLink('informativa privacy','/privacy-policy/'),'.');
     const declarationRequired=document.createElement('span');declarationRequired.dataset.nativeRequired='';declarationRequired.textContent=' *';declarationRequired.dataset.nativeRequiredState='required';declarationRequired.setAttribute('aria-hidden','true');declarationInput.setAttribute('aria-required','true');declarationCopy.append(declarationRequired);
     declarationLabel.append(declarationInput,declarationCopy);declaration.append(declarationLabel,declarationDetail);
     const declarationError=document.createElement('p');declarationError.id='ba-native-declarations-error';declarationError.className='ba-native-error';declarationError.hidden=true;

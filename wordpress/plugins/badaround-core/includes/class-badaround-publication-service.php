@@ -369,7 +369,7 @@ class BadAround_Publication_Service {
 		) ) ) );
 
         $public_text_without_address=$public_text;
-        $public_text .= '\n'.strtolower($approved_address);
+        $public_text .= '\n'.strtolower($approved_address).'\n'.strtolower($public_details['plate']??'');
 		$private_identity = trim( strtolower( trim( (string) $report->author_name . ' ' . (string) $report->author_surname ) ) );
 		foreach ( array( $private_identity, $report->author_email, $report->author_phone ) as $private_value ) {
 			$private_value = trim( strtolower( (string) $private_value ) );
@@ -397,7 +397,14 @@ class BadAround_Publication_Service {
 		$full_plate = strtoupper( preg_replace( '/[^A-Z0-9]/', '', (string) $report->full_plate ) );
 		if ( $full_plate ) {
 			$masked_plate = strtoupper( preg_replace( '/[^A-Z0-9*]/', '', (string) get_post_meta( $event_id, '_ba_vehicle_plate_masked', true ) ) );
-			if ( '' === $masked_plate || $masked_plate === $full_plate || false !== strpos( strtoupper( $public_text ), $full_plate ) ) {
+			// A full plate is allowed only in the sealed field issued from the versioned
+            // reporter declaration. It never authorizes a copy in prose/SEO/legacy meta.
+            $approved_plate=strtoupper(preg_replace('/[^A-Z0-9]/','',(string)($public_details['plate']??'')));
+            $plate_authorized=$approved_plate!=='' && hash_equals($full_plate,$approved_plate);
+            if($plate_authorized && false !== strpos(strtoupper($public_text_without_address),$full_plate)){
+                return new WP_Error('ba_publication_plate_outside_approved_field','La targa va mostrata nel campo pubblico dedicato, senza copie nei testi o nei metadati SEO.');
+            }
+            if ( !$plate_authorized && ( '' === $masked_plate || $masked_plate === $full_plate || false !== strpos(strtoupper($public_text_without_address),$full_plate) ) ) {
 				return new WP_Error( 'ba_publication_plate_not_masked', __( 'La targa completa non può essere pubblicata.', 'badaround-core' ) );
 			}
 		}
@@ -889,6 +896,16 @@ class BadAround_Publication_Service {
 			} else {
 				$result = $this->prepare_public_projection( $event_id );
 				if ( ! is_wp_error( $result ) ) { $result = $this->publish( $event_id ); }
+                if ( ! is_wp_error( $result ) ) {
+                    $details=BadAround_Event_Public_Details::publication_snapshot($event_id);
+                    if(is_wp_error($details))return $details;
+                    if(is_array($details)){
+                        update_post_meta($event_id,BadAround_Event_Public_Details::META,$details);
+                        if(BadAround_Event_Public_Details::view($event_id)!==$details['data'])return $this->geo_error('detail_signature');
+                        $result=$this->validate_public_projection($event_id,true);
+                        if(!is_wp_error($result) && false===BadAround_Audit_Log::record('event',$event_id,'public_details_approved','publication','public-details-v1'))return $this->geo_error('detail_audit');
+                    }
+                }
 				if ( ! is_wp_error( $result ) ) {
 					$c = $this->versioned_context( $event_id );
 					$p = BadAround_Public_Geo_Projection::verified( $event_id );

@@ -32,7 +32,7 @@ function badaround_native_report_labels() {
 		'time.mode' => 'Quando è successo?', 'time.date' => 'Data dell’evento', 'time.knowledge' => 'Conosci l’orario?', 'time.exact_time' => 'Orario',
 		'time.range_start' => 'Dalle ore', 'time.range_end' => 'Alle ore', 'time.approximate_period' => 'Periodo indicativo', 'time.duration' => 'Da quanto tempo?', 'time.frequency' => 'Con quale frequenza?',
 		'vehicle.role' => 'Eri coinvolto o testimone?', 'vehicle.type' => 'Tipo di veicolo', 'vehicle.make' => 'Marca', 'vehicle.model' => 'Modello', 'vehicle.color' => 'Colore',
-		'vehicle.plate_knowledge' => 'Conosci la targa?', 'vehicle.plate_raw' => 'Targa (riservata)', 'vehicle.distinctive_features' => 'Segni distintivi del veicolo',
+		'vehicle.plate_knowledge' => 'Conosci la targa?', 'vehicle.plate_raw' => 'Targa da pubblicare', 'vehicle.distinctive_features' => 'Segni distintivi del veicolo',
 		'animal.type' => 'Tipo di animale', 'animal.breed' => 'Razza', 'animal.name' => 'Nome dell’animale', 'animal.appearance' => 'Aspetto e segni distintivi',
 		'object.description' => 'Descrizione dell’oggetto', 'object.status' => 'Oggetto smarrito o trovato?', 'object.owner_verification_detail' => 'Dettaglio riservato per verificare il proprietario',
 		'property.tampered_entry_point' => 'Punto di accesso manomesso', 'property.stolen_item_categories' => 'Che cosa è stato rubato?', 'property.access_method' => 'Modalità di accesso', 'property.alarm_status' => 'Stato generale dell’allarme',
@@ -122,7 +122,7 @@ function badaround_native_report_config() {
 	$fields = array();
 	$contract = BadAround_Report_Conditional_Contract::definition();
 	foreach ( BadAround_Report_Conditional_Contract::fields() as $path => $definition ) {
-		if ( in_array( $path, array( 'schema_version', 'submission_id', 'consents.version', 'consents.social_visibility_version', 'media.items', 'location.place_id', 'authority.reference', 'location.public_location_request', 'location.public_location_request_version' ), true ) ) { continue; }
+		if ( in_array( $path, array( 'schema_version', 'submission_id', 'consents.version', 'consents.social_visibility_version', 'consents.public_details_version', 'media.items', 'location.place_id', 'authority.reference', 'location.public_location_request', 'location.public_location_request_version' ), true ) ) { continue; }
 		$options = array();
 		foreach ( $definition['constraints']['enum'] ?? $definition['constraints']['item_enum'] ?? array() as $value ) {
 			$options[ $value ] = badaround_native_report_option_label( $path, $value );
@@ -158,8 +158,8 @@ function badaround_native_report_config() {
 		if ( isset( $location_order[ $a ], $location_order[ $b ] ) ) { return $location_order[ $a ] <=> $location_order[ $b ]; }
 		return $original_order[ $a ] <=> $original_order[ $b ];
 	} );
-	$fields['location.exact_address']['help'] = 'Indirizzo e civico restano riservati. La rappresentazione pubblica della posizione sarà valutata dalla moderazione.';
-	$fields['vehicle.plate_raw']['help'] = 'La targa completa resta riservata. L’eventuale versione pubblica sarà mascherata.';
+	$fields['location.exact_address']['help'] = 'Con Punto esatto, l’indirizzo completo e il civico indicati saranno visibili nella scheda approvata. Con Area approssimata mostriamo solo la zona.';
+	$fields['vehicle.plate_raw']['help'] = 'La targa che inserisci sarà pubblicata in chiaro nella scheda, dopo la moderazione. Se la conosci solo in parte, indica soltanto i caratteri noti.';
 	$fields['reporter.public_identity_mode']['help'] = 'Scegli come preferisci essere indicato. BadAround non pubblica automaticamente i tuoi dati personali. La tua preferenza resta soggetta alla moderazione e alle regole di pubblicazione.';
 	$fields['reporter.contact_preference']['help'] = 'Gli altri utenti non vedono i tuoi recapiti e non possono contattarti direttamente.';
 	$fields['reporter.social_visibility']['help'] = 'La tua scelta sarà valutata dalla moderazione. Potranno essere condivisi solo contenuti approvati e destinati alla pubblicazione; i tuoi recapiti e le informazioni riservate resteranno esclusi. Se non rispondi, non richiedi la diffusione social. La richiesta riguarda Facebook, Instagram, X, Google Business Profile (Google Maps) e TikTok, secondo i canali attivati da BadAround.';
@@ -214,6 +214,7 @@ function badaround_native_report_config() {
 		'schemaVersion' => 'badaround-report/v2',
 		// Contract scaffolding only: no new visible control before GEO-PUBLIC-03.
 		'publicLocationRequest' => array( 'default' => 'exact_point', 'version' => BadAround_Public_Geo_Contract::RADIUS_REQUEST_VERSION, 'radii' => BadAround_Public_Geo_Contract::USER_RADII, 'defaultRadius' => 100 ),
+		'publicDetailsVersion' => 'public-details-v1',
 		'consentVersion' => 'native-f16-v1', // Version of this QA presentation, not a claim of finalized legal policies.
 		'socialPreferenceVersion' => BadAround_Report_Schema::SOCIAL_PREFERENCE_VERSION,
 		'endpoint' => rest_url( BadAround_Native_Report_REST_Controller::REST_NAMESPACE . BadAround_Native_Report_REST_Controller::REST_ROUTE ),

@@ -30,6 +30,13 @@ final class BadAround_Event_Public_Details {
         }
         return $value;
     }
+    private static function publication_requested($canonical){
+        return self::value($canonical,'consents.public_details_version')==='public-details-v1'
+            && self::value($canonical,'consents.truthfulness')===true
+            && self::value($canonical,'consents.publication_rules')===true
+            && self::value($canonical,'consents.terms')===true
+            && self::value($canonical,'consents.privacy')===true;
+    }
     public static function candidate($id,$reviewed_text=false){
         $r=self::report($id);$source=$r?json_decode($r->content_original,true):null;$c=$source['canonical']??null;
         if(!is_array($c))return new WP_Error('ba_detail_source','Report nativo non disponibile.',['status'=>409]);
@@ -53,7 +60,18 @@ final class BadAround_Event_Public_Details {
             if(in_array($key,['exact_time','range_start','range_end'],true)&&!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/D',$value))continue;
             $time[$key]=self::safe($value,$r);
         }
-        return ['facts'=>$facts,'time'=>$time,'seeking_witnesses'=>self::value($c,'witness.status')==='seeking',
+        $publication_requested=self::publication_requested($c);
+        $plate='';
+        if($publication_requested && self::value($c,'event.category')==='vehicle'
+            && in_array(self::value($c,'vehicle.plate_knowledge'),['full','partial'],true)){
+            $raw=self::value($c,'vehicle.plate_raw');
+            if(is_string($raw)&&preg_match('/^[A-Z0-9?]{1,32}$/D',$raw)&&$raw===(string)$r->full_plate){
+                $identity_only=clone $r;$identity_only->full_plate='';$plate=self::safe($raw,$identity_only);
+            }
+        }
+        return ['plate'=>$plate,'publication_requested'=>$publication_requested,
+            'address_requested'=>$publication_requested && BadAround_Public_Geo_Contract::request_mode($c['location']??[])==='exact_point',
+            'facts'=>$facts,'time'=>$time,'seeking_witnesses'=>self::value($c,'witness.status')==='seeking',
             'address'=>'','source_hash'=>hash('sha256',$r->content_original),'address_available'=>trim((string)$r->exact_address)!==''];
     }
     public static function approve($id,$expected,$include_address=false,$attested=false,$reviewed_text=false){
@@ -61,21 +79,45 @@ final class BadAround_Event_Public_Details {
         if(get_post_status($id)!=='publish'||get_post_meta($id,'_ba_moderation_status',true)!=='published')return new WP_Error('ba_detail_not_published','Pubblicare prima tramite il flusso di moderazione.',['status'=>409]);
         $p=self::candidate($id,$reviewed_text);if(is_wp_error($p))return $p;
         if(!is_string($expected)||!hash_equals($p['source_hash'],$expected))return new WP_Error('ba_detail_conflict','Il report è cambiato. Ricarica la revisione.',['status'=>409]);
+        // The new final declaration is an explicit request, not a retroactive assumption.
+        $geo=BadAround_Public_Geo_Projection::public_view($id);
+        if(!empty($p['address_requested']) && is_array($geo) && ($geo['mode']??'')==='exact_point' && $p['address_available']){
+            $include_address=true;$attested=true;
+        }
         if($include_address){
-            $geo=BadAround_Public_Geo_Projection::public_view($id);
             if(!$attested||!is_array($geo)||($geo['mode']??'')!=='exact_point')return new WP_Error('ba_detail_address_authorization','Indirizzo pubblicabile solo con posizione esatta e autorizzazione verificata.',['status'=>409]);
             $r=self::report($id);$p['address']=self::safe($r->exact_address,$r);
             if($p['address']==='')return new WP_Error('ba_detail_address_invalid','Indirizzo non pubblicabile.',['status'=>409]);
         }
-        unset($p['address_available']);
+        if($p['publication_requested'])$p['publication_policy']='public-details-v1';
+        unset($p['address_available'],$p['publication_requested'],$p['address_requested']);
+        if($p['plate']==='')unset($p['plate']);
         $stored=['data'=>$p,'seal'=>self::seal($id,$p)];
         $result=(new BadAround_Publication_Service())->apply_public_details($id,$stored,$p['source_hash']);
         return is_wp_error($result)?$result:self::view($id);
     }
 
+    /** Build only; Publication Service owns the transaction, validation and audit. */
+    public static function publication_snapshot($id){
+        $r=self::report($id);$source=$r?json_decode($r->content_original,true):null;
+        if(!self::publication_requested($source['canonical']??[]))return null;
+        if(!self::permitted($id))return new WP_Error('ba_detail_forbidden','Operazione non autorizzata.');
+        $p=self::candidate($id);if(is_wp_error($p))return $p;
+        $geo=BadAround_Public_Geo_Projection::public_view($id);
+        if(!empty($p['address_requested']) && is_array($geo) && ($geo['mode']??'')==='exact_point' && $p['address_available']){
+            $p['address']=self::safe($r->exact_address,$r);
+            if($p['address']==='')return new WP_Error('ba_detail_address_invalid','Verificare l’indirizzo destinato alla pubblicazione.');
+        }
+        $p['publication_policy']='public-details-v1';
+        unset($p['address_available'],$p['publication_requested'],$p['address_requested']);
+        if($p['plate']==='')unset($p['plate']);
+        return ['data'=>$p,'seal'=>self::seal($id,$p)];
+    }
     public static function published($id){
+        // New declarations are projected atomically during B3, not at shutdown.
+        if((self::view($id)['publication_policy']??'')==='public-details-v1')return;
         $p=self::candidate($id);if(is_wp_error($p))return;
-        // Publication is the moderation gate for public enums and the seeking flag. No address or private free text is copied.
+        // B3 is still the moderation gate. Versioned reporter declarations may project address and plate into sealed, public-only fields.
         self::approve($id,$p['source_hash']);
     }
     private static function render_preview($id){
@@ -109,7 +151,7 @@ final class BadAround_Event_Public_Details {
     }
     public static function box($post){
         if(!self::permitted($post->ID))return;$p=self::candidate($post->ID,true);if(is_wp_error($p)){echo '<p>Dettagli nativi non disponibili.</p>';return;}
-        echo '<p>La scheda pubblica include i dati strutturati pertinenti e l’eventuale ricerca testimoni. Indirizzo e testi descrittivi richiedono una revisione esplicita.</p>';
+        echo '<p>La scheda pubblica include i dati strutturati pertinenti e l’eventuale ricerca testimoni. I nuovi report con dichiarazione di pubblicazione mostrano la targa e, con Punto esatto, l’indirizzo completo. I report precedenti e i testi descrittivi richiedono una revisione esplicita.</p>';
         foreach($p['facts'] as $fact)echo '<p><strong>'.esc_html($fact['label']).':</strong> '.esc_html($fact['value']).'</p>';
         echo '<p>'.($p['seeking_witnesses']?'Si cercano testimoni.':'Nessuna ricerca testimoni indicata.').'</p>';
         if(get_post_status($post->ID)!=='publish'){echo '<p>Pubblica prima l’evento; i dati strutturati saranno proiettati automaticamente.</p>';return;}

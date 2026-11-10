@@ -126,6 +126,10 @@
         setPath(out, path, value);
       });
       setPath(out, 'consents.version', this.config.consentVersion);
+      // Recorded only after the explicit final declaration, never inferred for old reports.
+      if (this.config.publicDetailsVersion && ['truthfulness','publication_rules','terms','privacy'].every(key=>out.consents?.[key]===true)) {
+        setPath(out,'consents.public_details_version',this.config.publicDetailsVersion);
+      }
       // Versioned request only. Approval and public coordinates remain server-owned.
       if (this.config.publicLocationRequest) {
         const radiusAware=this.config.publicLocationRequest.version==='public-location-request-v2';

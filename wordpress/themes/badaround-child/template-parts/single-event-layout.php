@@ -73,6 +73,7 @@ $event_when = BadAround_Event_Dates::occurrence_label($post_id, $public_details)
 $report_receipt = BadAround_Event_Dates::receipt_label(BadAround_Event_Dates::view($post_id));
 $seeking_witnesses=!empty($public_details['seeking_witnesses'])&&!in_array($event_status,array('resolved','closed','archived','expired'),true);
 $public_address=$public_details['address']??'';
+if($public_address)$public_location=$public_address;
 
 $content_text = trim( wp_strip_all_tags( get_post_field( 'post_content', $post_id ) ) );
 $has_content  = '' !== $content_text;
@@ -109,7 +110,7 @@ $public_specific = array();
 $vehicle_make    = sanitize_text_field( (string) get_post_meta( $post_id, '_ba_vehicle_make', true ) );
 $vehicle_model   = sanitize_text_field( (string) get_post_meta( $post_id, '_ba_vehicle_model', true ) );
 $vehicle_color   = sanitize_text_field( (string) get_post_meta( $post_id, '_ba_vehicle_color', true ) );
-$plate_masked    = sanitize_text_field( (string) get_post_meta( $post_id, '_ba_vehicle_plate_masked', true ) );
+$plate_masked    = sanitize_text_field( (string) ( $public_details['plate'] ?? get_post_meta( $post_id, '_ba_vehicle_plate_masked', true ) ) );
 
 if ( $vehicle_make ) {
 	$public_specific['Marca'] = ucfirst( $vehicle_make );
@@ -274,6 +275,11 @@ if ( $status ) {
                 <?php else : ?>
                     <section class="ba-card ba-event-section ba-event-community-unavailable" id="commenti"><h2><?php echo esc_html($section_headings['comments']); ?></h2><p>I commenti sono disponibili nell’area di collaudo riservata, dalla connessione autorizzata.</p></section>
                 <?php endif; ?>
+                <section class="ba-card ba-event-section ba-event-responsibility" aria-labelledby="ba-event-responsibility-title">
+                    <h2 id="ba-event-responsibility-title">Responsabilità della segnalazione</h2>
+                    <p>Chi invia una segnalazione si assume la responsabilità dei contenuti trasmessi e dichiara di averli forniti in buona fede. Le segnalazioni sono soggette a moderazione; la pubblicazione non costituisce una verifica indipendente dei fatti da parte di BadAround. Quando i contenuti provengono da fonti esterne, la relativa provenienza è indicata nella scheda.</p>
+                    <p>Per segnalare inesattezze, contenuti inappropriati o richiedere una rettifica, <a href="<?php echo esc_url( 'mailto:info@badaround.it?subject=' . rawurlencode( 'Rettifica segnalazione #' . $post_id ) . '&body=' . rawurlencode( 'Segnalazione: ' . get_permalink( $post_id ) . "\n\nDescrivi il problema o la rettifica richiesta:\n" ) ); ?>">segnala un problema o richiedi una rettifica via email</a>.</p>
+                </section>
 			</div>
 
 			<aside class="ba-event-aside" aria-label="Riepilogo evento">

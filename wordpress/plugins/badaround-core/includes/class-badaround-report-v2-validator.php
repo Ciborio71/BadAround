@@ -53,7 +53,7 @@ class BadAround_Report_V2_Validator extends BadAround_Report_Validator {
 		$report = BadAround_Public_Geo_Contract::validation_report( $report );
 		foreach ( $fields as $path => $definition ) {
 			if ( ! BadAround_Report_Conditional_Contract::active( $path, $report, $row ) ) { continue; }
-			$rule = $row['fields'][ $path ]; $present = $this->has_meaningful_value( $report, $path );
+			$rule = 'consents.public_details_version' === $path ? array( 'required_when_active' => false, 'state' => 'OPTIONAL' ) : $row['fields'][ $path ]; $present = $this->has_meaningful_value( $report, $path );
 			if ( $rule['required_when_active'] && ! $present ) { return new WP_Error( 'ba_report_required_field', 'Required active field.', array( 'field' => $path, 'conditional' => 'CONDITIONAL' === $rule['state'] ) ); }
 			if ( ! $present ) { continue; }
 			if ( isset( $rule['constraints_override'] ) ) { $definition['constraints'] = array_merge( $definition['constraints'], $rule['constraints_override'] ); }

@@ -44,8 +44,9 @@ for (const [mode,label] of [['exact_point','Punto esatto'],['approximate_area','
     assert.equal(h.model.step,5);
     const review=h.doc.querySelector('[data-native-review]');
     const request=[...review.querySelectorAll('dt')].find(node=>node.textContent==='Posizione pubblica richiesta');
-    assert(request);assert.equal(request.nextElementSibling.textContent,label+(mode==='approximate_area'?' — circa 100 m':''));
-    assert(review.textContent.includes('Indirizzo e civico restano riservati. La rappresentazione pubblica della posizione sarà valutata dalla moderazione.'));
+    assert(request);assert.equal(request.nextElementSibling.firstChild.textContent,label+(mode==='approximate_area'?' — circa 100 m':''));
+    assert(request.nextElementSibling.textContent.includes(mode==='exact_point'?'Saranno pubblicati l’indirizzo completo e il civico indicati':'L’indirizzo completo e il civico restano riservati'));
+    assert.equal(h.model.payload().consents.public_details_version,'public-details-v1');
     assert(!/La posizione pubblica sarà approssimata|La posizione sarà pubblicata esattamente/i.test(review.textContent));
     assert.equal(h.model.publicLocationRequest,mode);
     assert.equal(h.model.payload().location.public_location_request.mode,mode);
@@ -132,4 +133,15 @@ test('all control descriptions resolve, labels associated and no executable user
   h.doc.querySelectorAll('[aria-describedby]').forEach(input=>input.getAttribute('aria-describedby').split(' ').forEach(id=>assert(h.doc.getElementById(id))));
   h.doc.querySelectorAll('input,select,textarea').forEach(input=>assert(input.closest('label')||h.doc.querySelector(`label[for="${input.id}"]`)));
   assert(!/wpforms/i.test(h.root.innerHTML));h.dom.window.close();
+});
+
+test('public data declaration is recorded only after final acknowledgement',()=>{
+  const h=create(completed);
+  assert.equal(h.model.payload().consents.public_details_version,undefined);
+  populate(h);
+  assert.equal(h.model.payload().consents.public_details_version,'public-details-v1');
+  h.set('consents.publication_rules',false);
+  assert.equal(h.model.payload().consents.public_details_version,undefined);
+  assert(h.doc.querySelector('#ba-native-declarations-detail').textContent.includes('targa inserita sarà pubblicata in chiaro'));
+  h.dom.window.close();
 });
