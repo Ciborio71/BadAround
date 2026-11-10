@@ -197,3 +197,16 @@ test('completion and new report reset the page heading without stale review inst
   h.click('new');assert.equal(h.doc.querySelector('[data-native-page-title]').textContent,'Cosa è successo?');assert.match(h.doc.querySelector('[data-native-page-intro]').textContent,/Ti guidiamo/);
  }finally{h.close();}
 });
+
+
+test('paired place/danger questions preserve progression and show emergency notice outside the row',()=>{
+ const h=create();try{
+  h.fill();h.model.step=2;h.set('location.immediate_danger','yes');
+  const row=h.doc.querySelector('.ba-native-place-danger-row');assert(row);
+  assert.deepEqual([...row.querySelectorAll(':scope>[data-native-field]')].map(e=>e.dataset.nativeField),['location.place_type','location.immediate_danger']);
+  const notice=h.doc.querySelector('[data-native-emergency-notice]');assert.equal(notice.hidden,false);
+  assert.equal(notice.previousElementSibling,row);assert.equal(notice.closest('.ba-native-field-pair'),null);
+  const danger=row.querySelector('[data-native-field="location.immediate_danger"] .ba-native-card-grid');assert(danger.classList.contains('ba-native-short-options'));
+  h.click('next');assert.equal(h.model.step,3);
+ }finally{h.close();}
+});

@@ -694,7 +694,7 @@
 /* Wide wizard canvas; short controls and long copy keep a readable measure. */
 .ba-native{width:100%}
 .ba-native .ba-native-field input:is([type=text],[type=email]){max-width:42rem}
-.ba-native .ba-native-field textarea{max-width:80ch}
+.ba-native .ba-native-field textarea{max-width:100%}
 .ba-native .ba-native-field select{max-width:32rem}
 .ba-native [data-native-field="reporter.first_name"] input,
 .ba-native [data-native-field="reporter.last_name"] input,
@@ -727,3 +727,15 @@
 .ba-native .ba-native-public-location-copy>strong{grid-column:2;grid-row:1;line-height:1.35}
 .ba-native .ba-native-public-location-copy>small{grid-column:1/-1;grid-row:2}
 @media(max-width:359px){.ba-native .ba-native-location-layout .ba-native-public-location-options .ba-native-public-location-option{grid-template-columns:64px minmax(0,1fr);gap:10px;padding:12px}}
+
+
+/* Short answers share a desktop row; longer options keep their existing layout. */
+.ba-native .ba-native-place-danger-row{display:block}
+@media(min-width:1025px){
+ .ba-native .ba-native-field .ba-native-short-options:not(.is-collapsed){grid-template-columns:repeat(3,minmax(0,1fr))}
+ .ba-native .ba-native-place-danger-row{display:grid;grid-template-columns:minmax(0,.3fr) minmax(0,.7fr);gap:20px;align-items:start}
+ .ba-native .ba-native-place-danger-row>.ba-native-field>label{margin-bottom:10px}
+ .ba-native .ba-native-place-danger-row .ba-native-choice-row{margin-top:0}
+ .ba-native .ba-native-place-danger-row select[data-native-input]{width:100%;max-width:100%;min-height:64px}
+ .ba-native .ba-native-place-danger-row .ba-native-card-grid .ba-native-option-card{min-height:64px}
+}

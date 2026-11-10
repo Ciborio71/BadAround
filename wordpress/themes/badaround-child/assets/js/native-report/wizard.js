@@ -56,7 +56,8 @@
         : current===config.fields['location.immediate_danger'].step
           ? wrappers.find(w=>w.dataset.nativeField==='location.immediate_danger')
           : form.querySelector(`[data-native-step="${current}"] h2`);
-      if(anchor && anchor.nextElementSibling!==emergencyNotice)anchor.after(emergencyNotice);
+      const noticeAnchor=anchor?.closest('.ba-native-field-pair')||anchor;
+      if(noticeAnchor && noticeAnchor.nextElementSibling!==emergencyNotice)noticeAnchor.after(emergencyNotice);
       emergencyNotice.hidden=!triggered;
       const text=triggered?emergencyCopy:'';
       if(emergencyNotice.textContent!==text)emergencyNotice.textContent=text;
@@ -316,10 +317,11 @@
       badge.textContent=number+'. ';
     }
     // Pair only closely related fields; DOM and keyboard order remain left-to-right.
-    for (const pair of [['reporter.email','reporter.phone'],['reporter.first_name','reporter.last_name'],['vehicle.make','vehicle.model','vehicle.color'],['animal.breed','animal.name'],['time.date','time.knowledge'],['time.range_start','time.range_end'],['property.access_method','property.alarm_status']]) {
+    for (const pair of [['location.place_type','location.immediate_danger'],['reporter.email','reporter.phone'],['reporter.first_name','reporter.last_name'],['vehicle.make','vehicle.model','vehicle.color'],['animal.breed','animal.name'],['time.date','time.knowledge'],['time.range_start','time.range_end'],['property.access_method','property.alarm_status']]) {
       const fields = pair.map(path => wrappers.find(wrapper => wrapper.dataset.nativeField === path));
       if (fields.some(field => !field) || fields.some(field=>field.parentElement!==fields[0].parentElement)) continue;
       const row = document.createElement('div'); row.className = 'ba-native-field-pair';
+      if(pair[0]==='location.place_type')row.classList.add('ba-native-place-danger-row');
       row.style.setProperty('--ba-field-columns',String(fields.length));
       fields[0].before(row); fields.forEach(field => row.append(field));
     }
@@ -346,7 +348,8 @@
       if (!target || target.disabled) return;
       target.focus({preventScroll:true});
       // Keep the contextual notice in view when the existing auto-focus advances.
-      const anchor = !emergencyNotice.hidden && wrapper.nextElementSibling===emergencyNotice
+      const questionRow=wrapper.closest('.ba-native-field-pair')||wrapper;
+      const anchor = !emergencyNotice.hidden && questionRow.nextElementSibling===emergencyNotice
         ? emergencyNotice : nextField || target;
       const rect = anchor.getBoundingClientRect();
       const headerBottom = document.querySelector('.ba-site-header')?.getBoundingClientRect().bottom || 0;
@@ -390,6 +393,7 @@
         group.addEventListener('keyup', () => { entry.arrowNavigation = false; });
 
       }
+      entry.group.classList.toggle('ba-native-short-options',!category&&!subtype&&options.length===3&&options.every(option=>option.textContent.trim().length<=32));
       const signature = JSON.stringify(options.map(option => [option.value,option.textContent]));
       if (entry.signature !== signature) {
         entry.group.replaceChildren(); entry.signature = signature;
