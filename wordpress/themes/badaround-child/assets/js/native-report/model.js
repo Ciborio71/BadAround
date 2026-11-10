@@ -102,7 +102,7 @@
     setPublicLocationRequest(value) {
       if (!this.busy && !this.snapshot && !this.completed && this.config.publicLocationRequest && ['exact_point', 'approximate_area'].includes(value)) {
         this.publicLocationRequest = value;
-        this.publicLocationRadius = value === 'approximate_area' ? (this.publicLocationRadius ?? this.config.publicLocationRequest.defaultRadius ?? 500) : null;
+        this.publicLocationRadius = value === 'approximate_area' ? (this.publicLocationRadius ?? this.config.publicLocationRequest.defaultRadius ?? 100) : null;
       }
     }
     setPublicLocationRadius(value) {

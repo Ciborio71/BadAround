@@ -20,7 +20,7 @@ test('GEO-PUBLIC-03: default request is exact_point and version is immutable',()
 });
 test('selection is actual serialized request, not config default',()=>{
  const v=m();v.setPublicLocationRequest('approximate_area');
- assert.deepEqual(v.payload().location.public_location_request,{mode:'approximate_area',radius_m:500});
+ assert.deepEqual(v.payload().location.public_location_request,{mode:'approximate_area',radius_m:100});
  assert.equal(v.payload().location.public_location_request_version,'public-location-request-v2');
  v.setPublicLocationRequest('exact_point');assert.deepEqual(v.payload().location.public_location_request,{mode:'exact_point'});
 });
@@ -39,7 +39,7 @@ test('snapshot/retry locks choice and reset restores default',()=>{
  const p=v.payload();v.snapshot=p;
  v.setPublicLocationRequest('exact_point');
  assert.equal(v.publicLocationRequest,'approximate_area');
- assert.deepEqual(v.snapshot.location.public_location_request,{mode:'approximate_area',radius_m:500});
+ assert.deepEqual(v.snapshot.location.public_location_request,{mode:'approximate_area',radius_m:100});
  assert.equal(v.snapshot.location.public_location_request_version,'public-location-request-v2');
  v.snapshot=null;v.reset();
  assert.equal(v.publicLocationRequest,'exact_point');

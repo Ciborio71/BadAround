@@ -79,7 +79,7 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
   assert.equal(await page.evaluate(()=>document.querySelector('[data-native-public-location-choice] input:checked').value),'approximate_area');
   assert.equal(await page.evaluate(()=>document.querySelector('[data-native-config]').textContent.includes('public-location-request-v2')),true);
   assert(!(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1)));
-  const radius=page.locator('#ba-public-location-radius');assert.equal(await radius.inputValue(),'500');assert(await radius.getAttribute('required')!==null);
+  const radius=page.locator('#ba-public-location-radius');assert.equal(await radius.inputValue(),'100');assert(await radius.getAttribute('required')!==null);
   for(const r of [50,100,250,500,1000]){
    await radius.selectOption(String(r));
    assert.deepEqual(await page.evaluate(()=>({radius:circles.at(-1).radius,center:circles.at(-1).center,payload:document.querySelector('[data-native-report]').nativeReport.model.payload().location.public_location_request})),{radius:r,center:{lat:41.66,lng:12.43},payload:{mode:'approximate_area',radius_m:r}});
@@ -94,7 +94,7 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
   await page.getByRole('button',{name:'Schermo intero (provider simulato)',exact:true}).click();await page.waitForFunction(()=>!document.fullscreenElement);
   assert.equal(await page.locator('.ba-map-pan').count(),0);
   await page.getByRole('button',{name:'Aumenta zoom (provider simulato)',exact:true}).focus();await page.keyboard.press('Enter');
-  for(const r of [50,1000]){await radius.selectOption(String(r));await choice.getByRole('radio',{name:/Punto esatto/}).check();assert(!(await radius.isVisible()));assert(await radius.isDisabled());assert.equal(await page.evaluate(()=>circles.at(-1).map),null);assert.deepEqual(await page.evaluate(()=>document.querySelector('[data-native-report]').nativeReport.model.payload().location.public_location_request),{mode:'exact_point'});await choice.getByRole('radio',{name:/Area approssimata/}).check();assert.equal(await radius.inputValue(),'500');}
+  for(const r of [50,1000]){await radius.selectOption(String(r));await choice.getByRole('radio',{name:/Punto esatto/}).check();assert(!(await radius.isVisible()));assert(await radius.isDisabled());assert.equal(await page.evaluate(()=>circles.at(-1).map),null);assert.deepEqual(await page.evaluate(()=>document.querySelector('[data-native-report]').nativeReport.model.payload().location.public_location_request),{mode:'exact_point'});await choice.getByRole('radio',{name:/Area approssimata/}).check();assert.equal(await radius.inputValue(),'100');}
   await radius.selectOption('100');assert.equal(await page.evaluate(()=>circles.at(-1).radius),100);await radius.selectOption('500');
   await radius.focus();assert(await radius.evaluate(el=>document.activeElement===el));
   assert(!(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1)));
