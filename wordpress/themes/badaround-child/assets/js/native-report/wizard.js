@@ -16,6 +16,28 @@
     const radiusField=form.querySelector('[data-native-radius-field]'),radiusSelect=radiusField?.querySelector('select');
     const steps = Object.keys(config.steps);
     const wrappers = Array.from(form.querySelectorAll('[data-native-field]'));
+    const workspace=container.closest('.ba-report-workspace');
+    const pageTitle=workspace?.querySelector('[data-native-page-title]');
+    const pageIntro=workspace?.querySelector('[data-native-page-intro]');
+    const stepCopy=new Map(Array.from(form.querySelectorAll('[data-native-step]')).map(section=>{
+      const heading=section.querySelector('h2');
+      const intro=heading?.nextElementSibling?.tagName==='P'?heading.nextElementSibling:null;
+      return [section.dataset.nativeStep,{section,heading,intro,text:intro?.textContent||''}];
+    }));
+    function syncPageHeading(current){
+      if(!pageTitle||!pageIntro)return;
+      for(const entry of stepCopy.values()){
+        if(entry.heading)entry.heading.hidden=true;
+        if(entry.intro)entry.intro.hidden=true;
+        entry.section.setAttribute('aria-labelledby',pageTitle.id);
+      }
+      pageTitle.textContent=model.completed?'Segnalazione inviata':config.steps[current]+(current==='event'?'?':'');
+      pageIntro.textContent=model.completed?'La segnalazione è stata inviata ed è in attesa di moderazione.':stepCopy.get(current)?.text||'';
+      pageIntro.hidden=!pageIntro.textContent;
+      const successHeading=success.querySelector('h2');if(successHeading)successHeading.hidden=model.completed;
+      if(model.completed)success.setAttribute('aria-labelledby',pageTitle.id);
+    }
+
     // One contextual, non-blocking notice. No model value or payload field is added.
     const emergencyNotice=document.createElement('div');
     emergencyNotice.className='ba-native-emergency-notice';
@@ -514,16 +536,17 @@
       if(added.length)conditionalStatus.textContent=added.map(path=>config.fields[path].label+' — campo obbligatorio.').join(' ');
       else if(specifications.size<activeSpecifications.size)conditionalStatus.textContent='Domande aggiornate in base alle risposte.';
       activeSpecifications=specifications;
+      syncPageHeading(current);
       syncEmergencyNotice(current);
       if (current === 'review') review();
       if (focus) focusStep(current);
     }
     function focusStep(current) {
       const section = form.querySelector(`[data-native-step="${current}"]`);
-      const heading = section?.querySelector('h2');
+      const heading = pageTitle || section?.querySelector('h2');
       if (!section || !heading) return;
       try { heading.focus({preventScroll:true}); } catch (_) { heading.focus(); }
-      const rect = section.getBoundingClientRect();
+      const rect = (pageTitle?.closest('header')||section).getBoundingClientRect();
       const header = document.querySelector('.ba-site-header');
       const headerBottom = header ? header.getBoundingClientRect().bottom : 0;
       const safeTop = Math.max(16, headerBottom + 16);
@@ -653,13 +676,14 @@
         form.setAttribute('aria-busy','false');syncSubmissionFeedback();
         mediaView?.dispose();
         form.hidden = true; container.querySelector('nav').hidden = true; success.hidden = false;
-        const heading=success.querySelector('h2');
+        syncPageHeading(steps[model.step]);
+        const heading=pageTitle||success.querySelector('h2');
         try{heading.focus({preventScroll:true});}catch(_){heading.focus();}
         const revealConfirmation=()=>{
           if(disposed||!model.completed)return;
           const header=document.querySelector('.ba-site-header');
           const safeTop=Math.max(24,(header?.getBoundingClientRect().bottom||0)+24);
-          const top=Math.max(0,(window.scrollY||0)+success.getBoundingClientRect().top-safeTop);
+          const top=Math.max(0,(window.scrollY||0)+(pageTitle?.closest('header')||success).getBoundingClientRect().top-safeTop);
           window.scrollTo({top,behavior:'instant'});
         };
         revealConfirmation();

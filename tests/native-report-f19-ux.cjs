@@ -169,3 +169,28 @@ test('F1.9 review and media CSS have stable narrow-screen wrapping with no fixed
   assert(f19.includes('.ba-native{max-width:none}'));
   assert(f19.includes('.ba-native .ba-native-media-actions button'));
 });
+
+
+test('page heading follows every step and back navigation without duplicating the step introduction',()=>{
+ const h=create({pageHeader:true});try{
+  const title=h.doc.querySelector('[data-native-page-title]'),intro=h.doc.querySelector('[data-native-page-intro]');
+  assert.equal(title.textContent,'Cosa è successo?');assert.match(intro.textContent,/Ti guidiamo/);
+  h.fill();const steps=Object.keys(h.root.nativeReport.config.steps);
+  for(let i=0;i<steps.length;i++){
+   const section=h.doc.querySelector('[data-native-step="'+steps[i]+'"]');
+   assert.equal(title.textContent,h.root.nativeReport.config.steps[steps[i]]+(i===0?'?':''));
+   assert(section.querySelector('h2').hidden);assert(section.querySelector('h2').nextElementSibling.hidden);
+   assert.equal(section.getAttribute('aria-labelledby'),title.id);
+   if(i<steps.length-1){h.click('next');assert.equal(h.doc.activeElement,title);}
+  }
+  h.click('back');assert.equal(title.textContent,h.root.nativeReport.config.steps.contact);assert.equal(h.doc.activeElement,title);
+ }finally{h.close();}
+});
+test('completion and new report reset the page heading without stale review instructions',async()=>{
+ const h=create({pageHeader:true});try{
+  h.fill();h.goReview();h.submit();await tick();await tick();
+  assert.equal(h.model.completed,true);assert.equal(h.doc.querySelector('[data-native-page-title]').textContent,'Segnalazione inviata');
+  assert.match(h.doc.querySelector('[data-native-page-intro]').textContent,/attesa di moderazione/);
+  h.click('new');assert.equal(h.doc.querySelector('[data-native-page-title]').textContent,'Cosa è successo?');assert.match(h.doc.querySelector('[data-native-page-intro]').textContent,/Ti guidiamo/);
+ }finally{h.close();}
+});

@@ -16,8 +16,8 @@ get_header();
 					</svg>
 				</span>
 				<div>
-					<h1 id="ba-report-page-title">Segnala un evento</h1>
-					<p>Aiuta la tua comunità a essere più sicura e informata.</p>
+					<h1 id="ba-report-page-title" data-native-page-title tabindex="-1">Cosa è successo?</h1>
+					<p data-native-page-intro>Ti guidiamo una domanda alla volta. Scegli la categoria e il tipo di evento: vedrai solo i dettagli pertinenti. Puoi cambiare una risposta con «Modifica».</p>
 				</div>
 			</div>
 

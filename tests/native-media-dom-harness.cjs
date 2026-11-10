@@ -8,6 +8,10 @@ const data={'event.category':'hazard','event.subtype':'hazard_road_obstruction',
 const tick=()=>new Promise(r=>setImmediate(r));
 function create(options={}) {
  const dom=new JSDOM(html,{url:'https://staging.badaround.it/segnala-un-evento/?native_report=1',runScripts:'outside-only'}),w=dom.window,requests=[],uploads=[],revoked=[];
+ if(options.pageHeader){
+  const root=w.document.querySelector('[data-native-report]'),workspace=w.document.createElement('section');workspace.className='ba-report-workspace';root.before(workspace);
+  workspace.innerHTML='<header><h1 id="ba-report-page-title" data-native-page-title tabindex="-1"></h1><p data-native-page-intro></p></header>';workspace.append(root);
+ }
  w.AbortController=AbortController;w.URL.createObjectURL=()=>`blob:https://staging.badaround.it/${globalThis.crypto.randomUUID()}`;w.URL.revokeObjectURL=u=>revoked.push(u);
  let uploadNumber=0;
  class XHR {
