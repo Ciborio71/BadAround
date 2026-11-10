@@ -7,7 +7,6 @@ if ( ! $config ) {
 }
 ?>
 <div class="ba-native" data-native-report>
-	<p class="ba-native-notice">La tua segnalazione sarà esaminata prima di un’eventuale pubblicazione. I dati personali e le informazioni riservate non saranno pubblicati automaticamente.</p>
 	<noscript><p>Per usare il wizard e inviare la segnalazione attiva JavaScript. I campi sono riportati di seguito per consultazione.</p></noscript>
 	<p data-native-boot role="status">Preparazione del modulo…</p>
 	<nav aria-label="Avanzamento della segnalazione"><p class="ba-native-position" data-native-position role="status" aria-live="polite" aria-atomic="true"></p><ol class="ba-native-progress">

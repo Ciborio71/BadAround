@@ -62,6 +62,6 @@ $identity_ui = class_exists('BadAround_Identity_WordPress_Portal',false) && BadA
 		</nav>
 	</div>
 </header>
-<?php if ( is_page( array( 'termini-e-condizioni', 'privacy-policy', 'cookie-policy', 'regole-di-pubblicazione' ) ) ) : ?>
+<?php if ( is_page( array( 'termini-e-condizioni', 'privacy-policy', 'cookie-policy', 'regole-di-pubblicazione', 'segnalazioni-privacy-e-moderazione' ) ) ) : ?>
 	<span id="main-content" class="ba-main-anchor" tabindex="-1"></span>
 <?php endif; ?>

@@ -164,7 +164,7 @@ function badaround_child_enqueue_assets() {
 	$is_account   = is_page_template( 'page-area-personale.php' );
 	$is_not_found    = is_404();
 	$is_how_it_works = is_page( 'come-funziona' );
-	$is_legal         = is_page( array( 'termini-e-condizioni', 'privacy-policy', 'cookie-policy', 'regole-di-pubblicazione' ) );
+	$is_legal         = is_page( array( 'termini-e-condizioni', 'privacy-policy', 'cookie-policy', 'regole-di-pubblicazione', 'segnalazioni-privacy-e-moderazione' ) );
 	$is_badaround     = $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_radar_demo || $is_search || $is_reports || $is_sentinel || $is_states || $is_account || $is_not_found || $is_how_it_works || $is_legal;
 
 	if ( ! $is_badaround ) {

@@ -25,6 +25,9 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 					<a href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Mappa</a>
 					<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Segnalazioni</a>
 					<a href="<?php echo esc_url( home_url( '/come-funziona/' ) ); ?>">Come funziona</a>
+                    <?php $information_page = get_page_by_path( 'segnalazioni-privacy-e-moderazione' ); if ( $information_page && 'publish' === $information_page->post_status ) : ?>
+                    <a href="<?php echo esc_url( get_permalink( $information_page ) ); ?>">Segnalazioni, privacy e moderazione</a>
+                    <?php endif; ?>
 				</div>
 				<div>
 					<h2>Community</h2>
