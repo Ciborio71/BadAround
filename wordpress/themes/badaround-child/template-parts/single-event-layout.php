@@ -206,7 +206,7 @@ if ( $status ) {
 		<div class="ba-container ba-event-layout">
 			<div class="ba-event-main">
                 <div class="ba-event-overview<?php echo !$gallery_ids?' ba-event-overview--empty':''; ?>">
-                    <?php if(function_exists('badaround_render_event_gallery'))badaround_render_event_gallery($gallery_ids,$title,$section_headings['photos']); ?>
+                    <?php if(function_exists('badaround_render_event_gallery'))badaround_render_event_gallery($gallery_ids,$title,$section_headings['photos'],badaround_child_placeholder_url($category_term?$category_term->slug:'')); ?>
 				<?php if ( ! empty( $public_specific ) ) : ?>
 					<section class="ba-card ba-event-section">
 						<div class="ba-event-section__head">
@@ -278,11 +278,7 @@ if ( $status ) {
                 <?php else : ?>
                     <section class="ba-card ba-event-section ba-event-community-unavailable" id="commenti"><h2><?php echo esc_html($section_headings['comments']); ?></h2><p>I commenti sono disponibili nell’area di collaudo riservata, dalla connessione autorizzata.</p></section>
                 <?php endif; ?>
-                <section class="ba-card ba-event-section ba-event-responsibility" aria-labelledby="ba-event-responsibility-title">
-                    <h2 id="ba-event-responsibility-title">Responsabilità della segnalazione</h2>
-                    <p>Chi invia una segnalazione si assume la responsabilità dei contenuti trasmessi e dichiara di averli forniti in buona fede. Le segnalazioni sono soggette a moderazione; la pubblicazione non costituisce una verifica indipendente dei fatti da parte di BadAround. Quando i contenuti provengono da fonti esterne, la relativa provenienza è indicata nella scheda.</p>
-                    <p>Per segnalare inesattezze, contenuti inappropriati o richiedere una rettifica, <a href="<?php echo esc_url( 'mailto:info@badaround.it?subject=' . rawurlencode( 'Rettifica segnalazione #' . $post_id ) . '&body=' . rawurlencode( 'Segnalazione: ' . get_permalink( $post_id ) . "\n\nDescrivi il problema o la rettifica richiesta:\n" ) ); ?>">segnala un problema o richiedi una rettifica via email</a>.</p>
-                </section>
+
 			</div>
 
 			<aside class="ba-event-aside" aria-label="Riepilogo evento">
@@ -297,10 +293,16 @@ if ( $status ) {
 					</section>
 				<?php endif; ?>
 
+                <?php if(function_exists('badaround_event_social_render'))badaround_event_social_render($post_id); ?>
 				<section class="ba-card ba-event-safety">
-					<h2>Serve aiuto immediato?</h2>
-					<p>BadAround non sostituisce i servizi di emergenza. In caso di pericolo immediato contatta il 112 o l'autorità competente.</p>
+					<h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h4l2 5-3 2a15 15 0 0 0 5 5l2-3 5 2v4c0 2-2 3-4 2C10 18 6 14 4 7 3 5 4 3 6 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Serve aiuto immediato?</h2>
+					<p>BadAround non sostituisce i servizi di emergenza. In caso di pericolo immediato chiama il <a href="tel:112">112</a> o contatta l'autorità competente.</p>
 				</section>
+                <section class="ba-card ba-event-section ba-event-responsibility" aria-labelledby="ba-event-responsibility-title">
+                    <h2 id="ba-event-responsibility-title">Responsabilità della segnalazione</h2>
+                    <p>Chi invia una segnalazione si assume la responsabilità dei contenuti trasmessi e dichiara di averli forniti in buona fede. Le segnalazioni sono soggette a moderazione; la pubblicazione non costituisce una verifica indipendente dei fatti da parte di BadAround. Quando i contenuti provengono da fonti esterne, la relativa provenienza è indicata nella scheda.</p>
+                    <p>Per segnalare inesattezze, contenuti inappropriati o richiedere una rettifica, <a href="<?php echo esc_url( 'mailto:info@badaround.it?subject=' . rawurlencode( 'Rettifica segnalazione #' . $post_id ) . '&body=' . rawurlencode( 'Segnalazione: ' . get_permalink( $post_id ) . "\n\nDescrivi il problema o la rettifica richiesta:\n" ) ); ?>">segnala un problema o richiedi una rettifica via email</a>.</p>
+                </section>
 			</aside>
 		</div>
 	</section>

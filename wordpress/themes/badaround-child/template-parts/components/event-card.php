@@ -19,9 +19,10 @@ $defaults = array(
 );
 $card = wp_parse_args( $args ?? array(), $defaults );
 if ( ! $card['image'] && function_exists( 'badaround_child_placeholder_url' ) ) {
-	$card['image'] = badaround_child_placeholder_url();
+	$card['image'] = badaround_child_placeholder_url($card['category']);
 	$card['image_alt'] = __( 'BadAround — immagine segnalazione non disponibile', 'badaround-child' );
 }
+if($card['category']&&strpos($card['image'],'/event-placeholder.svg')!==false)$card['image']=badaround_child_placeholder_url($card['category']);
 $category_class = $card['category'] ? ' ba-event-card--category-' . sanitize_html_class( $card['category'] ) : '';
 $category_icons = array(
 	'veicoli' => '<svg viewBox="0 0 24 24" focusable="false"><path d="M5 14h14l-1.5-5h-11L5 14Zm1 0v3m12-3v3M8 17h8M8 9l1-3h6l1 3"/></svg>',

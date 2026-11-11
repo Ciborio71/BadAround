@@ -235,7 +235,7 @@
 		wrap.className = 'ba-card ba-event-card ba-event-card--home ba-map-preview-card' + (category ? ' ba-event-card--category-' + category : '');
 		wrap.style.setProperty('--ba-card-accent', palette.color);
 
-		const imageUrl = item.thumbnail || config.placeholder;
+		const imageUrl = item.thumbnail || config.placeholders?.[category] || config.placeholder;
 		if (imageUrl) {
 			const media = document.createElement('a');
 			media.className = 'ba-event-card__media';
@@ -336,12 +336,12 @@
 			card.tabIndex = 0;
 			card.setAttribute('role','button');
 			card.setAttribute('aria-label','Mostra sulla mappa: ' + editorialText(item.title || 'Segnalazione BadAround'));
-			if (item.thumbnail || config.placeholder) {
+			if (item.thumbnail || config.placeholders?.[category] || config.placeholder) {
 				const media = document.createElement('div');
 				media.className = 'ba-event-card__media';
 				media.setAttribute('aria-hidden', 'true');
 				const img = document.createElement('img');
-				img.src = item.thumbnail || config.placeholder;
+				img.src = item.thumbnail || config.placeholders?.[category] || config.placeholder;
 				img.alt = '';
 				img.loading = 'lazy';
 				img.decoding = 'async';

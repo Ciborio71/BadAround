@@ -1,14 +1,23 @@
 (function(){
 'use strict';
+function choosePanel(kind,forceOpen=false){
+ const isPublic=kind==='public',selected=document.querySelector(isPublic?'[data-ba-comment-panel]':'[data-ba-contribution-panel]');
+ if(!selected)return;
+ const opening=forceOpen||selected.hidden;
+ for(const type of ['public','author']){
+  const panel=document.querySelector(type==='public'?'[data-ba-comment-panel]':'[data-ba-contribution-panel]');
+  const button=document.querySelector(type==='public'?'[data-ba-comment-open]':'[data-ba-contribution-open]');
+  const active=opening&&type===kind;
+  if(panel)panel.hidden=!active;
+  if(button){button.setAttribute('aria-expanded',String(active));button.classList.toggle('is-active',active);}
+ }
+ if(opening){selected.scrollIntoView({behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});selected.querySelector(isPublic?'textarea':'select')?.focus({preventScroll:true});}
+}
+document.addEventListener('ba-open-public-comment',()=>choosePanel('public',true));
 document.addEventListener('click',function(e){
- const btn=e.target.closest('[data-ba-contribution-open]');
- if(!btn)return;
- const panel=btn.closest('.ba-contribution-box')?.querySelector('[data-ba-contribution-panel]');
- if(!panel)return;
- const opening=panel.hidden;panel.hidden=!opening;
- btn.setAttribute('aria-expanded',String(opening));
- const label=btn.querySelector('[data-ba-contribution-label]')||btn;label.textContent=opening?'Chiudi il modulo riservato':'Contatta l’autore della segnalazione';
- if(opening){panel.scrollIntoView({behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});panel.querySelector('select')?.focus({preventScroll:true});}
+ const button=e.target.closest('[data-ba-comment-open],[data-ba-contribution-open]');
+ if(!button)return;
+ choosePanel(button.matches('[data-ba-comment-open]')?'public':'author');
 });
 document.addEventListener('change',function(e){
  if(e.target.matches('[name="visibility_requested"]')){

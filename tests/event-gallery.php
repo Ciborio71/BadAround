@@ -26,3 +26,5 @@ echo "EVENT_GALLERY_SUITE_PASS\n";
 
 ob_start();badaround_render_event_gallery([],'Honda SH','Foto della segnalazione di furto Honda SH');$html=ob_get_clean();check(!str_contains($html,'<h2>'),'no photo heading when no approved photos exist');
 ob_start();badaround_render_event_gallery([11],'Honda SH','Foto della segnalazione: Honda SH');$html=ob_get_clean();check(str_contains($html,'<h2>Foto della segnalazione: Honda SH</h2>'),'approved photos receive the dynamic heading');
+
+ob_start();badaround_render_event_gallery([],'Pericolo','Foto','https://example.test/event-placeholder-pericoli.svg');$html=ob_get_clean();check(str_contains($html,'event-placeholder-pericoli.svg')&&str_contains($html,'width="120"')&&str_contains($html,'height="80"'),'category placeholder stays compact with reserved dimensions');

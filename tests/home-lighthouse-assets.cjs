@@ -15,5 +15,12 @@ test('shared placeholder is a tiny local passive SVG with no external dependenci
  const file=fs.readFileSync(root+'assets/event-placeholder.svg');assert(file.length<1024);
  const d=new JSDOM(file.toString(),{contentType:'image/svg+xml'});assert.equal(d.window.document.querySelectorAll('script,image,foreignObject,a').length,0);
  assert.equal(d.window.document.documentElement.getAttribute('viewBox'),'0 0 360 240');
- const fn=fs.readFileSync(root+'functions.php','utf8');assert(fn.includes("'/assets/event-placeholder.svg?ver=1'"));assert(!fn.includes('placeholder-segnalazione.png'));d.window.close();
+ const fn=fs.readFileSync(root+'functions.php','utf8');assert(fn.includes("'/assets/event-placeholder'"));assert(!fn.includes('placeholder-segnalazione.png'));d.window.close();
+});
+
+test('six category placeholders are bounded passive local SVGs',()=>{
+ for(const category of ['veicoli','case-e-attivita','pericoli','spazi-pubblici','animali','oggetti-e-documenti']){
+  const file=fs.readFileSync(root+'assets/event-placeholder-'+category+'.svg');assert(file.length<1500);
+  const d=new JSDOM(file.toString(),{contentType:'image/svg+xml'});assert.equal(d.window.document.querySelectorAll('script,image,foreignObject,a').length,0);assert.equal(d.window.document.documentElement.getAttribute('viewBox'),'0 0 360 240');d.window.close();
+ }
 });

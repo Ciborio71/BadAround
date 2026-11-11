@@ -144,8 +144,20 @@ function badaround_child_public_image_sizes() {
 }
 add_action( 'after_setup_theme', 'badaround_child_public_image_sizes' );
 
-function badaround_child_placeholder_url() {
-	return get_stylesheet_directory_uri() . '/assets/event-placeholder.svg?ver=1';
+function badaround_child_placeholder_url($category='') {
+    $categories=array('veicoli','case-e-attivita','pericoli','spazi-pubblici','animali','oggetti-e-documenti');
+    $suffix=in_array($category,$categories,true)?'-'.$category:'';
+    return get_stylesheet_directory_uri().'/assets/event-placeholder'.$suffix.'.svg?ver=2';
+}
+function badaround_child_event_category_slug($id){
+    $terms=get_the_terms($id,'ba_tipo_evento');
+    if(is_wp_error($terms)||!is_array($terms))return '';
+    foreach($terms as $term){
+        $ancestors=get_ancestors($term->term_id,'ba_tipo_evento','taxonomy');
+        $root=$ancestors?get_term(end($ancestors),'ba_tipo_evento'):$term;
+        if($root&&!is_wp_error($root))return $root->slug;
+    }
+    return '';
 }
 
 function badaround_child_event_image_url( $post_id, $context = 'thumb' ) {
@@ -155,7 +167,7 @@ function badaround_child_event_image_url( $post_id, $context = 'thumb' ) {
 		$url = get_the_post_thumbnail_url( $post_id, $size );
 		if ( $url ) return $url;
 	}
-	return badaround_child_placeholder_url();
+	return badaround_child_placeholder_url(badaround_child_event_category_slug($post_id));
 }
 
 /**
@@ -333,6 +345,7 @@ function badaround_child_enqueue_assets() {
 						: '',
 					'categoryByTerm' => $category_by_term,
 					'placeholder'    => badaround_child_placeholder_url(),
+                    'placeholders' => array_combine(array('veicoli','case-e-attivita','pericoli','spazi-pubblici','animali','oggetti-e-documenti'),array_map('badaround_child_placeholder_url',array('veicoli','case-e-attivita','pericoli','spazi-pubblici','animali','oggetti-e-documenti'))),
 				)
 			) . ';',
 			'before'
@@ -624,3 +637,6 @@ require_once __DIR__ . '/inc/event-heading.php';
 require_once __DIR__ . '/inc/event-structured-data.php';
 
 require_once __DIR__ . '/inc/home-seo.php';
+
+require_once __DIR__.'/inc/event-social.php';
+add_action('wp_head',static function(){echo '<link rel="icon" type="image/png" sizes="32x32" href="'.esc_url(get_stylesheet_directory_uri().'/assets/favicon-32.png?ver=1').'"><link rel="apple-touch-icon" sizes="180x180" href="'.esc_url(get_stylesheet_directory_uri().'/assets/favicon-180.png?ver=1').'"><link rel="icon" type="image/svg+xml" sizes="any" href="'.esc_url(get_stylesheet_directory_uri().'/assets/favicon.svg?ver=1').'">'."\n";},100);

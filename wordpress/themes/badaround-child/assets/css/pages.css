@@ -307,3 +307,23 @@
 .ba-event-detail .ba-interaction-choice--author strong{color:#61430b}
 .ba-event-detail .ba-contribution-panel{background:#fffbf3;border:1px solid #ead7b3;border-radius:12px;padding:20px}
 @media(max-width:720px){.ba-event-detail .ba-contribution-panel{padding:14px}}
+
+/* Event interaction and factual alerts: scoped to the public detail. */
+.ba-event-detail .ba-event-witness-badge{background:#fff3cd;border-color:#e4bd45;border-left-color:#c18b00;color:#171717}
+.ba-event-detail .ba-event-witness-badge a{color:#171717}
+.ba-event-detail .ba-event-aside>.ba-event-safety,.ba-event-detail .ba-event-safety{background:#b51f2b;border-color:#b51f2b;color:#fff}
+.ba-event-detail .ba-event-safety h2,.ba-event-detail .ba-event-safety p,.ba-event-detail .ba-event-safety a{color:#fff}
+.ba-event-detail .ba-event-safety h2{display:flex;align-items:center;gap:10px}
+.ba-event-detail .ba-event-safety svg{width:26px;height:26px;flex:0 0 26px}
+.ba-event-detail .ba-event-safety a{font-weight:750;text-decoration:underline;text-underline-offset:3px}
+.ba-event-detail .ba-event-no-photo img{width:120px;height:80px;max-width:32%;object-fit:contain;flex:0 0 auto;border-radius:10px}
+.ba-event-detail [data-ba-comment-panel][hidden]{display:none!important}
+.ba-event-detail .ba-interaction-choice.is-active{outline:2px solid #087f8c;outline-offset:2px}
+.ba-event-detail .ba-event-responsibility{font-size:.85rem;line-height:1.6}
+.ba-event-detail .ba-event-responsibility h2{font-size:1.05rem}
+.ba-event-detail .ba-event-social-links{display:flex;flex-wrap:wrap;gap:10px;list-style:none;margin:12px 0 0;padding:0}
+.ba-event-detail .ba-event-social-links a{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;background:#f2f7fa;border:1px solid #dce5ed;border-radius:10px;color:#071a38;text-decoration:none}
+.ba-event-detail .ba-event-social-links svg{width:22px;height:22px;fill:currentColor;flex:0 0 22px}
+.ba-event-detail .ba-event-social-links a:focus-visible{outline:3px solid #087f8c;outline-offset:3px}
+
+@media(min-width:721px) and (max-width:1020px){.ba-event-detail .ba-event-aside>.ba-event-responsibility{grid-column:1/-1}}

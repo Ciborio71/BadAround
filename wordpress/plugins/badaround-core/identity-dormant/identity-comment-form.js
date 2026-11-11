@@ -40,6 +40,8 @@
     for (const button of root.querySelectorAll('[data-ba-reply]')) button.addEventListener('click',() => {
       const id=button.getAttribute('data-ba-reply');
       if (!parent || !/^[a-f0-9]{32}$/.test(id || '')) return;
+      const panel=root.querySelector('[data-ba-comment-panel]');if(panel)panel.hidden=false;
+      document.dispatchEvent(new CustomEvent('ba-open-public-comment'));
       parent.value=id;
       if (replyStatus) replyStatus.textContent='Stai rispondendo al commento selezionato.';
       if (cancelReply) cancelReply.hidden=false;

@@ -37,11 +37,11 @@ final class BadAround_Identity_WordPress_Comment_Form {
             return '';
         }
         $script=plugins_url('identity-dormant/identity-comment-form.js',BADAROUND_CORE_FILE);
-        wp_enqueue_script('badaround-identity-comment-form',$script,[], '0.3.0',true);
+        wp_enqueue_script('badaround-identity-comment-form',$script,[], '0.3.1',true);
         return '<section id="commenti" class="ba-card ba-event-section ba-identity-community" data-ba-comment-form data-event-id="'.(int)$eventId.'">'
             . '<h2>'.htmlspecialchars(class_exists('BadAround_Event_SEO')?BadAround_Event_SEO::section_headings($eventId)['comments']:'Commenti della community',ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8').'</h2>'
             . (class_exists('BadAround_Identity_Community_Review',false)?BadAround_Identity_Community_Review::render_comments($eventId):'')
-            . '<h3>Commenta la segnalazione</h3>'
+            . '<div id="ba-comment-panel" data-ba-comment-panel hidden><h3>Commenta la segnalazione</h3>'
             . '<p>Scrivi qui aggiornamenti destinati alla community. Per l’invio serve accedere; il testo sarà pubblicato soltanto dopo approvazione. Per dati personali o dettagli delicati usa il <a href="#contribuisci">modulo riservato</a>.</p>'
             . '<div role="status" data-ba-comment-status aria-live="polite"></div><button type="button" data-ba-comment-login hidden>Accedi per inviare il commento</button><div data-ba-comment-access hidden></div>'
             . '<form>'
@@ -61,7 +61,7 @@ final class BadAround_Identity_WordPress_Comment_Form {
             . '<label>Descrizione aggiornata <textarea name="description" required minlength="10" maxlength="5000" rows="5"></textarea></label>'
             . '<label>Motivo della modifica <textarea name="reason" maxlength="500" rows="2"></textarea></label>'
             . '<button type="submit">Invia modifica per moderazione</button>'
-            . '</form></details>'
+            . '</form></details></div>'
             . '</section>';
     }
 }

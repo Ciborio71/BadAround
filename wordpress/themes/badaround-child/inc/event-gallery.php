@@ -24,9 +24,10 @@ function badaround_event_gallery_ids($id){
     }
     return $result;
 }
-function badaround_render_event_gallery($ids,$title,$heading='Foto della segnalazione'){
+function badaround_render_event_gallery($ids,$title,$heading='Foto della segnalazione',$placeholder=''){
     if(!$ids){
-        echo '<section class="ba-card ba-event-section ba-event-photo-panel" aria-label="Immagini della segnalazione"><div class="ba-event-no-photo"><svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m4 18 5-5 3 3 3-4 5 6"/></svg><div><strong>Nessuna foto disponibile</strong><span>Consulta i dettagli della segnalazione qui sotto.</span></div></div></section>';
+        $image=$placeholder!==''?'<img src="'.esc_url($placeholder).'" width="120" height="80" loading="lazy" decoding="async" alt="">':'<svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path d="M4 5h16v14H4z" fill="none" stroke="currentColor"/></svg>';
+        echo '<section class="ba-card ba-event-section ba-event-photo-panel" aria-label="Immagini della segnalazione"><div class="ba-event-no-photo">'.$image.'<div><strong>Nessuna foto disponibile</strong><span>Consulta i dettagli della segnalazione qui sotto.</span></div></div></section>';
         return;
     }
     $count=count($ids);$full=wp_get_attachment_image_url($ids[0],'full');
