@@ -749,3 +749,12 @@
 .ba-native-neighborhood [aria-busy="true"]::before{content:"";display:inline-block;width:1em;height:1em;margin-right:.5em;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:ba-zone-spin .8s linear infinite;vertical-align:middle}
 @keyframes ba-zone-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.ba-native-neighborhood [aria-busy="true"]::before{animation:none}}
+
+/* Informative channel list: local SVGs, visible names, no outbound navigation. */
+.ba-native .ba-native-social-channels{display:flex;flex-wrap:wrap;gap:10px 16px;list-style:none;margin:16px 0;padding:0}
+.ba-native .ba-native-social-channels li{display:inline-flex;align-items:center;gap:8px;min-width:0;max-width:100%;margin:0;padding:8px 12px;background:#fff;border:1px solid #dce5ed;border-radius:12px;color:var(--ba-text,#102a43);font-weight:400}
+.ba-native .ba-native-social-channels span{overflow-wrap:anywhere}
+.ba-native .ba-native-social-icon{display:block;flex:0 0 24px;width:24px;height:24px;fill:currentColor}
+.ba-native .ba-native-social-icon--facebook{color:#1877f2}
+.ba-native .ba-native-social-icon--instagram{color:#c13584}
+.ba-native .ba-native-social-icon--tiktok,.ba-native .ba-native-social-icon--x{color:#111}

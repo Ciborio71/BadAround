@@ -241,6 +241,7 @@ function badaround_native_report_field( $path, $field ) {
 	$type = $field['type'];
 	$c = $field['constraints'];
 	$description = $id . '-help ' . $id . '-error';
+	if ( 'reporter.social_visibility' === $path ) { $description .= ' ' . $id . '-channels'; }
 	?>
 	<div class="ba-native-field" data-native-field="<?php echo esc_attr( $path ); ?>">
 	<?php if ( 'array' === $type ) : ?>
@@ -272,6 +273,15 @@ function badaround_native_report_field( $path, $field ) {
 			<p>La community di BadAround può aiutarti con avvistamenti, testimonianze e altre informazioni utili su questo evento. BadAround può inoltrarti questi contributi senza mostrare i tuoi recapiti. Anche scegliendo nessun aggiornamento facoltativo, BadAround potrà scriverti per chiarimenti necessari alla gestione della segnalazione.</p>
 		</div>
 		<?php endif; ?>
+		<?php if ( 'reporter.social_visibility' === $path ) : ?>
+        <ul id="<?php echo esc_attr( $id ); ?>-channels" class="ba-native-social-channels" aria-label="Canali social previsti, secondo quelli attivati da BadAround" role="list">
+            <li><svg class="ba-native-social-icon ba-native-social-icon--facebook" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13.8 21v-8.2h2.8l.4-3.2h-3.2V7.5c0-.9.3-1.5 1.6-1.5h1.7V3.1c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.3H7.6v3.2h2.8V21z"/></svg><span>Facebook</span></li>
+            <li><svg class="ba-native-social-icon ba-native-social-icon--instagram" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.2"/></svg><span>Instagram</span></li>
+            <li><svg class="ba-native-social-icon ba-native-social-icon--tiktok" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 3h3c.3 2.1 1.7 3.5 4 3.8v3a8.4 8.4 0 0 1-4-1.3V16a5.5 5.5 0 1 1-5-5.5v3.1a2.5 2.5 0 1 0 2 2.4V3z"/></svg><span>TikTok</span></li>
+            <li><svg class="ba-native-social-icon ba-native-social-icon--x" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.5 22H2.3l8.2-9.4L2.8 2h6.5l4.5 6.8L18.9 2zm-1.1 18h1.8L8.3 3.9H6.4L17.8 20z"/></svg><span>X</span></li>
+            <li><svg class="ba-native-social-icon ba-native-social-icon--google" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21.6 12.2c0-.7-.1-1.3-.2-2H12v3.9h5.4a4.5 4.5 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.2 3-7.4z" fill="#4285f4"/><path d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22z" fill="#34a853"/><path d="M6.4 14a6 6 0 0 1 0-4V7.4H3.1a10 10 0 0 0 0 9.2L6.4 14z" fill="#fbbc05"/><path d="M12 5.9c1.5 0 2.8.5 3.8 1.5l2.8-2.8A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.9 5.4L6.4 10c.8-2.3 3-4.1 5.6-4.1z" fill="#ea4335"/></svg><span>Google Business Profile</span></li>
+        </ul>
+        <?php endif; ?>
 		<p id="<?php echo esc_attr( $id ); ?>-help" class="ba-native-help"><?php echo esc_html( $field['help'] ); ?></p>
 		<p id="<?php echo esc_attr( $id ); ?>-error" class="ba-native-error" hidden></p>
 	</div>
