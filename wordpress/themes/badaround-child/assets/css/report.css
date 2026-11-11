@@ -319,3 +319,9 @@ body.page-template-page-segnala-evento .ba-site-header{position:sticky}
 .ba-report-workspace__identity [data-native-page-title]:focus-visible{outline:3px solid var(--ba-report-teal-dark);outline-offset:4px}
 .ba-report-workspace__identity [data-native-page-intro]{max-width:none;font-size:1rem;line-height:1.55;margin-top:10px}
 .ba-report-workspace:has([data-native-page-title]) .ba-report-stage{padding-top:20px}
+
+/* Contextual step icon beside the heading, retaining the existing typography. */
+.ba-report-workspace__identity{justify-content:flex-start;align-items:flex-start}
+.ba-report-workspace__identity>div{flex:1}
+.ba-report-workspace__icon{order:0;flex-shrink:0}
+.ba-report-workspace__icon [data-native-step-icon][hidden]{display:none}

@@ -19,6 +19,7 @@
     const workspace=container.closest('.ba-report-workspace');
     const pageTitle=workspace?.querySelector('[data-native-page-title]');
     const pageIntro=workspace?.querySelector('[data-native-page-intro]');
+    const pageIcon=workspace?.querySelector('[data-native-page-icon]');
     const stepCopy=new Map(Array.from(form.querySelectorAll('[data-native-step]')).map(section=>{
       const heading=section.querySelector('h2');
       const intro=heading?.nextElementSibling?.tagName==='P'?heading.nextElementSibling:null;
@@ -32,6 +33,11 @@
         entry.section.setAttribute('aria-labelledby',pageTitle.id);
       }
       pageTitle.textContent=model.completed?'Segnalazione inviata':config.steps[current]+(current==='event'?'?':'');
+      if(pageIcon){
+        const iconKey=model.completed?'complete':current;
+        pageIcon.dataset.nativePageIconState=iconKey;
+        pageIcon.querySelectorAll('[data-native-step-icon]').forEach(icon=>icon.toggleAttribute('hidden',icon.dataset.nativeStepIcon!==iconKey));
+      }
       pageIntro.textContent=model.completed?'La segnalazione è stata inviata ed è in attesa di moderazione.':stepCopy.get(current)?.text||'';
       pageIntro.hidden=!pageIntro.textContent;
       const successHeading=success.querySelector('h2');if(successHeading)successHeading.hidden=model.completed;

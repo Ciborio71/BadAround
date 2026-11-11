@@ -8,11 +8,15 @@ get_header();
 	<section class="ba-report-workspace ba-container--wide" aria-labelledby="ba-report-page-title">
 		<header class="ba-report-workspace__head">
 			<div class="ba-report-workspace__identity">
-				<span class="ba-report-workspace__icon" aria-hidden="true">
-					<svg viewBox="0 0 24 24" focusable="false">
-						<path d="M5 4h9a2 2 0 0 1 2 2v2M5 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-						<path d="m13.5 13.5 6-6 2 2-6 6-3 1 1-3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-						<path d="M7 9h5M7 13h3M7 17h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+				<span class="ba-report-workspace__icon" data-native-page-icon data-native-page-icon-state="event" aria-hidden="true">
+					<svg viewBox="0 0 24 24" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+						<g data-native-step-icon="event"><path d="M5 4h10a2 2 0 0 1 2 2v2M5 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3M7 8h5M7 12h3M7 16h4m3-3 6-6 2 2-6 6-3 1 1-3Z"/></g>
+						<g data-native-step-icon="location" hidden><path d="M12 20s-7-6-7-11a7 7 0 1 1 14 0c0 2-1 4-2 5"/><circle cx="12" cy="9" r="2.5"/><circle cx="18" cy="18" r="4"/><path d="M18 16v2l1.5 1"/></g>
+						<g data-native-step-icon="details" hidden><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Zm0 0v6h6M8 13h8M8 17h5"/></g>
+						<g data-native-step-icon="media" hidden><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m3 17 5-5 4 4 3-3 6 6"/></g>
+						<g data-native-step-icon="contact" hidden><circle cx="8" cy="7" r="3"/><path d="M2 20v-3a6 6 0 0 1 9-5"/><rect x="12" y="12" width="10" height="8" rx="1"/><path d="m12 13 5 4 5-4"/></g>
+						<g data-native-step-icon="review" hidden><rect x="4" y="3" width="16" height="18" rx="2"/><path d="m7 8 1.5 1.5L11 7m-4 7 1.5 1.5L11 13M14 8h3M14 14h3M7 18h10"/></g>
+						<g data-native-step-icon="complete" hidden><circle cx="12" cy="12" r="9"/><path d="m7.5 12 3 3 6-6"/></g>
 					</svg>
 				</span>
 				<div>
