@@ -14,3 +14,8 @@ function badaround_event_heading($title) {
     }, $title);
     return is_string($result) ? $result : $title;
 }
+
+/** Shared decorative witness cue; all meaning remains in the adjacent text. */
+function badaround_event_witness_icon(){
+    return '<svg class="ba-witness-icon" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true" focusable="false"><path d="M14.3 4.3a2 2 0 0 1 3.4 0l12 21a2 2 0 0 1-1.7 3H4a2 2 0 0 1-1.7-3Z" fill="#fec600" stroke="#b38a00" stroke-width="1.2" stroke-linejoin="round"/><path d="M16 11v8" fill="none" stroke="#171717" stroke-width="3" stroke-linecap="round"/><circle cx="16" cy="23" r="1.6" fill="#171717"/></svg>';
+}

@@ -309,7 +309,7 @@
 @media(max-width:720px){.ba-event-detail .ba-contribution-panel{padding:14px}}
 
 /* Event interaction and factual alerts: scoped to the public detail. */
-.ba-event-detail .ba-event-witness-badge{background:#fec600;border-color:#c39800;border-left-color:#171717;color:#171717}
+.ba-event-detail .ba-event-witness-badge{background:#fffdf4;border-color:#e4dfc5;border-left-color:#e4dfc5;border-left-width:1px;color:#171717}
 .ba-event-detail .ba-event-witness-badge a{color:#171717}
 .ba-event-detail .ba-event-aside>.ba-event-safety,.ba-event-detail .ba-event-safety{background:#b51f2b;border-color:#b51f2b;color:#fff}
 .ba-event-detail .ba-event-safety h2,.ba-event-detail .ba-event-safety p,.ba-event-detail .ba-event-safety a{color:#fff}
@@ -327,3 +327,8 @@
 .ba-event-detail .ba-event-social-links a:focus-visible{outline:3px solid #087f8c;outline-offset:3px}
 
 @media(min-width:721px) and (max-width:1020px){.ba-event-detail .ba-event-aside>.ba-event-responsibility{grid-column:1/-1}}
+
+/* A shared yellow cue links the witness notice to its contribution section. */
+.ba-event-detail .ba-event-witness-badge a,.ba-event-detail .ba-contribution-cta h2{display:flex;align-items:flex-start;gap:12px}
+.ba-event-detail .ba-witness-icon{display:block;width:28px;height:28px;flex:0 0 28px;margin-top:1px}
+.ba-event-detail .ba-event-witness-badge a>span,.ba-event-detail .ba-contribution-cta h2>span{min-width:0;overflow-wrap:anywhere}

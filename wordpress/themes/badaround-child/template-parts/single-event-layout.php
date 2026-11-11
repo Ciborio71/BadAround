@@ -179,7 +179,7 @@ if ( $status ) {
 				</div>
 
 				<h1><?php echo esc_html( badaround_event_heading($title) ); ?></h1>
-                <?php if($seeking_witnesses): ?><p class="ba-event-witness-badge"><a href="#contribuisci"><strong>Si cercano testimoni</strong> · Hai visto qualcosa o hai informazioni utili?</a></p><?php endif; ?>
+                <?php if($seeking_witnesses): ?><p class="ba-event-witness-badge"><a href="#contribuisci"><?php echo badaround_event_witness_icon(); ?><span><strong>Si cercano testimoni</strong> · Hai visto qualcosa o hai informazioni utili?</span></a></p><?php endif; ?>
                 <?php if ($event_seo) : ?><p class="ba-event-intro"><?php echo esc_html($event_seo['intro']); ?></p><?php endif; ?>
 
 				<?php if ( $public_location || $report_receipt ) : ?>

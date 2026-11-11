@@ -9,4 +9,5 @@ function esc_url($v){return htmlspecialchars($v,ENT_QUOTES);}function esc_html($
 class BadAround_Publication_Service{const STATUS_PUBLISHED='published';}class BadAround_Contribution_Post_Type{const POST_TYPE='contribution';}class WP_Query{function __construct($args){}function have_posts(){return false;}}
 require __DIR__.'/../wordpress/plugins/badaround-core/identity-dormant/wordpress-comment-form.php';
 require __DIR__.'/../wordpress/plugins/badaround-core/includes/class-badaround-contribution-service.php';
+require __DIR__.'/../wordpress/themes/badaround-child/inc/event-heading.php';
 echo '<main class="ba-event-detail">';BadAround_Contribution_Service::render_event_contribution_block(501);echo BadAround_Identity_WordPress_Comment_Form::render();echo '</main>';

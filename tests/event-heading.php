@@ -11,3 +11,7 @@ $cases = [
 ];
 foreach($cases as $input=>$expected){if(badaround_event_heading($input)!==$expected){fwrite(STDERR,'FAIL '.$input.' => '.badaround_event_heading($input).PHP_EOL);exit(1);}}
 echo "EVENT_HEADING_SUITE_PASS\n";
+
+$icon=badaround_event_witness_icon();
+if(!str_contains($icon,'fill="#fec600"')||!str_contains($icon,'aria-hidden="true"')||str_contains($icon,'<script'))throw new RuntimeException('Invalid decorative witness SVG');
+echo "WITNESS_ICON_PASS\n";
