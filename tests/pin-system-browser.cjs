@@ -13,9 +13,9 @@ const {chromium}=require(process.env.BA_PLAYWRIGHT_MODULE||'playwright-core'),{e
   await page.setViewportSize({width,height:1100});
   const result=await page.evaluate(()=>{
    const icons=[...document.querySelectorAll('.ba-native-category-grid .ba-native-card-icon svg')];
-   return {count:icons.length,clear:icons.every(svg=>getComputedStyle(svg).transform==='none'&&!!svg.querySelector('circle[fill="#fff"]')&&getComputedStyle(svg.closest('.ba-native-card-icon')).transform==='none'),home:[...document.querySelectorAll('.ba-home-category__pin svg')].every(svg=>getComputedStyle(svg).transform==='none'),overflow:document.documentElement.scrollWidth>innerWidth+1};
+   return {count:icons.length,large:icons.every(svg=>{const pin=svg.getBoundingClientRect(),card=svg.closest('.ba-native-option-card').getBoundingClientRect();return pin.height>=80&&pin.height/card.height>=.6&&pin.height<card.height&&pin.right<=card.right&&pin.left>=card.left}),clear:icons.every(svg=>getComputedStyle(svg).transform==='none'&&!!svg.querySelector('circle[fill="#fff"]')&&getComputedStyle(svg.closest('.ba-native-card-icon')).transform==='none'),home:[...document.querySelectorAll('.ba-home-category__pin svg')].every(svg=>getComputedStyle(svg).transform==='none'),overflow:document.documentElement.scrollWidth>innerWidth+1};
   });
-  assert.equal(result.count,6);assert(result.clear,'unrotated SVG with white center '+width);assert(result.home);assert(!result.overflow,'pin layout overflow '+width);
+  assert.equal(result.count,6);assert(result.large,'large contained category pins '+width);assert(result.clear,'unrotated SVG with white center '+width);assert(result.home);assert(!result.overflow,'pin layout overflow '+width);
   console.log('PASS pin system layout',width);
  }
  }finally{await browser.close();}

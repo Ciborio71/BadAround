@@ -768,3 +768,13 @@
 .ba-native .ba-native-category-grid .ba-native-card-icon .ba-pin-svg{width:32px;height:40px;transform:none;stroke:none;fill:initial}
 .ba-native .ba-native-location-pin{width:44px;height:55px;border:0;border-radius:0;transform:none;background:none;box-shadow:none}
 .ba-native .ba-native-location-pin .ba-pin-svg{width:44px;height:55px;transform:none;stroke:none;fill:initial}
+
+/* Category selection: large upright pins, with a small clear margin inside the card. */
+.ba-native .ba-native-category-grid:not(.is-collapsed) .ba-native-option-card{grid-template-columns:88px minmax(0,1fr);padding-block:14px}
+.ba-native .ba-native-category-grid:not(.is-collapsed) .ba-native-card-icon,
+.ba-native .ba-native-category-grid:not(.is-collapsed) .ba-native-card-icon .ba-pin-svg{width:88px;height:110px}
+@media(max-width:600px){
+ .ba-native .ba-native-category-grid:not(.is-collapsed) .ba-native-option-card{grid-template-columns:64px minmax(0,1fr);padding:12px}
+ .ba-native .ba-native-category-grid:not(.is-collapsed) .ba-native-card-icon,
+ .ba-native .ba-native-category-grid:not(.is-collapsed) .ba-native-card-icon .ba-pin-svg{width:64px;height:80px}
+}
