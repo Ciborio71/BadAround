@@ -131,7 +131,7 @@ function badaround_child_public_image_sizes() {
 add_action( 'after_setup_theme', 'badaround_child_public_image_sizes' );
 
 function badaround_child_placeholder_url() {
-	return content_url( '/uploads/2026/10/BadAround-—-placeholder-segnalazione.png' );
+	return get_stylesheet_directory_uri() . '/assets/event-placeholder.svg?ver=1';
 }
 
 function badaround_child_event_image_url( $post_id, $context = 'thumb' ) {
@@ -608,3 +608,5 @@ add_action('wp_enqueue_scripts',static function(){
 
 require_once __DIR__ . '/inc/event-heading.php';
 require_once __DIR__ . '/inc/event-structured-data.php';
+
+require_once __DIR__ . '/inc/home-seo.php';

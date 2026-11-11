@@ -252,8 +252,8 @@ a.ba-home-category-card:hover,a.ba-home-category-card:focus-visible { transform:
 .ba-home-events .ba-event-card--category-spazi-pubblici{--ba-card-accent:#0AA184}
 .ba-home-events .ba-event-card--category-animali{--ba-card-accent:#7040C8}
 .ba-home-events .ba-event-card--category-oggetti-e-documenti{--ba-card-accent:#E3A415}
-.ba-home-events .ba-event-card--home .ba-badge{border:1px solid color-mix(in srgb,var(--ba-card-accent) 30%,transparent);background:color-mix(in srgb,var(--ba-card-accent) 11%,white);color:color-mix(in srgb,var(--ba-card-accent) 78%,#071a38)}
-.ba-home-events .ba-event-card--home .ba-event-card__link{color:var(--ba-card-accent)}
+.ba-home-events .ba-event-card--home .ba-badge{border:1px solid color-mix(in srgb,var(--ba-card-accent) 30%,transparent);background:color-mix(in srgb,var(--ba-card-accent) 11%,white);color:color-mix(in srgb,var(--ba-card-accent) 55%,#071a38)}
+.ba-home-events .ba-event-card--home .ba-event-card__link{color:color-mix(in srgb,var(--ba-card-accent) 55%,#071a38)}
 .ba-home-events .ba-event-card--home .ba-event-card__media{position:relative;background:#eef3f6}
 .ba-home-events .ba-event-card--home .ba-event-card__media::after{content:"";position:absolute;inset:0;box-shadow:inset -1px 0 rgba(7,26,56,.06);pointer-events:none}
 @media(prefers-reduced-motion:reduce){.ba-home-events .ba-event-card--home{transition:none}}
@@ -400,3 +400,11 @@ a.ba-home-category-card:hover,a.ba-home-category-card:focus-visible { transform:
  .ba-home-hero{grid-template-columns:minmax(0,760px) minmax(0,1fr)}
  .ba-home-hero__content{padding-left:32px}
 }
+
+/* Lighthouse: accessible text colors; category pins and typography retain their identity. */
+.ba-home .ba-home-search .ba-button,
+.ba-home .ba-home-position,
+.ba-home .ba-home-sentinel__copy>.ba-button{background:#087f8c;color:#fff}
+.ba-home .ba-home-search .ba-button:is(:hover,:focus-visible),
+.ba-home .ba-home-position:is(:hover,:focus-visible):not(:disabled),
+.ba-home .ba-home-sentinel__copy>.ba-button:is(:hover,:focus-visible){background:#066f79;color:#fff}

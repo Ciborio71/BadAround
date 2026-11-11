@@ -878,15 +878,21 @@
 
 	const setupPlacesAutocomplete = async (input, onSelected, options = {}) => {
 		if (!input || !window.google?.maps?.importLibrary) return;
-		let places;
-		try {
-			places = await google.maps.importLibrary('places');
-		} catch (error) {
-			console.warn('BadAround Places Autocomplete non disponibile:', error);
-			return;
-		}
-		const { AutocompleteSuggestion, AutocompleteSessionToken } = places || {};
-		if (!AutocompleteSuggestion || !AutocompleteSessionToken) return;
+        // Bind immediately; import Places only when the user starts using search.
+        let AutocompleteSuggestion, AutocompleteSessionToken, placesPromise;
+        const ensurePlaces = () => {
+            if (!placesPromise) placesPromise = google.maps.importLibrary('places').then((places) => {
+                ({ AutocompleteSuggestion, AutocompleteSessionToken } = places || {});
+                if (!AutocompleteSuggestion || !AutocompleteSessionToken) throw new Error('Places unavailable');
+                token = new AutocompleteSessionToken();
+                return true;
+            }).catch((error) => {
+                placesPromise = null;
+                console.warn('BadAround Places Autocomplete non disponibile:', error);
+                return false;
+            });
+            return placesPromise;
+        };
 
 		const host = input.closest('.ba-map-inline-search') || input.parentElement;
 		if (!host) return;
@@ -898,11 +904,12 @@
 		menu.setAttribute('role','listbox');
 		host.appendChild(menu);
 
-		let token = new AutocompleteSessionToken();
+		let token = null;
 		let timer = null;
 		let requestId = 0;
 
 		const close = () => {
+            ++requestId; // A cleared/closed search cannot show stale in-flight suggestions.
 			menu.hidden = true;
 			menu.replaceChildren();
 		};
@@ -932,13 +939,14 @@
 			}
 		};
 
-		input.addEventListener('input', () => {
+		const predict = () => {
 			clearTimeout(timer);
 			const query = input.value.trim();
+            const currentRequest = ++requestId;
 			if (query.length < 2) { close(); return; }
-			const currentRequest = ++requestId;
 			timer = setTimeout(async () => {
 				try {
+                    if (!await ensurePlaces() || currentRequest !== requestId) return;
 					const response = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
 						input: query,
 						sessionToken: token,
@@ -971,7 +979,13 @@
 					console.warn('BadAround Places predictions:', error);
 				}
 			},180);
-		});
+		};
+        input.addEventListener('input', predict);
+        input.addEventListener('focus', () => { void ensurePlaces(); });
+        if (document.activeElement === input) {
+            void ensurePlaces();
+            if (input.value.trim().length >= 2) predict();
+        }
 		input.addEventListener('keydown', (event) => {
 			if (event.key === 'Escape') close();
 		});

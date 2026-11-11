@@ -7,7 +7,7 @@ const source=fs.readFileSync(path.join(__dirname,'../wordpress/themes/badaround-
 
 test('discovery renders before Google Maps bootstrap',()=>{
   const discovery=source.indexOf('payload = await loadDiscovery()');
-  const render=source.indexOf('renderList(items, total)',discovery);
+  const render=source.indexOf('renderList(visibleItems, visibleItems.length)',discovery);
   const schedule=source.indexOf('scheduleMaps(async () =>',render);
   const maps=source.indexOf('await loadGoogleMaps()',schedule);
   assert(discovery>=0 && render>discovery && schedule>render && maps>schedule);
