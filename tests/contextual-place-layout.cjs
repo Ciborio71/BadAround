@@ -5,7 +5,7 @@ const {execFileSync}=require('node:child_process'),fs=require('node:fs'),path=re
  const html=execFileSync(process.env.BA_PHP||'php',[path.join(__dirname,'native-report-f16.php'),'--html'],{encoding:'utf8'}).replace(/<script src=[^>]*><\/script>/g,'').replace(/<link[^>]*>/g,'');
  const browser=await chromium.launch({executablePath:process.env.BA_CHROMIUM||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
  try{
- const page=await browser.newPage();await page.route('**/*',r=>r.abort());await page.setContent(html);
+ const page=await browser.newPage();await page.route('**/*',r=>r.request().url()==='https://staging.badaround.it/'?r.fulfill({contentType:'text/html',body:html}):r.abort());await page.goto('https://staging.badaround.it/');
  for(const name of ['base','components','report','native-report','map-navigation'])await page.addStyleTag({content:fs.readFileSync(path.join(root,'wordpress/themes/badaround-child/assets/css',name+'.css'),'utf8')});
  for(const name of ['model','api','errors','media','media-view','wizard'])await page.addScriptTag({content:fs.readFileSync(path.join(root,'wordpress/themes/badaround-child/assets/js/native-report',name+'.js'),'utf8')});
  await page.evaluate(()=>{const r=document.querySelector('[data-native-report]'),m=r.nativeReport.model;m.set('event.category','item_document');m.set('event.subtype','wallet_docs');m.step=2;const input=r.querySelector('[name="content.description"]');input.value='Contenuto sintetico';input.dispatchEvent(new Event('input',{bubbles:true}));});

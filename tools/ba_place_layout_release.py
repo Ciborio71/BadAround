@@ -23,3 +23,4 @@ if __name__=='__main__':main()
 
 # Retry after aligning existing regression assertions with approved runtime overlays.
 # Fixture syntax corrected before any live upload.
+# Render offline fixture under its expected origin for browser geometry QA.
