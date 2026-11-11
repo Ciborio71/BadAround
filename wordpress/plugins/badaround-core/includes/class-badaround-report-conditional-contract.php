@@ -46,9 +46,9 @@ class BadAround_Report_Conditional_Contract {
     }
     public static function place_question($category,$subtype) {
         if($category==='vehicle')return $subtype==='vehicle_hit_and_run'?'In quale tipo di luogo è avvenuto l’incidente?':'Dove si trovava il veicolo?';
-        if($category==='property')return 'Quale tipo di immobile o luogo è interessato?';
+        if($category==='property')return 'Tipo di immobile o luogo';
         if($category==='animal')return $subtype==='animal_missing'?'Dove è stato visto l’animale l’ultima volta?':'In quale tipo di luogo si trova l’animale?';
-        return $category==='item_document'?'In quale tipo di luogo è stato smarrito o trovato l’oggetto?':'Quale tipo di luogo è interessato?';
+        return $category==='item_document'?'Dove è stato perso o trovato?':'Quale tipo di luogo è interessato?';
     }
 	public static function fields() {
 		$c = self::definition();

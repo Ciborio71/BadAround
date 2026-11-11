@@ -734,7 +734,7 @@
 @media(min-width:1025px){
  .ba-native .ba-native-field .ba-native-short-options:not(.is-collapsed){grid-template-columns:repeat(3,minmax(0,1fr))}
  .ba-native .ba-native-place-danger-row{display:grid;grid-template-columns:minmax(0,.3fr) minmax(0,.7fr);gap:20px;align-items:start}
- .ba-native .ba-native-place-danger-row>.ba-native-field>label{margin-bottom:10px}
+ .ba-native .ba-native-place-danger-row>.ba-native-field>label{margin-bottom:10px;min-block-size:var(--ba-paired-label-height,auto);box-sizing:border-box}
  .ba-native .ba-native-place-danger-row .ba-native-choice-row{margin-top:0}
  .ba-native .ba-native-place-danger-row select[data-native-input]{width:100%;max-width:100%;min-height:64px}
  .ba-native .ba-native-place-danger-row .ba-native-card-grid .ba-native-option-card{min-height:64px}
@@ -758,3 +758,7 @@
 .ba-native .ba-native-social-icon--facebook{color:#1877f2}
 .ba-native .ba-native-social-icon--instagram{color:#c13584}
 .ba-native .ba-native-social-icon--tiktok,.ba-native .ba-native-social-icon--x{color:#111}
+
+/* Paired questions may wrap naturally without pushing controls out of alignment. */
+.ba-native .ba-native-place-danger-row>.ba-native-field{min-width:0}
+.ba-native .ba-native-place-danger-row .ba-native-card-copy{overflow-wrap:anywhere}

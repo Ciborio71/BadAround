@@ -3,9 +3,9 @@
   const ns = window.BadAroundNative;
   function boot(container) {
     if (container.nativeReport) return; // Reinitialization must retain the current logical wizard.
-    let disposed=false; const listeners=[]; let submitWaitTimer=null;let accessPhase=null;
+    let disposed=false; const listeners=[]; let submitWaitTimer=null;let accessPhase=null;let pairedLabelObserver=null;
     function listen(target,type,handler) { target.addEventListener(type,handler);listeners.push(()=>target.removeEventListener(type,handler)); }
-    function teardown() { if(disposed)return; disposed=true;clearTimeout(submitWaitTimer);submissionFeedback.hidden=true;listeners.forEach(remove=>remove());mediaView?.dispose();smartAddress?.dispose(); }
+    function teardown() { if(disposed)return; disposed=true;pairedLabelObserver?.disconnect();clearTimeout(submitWaitTimer);submissionFeedback.hidden=true;listeners.forEach(remove=>remove());mediaView?.dispose();smartAddress?.dispose(); }
     const config = JSON.parse(container.querySelector('[data-native-config]').textContent);
     const model = new ns.Model(config);
     // These are explicit reporter choices in the UI; canonical fallback defaults stay frozen.
@@ -339,6 +339,30 @@
       row.style.setProperty('--ba-field-columns',String(fields.length));
       fields[0].before(row); fields.forEach(field => row.append(field));
     }
+    // Match actual label height, including wrapping, font loading and zoom.
+    // Only presentation changes: controls, canonical values and keyboard order stay intact.
+    function alignPlaceLabels(){
+      if(disposed)return;
+      const row=form.querySelector('.ba-native-place-danger-row');
+      if(!row)return;
+      row.style.removeProperty('--ba-paired-label-height');
+      if(!window.matchMedia?.('(min-width:1025px)').matches)return;
+      const labels=[...row.querySelectorAll(':scope > .ba-native-field:not([hidden]) > label')];
+      if(labels.length!==2)return;
+      const height=Math.max(...labels.map(label=>label.getBoundingClientRect().height));
+      if(height>0)row.style.setProperty('--ba-paired-label-height',Math.ceil(height)+'px');
+    }
+    const pairedRow=form.querySelector('.ba-native-place-danger-row');
+    if(pairedRow&&window.ResizeObserver){
+      let width=-1;
+      pairedLabelObserver=new ResizeObserver(entries=>{
+        const nextWidth=entries[0]?.contentRect.width;
+        if(nextWidth!==width){width=nextWidth;alignPlaceLabels();}
+      });
+      pairedLabelObserver.observe(pairedRow);
+    }
+    listen(window,'resize',alignPlaceLabels);
+    if(document.fonts?.addEventListener)listen(document.fonts,'loadingdone',alignPlaceLabels);
     function expandCards(wrapper) {
       const select = wrapper.querySelector('select[data-native-input]');
       const entry = cardGroups.get(select);
@@ -561,6 +585,7 @@
       activeSpecifications=specifications;
       syncPageHeading(current);
       syncEmergencyNotice(current);
+      alignPlaceLabels();
       if (current === 'review') review();
       if (focus) focusStep(current);
     }
