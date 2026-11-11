@@ -12,6 +12,7 @@ add_filter( 'use_block_editor_for_post_type', '__return_false', 100 );
 add_filter( 'use_block_editor_for_post', '__return_false', 100 );
 
 define( 'BADAROUND_CHILD_VERSION', '0.6.0' );
+require_once __DIR__.'/inc/pins.php';
 
 
 /**
@@ -147,7 +148,7 @@ add_action( 'after_setup_theme', 'badaround_child_public_image_sizes' );
 function badaround_child_placeholder_url($category='') {
     $categories=array('veicoli','case-e-attivita','pericoli','spazi-pubblici','animali','oggetti-e-documenti');
     $suffix=in_array($category,$categories,true)?'-'.$category:'';
-    return get_stylesheet_directory_uri().'/assets/event-placeholder'.$suffix.'.svg?ver=3';
+    return get_stylesheet_directory_uri().'/assets/event-placeholder'.$suffix.'.svg?ver=4';
 }
 function badaround_child_event_category_slug($id){
     $terms=get_the_terms($id,'ba_tipo_evento');
@@ -344,6 +345,7 @@ function badaround_child_enqueue_assets() {
 						)
 						: '',
 					'categoryByTerm' => $category_by_term,
+                    'pinDesigns' => badaround_pin_map_catalog(),
 					'placeholder'    => badaround_child_placeholder_url(),
                     'placeholders' => array_combine(array('veicoli','case-e-attivita','pericoli','spazi-pubblici','animali','oggetti-e-documenti'),array_map('badaround_child_placeholder_url',array('veicoli','case-e-attivita','pericoli','spazi-pubblici','animali','oggetti-e-documenti'))),
 				)

@@ -762,3 +762,9 @@
 /* Paired questions may wrap naturally without pushing controls out of alignment. */
 .ba-native .ba-native-place-danger-row>.ba-native-field{min-width:0}
 .ba-native .ba-native-place-danger-row .ba-native-card-copy{overflow-wrap:anywhere}
+
+/* Shared pin SVG replaces CSS-rotated category shapes. */
+.ba-native .ba-native-category-grid .ba-native-card-icon{width:32px;height:40px;border:0;border-radius:0;transform:none;background:none;box-shadow:none}
+.ba-native .ba-native-category-grid .ba-native-card-icon .ba-pin-svg{width:32px;height:40px;transform:none;stroke:none;fill:initial}
+.ba-native .ba-native-location-pin{width:44px;height:55px;border:0;border-radius:0;transform:none;background:none;box-shadow:none}
+.ba-native .ba-native-location-pin .ba-pin-svg{width:44px;height:55px;transform:none;stroke:none;fill:initial}

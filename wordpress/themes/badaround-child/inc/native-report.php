@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/pins.php';
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /** F1.6 diagnostic gate remains staging administrator-only and distinct from default routing. */
@@ -209,7 +210,8 @@ function badaround_native_report_config() {
 	}
 	$fields = $ordered_fields;
 	$config = array(
-		'placeContextVersion' => '1.0',
+		'pinIcons' => array_combine(array('vehicle','property','hazard','public_space','animal','item_document'),array_map('badaround_pin_svg',array('vehicle','property','hazard','public_space','animal','item_document'))),
+        'placeContextVersion' => '1.0',
 		'conditional' => array( 'sha256' => BadAround_Report_Conditional_Contract::SHA256, 'profiles' => $profiles ),
 		'emergencyNotice' => array( 'subtypes' => $emergency_subtypes, 'dangerValues' => array_values( array_unique( $danger_values ) ) ),
 		'smartAddress' => $smart_key ? array( 'key' => $smart_key, 'territories' => $territories, 'country' => 'IT' ) : null,

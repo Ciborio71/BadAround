@@ -33,8 +33,7 @@ if ( 'event' === $key ) : ?>
         <svg viewBox="0 0 160 104" focusable="false">
           <rect x="6" y="6" width="148" height="92" rx="14" class="ba-geo-map-bg"/>
           <path d="M20 30h120M20 53h120M20 76h120M47 18v68M83 18v68M118 18v68" class="ba-geo-map-grid"/>
-          <path d="M68 71c-6-8-17-20-17-33 0-12 9-21 21-21s21 9 21 21c0 13-11 25-17 33l-4 5-4-5Z" class="ba-geo-pin"/>
-          <circle cx="72" cy="38" r="7" class="ba-geo-pin-core"/>
+          <g transform="translate(54 12) scale(.72)"><?php echo badaround_pin_catalog()['neutral']['body']; ?></g>
         </svg>
       </span>
       <span class="ba-native-public-location-copy"><input type="radio" name="ba-public-location-choice" value="exact_point" checked><strong>Punto esatto</strong><small>Mostra il punto sulla mappa e l’indirizzo completo, compreso il civico indicato, dopo la moderazione.</small></span>

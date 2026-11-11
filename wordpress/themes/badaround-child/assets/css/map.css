@@ -1112,3 +1112,13 @@ body.home .ba-home-map .ba-map-legend--home .ba-map-legend__body{
   max-height:min(34vh,240px)
  }
 }
+
+/* Shared category pin; circle-shaped privacy badges on the map retain their meaning. */
+.ba-map-legend .ba-map-legend__pin{width:24px;height:30px;margin-left:0;border:0;border-radius:0;transform:none;background:none;box-shadow:none}
+.ba-map-legend .ba-map-legend__pin::after{display:none}
+.ba-map-legend .ba-map-legend__pin .ba-pin-svg{width:24px;height:30px}
+.ba-event-card .ba-event-card__media-category{background:none;border:0;border-radius:0;box-shadow:none;width:32px;height:40px}
+.ba-event-card .ba-event-card__media-category .ba-pin-svg{width:32px;height:40px;fill:initial;stroke:none;transform:none}
+
+.ba-map-preview-card.ba-event-card .ba-event-card__media-category{width:36px;height:45px;border:0;border-radius:0;background:none;box-shadow:none}
+.ba-map-preview-card.ba-event-card .ba-event-card__media-category .ba-pin-svg{width:36px;height:45px;fill:initial;stroke:none}

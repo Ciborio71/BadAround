@@ -208,14 +208,6 @@
       item_document: {title:'Oggetti e documenti', desc:'Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.', icon:'object', color:'#E3A415'}
     };
     // Same SVG geometry and stroke/fill treatment as the home category pins.
-    const cardIcons = {
-      vehicle:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 14h14l-1.5-5h-11L5 14Zm1 0v3m12-3v3M8 17h8M8 9l1-3h6l1 3"/></svg>',
-      property:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7v9h-6v-6h-4v6H4v-9Z"/></svg>',
-      hazard:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 3.5 20h17L12 4Z"/><path d="M12 9v5m0 3h.01"/></svg>',
-      public:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h16M6 18V9h12v9M8 9V6h8v3M9 13h2m2 0h2"/></svg>',
-      animal:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor" stroke="none"><path d="M8 11c-1.3 0-2.3-1.3-2.3-2.8S6.5 5.5 7.8 5.5s2.2 1.2 2.2 2.7S9.3 11 8 11Zm8 0c-1.3 0-2-1.3-2-2.8s.9-2.7 2.2-2.7 2.1 1.2 2.1 2.7S17.3 11 16 11Zm-4 9c-3.2 0-5.4-1.7-5.4-3.8 0-1.8 1.4-3 3-3.9.8-.5 1.2-1.5 2.4-1.5s1.6 1 2.4 1.5c1.6.9 3 2.1 3 3.9 0 2.1-2.2 3.8-5.4 3.8Z"/></svg>',
-      object:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14v12H5V7Zm3-3h8v3H8V4Zm1 7h6m-6 4h4"/></svg>'
-    };
     const cardGroups = new Map();
     // Presentation adapters preserve every canonical value and validation rule.
     // One explicit action for required declarations only; optional contact preferences stay independent.
@@ -446,7 +438,7 @@
           if (meta) {
             card.style.setProperty('--ba-card-accent',meta.color);
             const icon = document.createElement('span'); icon.className = 'ba-native-card-icon';
-            icon.setAttribute('aria-hidden','true'); icon.innerHTML = cardIcons[meta.icon];
+            icon.setAttribute('aria-hidden','true'); icon.innerHTML = config.pinIcons?.[option.value] || '';
             const description = document.createElement('small'); description.textContent = meta.desc; copy.append(description);
             card.append(icon);
           }

@@ -1,0 +1,9 @@
+# Unified BadAround pin system — 2026-11-11
+
+Eight passive SVG assets: six category pins plus neutral and resolved. Colored silhouette with white keyline, white medallion and black original pictogram. Each standalone SVG is 624–831 bytes. assets/pin-designs.json is the shared registry consumed by the PHP helpers, native wizard config and public map config. Static and inline SVG parity is asserted. No raster embeds, remote fonts or third-party dependencies.
+
+Coverage: Home category links/search/legend, shared event-card thumbnails and map previews, Mappa category filters/legend and marker renderer, detail location symbol/map, Radar search-center marker, wizard category cards/private draggable marker/step heading/public-position illustration, How it works and Sentinelle illustrations, and all branded placeholders. The eye and secondary badge are removed from placeholders. Utility crosshair buttons, cluster counts and the user-position dot remain function-specific controls rather than event category pins.
+
+Exact projection anchor remains (28,64), including hover/selection; approximate projection remains a circle-shaped category medallion centered at (24,24), accompanied by the approved geographic meter circle. Approximate location is not relabeled exact. Legacy pin anchors align with the new physical tip, including the enlarged selected halo. Public/private GEO values, radius choices, taxonomy IDs, moderation, endpoint and filter semantics remain unchanged. Placeholder cache version is 4. Existing screen layouts and fonts remain.
+
+Verification: shared registry/passive SVG tests; public GEO renderer and all radii, selected anchor, cluster redraw, resolved and exclusion behavior; actual wizard PHP config and browser pin layout at desktop/tablet/mobile; existing form, gallery and metadata regression suites. No production records or provider settings are changed.

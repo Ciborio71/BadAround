@@ -16,6 +16,7 @@ body.page-template-page-mappa .ba-map-category-filter:hover{transform:translateY
 body.page-template-page-mappa .ba-map-category-filter:focus-visible{outline:3px solid #071a38;outline-offset:2px}
 @media(max-width:700px){body.page-template-page-mappa .ba-map-category-filter .ba-map-category-icon{width:14px;height:14px;flex-basis:14px}}
 @media(prefers-reduced-motion:reduce){body.page-template-page-mappa .ba-map-category-filter{transition:none}body.page-template-page-mappa .ba-map-category-filter:hover{transform:none}}
+body.page-template-page-mappa .ba-map-category-filter .ba-pin-svg{width:20px;height:25px;flex:0 0 20px}
 </style>
 <main class="ba-map-page" id="main-content">
 	<section class="ba-map-commandbar" aria-label="Ricerca e filtri mappa">
@@ -35,12 +36,12 @@ body.page-template-page-mappa .ba-map-category-filter:focus-visible{outline:3px 
 			<div class="ba-map-commandbar__filters">
 				<div class="ba-map-category-filters" role="group" aria-label="Filtra per categoria">
 					<button type="button" class="ba-map-category-filter is-active" data-ba-map-filter="all" aria-pressed="true"><svg class="ba-map-category-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/></svg><span>Tutte le segnalazioni</span></button>
-					<button type="button" class="ba-map-category-filter" data-ba-map-filter="veicoli" aria-pressed="false"><svg class="ba-map-category-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11l1.5-4h11L19 11M4 16h16v-5H4zM6 16v2M18 16v2"/><circle cx="7" cy="13" r="1"/><circle cx="17" cy="13" r="1"/></svg><span>Veicoli</span></button>
-					<button type="button" class="ba-map-category-filter" data-ba-map-filter="case-e-attivita" aria-pressed="false"><svg class="ba-map-category-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 3l9 8M5 10v11h14V10M9 21v-7h6v7"/></svg><span>Case e attività</span></button>
-					<button type="button" class="ba-map-category-filter" data-ba-map-filter="pericoli" aria-pressed="false"><svg class="ba-map-category-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19L12 3zM12 9v5M12 17v1"/></svg><span>Pericoli</span></button>
-					<button type="button" class="ba-map-category-filter" data-ba-map-filter="spazi-pubblici" aria-pressed="false"><svg class="ba-map-category-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21v-8M18 21v-8M5 13 12 3l7 10H5zM12 13v8"/></svg><span>Spazi pubblici</span></button>
-					<button type="button" class="ba-map-category-filter" data-ba-map-filter="animali" aria-pressed="false"><svg class="ba-map-category-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="8" r="1.3"/><circle cx="11" cy="5" r="1.3"/><circle cx="17" cy="7" r="1.3"/><circle cx="20" cy="11" r="1.3"/><path d="M7 18c0-3 3-6 5-6s5 3 5 6c0 2-2 3-5 2-3 1-5 0-5-2z"/></svg><span>Animali</span></button>
-					<button type="button" class="ba-map-category-filter" data-ba-map-filter="oggetti-e-documenti" aria-pressed="false"><svg class="ba-map-category-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l4 4v16H6zM15 2v5h4M9 12h7M9 16h7"/></svg><span>Oggetti e documenti</span></button>
+					<button type="button" class="ba-map-category-filter" data-ba-map-filter="veicoli" aria-pressed="false"><?php echo badaround_pin_svg('veicoli'); ?><span>Veicoli</span></button>
+					<button type="button" class="ba-map-category-filter" data-ba-map-filter="case-e-attivita" aria-pressed="false"><?php echo badaround_pin_svg('case-e-attivita'); ?><span>Case e attività</span></button>
+					<button type="button" class="ba-map-category-filter" data-ba-map-filter="pericoli" aria-pressed="false"><?php echo badaround_pin_svg('pericoli'); ?><span>Pericoli</span></button>
+					<button type="button" class="ba-map-category-filter" data-ba-map-filter="spazi-pubblici" aria-pressed="false"><?php echo badaround_pin_svg('spazi-pubblici'); ?><span>Spazi pubblici</span></button>
+					<button type="button" class="ba-map-category-filter" data-ba-map-filter="animali" aria-pressed="false"><?php echo badaround_pin_svg('animali'); ?><span>Animali</span></button>
+					<button type="button" class="ba-map-category-filter" data-ba-map-filter="oggetti-e-documenti" aria-pressed="false"><?php echo badaround_pin_svg('oggetti-e-documenti'); ?><span>Oggetti e documenti</span></button>
 				</div>
 
 				<div class="ba-map-time-filter-wrap">
@@ -93,13 +94,13 @@ body.page-template-page-mappa .ba-map-category-filter:focus-visible{outline:3px 
 			<details class="ba-map-legend">
 				<summary><span class="ba-map-legend__label">Legenda pinpoint</span></summary>
 				<div class="ba-map-legend__body">
-					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-vehicles" aria-hidden="true"></span><span><strong>Veicoli</strong><small>Auto, moto e altri mezzi</small></span></div>
-					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-property" aria-hidden="true"></span><span><strong>Case e attività</strong><small>Abitazioni, negozi e uffici</small></span></div>
-					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-hazard" aria-hidden="true"></span><span><strong>Pericoli</strong><small>Rischi e situazioni pericolose</small></span></div>
-					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-public" aria-hidden="true"></span><span><strong>Spazi pubblici</strong><small>Strade, aree pubbliche e decoro</small></span></div>
-					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-animal" aria-hidden="true"></span><span><strong>Animali</strong><small>Smarrimenti e segnalazioni</small></span></div>
-					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-object" aria-hidden="true"></span><span><strong>Oggetti e documenti</strong><small>Oggetti smarriti o ritrovati</small></span></div>
-					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-resolved" aria-hidden="true">✓</span><span><strong>Risolto</strong><small>Evento concluso</small></span></div>
+					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-vehicles" aria-hidden="true"><?php echo badaround_pin_svg('veicoli'); ?></span><span><strong>Veicoli</strong><small>Auto, moto e altri mezzi</small></span></div>
+					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-property" aria-hidden="true"><?php echo badaround_pin_svg('case-e-attivita'); ?></span><span><strong>Case e attività</strong><small>Abitazioni, negozi e uffici</small></span></div>
+					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-hazard" aria-hidden="true"><?php echo badaround_pin_svg('pericoli'); ?></span><span><strong>Pericoli</strong><small>Rischi e situazioni pericolose</small></span></div>
+					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-public" aria-hidden="true"><?php echo badaround_pin_svg('spazi-pubblici'); ?></span><span><strong>Spazi pubblici</strong><small>Strade, aree pubbliche e decoro</small></span></div>
+					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-animal" aria-hidden="true"><?php echo badaround_pin_svg('animali'); ?></span><span><strong>Animali</strong><small>Smarrimenti e segnalazioni</small></span></div>
+					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-object" aria-hidden="true"><?php echo badaround_pin_svg('oggetti-e-documenti'); ?></span><span><strong>Oggetti e documenti</strong><small>Oggetti smarriti o ritrovati</small></span></div>
+					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-resolved" aria-hidden="true"><?php echo badaround_pin_svg('resolved'); ?></span><span><strong>Risolto</strong><small>Evento concluso</small></span></div>
 					<div class="ba-map-legend__item"><span class="ba-map-legend__cluster" aria-hidden="true">3</span><span><strong>Più eventi</strong><small>Pinpoint raggruppati nella stessa area</small></span></div>
 				</div>
 			</details>

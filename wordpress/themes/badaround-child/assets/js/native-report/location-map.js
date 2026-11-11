@@ -28,10 +28,10 @@
   function glyph(){
    const category=model.values['event.category'];
    const colors={vehicle:'#1677E8',property:'#C9153D',hazard:'#F57C00',public_space:'#0AA184',animal:'#7040C8',item_document:'#E3A415'};
-   const pin=container.ownerDocument.createElement('span');pin.className='ba-native-location-pin';pin.style.backgroundColor=colors[category]||'#087f8c';
+   const pin=container.ownerDocument.createElement('span');pin.className='ba-native-location-pin';
    const radio=Array.from(container.querySelectorAll('.ba-native-category-grid input')).find(el=>el.value===category);
    const icon=radio?.closest('label')?.querySelector('svg');
-   if(icon)pin.append(icon.cloneNode(true));
+   if(icon)pin.append(icon.cloneNode(true));else if(config.pinIcons?.[category])pin.innerHTML=config.pinIcons[category];
    pin.setAttribute('aria-hidden','true');return pin;
   }
   function show(position){return mapTask=renderMap(position);}

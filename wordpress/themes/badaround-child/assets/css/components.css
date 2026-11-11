@@ -46,3 +46,6 @@
 	.ba-map { min-height: 340px; }
 }
 
+
+.ba-event-card .ba-event-card__media-category{width:32px;height:40px;border:0;border-radius:0;background:none;box-shadow:none}
+.ba-event-card .ba-event-card__media-category .ba-pin-svg{width:32px;height:40px;transform:none;fill:initial;stroke:none}

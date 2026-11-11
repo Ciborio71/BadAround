@@ -10,7 +10,7 @@ const approximate = { id:304,title:'QA approximate',event_type:{id:1},public_geo
 const legacy = { id:290,title:'Legacy',event_type:{id:1},public_geo:{lat:41.866107,lng:12.436241,radius_m:1000} };
 const territory = { id:269,title:'Territory',territory:{name:'Roma'},event_type:{id:1},public_geo:null,exact_lat:99,exact_lng:99 };
 const svg = marker => decodeURIComponent(marker.icon.url.split(',').slice(1).join(','));
-async function render(items, context='full', dataset={}) {
+async function render(items, context='full', dataset={}, pinCategory='spazi-pubblici') {
  const dom = new JSDOM('<h1>Public title</h1><section><div data-ba-map></div><div data-ba-map-status hidden></div><div data-ba-map-preview hidden><div data-ba-map-preview-content></div><button data-ba-map-preview-close></button></div></section>', {url:'https://staging.badaround.it/',runScripts:'outside-only'});
  const w=dom.window, node=w.document.querySelector('[data-ba-map]');
  node.dataset.baMapContext=context; Object.assign(node.dataset,dataset);
@@ -33,7 +33,8 @@ async function render(items, context='full', dataset={}) {
   getProjection(){return{fromLatLngToDivPixel:p=>({x:p.lat*100,y:p.lng*100})};}
  }
  w.google={maps:{ControlPosition:{RIGHT_TOP:"RIGHT_TOP"},Map,Marker,Circle,LatLngBounds:Bounds,OverlayView:Overlay,LatLng:class{constructor(p){Object.assign(this,p);}},Size:class{constructor(w,h){this.width=w;this.height=h;}},Point:class{constructor(x,y){this.x=x;this.y=y;}},InfoWindow:class{setContent(){}open(){}close(){}}}};
- w.BadAroundMap={hasMaps:true,mapsUrl:'https://maps.googleapis.com',endpoint:'/wp-json/badaround/v1/discovery',categoryByTerm:{1:'spazi-pubblici'}};
+ w.IntersectionObserver=class{constructor(callback){this.callback=callback;}observe(){this.callback([{isIntersecting:true}]);}disconnect(){}};
+ w.BadAroundMap={pinDesigns:JSON.parse(fs.readFileSync('wordpress/themes/badaround-child/assets/pin-designs.json','utf8')),hasMaps:true,mapsUrl:'https://maps.googleapis.com',endpoint:'/wp-json/badaround/v1/discovery',categoryByTerm:{1:pinCategory}};
  w.fetch=async()=>({ok:true,json:async()=>({items,total:items.length})});
  w.eval(fs.readFileSync("wordpress/themes/badaround-child/assets/js/map-navigation.js","utf8"));
  w.eval(source);
@@ -45,7 +46,7 @@ test('explicit exact: one body, separate grounded shadow, correct tip, icon/cate
  const r=await render([{...exact,public_geo:{...exact.public_geo,radius_meters:1000}}]);
  assert.equal(r.markers.length,2);assert.equal(r.circles.length,0);
  const [pin,shadow]=r.markers;
- assert.match(svg(pin),/M28 64C/);assert.match(svg(pin),/#0AA184/);assert.match(svg(pin),/translate\(16 15\)/);
+ assert.match(svg(pin),/M24 58C/);assert.match(svg(pin),/translate\(4 6\)/);assert.match(svg(pin),/#0AA184/);assert.match(svg(pin),/translate\(12 11\)/);
  assert.equal(pin.icon.anchor.x,28);assert.equal(pin.icon.anchor.y,64);
  assert.equal(shadow.icon.anchor.x,12);assert.equal(shadow.icon.anchor.y,6);
  assert.deepEqual(pin.position,shadow.position);assert.match(svg(shadow),/<ellipse/);assert.equal(shadow.clickable,false);
@@ -87,7 +88,7 @@ test('Home and Mappa share exact/area semantics and public approved coordinates'
 test('detail uses same renderer, single map, approved dataset and meter fit bounds',async()=>{
  const r=await render([], 'detail',pointData);
  assert.equal(r.maps.length,1);assert.equal(r.maps[0].zoom,16);assert.equal(r.markers.length,2);assert.equal(r.circles.length,0);
- assert.match(svg(r.markers[0]),/M28 64C/);assert.match(svg(r.markers[0]),/#0AA184/);r.close();
+ assert.match(svg(r.markers[0]),/M24 58C/);assert.match(svg(r.markers[0]),/translate\(4 6\)/);assert.match(svg(r.markers[0]),/#0AA184/);r.close();
  const a=await render([], 'detail',{...pointData,baEventId:'304',baEventMode:'approximate_area',baEventRadius:'1000',baEventLat:'41.89553',baEventLng:'12.479214'});
  assert.equal(a.maps.length,1);assert.equal(a.circles[0].radius,1000);assert.equal(a.markers.length,1);assert.doesNotMatch(svg(a.markers[0]),/M28 64C/);a.close();
  const t=await render([], 'detail',{baEventLat:'',baEventLng:''});
@@ -117,5 +118,14 @@ test('radius-aware public Home/map/detail circles preserve all five approved met
  for(const radius of [50,100,250,500,1000])for(const context of ['home','full','detail']){
   const r=await render([{...approximate,public_geo:{...approximate.public_geo,radius_meters:radius}}],context,{...pointData,baEventMode:'approximate_area',baEventRadius:String(radius)});
   assert.equal(r.circles.length,1);assert.equal(r.circles[0].radius,radius);r.close();
+ }
+});
+test('all six published category pins use the shared black-on-white artwork with stable exact anchor',async()=>{
+ const catalog=JSON.parse(fs.readFileSync('wordpress/themes/badaround-child/assets/pin-designs.json','utf8'));
+ for(const key of ['veicoli','case-e-attivita','pericoli','spazi-pubblici','animali','oggetti-e-documenti']){
+  const r=await render([exact],'full',{},key),pin=r.markers[0];
+  assert(svg(pin).includes(catalog[key].body),key+' shared body');
+  assert.equal(pin.icon.anchor.x,28);assert.equal(pin.icon.anchor.y,64);
+  const position=JSON.stringify(pin.position);pin.trigger('mouseover');assert.equal(pin.icon.anchor.y,64);assert.equal(JSON.stringify(pin.position),position);r.close();
  }
 });

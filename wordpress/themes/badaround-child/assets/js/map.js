@@ -14,7 +14,7 @@
 		'animali': { color: '#7040C8', dark: '#503096', icon: 'animal' },
 		'oggetti-e-documenti': { color: '#E3A415', dark: '#AA780C', icon: 'object' },
 	};
-	const neutral = { color: '#8292A8', dark: '#627187', icon: 'check' };
+	const neutral = { color: '#8292A8', dark: '#627187', icon: 'neutral' };
 	const clusterColor = '#263B63';
 	let googleMapsPromise;
 
@@ -78,45 +78,21 @@
 		.replace(/\bO\b/g, 'o')
 		.replace(/\bE\b/g, 'e');
 
-	const iconMarkup = (name) => {
-		const common = 'fill="none" stroke="white" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"';
-		switch (name) {
-			case 'vehicle':
-				return '<path d="M7 14h10l-1.4-4.2H8.4L7 14Zm1 0v3m8-3v3M9 17h6M9.2 9.8l1-2.8h3.6l1 2.8" ' + common + '/><circle cx="9" cy="14.5" r=".8" fill="white"/><circle cx="15" cy="14.5" r=".8" fill="white"/>';
-			case 'property':
-				return '<path d="m5 11 7-6 7 6v8H8v-7" ' + common + '/><path d="M13 14h6v5h-6zM14 14v-2h4v2" ' + common + '/>';
-			case 'hazard':
-				return '<path d="M12 4 3.8 19h16.4L12 4Z" ' + common + '/><path d="M12 9v5m0 2.5h.01" ' + common + '/>';
-			case 'public':
-				return '<path d="M4 14h9M5 11h8M6 14v4m6-4v4M17 8v10" ' + common + '/><path d="M17 8c-2.2 0-3.2-1.4-3.2-3 0-1.7 1.3-3 3.2-3s3.2 1.3 3.2 3c0 1.6-1 3-3.2 3Z" ' + common + '/>';
-			case 'animal':
-				return '<circle cx="8" cy="9" r="1.6" fill="white"/><circle cx="12" cy="7" r="1.7" fill="white"/><circle cx="16" cy="9" r="1.6" fill="white"/><circle cx="6.5" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/><path d="M8 17c0-2.3 1.8-4.2 4-4.2s4 1.9 4 4.2c0 1.6-1.2 2.3-2.5 2-.9-.2-2.1-.2-3 0C9.2 19.3 8 18.6 8 17Z" fill="white"/>';
-			case 'object':
-				return '<path d="M6 5h8v11H6zM8 8h4M8 11h3" ' + common + '/><circle cx="15.5" cy="15.5" r="3.5" ' + common + '/><path d="m18 18 2 2" ' + common + '/>';
-			case 'check':
-				return '<path d="m7 12 3.2 3.2L17.5 8" ' + common + '/>';
-			default:
-				return '<circle cx="12" cy="12" r="3" fill="white"/>';
-		}
-	};
-
-	const pinSvg = (categorySlug, selected = false, resolved = false) => {
-		const palette = resolved ? neutral : (categories[categorySlug] || neutral);
-		const width = selected ? 64 : 48;
-		const height = selected ? 78 : 60;
-		const halo = selected
-			? '<circle cx="32" cy="30" r="29" fill="' + palette.color + '" fill-opacity=".16" stroke="' + palette.color + '" stroke-opacity=".42" stroke-width="2"/>'
-			: '';
-		const tx = selected ? 8 : 0;
-		const ty = selected ? 4 : 0;
-		const pin = '<path d="M24 58C20.5 53 8 40.8 8 25.8 8 16 15.2 8 24 8s16 8 16 17.8C40 40.8 27.5 53 24 58Z" fill="' + palette.color + '" stroke="' + palette.dark + '" stroke-width="1.5"/><circle cx="24" cy="25" r="12.2" fill="' + palette.color + '"/><g transform="translate(12 13)">' + iconMarkup(resolved ? 'check' : palette.icon) + '</g>';
-		const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + ' ' + height + '">' + halo + '<g transform="translate(' + tx + ' ' + ty + ')">' + pin + '</g></svg>';
-		return {
-			url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-			scaledSize: new google.maps.Size(width, height),
-			anchor: new google.maps.Point(width / 2, height),
-		};
-	};
+	const pinGlyphs = {"neutral":"<g fill=\"#111\"><circle cx=\"12\" cy=\"12\" r=\"7\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/><path d=\"M12 1v5m0 12v5M1 12h5m12 0h5\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/></g>","vehicle":"<g fill=\"#111\"><path fill-rule=\"evenodd\" d=\"M6 4h12l3 8v8h-4v-3H7v3H3v-8Zm1.5 3-1.8 5h12.6l-1.8-5Z\"/><circle cx=\"7\" cy=\"14.5\" r=\"1.4\" fill=\"#fff\"/><circle cx=\"17\" cy=\"14.5\" r=\"1.4\" fill=\"#fff\"/></g>","property":"<g fill=\"#111\"><path d=\"m1 11 11-9 11 9-2 2-1-1v10h-6v-7h-4v7H4V12l-1 1Z\"/></g>","hazard":"<g fill=\"#111\"><path d=\"M12 3 2 21h20Z\" fill=\"none\" stroke=\"#111\" stroke-width=\"2.3\" stroke-linejoin=\"round\"/><path d=\"M12 9v6\" fill=\"none\" stroke=\"#111\" stroke-width=\"2.6\" stroke-linecap=\"round\"/><circle cx=\"12\" cy=\"18\" r=\"1.2\"/></g>","public":"<g fill=\"#111\"><path d=\"M2 13h10v2H2zm0 4h10v2H2zm1 2h2v3H3zm6 0h2v3H9zm8-7h3v10h-3z\"/><path d=\"M18 2a4 4 0 0 0-4 4 4 4 0 0 0 0 7h8a4 4 0 0 0 0-7 4 4 0 0 0-4-4Z\"/></g>","animal":"<g fill=\"#111\"><ellipse cx=\"5\" cy=\"9\" rx=\"2.2\" ry=\"3\" transform=\"rotate(-25 5 9)\"/><ellipse cx=\"10\" cy=\"5\" rx=\"2.2\" ry=\"3\"/><ellipse cx=\"16\" cy=\"5\" rx=\"2.2\" ry=\"3\"/><ellipse cx=\"21\" cy=\"10\" rx=\"2.2\" ry=\"3\" transform=\"rotate(25 21 10)\"/><path d=\"M5 19c0-3 4-8 7-8s7 5 7 8c0 4-4 3-7 2-3 1-7 2-7-2Z\"/></g>","object":"<g fill=\"#111\"><path d=\"M4 2h9l4 4v4M4 2v18h5M8 7h4M8 11h3\" fill=\"none\" stroke=\"#111\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"m16 16-6 6-2-2 6-6Z\"/><circle cx=\"17\" cy=\"13\" r=\"5\"/><circle cx=\"18\" cy=\"12\" r=\"1.6\" fill=\"#fff\"/></g>","check":"<g fill=\"#111\"><path d=\"m4 12 5 5L20 6\" fill=\"none\" stroke=\"#111\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></g>"};
+	const iconMarkup = name => pinGlyphs[name] || pinGlyphs.neutral;
+    const pinBody = (category, resolved=false) => {
+        const key=resolved?'resolved':(categories[category]?category:'neutral');
+        if(config.pinDesigns?.[key]?.body)return config.pinDesigns[key].body;
+        const p=resolved?neutral:(categories[category]||neutral);
+        return '<path d="M24 58C19 52 3 37 3 23a21 21 0 1 1 42 0c0 14-16 29-21 35Z" fill="'+p.color+'" stroke="#fff" stroke-width="1.6"/><circle cx="24" cy="23" r="15.3" fill="#fff"/><g transform="translate(12 11)">'+iconMarkup(resolved?'check':p.icon)+'</g>';
+    };
+    const pinSvg = (categorySlug, selected=false, resolved=false) => {
+        const p=resolved?neutral:(categories[categorySlug]||neutral);
+        const width=selected?64:48,height=selected?78:60,tx=selected?8:0,ty=selected?4:0;
+        const halo=selected?'<circle cx="32" cy="27" r="29" fill="'+p.color+'" fill-opacity=".16"/>':'';
+        const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'">'+halo+'<g transform="translate('+tx+' '+ty+')">'+pinBody(categorySlug,resolved)+'</g></svg>';
+        return {url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(width,height),anchor:new google.maps.Point(24+tx,58+ty)};
+    };
 
 	const clusterSvg = (count) => {
 		const label = count > 99 ? '99+' : String(count);
@@ -167,15 +143,13 @@
 			width = 56; height = 68;
 			// The path terminates at (28,64); halo and state changes never move that tip.
 			svg = (active ? '<circle cx="28" cy="26" r="25" fill="' + palette.color + '" fill-opacity=".16"/>' : '')
-				+ '<path d="M28 64C23 57 9 43 9 27a19 19 0 1 1 38 0c0 16-14 30-19 37Z" fill="' + palette.color + '" stroke="' + palette.dark + '" stroke-width="1.5"/>'
-				+ '<circle cx="28" cy="27" r="13" fill="' + palette.dark + '" stroke="white" stroke-width="1.5"/>'
-				+ '<g transform="translate(16 15)">' + icon + '</g>';
+                + '<g transform="translate(4 6)">'+pinBody(category,resolved)+'</g>';
 			anchor = new google.maps.Point(28, 64);
 		} else {
 			width = 48; height = 48;
 			svg = (active ? '<circle cx="24" cy="24" r="23" fill="' + palette.color + '" fill-opacity=".18"/>' : '')
 				+ '<circle cx="24" cy="24" r="18" fill="' + palette.color + '" stroke="white" stroke-width="3"/>'
-				+ '<circle cx="24" cy="24" r="14" fill="' + palette.dark + '"/>'
+				+ '<circle cx="24" cy="24" r="14" fill="#fff"/>'
 				+ '<g transform="translate(12 12)">' + icon + '</g>';
 			anchor = new google.maps.Point(24, 24);
 		}
@@ -253,7 +227,7 @@
 			const medallion = document.createElement('span');
 			medallion.className = 'ba-event-card__media-category';
 			medallion.setAttribute('aria-hidden', 'true');
-			medallion.innerHTML = '<svg viewBox="0 0 24 24" focusable="false">' + iconMarkup(palette.icon) + '</svg>';
+			medallion.innerHTML = '<svg class="ba-pin-svg" viewBox="0 0 48 60" aria-hidden="true" focusable="false">'+pinBody(category,false)+'</svg>';
 			media.appendChild(medallion);
 			wrap.appendChild(media);
 		} else {

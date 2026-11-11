@@ -45,7 +45,7 @@ $categories = array(
 					<div class="ba-how-phone__speaker"></div>
 					<div class="ba-how-phone__map">
 						<span class="ba-how-road ba-how-road--a"></span><span class="ba-how-road ba-how-road--b"></span><span class="ba-how-road ba-how-road--c"></span>
-						<span class="ba-how-pin ba-how-pin--1">!</span><span class="ba-how-pin ba-how-pin--2">●</span><span class="ba-how-pin ba-how-pin--3">⌂</span><span class="ba-how-pin ba-how-pin--4">●</span>
+						<span class="ba-how-pin ba-how-pin--1"><?php echo badaround_pin_svg('pericoli'); ?></span><span class="ba-how-pin ba-how-pin--2"><?php echo badaround_pin_svg('veicoli'); ?></span><span class="ba-how-pin ba-how-pin--3"><?php echo badaround_pin_svg('case-e-attivita'); ?></span><span class="ba-how-pin ba-how-pin--4"><?php echo badaround_pin_svg('spazi-pubblici'); ?></span>
 						<div class="ba-how-preview"><strong>Evento segnalato</strong><span>Pubblicato dalla community</span></div>
 					</div>
 				</div>
@@ -109,7 +109,7 @@ $categories = array(
 				<p class="ba-how-note">La tua identità non viene resa pubblica.</p>
 				<a class="ba-button" href="<?php echo esc_url( $sentinel_url ); ?>">Attiva una Sentinella</a>
 			</div>
-			<div class="ba-how-sentinel__visual" aria-hidden="true"><span class="ba-how-sentinel__pin">⌖</span><span class="ba-how-sentinel__eye">◉</span></div>
+			<div class="ba-how-sentinel__visual" aria-hidden="true"><span class="ba-how-sentinel__pin"><?php echo badaround_pin_svg('neutral'); ?></span></div>
 		</div>
 	</section>
 

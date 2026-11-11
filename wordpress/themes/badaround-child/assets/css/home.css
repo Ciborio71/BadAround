@@ -408,3 +408,10 @@ a.ba-home-category-card:hover,a.ba-home-category-card:focus-visible { transform:
 .ba-home .ba-home-search .ba-button:is(:hover,:focus-visible),
 .ba-home .ba-home-position:is(:hover,:focus-visible):not(:disabled),
 .ba-home .ba-home-sentinel__copy>.ba-button:is(:hover,:focus-visible){background:#066f79;color:#fff}
+
+/* Unified pin artwork: outer slots retain their existing dimensions. */
+.ba-home-category-card .ba-home-category__pin{border:0;border-radius:0;background:transparent;transform:none;box-shadow:none}
+.ba-home-category-card .ba-home-category__pin .ba-pin-svg{width:64px;height:80px;transform:none;fill:initial;stroke:none;filter:drop-shadow(0 3px 4px #071a3824)}
+.ba-home-category-card .ba-home-category__pin.is-animal .ba-pin-svg{fill:initial;stroke:none}
+.ba-home-events .ba-event-card--home .ba-event-card__media-category{width:36px;height:45px;border:0;border-radius:0;background:none;box-shadow:none}
+.ba-home-events .ba-event-card--home .ba-event-card__media-category .ba-pin-svg{width:36px;height:45px;transform:none;fill:initial;stroke:none}

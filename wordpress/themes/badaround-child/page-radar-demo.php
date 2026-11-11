@@ -845,7 +845,7 @@ function focusLocation(position,address,save=true){
  const pos=position;
  if(!searchCircle)searchCircle=new google.maps.Circle({map,center:pos,radius:radiusMeters(),strokeColor:'#078e99',strokeWeight:2,strokeOpacity:.9,fillColor:'#0798a8',fillOpacity:.05});
  else searchCircle.setCenter(pos);
- if(!centerMarker)centerMarker=new google.maps.Marker({map,position:pos,title:'Centro della ricerca Radar (nessun evento)'});
+ if(!centerMarker)centerMarker=new google.maps.Marker({map,position:pos,title:'Centro della ricerca Radar (nessun evento)',icon:{url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(<?php echo wp_json_encode(badaround_pin_svg('neutral')); ?>),scaledSize:new google.maps.Size(40,50),anchor:new google.maps.Point(20,48.333)}});
  else centerMarker.setPosition(pos);
  searchCircle.setRadius(radiusMeters());searchCircle.setVisible(true);
  chosenCenter={lat:pos.lat instanceof Function?pos.lat():pos.lat,lng:pos.lng instanceof Function?pos.lng():pos.lng};
