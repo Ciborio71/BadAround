@@ -3,6 +3,7 @@ require __DIR__.'/test-ba-event-public-details.php';
 foreach(array('exact_point','approximate_area') as $mode){
     $id=$mode==='exact_point'?9350:9351;g5seed($id,$mode,$mode);
     $raw=json_decode($GLOBALS['private_fixture']['content_original'],true);
+    $raw['canonical']['consents']=array('truthfulness'=>true,'publication_rules'=>true,'terms'=>true,'privacy'=>true,'public_details_version'=>'public-details-v1');
     $raw['canonical']['location']['neighborhood_label']='Aurelio';
     $raw['canonical']['location']['neighborhood_source']='google_neighborhood';
     $raw['canonical']['location']['neighborhood_confirmed']=true;

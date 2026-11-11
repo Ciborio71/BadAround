@@ -74,8 +74,8 @@ $report_receipt = BadAround_Event_Dates::receipt_label(BadAround_Event_Dates::vi
 $seeking_witnesses=!empty($public_details['seeking_witnesses'])&&!in_array($event_status,array('resolved','closed','archived','expired'),true);
 $public_address=$public_details['address']??'';
 $public_neighborhood=$public_details['neighborhood']??'';
-if($public_neighborhood)$public_location.=', zona '.$public_neighborhood;
 if($public_address)$public_location=$public_address;
+if($public_neighborhood&&stripos($public_location,$public_neighborhood)===false)$public_location.=($public_location!==''?', zona ':'').$public_neighborhood;
 
 $content_text = trim( wp_strip_all_tags( get_post_field( 'post_content', $post_id ) ) );
 $has_content  = '' !== $content_text;

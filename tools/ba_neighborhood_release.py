@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guarded optional neighborhood proposal release."""
+"""Guarded optional neighborhood proposal release; verified snapshot tests."""
 from pathlib import Path
 import importlib.util,ftplib,ssl,os,json
 ROOT=Path(__file__).resolve().parents[1]
