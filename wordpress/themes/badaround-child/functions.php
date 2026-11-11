@@ -147,7 +147,7 @@ add_action( 'after_setup_theme', 'badaround_child_public_image_sizes' );
 function badaround_child_placeholder_url($category='') {
     $categories=array('veicoli','case-e-attivita','pericoli','spazi-pubblici','animali','oggetti-e-documenti');
     $suffix=in_array($category,$categories,true)?'-'.$category:'';
-    return get_stylesheet_directory_uri().'/assets/event-placeholder'.$suffix.'.svg?ver=2';
+    return get_stylesheet_directory_uri().'/assets/event-placeholder'.$suffix.'.svg?ver=3';
 }
 function badaround_child_event_category_slug($id){
     $terms=get_the_terms($id,'ba_tipo_evento');
