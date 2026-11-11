@@ -29,8 +29,9 @@ return (static function():bool {
             return @unserialize($raw,['allowed_classes'=>false]);
         };
         $ips=$load('badaround_identity_qa_ip_allowlist');
-        if (!is_array($ips) || !array_is_list($ips) || count($ips)!==1
-            || !is_string($ips[0]) || !filter_var($ips[0],FILTER_VALIDATE_IP))return false;
+        if (!is_array($ips) || !array_is_list($ips) || count($ips)<1 || count($ips)>16)return false;
+        foreach($ips as $ip)if(!is_string($ip)||!filter_var($ip,FILTER_VALIDATE_IP))return false;
+        if(count(array_unique($ips))!==count($ips))return false;
         // Use the server peer. Never trust forwarding headers or a form input.
         $peer=$_SERVER['REMOTE_ADDR']??null;
         if (!is_string($peer) || !in_array($peer,$ips,true))return false;

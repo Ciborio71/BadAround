@@ -15,7 +15,7 @@ if(($argv[1]??null)==='--worker') {
     define('DB_HOST',$host[1].':'.$port[1]);define('DB_NAME','ba_identity_ci');
     define('DB_USER',(string)getenv('BA_TEST_DB_USER'));define('DB_PASSWORD',(string)getenv('BA_TEST_DB_PASS'));
     $table_prefix='qa_cfg_';$mode=$argv[2];
-    $_SERVER['REMOTE_ADDR']=$mode==='deny'||$mode==='forged'?'203.0.113.43':'203.0.113.42';
+    $_SERVER['REMOTE_ADDR']=in_array($mode,['deny','forged','allow_second'],true)?'203.0.113.43':'203.0.113.42';
     if($mode==='forged')$_SERVER['HTTP_X_FORWARDED_FOR']='203.0.113.42';
     if($mode==='missing_peer')unset($_SERVER['REMOTE_ADDR']);
     if($mode==='existing_key')define('BADAROUND_IDENTITY_ROOT_SECRET',str_repeat('b',96));
@@ -76,10 +76,13 @@ try {
     cfgCheck($r['ok']===false && !$r['root_defined'] && count(array_filter($r['flags']))===0,
         'explicit disabled feature never overridden');
     $q=$db->prepare('UPDATE qa_cfg_options SET option_value=? WHERE option_name=?');
-    foreach([[],['*'],['203.0.113.42','203.0.113.43']] as $bad) {
+    foreach([[],['*'],['203.0.113.42','*'],['203.0.113.42','203.0.113.42'],array_fill(0,17,'203.0.113.42')] as $bad) {
         $reset();$q->execute([serialize($bad),'badaround_identity_qa_ip_allowlist']);$r=$run('allow');
         cfgCheck($r['ok']===false && !$r['root_defined'],'invalid or expanded peer list rejected');
     }
+    $reset();$q->execute([serialize(['203.0.113.42','203.0.113.43']),'badaround_identity_qa_ip_allowlist']);
+    foreach(['allow','allow_second'] as $mode)cfgCheck($run($mode)['ok']===true,'each explicit peer in bounded list is authorized');
+    cfgCheck($run('existing_key')['existing_key_preserved'],'multiple peers never rotate key');
     $reset();$q->execute([serialize(['other@example.org','tester@example.org']),'badaround_identity_qa_email_allowlist']);
     cfgCheck($run('allow')['ok']===false,'test configuration requires exactly one explicit inbox');
     $reset();$q->execute([serialize(['scope'=>'public','state'=>'owner_adopted']),'badaround_identity_qa_notice_adoption']);

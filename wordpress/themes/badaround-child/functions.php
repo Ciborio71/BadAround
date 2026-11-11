@@ -24,6 +24,13 @@ function badaround_child_maintenance_enabled() {
 	return true;
 }
 
+/** Same fully registered private QA boundary as the Identity REST flow. */
+function badaround_child_is_private_qa_request() {
+    return class_exists('BadAround_Identity_QA_Report_REST', false)
+        && BadAround_Identity_QA_Report_REST::enabled()
+        && false !== has_filter('rest_pre_dispatch', array('BadAround_Identity_WordPress_Private_Bootstrap','private_qa_maintenance_request'));
+}
+
 function badaround_child_is_maintenance_exempt() {
 	if ( ! badaround_child_maintenance_enabled() ) {
 		return true;
@@ -32,6 +39,8 @@ function badaround_child_is_maintenance_exempt() {
 	if ( is_user_logged_in() || is_admin() || wp_doing_ajax() || wp_doing_cron() ) {
 		return true;
 	}
+
+    if ( badaround_child_is_private_qa_request() ) { return true; }
 
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		return true;
@@ -42,6 +51,11 @@ function badaround_child_is_maintenance_exempt() {
 
 function badaround_child_render_maintenance() {
 	if ( badaround_child_is_maintenance_exempt() ) {
+        if ( badaround_child_is_private_qa_request() ) {
+            nocache_headers();
+            header('Cache-Control: private, no-store, max-age=0', true);
+            header('X-Robots-Tag: noindex, nofollow, noarchive', true);
+        }
 		return;
 	}
 
