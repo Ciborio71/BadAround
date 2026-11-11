@@ -122,7 +122,7 @@ function badaround_native_report_config() {
 	$fields = array();
 	$contract = BadAround_Report_Conditional_Contract::definition();
 	foreach ( BadAround_Report_Conditional_Contract::fields() as $path => $definition ) {
-		if ( in_array( $path, array( 'schema_version', 'submission_id', 'consents.version', 'consents.social_visibility_version', 'consents.public_details_version', 'media.items', 'location.place_id', 'authority.reference', 'location.public_location_request', 'location.public_location_request_version' ), true ) ) { continue; }
+		if ( in_array( $path, array( 'schema_version', 'submission_id', 'consents.version', 'consents.social_visibility_version', 'consents.public_details_version', 'location.neighborhood_label', 'location.neighborhood_source', 'location.neighborhood_confirmed', 'media.items', 'location.place_id', 'authority.reference', 'location.public_location_request', 'location.public_location_request_version' ), true ) ) { continue; }
 		$options = array();
 		foreach ( $definition['constraints']['enum'] ?? $definition['constraints']['item_enum'] ?? array() as $value ) {
 			$options[ $value ] = badaround_native_report_option_label( $path, $value );
@@ -215,6 +215,7 @@ function badaround_native_report_config() {
 		// Contract scaffolding only: no new visible control before GEO-PUBLIC-03.
 		'publicLocationRequest' => array( 'default' => 'exact_point', 'version' => BadAround_Public_Geo_Contract::RADIUS_REQUEST_VERSION, 'radii' => BadAround_Public_Geo_Contract::USER_RADII, 'defaultRadius' => 100 ),
 		'publicDetailsVersion' => 'public-details-v1',
+        'neighborhoodProposal' => true,
 		'consentVersion' => 'native-f16-v1', // Version of this QA presentation, not a claim of finalized legal policies.
 		'socialPreferenceVersion' => BadAround_Report_Schema::SOCIAL_PREFERENCE_VERSION,
 		'endpoint' => rest_url( BadAround_Native_Report_REST_Controller::REST_NAMESPACE . BadAround_Native_Report_REST_Controller::REST_ROUTE ),

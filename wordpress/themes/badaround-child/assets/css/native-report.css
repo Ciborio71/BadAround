@@ -739,3 +739,13 @@
  .ba-native .ba-native-place-danger-row select[data-native-input]{width:100%;max-width:100%;min-height:64px}
  .ba-native .ba-native-place-danger-row .ba-native-card-grid .ba-native-option-card{min-height:64px}
 }
+
+/* Optional neighborhood proposal: scoped to the wizard, no global width/font override. */
+.ba-native-neighborhood{margin:20px 0;padding:20px;border:1px solid #b8dfe3;border-radius:16px;background:#f2fbfb;min-width:0}
+.ba-native-neighborhood[hidden]{display:none}
+.ba-native-neighborhood input{width:100%;max-width:100%;box-sizing:border-box}
+.ba-native-neighborhood__actions{display:flex;flex-wrap:wrap;gap:12px}
+.ba-native-neighborhood__actions button{width:auto;flex:0 1 auto}
+.ba-native-neighborhood [aria-busy="true"]::before{content:"";display:inline-block;width:1em;height:1em;margin-right:.5em;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:ba-zone-spin .8s linear infinite;vertical-align:middle}
+@keyframes ba-zone-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.ba-native-neighborhood [aria-busy="true"]::before{animation:none}}

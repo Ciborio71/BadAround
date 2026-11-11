@@ -357,7 +357,7 @@ class BadAround_Publication_Service {
         if ( is_wp_error( $seo_projection ) ) { return $seo_projection; }
         $public_details=BadAround_Event_Public_Details::view($event_id);
         $approved_address=$public_details['address']??'';
-        $detail_text=implode(' ',array_column($public_details['facts']??[],'value'));
+        $detail_text=implode(' ',array_column($public_details['facts']??[],'value')).' '.($public_details['neighborhood']??'');
 		$public_text = strtolower( implode( "\n", array_filter( array(
 			$title,
             $detail_text,

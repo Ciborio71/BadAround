@@ -95,12 +95,12 @@ function deferred(){
   const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});
   return {promise,resolve,reject};
 }
-async function liveWidget(registry=territory,withMap=false){
+async function liveWidget(registry=territory,withMap=false,neighborhoodProposal=false){
   const h=setup(withMap),requests=[];
   class Widget extends h.win.HTMLElement {}
   h.win.customElements.define('fake-r6-place-widget',Widget);
   const adapter=h.win.BadAroundNative.SmartAddress;
-  const controller=adapter.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:registry},publicLocationRequest:{radii:[50,100,250,500,1000]}},h.model);
+  const controller=adapter.mount(h.container,{neighborhoodProposal,smartAddress:{key:'TEST_BROWSER_KEY',territories:registry},publicLocationRequest:{radii:[50,100,250,500,1000]}},h.model);
   h.button.click();
   h.win.google={maps:{importLibrary:async()=>({PlaceAutocompleteElement:class {constructor(){return h.win.document.createElement('fake-r6-place-widget');}}})}};
   h.win[new URL(h.win.document.querySelector('script[data-ba-smart-address]').src).searchParams.get('callback')]();
@@ -705,4 +705,35 @@ test('failed search loading retains the original input slot and the privacy orde
  assert(holder.hidden);h.button.click();assert.equal(h.button.hidden,false);
  h.win.document.querySelector('script[src*="maps.googleapis.com"]').onerror();await new Promise(resolve=>setImmediate(resolve));
  assert.equal(h.button.hidden,false);assert.equal(h.button.disabled,false);assert(holder.hidden);assert.equal(slot.nextElementSibling.id,'ba-smart-privacy');controller.dispose();h.dom.window.close();
+});
+
+const {resolveNeighborhood}=require('../wordpress/themes/badaround-child/assets/js/native-report/smart-address.js');
+test('neighborhood evidence is optional, unambiguous and excludes POI/town/unsafe labels',()=>{
+ assert.equal(resolveNeighborhood([ac('point_of_interest','Centro EUR')],'Roma'),null);
+ assert.equal(resolveNeighborhood([ac('sublocality','Roma')],'Roma'),null);
+ assert.equal(resolveNeighborhood([ac('neighborhood','Aurelio'),ac('neighborhood','EUR')],'Roma'),null);
+ assert.equal(resolveNeighborhood([ac('neighborhood','<b>Zona</b>')],'Roma'),null);
+ assert.equal(resolveNeighborhood([ac('sublocality_level_1','Municipio IX'),ac('sublocality_level_2','EUR')],'Roma').label,'EUR');
+ assert.equal(resolveNeighborhood([ac('neighborhood','Aurelio'),ac('sublocality','Municipio XIII')],'Roma').source,'google_neighborhood');
+ assert.equal(resolveNeighborhood([ac('neighborhood','Quarto Oggiaro')],'Milano').confirmed,false);
+});
+test('zone requires explicit confirmation; editing and new address clear it; locked form cannot change it',async()=>{
+ const h=await liveWidget(territory,false,true);const chosen=h.select();chosen.resolve();await new Promise(r=>setImmediate(r));
+ const box=h.container.querySelector('.ba-native-neighborhood'),input=box.querySelector('input'),buttons=box.querySelectorAll('button');
+ assert(!box.hidden);assert.equal(input.value,'Torvaianica');assert.equal(h.model.neighborhood.confirmed,false);
+ buttons[0].click();assert.equal(h.model.neighborhood.confirmed,true);
+ input.value='Altra zona';input.dispatchEvent(new h.win.Event('input',{bubbles:true}));assert.equal(h.model.neighborhood,null);
+ buttons[0].click();assert.equal(h.model.neighborhood.source,'user_proposed');
+ h.model.busy=true;h.controller.syncVisibility();assert(input.disabled);assert(buttons[0].disabled);buttons[1].click();assert.equal(h.model.neighborhood.label,'Altra zona');
+ h.model.busy=false;h.widget.dispatchEvent(new h.win.Event('input',{bubbles:true}));assert.equal(h.model.neighborhood,null);assert(box.hidden);
+ h.controller.reset();assert.equal(input.value,'');h.close();
+});
+test('late reverse geocode never overrides manual zone or newer address',async()=>{
+ const h=await liveWidget(territory,false,true),wait=deferred();
+ h.win.google.maps.importLibrary=async()=>({Geocoder:class{geocode(){return wait.promise;}}});
+ const chosen=h.select({components:[ac('country','Italia','IT'),ac('administrative_area_level_1','Lazio'),ac('administrative_area_level_2','Roma','RM'),ac('locality','Pomezia')]});chosen.resolve();await new Promise(r=>setImmediate(r));
+ const input=h.container.querySelector('#ba-neighborhood-label');assert.equal(h.container.querySelector('#ba-neighborhood-status').getAttribute('aria-busy'),'true');
+ input.value='Zona mia';input.dispatchEvent(new h.win.Event('input',{bubbles:true}));
+ wait.resolve({results:[{address_components:[{types:['country'],long_name:'Italia',short_name:'IT'},{types:['administrative_area_level_1'],long_name:'Lazio'},{types:['administrative_area_level_2'],long_name:'Roma',short_name:'RM'},{types:['locality'],long_name:'Pomezia'},{types:['neighborhood'],long_name:'Zona vecchia'}]}]});await new Promise(r=>setImmediate(r));
+ assert.equal(input.value,'Zona mia');assert.equal(h.model.neighborhood,null);assert(!h.container.querySelector('#ba-neighborhood-status').hasAttribute('aria-busy'));h.close();
 });

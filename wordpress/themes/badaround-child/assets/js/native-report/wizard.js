@@ -168,6 +168,11 @@
         const exposure=document.createElement('small');exposure.className='ba-native-review-help';
         exposure.textContent=model.publicLocationRequest==='exact_point'?'Saranno pubblicati l’indirizzo completo e il civico indicati, dopo la moderazione.':'L’indirizzo completo e il civico restano riservati: sarà pubblicata solo la zona approssimata.';detail.append(exposure);
         locationSection.querySelector('dl').append(term,detail);
+        if(config.neighborhoodProposal&&model.neighborhood?.confirmed){
+          const zoneTerm=document.createElement('dt');zoneTerm.textContent='Quartiere / zona proposta';
+          const zoneDetail=document.createElement('dd');zoneDetail.textContent=model.neighborhood.label+' — da verificare in moderazione';
+          locationSection.querySelector('dl').append(zoneTerm,zoneDetail);
+        }
       }
       // Follow the seven-step sequence even when schema fields are ordered differently.
       steps.forEach(key => { if (sections.has(key)) region.append(sections.get(key)); });

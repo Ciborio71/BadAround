@@ -120,3 +120,13 @@ Gli esempi rappresentano regole editoriali, non keyword con volumi misurati o pr
 ### Invarianti tecniche
 
 Slug e `public_url_id` invariati; nessuna riscrittura di titoli/URL di eventi storici già pubblicati; nessuna migrazione DB. `project()` restituisce ancora un DTO piatto di stringhe per il validator del Publication Service. La revisione editoriale è esposta separatamente come `copy_version=1.2` nell’anteprima riservata. JSON-LD resta WebPage + BreadcrumbList; non si aggiungono Event, identità, coordinate precise o date dedotte. Protezioni QA, noindex, moderazione, Identity e reset non vengono modificati.
+
+### 11 novembre 2026 — Quartiere / zona proposta e verificata (copy 1.3)
+
+L’intake V2 accetta un’estensione facoltativa e privata: `location.neighborhood_label` (100 caratteri Unicode, riga singola), `neighborhood_source` e `neighborhood_confirmed=true`. Il discriminatore V1 e la matrice condizionale congelata restano invariati. La proposta non crea termini territoriali né certifica confini amministrativi.
+
+Google può proporre un `neighborhood` oppure la `sublocality` più specifica disponibile. In assenza di componenti utilizzabili si tenta una sola geocodifica inversa sul punto selezionato, con controllo Italia/Regione/Provincia/Comune e timeout di sette secondi. Ambiguità e POI non diventano quartieri. Il campo è facoltativo: l’utente conferma, corregge o omette la zona. Modifiche all’indirizzo annullano la proposta e le risposte tardive non sovrascrivono gli interventi dell’utente.
+
+La pubblicazione iniziale non espone automaticamente la zona. Nel box amministrativo «Dettagli pubblici del wizard», dopo la pubblicazione dell’evento, il moderatore deve revisionare i dettagli e attestare separatamente la coerenza della zona con la posizione pubblica. Per l’area approssimata l’attestazione riguarda l’intera area visibile, senza restringerne la precisione. Il valore firmato è vincolato al digest della geometria pubblica verificata e viene nascosto quando questa cambia o la prova non è valida.
+
+Solo questa proiezione pubblica può arricchire indirizzo/riassunto, H1, title compatibile con il budget editoriale, description, heading geografico H2 e mappa H3, nonché `public_place_name` del feed pubblico (ricerca locale nelle card). Nessuna lettura del report privato nei consumer pubblici. URL, slug e public_url_id congelati restano invariati. Non sono introdotte landing territoriali automatiche né poligoni ufficiali dei quartieri.

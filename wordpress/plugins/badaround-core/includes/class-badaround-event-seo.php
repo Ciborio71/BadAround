@@ -1,9 +1,9 @@
 <?php
-/** SEO-EVENTS URL v1.1 / editorial copy v1.2: public fields only; no private report reads. */
+/** SEO-EVENTS URL v1.1 / editorial copy v1.3: public fields only; no private report reads. */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 final class BadAround_Event_SEO {
     const VERSION = '1.1'; // URL/activation contract stays compatible with published events.
-    const COPY_VERSION = '1.2';
+    const COPY_VERSION = '1.3';
     const CONTRACT = '_ba_seo_contract';
     const SLUG = '_ba_seo_slug';
     const URL_ID = '_ba_public_url_id';
@@ -142,9 +142,11 @@ final class BadAround_Event_SEO {
                 $zone=self::text($term->name);$zone_depth=count($chain);
             }
         }
+        $approved_zone=self::text($public_details['neighborhood']??'');
+        if($approved_zone!=='')$zone=$approved_zone;
         $street=self::public_street($public_details['address']??'');
         $area=$street!==''?$street:($zone!==''?'zona '.$zone:'');
-        $where=' a '.$municipality.($area!==''?', '.($street!==''?'in ':'').$area:'');
+        $where=' a '.$municipality.($area!==''?', '.($street!==''?'in ':'').$area:'').($street!==''&&$approved_zone!==''?', zona '.$approved_zone:'');
         $animal_types=array('dog'=>'cane','cat'=>'gatto','bird'=>'uccello','rabbit'=>'coniglio','livestock'=>'animale da allevamento','wild'=>'animale selvatico','reptile'=>'rettile');
         $animal=$animal_types[$public_details['facts']['animal.type']['value']??'']??'';
         $object_status=$public_details['facts']['object.status']['value']??'';
@@ -164,6 +166,7 @@ final class BadAround_Event_SEO {
         $title=self::choose_title(array(
             $state_prefix.$with_color.$where,
             $state_prefix.$title_base.$where,
+            $state_prefix.$title_base.' a '.$municipality.($zone!==''?', zona '.$zone:''),
             $state_prefix.$with_color.' a '.$municipality,
             $state_prefix.$title_base.' a '.$municipality,
         ));
@@ -178,6 +181,10 @@ final class BadAround_Event_SEO {
         }
         $sections=$copy['sections'];
         $sections+=array('address'=>'Indirizzo pubblico dell’evento','occurrence'=>'Data e periodo indicati nella segnalazione','map'=>'Mappa della zona di '.$municipality);
+        if($approved_zone!==''){
+            $sections['location']='Dove è avvenuto l’evento: zona '.$approved_zone.', '.$municipality;
+            $sections['map']='Mappa della zona '.$approved_zone.' a '.$municipality;
+        }
         if($headings_only)return $sections;
         return array('h1'=>$h1,'title'=>$title,'description'=>self::limit_text($intro.' Leggi i dettagli e gli aggiornamenti su BadAround.',190),
             'intro'=>$intro,'heading'=>$sections['facts'],'prose_heading'=>$sections['prose'],'location_heading'=>$sections['location'],

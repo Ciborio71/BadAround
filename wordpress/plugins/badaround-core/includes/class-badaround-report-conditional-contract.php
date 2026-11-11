@@ -25,6 +25,10 @@ class BadAround_Report_Conditional_Contract {
 					'privacy' => 'PRIVATE ONLY' === $field['classification'] ? 'private' : 'moderation-only', 'exposure' => 'private', 'destination' => 'ba_reports.content_original', 'public_projection' => 'none' );
 			}
 		}
+        // Optional neighborhood proposal, private until explicit public-detail review.
+        $out['location.neighborhood_label']=array('type'=>'string','required'=>false,'nullable'=>false,'conditions'=>array(),'constraints'=>array('max_length'=>100,'single_line'=>true),'privacy'=>'moderation-only','exposure'=>'private','destination'=>'ba_reports.content_original','public_projection'=>'explicit-public-detail-review');
+        $out['location.neighborhood_source']=array('type'=>'enum','required'=>false,'nullable'=>false,'conditions'=>array(),'constraints'=>array('enum'=>array('google_neighborhood','google_sublocality','user_proposed')),'privacy'=>'private','exposure'=>'private','destination'=>'ba_reports.content_original','public_projection'=>'none');
+        $out['location.neighborhood_confirmed']=array('type'=>'bool','required'=>false,'nullable'=>false,'conditions'=>array(),'constraints'=>array(),'privacy'=>'private','exposure'=>'private','destination'=>'ba_reports.content_original','public_projection'=>'none');
 		// Explicit technical overlay from NF-UX-02A; frozen v1 schema is untouched.
 		$out['schema_version']['constraints']['enum'] = array( 'badaround-report/v2' );
 		return $out;
@@ -54,7 +58,7 @@ class BadAround_Report_Conditional_Contract {
 	public static function active( $path, $report, $row, $seen = array() ) {
 		// NF-UX-02A technical envelope overlay: questionnaire visibility cannot
 		// strip the explicit discriminator or the existing global UUID identity.
-		if ( in_array( $path, array( 'schema_version', 'submission_id', 'consents.public_details_version' ), true ) ) { return true; }
+		if ( in_array( $path, array( 'schema_version', 'submission_id', 'consents.public_details_version', 'location.neighborhood_label', 'location.neighborhood_source', 'location.neighborhood_confirmed' ), true ) ) { return true; }
 		if ( ! $row || isset( $seen[ $path ] ) || ! isset( $row['fields'][ $path ] ) ) { return false; }
 		$seen[ $path ] = true; $rule = $row['fields'][ $path ];
 		if ( 'HIDDEN' === $rule['state'] ) { return false; }

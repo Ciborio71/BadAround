@@ -73,6 +73,8 @@ $event_when = BadAround_Event_Dates::occurrence_label($post_id, $public_details)
 $report_receipt = BadAround_Event_Dates::receipt_label(BadAround_Event_Dates::view($post_id));
 $seeking_witnesses=!empty($public_details['seeking_witnesses'])&&!in_array($event_status,array('resolved','closed','archived','expired'),true);
 $public_address=$public_details['address']??'';
+$public_neighborhood=$public_details['neighborhood']??'';
+if($public_neighborhood)$public_location.=', zona '.$public_neighborhood;
 if($public_address)$public_location=$public_address;
 
 $content_text = trim( wp_strip_all_tags( get_post_field( 'post_content', $post_id ) ) );
@@ -132,6 +134,7 @@ foreach(($public_details['facts']??array()) as $path=>$fact){
 }
 
 $summary_facts = array();
+if($public_neighborhood)$summary_facts['Quartiere / zona']=$public_neighborhood;
 if ( $category ) {
 	$summary_facts['Categoria'] = $category;
 }

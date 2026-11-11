@@ -20,7 +20,7 @@
     reset() {
       this.submissionId = uuid(this.crypto);
       this.publicLocationRadius = null;
-      this.values = {}; this.publicLocationRequest = this.config.publicLocationRequest?.default === 'approximate_area' ? 'approximate_area' : 'exact_point'; this.step = 0; this.busy = false; this.completed = false; this.snapshot = null;
+      this.neighborhood = null; this.values = {}; this.publicLocationRequest = this.config.publicLocationRequest?.default === 'approximate_area' ? 'approximate_area' : 'exact_point'; this.step = 0; this.busy = false; this.completed = false; this.snapshot = null;
       const defaults = {'location.public_precision':'area', 'reporter.public_identity_mode':'anonymous', 'reward.status':'none'};
       Object.entries(this.config.conditional ? {} : defaults).forEach(([path, value]) => {
         if (this.config.fields[path]?.constraints.enum?.includes(value)) this.values[path] = value;
@@ -136,6 +136,11 @@
         const request=radiusAware ? {mode:this.publicLocationRequest,...(this.publicLocationRequest==='approximate_area'?{radius_m:this.publicLocationRadius}:{})} : this.publicLocationRequest;
         setPath(out, 'location.public_location_request', request);
         setPath(out, 'location.public_location_request_version', this.config.publicLocationRequest.version);
+      }
+      if(this.config.neighborhoodProposal && this.neighborhood?.confirmed===true && this.neighborhood.label && out.location?.municipality){
+        setPath(out,'location.neighborhood_label',this.neighborhood.label);
+        setPath(out,'location.neighborhood_source',this.neighborhood.source);
+        setPath(out,'location.neighborhood_confirmed',true);
       }
       // Optional request, independent of the mandatory declaration and contact choices.
       if (['requested','declined'].includes(out.reporter?.social_visibility)) {

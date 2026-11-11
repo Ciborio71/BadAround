@@ -14,6 +14,7 @@ final class BadAround_Event_Public_Details {
         // A later privacy downgrade hides an earlier address immediately.
         $geo=BadAround_Public_Geo_Projection::public_view($id);
         if(!is_array($geo)||($geo['mode']??'')!=='exact_point')$data['address']='';
+        if(!empty($data['neighborhood']) && (!is_array($geo)||!hash_equals($data['neighborhood_geo_digest']??'',hash('sha256',wp_json_encode($geo)))))$data['neighborhood']='';
         return $data;
     }
     public static function address_authorized($id,$address){$p=self::view($id);return is_string($address)&&$address!==''&&($p['address']??'')===$address;}
@@ -69,12 +70,22 @@ final class BadAround_Event_Public_Details {
                 $identity_only=clone $r;$identity_only->full_plate='';$plate=self::safe($raw,$identity_only);
             }
         }
-        return ['plate'=>$plate,'publication_requested'=>$publication_requested,
+        $neighborhood='';
+        if(self::value($c,'location.neighborhood_confirmed')===true){
+            $v=self::value($c,'location.neighborhood_label');
+            if(is_string($v)&&preg_match_all('/./us',$v)<=100&&!preg_match('/[\r\n@<>]|https?:|\+?\d[\d .-]{7,}\d|\b[A-Z]{2}\s?\d{3}\s?[A-Z]{2}\b|^(?:via|viale|piazza|corso|vicolo)\s/ui',$v)){
+                $neighborhood=self::safe($v,$r);
+                if($neighborhood===(string)self::value($c,'location.municipality')||($r->exact_address!==''&&stripos($neighborhood,$r->exact_address)!==false))$neighborhood='';
+            }
+        }
+        return ['neighborhood'=>'','neighborhood_proposal'=>$neighborhood,
+            'neighborhood_source'=>self::value($c,'location.neighborhood_source')??'',
+            'plate'=>$plate,'publication_requested'=>$publication_requested,
             'address_requested'=>$publication_requested && BadAround_Public_Geo_Contract::request_mode($c['location']??[])==='exact_point',
             'facts'=>$facts,'time'=>$time,'seeking_witnesses'=>self::value($c,'witness.status')==='seeking',
             'address'=>'','source_hash'=>hash('sha256',$r->content_original),'address_available'=>trim((string)$r->exact_address)!==''];
     }
-    public static function approve($id,$expected,$include_address=false,$attested=false,$reviewed_text=false){
+    public static function approve($id,$expected,$include_address=false,$attested=false,$reviewed_text=false,$neighborhood_attested=false){
         if(!self::permitted($id)||get_post_type($id)!=='ba_evento')return new WP_Error('ba_detail_forbidden','Operazione non autorizzata.',['status'=>403]);
         if(get_post_status($id)!=='publish'||get_post_meta($id,'_ba_moderation_status',true)!=='published')return new WP_Error('ba_detail_not_published','Pubblicare prima tramite il flusso di moderazione.',['status'=>409]);
         $p=self::candidate($id,$reviewed_text);if(is_wp_error($p))return $p;
@@ -89,8 +100,13 @@ final class BadAround_Event_Public_Details {
             $r=self::report($id);$p['address']=self::safe($r->exact_address,$r);
             if($p['address']==='')return new WP_Error('ba_detail_address_invalid','Indirizzo non pubblicabile.',['status'=>409]);
         }
+        if($reviewed_text && $neighborhood_attested && $p['neighborhood_proposal']!==''){
+            if(!is_array($geo)||!in_array($geo['mode']??'',array('exact_point','approximate_area'),true))return new WP_Error('ba_detail_neighborhood_precision','La precisione pubblica non consente questa zona.');
+            $p['neighborhood']=$p['neighborhood_proposal'];
+            $p['neighborhood_geo_digest']=hash('sha256',wp_json_encode($geo));
+        }
         if($p['publication_requested'])$p['publication_policy']='public-details-v1';
-        unset($p['address_available'],$p['publication_requested'],$p['address_requested']);
+        unset($p['address_available'],$p['publication_requested'],$p['address_requested'],$p['neighborhood_proposal'],$p['neighborhood_source']);
         if($p['plate']==='')unset($p['plate']);
         $stored=['data'=>$p,'seal'=>self::seal($id,$p)];
         $result=(new BadAround_Publication_Service())->apply_public_details($id,$stored,$p['source_hash']);
@@ -109,7 +125,7 @@ final class BadAround_Event_Public_Details {
             if($p['address']==='')return new WP_Error('ba_detail_address_invalid','Verificare l’indirizzo destinato alla pubblicazione.');
         }
         $p['publication_policy']='public-details-v1';
-        unset($p['address_available'],$p['publication_requested'],$p['address_requested']);
+        unset($p['address_available'],$p['publication_requested'],$p['address_requested'],$p['neighborhood_proposal'],$p['neighborhood_source']);
         if($p['plate']==='')unset($p['plate']);
         return ['data'=>$p,'seal'=>self::seal($id,$p)];
     }
@@ -134,7 +150,7 @@ final class BadAround_Event_Public_Details {
         add_action('add_meta_boxes_ba_evento',static function(){add_meta_box('ba-public-details','Dettagli pubblici del wizard',[__CLASS__,'box'],'ba_evento','normal','default');});
         add_action('admin_post_ba_public_details',static function(){
             $id=absint($_POST['event_id']??0);check_admin_referer('ba_public_details_'.$id);
-            $result=self::approve($id,sanitize_text_field(wp_unslash($_POST['source_hash']??'')),isset($_POST['include_address']),isset($_POST['address_attested']),isset($_POST['reviewed_text']));
+            $result=self::approve($id,sanitize_text_field(wp_unslash($_POST['source_hash']??'')),isset($_POST['include_address']),isset($_POST['address_attested']),isset($_POST['reviewed_text']),isset($_POST['neighborhood_attested']));
             if(is_wp_error($result))wp_die(esc_html($result->get_error_message()));
             wp_safe_redirect(get_edit_post_link($id,'raw'));exit;
         });
@@ -142,7 +158,7 @@ final class BadAround_Event_Public_Details {
             'methods'=>['GET','POST'],'permission_callback'=>static function($r){return self::permitted((int)$r['id']);},
             'callback'=>static function($r){
                 $id=(int)$r['id'];$body=$r->get_json_params();
-                $data=$r->get_method()==='GET'?['candidate'=>self::candidate($id,true),'public'=>self::view($id)]:self::approve($id,$body['source_hash']??null,($body['include_address']??false)===true,($body['address_attested']??false)===true,($body['reviewed_text']??false)===true);
+                $data=$r->get_method()==='GET'?['candidate'=>self::candidate($id,true),'public'=>self::view($id)]:self::approve($id,$body['source_hash']??null,($body['include_address']??false)===true,($body['address_attested']??false)===true,($body['reviewed_text']??false)===true,($body['neighborhood_attested']??false)===true);
                 if(is_wp_error($data))return $data;
                 if($r->get_method()==='GET'&&$r->get_param('render')==='1')$data['public_html']=self::render_preview($id);
                 $response=new WP_REST_Response($data,200);$response->header('Cache-Control','private, no-store');return $response;
@@ -154,11 +170,13 @@ final class BadAround_Event_Public_Details {
         echo '<p>La scheda pubblica include i dati strutturati pertinenti e l’eventuale ricerca testimoni. I nuovi report con dichiarazione di pubblicazione mostrano la targa e, con Punto esatto, l’indirizzo completo. I report precedenti e i testi descrittivi richiedono una revisione esplicita.</p>';
         foreach($p['facts'] as $fact)echo '<p><strong>'.esc_html($fact['label']).':</strong> '.esc_html($fact['value']).'</p>';
         echo '<p>'.($p['seeking_witnesses']?'Si cercano testimoni.':'Nessuna ricerca testimoni indicata.').'</p>';
+        if($p['neighborhood_proposal']!=='')echo '<p><strong>Quartiere/zona proposto:</strong> '.esc_html($p['neighborhood_proposal']).' — '.esc_html($p['neighborhood_source']).'. Proposta dell’autore: non è una certificazione dei confini ufficiali.</p>';
         if(get_post_status($post->ID)!=='publish'){echo '<p>Pubblica prima l’evento; i dati strutturati saranno proiettati automaticamente.</p>';return;}
         // Separate form avoids nesting a form inside the Classic Editor post form.
         $form='ba-detail-form-'.$post->ID;
         echo '<input type="hidden" form="'.esc_attr($form).'" name="action" value="ba_public_details"><input type="hidden" form="'.esc_attr($form).'" name="event_id" value="'.(int)$post->ID.'"><input type="hidden" form="'.esc_attr($form).'" name="source_hash" value="'.esc_attr($p['source_hash']).'"><input type="hidden" form="'.esc_attr($form).'" name="_wpnonce" value="'.esc_attr(wp_create_nonce('ba_public_details_'.$post->ID)).'">';
         echo '<p><label><input form="'.esc_attr($form).'" type="checkbox" name="reviewed_text"> Ho revisionato i dettagli descrittivi sopra e ne autorizzo la pubblicazione.</label></p>';
+        if($p['neighborhood_proposal']!=='')echo '<p><label><input form="'.esc_attr($form).'" type="checkbox" name="neighborhood_attested"> Ho verificato la zona proposta rispetto alla posizione pubblica. Se approssimata, la zona è coerente con tutta l’area visibile e non ne restringe la precisione. Pubblicare solo insieme alla revisione dei dettagli descrittivi.</label></p>';
         if($p['address_available'])echo '<p><label><input form="'.esc_attr($form).'" type="checkbox" name="include_address"> Pubblica l’indirizzo completo del report, compreso il civico.</label><br><label><input form="'.esc_attr($form).'" type="checkbox" name="address_attested"> Ho verificato che l’autore abbia destinato questo indirizzo alla pubblicazione. Disponibile solo con posizione pubblica esatta.</label></p>';
         echo '<button form="'.esc_attr($form).'" class="button" type="submit">Approva i dettagli pubblici</button>';
         add_action('admin_footer',static function()use($form){echo '<form id="'.esc_attr($form).'" method="post" action="'.esc_url(admin_url('admin-post.php')).'"></form>';});
