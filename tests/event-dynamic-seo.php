@@ -74,3 +74,23 @@ g5seed(9662);$GLOBALS['term_meta'][11]['_ba_canonical_event_key']='vehicle_stole
 $x=BadAround_Event_SEO::project(9662);check(preg_match('//u',$x['title'])===1&&preg_match_all('/./us',$x['title'])<=90&&preg_match_all('/./us',$x['description'])<=190,'bounded Unicode-safe metadata with long attributes');
 check(str_contains($x['h1'],'CX-5'),'H1 retains full model identity independently of compact Title');
 echo "EVENT_DYNAMIC_SEO_SUITE_PASS\n";
+
+dynamic_fixture(9670,'exact_point','property_attempted_breakin');
+$raw=json_decode($GLOBALS['private_fixture']['content_original'],true);
+$raw['canonical']['event']['category']='property';$raw['canonical']['location']['place_type']='private_home';
+$GLOBALS['private_fixture']['content_original']=json_encode($raw);
+$before=BadAround_Event_SEO::project(9670);
+check(!str_contains($before['h1'],'abitazione privata'),'private place never enriches draft SEO');
+check($svc->publish(9670)===true,'property fixture publishes through owning service');
+$candidate=BadAround_Event_Public_Details::candidate(9670);
+check(!is_wp_error(BadAround_Event_Public_Details::approve(9670,$candidate['source_hash'])),'public place approved through moderation');
+$x=BadAround_Event_SEO::project(9670);$h=BadAround_Event_SEO::section_headings(9670);
+check(str_contains($x['h1'],'Tentato furto o scasso in abitazione privata segnalato a Pomezia'),'approved place enriches property H1');
+check(str_contains($x['title'],'abitazione privata')&&str_contains($x['description'],'abitazione privata'),'approved place enriches metadata');
+check(str_contains($h['facts'],'abitazione privata')&&$h['facts']!==$h['photos'],'place-aware sections have distinct purposes');
+check($x['slug']===$before['slug'],'place enrichment preserves URL formula');
+$sealed=$GLOBALS['meta'][9670][BadAround_Event_Public_Details::META];
+$GLOBALS['meta'][9670][BadAround_Event_Public_Details::META]['data']['facts']['location.place_type']['value']='office';
+check(!str_contains(BadAround_Event_SEO::project(9670)['h1'],'ufficio'),'tampered place excluded from SEO');
+$GLOBALS['meta'][9670][BadAround_Event_Public_Details::META]=$sealed;
+echo "CONTEXTUAL_PLACE_SEO_PASS\n";

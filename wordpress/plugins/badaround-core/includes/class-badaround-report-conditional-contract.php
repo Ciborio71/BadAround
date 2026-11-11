@@ -12,10 +12,44 @@ class BadAround_Report_Conditional_Contract {
 			if ( ! is_string( $bytes ) || ! hash_equals( self::SHA256, hash( 'sha256', $bytes ) ) ) { throw new RuntimeException( 'Conditional contract integrity failed.' ); }
 			self::$contract = json_decode( $bytes, true, 512, JSON_THROW_ON_ERROR );
 			self::$rows = array();
-			foreach ( self::$contract['matrix'] as $row ) { self::$rows[ $row['subtype'] ] = $row; }
+			// Versioned contextual overlay; the hash-pinned v1 artifact stays unchanged.
+            foreach ( self::$contract['matrix'] as &$row ) {
+                $row['fields']['location.place_type']['constraints_override']['enum']=self::place_options($row['category'],$row['subtype']);
+                self::$rows[$row['subtype']]=$row;
+            }
+            unset($row);
 		}
 		return self::$contract;
 	}
+    public static function place_options($category,$subtype) {
+        $groups=array(
+            'vehicle'=>array('road_sidewalk','public_parking','private_parking','garage_outbuilding','condominium','industrial_work_area'),
+            'property'=>array('private_home','condominium','commercial_premises','office','warehouse','garage_outbuilding','public_building'),
+            'hazard'=>array('road_sidewalk','park_green','public_parking','condominium','industrial_work_area','rural_natural'),
+            'public_space'=>array('road_sidewalk','public_parking','park_green','public_transport','public_building','rural_natural'),
+            'animal'=>array('road_sidewalk','park_green','rural_natural','private_home','condominium','public_parking'),
+            'item_document'=>array('road_sidewalk','public_transport','commercial_premises','public_building','park_green','public_parking','office')
+        );
+        $specific=array(
+            'vehicle_hit_and_run'=>array('road_sidewalk','public_parking','private_parking','industrial_work_area'),
+            'hazard_falling_element'=>array('road_sidewalk','park_green','rural_natural','condominium','private_parking','industrial_work_area'),
+            'hazard_road_disruption'=>array('road_sidewalk','public_parking','private_parking','rural_natural','industrial_work_area'),
+            'hazard_road_obstruction'=>array('road_sidewalk','public_parking','private_parking','industrial_work_area'),
+            'hazard_flood_or_ice'=>array('road_sidewalk','public_parking','private_parking','condominium','park_green','rural_natural'),
+            'hazard_fire_or_smoke'=>array('road_sidewalk','private_home','condominium','commercial_premises','industrial_work_area','rural_natural','park_green'),
+            'civic_surface_damage'=>array('road_sidewalk','public_parking','park_green','public_transport'),
+            'civic_road_signage'=>array('road_sidewalk','public_parking','public_transport'),
+            'civic_public_lighting'=>array('road_sidewalk','public_parking','park_green','public_building'),
+            'civic_public_furniture_green'=>array('park_green','road_sidewalk','public_parking','public_building'),
+        );
+        return array_merge($specific[$subtype]??$groups[$category]??array(),array('other'));
+    }
+    public static function place_question($category,$subtype) {
+        if($category==='vehicle')return $subtype==='vehicle_hit_and_run'?'In quale tipo di luogo è avvenuto l’incidente?':'Dove si trovava il veicolo?';
+        if($category==='property')return 'Quale tipo di immobile o luogo è interessato?';
+        if($category==='animal')return $subtype==='animal_missing'?'Dove è stato visto l’animale l’ultima volta?':'In quale tipo di luogo si trova l’animale?';
+        return $category==='item_document'?'In quale tipo di luogo è stato smarrito o trovato l’oggetto?':'Quale tipo di luogo è interessato?';
+    }
 	public static function fields() {
 		$c = self::definition();
 		$out = BadAround_Report_Schema::fields();

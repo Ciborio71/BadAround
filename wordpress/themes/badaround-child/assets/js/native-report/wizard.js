@@ -486,6 +486,11 @@
       subtype.value = previous;
       wrappers.forEach(wrapper => {
         const path = wrapper.dataset.nativeField, field = config.fields[path], active = model.active(path);
+        if(path==='location.place_type'){
+          const label=wrapper.querySelector('label');
+          const copyNode=label&&[...label.childNodes].find(node=>node.nodeType===3);
+          if(copyNode)copyNode.textContent=config.conditional?.profiles[model.effective('event.subtype')]?.placeQuestion||field.label;
+        }
         if (path === 'damage.status') {
           const theft = model.effective('event.subtype') === 'vehicle_stolen';
           const label = wrapper.querySelector('label');

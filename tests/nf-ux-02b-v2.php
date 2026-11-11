@@ -13,7 +13,7 @@ function v2fixture( $subtype = 'animal_missing' ) {
 	$c = BadAround_Report_Conditional_Contract::definition();
 	foreach ( $c['regression_oracle'] as $test ) {
 		if ( $test['subtype'] === $subtype ) {
-			$p = f13_fixture();
+			$p = f13_fixture(); unset($p['location']['place_type']);
 			foreach ( $test['minimal_user_values'] as $path => $value ) { v2put( $p, $path, $value ); }
 			$p['schema_version'] = 'badaround-report/v2'; $p['submission_id'] = BadAround_Native_Media_Config::new_uuid();
 			return $p;
@@ -153,3 +153,15 @@ foreach($stored as $item){$c=json_decode($item['content_original'],true);if(($c[
 v2check($found,'stored canonical envelope retains publication declaration');
 echo "NF_UX_02B_V2=PASS assertions={$checks} matrix_assignments={$assignments} oracle_cases=33 specs=8\n";
 rmdir( $root ); rmdir( $public );
+
+foreach(BadAround_Report_Conditional_Contract::definition()['matrix'] as $row){
+ $p=v2fixture($row['subtype']);$allowed=$row['fields']['location.place_type']['constraints_override']['enum'];
+ v2check(count($allowed)<=8 && in_array('other',$allowed,true),'bounded contextual choices '.$row['subtype']);
+ foreach($allowed as $place){if($place==='other')continue;$p['location']['place_type']=$place;
+  v2check(!is_wp_error(BadAround_Report_Version_Registry::prepare($p)),'contextual place accepted '.$row['subtype'].' '.$place);}
+}
+$p=v2fixture('property_attempted_breakin');$p['location']['place_type']='park_green';
+v2check(is_wp_error(BadAround_Report_Version_Registry::prepare($p)),'incompatible property place rejected by server');
+$p=v2fixture('hazard_road_obstruction');$p['location']['place_type']='private_home';
+v2check(is_wp_error(BadAround_Report_Version_Registry::prepare($p)),'incompatible road obstruction place rejected by server');
+echo "CONTEXTUAL_PLACE_VALIDATION_PASS\n";

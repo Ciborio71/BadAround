@@ -196,11 +196,12 @@ function badaround_native_report_config() {
 	// Presentation projection only: no storage destinations, privacy internals or test oracle.
 	$profiles = array();
 	foreach ( $contract['matrix'] as $row ) {
-		$profiles[ $row['subtype'] ] = array( 'category' => $row['category'], 'fields' => $row['fields'] );
+		$profiles[ $row['subtype'] ] = array( 'category' => $row['category'], 'fields' => $row['fields'], 'placeQuestion' => BadAround_Report_Conditional_Contract::place_question($row['category'],$row['subtype']) );
 	}
 	$ordered_fields = array();
 	foreach ( $fields as $path => $field ) {
 		if ( isset( $field['sourceField'] ) ) { continue; }
+		if($path==='location.place_type')$field['options']['other']='Altro luogo';
 		$ordered_fields[ $path ] = $field;
 		foreach ( $fields as $child => $spec ) {
 			if ( ( $spec['sourceField'] ?? null ) === $path ) { $ordered_fields[ $child ] = $spec; }
@@ -208,6 +209,7 @@ function badaround_native_report_config() {
 	}
 	$fields = $ordered_fields;
 	$config = array(
+		'placeContextVersion' => '1.0',
 		'conditional' => array( 'sha256' => BadAround_Report_Conditional_Contract::SHA256, 'profiles' => $profiles ),
 		'emergencyNotice' => array( 'subtypes' => $emergency_subtypes, 'dangerValues' => array_values( array_unique( $danger_values ) ) ),
 		'smartAddress' => $smart_key ? array( 'key' => $smart_key, 'territories' => $territories, 'country' => 'IT' ) : null,

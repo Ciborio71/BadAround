@@ -59,7 +59,7 @@
       do {
         changed = false;
         for (const path of Object.keys(this.values)) {
-          if (!this.active(path) || (path === 'event.subtype' && this.effective(path) === undefined)) {
+          if (!this.active(path) || (path === 'event.subtype' && this.effective(path) === undefined) || (path === 'location.place_type' && this.constraints(path).enum && !this.constraints(path).enum.includes(this.values[path]))) {
             delete this.values[path]; changed = true;
           }
         }
