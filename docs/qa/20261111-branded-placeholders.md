@@ -5,3 +5,7 @@ Replaced the generic camera and category-only symbols with compact original SVG 
 Existing shared card, Home helper, map previews/list and compact detail fallback use the same filenames. URL version changed to 3 to invalidate caches. The existing 120x80 detail image reservation remains unchanged.
 
 Verified rendered six-category montage and local passive SVG tests: no scripts, image embeds, links or foreignObject; all files below 4 KiB. File size budget updated to account for the map/pin artwork while staying lightweight. Existing public-gallery safety suite remains required before guarded release.
+
+## Verified release
+Runtime ab7004b7af7a41bc3141de013dbf29c8c94d1d57. Guarded production release PASS: https://github.com/Ciborio71/BadAround/actions/runs/43072437643
+Eight file hashes verified after deployment. PHP syntax, public-gallery safety suite and three passive asset/contrast tests PASS. Native live source confirms placeholder URL version 3. All six renders visually inspected as a montage. No event, attachment, private media, slug or social record changes.
