@@ -44,6 +44,11 @@ final class BadAround_Identity_WordPress_Session_REST {
         return defined('BADAROUND_IDENTITY_LOGIN_ENABLED')
             && BADAROUND_IDENTITY_LOGIN_ENABLED===true;
     }
+    /** Read-only server rendering; never exposes bearer, identity or CSRF data. */
+    public function authenticated():bool {
+        return self::enabled() && function_exists('is_ssl') && is_ssl()===true
+            && $this->active_secret(time())!==null;
+    }
     private function accepted($request):bool {
         if (!self::enabled() || !function_exists('is_ssl') || is_ssl()!==true
             || !is_object($request) || !method_exists($request,'get_header')) {

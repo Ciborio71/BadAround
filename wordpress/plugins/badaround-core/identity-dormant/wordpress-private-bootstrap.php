@@ -136,6 +136,7 @@ final class BadAround_Identity_WordPress_Private_Bootstrap {
             $activityApi->register_hooks();
             $community->register_hooks();
             $review->register_hooks();
+            BadAround_Identity_WordPress_Portal::bind_session_status([$sessionApi,'authenticated']);
             BadAround_Identity_WordPress_Portal::register_hooks();
             BadAround_Identity_WordPress_Comment_Form::register_hooks();
             // Community authentication has its own cookie and CSRF checks.

@@ -11,6 +11,16 @@ require_once __DIR__.'/wordpress-privacy-notice.php';
 
 final class BadAround_Identity_WordPress_Portal {
     public const SHORTCODE='badaround_identity_portal';
+    private static ?Closure $sessionStatus=null;
+
+    public static function bind_session_status(callable $reader):void {
+        self::$sessionStatus=Closure::fromCallable($reader);
+    }
+    public static function account_authenticated():bool {
+        if (!self::enabled() || self::$sessionStatus===null)return false;
+        try {return (self::$sessionStatus)()===true;}
+        catch (Throwable) {return false;}
+    }
 
     public static function enabled():bool {
         if (!defined('BADAROUND_IDENTITY_PORTAL_ENABLED')
@@ -36,7 +46,7 @@ final class BadAround_Identity_WordPress_Portal {
     public static function enqueue_feedback():void {
         if (!self::enabled() || !defined('BADAROUND_CORE_FILE')
             || !function_exists('wp_enqueue_style') || !function_exists('plugins_url'))return;
-        wp_enqueue_script('badaround-identity-access',plugins_url('identity-dormant/identity-access.js',BADAROUND_CORE_FILE),[],'1.1.0',true);
+        wp_enqueue_script('badaround-identity-access',plugins_url('identity-dormant/identity-access.js',BADAROUND_CORE_FILE),[],'1.1.1',true);
         wp_enqueue_style('badaround-identity-feedback',
             plugins_url('identity-dormant/identity-feedback.css',BADAROUND_CORE_FILE),[],'1.1.0');
     }

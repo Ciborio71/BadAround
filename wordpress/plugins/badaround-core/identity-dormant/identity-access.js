@@ -15,7 +15,7 @@
   }
   function updateSession(authenticated) {
     generation++;
-    document.querySelectorAll('[data-ba-account-link]').forEach(a=>{a.textContent=authenticated?'Il mio profilo':'Accedi';});
+    document.querySelectorAll('[data-ba-account-link]').forEach(a=>{a.textContent=authenticated?'Il mio profilo':'Accedi';a.dataset.baAccountState=authenticated?'authenticated':'anonymous';});
     window.dispatchEvent(new CustomEvent('ba-identity-session',{detail:{authenticated}}));
   }
   function mount(host,{profile=null,onVerified=()=>{},onCancel=null}={}) {

@@ -3,10 +3,10 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),{JSDOM}=r
 const source=fs.readFileSync(__dirname+'/../wordpress/plugins/badaround-core/identity-dormant/identity-access.js','utf8');
 const tick=()=>new Promise(r=>setImmediate(r));
 const json=(data,status=200)=>({ok:status>=200&&status<300,status,json:async()=>data});
-function setup(fetcher){
+function setup(fetcher,label='Accedi'){
  const dom=new JSDOM('<a data-ba-account-link>Accedi</a><div id="entry"></div>',{url:'https://badaround.it/segnala-un-evento/',runScripts:'outside-only'}),w=dom.window;
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};
- w.fetch=fetcher;w.eval(source);return dom;
+ w.document.querySelector('[data-ba-account-link]').textContent=label;w.fetch=fetcher;w.eval(source);return dom;
 }
 test('wizard authenticates at final confirmation with one six digit code, matching email and no storage',async()=>{
  const calls=[];let authenticated=false;
@@ -104,4 +104,19 @@ test('resend cooldown expires, shows its own spinner and clears the previous cod
   form.elements.code.value='123456';resend.click();assert(resend.classList.contains('is-loading'));assert.equal(resend.textContent,'Invio del nuovo codice…');assert.equal(deliveries,2);
   deliver(json({state:'code_sent',challenge_id:'b'.repeat(32)}));await tick();await tick();assert(!resend.classList.contains('is-loading'));assert(resend.disabled);assert.match(resend.textContent,/Nuovo codice tra/);assert.equal(form.elements.code.value,'');
  }finally{dom.window.close();}
+});
+
+test('server-rendered profile stays visible during delayed session check and expired sessions reconcile',async()=>{
+ let resolve;const dom=setup(()=>new Promise(r=>{resolve=r;}),'Il mio profilo'),w=dom.window;
+ assert.equal(w.document.querySelector('a').textContent,'Il mio profilo');await tick();
+ assert.equal(w.document.querySelector('a').textContent,'Il mio profilo');
+ resolve(json({authenticated:false}));await tick();
+ assert.equal(w.document.querySelector('a').textContent,'Accedi');
+ assert.equal(w.document.querySelector('a').dataset.baAccountState,'anonymous');dom.window.close();
+});
+test('delayed initial anonymous response cannot overwrite newer verified authentication',async()=>{
+ let resolve;const dom=setup(()=>new Promise(r=>{resolve=r;})),w=dom.window;
+ w.BadAroundAccess.updateSession(true);resolve(json({authenticated:false}));await tick();
+ assert.equal(w.document.querySelector('a').textContent,'Il mio profilo');
+ assert.equal(w.document.querySelector('a').dataset.baAccountState,'authenticated');dom.window.close();
 });

@@ -44,9 +44,18 @@ portal_assert(str_contains($html,'data-ba-access-entry') && str_contains($html,'
 portal_assert(str_contains($html,'data-ba-logout') && str_contains($html,'data-ba-activity')
     && str_contains($html,'data-ba-activity-list') && str_contains($html,'data-ba-portal-title')
     && count($GLOBALS['portal_enqueue'])===1,'personal dashboard and dedicated script retained');
+portal_assert(!BadAround_Identity_WordPress_Portal::account_authenticated(),'no reader means anonymous');
+BadAround_Identity_WordPress_Portal::bind_session_status(fn()=>true);
+portal_assert(BadAround_Identity_WordPress_Portal::account_authenticated(),'verified server reader renders profile');
+BadAround_Identity_WordPress_Portal::bind_session_status(fn()=>false);
+portal_assert(!BadAround_Identity_WordPress_Portal::account_authenticated(),'anonymous server reader renders access');
+BadAround_Identity_WordPress_Portal::bind_session_status(fn()=>throw new RuntimeException('unavailable'));
+portal_assert(!BadAround_Identity_WordPress_Portal::account_authenticated(),'reader errors fail closed');
+BadAround_Identity_WordPress_Portal::bind_session_status(fn()=>true);
 $GLOBALS['portal_page']->post_modified_gmt='2026-11-04 01:00:00';
 portal_assert(!BadAround_Identity_WordPress_Portal::enabled(),
     'privacy document change immediately disables portal');
+portal_assert(!BadAround_Identity_WordPress_Portal::account_authenticated(),'privacy gates override authenticated reader');
 $_SERVER['REMOTE_ADDR']='203.0.113.100';
 portal_assert(BadAround_Identity_WordPress_Portal::render()==='',
     'public visitor cannot render private portal');
