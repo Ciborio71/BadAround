@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guarded navbar session rendering; authentication semantics unchanged."""
+"""Guarded navbar session rendering; contextual location and public editorial projection."""
 from pathlib import Path
 import importlib.util,ftplib,ssl,os,json
 ROOT=Path(__file__).resolve().parents[1]
@@ -20,3 +20,5 @@ def main():
         try:ftp.quit()
         except ftplib.all_errors:ftp.close()
 if __name__=='__main__':main()
+
+# Retry after aligning existing regression assertions with approved runtime overlays.

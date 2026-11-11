@@ -94,3 +94,7 @@ $GLOBALS['meta'][9670][BadAround_Event_Public_Details::META]['data']['facts']['l
 check(!str_contains(BadAround_Event_SEO::project(9670)['h1'],'ufficio'),'tampered place excluded from SEO');
 $GLOBALS['meta'][9670][BadAround_Event_Public_Details::META]=$sealed;
 echo "CONTEXTUAL_PLACE_SEO_PASS\n";
+
+$legacy=$sealed['data'];$legacy['facts']['location.place_type']['value']='public_parking';
+$GLOBALS['meta'][9670][BadAround_Event_Public_Details::META]=['data'=>$legacy,'seal'=>hash_hmac('sha256',9670.'|'.wp_json_encode($legacy),wp_salt('auth').'|ba-public-detail/v1')];
+check(str_contains(BadAround_Event_SEO::project(9670)['h1'],'parcheggio pubblico'),'legacy approved parking fact remains accurate');

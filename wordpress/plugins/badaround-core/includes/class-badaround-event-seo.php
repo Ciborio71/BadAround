@@ -158,7 +158,7 @@ final class BadAround_Event_SEO {
         if(isset($copy['subject']))$subject=$copy['subject'];
         // Only the reviewed, sealed public enum may enrich editorial copy.
         $place=$public_details['facts']['location.place_type']['value']??'';
-        $property_places=array('private_home'=>'in abitazione privata','condominium'=>'in condominio','commercial_premises'=>'in un negozio o attività commerciale','office'=>'in un ufficio','warehouse'=>'in un magazzino','garage_outbuilding'=>'in un garage o pertinenza','public_building'=>'in un edificio pubblico');
+        $property_places=array('public_parking'=>'in un parcheggio pubblico','private_parking'=>'in un parcheggio privato','road_sidewalk'=>'su strada o marciapiede','private_home'=>'in abitazione privata','condominium'=>'in condominio','commercial_premises'=>'in un negozio o attività commerciale','office'=>'in un ufficio','warehouse'=>'in un magazzino','garage_outbuilding'=>'in un garage o pertinenza','public_building'=>'in un edificio pubblico');
         $place_phrase=str_starts_with((string)$key,'property_')?($property_places[$place]??''):'';
         if($place_phrase!==''){
             $subject=preg_replace('/ in un immobile/u','',$subject);
