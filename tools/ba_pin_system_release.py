@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Guarded wizard category pin size refinement; CSS only."""
+"""Guarded How it works category pin alignment; presentation only."""
 from pathlib import Path
 import importlib.util,ftplib,ssl,os,json
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('guard',ROOT/'tools/ba_event_seo_release.py')
 guard=importlib.util.module_from_spec(spec);spec.loader.exec_module(guard)
-FILES=['themes/badaround-child/assets/css/native-report.css']
+FILES=['themes/badaround-child/assets/css/how-it-works.css','themes/badaround-child/page-come-funziona.php']
 guard.FILES=FILES
 def main():
     prior={n:(ROOT/'prior-source/wordpress'/n).read_bytes() if (ROOT/'prior-source/wordpress'/n).exists() else None for n in FILES}

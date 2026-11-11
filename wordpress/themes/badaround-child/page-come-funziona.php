@@ -17,12 +17,12 @@ $steps = array(
 );
 
 $categories = array(
-	array( 'class'=>'vehicles', 'icon'=>'🚗', 'title'=>'Veicoli', 'text'=>'Auto, moto e mezzi: furti, danneggiamenti e altre situazioni utili da condividere.' ),
-	array( 'class'=>'places', 'icon'=>'⌂', 'title'=>'Case e attività', 'text'=>'Abitazioni, negozi, uffici e altri luoghi interessati da eventi o situazioni da segnalare.' ),
-	array( 'class'=>'hazards', 'icon'=>'!', 'title'=>'Pericoli', 'text'=>'Ostacoli, rischi stradali, ambientali o altre situazioni che richiedono attenzione.' ),
-	array( 'class'=>'public', 'icon'=>'♟', 'title'=>'Spazi pubblici', 'text'=>'Aree comuni, vandalismi, degrado e situazioni che interessano la vita del territorio.' ),
-	array( 'class'=>'animals', 'icon'=>'●', 'title'=>'Animali', 'text'=>'Animali smarriti, avvistati o situazioni in cui una segnalazione può essere utile.' ),
-	array( 'class'=>'objects', 'icon'=>'▤', 'title'=>'Oggetti e documenti', 'text'=>'Chiavi, documenti, dispositivi e altri oggetti personali smarriti o ritrovati.' ),
+	array( 'class'=>'vehicles', 'pin'=>'veicoli', 'title'=>'Veicoli', 'text'=>'Auto, moto e mezzi: furti, danneggiamenti e altre situazioni utili da condividere.' ),
+	array( 'class'=>'places', 'pin'=>'case-e-attivita', 'title'=>'Case e attività', 'text'=>'Abitazioni, negozi, uffici e altri luoghi interessati da eventi o situazioni da segnalare.' ),
+	array( 'class'=>'hazards', 'pin'=>'pericoli', 'title'=>'Pericoli', 'text'=>'Ostacoli, rischi stradali, ambientali o altre situazioni che richiedono attenzione.' ),
+	array( 'class'=>'public', 'pin'=>'spazi-pubblici', 'title'=>'Spazi pubblici', 'text'=>'Aree comuni, vandalismi, degrado e situazioni che interessano la vita del territorio.' ),
+	array( 'class'=>'animals', 'pin'=>'animali', 'title'=>'Animali', 'text'=>'Animali smarriti, avvistati o situazioni in cui una segnalazione può essere utile.' ),
+	array( 'class'=>'objects', 'pin'=>'oggetti-e-documenti', 'title'=>'Oggetti e documenti', 'text'=>'Chiavi, documenti, dispositivi e altri oggetti personali smarriti o ritrovati.' ),
 );
 ?>
 <main id="main-content" class="ba-how">
@@ -81,7 +81,7 @@ $categories = array(
 			<div class="ba-how-categories">
 				<?php foreach ( $categories as $category ) : ?>
 					<article class="ba-how-category ba-how-category--<?php echo esc_attr( $category['class'] ); ?>">
-						<span class="ba-how-category__icon" aria-hidden="true"><?php echo esc_html( $category['icon'] ); ?></span>
+						<span class="ba-how-category__icon" aria-hidden="true"><?php echo badaround_pin_svg( $category['pin'] ); ?></span>
 						<div><h3><?php echo esc_html( $category['title'] ); ?></h3><p><?php echo esc_html( $category['text'] ); ?></p></div>
 					</article>
 				<?php endforeach; ?>

@@ -52,3 +52,9 @@ body.page-template-page-come-funziona .site-content{padding:0}
 .ba-how-pin>.ba-pin-svg{width:38px;height:48px;transform:none}
 .ba-how-sentinel__pin{width:160px;height:200px;border:0;border-radius:0;transform:none;background:none;box-shadow:none}
 .ba-how-sentinel__pin>.ba-pin-svg{width:160px;height:200px}
+
+/* Category cards use the same lightweight pin family as maps and the wizard. */
+.ba-how .ba-how-category{grid-template-columns:64px minmax(0,1fr);align-items:center}
+.ba-how .ba-how-category__icon{display:block;width:64px;height:80px;border:0;border-radius:0;background:none;box-shadow:none}
+.ba-how .ba-how-category__icon>.ba-pin-svg{display:block;width:64px;height:80px;transform:none}
+.ba-how .ba-how-category>div{min-width:0;overflow-wrap:anywhere}
