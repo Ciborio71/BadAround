@@ -21,7 +21,7 @@ const {chromium}=require(process.env.BA_PLAYWRIGHT_MODULE||'playwright-core'),{e
   }
   await page.evaluate(()=>{const root=document.querySelector('main');root.insertAdjacentHTML('afterbegin','<p class="ba-event-witness-badge"><a href="#contribuisci">Si cercano testimoni</a></p><aside class="ba-event-aside"><section class="ba-card ba-event-safety"><h2>Serve aiuto immediato?</h2><p>Contatta il 112</p></section></aside>');});
   const colors=await page.evaluate(()=>{const w=document.querySelector('.ba-event-witness-badge'),e=document.querySelector('.ba-event-safety');return {w:getComputedStyle(w).backgroundColor,wc:getComputedStyle(w.querySelector('a')).color,e:getComputedStyle(e).backgroundColor,ec:getComputedStyle(e.querySelector('p')).color};});
-  assert.equal(colors.w,'rgb(255, 243, 205)');assert.equal(colors.wc,'rgb(23, 23, 23)');assert.equal(colors.e,'rgb(181, 31, 43)');assert.equal(colors.ec,'rgb(255, 255, 255)');
+  assert.equal(colors.w,'rgb(254, 198, 0)');assert.equal(colors.wc,'rgb(23, 23, 23)');assert.equal(colors.e,'rgb(181, 31, 43)');assert.equal(colors.ec,'rgb(255, 255, 255)');
   console.log('PASS witness/emergency palette');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1);});

@@ -639,4 +639,4 @@ require_once __DIR__ . '/inc/event-structured-data.php';
 require_once __DIR__ . '/inc/home-seo.php';
 
 require_once __DIR__.'/inc/event-social.php';
-add_action('wp_head',static function(){echo '<link rel="icon" type="image/png" sizes="32x32" href="'.esc_url(get_stylesheet_directory_uri().'/assets/favicon-32.png?ver=1').'"><link rel="apple-touch-icon" sizes="180x180" href="'.esc_url(get_stylesheet_directory_uri().'/assets/favicon-180.png?ver=1').'"><link rel="icon" type="image/svg+xml" sizes="any" href="'.esc_url(get_stylesheet_directory_uri().'/assets/favicon.svg?ver=1').'">'."\n";},100);
+add_action('wp_head',static function(){echo '<link rel="icon" type="image/png" sizes="32x32" href="'.esc_url(get_stylesheet_directory_uri().'/assets/favicon-32.png?ver=2').'"><link rel="apple-touch-icon" sizes="180x180" href="'.esc_url(get_stylesheet_directory_uri().'/assets/favicon-180.png?ver=2').'"><link rel="icon" type="image/svg+xml" sizes="any" href="'.esc_url(get_stylesheet_directory_uri().'/assets/favicon.svg?ver=2').'">'."\n";},100);

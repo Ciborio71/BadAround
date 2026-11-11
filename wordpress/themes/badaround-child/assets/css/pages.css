@@ -309,7 +309,7 @@
 @media(max-width:720px){.ba-event-detail .ba-contribution-panel{padding:14px}}
 
 /* Event interaction and factual alerts: scoped to the public detail. */
-.ba-event-detail .ba-event-witness-badge{background:#fff3cd;border-color:#e4bd45;border-left-color:#c18b00;color:#171717}
+.ba-event-detail .ba-event-witness-badge{background:#fec600;border-color:#c39800;border-left-color:#171717;color:#171717}
 .ba-event-detail .ba-event-witness-badge a{color:#171717}
 .ba-event-detail .ba-event-aside>.ba-event-safety,.ba-event-detail .ba-event-safety{background:#b51f2b;border-color:#b51f2b;color:#fff}
 .ba-event-detail .ba-event-safety h2,.ba-event-detail .ba-event-safety p,.ba-event-detail .ba-event-safety a{color:#fff}
