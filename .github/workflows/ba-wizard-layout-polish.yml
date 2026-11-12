@@ -25,7 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify public signature, independent marker gradients and wizard flow
+      - name: Verify private identity preview, signature selection and wizard flow
         run: |
           npm ci --prefix tests --ignore-scripts
           node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
