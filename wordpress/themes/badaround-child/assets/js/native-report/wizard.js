@@ -101,7 +101,7 @@
     }
     const signatureModeration=document.createElement('p');signatureModeration.className='ba-native-help';signatureModeration.textContent='La pubblicazione della segnalazione e della firma scelta resta soggetta alle linee guida e alla moderazione di BadAround.';form.querySelector('[data-native-step="review"]')?.append(signatureModeration);
     const choiceHelp={
-      'reporter.contact_preference':{community:'Ricevi avvistamenti, testimonianze e informazioni utili inoltrati da BadAround, senza mostrare i tuoi recapiti.',badaround_only:'Ricevi gli aggiornamenti di BadAround sulla segnalazione, senza gli inoltri facoltativi della community.',none:'Nessun aggiornamento facoltativo. Restano possibili i chiarimenti necessari alla gestione della segnalazione.'},
+      'reporter.contact_preference':{community:'Ricevi sia gli aggiornamenti sullo stato della segnalazione, sia eventuali avvistamenti e testimonianze inviati dagli altri utenti tramite BadAround.',badaround_only:'Ricevi solo le comunicazioni di BadAround sulla gestione e sullo stato della segnalazione. Nessun messaggio dalla community.'},
       'reporter.social_visibility':{requested:'La richiesta sarà valutata dallo staff. Verranno condivisi solo contenuti approvati e pubblicabili.',declined:'La segnalazione rimane sul sito; non richiedi la diffusione sui canali social di BadAround.'}
     };
     let mediaView = null;
@@ -399,7 +399,7 @@
     function syncCards(wrapper, field) {
       const select = wrapper.querySelector('select[data-native-input]');
       if (!select || (field.step === 'location' && wrapper.dataset.nativeField.startsWith('location.')) || wrapper===authorityWrapper || wrapper.dataset.nativeField==='authority.type') return;
-      const options = Array.from(select.options).filter(option => option.value);
+      const options = Array.from(select.options).filter(option => option.value && !option.hidden);
       const category = wrapper.dataset.nativeField === 'event.category';
       const subtype = wrapper.dataset.nativeField === 'event.subtype';
       if (!category && !subtype && options.length > 6) return;
@@ -450,6 +450,7 @@
             const description = document.createElement('small'); description.textContent = meta.desc; copy.append(description);
             card.append(icon);
           }
+          if(wrapper.dataset.nativeField==='reporter.contact_preference'&&option.value==='community'){const badge=document.createElement('span');badge.className='ba-native-recommended';badge.textContent='Consigliato';copy.append(badge);}
           const optionHelp=choiceHelp[wrapper.dataset.nativeField]?.[option.value];if(optionHelp){const description=document.createElement('small');description.textContent=optionHelp;copy.append(description);}
           card.append(radio,copy); entry.group.append(card);
           const commitChoice = () => {
@@ -477,7 +478,7 @@
         });
       }
       if (!select.value || entry.collapsedValue !== select.value) entry.collapsedValue = null;
-      const collapsed = wrapper.dataset.nativeField!=='reporter.public_identity_mode' && Boolean(entry.collapsedValue);
+      const collapsed = !['reporter.public_identity_mode','reporter.contact_preference'].includes(wrapper.dataset.nativeField) && Boolean(entry.collapsedValue);
       entry.group.classList.toggle('is-collapsed',collapsed);
       entry.edit.hidden = !collapsed; entry.edit.disabled = select.disabled;
       entry.edit.setAttribute('aria-expanded',String(!collapsed));
@@ -531,6 +532,7 @@
           if(input.type==='checkbox')input.checked=field.type==='array'?Array.isArray(value)&&value.includes(input.value):value===true;
           else input.value=value===undefined?'':String(value);
         });
+        if(path==='reporter.contact_preference'&&active&&model.effective(path)===undefined&&!model.busy&&!model.snapshot&&!model.completed&&config.contactPreferenceDefault==='community')model.set(path,'community');
         if(config.conditional && field.constraints.enum && path!=='event.subtype'){
           const select=wrapper.querySelector('select[data-native-input]');
           let allowed=model.constraints(path).enum;
@@ -546,7 +548,7 @@
             if(!foundLabel){allowed=allowed.filter(value=>value!=='found_subject');if(model.effective(path)==='found_subject')model.set(path,undefined);}
             else optionLabels={...field.options,found_subject:foundLabel};
           }
-          if(select){const value=model.effective(path)||'';select.replaceChildren(new Option(path==='reporter.public_identity_mode'?'Seleziona un’opzione…':'Seleziona…',''));for(const option of allowed)select.add(new Option(optionLabels[option]||option,option));select.value=value;}
+          if(select){const value=model.effective(path)||'';select.replaceChildren(new Option(path==='reporter.public_identity_mode'?'Seleziona un’opzione…':'Seleziona…',''));for(const option of allowed){const item=new Option(optionLabels[option]||option,option);if(path==='reporter.contact_preference'&&option==='none')item.hidden=true;select.add(item);}select.value=value;}
         }
         const deferred = (path === 'event.subtype' && !model.values['event.category']) || (path === 'reporter.relationship' && !model.effective('event.subtype'));
         wrapper.hidden = !active || deferred;

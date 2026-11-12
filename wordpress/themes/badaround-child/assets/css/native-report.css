@@ -828,3 +828,11 @@
 
 /* Separate the privacy explanation from the visible signature choices. */
 .ba-native [data-native-field="reporter.public_identity_mode"] .ba-native-anonymous-note{margin-top:18px;padding-top:18px}
+
+/* Clear notification choices use visible native radios and stay expanded. */
+.ba-native .ba-native-engagement--community .ba-native-card-grid input[type=radio]{position:static;opacity:1;flex:0 0 22px;width:22px;height:22px;min-height:22px;margin:0;padding:0;accent-color:#087f8c}
+.ba-native .ba-native-engagement--community .ba-native-card-grid .ba-native-option-card::after{display:none}
+.ba-native .ba-native-engagement--community .ba-native-option-card{align-items:flex-start;padding:18px;gap:14px}
+.ba-native .ba-native-engagement--community .ba-native-card-copy{min-width:0;flex:1}
+.ba-native .ba-native-recommended{display:inline-block;width:fit-content;max-width:100%;margin:6px 0 2px;padding:3px 9px;border-radius:999px;background:#dcf4e8;color:#075d3f;font-size:.78rem;font-weight:700}
+.ba-native .ba-native-engagement--community>.ba-native-help{margin-top:16px}

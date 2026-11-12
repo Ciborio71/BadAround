@@ -37,5 +37,18 @@ const {chromium}=require('playwright-core'),{execFileSync}=require('node:child_p
  const cta=page.locator('.ba-site-header a');await cta.focus();assert.equal(await cta.evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');await cta.hover();assert.equal(await cta.evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');
  console.log('PASS wizard presentation viewport',width);
  }
+ await page.evaluate(()=>{
+ const root=document.querySelector('[data-native-report]');root.nativeReport.model.step=4;
+ const answers={'event.category':'animal','event.subtype':'animal_missing','reporter.public_identity_mode':'anonymous','reporter.first_name':'Marco','reporter.last_name':'Rossi','reporter.email':'qa@example.invalid','reporter.contact_preference':'community'};
+ for(const [key,value]of Object.entries(answers)){const input=document.querySelector('[name="'+key+'"]');input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));}
+ });
+ for(const width of [1440,1024,768,390,320]){
+ await page.setViewportSize({width,height:1100});
+ const result=await page.evaluate(()=>{
+ const box=document.querySelector('[data-native-field="reporter.contact_preference"]'),radios=[...box.querySelectorAll('.ba-native-card-grid input[type="radio"]')],footer=box.querySelector(':scope>.ba-native-help');
+ return {visible:!box.hidden&&!box.closest('[data-native-step]').hidden,count:radios.length,checked:radios.find(r=>r.checked)?.value,radioVisible:radios.every(r=>getComputedStyle(r).opacity==='1'&&r.getBoundingClientRect().width>=20),expanded:!box.querySelector('.ba-native-card-grid').classList.contains('is-collapsed'),footer:footer.textContent.includes('Privacy garantita'),overflow:document.documentElement.scrollWidth>innerWidth+1};
+ });
+ assert(result.visible,'network box visible '+width);assert.equal(result.count,2);assert.equal(result.checked,'community');assert(result.radioVisible);assert(result.expanded);assert(result.footer);assert(!result.overflow,'network box overflow '+width);console.log('PASS network choices viewport',width);
+ }
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1);});
