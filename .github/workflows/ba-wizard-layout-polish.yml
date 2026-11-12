@@ -25,7 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify two visible notification choices and new-report default
+      - name: Verify recommended notification default and retained explicit preferences
         run: |
           npm ci --prefix tests --ignore-scripts
           node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
