@@ -1,0 +1,26 @@
+'use strict';
+const {test}=require('node:test'),assert=require('node:assert/strict');
+const {create,tick}=require('./native-media-dom-harness.cjs');
+test('relationship found option follows event context and clears incompatible answer',()=>{
+ const h=create();try{
+ h.set('event.category','vehicle');h.set('event.subtype','vehicle_stolen');
+ const select=()=>h.doc.querySelector('[name="reporter.relationship"]');
+ assert(![...select().options].some(o=>o.value==='found_subject'));
+ h.set('event.subtype','vehicle_observed');assert.match([...select().options].find(o=>o.value==='found_subject').textContent,/veicolo/);
+ h.set('reporter.relationship','found_subject');h.set('event.subtype','vehicle_stolen');assert.equal(h.model.effective('reporter.relationship'),undefined);
+ h.set('event.category','animal');h.set('event.subtype','animal_sighted_or_found');assert.match([...select().options].find(o=>o.value==='found_subject').textContent,/animale/);
+ }finally{h.close();}
+});
+test('anonymous choice explains private names and engagement is never preselected',()=>{
+ const h=create();try{
+ assert.equal(h.model.effective('reporter.contact_preference'),undefined);assert.equal(h.model.effective('reporter.social_visibility'),undefined);
+ h.fill();h.set('reporter.public_identity_mode','anonymous');const note=h.doc.querySelector('[data-native-anonymous-note]');assert.equal(note.hidden,false);assert.match(note.textContent,/non saranno pubblicati/);
+ h.set('reporter.public_identity_mode','pseudonym');assert.equal(note.hidden,true);
+ assert.equal(h.doc.querySelectorAll('.ba-native-engagement__intro').length,2);
+ }finally{h.close();}
+});
+test('submission feedback persists while request is pending and prevents duplicates',async()=>{
+ let finish;const h=create({fetch:async(url,request,body)=>url.endsWith('/reports')?await new Promise(resolve=>{finish=()=>resolve({ok:true,status:201,json:async()=>({status:'success',schema_version:body.schema_version,submission_id:body.submission_id,next_state:'moderation_pending'})});}):null});try{
+ h.fill();h.goReview();h.submit();await tick();const overlay=h.doc.querySelector('[data-native-submit-feedback]');assert.equal(overlay.hidden,false);assert.match(overlay.textContent,/Invio/);assert.equal(h.doc.activeElement.className,'ba-native-submit-panel');h.submit();await tick();assert.equal(h.requests.filter(r=>r.url.endsWith('/reports')).length,1);finish();await tick();await tick();assert.equal(overlay.hidden,true);assert.equal(h.model.completed,true);
+ }finally{h.close();}
+});

@@ -61,14 +61,14 @@ function badaround_native_report_option_label( $path, $value ) {
 		'vehicle.plate_knowledge' => array( 'full' => 'Targa completa', 'partial' => 'Solo una parte', 'unknown' => 'Non la conosco', 'none' => 'Il veicolo non ha targa' ),
 		'location.public_precision' => array( 'point' => 'Punto approssimato', 'street' => 'Via, senza civico', 'area' => 'Area o quartiere', 'municipality' => 'Solo il Comune' ),
 		'reward.status' => array( 'none' => 'Nessuna ricompensa', 'fixed' => 'Importo definito', 'negotiable' => 'Da concordare' ),
-		'reporter.contact_preference' => array( 'community' => 'Sì, vorrei ricevere informazioni e aggiornamenti dalla community di BadAround', 'badaround_only' => 'Sì, ma solo aggiornamenti di BadAround', 'none' => 'No, non desidero aggiornamenti facoltativi' ),
+		'reporter.contact_preference' => array( 'community' => 'Sì, anche informazioni dalla community', 'badaround_only' => 'Solo aggiornamenti di BadAround', 'none' => 'Nessun aggiornamento facoltativo' ),
 		'reporter.public_identity_mode' => array( 'anonymous' => 'In forma anonima', 'pseudonym' => 'Con uno pseudonimo', 'first_name' => 'Con il mio nome', 'name_initial' => 'Nome e iniziale del cognome' ),
 		'media.availability' => array( 'yes' => 'Sì', 'no' => 'No', 'possible' => 'Potrei procurarle', 'surveillance' => 'Possibili riprese di videosorveglianza' ),
 	);
 	if ( isset( $context[ $path ][ $value ] ) ) { return $context[ $path ][ $value ]; }
 	$labels = array(
 		'yes' => 'Sì', 'no' => 'No', 'unsure' => 'Non sono sicuro', 'unknown' => 'Non lo so', 'other' => 'Altro', 'none' => 'Nessuno', 'not_applicable' => 'Non applicabile', 'prefer_not' => 'Preferisco non indicarlo',
-		'directly_involved' => 'Sono coinvolto direttamente', 'witness' => 'Ho assistito come testimone', 'on_behalf' => 'Segnalo per un’altra persona', 'found_subject' => 'Ho trovato il soggetto', 'has_information' => 'Ho informazioni utili', 'territory_observer' => 'Ho osservato la situazione nella zona', 'involved' => 'Coinvolto direttamente',
+		'directly_involved' => 'Sono coinvolto direttamente', 'witness' => 'Ho assistito come testimone', 'on_behalf' => 'Segnalo per un’altra persona', 'found_subject' => 'Ho trovato o avvistato ciò che segnalo', 'has_information' => 'Ho informazioni utili', 'territory_observer' => 'Ho osservato la situazione nella zona', 'involved' => 'Coinvolto direttamente',
 		'road_sidewalk' => 'Strada o marciapiede', 'public_parking' => 'Parcheggio pubblico', 'private_parking' => 'Parcheggio privato', 'private_home' => 'Abitazione privata', 'condominium' => 'Condominio', 'commercial_premises' => 'Negozio o attività commerciale', 'office' => 'Ufficio', 'warehouse' => 'Magazzino', 'garage_outbuilding' => 'Garage o pertinenza', 'park_green' => 'Parco o area verde', 'public_transport' => 'Trasporto pubblico', 'public_building' => 'Edificio pubblico', 'industrial_work_area' => 'Area industriale o di lavoro', 'rural_natural' => 'Area rurale o naturale',
 		'today' => 'Oggi', 'yesterday' => 'Ieri', 'last_7_days' => 'Ultimi 7 giorni', 'last_30_days' => 'Ultimi 30 giorni', 'one_to_three_months' => 'Da uno a tre mesi', 'over_three_months' => 'Oltre tre mesi', 'days' => 'Da alcuni giorni', 'weeks' => 'Da alcune settimane',
 		'daily' => 'Ogni giorno', 'several_times_week' => 'Più volte a settimana', 'weekly' => 'Ogni settimana', 'several_times_month' => 'Più volte al mese', 'occasional' => 'Occasionalmente', 'indeterminate' => 'Frequenza non definita',
@@ -159,7 +159,7 @@ function badaround_native_report_config() {
 		if ( isset( $location_order[ $a ], $location_order[ $b ] ) ) { return $location_order[ $a ] <=> $location_order[ $b ]; }
 		return $original_order[ $a ] <=> $original_order[ $b ];
 	} );
-	$fields['location.exact_address']['help'] = 'Con Punto esatto, l’indirizzo completo e il civico indicati saranno visibili nella scheda approvata. Con Area approssimata mostriamo solo la zona.';
+	$fields['location.exact_address']['help'] = '';
 	$fields['vehicle.plate_raw']['help'] = 'La targa che inserisci sarà pubblicata in chiaro nella scheda, dopo la moderazione. Se la conosci solo in parte, indica soltanto i caratteri noti.';
 	$fields['reporter.public_identity_mode']['help'] = 'Scegli come preferisci essere indicato. BadAround non pubblica automaticamente i tuoi dati personali. La tua preferenza resta soggetta alla moderazione e alle regole di pubblicazione.';
 	$fields['reporter.contact_preference']['help'] = 'Gli altri utenti non vedono i tuoi recapiti e non possono contattarti direttamente.';
@@ -247,7 +247,13 @@ function badaround_native_report_field( $path, $field ) {
 	$description = $id . '-help ' . $id . '-error';
 	if ( 'reporter.social_visibility' === $path ) { $description .= ' ' . $id . '-channels'; }
 	?>
-	<div class="ba-native-field" data-native-field="<?php echo esc_attr( $path ); ?>">
+	<div class="ba-native-field<?php echo $path==='reporter.contact_preference'?' ba-native-engagement ba-native-engagement--community':($path==='reporter.social_visibility'?' ba-native-engagement ba-native-engagement--social':''); ?>" data-native-field="<?php echo esc_attr( $path ); ?>">
+    <?php if($path==='reporter.contact_preference'||$path==='reporter.social_visibility'): ?>
+    <div class="ba-native-engagement__intro">
+      <svg viewBox="0 0 40 40" width="40" height="40" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="20" cy="9" r="5"/><circle cx="8" cy="29" r="5"/><circle cx="32" cy="29" r="5"/><path d="M17 14l-6 10m12-10 6 10M14 29h12"/></g></svg>
+      <div><strong><?php echo $path==='reporter.contact_preference'?'Facciamo rete sul tuo evento':'Più condivisioni, più possibilità di aiutarti'; ?></strong><p><?php echo $path==='reporter.contact_preference'?'Un avvistamento o una testimonianza possono fare la differenza. Scegli quali aggiornamenti ricevere, mantenendo riservati i tuoi recapiti.':'Puoi chiedere a BadAround di dare più visibilità alla segnalazione sui propri canali social. La diffusione sarà valutata dopo la moderazione.'; ?></p></div>
+    </div>
+    <?php endif; ?>
 	<?php if ( 'array' === $type ) : ?>
 		<fieldset id="<?php echo esc_attr( $id ); ?>" tabindex="-1" aria-describedby="<?php echo esc_attr( $description ); ?>"><legend><?php echo esc_html( $field['label'] ); ?><span data-native-required></span></legend>
 		<?php foreach ( $field['options'] as $value => $label ) : ?>
@@ -272,11 +278,6 @@ function badaround_native_report_field( $path, $field ) {
 		<?php if ( 'email' === $input_type ) : ?> autocomplete="email"<?php elseif ( 'tel' === $input_type ) : ?> autocomplete="tel"<?php elseif ( 'reporter.first_name' === $path ) : ?> autocomplete="given-name"<?php elseif ( 'reporter.last_name' === $path ) : ?> autocomplete="family-name"<?php endif; ?>>
 		<?php endif; ?>
 	<?php endif; ?>
-		<?php if ( 'reporter.contact_preference' === $path ) : ?>
-		<div class="ba-native-contact-explainer">
-			<p>La community di BadAround può aiutarti con avvistamenti, testimonianze e altre informazioni utili su questo evento. BadAround può inoltrarti questi contributi senza mostrare i tuoi recapiti. Anche scegliendo nessun aggiornamento facoltativo, BadAround potrà scriverti per chiarimenti necessari alla gestione della segnalazione.</p>
-		</div>
-		<?php endif; ?>
 		<?php if ( 'reporter.social_visibility' === $path ) : ?>
         <ul id="<?php echo esc_attr( $id ); ?>-channels" class="ba-native-social-channels" aria-label="Canali social previsti, secondo quelli attivati da BadAround" role="list">
             <li><svg class="ba-native-social-icon ba-native-social-icon--facebook" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13.8 21v-8.2h2.8l.4-3.2h-3.2V7.5c0-.9.3-1.5 1.6-1.5h1.7V3.1c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.3H7.6v3.2h2.8V21z"/></svg><span>Facebook</span></li>

@@ -9,21 +9,20 @@ if ( 'event' === $key ) : ?>
 <div class="ba-native-smart-address" data-native-smart-address>
   <label for="ba-smart-search">Dove è successo?</label>
   <div class="ba-native-address-slot" data-smart-search-slot>
-  <input id="ba-smart-search" data-smart-start type="text" readonly autocomplete="off" placeholder="Cerca indirizzo o località" aria-describedby="ba-smart-privacy ba-smart-status">
+  <input id="ba-smart-search" data-smart-start type="text" readonly autocomplete="off" placeholder="Cerca indirizzo, comune o quartiere…" aria-describedby="ba-smart-status">
   <div data-smart-widget hidden></div>
   </div>
-  <p id="ba-smart-privacy" class="ba-native-help"><strong>Con Punto esatto, l’indirizzo completo e il civico saranno pubblicati nella scheda approvata. Con Area approssimata sarà mostrata solo la zona.</strong></p>
   <button data-smart-geolocate type="button" class="ba-button ba-native-gps-button"><svg class="ba-native-gps-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg><span data-smart-geolocate-label>Usa la mia posizione</span></button>
-  <p class="ba-native-help">Seleziona un suggerimento Google, anche usando le frecce e Invio. La posizione del dispositivo viene richiesta solo premendo il pulsante.</p>
-  <p id="ba-smart-status" data-smart-status role="status" aria-live="polite">Seleziona il campo per cercare un luogo.</p>
+  <p id="ba-smart-status" data-smart-status role="status" aria-live="polite"></p>
   <div class="ba-native-location-layout" data-smart-location-layout hidden>
   <div class="ba-native-location-card" data-smart-location-card hidden>
-  <div data-smart-confirmation hidden><strong>Posizione riconosciuta</strong><p data-smart-address-label></p><small>Questo è l’indirizzo indicato. Con Punto esatto sarà visibile nella scheda approvata, compreso il civico; con Area approssimata resterà riservato.</small></div>
+  <div data-smart-confirmation hidden><strong>La tua posizione è:</strong><p data-smart-address-label></p></div>
   <div data-smart-map-panel hidden>
     <div data-smart-map class="ba-native-location-map" role="region" aria-label="Mappa della posizione riservata dell’evento" aria-describedby="ba-smart-map-help"></div>
     <p id="ba-smart-map-help" class="ba-native-help">Il segnaposto indica il luogo preciso dell’evento. Con Area approssimata, il pubblico vedrà solo la zona scelta. Se necessario, spostalo nel punto esatto in cui è avvenuto l'evento. L’indirizzo viene verificato di nuovo. Da tastiera, seleziona il segnaposto e premi Alt e Invio (Option e Invio su Mac) per spostarlo con le frecce, poi Invio per confermare.</p>
   </div>
   </div>
+  <div class="ba-native-location-side" data-smart-location-side>
   <?php if ( ! empty( $config['publicLocationRequest'] ) ) : ?>
   <fieldset class="ba-native-public-location-choice" data-native-public-location-choice hidden aria-describedby="ba-native-public-location-help">
     <legend>Come vuoi mostrare la posizione al pubblico?</legend>
@@ -65,6 +64,7 @@ if ( 'event' === $key ) : ?>
     <p id="ba-native-public-location-help" class="ba-native-help">Scegli il punto esatto oppure un’area approssimativa con il suo raggio. Se la segnalazione è approvata, Punto esatto pubblica anche indirizzo completo e civico; Area approssimata mantiene questi dati riservati.</p>
   </fieldset>
   <?php endif; ?>
+  </div>
   </div>
   <p data-smart-map-status role="status" aria-live="polite"></p>
   <button data-smart-manual type="button" class="ba-button" hidden>Inserisci manualmente</button>

@@ -214,7 +214,7 @@
       const actions=root.document.createElement('div');actions.className='ba-native-neighborhood__actions';
       neighborhoodConfirm=root.document.createElement('button');neighborhoodConfirm.type='button';neighborhoodConfirm.textContent='Conferma zona';
       neighborhoodClear=root.document.createElement('button');neighborhoodClear.type='button';neighborhoodClear.textContent='Non indicare una zona';
-      actions.append(neighborhoodConfirm,neighborhoodClear);neighborhoodBox.append(legend,label,neighborhoodInput,neighborhoodStatus,actions);ui.append(neighborhoodBox);
+      actions.append(neighborhoodConfirm,neighborhoodClear);neighborhoodBox.append(legend,label,neighborhoodInput,neighborhoodStatus,actions);(ui.querySelector('[data-smart-location-side]')||ui).append(neighborhoodBox);
       neighborhoodInput.addEventListener('input',()=>{if(locked())return;cancelZoneLookup();model.neighborhood=null;neighborhoodStatus.textContent='Zona proposta da te. Confermala per includerla nel riepilogo; sarà verificata in moderazione.';syncVisibility();});
       neighborhoodConfirm.addEventListener('click',()=>{
         if(locked())return;const label=neighborhoodInput.value.trim();
@@ -408,11 +408,13 @@
         widget=new Element({includedRegionCodes:['it']});
         widget.includedRegionCodes=['it'];
         widget.setAttribute('aria-label', 'Posizione dell’evento');
-        widget.setAttribute('aria-describedby', 'ba-smart-privacy ba-smart-status');
+        widget.setAttribute('aria-describedby', 'ba-smart-status');
+        widget.placeholder='Cerca indirizzo, comune o quartiere…';
+        widget.setAttribute('placeholder',widget.placeholder);
         widget.addEventListener('gmp-select',choose);
         holder.replaceChildren(widget);
         start.hidden=true;holder.hidden=false;
-        say('Cerca un indirizzo italiano e seleziona un suggerimento.');
+        say('');
         try{widget.focus()}catch(_){}
       } catch (_) {
         if (!disposed) {start.disabled=false;offerManual('Google non è disponibile. Inserisci la posizione manualmente.');}
@@ -449,7 +451,7 @@
       start.value='';start.hidden=false;start.disabled=false;
       if(manualButton)manualButton.hidden=config.locationManualEntry===false || Boolean(config.smartAddress?.key);
       syncVisibility();
-      say('Seleziona il campo per cercare un luogo.');
+      say('');
     }
     function changedGoogle(event){
       if(event.type==='gmp-select')return;

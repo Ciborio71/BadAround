@@ -52,22 +52,7 @@
     emergencyNotice.setAttribute('role','status');
     emergencyNotice.setAttribute('aria-live','polite');
     emergencyNotice.setAttribute('aria-atomic','true');
-    const emergencyCopy='Se c’è un pericolo immediato o un’emergenza, contatta subito il 112. BadAround non sostituisce i servizi di emergenza.';
-    function syncEmergencyNotice(current){
-      const rules=config.emergencyNotice;
-      const triggered=!!rules && (rules.subtypes.includes(model.effective('event.subtype')) ||
-        (model.active('location.immediate_danger') && rules.dangerValues.includes(model.effective('location.immediate_danger'))));
-      const anchor=current===config.fields['event.subtype'].step
-        ? wrappers.find(w=>w.dataset.nativeField==='event.subtype')
-        : current===config.fields['location.immediate_danger'].step
-          ? wrappers.find(w=>w.dataset.nativeField==='location.immediate_danger')
-          : form.querySelector(`[data-native-step="${current}"] h2`);
-      const noticeAnchor=anchor?.closest('.ba-native-field-pair')||anchor;
-      if(noticeAnchor && noticeAnchor.nextElementSibling!==emergencyNotice)noticeAnchor.after(emergencyNotice);
-      emergencyNotice.hidden=!triggered;
-      const text=triggered?emergencyCopy:'';
-      if(emergencyNotice.textContent!==text)emergencyNotice.textContent=text;
-    }
+    function syncEmergencyNotice(){emergencyNotice.hidden=true;emergencyNotice.textContent='';}
     const conditionalStatus=document.createElement('p');conditionalStatus.className='ba-native-conditional-status';
     conditionalStatus.setAttribute('role','status');conditionalStatus.setAttribute('aria-live','polite');conditionalStatus.setAttribute('aria-atomic','true');form.before(conditionalStatus);
     let activeSpecifications=new Set();
@@ -78,17 +63,20 @@
     submissionFeedback.className='ba-native-submit-feedback';submissionFeedback.hidden=true;
     submissionFeedback.dataset.nativeSubmitFeedback='';
     submissionFeedback.setAttribute('role','status');submissionFeedback.setAttribute('aria-live','polite');submissionFeedback.setAttribute('aria-atomic','true');
+    const submissionPanel=document.createElement('div');submissionPanel.className='ba-native-submit-panel';submissionPanel.tabIndex=-1;
+    const submissionText=document.createElement('p');submissionPanel.append(submissionText);submissionFeedback.append(submissionPanel);
     form.after(submissionFeedback);
+    listen(document,'keydown',event=>{if(!submissionFeedback.hidden&&event.key==='Tab'){event.preventDefault();submissionPanel.focus({preventScroll:true});}});
     function syncSubmissionFeedback(){
       if(accessPhase&&accessPhase!=='checking'){submit.classList.remove('is-loading');clearTimeout(submitWaitTimer);submitWaitTimer=null;submissionFeedback.hidden=true;return;}
       submit.classList.toggle('is-loading',model.busy);
       if(model.busy){
         if(submissionFeedback.hidden){
-          submissionFeedback.textContent=accessPhase==='checking'?'Controllo dell’accesso in corso…':'Invio in corso… Attendi la conferma prima di chiudere la pagina.';
+          submissionText.textContent=accessPhase==='checking'?'Controllo dell’accesso in corso…':'Invio in corso… Attendi la conferma prima di chiudere la pagina.';
           submissionFeedback.hidden=false;
-          submissionFeedback.scrollIntoView?.({block:'nearest',behavior:'instant'});
+          submissionPanel.focus({preventScroll:true});
           submitWaitTimer=setTimeout(()=>{
-            if(!disposed&&model.busy)submissionFeedback.textContent=accessPhase==='checking'?'Stiamo verificando l’accesso. Attendi: la segnalazione non è ancora stata inviata.':'Stiamo elaborando la segnalazione. Attendi la conferma: non occorre premere di nuovo Invia.';
+            if(!disposed&&model.busy)submissionText.textContent=accessPhase==='checking'?'Stiamo verificando l’accesso. Attendi: la segnalazione non è ancora stata inviata.':'Stiamo elaborando la segnalazione. Attendi la conferma: non occorre premere di nuovo Invia.';
           },6000);
         }
       }else{
@@ -96,6 +84,14 @@
       }
     }
 
+    const identityWrapper=wrappers.find(w=>w.dataset.nativeField==='reporter.public_identity_mode');
+    const anonymousNote=document.createElement('p');anonymousNote.className='ba-native-anonymous-note';anonymousNote.hidden=true;anonymousNote.dataset.nativeAnonymousNote='';anonymousNote.setAttribute('role','status');
+    anonymousNote.textContent='Nome e cognome sono necessari per gestire e pubblicare la segnalazione. Restano riservati a BadAround: non saranno pubblicati né diffusi pubblicamente. Gli altri utenti vedranno solo la dicitura Anonimo.';
+    identityWrapper?.append(anonymousNote);
+    const choiceHelp={
+      'reporter.contact_preference':{community:'Ricevi avvistamenti, testimonianze e informazioni utili inoltrati da BadAround, senza mostrare i tuoi recapiti.',badaround_only:'Ricevi gli aggiornamenti di BadAround sulla segnalazione, senza gli inoltri facoltativi della community.',none:'Nessun aggiornamento facoltativo. Restano possibili i chiarimenti necessari alla gestione della segnalazione.'},
+      'reporter.social_visibility':{requested:'La richiesta sarà valutata dallo staff. Verranno condivisi solo contenuti approvati e pubblicabili.',declined:'La segnalazione rimane sul sito; non richiedi la diffusione sui canali social di BadAround.'}
+    };
     let mediaView = null;
     const smartAddress = ns.SmartAddress?.mount(container, config, model);
     function mountMedia() {
@@ -442,6 +438,7 @@
             const description = document.createElement('small'); description.textContent = meta.desc; copy.append(description);
             card.append(icon);
           }
+          const optionHelp=choiceHelp[wrapper.dataset.nativeField]?.[option.value];if(optionHelp){const description=document.createElement('small');description.textContent=optionHelp;copy.append(description);}
           card.append(radio,copy); entry.group.append(card);
           const commitChoice = () => {
             if (entry.arrowNavigation) return;
@@ -529,7 +526,14 @@
             const presentationOrder=['vehicle','property','hazard','public_space','animal','item_document'];
             allowed=[...allowed].sort((a,b)=>presentationOrder.indexOf(a)-presentationOrder.indexOf(b));
           }
-          if(select){const value=model.effective(path)||'';select.replaceChildren(new Option('Seleziona…',''));for(const option of allowed)select.add(new Option(field.options[option]||option,option));select.value=value;}
+          let optionLabels=field.options;
+          if(path==='reporter.relationship'){
+            const subtype=model.effective('event.subtype');
+            const foundLabel=subtype==='vehicle_observed'?'Ho individuato il veicolo':subtype==='animal_sighted_or_found'?'Ho trovato o avvistato l’animale':model.effective('event.category')==='item_document'?'Ho trovato l’oggetto':null;
+            if(!foundLabel){allowed=allowed.filter(value=>value!=='found_subject');if(model.effective(path)==='found_subject')model.set(path,undefined);}
+            else optionLabels={...field.options,found_subject:foundLabel};
+          }
+          if(select){const value=model.effective(path)||'';select.replaceChildren(new Option('Seleziona…',''));for(const option of allowed)select.add(new Option(optionLabels[option]||option,option));select.value=value;}
         }
         const deferred = (path === 'event.subtype' && !model.values['event.category']) || (path === 'reporter.relationship' && !model.effective('event.subtype'));
         wrapper.hidden = !active || deferred;
@@ -550,6 +554,7 @@
         }
         syncCards(wrapper, field);
       });
+      anonymousNote.hidden=model.effective('reporter.public_identity_mode')!=='anonymous';
       form.querySelectorAll('[data-native-step]').forEach(step => { step.hidden = step.dataset.nativeStep !== current; });
       container.querySelectorAll('[data-native-progress]').forEach((li,index) => {
         li.classList.toggle('is-active', index === model.step);

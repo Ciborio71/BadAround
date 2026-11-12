@@ -14,31 +14,37 @@ jobs:
   release:
     if: contains(github.event.head_commit.message, '[wizard-layout-polish-release]')
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: d948653bb926d5c84d253d8ac37301debc0f86cc
+          ref: afd4bee37e68fdd71fa10224ab29546057e1dd67
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify paired question flow, emergency placement and wizard regressions
+      - name: Verify wizard presentation, submission feedback and regressions
         run: |
           npm ci --prefix tests --ignore-scripts
           node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
           php -l wordpress/themes/badaround-child/inc/native-report.php
+          php -l wordpress/themes/badaround-child/template-parts/native-report/step.php
+          node --check wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
           node --check wordpress/themes/badaround-child/assets/js/native-report/model.js
           php -l wordpress/themes/badaround-child/functions.php
           php -l wordpress/themes/badaround-child/header.php
           php -l wordpress/themes/badaround-child/footer.php
           php tests/geo-prec-01-publication.php
           php tests/geo-area-01-publication.php
-          node --test tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs tests/native-report-f19-ux.cjs tests/geo-public-03-choice.cjs tests/geo-area-01-model.cjs
+          node --test tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs tests/native-report-f19-ux.cjs tests/geo-public-03-choice.cjs tests/geo-area-01-model.cjs tests/wizard-presentation-20261112.cjs tests/test-ba-access-wizard-dom.cjs
           python3 -m py_compile tools/ba_wizard_layout_polish_release.py
           python3 -m unittest discover -s tests -p test_ba_event_seo_release.py
+      - name: Verify responsive presentation in Chromium
+        run: |
+          npm install --no-save --prefix tests playwright-core
+          BA_CHROMIUM=/usr/bin/google-chrome node tests/wizard-presentation-browser.cjs
       - name: Prepare verified FTPS trust chain
         run: |
           mkdir -p tls
