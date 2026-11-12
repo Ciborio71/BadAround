@@ -46,3 +46,9 @@ The reporter subsequently confirmed keeping the initial question before private 
 The optional district/neighborhood confirmation box is disabled in the public wizard (`neighborhoodProposal=false`). No explicit neighborhood field or confirmation is required or submitted by this presentation. Address, exact/approximate public position and default 100m area stay unchanged. Existing moderated territorial data and legacy canonical support are preserved; no district-to-municipality name conversion or new automatic geographic enrichment is introduced. Future use in detail/SEO requires verified public geographic data, never an inferred one-to-one mapping from numbered municipalities.
 
 Runtime 932c59af729c61dc220cf182327b4eb33fe03b9a; guarded one-file release https://github.com/Ciborio71/BadAround/actions/runs/43253967585 PASS. 109 tests and five viewport checks PASS, final source SHA and independent production configuration readback confirmed. This supersedes all prior requests to position/style the neighborhood choice box.
+
+## Larger map pinpoint and shorter location step
+
+Wizard-only map marker enlarged from 44×55 to 64×80 CSS pixels, retaining upright SVG, independent gradient IDs and original point/drag semantics. Runtime df5fd34241a2cd0b41004bae1cfc82570948ea35; guarded release https://github.com/Ciborio71/BadAround/actions/runs/43255063736 PASS.
+
+Subsequent requested copy cleanup removes the successful-map status “Il segnaposto indica la posizione riservata…” and the extra date guidance “Indica anche quando è successo…”. Loading/errors and map keyboard help remain functional. Runtime 13e0ad961b624d9b95b80af7d17d80adc06711f9; guarded release https://github.com/Ciborio71/BadAround/actions/runs/43255221735 PASS. 76 targeted address/map/geo tests and five responsive viewport checks PASS; final SHA and production source readback confirmed. No map coordinates, privacy selection, dates or event data changed.
