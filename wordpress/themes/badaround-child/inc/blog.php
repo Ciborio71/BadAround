@@ -29,7 +29,7 @@ function badaround_blog_navigation(){
 function badaround_blog_home(){
  $articles=badaround_blog_query(3);if(!$articles->have_posts())return;
  echo '<section class="ba-blog ba-blog-home" aria-labelledby="ba-blog-home-title"><div class="ba-blog-section-head"><div><p class="ba-blog-eyebrow">Il blog di BadAround</p><h2 id="ba-blog-home-title">Informarsi, condividere, fare rete</h2></div><a class="ba-button ba-button--outline" href="'.esc_url(home_url('/blog/')).'">Tutti gli articoli <span aria-hidden="true">→</span></a></div><div class="ba-blog-grid">';
- while($articles->have_posts()){$articles->the_post();get_template_part('template-parts/blog/card',null,array('heading'=>'h3'));}wp_reset_postdata();echo '</div></section>';
+ while($articles->have_posts()){$articles->the_post();get_template_part('template-parts/blog-card',null,array('heading'=>'h3'));}wp_reset_postdata();echo '</div></section>';
 }
 add_action('init',static function(){
  add_rewrite_rule('^blog/page/([0-9]+)/?$','index.php?pagename=blog&paged=$matches[1]','top');

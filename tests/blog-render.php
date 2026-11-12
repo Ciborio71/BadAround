@@ -76,6 +76,7 @@ function wp_footer(){}
 function wp_date($f){return '2026';}
 function get_header(){include get_stylesheet_directory().'/header.php';}
 function get_footer(){include get_stylesheet_directory().'/footer.php';}
+class BadAround_Identity_WordPress_Portal{public static function enabled(){return true;}public static function account_authenticated(){return true;}}
 require get_stylesheet_directory().'/inc/pins.php';require get_stylesheet_directory().'/inc/blog.php';
 if($GLOBALS['ctx']==='verify'){
  badaround_blog_query(3);$q=end($GLOBALS['queries']);
