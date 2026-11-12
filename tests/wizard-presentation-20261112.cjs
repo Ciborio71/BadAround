@@ -19,7 +19,8 @@ test('anonymous choice explains private names and engagement is never preselecte
  h.set('reporter.first_name','Marco');h.set('reporter.last_name','Rossi');h.set('reporter.public_identity_mode','name_initial');assert.match(note.textContent,/Marco R\./);assert(!note.textContent.includes('Rossi'));
  const select=h.doc.querySelector('[name="reporter.public_identity_mode"]');assert.equal(select.hidden,false);assert.equal(select.parentElement.querySelector('.ba-native-card-grid'),null);
  assert.deepEqual([...select.options].map(o=>o.value),['','name_initial','first_name','pseudonym','anonymous']);
- assert(h.doc.querySelector('[data-native-field="reporter.first_name"]').compareDocumentPosition(select)&h.w.Node.DOCUMENT_POSITION_FOLLOWING);
+ assert(select.compareDocumentPosition(h.doc.querySelector('[data-native-field="reporter.first_name"]'))&h.w.Node.DOCUMENT_POSITION_FOLLOWING);
+ assert.equal(h.root.nativeReport.config.fields['reporter.public_identity_mode'].label,'Come vuoi comparire online?');
  assert.equal(h.doc.querySelectorAll('.ba-native-engagement__intro').length,2);
  }finally{h.close();}
 });

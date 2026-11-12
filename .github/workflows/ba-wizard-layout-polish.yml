@@ -19,13 +19,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: 05f2221bf6f57742f14392a5d5bfae09062a3b41
+          ref: efb71403e5c348cd384b49db37cce6647b8e691c
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify private identity preview, signature selection and wizard flow
+      - name: Verify online identity choice precedes private names
         run: |
           npm ci --prefix tests --ignore-scripts
           node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
