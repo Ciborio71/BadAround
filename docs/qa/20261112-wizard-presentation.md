@@ -40,3 +40,9 @@ Follow-up outcome: PASS — 107 targeted tests, five Chromium viewport checks, i
 ## Final reporter-preferred ordering
 
 The reporter subsequently confirmed keeping the initial question before private names: “Come vuoi comparire online?” → dynamic privacy/signature preview → optional pseudonym → required first/last names. Native select and all four canonical identity modes retained. Private-name helper now refers to the choice above. Runtime 5e352127d72f2d37ed66bb83dc7d75dc2a6ee410. Guarded one-file release https://github.com/Ciborio71/BadAround/actions/runs/43245133473 PASS; 107 tests and five responsive widths PASS; SHA readback PASS. This ordering supersedes the prior names-first proposal.
+
+## Final decision: remove neighborhood choice
+
+The optional district/neighborhood confirmation box is disabled in the public wizard (`neighborhoodProposal=false`). No explicit neighborhood field or confirmation is required or submitted by this presentation. Address, exact/approximate public position and default 100m area stay unchanged. Existing moderated territorial data and legacy canonical support are preserved; no district-to-municipality name conversion or new automatic geographic enrichment is introduced. Future use in detail/SEO requires verified public geographic data, never an inferred one-to-one mapping from numbered municipalities.
+
+Runtime 932c59af729c61dc220cf182327b4eb33fe03b9a; guarded one-file release https://github.com/Ciborio71/BadAround/actions/runs/43253967585 PASS. 109 tests and five viewport checks PASS, final source SHA and independent production configuration readback confirmed. This supersedes all prior requests to position/style the neighborhood choice box.
