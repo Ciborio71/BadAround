@@ -41,7 +41,7 @@ jobs:
           node --test tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs tests/native-report-f19-ux.cjs tests/geo-public-03-choice.cjs tests/geo-area-01-model.cjs tests/wizard-presentation-20261112.cjs tests/test-ba-access-wizard-dom.cjs
           python3 -m py_compile tools/ba_wizard_layout_polish_release.py
           python3 -m unittest discover -s tests -p test_ba_event_seo_release.py
-      - name: Verify responsive presentation in Chromium
+      - name: Verify responsive presentation with the canonical fixture origin
         run: |
           npm install --no-save --prefix tests playwright-core
           BA_CHROMIUM=/usr/bin/google-chrome node tests/wizard-presentation-browser.cjs

@@ -6,7 +6,7 @@ const {chromium}=require('playwright-core'),{execFileSync}=require('node:child_p
  html='<header class="ba-site-header"><a href="#report" class="ba-button ba-button--urgent">Segnala un evento</a></header>'+html;
  const browser=await chromium.launch({executablePath:process.env.BA_CHROMIUM||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox']});
  try{
- const page=await browser.newPage();await page.route('**/*',r=>r.request().url()==='https://badaround.it/'?r.fulfill({contentType:'text/html',body:html}):r.abort());await page.goto('https://badaround.it/');
+ const page=await browser.newPage();await page.route('**/*',r=>r.request().url()==='https://staging.badaround.it/'?r.fulfill({contentType:'text/html',body:html}):r.abort());await page.goto('https://staging.badaround.it/');
  for(const name of ['base','components','report','native-report'])await page.addStyleTag({content:fs.readFileSync(path.join(assets,'css',name+'.css'),'utf8')});
  for(const name of ['model','api','errors','media','media-view','wizard'])await page.addScriptTag({content:fs.readFileSync(path.join(assets,'js/native-report',name+'.js'),'utf8')});
  for(const width of [1440,1024,768,390,320]){
