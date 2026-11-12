@@ -4,7 +4,7 @@ function badaround_child_maintenance_enabled(){return $GLOBALS['retry_maintenanc
 class PublicationRetryDB extends Geo05DB{function get_var($sql){if(str_contains($sql,'SELECT SHA2(content_original,256)'))return hash('sha256',$GLOBALS['private_fixture']['content_original']);return parent::get_var($sql);}}
 $wpdb=new PublicationRetryDB();BadAround_Publication_Service::register_publication_retry();$route=$GLOBALS['seo_route'];
 check($route['methods']==='POST','publication retry is POST only');
-g5seed(9850,'approximate_area','approximate_area');$input=['id'=>9850,'expected_report_id'=>9851,'expected_source_hash'=>hash('sha256',$GLOBALS['private_fixture']['content_original'])];
+g5seed(9850,'approximate_area','approximate_area');$input=['id'=>9850,'expected_report_id'=>10850,'expected_source_hash'=>hash('sha256',$GLOBALS['private_fixture']['content_original'])];
 foreach(['manage_options','ba_moderate_events','publish_ba_eventi','ba_view_private_reports','edit_post'] as $cap){$GLOBALS['denied']=[$cap];check(!$route['permission_callback']($input),'retry denies missing capability '.$cap);}$GLOBALS['denied']=[];
 check($route['permission_callback']($input),'retry permits authorized admin');
 $before=serialize([$GLOBALS['meta'],$GLOBALS['posts']]);
