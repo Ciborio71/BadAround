@@ -19,13 +19,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: 9af96dc959da43f126d6a251e29a2a530d18dc53
+          ref: fca381d41060abf58463474c5fc686d84e721634
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify visible public identity options and private-name preview
+      - name: Verify private email help and wizard accessibility
         run: |
           npm ci --prefix tests --ignore-scripts
           node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js

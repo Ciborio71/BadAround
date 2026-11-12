@@ -163,6 +163,7 @@ function badaround_native_report_config() {
 	$fields['vehicle.plate_raw']['help'] = 'La targa che inserisci sarà pubblicata in chiaro nella scheda, dopo la moderazione. Se la conosci solo in parte, indica soltanto i caratteri noti.';
 	$fields['reporter.public_identity_mode']['help'] = '';
 	$fields['reporter.first_name']['help'] = 'Nome e cognome completi servono per verifiche interne e gestione della segnalazione. La visibilità online segue la scelta indicata sopra.';
+	$fields['reporter.email']['help'] = 'La tua email serve solo per le comunicazioni da BadAround e non viene mai resa pubblica.';
 	$fields['reporter.contact_preference']['help'] = 'Gli altri utenti non vedono i tuoi recapiti e non possono contattarti direttamente.';
 	$fields['reporter.social_visibility']['help'] = 'La tua scelta sarà valutata dalla moderazione. Potranno essere condivisi solo contenuti approvati e destinati alla pubblicazione; i tuoi recapiti e le informazioni riservate resteranno esclusi. Se non rispondi, non richiedi la diffusione social. La richiesta riguarda Facebook, Instagram, X, Google Business Profile (Google Maps) e TikTok, secondo i canali attivati da BadAround.';
 	$fields['reward.status']['help'] = 'La ricompensa è destinata esclusivamente a chi fornisce informazioni utili al ritrovamento o alla risoluzione della segnalazione.';
