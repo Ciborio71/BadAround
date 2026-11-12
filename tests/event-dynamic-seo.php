@@ -121,3 +121,9 @@ g5seed(9721);$GLOBALS['term_meta'][11]['_ba_canonical_event_key']='keys';$GLOBAL
 check(str_contains(BadAround_Event_SEO::project(9721)['description'],'10/10/2026'),'legacy Italian date parsed without ambiguous conversion');
 $GLOBALS['meta'][9721]['_ba_occurred_date']='31/02/2026';check(!str_contains(BadAround_Event_SEO::project(9721)['description'],'31/02'),'invalid date omitted');
 echo "EVENT_SEO_V2_POLICY_PASS\n";
+
+$reflection=new ReflectionMethod(BadAround_Event_SEO::class,'meta_description');
+$intro='Segnalato il furto di Honda SH a Roma, in via Vincenzo Arangio Ruiz. Colore indicato: bianco. Si cercano testimoni o informazioni utili.';
+$description=$reflection->invoke(null,$intro);
+check(preg_match_all('/./us',$description)<=170&&str_ends_with($description,'.')&&!str_contains($description,'…'),'metadata keeps complete sentences instead of a cut invitation');
+echo "COMPLETE_META_DESCRIPTION_PASS\n";

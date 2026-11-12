@@ -3,7 +3,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 final class BadAround_Event_SEO {
     const VERSION = '1.1'; // URL/activation contract stays compatible with published events.
-    const COPY_VERSION = '2.0';
+    const COPY_VERSION = '2.1';
     const URL_POLICY = 'event-url/2';
     const CONTRACT = '_ba_seo_contract';
     const SLUG = '_ba_seo_slug';
@@ -205,7 +205,7 @@ final class BadAround_Event_SEO {
         $sections['occurrence']='Quando è successo e quando è stato segnalato';
         $sections['map']='Esplora la mappa di '.($zone!==''?$zone.', ':'').$municipality;
         if($headings_only)return $sections;
-        return array('h1'=>$h1,'title'=>$title,'description'=>self::limit_text($intro.' Consulta dettagli e aggiornamenti su BadAround.',170),
+        return array('h1'=>$h1,'title'=>$title,'description'=>self::meta_description($intro),
             'narrative'=>$intro,
             'intro'=>$intro,'heading'=>$sections['facts'],'prose_heading'=>$sections['prose'],'location_heading'=>$sections['location'],
             'image_alt'=>'Foto allegata alla segnalazione: '.self::limit_text($copy['title'].$where,145),
@@ -297,8 +297,9 @@ final class BadAround_Event_SEO {
             $sections['facts']='Come riconoscere '.$article;
             $sections['prose']=$status?($status==='smarrimento'?'Dove e quando è avvenuto lo smarrimento':'Circostanze e luogo del ritrovamento'):'Informazioni disponibili sull’oggetto';
             $sections['location']=($status==='smarrimento'?'Zona dello smarrimento':($status==='ritrovamento'?'Luogo del ritrovamento':'Posizione della segnalazione')).' a '.$town;
-            $sections['summary']='Dettagli utili su '.lcfirst($noun).' a '.$town;
-            $sections['comments']=($status==='smarrimento'?'Ritrovamenti e aggiornamenti':($status==='ritrovamento'?'Richieste di riconoscimento e aggiornamenti':'Informazioni della community')).' su '.lcfirst($noun);
+            $on=array('keys'=>'sulle chiavi','wallet_docs'=>'su documenti, portafoglio o borsa','electronics'=>'sul dispositivo elettronico','valuables'=>'sull’oggetto di valore o accessorio','other'=>'sull’oggetto personale')[$key];
+            $sections['summary']='Informazioni utili '.$on.' a '.$town;
+            $sections['comments']=($status==='smarrimento'?'Ritrovamenti e aggiornamenti':($status==='ritrovamento'?'Richieste di riconoscimento e aggiornamenti':'Informazioni della community')).' '.$on;
         }elseif(str_starts_with((string)$key,'property_')){
             $sections['photos']='Foto dei luoghi e degli eventuali danni segnalati';
             $sections['prose']=$key==='property_theft'?'Circostanze del furto nell’immobile':($key==='property_attempted_breakin'?'Segni del tentativo di furto o scasso':'Che cosa è successo nell’immobile');
@@ -322,6 +323,19 @@ final class BadAround_Event_SEO {
         return $result;
     }
 
+    private static function meta_description($intro){
+        // Prefer complete factual sentences; never leave a half-truncated invitation.
+        foreach(array($intro.' Leggi gli aggiornamenti su BadAround.',$intro.' Dettagli su BadAround.',$intro) as $candidate){
+            if(self::length($candidate)<=170)return $candidate;
+        }
+        $result='';
+        foreach(preg_split('/(?<=[.!?])\s+/u',$intro) as $sentence){
+            $next=$result!==''?$result.' '.$sentence:$sentence;
+            if(self::length($next)>170)break;
+            $result=$next;
+        }
+        return $result!==''?$result:self::limit_text($intro,170);
+    }
     private static function occurrence_date($id,$details){
         // Prefer the signed wizard date. Legacy D/M/Y remains an explicit fallback.
         $candidates=array($details['time']['date']??'',get_post_meta($id,'_ba_occurred_date',true));
