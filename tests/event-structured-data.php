@@ -7,6 +7,8 @@ function wp_get_canonical_url($id){return $GLOBALS['canonical_override']??get_pe
 function post_password_required($id){return $GLOBALS['password_required']??false;}
 function is_singular($type){return true;}
 function get_queried_object_id(){return 9000;}
+function badaround_event_gallery_ids($id){return $GLOBALS['schema_gallery_ids']??[];}
+function wp_get_attachment_image_src($id,$size){return $GLOBALS['schema_image']??false;}
 require dirname(__DIR__).'/wordpress/themes/badaround-child/inc/event-structured-data.php';
 $snapshot=serialize([$GLOBALS['meta'],$GLOBALS['posts'],$GLOBALS['private_fixture']]);
 $g=badaround_event_structured_data(9000);$nodes=$g['@graph']??[];
@@ -19,5 +21,19 @@ $old=$GLOBALS['posts'][9000]->post_status;$GLOBALS['posts'][9000]->post_status='
 $GLOBALS['password_required']=true;check(badaround_event_structured_data(9000)===[],'password-protected event excluded');$GLOBALS['password_required']=false;
 foreach(['https://other.test/event/','http://example.test/event/','https://example.test/event/?token=private','https://example.test/event/#private','https://user:secret@example.test/event/'] as $bad){$GLOBALS['canonical_override']=$bad;check(badaround_event_structured_data(9000)===[],'unsafe canonical rejected');}unset($GLOBALS['canonical_override']);
 check(badaround_event_structured_data(9003)===[],'legacy unapproved contract is not rewritten');
+$social=badaround_event_social_metadata(9000);$seo=BadAround_Event_SEO::project(9000);
+check($social['og:title']===$seo['title']&&$social['twitter:description']===$seo['description']&&$social['og:url']===get_permalink(9000),'social metadata shares canonical and editorial projection');
+check(!isset($social['og:image'])&&$social['twitter:card']==='summary','no approved photo means no misleading social image');
+$GLOBALS['schema_gallery_ids']=[100];$GLOBALS['schema_image']=['https://example.test/public-photo.webp',1200,800];
+$g=badaround_event_structured_data(9000);$social=badaround_event_social_metadata(9000);
+check($g['@graph'][0]['primaryImageOfPage']['url']===$social['og:image']&&$g['@graph'][1]['image']['width']===1200,'approved photo consistently used by page report and social preview');
+check($social['og:image:alt']===$seo['image_alt']&&$social['twitter:image:alt']===$seo['image_alt'],'contextual attachment alt shared without invented visual details');
+check($social['twitter:card']==='summary_large_image','approved photo enables large social preview');
+$GLOBALS['schema_image']=['http://example.test/insecure.webp',1200,800];
+check(!isset(badaround_event_social_metadata(9000)['og:image']),'insecure image URL omitted');
+$GLOBALS['schema_gallery_ids']=[];
+$GLOBALS['posts'][9000]->post_date_gmt='2026-10-20 10:00:00';$GLOBALS['posts'][9000]->post_modified_gmt='2026-10-21 12:00:00';
+$g=badaround_event_structured_data(9000);$social=badaround_event_social_metadata(9000);
+check($g['@graph'][1]['datePublished']==='2026-10-20T10:00:00Z'&&$social['article:modified_time']==='2026-10-21T12:00:00Z','publication and modification dates are ISO UTC, separate from occurrence');
 define('WPSEO_VERSION','fixture');check(badaround_event_structured_data(9000)===[],'external SEO owner prevents duplicate graph');
 echo "EVENT_STRUCTURED_DATA_SUITE_PASS\n";
