@@ -11,16 +11,18 @@ test('relationship found option follows event context and clears incompatible an
  h.set('event.category','animal');h.set('event.subtype','animal_sighted_or_found');assert.match([...select().options].find(o=>o.value==='found_subject').textContent,/animale/);
  }finally{h.close();}
 });
-test('anonymous choice explains private names and engagement is never preselected',()=>{
+test('anonymous choice explains private names and engagement is never preselected',async()=>{
  const h=create();try{
  assert.equal(h.model.effective('reporter.contact_preference'),undefined);assert.equal(h.model.effective('reporter.social_visibility'),undefined);
  h.fill();h.set('reporter.public_identity_mode','anonymous');const note=h.doc.querySelector('[data-native-anonymous-note]');assert.equal(note.hidden,false);assert.match(note.textContent,/non saranno pubblicati/i);
  h.set('reporter.public_identity_mode','pseudonym');assert.equal(note.hidden,false);assert.match(note.textContent,/pseudonimo/);
  h.set('reporter.first_name','Marco');h.set('reporter.last_name','Rossi');h.set('reporter.public_identity_mode','name_initial');assert.match(note.textContent,/Marco R\./);assert(!note.textContent.includes('Rossi'));
- const select=h.doc.querySelector('[name="reporter.public_identity_mode"]');assert.equal(select.hidden,false);assert.equal(select.parentElement.querySelector('.ba-native-card-grid'),null);
+ const select=h.doc.querySelector('[name="reporter.public_identity_mode"]');assert.equal(select.hidden,true);const group=select.parentElement.querySelector('.ba-native-card-grid');assert(group);
+ group.querySelector('input[value="name_initial"]').click();await new Promise(resolve=>setTimeout(resolve,10));
+ assert.equal(group.classList.contains('is-collapsed'),false);assert.equal([...group.querySelectorAll('label')].filter(el=>!el.hidden).length,4);assert.equal(select.parentElement.querySelector('.ba-native-edit-choice').hidden,true);
  assert.deepEqual([...select.options].map(o=>o.value),['','name_initial','first_name','pseudonym','anonymous']);
  assert(select.compareDocumentPosition(h.doc.querySelector('[data-native-field="reporter.first_name"]'))&h.w.Node.DOCUMENT_POSITION_FOLLOWING);
- assert.equal(h.root.nativeReport.config.fields['reporter.public_identity_mode'].label,'Come vuoi comparire online?');
+ assert.equal(h.root.nativeReport.config.fields['reporter.public_identity_mode'].label,'Come vuoi comparire nella segnalazione?');
  assert.equal(h.doc.querySelectorAll('.ba-native-engagement__intro').length,2);
  }finally{h.close();}
 });

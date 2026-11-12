@@ -821,8 +821,10 @@
 .ba-native .ba-native-neighborhood__actions button+button{background:#fff;color:#087f8c}
 .ba-native .ba-native-neighborhood__actions button:disabled{opacity:.55;cursor:default}
 .ba-native .ba-native-neighborhood__actions button:focus-visible{outline:2px solid #1a73e8;outline-offset:2px}
-.ba-native [data-native-field="reporter.public_identity_mode"] select{display:block;width:100%;padding-right:42px;border-radius:12px;cursor:pointer}
 .ba-native .ba-native-help:empty{display:none}
 .ba-native .ba-native-anonymous-note strong{font-weight:700}
 
 .ba-native .ba-native-location-card [data-smart-confirmation][hidden]{display:none}
+
+/* Separate the privacy explanation from the visible signature choices. */
+.ba-native [data-native-field="reporter.public_identity_mode"] .ba-native-anonymous-note{margin-top:18px;padding-top:18px}

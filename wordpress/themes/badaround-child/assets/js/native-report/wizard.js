@@ -398,7 +398,7 @@
     }
     function syncCards(wrapper, field) {
       const select = wrapper.querySelector('select[data-native-input]');
-      if (!select || (field.step === 'location' && wrapper.dataset.nativeField.startsWith('location.')) || wrapper===authorityWrapper || wrapper.dataset.nativeField==='authority.type' || wrapper.dataset.nativeField==='reporter.public_identity_mode') return;
+      if (!select || (field.step === 'location' && wrapper.dataset.nativeField.startsWith('location.')) || wrapper===authorityWrapper || wrapper.dataset.nativeField==='authority.type') return;
       const options = Array.from(select.options).filter(option => option.value);
       const category = wrapper.dataset.nativeField === 'event.category';
       const subtype = wrapper.dataset.nativeField === 'event.subtype';
@@ -477,7 +477,7 @@
         });
       }
       if (!select.value || entry.collapsedValue !== select.value) entry.collapsedValue = null;
-      const collapsed = Boolean(entry.collapsedValue);
+      const collapsed = wrapper.dataset.nativeField!=='reporter.public_identity_mode' && Boolean(entry.collapsedValue);
       entry.group.classList.toggle('is-collapsed',collapsed);
       entry.edit.hidden = !collapsed; entry.edit.disabled = select.disabled;
       entry.edit.setAttribute('aria-expanded',String(!collapsed));

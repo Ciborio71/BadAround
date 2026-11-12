@@ -43,7 +43,7 @@ function badaround_native_report_labels() {
 		'reward.status' => 'Vuoi offrire una ricompensa per informazioni utili?', 'reward.amount' => 'Importo in euro', 'reward.conditions' => 'Condizioni della ricompensa', 'reward.expires_on' => 'Scadenza',
 		'reward.confirmed' => 'Confermo l’impegno relativo alla ricompensa indicata',
 		'reporter.first_name' => 'Nome', 'reporter.last_name' => 'Cognome', 'reporter.email' => 'Email', 'reporter.phone' => 'Telefono',
-		'reporter.public_identity_mode' => 'Come vuoi comparire online?', 'reporter.pseudonym' => 'Pseudonimo pubblico', 'reporter.contact_preference' => 'Vuoi ricevere aggiornamenti e informazioni su questo evento?',
+		'reporter.public_identity_mode' => 'Come vuoi comparire nella segnalazione?', 'reporter.pseudonym' => 'Pseudonimo pubblico', 'reporter.contact_preference' => 'Vuoi ricevere aggiornamenti e informazioni su questo evento?',
 		'reporter.social_visibility' => 'Vuoi dare visibilità a questo evento sui canali social di BadAround?',
 		'consents.truthfulness' => 'Confermo che le informazioni sono veritiere per quanto a mia conoscenza',
 		'consents.media_rights' => 'Confermo di avere i diritti su eventuali contenuti forniti',

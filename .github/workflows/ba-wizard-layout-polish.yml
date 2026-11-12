@@ -19,13 +19,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: df5fd34241a2cd0b41004bae1cfc82570948ea35
+          ref: 9af96dc959da43f126d6a251e29a2a530d18dc53
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify simplified location copy and map behavior
+      - name: Verify visible public identity options and private-name preview
         run: |
           npm ci --prefix tests --ignore-scripts
           node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
@@ -39,7 +39,7 @@ jobs:
           php -l wordpress/themes/badaround-child/footer.php
           php tests/geo-prec-01-publication.php
           php tests/geo-area-01-publication.php
-          node --test tests/f1-15b-r5-smart-address.cjs tests/geo-public-03-choice.cjs tests/geo-area-01-model.cjs
+          node --test tests/native-report-f16-dom.cjs tests/native-report-f19-ux.cjs tests/wizard-presentation-20261112.cjs tests/test-ba-access-wizard-dom.cjs
           python3 -m py_compile tools/ba_wizard_layout_polish_release.py
           python3 -m unittest discover -s tests -p test_ba_event_seo_release.py
       - name: Verify responsive presentation with the canonical fixture origin
