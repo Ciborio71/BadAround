@@ -36,3 +36,7 @@ Targeted release: https://github.com/Ciborio71/BadAround/actions/runs/4324059318
 Identity functional and MySQL: https://github.com/Ciborio71/BadAround/actions/runs/43240262299 — PASS.
 
 Follow-up outcome: PASS — 107 targeted tests, five Chromium viewport checks, independent marker gradient reference check, guarded four-file installation and SHA readback. Production source independently confirmed for marker, private-name ordering and location/zone styling.
+
+## Final reporter-preferred ordering
+
+The reporter subsequently confirmed keeping the initial question before private names: “Come vuoi comparire online?” → dynamic privacy/signature preview → optional pseudonym → required first/last names. Native select and all four canonical identity modes retained. Private-name helper now refers to the choice above. Runtime 5e352127d72f2d37ed66bb83dc7d75dc2a6ee410. Guarded one-file release https://github.com/Ciborio71/BadAround/actions/runs/43245133473 PASS; 107 tests and five responsive widths PASS; SHA readback PASS. This ordering supersedes the prior names-first proposal.
