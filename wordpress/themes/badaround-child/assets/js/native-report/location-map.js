@@ -44,10 +44,10 @@
       element.setAttribute(attribute.name,value==='#'+old?'#'+fresh:value);
      }
     }
-    svg.setAttribute('width','44');svg.setAttribute('height','55');
-    Object.assign(svg.style,{display:'block',width:'44px',height:'55px',transform:'none'});
+    svg.setAttribute('width','64');svg.setAttribute('height','80');
+    Object.assign(svg.style,{display:'block',width:'64px',height:'80px',transform:'none'});
    }
-   Object.assign(pin.style,{display:'block',width:'44px',height:'55px',background:'none',transform:'none'});
+   Object.assign(pin.style,{display:'block',width:'64px',height:'80px',background:'none',transform:'none'});
    pin.setAttribute('aria-hidden','true');return pin;
   }
   function show(position){return mapTask=renderMap(position);}

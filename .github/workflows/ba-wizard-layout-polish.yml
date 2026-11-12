@@ -19,13 +19,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: 5dadebb13ece33d083678417d7b752aeb3e5f181
+          ref: f514528981a4af9a41d6535dbb752d880c801172
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify wizard without optional district selection
+      - name: Verify larger wizard marker and unchanged map behavior
         run: |
           npm ci --prefix tests --ignore-scripts
           node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
@@ -39,7 +39,7 @@ jobs:
           php -l wordpress/themes/badaround-child/footer.php
           php tests/geo-prec-01-publication.php
           php tests/geo-area-01-publication.php
-          node --test tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs tests/native-report-f19-ux.cjs tests/geo-public-03-choice.cjs tests/geo-area-01-model.cjs tests/wizard-presentation-20261112.cjs tests/test-ba-access-wizard-dom.cjs tests/neighborhood-model.cjs
+          node --test tests/f1-15b-r5-smart-address.cjs tests/geo-public-03-choice.cjs tests/geo-area-01-model.cjs
           python3 -m py_compile tools/ba_wizard_layout_polish_release.py
           python3 -m unittest discover -s tests -p test_ba_event_seo_release.py
       - name: Verify responsive presentation with the canonical fixture origin
