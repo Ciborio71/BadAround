@@ -33,7 +33,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: bb34779c5204e195747bb9b39d57ba42937592d1
+          ref: 24c77d23050d5acb172b663784586504e1275817
           path: prior-source
           persist-credentials: false
       - name: Verify exact peers, forged headers, preserved secrets and maintenance isolation
@@ -55,7 +55,7 @@ jobs:
           curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
           curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
           cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/chain.pem
-      - name: Install bounded whitelist support without changing allowed peers
+      - name: Install bounded private inbox support preserving existing configuration
         env:
           FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}

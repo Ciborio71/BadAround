@@ -5,7 +5,7 @@ import importlib.util,ftplib,ssl,os,json,re,io,tempfile,subprocess,hashlib
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('guard',ROOT/'tools/ba_event_seo_release.py')
 guard=importlib.util.module_from_spec(spec);spec.loader.exec_module(guard)
-FILES=['themes/badaround-child/functions.php'];guard.FILES=FILES
+FILES=[];guard.FILES=FILES
 PRIVATE='/ba-identity-private-qa.php'
 def candidate_private(original):
     pattern=rb"define\('BADAROUND_IDENTITY_ROOT_SECRET','([a-f0-9]{96})'\);"
@@ -47,7 +47,7 @@ def main():
         ftp.rename(temp,PRIVATE);installed=True
         if guard.read(ftp,PRIVATE)!=private:raise RuntimeError('Private readback mismatch')
         evidence=guard.release(ftp,prior,candidate,run)
-        evidence.update({'private_configuration_verified':True,'private_key_preserved':True,'permissions_0600_preserved':True,'option_allowlist_unchanged_by_deploy':True,'max_explicit_peers':16})
+        evidence.update({'private_configuration_verified':True,'private_key_preserved':True,'permissions_0600_preserved':True,'option_allowlist_unchanged_by_deploy':True,'max_explicit_peers':16,'max_explicit_inboxes':8})
         print('IP_WHITELIST_RELEASE_PASS');print(json.dumps(evidence,sort_keys=True))
     except Exception:
         if installed:

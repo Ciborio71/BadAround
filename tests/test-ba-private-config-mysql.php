@@ -84,7 +84,14 @@ try {
     foreach(['allow','allow_second'] as $mode)cfgCheck($run($mode)['ok']===true,'each explicit peer in bounded list is authorized');
     cfgCheck($run('existing_key')['existing_key_preserved'],'multiple peers never rotate key');
     $reset();$q->execute([serialize(['other@example.org','tester@example.org']),'badaround_identity_qa_email_allowlist']);
-    cfgCheck($run('allow')['ok']===false,'test configuration requires exactly one explicit inbox');
+    cfgCheck($run('allow')['ok']===true,'two explicit private inboxes retain runtime admission');
+    cfgCheck($run('existing_key')['existing_key_preserved'],'multiple inboxes never rotate key');
+    foreach([[],['*'],['tester@example.org','tester@example.org'],['Tester@example.org'],[' tester@example.org'],['invalid'],array_fill(0,9,'tester@example.org'),['inbox'=>'tester@example.org']] as $bad) {
+        $reset();$q->execute([serialize($bad),'badaround_identity_qa_email_allowlist']);
+        cfgCheck($run('allow')['ok']===false,'malformed, duplicate or excessive inbox list rejected');
+    }
+    $reset();$q->execute([serialize(array_map(static fn($i)=>'tester'.$i.'@example.org',range(1,8))),'badaround_identity_qa_email_allowlist']);
+    cfgCheck($run('allow')['ok']===true,'eight distinct explicit inboxes allowed within existing mail fence bound');
     $reset();$q->execute([serialize(['scope'=>'public','state'=>'owner_adopted']),'badaround_identity_qa_notice_adoption']);
     cfgCheck($run('allow')['ok']===false,'public notice scope cannot activate private test configuration');
 }finally {
