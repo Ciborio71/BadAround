@@ -36,6 +36,7 @@ $account_label = $account_authenticated ? 'Il mio profilo' : 'Accedi';
 			<a href="<?php echo esc_url( home_url( '/cerca/' ) ); ?>">Cerca</a>
 			<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Segnalazioni</a>
 			<a href="<?php echo esc_url( home_url( '/come-funziona/' ) ); ?>">Come funziona</a>
+            <a href="<?php echo esc_url(home_url('/blog/')); ?>"<?php echo (is_page('blog')||is_singular('post')||is_category())?' aria-current="page"':''; ?>>Blog</a>
 			<a href="<?php echo esc_url( home_url( '/sentinelle/' ) ); ?>">Sentinelle</a>
 		</nav>
 
@@ -59,6 +60,7 @@ $account_label = $account_authenticated ? 'Il mio profilo' : 'Accedi';
 			<a href="<?php echo esc_url( home_url( '/cerca/' ) ); ?>">Cerca</a>
 			<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Segnalazioni</a>
 			<a href="<?php echo esc_url( home_url( '/come-funziona/' ) ); ?>">Come funziona</a>
+            <a href="<?php echo esc_url(home_url('/blog/')); ?>"<?php echo (is_page('blog')||is_singular('post')||is_category())?' aria-current="page"':''; ?>>Blog</a>
 			<a href="<?php echo esc_url( home_url( '/sentinelle/' ) ); ?>">Sentinelle</a>
 			<a class="ba-button ba-button--urgent" href="<?php echo esc_url( $report_url ); ?>">Segnala un evento</a>
 		</nav>

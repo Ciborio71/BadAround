@@ -206,6 +206,7 @@ $home_categories = array(
 				</section>
 			</div>
 
+			<?php badaround_blog_home(); ?>
 		</div>
 	</section>
 </main>

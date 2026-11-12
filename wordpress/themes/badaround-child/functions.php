@@ -13,6 +13,7 @@ add_filter( 'use_block_editor_for_post', '__return_false', 100 );
 
 define( 'BADAROUND_CHILD_VERSION', '0.6.0' );
 require_once __DIR__.'/inc/pins.php';
+require_once __DIR__.'/inc/blog.php';
 
 
 /**
@@ -193,7 +194,8 @@ function badaround_child_enqueue_assets() {
 	$is_not_found    = is_404();
 	$is_how_it_works = is_page( 'come-funziona' );
 	$is_legal         = is_page( array( 'termini-e-condizioni', 'privacy-policy', 'cookie-policy', 'regole-di-pubblicazione', 'segnalazioni-privacy-e-moderazione' ) );
-	$is_badaround     = $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_radar_demo || $is_search || $is_reports || $is_sentinel || $is_states || $is_account || $is_not_found || $is_how_it_works || $is_legal;
+	$is_blog = is_page('blog') || is_singular('post') || is_category();
+	$is_badaround     = $is_blog || $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_radar_demo || $is_search || $is_reports || $is_sentinel || $is_states || $is_account || $is_not_found || $is_how_it_works || $is_legal;
 
 	if ( ! $is_badaround ) {
 		return;

@@ -67,3 +67,11 @@
 
 /* Stable account slot across session checks and page navigation. */
 .ba-header-login{inline-size:8em;flex:0 0 8em;text-align:center}
+
+/* Seven navigation items retain room for the report/account actions. */
+@media(min-width:861px) and (max-width:1180px){
+ .ba-site-header__inner{min-height:68px;grid-template-columns:auto 1fr}
+ .ba-site-header .ba-primary-nav,.ba-site-header .ba-header-report{display:none}
+ .ba-site-header .ba-header-actions{gap:10px}
+ .ba-site-header .ba-menu-toggle{display:block}
+}
