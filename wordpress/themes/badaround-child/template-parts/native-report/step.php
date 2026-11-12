@@ -86,7 +86,6 @@ foreach ( $config['fields'] as $path => $field ) {
 }
 if ( 'location' === $key ) : ?></div>
 	<div data-native-time-fields>
-	<p>Indica anche quando è successo. Puoi scegliere una data, un periodo approssimativo oppure «Non lo so». Gli orari si riferiscono al fuso <?php echo esc_html( $config['timezone'] ); ?>.</p>
 	<?php foreach ( $config['fields'] as $path => $field ) { if ( 0 === strpos( $path, 'time.' ) ) { badaround_native_report_field( $path, $field ); } } ?>
 	</div>
 <?php endif;

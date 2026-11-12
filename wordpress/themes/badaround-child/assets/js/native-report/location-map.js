@@ -69,7 +69,7 @@
      marker.addEventListener('gmp-dragend',dragListener);
      dragMoveListener=()=>syncCircle();marker.addEventListener('gmp-drag',dragMoveListener);
     }else{marker.map=map;marker.position=position;marker.replaceChildren(glyph());map.setCenter(position);}
-    sync();say('Il segnaposto indica la posizione riservata dell’evento. Puoi correggerla spostandolo.');
+    sync();say('');
    }catch(_){if(!disposed&&bridge.current(ticket))say('Mappa non disponibile. Puoi continuare con l’indirizzo Google confermato.');}
   }
   function revealAddress(ticket){

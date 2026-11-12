@@ -19,13 +19,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: f514528981a4af9a41d6535dbb752d880c801172
+          ref: df5fd34241a2cd0b41004bae1cfc82570948ea35
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify larger wizard marker and unchanged map behavior
+      - name: Verify simplified location copy and map behavior
         run: |
           npm ci --prefix tests --ignore-scripts
           node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
