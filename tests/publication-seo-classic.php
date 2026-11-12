@@ -1,7 +1,7 @@
 <?php
 /** Reproduce classic admin publication with the real B2 filters and B3 service. */
 require __DIR__.'/event-dynamic-seo.php';
-require_once dirname(__DIR__).'/wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php';
+require_once getenv('BA_PUBLICATION_SERVICE_FILE')?dirname(getenv('BA_PUBLICATION_SERVICE_FILE')).'/class-badaround-moderation-admin.php':dirname(__DIR__).'/wordpress/plugins/badaround-core/includes/class-badaround-moderation-admin.php';
 if(!function_exists('remove_action')){function remove_action($name,$fn,$priority=10){remove_filter($name,$fn,$priority);}}
 $admin=new BadAround_Moderation_Admin();$GLOBALS['fixture_moderation']=$admin;
 add_filter('wp_insert_post_data',array($admin,'prevent_b2_publish'),20,2);

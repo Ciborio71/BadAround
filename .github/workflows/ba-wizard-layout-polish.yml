@@ -25,7 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify classic publication regression, GEO rollback and wizard cleanup
+      - name: Verify prior classic failure and corrected publication lifecycle
         run: |
           npm ci --prefix tests --ignore-scripts
           node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
