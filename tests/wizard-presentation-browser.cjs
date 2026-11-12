@@ -28,14 +28,14 @@ const {chromium}=require('playwright-core'),{execFileSync}=require('node:child_p
    const svg=document.querySelector('[data-smart-map] .ba-native-location-pin svg');
    results.push({category,round:svg.getAttribute('viewBox')==='0 -1 48 48'&&!svg.querySelector(':scope > path'),width:svg.getAttribute('width'),height:svg.getAttribute('height'),anchor:window.fixtureMarker.anchorTop,color:window.fixtureCircle.options.strokeColor,fill:window.fixtureCircle.options.fillColor,radius:window.fixtureCircle.radius});
   }
-  wizard.model.publicLocationRadius=300;window.fixtureMapController.sync();const radius=window.fixtureCircle.radius;
+  wizard.model.publicLocationRadius=250;window.fixtureMapController.sync();const radius=window.fixtureCircle.radius;
   wizard.model.publicLocationRequest='exact_point';window.fixtureMapController.sync();
   const svg=document.querySelector('[data-smart-map] .ba-native-location-pin svg');
   return {results,radius,exact:!!svg.querySelector(':scope > path'),height:svg.getAttribute('height'),anchor:window.fixtureMarker.anchorTop,circleHidden:window.fixtureCircle.map===null};
  });
  const colors=['#1677E8','#C9153D','#F57C00','#0AA184','#7040C8','#E3A415'];
  modes.results.forEach((r,i)=>{assert(r.round);assert.equal(r.width,'80');assert.equal(r.height,'80');assert.equal(r.anchor,'-50%');assert.equal(r.color,colors[i]);assert.equal(r.fill,colors[i]);assert.equal(r.radius,100);});
- assert.equal(modes.radius,300);assert(modes.exact);assert.equal(modes.height,'100');assert.equal(modes.anchor,'-100%');assert(modes.circleHidden);
+ assert.equal(modes.radius,250);assert(modes.exact);assert.equal(modes.height,'100');assert.equal(modes.anchor,'-100%');assert(modes.circleHidden);
 
  for(const width of [1440,1024,768,390,320]){
  await page.setViewportSize({width,height:1100});
