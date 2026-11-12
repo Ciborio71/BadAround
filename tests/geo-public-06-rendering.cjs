@@ -12,7 +12,7 @@ const territory = { id:269,title:'Territory',territory:{name:'Roma'},event_type:
 const svg = marker => decodeURIComponent(marker.icon.url.split(',').slice(1).join(','));
 async function render(items, context='full', dataset={}, pinCategory='spazi-pubblici') {
  const dom = new JSDOM('<h1>Public title</h1><section><div data-ba-map></div><div data-ba-map-list></div><div data-ba-map-status hidden></div><div data-ba-map-preview hidden><div data-ba-map-preview-content></div><button data-ba-map-preview-close></button></div></section>', {url:'https://staging.badaround.it/',runScripts:'outside-only'});
- const w=dom.window, node=w.document.querySelector('[data-ba-map]');
+ const w=dom.window;w.HTMLElement.prototype.scrollTo=function(options){this.scrollTop=options?.top||0;};const node=w.document.querySelector('[data-ba-map]');
  node.dataset.baMapContext=context; Object.assign(node.dataset,dataset);
  const state={markers:[],circles:[],maps:[],overlays:[]};
  class Layer {

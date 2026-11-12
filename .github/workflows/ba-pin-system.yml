@@ -25,7 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify unified category pin system and access regressions
+      - name: Verify category artwork, precision cards and access regressions
         run: |
           npm ci --prefix tests --ignore-scripts
           find wordpress/themes/badaround-child -name "*.php" -exec php -l {} \; > /dev/null
