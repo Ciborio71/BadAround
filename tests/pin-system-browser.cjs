@@ -3,6 +3,7 @@ const {chromium}=require(process.env.BA_PLAYWRIGHT_MODULE||'playwright-core'),{e
  const root=path.join(__dirname,'..'),catalog=JSON.parse(fs.readFileSync(path.join(root,'wordpress/themes/badaround-child/assets/pin-designs.json'),'utf8'));
  const keys=['veicoli','case-e-attivita','pericoli','spazi-pubblici','animali','oggetti-e-documenti'];
  let html=execFileSync(process.env.BA_PHP||'php',[path.join(__dirname,'native-report-f16.php'),'--html'],{encoding:'utf8'}).replace(/<script src=[^>]*><\/script>/g,'').replace(/<link[^>]*>/g,'');
+ html+=execFileSync(process.env.BA_PHP||'php',[path.join(__dirname,'event-area-artwork.php'),'--html'],{encoding:'utf8'});
  html+='<section class="ba-home-categories">'+keys.map(k=>'<a class="ba-home-category-card"><span class="ba-home-category__pin">'+catalog[k].svg+'</span><span>Categoria '+k+'</span></a>').join('')+'</section><details class="ba-map-legend" open>'+keys.map(k=>'<span class="ba-map-legend__pin">'+catalog[k].svg+'</span>').join('')+'</details>';
  const browser=await chromium.launch({executablePath:process.env.BA_CHROMIUM||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
  try{
@@ -15,6 +16,8 @@ const {chromium}=require(process.env.BA_PLAYWRIGHT_MODULE||'playwright-core'),{e
    const icons=[...document.querySelectorAll('.ba-native-category-grid .ba-native-card-icon svg')];
    return {count:icons.length,large:icons.every(svg=>{const pin=svg.getBoundingClientRect(),card=svg.closest('.ba-native-option-card').getBoundingClientRect();return pin.height>=80&&pin.height/card.height>=.6&&pin.height<card.height&&pin.right<=card.right&&pin.left>=card.left}),clear:icons.every(svg=>getComputedStyle(svg).transform==='none'&&!!svg.querySelector('circle[fill="#fff"]')&&getComputedStyle(svg.closest('.ba-native-card-icon')).transform==='none'),home:[...document.querySelectorAll('.ba-home-category__pin svg')].every(svg=>getComputedStyle(svg).transform==='none'),overflow:document.documentElement.scrollWidth>innerWidth+1};
   });
+  const areas=await page.evaluate(()=>[...document.querySelectorAll('.ba-event-card--approximate')].map(card=>{const svg=card.querySelector('.ba-pin-svg--area'),rect=svg.getBoundingClientRect();return {square:Math.abs(rect.width-rect.height)<1,white:!!svg.querySelector('circle[fill="#fff"]'),radius:card.textContent.includes('raggio 100 m')};}));
+  assert.equal(areas.length,2);areas.forEach(area=>{assert(area.square);assert(area.white);assert(area.radius);});
   assert.equal(result.count,6);assert(result.large,'large contained category pins '+width);assert(result.clear,'unrotated SVG with white center '+width);assert(result.home);assert(!result.overflow,'pin layout overflow '+width);
   console.log('PASS pin system layout',width);
  }

@@ -143,7 +143,8 @@ $home_categories = array(
 							'template-parts/components/event-card',
 							null,
 							array(
-								'title'        => $item['title'],
+								'event_id'     => $item['id'] ?? 0,
+                                'title'        => $item['title'],
 								'url'          => $item['permalink'],
 								'status'       => 'info',
 								'status_label' => $item['event_type']['name'] ?? 'Segnalazione',

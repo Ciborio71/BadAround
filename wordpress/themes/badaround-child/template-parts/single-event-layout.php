@@ -206,7 +206,7 @@ if ( $status ) {
 		<div class="ba-container ba-event-layout">
 			<div class="ba-event-main">
                 <div class="ba-event-overview<?php echo !$gallery_ids?' ba-event-overview--empty':''; ?>">
-                    <?php if(function_exists('badaround_render_event_gallery'))badaround_render_event_gallery($gallery_ids,$event_seo['image_alt']??$title,$section_headings['photos'],badaround_child_placeholder_url($category_term?$category_term->slug:'')); ?>
+                    <?php if(function_exists('badaround_render_event_gallery'))badaround_render_event_gallery($gallery_ids,$event_seo['image_alt']??$title,$section_headings['photos'],badaround_child_placeholder_url($category_term?$category_term->slug:'',$public_mode)); ?>
 				<?php if ( ! empty( $public_specific ) ) : ?>
 					<section class="ba-card ba-event-section">
 						<div class="ba-event-section__head">

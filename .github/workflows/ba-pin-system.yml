@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: 6c442d425e24fda7164c99da8d25791475603d07
+          ref: c33f54f66c484419a23dcd8662238df75847938d
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -30,6 +30,7 @@ jobs:
           npm ci --prefix tests --ignore-scripts
           find wordpress/themes/badaround-child -name "*.php" -exec php -l {} \; > /dev/null
           php tests/pin-system.php
+          php tests/event-area-artwork.php
           php tests/native-report-f16.php
           php tests/nf-ux-02b-v2.php
           php tests/event-gallery.php

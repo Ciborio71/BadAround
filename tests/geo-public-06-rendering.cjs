@@ -11,7 +11,7 @@ const legacy = { id:290,title:'Legacy',event_type:{id:1},public_geo:{lat:41.8661
 const territory = { id:269,title:'Territory',territory:{name:'Roma'},event_type:{id:1},public_geo:null,exact_lat:99,exact_lng:99 };
 const svg = marker => decodeURIComponent(marker.icon.url.split(',').slice(1).join(','));
 async function render(items, context='full', dataset={}, pinCategory='spazi-pubblici') {
- const dom = new JSDOM('<h1>Public title</h1><section><div data-ba-map></div><div data-ba-map-status hidden></div><div data-ba-map-preview hidden><div data-ba-map-preview-content></div><button data-ba-map-preview-close></button></div></section>', {url:'https://staging.badaround.it/',runScripts:'outside-only'});
+ const dom = new JSDOM('<h1>Public title</h1><section><div data-ba-map></div><div data-ba-map-list></div><div data-ba-map-status hidden></div><div data-ba-map-preview hidden><div data-ba-map-preview-content></div><button data-ba-map-preview-close></button></div></section>', {url:'https://staging.badaround.it/',runScripts:'outside-only'});
  const w=dom.window, node=w.document.querySelector('[data-ba-map]');
  node.dataset.baMapContext=context; Object.assign(node.dataset,dataset);
  const state={markers:[],circles:[],maps:[],overlays:[]};
@@ -34,7 +34,7 @@ async function render(items, context='full', dataset={}, pinCategory='spazi-pubb
  }
  w.google={maps:{ControlPosition:{RIGHT_TOP:"RIGHT_TOP"},Map,Marker,Circle,LatLngBounds:Bounds,OverlayView:Overlay,LatLng:class{constructor(p){Object.assign(this,p);}},Size:class{constructor(w,h){this.width=w;this.height=h;}},Point:class{constructor(x,y){this.x=x;this.y=y;}},InfoWindow:class{setContent(){}open(){}close(){}}}};
  w.IntersectionObserver=class{constructor(callback){this.callback=callback;}observe(){this.callback([{isIntersecting:true}]);}disconnect(){}};
- w.BadAroundMap={pinDesigns:JSON.parse(fs.readFileSync('wordpress/themes/badaround-child/assets/pin-designs.json','utf8')),hasMaps:true,mapsUrl:'https://maps.googleapis.com',endpoint:'/wp-json/badaround/v1/discovery',categoryByTerm:{1:pinCategory}};
+ w.BadAroundMap={placeholder:'/assets/event-placeholder.svg?ver=4',placeholders:{'spazi-pubblici':'/assets/event-placeholder-spazi-pubblici.svg?ver=4'},pinDesigns:JSON.parse(fs.readFileSync('wordpress/themes/badaround-child/assets/pin-designs.json','utf8')),hasMaps:true,mapsUrl:'https://maps.googleapis.com',endpoint:'/wp-json/badaround/v1/discovery',categoryByTerm:{1:pinCategory}};
  w.fetch=async()=>({ok:true,json:async()=>({items,total:items.length})});
  w.eval(fs.readFileSync("wordpress/themes/badaround-child/assets/js/map-navigation.js","utf8"));
  w.eval(source);
@@ -128,4 +128,20 @@ test('all six published category pins use the shared black-on-white artwork with
   assert.equal(pin.icon.anchor.x,28);assert.equal(pin.icon.anchor.y,64);
   const position=JSON.stringify(pin.position);pin.trigger('mouseover');assert.equal(pin.icon.anchor.y,64);assert.equal(JSON.stringify(pin.position),position);r.close();
  }
+});
+
+test('public cards and map previews distinguish approximate areas and retain real photos',async()=>{
+ for(const photo of ['', 'https://badaround.it/uploads/dog.jpg']){
+  const r=await render([{...approximate,thumbnail:photo,permalink:'https://badaround.it/eventi/test/'}]);
+  const card=r.dom.window.document.querySelector('.ba-map-event-card');
+  assert(card.classList.contains('ba-event-card--approximate'));
+  assert.match(card.textContent,/Area approssimata · raggio 1000 m/);
+  assert(card.querySelector('.ba-pin-svg--area'));
+  const img=card.querySelector('img');assert.equal(img.getAttribute('src'),photo||'/assets/event-placeholder-spazi-pubblici-area.svg?ver=4');
+  r.markers[0].trigger('click');const preview=r.dom.window.document.querySelector('.ba-map-preview-card');
+  assert(preview.querySelector('.ba-pin-svg--area'));assert.match(preview.textContent,/raggio 1000 m/);
+  assert.equal(preview.querySelector('img').getAttribute('src'),photo||'/assets/event-placeholder-spazi-pubblici-area.svg?ver=4');r.close();
+ }
+ const r=await render([exact]);const card=r.dom.window.document.querySelector('.ba-map-event-card');
+ assert(!card.querySelector('.ba-pin-svg--area'));assert.doesNotMatch(card.textContent,/Area approssimata/);r.close();
 });

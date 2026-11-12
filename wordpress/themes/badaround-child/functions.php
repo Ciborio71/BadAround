@@ -145,10 +145,10 @@ function badaround_child_public_image_sizes() {
 }
 add_action( 'after_setup_theme', 'badaround_child_public_image_sizes' );
 
-function badaround_child_placeholder_url($category='') {
+function badaround_child_placeholder_url($category='',$mode='') {
     $categories=array('veicoli','case-e-attivita','pericoli','spazi-pubblici','animali','oggetti-e-documenti');
     $suffix=in_array($category,$categories,true)?'-'.$category:'';
-    return get_stylesheet_directory_uri().'/assets/event-placeholder'.$suffix.'.svg?ver=4';
+    return get_stylesheet_directory_uri().'/assets/event-placeholder'.$suffix.($mode==='approximate_area'?'-area':'').'.svg?ver=4';
 }
 function badaround_child_event_category_slug($id){
     $terms=get_the_terms($id,'ba_tipo_evento');
@@ -168,7 +168,8 @@ function badaround_child_event_image_url( $post_id, $context = 'thumb' ) {
 		$url = get_the_post_thumbnail_url( $post_id, $size );
 		if ( $url ) return $url;
 	}
-	return badaround_child_placeholder_url(badaround_child_event_category_slug($post_id));
+	$presentation=badaround_event_public_presentation($post_id);
+	return badaround_child_placeholder_url(badaround_child_event_category_slug($post_id),$presentation['mode']??'');
 }
 
 /**

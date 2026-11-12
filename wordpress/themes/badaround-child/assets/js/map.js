@@ -159,6 +159,19 @@
 		};
 	};
 
+    const approximateItem = item => publicGeometry(item.public_geo)?.mode === 'approximate_area';
+    const precisionLabel = item => approximateItem(item) ? 'Area approssimata · raggio '+publicGeometry(item.public_geo).radius+' m' : '';
+    const cardImage = (item,category) => {
+        if(item.thumbnail)return item.thumbnail;
+        const url=config.placeholders?.[category]||config.placeholder;
+        return approximateItem(item)&&url?url.replace(/\.svg(?=\?|$)/,'-area.svg'):url;
+    };
+    const cardMedallion = (item,category) => {
+        if(!approximateItem(item))return '<svg class="ba-pin-svg" viewBox="0 0 48 60" aria-hidden="true" focusable="false">'+pinBody(category,false)+'</svg>';
+        const p=categories[category]||neutral;
+        return '<svg class="ba-pin-svg ba-pin-svg--area" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><circle cx="24" cy="24" r="21" fill="'+p.color+'" stroke="#fff" stroke-width="1.6"/><circle cx="24" cy="24" r="15.3" fill="#fff"/><g transform="translate(12 12)">'+iconMarkup(p.icon)+'</g></svg>';
+    };
+
 	const groundShadow = () => ({
 		url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="12" viewBox="0 0 24 12"><defs><filter id="blur"><feGaussianBlur stdDeviation="1"/></filter></defs><ellipse cx="12" cy="6" rx="8" ry="3" fill="#071a38" opacity=".35" filter="url(#blur)"/></svg>'),
 		scaledSize: new google.maps.Size(24, 12), anchor: new google.maps.Point(12, 6),
@@ -208,8 +221,9 @@
 		const wrap = document.createElement('article');
 		wrap.className = 'ba-card ba-event-card ba-event-card--home ba-map-preview-card' + (category ? ' ba-event-card--category-' + category : '');
 		wrap.style.setProperty('--ba-card-accent', palette.color);
+        wrap.classList.toggle('ba-event-card--approximate',approximateItem(item));
 
-		const imageUrl = item.thumbnail || config.placeholders?.[category] || config.placeholder;
+		const imageUrl = cardImage(item,category);
 		if (imageUrl) {
 			const media = document.createElement('a');
 			media.className = 'ba-event-card__media';
@@ -227,7 +241,7 @@
 			const medallion = document.createElement('span');
 			medallion.className = 'ba-event-card__media-category';
 			medallion.setAttribute('aria-hidden', 'true');
-			medallion.innerHTML = '<svg class="ba-pin-svg" viewBox="0 0 48 60" aria-hidden="true" focusable="false">'+pinBody(category,false)+'</svg>';
+			medallion.innerHTML = cardMedallion(item,category);
 			media.appendChild(medallion);
 			wrap.appendChild(media);
 		} else {
@@ -252,7 +266,7 @@
 		title.appendChild(titleLink);
 		body.appendChild(title);
 
-		const metaParts = [item.occurred_date, item.occurred_time, item.public_place_name || item.territory?.name].filter(Boolean);
+		const metaParts = [item.occurred_date, item.occurred_time, item.public_place_name || item.territory?.name, precisionLabel(item)].filter(Boolean);
 		if (metaParts.length) {
 			const meta = document.createElement('div');
 			meta.className = 'ba-event-card__meta';
@@ -306,6 +320,7 @@
 			const card = document.createElement('article');
 			const category = categoryFor(item);
 			card.className = 'ba-card ba-event-card ba-map-event-card' + (category ? ' ba-event-card--category-' + category : '');
+			card.classList.toggle('ba-event-card--approximate',approximateItem(item));
 			card.dataset.baEventId = String(item.id || '');
 			card.tabIndex = 0;
 			card.setAttribute('role','button');
@@ -315,11 +330,12 @@
 				media.className = 'ba-event-card__media';
 				media.setAttribute('aria-hidden', 'true');
 				const img = document.createElement('img');
-				img.src = item.thumbnail || config.placeholders?.[category] || config.placeholder;
+				img.src = cardImage(item,category);
 				img.alt = '';
 				img.loading = 'lazy';
 				img.decoding = 'async';
 				media.appendChild(img);
+                const medallion=document.createElement('span');medallion.className='ba-event-card__media-category';medallion.innerHTML=cardMedallion(item,category);media.appendChild(medallion);
 				card.appendChild(media);
 			}
 			const body = document.createElement('div');
@@ -336,7 +352,7 @@
 			heading.appendChild(text(editorialText(item.title)));
 			body.appendChild(heading);
 
-			const metaParts = [item.occurred_date, item.occurred_time, item.public_place_name || item.territory?.name].filter(Boolean);
+			const metaParts = [item.occurred_date, item.occurred_time, item.public_place_name || item.territory?.name, precisionLabel(item)].filter(Boolean);
 			if (metaParts.length) {
 				const meta = document.createElement('div');
 				meta.className = 'ba-event-card__meta';

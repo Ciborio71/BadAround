@@ -71,7 +71,7 @@ add_action('rest_api_init',static function(){
                 $category='';$term=get_term((int)($item['event_type']['id']??0),'ba_tipo_evento');
                 if($term instanceof WP_Term){while($term->parent){$p=get_term($term->parent,'ba_tipo_evento');if(!$p instanceof WP_Term)break;$term=$p;}$category=$term->slug;}
                 get_template_part('template-parts/components/event-card',null,[
-                    'title'=>$item['title'],'url'=>$item['permalink'],'image'=>$item['thumbnail'],'excerpt'=>$item['excerpt'],
+                    'event_id'=>$item['id']??0,'title'=>$item['title'],'url'=>$item['permalink'],'image'=>$item['thumbnail'],'excerpt'=>$item['excerpt'],
                     'status_label'=>$labels[$item['home_scope']],'category'=>$category,'class'=>'ba-event-card--home',
                     'meta'=>implode(' · ',array_filter([$item['occurred_date'],$item['occurred_time'],$item['public_place_name']?:($item['territory']['name']??'')]))
                 ]);
