@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: c7be1af344a524bd07a2654bc05a10ece837b79e
+          ref: f7e233cbe7c6a0f694ca5b9d5a1dcc3be902460f
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -37,7 +37,6 @@ jobs:
           php -l wordpress/themes/badaround-child/functions.php
           php -l wordpress/themes/badaround-child/header.php
           php -l wordpress/themes/badaround-child/footer.php
-          BA_PUBLICATION_SERVICE_FILE="$PWD/prior-source/wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php" php tests/publication-seo-classic.php --expect-old-failure
           php tests/publication-seo-classic.php
           php tests/publication-retry.php
           php tests/geo-prec-01-publication.php

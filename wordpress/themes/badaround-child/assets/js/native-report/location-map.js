@@ -14,20 +14,28 @@
   const card=ui.querySelector('[data-smart-location-card]');
   if(confirmation){if(card)card.prepend(confirmation);else (layout||panel).after(confirmation);confirmation.tabIndex=-1;}
   let disposed=false,map,marker,circle,dragListener,dragMoveListener,busy=false;
-  let mapTask=Promise.resolve();
+  let mapTask=Promise.resolve(),markerAppearance='';
+  const colors={vehicle:'#1677E8',property:'#C9153D',hazard:'#F57C00',public_space:'#0AA184',animal:'#7040C8',item_document:'#E3A415'};
+  const categoryColor=()=>colors[model.values['event.category']]||'#087f8c';
+  function syncMarker(){
+   if(!marker)return;
+   const approximate=model.publicLocationRequest==='approximate_area';
+   const appearance=model.values['event.category']+':'+approximate;
+   if(appearance!==markerAppearance){marker.anchorLeft='-50%';marker.anchorTop=approximate?'-50%':'-100%';marker.replaceChildren(glyph());markerAppearance=appearance;}
+  }
   const locked=()=>Boolean(disposed||model.busy||model.snapshot||model.completed);
   const say=text=>{if(!disposed&&status)status.textContent=text;};
   function syncCircle(){
    const radius=model.publicLocationRadius;
    if(!map||!marker||panel.hidden||model.publicLocationRequest!=='approximate_area'||!Number.isInteger(radius)||!config.publicLocationRequest?.radii?.includes(radius)){circle?.setMap(null);return;}
    const p=marker.position,center={lat:typeof p.lat==='function'?p.lat():p.lat,lng:typeof p.lng==='function'?p.lng():p.lng};
-   if(!circle&&root.google?.maps?.Circle)circle=new root.google.maps.Circle({map,center,radius,strokeColor:'#087f8c',strokeOpacity:.8,strokeWeight:2,fillColor:'#087f8c',fillOpacity:.12,clickable:false});
-   if(circle){circle.setCenter(center);circle.setRadius(radius);circle.setMap(map);}
+   if(!circle&&root.google?.maps?.Circle)circle=new root.google.maps.Circle({map,center,radius,strokeColor:categoryColor(),strokeOpacity:.8,strokeWeight:2,fillColor:categoryColor(),fillOpacity:.12,clickable:false});
+   if(circle){circle.setOptions({strokeColor:categoryColor(),fillColor:categoryColor()});circle.setCenter(center);circle.setRadius(radius);circle.setMap(map);}
   }
-  function sync(){layout?.classList.toggle('has-map',!panel.hidden);geo.disabled=locked()||busy||!config.smartAddress?.key;if(marker)marker.gmpDraggable=!locked()&&!busy;syncCircle();}
+  function sync(){layout?.classList.toggle('has-map',!panel.hidden);geo.disabled=locked()||busy||!config.smartAddress?.key;if(marker)marker.gmpDraggable=!locked()&&!busy;syncMarker();syncCircle();}
   function glyph(){
    const category=model.values['event.category'];
-   const colors={vehicle:'#1677E8',property:'#C9153D',hazard:'#F57C00',public_space:'#0AA184',animal:'#7040C8',item_document:'#E3A415'};
+   const approximate=model.publicLocationRequest==='approximate_area',width=80,height=approximate?80:100;
    const pin=container.ownerDocument.createElement('span');pin.className='ba-native-location-pin';
    const radio=Array.from(container.querySelectorAll('.ba-native-category-grid input')).find(el=>el.value===category);
    const icon=radio?.closest('label')?.querySelector('svg');
@@ -44,10 +52,17 @@
       element.setAttribute(attribute.name,value==='#'+old?'#'+fresh:value);
      }
     }
-    svg.setAttribute('width','64');svg.setAttribute('height','80');
-    Object.assign(svg.style,{display:'block',width:'64px',height:'80px',transform:'none'});
+    if(approximate){
+     const outline=svg.querySelector(':scope > path');
+     const ring=container.ownerDocument.createElementNS('http://www.w3.org/2000/svg','circle');
+     for(const [key,value] of Object.entries({cx:24,cy:23,r:21,fill:outline?.getAttribute('fill')||categoryColor(),stroke:'#fff','stroke-width':1.6}))ring.setAttribute(key,String(value));
+     if(outline)outline.replaceWith(ring);else svg.prepend(ring);
+     svg.setAttribute('viewBox','0 -1 48 48');
+    }
+    svg.setAttribute('width',String(width));svg.setAttribute('height',String(height));
+    Object.assign(svg.style,{display:'block',width:width+'px',height:height+'px',transform:'none'});
    }
-   Object.assign(pin.style,{display:'block',width:'64px',height:'80px',background:'none',transform:'none'});
+   Object.assign(pin.style,{display:'block',width:width+'px',height:height+'px',background:'none',transform:'none'});
    pin.setAttribute('aria-hidden','true');return pin;
   }
   function show(position){return mapTask=renderMap(position);}
@@ -64,11 +79,11 @@
      // Native zoom/fullscreen and keyboard gestures suffice for this small preview.
      // Keep the directional pad on the other application maps only.
      marker=new AdvancedMarkerElement({map,position,title:'Posizione riservata dell’evento. Sposta per correggere.',gmpDraggable:true});
-     marker.replaceChildren(glyph());
+     syncMarker();
      dragListener=()=>{const p=marker.position;reverse({lat:typeof p.lat==='function'?p.lat():p.lat,lng:typeof p.lng==='function'?p.lng():p.lng});};
      marker.addEventListener('gmp-dragend',dragListener);
      dragMoveListener=()=>syncCircle();marker.addEventListener('gmp-drag',dragMoveListener);
-    }else{marker.map=map;marker.position=position;marker.replaceChildren(glyph());map.setCenter(position);}
+    }else{marker.map=map;marker.position=position;syncMarker();map.setCenter(position);}
     sync();say('');
    }catch(_){if(!disposed&&bridge.current(ticket))say('Mappa non disponibile. Puoi continuare con l’indirizzo Google confermato.');}
   }
@@ -130,8 +145,8 @@
     resolve({lat:p.coords.latitude,lng:p.coords.longitude},ticket,true);
    },failed,{enableHighAccuracy:true,timeout:12000,maximumAge:0});}catch(_){failed();}
   }
-  function categoryChanged(event){if(event.target?.name==='event.category'&&marker)marker.replaceChildren(glyph());}
-  function geoChoiceChanged(event){if(['ba-public-location-choice','ba-public-location-radius'].includes(event.target?.name))syncCircle();}
+  function categoryChanged(event){if(event.target?.name==='event.category'){syncMarker();syncCircle();}}
+  function geoChoiceChanged(event){if(['ba-public-location-choice','ba-public-location-radius'].includes(event.target?.name)){syncMarker();syncCircle();}}
   geo.addEventListener('click',geolocate);container.addEventListener('input',categoryChanged);container.addEventListener('change',geoChoiceChanged);sync();
   return {show,sync,hide(){panel.hidden=true;layout?.classList.remove('has-map');if(marker)marker.map=null;circle?.setMap(null);},dispose(){disposed=true;if(marker&&dragListener)marker.removeEventListener('gmp-dragend',dragListener);if(marker&&dragMoveListener)marker.removeEventListener('gmp-drag',dragMoveListener);circle?.setMap(null);if(marker)marker.map=null;container.removeEventListener('change',geoChoiceChanged);geo.removeEventListener('click',geolocate);container.removeEventListener('input',categoryChanged);}};
  }

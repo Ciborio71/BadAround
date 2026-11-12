@@ -766,8 +766,8 @@
 /* Shared pin SVG replaces CSS-rotated category shapes. */
 .ba-native .ba-native-category-grid .ba-native-card-icon{width:32px;height:40px;border:0;border-radius:0;transform:none;background:none;box-shadow:none}
 .ba-native .ba-native-category-grid .ba-native-card-icon .ba-pin-svg{width:32px;height:40px;transform:none;stroke:none;fill:initial}
-.ba-native .ba-native-location-pin{width:64px;height:80px;border:0;border-radius:0;transform:none;background:none;box-shadow:none}
-.ba-native .ba-native-location-pin .ba-pin-svg{width:64px;height:80px;transform:none;stroke:none;fill:initial}
+.ba-native .ba-native-location-pin{width:80px;height:100px;border:0;border-radius:0;transform:none;background:none;box-shadow:none}
+.ba-native .ba-native-location-pin .ba-pin-svg{width:80px;height:100px;transform:none;stroke:none;fill:initial}
 
 /* Category selection: large upright pins, with a small clear margin inside the card. */
 .ba-native .ba-native-category-grid:not(.is-collapsed) .ba-native-option-card{grid-template-columns:88px minmax(0,1fr);padding-block:14px}
@@ -857,3 +857,8 @@
 .ba-native .ba-native-engagement--social .ba-native-social-channels span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .ba-native .ba-native-engagement--social>.ba-native-help{margin-top:12px}
 @media(max-width:600px){.ba-native .ba-native-engagement--social{padding:18px 14px}.ba-native .ba-native-social-consent{padding:14px 12px;gap:10px}}
+
+/* Equal address/title sizing; safe wrapping on narrow screens. */
+.ba-native .ba-native-location-card [data-smart-confirmation]>strong,
+.ba-native .ba-native-location-card [data-smart-address-label]{font-size:17.6px;line-height:1.35}
+.ba-native .ba-native-location-card [data-smart-address-label]{color:#056bd2}
