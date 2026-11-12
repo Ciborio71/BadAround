@@ -162,7 +162,7 @@ function badaround_native_report_config() {
 	$fields['location.exact_address']['help'] = '';
 	$fields['vehicle.plate_raw']['help'] = 'La targa che inserisci sarà pubblicata in chiaro nella scheda, dopo la moderazione. Se la conosci solo in parte, indica soltanto i caratteri noti.';
 	$fields['reporter.public_identity_mode']['help'] = '';
-	$fields['reporter.first_name']['help'] = 'Nome e cognome completi servono per verifiche interne e gestione della segnalazione. La visibilità online segue la scelta indicata sopra.';
+	$fields['reporter.first_name']['help'] = '';
 	$fields['reporter.email']['help'] = 'La tua email serve solo per le comunicazioni da BadAround e non viene mai resa pubblica.';
 	$fields['reporter.contact_preference']['help'] = 'Gli altri utenti non vedono i tuoi recapiti e non possono contattarti direttamente.';
 	$fields['reporter.social_visibility']['help'] = 'I tuoi dati riservati e recapiti non saranno mai condivisi sui social.';

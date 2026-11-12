@@ -44,11 +44,40 @@ class BadAround_Publication_Service {
 
 	public static function register_geo_guards() {
 		BadAround_Event_SEO::register_hooks();
+        add_action('rest_api_init',array(__CLASS__,'register_publication_retry'));
         BadAround_Event_Public_Details::register_hooks();
 		foreach ( array( 'add_post_metadata', 'update_post_metadata', 'delete_post_metadata' ) as $hook ) {
 			add_filter( $hook, array( __CLASS__, 'guard_geo_write' ), 999, 5 );
 		}
 	}
+
+    /** Maintenance-only admin retry through the owning publication service. */
+    public static function register_publication_retry(){
+        register_rest_route('badaround-ops/v1','/publication-retry/(?P<id>\\d+)',array(
+            'methods'=>'POST',
+            'permission_callback'=>static function($r){
+                $id=absint($r['id']);
+                return current_user_can('manage_options')&&current_user_can('ba_moderate_events')
+                    &&current_user_can('publish_ba_eventi')&&current_user_can('ba_view_private_reports')&&current_user_can('edit_post',$id);
+            },
+            'callback'=>static function($r){
+                $id=absint($r['id']);clean_post_cache($id);
+                if(!function_exists('badaround_child_maintenance_enabled')||!badaround_child_maintenance_enabled()
+                    ||get_post_type($id)!=='ba_evento')return new WP_Error('ba_publication_retry_unavailable','Ripristino riservato alla manutenzione.',array('status'=>409));
+                $primary=absint(get_post_meta($id,'_ba_primary_report_id',true));
+                if(!$primary||$primary!==absint($r['expected_report_id']??0))return new WP_Error('ba_publication_retry_stale','Segnalazione modificata.',array('status'=>409));
+                global $wpdb;
+                $digest=$wpdb->get_var($wpdb->prepare("SELECT SHA2(content_original,256) FROM {$wpdb->prefix}ba_reports WHERE id=%d AND event_id=%d AND deleted_at IS NULL",$primary,$id));
+                if(!is_string($digest)||!is_string($r['expected_source_hash']??null)||!hash_equals($digest,$r['expected_source_hash']))return new WP_Error('ba_publication_retry_stale','Dati modificati.',array('status'=>409));
+                $status=get_post_status($id);$moderation=get_post_meta($id,'_ba_moderation_status',true);
+                if(!((in_array($status,array('draft','pending'),true)&&$moderation==='approved')||($status==='publish'&&$moderation==='published')))return new WP_Error('ba_publication_retry_state','Serve una segnalazione già approvata.',array('status'=>409));
+                if(($r['apply']??false)!==true)return new WP_REST_Response(array('id'=>$id,'status'=>$status,'moderation'=>$moderation,'ready'=>true),200);
+                $result=(new self())->publish($id);
+                if(is_wp_error($result))return $result;
+                return new WP_REST_Response(array('id'=>$id,'status'=>get_post_status($id),'moderation'=>get_post_meta($id,'_ba_moderation_status',true),'url'=>get_permalink($id)),200);
+            }
+        ));
+    }
 
 	public static function guard_geo_write( $check, $event_id, $key, $value = null, $extra = null ) {
 		if ( ! in_array( $key, array( '_ba_public_geo', '_ba_public_geo_proof', '_ba_public_lat', '_ba_public_lng', '_ba_public_radius_m' ), true ) ) { return $check; }
@@ -902,7 +931,12 @@ class BadAround_Publication_Service {
                     if(is_array($details)){
                         update_post_meta($event_id,BadAround_Event_Public_Details::META,$details);
                         if(BadAround_Event_Public_Details::view($event_id)!==$details['data'])return $this->geo_error('detail_signature');
-                        $result=BadAround_Event_SEO::finalize_publication($event_id);
+                        // SEO updates post_title/post_name through wp_update_post. Keep the
+                        // event-bound B3 authorization for that write as well, then remove it.
+                        $seo_allow=static function($allowed,$candidate_id)use($event_id){return absint($candidate_id)===$event_id?true:$allowed;};
+                        add_filter('badaround_allow_event_publish',$seo_allow,999,2);
+                        try{$result=BadAround_Event_SEO::finalize_publication($event_id);}
+                        finally{remove_filter('badaround_allow_event_publish',$seo_allow,999);}
                         if(!is_wp_error($result))$result=$this->validate_public_projection($event_id,true);
                         if(!is_wp_error($result) && false===BadAround_Audit_Log::record('event',$event_id,'public_details_approved','publication','public-details-v1'))return $this->geo_error('detail_audit');
                     }

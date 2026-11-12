@@ -19,13 +19,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: a6ab3ecbc1a5f45a5b26d020d7908e70515c182e
+          ref: c7be1af344a524bd07a2654bc05a10ece837b79e
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify unchecked social consent, privacy footer and distinct engagement boxes
+      - name: Verify classic publication regression, GEO rollback and wizard cleanup
         run: |
           npm ci --prefix tests --ignore-scripts
           node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
@@ -37,10 +37,17 @@ jobs:
           php -l wordpress/themes/badaround-child/functions.php
           php -l wordpress/themes/badaround-child/header.php
           php -l wordpress/themes/badaround-child/footer.php
+          BA_PUBLICATION_SERVICE_FILE="$PWD/prior-source/wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php" php tests/publication-seo-classic.php --expect-old-failure
+          php tests/publication-seo-classic.php
+          php tests/publication-retry.php
           php tests/geo-prec-01-publication.php
           php tests/geo-area-01-publication.php
           php tests/native-social-preference.php
           php tests/event-social-links.php
+          php tests/event-dynamic-seo.php
+          php tests/event-structured-data.php
+          php tests/test-ba-event-seo-refresh.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
           node --test tests/native-report-f16-dom.cjs tests/native-report-f19-ux.cjs tests/wizard-presentation-20261112.cjs tests/test-ba-access-wizard-dom.cjs tests/native-social-preference.cjs
           python3 -m py_compile tools/ba_wizard_layout_polish_release.py
           python3 -m unittest discover -s tests -p test_ba_event_seo_release.py
