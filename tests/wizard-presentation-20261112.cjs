@@ -13,7 +13,7 @@ test('relationship found option follows event context and clears incompatible an
 });
 test('anonymous choice explains private names and social sharing remains unselected',async()=>{
  const h=create();try{
- assert.equal(h.model.effective('reporter.contact_preference'),'community');assert.equal(h.model.effective('reporter.social_visibility'),undefined);
+ assert.equal(h.model.effective('reporter.contact_preference'),'community');assert.equal(h.model.effective('reporter.social_visibility'),'declined');
  h.fill();h.set('reporter.public_identity_mode','anonymous');const note=h.doc.querySelector('[data-native-anonymous-note]');assert.equal(note.hidden,false);assert.match(note.textContent,/non saranno pubblicati/i);
  h.set('reporter.public_identity_mode','pseudonym');assert.equal(note.hidden,false);assert.match(note.textContent,/pseudonimo/);
  h.set('reporter.first_name','Marco');h.set('reporter.last_name','Rossi');h.set('reporter.public_identity_mode','name_initial');assert.match(note.textContent,/Marco R\./);assert(!note.textContent.includes('Rossi'));
@@ -35,7 +35,7 @@ test('submission feedback persists while request is pending and prevents duplica
 test('network choices default to community for new eligible reports and retain an explicit alternative',()=>{
  const h=create();try{
  h.set('event.category','hazard');h.set('event.subtype','hazard_road_obstruction');
- assert.equal(h.model.effective('reporter.contact_preference'),'community');assert.equal(h.model.effective('reporter.social_visibility'),undefined);
+ assert.equal(h.model.effective('reporter.contact_preference'),'community');assert.equal(h.model.effective('reporter.social_visibility'),'declined');
  const select=h.doc.querySelector('[name="reporter.contact_preference"]'),wrapper=select.parentElement,group=wrapper.querySelector('.ba-native-card-grid');
  assert.equal(group.querySelectorAll('input[type="radio"]').length,2);assert.equal(group.querySelector('input:checked').value,'community');assert(wrapper.querySelector('.ba-native-recommended'));
  h.set('reporter.contact_preference','badaround_only');h.set('reporter.first_name','Marco');assert.equal(h.model.effective('reporter.contact_preference'),'badaround_only');assert.equal(group.classList.contains('is-collapsed'),false);

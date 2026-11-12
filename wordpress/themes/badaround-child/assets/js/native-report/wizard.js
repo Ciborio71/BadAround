@@ -99,6 +99,13 @@
       const text=mode==='anonymous'?'chiediamo nome e cognome solo per verifiche interne e gestione della segnalazione. Non saranno pubblicati né diffusi pubblicamente: gli altri utenti leggeranno solo ':mode==='pseudonym'?'nome e cognome completi restano riservati per verifiche interne. Online apparirà solo ':'i dati completi servono per verifiche interne e gestione della segnalazione. Online sarà visibile solo ';
       anonymousNote.replaceChildren(heading,document.createTextNode(text),preview,document.createTextNode('.'));
     }
+    const socialWrapper=wrappers.find(w=>w.dataset.nativeField==='reporter.social_visibility');
+    const socialConsent=socialWrapper?.querySelector('[data-native-social-consent]');
+    function socialConsentChanged(event){
+      event.stopPropagation();if(model.busy||model.snapshot||model.completed)return;
+      model.set('reporter.social_visibility',socialConsent.checked?'requested':'declined');ns.presentErrors(container,[],config);render();
+    }
+    if(socialConsent){listen(socialConsent,'input',socialConsentChanged);listen(socialConsent,'change',socialConsentChanged);}
     const signatureModeration=document.createElement('p');signatureModeration.className='ba-native-help';signatureModeration.textContent='La pubblicazione della segnalazione e della firma scelta resta soggetta alle linee guida e alla moderazione di BadAround.';form.querySelector('[data-native-step="review"]')?.append(signatureModeration);
     const choiceHelp={
       'reporter.contact_preference':{community:'Ricevi sia gli aggiornamenti sullo stato della segnalazione, sia eventuali avvistamenti e testimonianze inviati dagli altri utenti tramite BadAround.',badaround_only:'Ricevi solo le comunicazioni di BadAround sulla gestione e sullo stato della segnalazione. Nessun messaggio dalla community.'},
@@ -304,6 +311,7 @@
           }else unit.querySelectorAll('[data-native-question-number]').forEach(el=>el.remove());
           if(!visible)unit.querySelectorAll('input,select,textarea').forEach(el=>{el.disabled=true;el.required=false;el.setAttribute('aria-required','false');});
           if(unit===authorityWrapper){authorityCanonical.disabled=true;authorityCanonical.required=false;authorityCanonical.setAttribute('aria-required','false');authorityChoice.disabled=!visible||locked;authorityChoice.required=visible&&model.required(path);authorityChoice.setAttribute('aria-required',String(visible&&model.required(path)));}
+          if(unit===socialWrapper&&socialConsent){socialConsent.checked=model.effective(path)==='requested';socialConsent.disabled=!visible||locked||section.dataset.nativeStep!==steps[model.step];socialConsent.required=false;}
           if(unit===declaration){declarationInput.disabled=!visible||locked;declarationInput.required=visible;declarationInput.setAttribute('aria-required',String(visible));}
         }
         if(section.dataset.nativeStep==='media'){
@@ -398,7 +406,7 @@
     }
     function syncCards(wrapper, field) {
       const select = wrapper.querySelector('select[data-native-input]');
-      if (!select || (field.step === 'location' && wrapper.dataset.nativeField.startsWith('location.')) || wrapper===authorityWrapper || wrapper.dataset.nativeField==='authority.type') return;
+      if (!select || (field.step === 'location' && wrapper.dataset.nativeField.startsWith('location.')) || wrapper===authorityWrapper || wrapper.dataset.nativeField==='authority.type' || wrapper.dataset.nativeField==='reporter.social_visibility') return;
       const options = Array.from(select.options).filter(option => option.value && !option.hidden);
       const category = wrapper.dataset.nativeField === 'event.category';
       const subtype = wrapper.dataset.nativeField === 'event.subtype';
@@ -532,6 +540,7 @@
           if(input.type==='checkbox')input.checked=field.type==='array'?Array.isArray(value)&&value.includes(input.value):value===true;
           else input.value=value===undefined?'':String(value);
         });
+        if(path==='reporter.social_visibility'&&active&&model.effective(path)===undefined&&!model.busy&&!model.snapshot&&!model.completed&&config.socialConsentBinary===true)model.set(path,'declined');
         if(path==='reporter.contact_preference'&&active&&model.effective(path)===undefined&&!model.busy&&!model.snapshot&&!model.completed&&config.contactPreferenceDefault==='community')model.set(path,'community');
         if(config.conditional && field.constraints.enum && path!=='event.subtype'){
           const select=wrapper.querySelector('select[data-native-input]');

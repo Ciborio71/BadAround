@@ -165,7 +165,7 @@ function badaround_native_report_config() {
 	$fields['reporter.first_name']['help'] = 'Nome e cognome completi servono per verifiche interne e gestione della segnalazione. La visibilità online segue la scelta indicata sopra.';
 	$fields['reporter.email']['help'] = 'La tua email serve solo per le comunicazioni da BadAround e non viene mai resa pubblica.';
 	$fields['reporter.contact_preference']['help'] = 'Gli altri utenti non vedono i tuoi recapiti e non possono contattarti direttamente.';
-	$fields['reporter.social_visibility']['help'] = 'La tua scelta sarà valutata dalla moderazione. Potranno essere condivisi solo contenuti approvati e destinati alla pubblicazione; i tuoi recapiti e le informazioni riservate resteranno esclusi. Se non rispondi, non richiedi la diffusione social. La richiesta riguarda Facebook, Instagram, X, Google Business Profile (Google Maps) e TikTok, secondo i canali attivati da BadAround.';
+	$fields['reporter.social_visibility']['help'] = 'I tuoi dati riservati e recapiti non saranno mai condivisi sui social.';
 	$fields['reward.status']['help'] = 'La ricompensa è destinata esclusivamente a chi fornisce informazioni utili al ritrovamento o alla risoluzione della segnalazione.';
 	// Identity preference first; canonical conditions and values are unchanged.
 	$contact_order = array_flip( array( 'reporter.public_identity_mode', 'reporter.pseudonym', 'reporter.first_name', 'reporter.last_name', 'reporter.email', 'reporter.phone', 'reporter.contact_preference' ) );
@@ -222,6 +222,7 @@ function badaround_native_report_config() {
 		'publicLocationRequest' => array( 'default' => 'exact_point', 'version' => BadAround_Public_Geo_Contract::RADIUS_REQUEST_VERSION, 'radii' => BadAround_Public_Geo_Contract::USER_RADII, 'defaultRadius' => 100 ),
 		'publicDetailsVersion' => 'public-details-v1',
         'contactPreferenceDefault' => 'community',
+        'socialConsentBinary' => true,
         // Optional district selection is removed from the public wizard.
         // Existing moderated territorial data remains independent.
         'neighborhoodProposal' => false,
@@ -255,11 +256,22 @@ function badaround_native_report_field( $path, $field ) {
 	<div class="ba-native-field<?php echo $path==='reporter.contact_preference'?' ba-native-engagement ba-native-engagement--community':($path==='reporter.social_visibility'?' ba-native-engagement ba-native-engagement--social':''); ?>" data-native-field="<?php echo esc_attr( $path ); ?>">
     <?php if($path==='reporter.contact_preference'||$path==='reporter.social_visibility'): ?>
     <div class="ba-native-engagement__intro">
-      <svg viewBox="0 0 40 40" width="40" height="40" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="20" cy="9" r="5"/><circle cx="8" cy="29" r="5"/><circle cx="32" cy="29" r="5"/><path d="M17 14l-6 10m12-10 6 10M14 29h12"/></g></svg>
-      <div><strong><?php echo $path==='reporter.contact_preference'?'Facciamo rete sulla tua segnalazione':'Più condivisioni, più possibilità di aiutarti'; ?></strong><p><?php echo $path==='reporter.contact_preference'?'Un avvistamento o una testimonianza possono fare la differenza. Scegli quali notifiche ricevere: i tuoi recapiti resteranno sempre nascosti.':'Puoi chiedere a BadAround di dare più visibilità alla segnalazione sui propri canali social. La diffusione sarà valutata dopo la moderazione.'; ?></p></div>
+      <?php if($path==='reporter.contact_preference'): ?>
+      <svg class="ba-native-engagement-icon ba-native-engagement-icon--network" viewBox="0 0 64 64" width="52" height="52" aria-hidden="true" focusable="false"><path d="m4 16 17-5 21 7 18-5v39l-18 5-21-7-17 5Z" fill="#d4f1e8"/><path d="M21 11v39m21-32v39M8 37l48-9" fill="none" stroke="#9ad4c4" stroke-width="2"/><path d="m17 40 15-19 15 19H17Z" fill="none" stroke="#087f8c" stroke-width="2.5"/><g fill="#087f8c"><circle cx="32" cy="17" r="5"/><path d="M24 29v-3a8 8 0 0 1 16 0v3Z"/></g><g fill="#1464bf"><circle cx="15" cy="37" r="5"/><path d="M7 49v-3a8 8 0 0 1 16 0v3Z"/></g><g fill="#d48b13"><circle cx="49" cy="37" r="5"/><path d="M41 49v-3a8 8 0 0 1 16 0v3Z"/></g></svg>
+      <?php else: ?>
+      <svg class="ba-native-engagement-icon ba-native-engagement-icon--social" viewBox="0 0 64 64" width="52" height="52" aria-hidden="true" focusable="false"><circle cx="32" cy="32" r="29" fill="#dceaff"/><path d="M11 26h13l26-12v34L24 36H11Z" fill="#1a73e8"/><path d="M24 26v10l26 12V14Z" fill="#79afff"/><path d="M18 36h10l5 17H22Z" fill="#164b8b"/><rect x="8" y="25" width="7" height="12" rx="3" fill="#164b8b"/><path d="m55 20 5-4m-5 15h6m-6 11 5 4" fill="none" stroke="#e6a12a" stroke-width="3" stroke-linecap="round"/></svg>
+      <?php endif; ?>
+      <div><strong><?php echo $path==='reporter.contact_preference'?'Facciamo rete sulla tua segnalazione':'Amplifica la tua segnalazione sui social'; ?></strong><p><?php echo $path==='reporter.contact_preference'?'Un avvistamento o una testimonianza possono fare la differenza. Scegli quali notifiche ricevere: i tuoi recapiti resteranno sempre nascosti.':'Più visibilità significa più possibilità di trovare testimoni o riscontri utili.'; ?></p></div>
     </div>
     <?php endif; ?>
-	<?php if ( 'array' === $type ) : ?>
+	<?php if('reporter.social_visibility' === $path): ?>
+        <label class="ba-native-choice ba-native-social-consent" for="<?php echo esc_attr($id); ?>-consent">
+          <input type="checkbox" id="<?php echo esc_attr($id); ?>-consent" name="social_share_consent" data-native-social-consent aria-describedby="<?php echo esc_attr($description); ?>">
+          <span><strong>Autorizzo BadAround a condividere la segnalazione sui propri canali social</strong><small>Se approvata dalla moderazione, la segnalazione potrà essere rilanciata sulle pagine ufficiali di BadAround (Facebook, Instagram, TikTok, X e Google Business Profile).</small></span>
+        </label>
+        <label for="<?php echo esc_attr($id); ?>" hidden>Preferenza di condivisione social</label>
+        <select id="<?php echo esc_attr($id); ?>" name="<?php echo esc_attr($path); ?>" data-native-input hidden tabindex="-1" aria-describedby="<?php echo esc_attr($description); ?>"><option value="declined">Non autorizzata</option><option value="requested">Autorizzata</option></select>
+    <?php elseif ( 'array' === $type ) : ?>
 		<fieldset id="<?php echo esc_attr( $id ); ?>" tabindex="-1" aria-describedby="<?php echo esc_attr( $description ); ?>"><legend><?php echo esc_html( $field['label'] ); ?><span data-native-required></span></legend>
 		<?php foreach ( $field['options'] as $value => $label ) : ?>
 		<label class="ba-native-choice"><input type="checkbox" name="<?php echo esc_attr( $path ); ?>" value="<?php echo esc_attr( $value ); ?>" data-native-input><?php echo esc_html( $label ); ?></label>
@@ -292,7 +304,7 @@ function badaround_native_report_field( $path, $field ) {
             <li><svg class="ba-native-social-icon ba-native-social-icon--google" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21.6 12.2c0-.7-.1-1.3-.2-2H12v3.9h5.4a4.5 4.5 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.2 3-7.4z" fill="#4285f4"/><path d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22z" fill="#34a853"/><path d="M6.4 14a6 6 0 0 1 0-4V7.4H3.1a10 10 0 0 0 0 9.2L6.4 14z" fill="#fbbc05"/><path d="M12 5.9c1.5 0 2.8.5 3.8 1.5l2.8-2.8A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.9 5.4L6.4 10c.8-2.3 3-4.1 5.6-4.1z" fill="#ea4335"/></svg><span>Google Business Profile</span></li>
         </ul>
         <?php endif; ?>
-		<p id="<?php echo esc_attr( $id ); ?>-help" class="ba-native-help"><?php if('reporter.contact_preference' === $path): ?><strong>🔒 Privacy garantita:</strong> <?php endif; ?><?php echo esc_html( $field['help'] ); ?></p>
+		<p id="<?php echo esc_attr( $id ); ?>-help" class="ba-native-help"><?php if('reporter.contact_preference' === $path): ?><strong>🔒 Privacy garantita:</strong> <?php elseif('reporter.social_visibility' === $path): ?><strong>🔒 Privacy protetta:</strong> <?php endif; ?><?php echo esc_html( $field['help'] ); ?></p>
 		<p id="<?php echo esc_attr( $id ); ?>-error" class="ba-native-error" hidden></p>
 	</div>
 	<?php

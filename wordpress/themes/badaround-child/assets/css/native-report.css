@@ -836,3 +836,24 @@
 .ba-native .ba-native-engagement--community .ba-native-card-copy{min-width:0;flex:1}
 .ba-native .ba-native-recommended{display:inline-block;width:fit-content;max-width:100%;margin:6px 0 2px;padding:3px 9px;border-radius:999px;background:#dcf4e8;color:#075d3f;font-size:.78rem;font-weight:700}
 .ba-native .ba-native-engagement--community>.ba-native-help{margin-top:16px}
+
+/* Distinct illustrations separate network updates from social publication. */
+.ba-native .ba-native-engagement--community{background:#effaf7;border-color:#b8dfcf}
+.ba-native .ba-native-engagement--social{background:#eff5ff;border-color:#c5d8fa;padding:20px}
+.ba-native .ba-native-engagement__intro>.ba-native-engagement-icon{flex:0 0 52px;width:52px;height:52px}
+.ba-native .ba-native-engagement--social .ba-native-engagement__intro{margin-bottom:14px}
+.ba-native .ba-native-social-consent{display:flex;align-items:flex-start;gap:14px;padding:16px;margin:0;border:1px solid #c5d8fa;border-radius:14px;background:#fff;cursor:pointer}
+.ba-native .ba-native-social-consent input[type=checkbox]{flex:0 0 22px;width:22px;height:22px;min-height:22px;margin:2px 0 0;padding:0;accent-color:#1a73e8}
+.ba-native .ba-native-social-consent>span{min-width:0;display:block}
+.ba-native .ba-native-social-consent strong{display:inline;line-height:1.4}
+.ba-native .ba-native-social-consent small{display:block;margin-top:6px;color:#53677c;line-height:1.5}
+.ba-native .ba-native-social-consent:has(input:checked){border-color:#1a73e8;background:#f9fbff}
+.ba-native .ba-native-social-consent:has(input:focus-visible){outline:2px solid #1a73e8;outline-offset:3px}
+.ba-native .ba-native-social-consent:has(input:disabled){cursor:default}
+.ba-native .ba-native-engagement--social .ba-native-social-channels{gap:12px;margin:12px 0}
+.ba-native .ba-native-engagement--social .ba-native-social-channels li{padding:0;border:0;border-radius:0;background:transparent;gap:0}
+.ba-native .ba-native-engagement--social .ba-native-social-icon{width:16px;height:16px;flex-basis:16px;color:#64748b}
+.ba-native .ba-native-engagement--social .ba-native-social-icon [fill]:not([fill="none"]){fill:currentColor}
+.ba-native .ba-native-engagement--social .ba-native-social-channels span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.ba-native .ba-native-engagement--social>.ba-native-help{margin-top:12px}
+@media(max-width:600px){.ba-native .ba-native-engagement--social{padding:18px 14px}.ba-native .ba-native-social-consent{padding:14px 12px;gap:10px}}
