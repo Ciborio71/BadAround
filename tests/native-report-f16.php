@@ -107,6 +107,7 @@ function get_stylesheet_directory_uri() { return home_url( '/wp-content/themes/b
 function is_front_page() { return false; }
 function is_singular() { return false; }
 function is_tax() { return false; }
+function is_category() { return false; }
 function is_404() { return false; }
 function is_page() { return false; }
 function is_page_template( $templates ) { return in_array( $GLOBALS['test_screen'] ?? 'page-segnala-evento.php', (array) $templates, true ); }

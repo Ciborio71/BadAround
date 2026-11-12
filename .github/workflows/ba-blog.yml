@@ -25,7 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify native editorial templates and public UI regressions
+      - name: Verify editorial rendering and existing wizard regressions
         run: |
           npm ci --prefix tests --ignore-scripts
           find wordpress/themes/badaround-child -name "*.php" -exec php -l {} \; > /dev/null
