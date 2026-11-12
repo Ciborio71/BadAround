@@ -3,7 +3,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 final class BadAround_Event_SEO {
     const VERSION = '1.1'; // URL/activation contract stays compatible with published events.
-    const COPY_VERSION = '2.1';
+    const COPY_VERSION = '2.2';
     const URL_POLICY = 'event-url/2';
     const CONTRACT = '_ba_seo_contract';
     const SLUG = '_ba_seo_slug';
@@ -202,7 +202,7 @@ final class BadAround_Event_SEO {
         }
         // Purpose-specific headings: no random synonyms and no unreviewed intake text.
         $sections['address']='Indirizzo e posizione pubblica';
-        $sections['occurrence']='Quando è successo e quando è stato segnalato';
+        $sections['occurrence']='Data e periodo dell’evento';
         $sections['map']='Esplora la mappa di '.($zone!==''?$zone.', ':'').$municipality;
         if($headings_only)return $sections;
         return array('h1'=>$h1,'title'=>$title,'description'=>self::meta_description($intro),
