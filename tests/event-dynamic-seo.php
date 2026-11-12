@@ -29,7 +29,7 @@ check($s['photos']==='Foto della segnalazione: Fiat Panda'&&$s['prose']==='Come 
 check(count(array_unique(array_values($s)))===count($s),'section labels are distinct within an event');
 check(count(array_filter($p,'is_array'))===0,'publication validator still receives a flat string DTO');
 check(serialize([$GLOBALS['meta'],$GLOBALS['posts'],$GLOBALS['private_fixture']])===$before,'projection does not mutate reports, snapshots, status or frozen URLs');
-check($p['slug']==='veicolo-rubato-pomezia-fiat-panda','existing URL formula is unchanged');
+check($p['slug']==='veicolo-rubato-pomezia-fiat-panda-viale-marconi','new URL includes only approved street and entity');
 $slug=get_post_meta(9600,BadAround_Event_SEO::SLUG,true);
 foreach(['resolved'=>'Risolto','closed'=>'Chiuso','archived'=>'Archiviato','expired'=>'Scaduto'] as $state=>$label){
     $GLOBALS['meta'][9600]['_ba_event_status']=$state;$x=BadAround_Event_SEO::project(9600);
@@ -68,7 +68,7 @@ g5seed(9661);$GLOBALS['term_meta'][11]['_ba_canonical_event_key']='keys';
 $x=BadAround_Event_SEO::project(9661);check(!str_contains(implode(' ',$x),'smarrimento')&&!str_contains(implode(' ',$x),'ritrovamento'),'object missing-state is never inferred');
 $raw=json_decode($GLOBALS['private_fixture']['content_original'],true);$raw['canonical']['object']=['status'=>'found'];$GLOBALS['private_fixture']['content_original']=json_encode($raw);
 check($svc->publish(9661)===true,'object fixture publishes');$c=BadAround_Event_Public_Details::candidate(9661);check(!is_wp_error(BadAround_Event_Public_Details::approve(9661,$c['source_hash'])),'object state approved');
-$x=BadAround_Event_SEO::project(9661);check(str_contains($x['title'],'Ritrovamento')&&str_contains($x['h1'],'Segnalazione di ritrovamento'),'approved found-state personalizes object copy');
+$x=BadAround_Event_SEO::project(9661);check(str_contains($x['title'],'Chiavi ritrovate')&&str_contains($x['h1'],'Chiavi ritrovate'),'approved found-state personalizes object copy');
 // Long Unicode attributes must not produce broken UTF-8 or unlimited metadata.
 g5seed(9662);$GLOBALS['term_meta'][11]['_ba_canonical_event_key']='vehicle_stolen';$GLOBALS['meta'][9662]['_ba_vehicle_make']=str_repeat('Èlite ',22);$GLOBALS['meta'][9662]['_ba_vehicle_model']='CX-5';
 $x=BadAround_Event_SEO::project(9662);check(preg_match('//u',$x['title'])===1&&preg_match_all('/./us',$x['title'])<=90&&preg_match_all('/./us',$x['description'])<=190,'bounded Unicode-safe metadata with long attributes');
@@ -88,7 +88,7 @@ $x=BadAround_Event_SEO::project(9670);$h=BadAround_Event_SEO::section_headings(9
 check(str_contains($x['h1'],'Tentato furto o scasso in abitazione privata segnalato a Pomezia'),'approved place enriches property H1');
 check(str_contains($x['title'],'abitazione privata')&&str_contains($x['description'],'abitazione privata'),'approved place enriches metadata');
 check(str_contains($h['facts'],'abitazione privata')&&$h['facts']!==$h['photos'],'place-aware sections have distinct purposes');
-check($x['slug']===$before['slug'],'place enrichment preserves URL formula');
+check($x['slug']!==$before['slug']&&str_contains($x['slug'],'abitazione-privata'),'proposed new URL includes approved place while stored URL stays frozen');
 $sealed=$GLOBALS['meta'][9670][BadAround_Event_Public_Details::META];
 $GLOBALS['meta'][9670][BadAround_Event_Public_Details::META]['data']['facts']['location.place_type']['value']='office';
 check(!str_contains(BadAround_Event_SEO::project(9670)['h1'],'ufficio'),'tampered place excluded from SEO');
@@ -98,3 +98,26 @@ echo "CONTEXTUAL_PLACE_SEO_PASS\n";
 $legacy=$sealed['data'];$legacy['facts']['location.place_type']['value']='public_parking';
 $GLOBALS['meta'][9670][BadAround_Event_Public_Details::META]=['data'=>$legacy,'seal'=>hash_hmac('sha256',9670 . '|'.wp_json_encode($legacy),wp_salt('auth').'|ba-public-detail/v1')];
 check(str_contains(BadAround_Event_SEO::project(9670)['h1'],'parcheggio pubblico'),'legacy approved parking fact remains accurate');
+
+// New first-publication URL policy must receive the signed snapshot, not a later page view.
+$objects=['keys'=>['chiavi-smarrite','chiavi-ritrovate'],'wallet_docs'=>['documenti-portafoglio-borsa-smarriti','documenti-portafoglio-borsa-ritrovati'],
+ 'electronics'=>['dispositivo-elettronico-smarrito','dispositivo-elettronico-ritrovato'],'valuables'=>['oggetto-valore-accessorio-smarrito','oggetto-valore-accessorio-ritrovato'],'other'=>['oggetto-personale-smarrito','oggetto-personale-ritrovato']];
+$i=9700;
+foreach($objects as $key=>$prefixes)foreach(['lost','found'] as $index=>$state){
+ $id=$i++;dynamic_fixture($id,'exact_point',$key);
+ $raw=json_decode($GLOBALS['private_fixture']['content_original'],true);$raw['canonical']['event']['category']='item_document';$raw['canonical']['object']=['status'=>$state];$raw['canonical']['time']=['mode'=>'exact','date'=>'2026-10-10'];
+ $GLOBALS['private_fixture']['content_original']=json_encode($raw);
+ check($svc->publish($id)===true,'first B3 publication with explicit object state '.$key.' '.$state);
+ $seo=BadAround_Event_SEO::project($id);$stored=get_post_meta($id,BadAround_Event_SEO::SLUG,true);
+ check(str_starts_with($stored,$prefixes[$index].'-pomezia-')&&str_contains($stored,'viale-marconi'),'first stored URL contains state and approved street '.$key.' '.$state);
+ check(str_contains($seo['description'],'10/10/2026'),'signed occurrence date enriches description '.$key.' '.$state);
+ check(!str_contains($seo['image_alt'],'123')&&!str_contains($seo['image_alt'],'AB123CD'),'image alt excludes civic number and plate');
+ check($svc->publish($id)===true&&get_post_meta($id,BadAround_Event_SEO::SLUG,true)===$stored,'repeat publication keeps frozen URL');
+}
+dynamic_fixture(9720,'approximate_area','keys');$raw=json_decode($GLOBALS['private_fixture']['content_original'],true);$raw['canonical']['object']=['status'=>'lost'];$GLOBALS['private_fixture']['content_original']=json_encode($raw);
+check($svc->publish(9720)===true,'approximate object publication');$seo=BadAround_Event_SEO::project(9720);
+check(!str_contains($seo['slug'],'marconi')&&!str_contains($seo['image_alt'],'Marconi'),'approximate SEO never derives a private street');
+g5seed(9721);$GLOBALS['term_meta'][11]['_ba_canonical_event_key']='keys';$GLOBALS['meta'][9721]['_ba_occurred_date']='10/10/2026';
+check(str_contains(BadAround_Event_SEO::project(9721)['description'],'10/10/2026'),'legacy Italian date parsed without ambiguous conversion');
+$GLOBALS['meta'][9721]['_ba_occurred_date']='31/02/2026';check(!str_contains(BadAround_Event_SEO::project(9721)['description'],'31/02'),'invalid date omitted');
+echo "EVENT_SEO_V2_POLICY_PASS\n";

@@ -3,7 +3,8 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 final class BadAround_Event_SEO {
     const VERSION = '1.1'; // URL/activation contract stays compatible with published events.
-    const COPY_VERSION = '1.4';
+    const COPY_VERSION = '2.0';
+    const URL_POLICY = 'event-url/2';
     const CONTRACT = '_ba_seo_contract';
     const SLUG = '_ba_seo_slug';
     const URL_ID = '_ba_public_url_id';
@@ -11,6 +12,7 @@ final class BadAround_Event_SEO {
     public static function register_hooks() {
         add_filter( 'wp_insert_post_data', array( __CLASS__, 'preserve_slug' ), 999, 2 );
         add_action('rest_api_init', array(__CLASS__, 'register_preview'));
+        add_action('rest_api_init', array(__CLASS__, 'register_test_refresh'));
         add_action('add_meta_boxes_ba_evento', array(__CLASS__, 'register_preview_box'));
     }
     public static function register_preview() {
@@ -187,7 +189,7 @@ final class BadAround_Event_SEO {
         if($detail&&$color)$intro.=' Colore indicato: '.lcfirst($color).'.';
         if(isset($state_labels[$state]))$intro.=' Stato: '.lcfirst($state_labels[$state]).'.';
         elseif(!empty($public_details['seeking_witnesses']))$intro.=' Si cercano testimoni o informazioni utili.';
-        $date=(string)get_post_meta($id,'_ba_occurred_date',true);
+        $date=self::occurrence_date($id,$public_details);
         if(preg_match('/^\d{4}-\d{2}-\d{2}$/D',$date)){
             $parts=explode('-',$date);
             if(checkdate((int)$parts[1],(int)$parts[2],(int)$parts[0]))$intro.=' Data indicata: '.$parts[2].'/'.$parts[1].'/'.$parts[0].'.';
@@ -198,12 +200,18 @@ final class BadAround_Event_SEO {
             $sections['location']='Dove è avvenuto l’evento: zona '.$approved_zone.', '.$municipality;
             $sections['map']='Mappa della zona '.$approved_zone.' a '.$municipality;
         }
+        // Purpose-specific headings: no random synonyms and no unreviewed intake text.
+        $sections['address']='Indirizzo e posizione pubblica';
+        $sections['occurrence']='Quando è successo e quando è stato segnalato';
+        $sections['map']='Esplora la mappa di '.($zone!==''?$zone.', ':'').$municipality;
         if($headings_only)return $sections;
-        return array('h1'=>$h1,'title'=>$title,'description'=>self::limit_text($intro.' Leggi i dettagli e gli aggiornamenti su BadAround.',190),
+        return array('h1'=>$h1,'title'=>$title,'description'=>self::limit_text($intro.' Consulta dettagli e aggiornamenti su BadAround.',170),
+            'narrative'=>$intro,
             'intro'=>$intro,'heading'=>$sections['facts'],'prose_heading'=>$sections['prose'],'location_heading'=>$sections['location'],
+            'image_alt'=>'Foto allegata alla segnalazione: '.self::limit_text($copy['title'].$where,145),
             'witness_heading'=>$detail?'Hai visto questo '.$detail.'?':($animal?'Hai informazioni su questo '.$animal.'?':'Hai informazioni su questa segnalazione?'),
-            // This exact formula remains frozen, independently of editorial copy.
-            'slug'=>sanitize_title($template[1].'-'.$municipality.($detail?'-'.$detail:'')));
+            // Freeze only after the approved public snapshot is available in B3.
+            'slug'=>self::descriptive_slug($key,$template,$municipality,$detail,$animal,$object_status,$street,$zone,$place_phrase));
     }
 
     private static function length($value){return preg_match_all('/./us',$value);}
@@ -216,7 +224,7 @@ final class BadAround_Event_SEO {
     private static function choose_title($candidates){
         // Editorial budget, not a claim about a Google character limit. Never cut a URL or H1.
         foreach($candidates as $candidate){if(self::length($candidate.' | BadAround')<=75)return $candidate.' | BadAround';}
-        return self::limit_text(end($candidates),77).' | BadAround';
+        return self::limit_text(end($candidates),63).' | BadAround';
     }
     private static function public_street($address){
         // Input is already the signed public address; never inspect the private report.
@@ -273,35 +281,134 @@ final class BadAround_Event_SEO {
             $sections['facts']='Aspetto e segni di riconoscimento'.($animal?' del '.$animal:' dell’animale');
             $sections['prose']=$key==='animal_missing'?'Circostanze dello smarrimento':'Circostanze e condizioni dell’animale segnalato';
             $sections['location']=$key==='animal_missing'?'Ultima posizione segnalata e periodo a '.$town:'Luogo e periodo dell’avvistamento a '.$town;
-            $sections['comments']='Avvistamenti e aggiornamenti della community a '.$town;
+            $sections['comments']='Avvistamenti e aggiornamenti'.($animal?' su questo '.$animal:' sull’animale').' a '.$town;
         }elseif($object){
             $status=in_array($object_status,array('lost','found'),true)?($object_status==='lost'?'smarrimento':'ritrovamento'):'';
-            $title=$status?ucfirst($status).': '.lcfirst($topic):'Segnalazione: '.lcfirst($topic);
-            $description=$status?'Segnalazione di '.$status.' relativa a '.lcfirst($topic):'Informazioni su '.lcfirst($topic).' nella segnalazione';
-            $sections['facts']='Caratteristiche per riconoscere l’oggetto';
-            $sections['prose']=$status?($status==='smarrimento'?'Circostanze dello smarrimento':'Circostanze del ritrovamento'):'Informazioni disponibili sull’oggetto';
-            $sections['comments']='Informazioni e aggiornamenti sull’oggetto segnalato';
+            $labels=array('keys'=>array('Chiavi','smarrite','ritrovate','le chiavi'),
+                'wallet_docs'=>array('Documenti, portafoglio o borsa','smarriti','ritrovati','gli oggetti'),
+                'electronics'=>array('Dispositivo elettronico','smarrito','ritrovato','il dispositivo'),
+                'valuables'=>array('Oggetto di valore o accessorio','smarrito','ritrovato','l’oggetto'),
+                'other'=>array('Oggetto personale','smarrito','ritrovato','l’oggetto'));
+            [$noun,$lost,$found,$article]=$labels[$key];
+            $title=$noun.($status?' '.($object_status==='lost'?$lost:$found):' segnalati');
+            if(!$status)$title='Segnalazione: '.lcfirst($noun);
+            $description=$status?'Segnalazione di '.$status.': '.lcfirst($noun):'Informazioni su '.lcfirst($noun).' nella segnalazione';
+            $sections['photos']='Foto per riconoscere '.$article;
+            $sections['facts']='Come riconoscere '.$article;
+            $sections['prose']=$status?($status==='smarrimento'?'Dove e quando è avvenuto lo smarrimento':'Circostanze e luogo del ritrovamento'):'Informazioni disponibili sull’oggetto';
+            $sections['location']=($status==='smarrimento'?'Zona dello smarrimento':($status==='ritrovamento'?'Luogo del ritrovamento':'Posizione della segnalazione')).' a '.$town;
+            $sections['summary']='Dettagli utili su '.lcfirst($noun).' a '.$town;
+            $sections['comments']=($status==='smarrimento'?'Ritrovamenti e aggiornamenti':($status==='ritrovamento'?'Richieste di riconoscimento e aggiornamenti':'Informazioni della community')).' su '.lcfirst($noun);
         }elseif(str_starts_with((string)$key,'property_')){
             $sections['photos']='Foto dei luoghi e degli eventuali danni segnalati';
             $sections['prose']=$key==='property_theft'?'Circostanze del furto nell’immobile':($key==='property_attempted_breakin'?'Segni del tentativo di furto o scasso':'Che cosa è successo nell’immobile');
             $sections['facts']='Dettagli utili sull’immobile e sull’evento';
-            $sections['comments']='Commenti della community sull’evento a '.$town;
+            $sections['comments']='Aggiornamenti su '.lcfirst($topic).' a '.$town;
         }elseif(str_starts_with((string)$key,'civic_')){
             $sections['photos']='Foto del problema segnalato: '.lcfirst($topic);
             $sections['prose']='Descrizione del problema nello spazio pubblico';
-            $sections['facts']='Caratteristiche e condizioni segnalate';
+            $sections['facts']='Dettagli su '.lcfirst($topic);
             $sections['location']='Area interessata e periodo della segnalazione a '.$town;
-            $sections['comments']='Aggiornamenti dalla zona di '.$town;
+            $sections['comments']='Interventi e aggiornamenti su '.lcfirst($topic).' a '.$town;
         }elseif(str_starts_with((string)$key,'hazard_')){
-            $sections['photos']='Immagini della situazione segnalata';
+            $sections['photos']='Foto e documentazione: '.lcfirst($topic);
             $sections['prose']='Che cosa è stato osservato: '.lcfirst($topic);
             $sections['facts']='Elementi utili per comprendere il pericolo segnalato';
             $sections['location']='Zona interessata e periodo a '.$town;
-            $sections['comments']='Aggiornamenti della community sulla situazione';
+            $sections['comments']='Aggiornamenti su '.lcfirst($topic).' a '.$town;
         }
         $result=array('title'=>$title,'description'=>$description,'sections'=>$sections);
-        if($object&&$status!=='')$result['subject']=$topic.' | Segnalazione di '.$status;
+        if($object&&$status!=='')$result['subject']=$title;
         return $result;
+    }
+
+    private static function occurrence_date($id,$details){
+        // Prefer the signed wizard date. Legacy D/M/Y remains an explicit fallback.
+        $candidates=array($details['time']['date']??'',get_post_meta($id,'_ba_occurred_date',true));
+        foreach($candidates as $value){
+            foreach(array('Y-m-d','d/m/Y') as $format){
+                $d=is_string($value)?DateTimeImmutable::createFromFormat('!'.$format,$value):false;
+                if($d&&$d->format($format)===$value)return $d->format('Y-m-d');
+            }
+        }
+        return '';
+    }
+    private static function descriptive_slug($key,$template,$town,$detail,$animal,$status,$street,$zone,$place){
+        $type=$template[1];
+        $objects=array('keys'=>array('chiavi','smarrite','ritrovate'),
+            'wallet_docs'=>array('documenti-portafoglio-borsa','smarriti','ritrovati'),
+            'electronics'=>array('dispositivo-elettronico','smarrito','ritrovato'),
+            'valuables'=>array('oggetto-valore-accessorio','smarrito','ritrovato'),
+            'other'=>array('oggetto-personale','smarrito','ritrovato'));
+        if(isset($objects[$key])&&in_array($status,array('lost','found'),true)){
+            $o=$objects[$key];$type=$o[0].'-'.$o[$status==='lost'?1:2];
+        }
+        if($animal!==''&&str_starts_with((string)$key,'animal_')){
+            $type=sanitize_title($animal).'-'.(array('animal_missing'=>'smarrito','animal_sighted_or_found'=>'avvistato-trovato','animal_injured'=>'ferito','animal_risk'=>'in-pericolo')[$key]??'segnalato');
+        }
+        $parts=array($type,$town);
+        if($detail!=='')$parts[]=$detail;
+        if($place!=='')$parts[]=$place;
+        if($street!==''||$zone!=='')$parts[]=$street!==''?$street:$zone;
+        // Add whole components only; never truncate a UTF-8 string or a URL token.
+        $slug='';foreach($parts as $part){$part=sanitize_title($part);if($part==='')continue;$next=$slug!==''?$slug.'-'.$part:$part;if(strlen($next)<=160)$slug=$next;}
+        return $slug;
+    }
+    private static function write_public_slug($id,$projection){
+        $public_id=get_post_meta($id,self::URL_ID,true);
+        if(!preg_match('/^[a-f0-9]{32}$/D',(string)$public_id))return new WP_Error('ba_seo_id','Identificativo URL non valido.');
+        $base=$projection['slug'];$slug=wp_unique_post_slug($base,$id,'publish','ba_evento',0);
+        if($slug!==$base){$base.='-'.substr($public_id,0,12);$slug=wp_unique_post_slug($base,$id,'publish','ba_evento',0);if($slug!==$base)return new WP_Error('ba_seo_collision','Conflitto URL.');}
+        // B3 owns its transaction. The explicit test refresh owns a separate transaction.
+        update_post_meta($id,self::SLUG,$slug);
+        $priority=function_exists('has_action')?has_action('post_updated','wp_check_for_changed_slugs'):false;
+        if($priority!==false)remove_action('post_updated','wp_check_for_changed_slugs',$priority);
+        try{$result=wp_update_post(array('ID'=>$id,'post_title'=>$projection['h1'],'post_name'=>$slug),true);}
+        finally{if($priority!==false)add_action('post_updated','wp_check_for_changed_slugs',$priority,3);}
+        if(is_wp_error($result)||get_post($id)->post_name!==$slug||get_post_meta($id,self::SLUG,true)!==$slug)return new WP_Error('ba_seo_slug_write','Aggiornamento URL non riuscito.');
+        update_post_meta($id,'_ba_seo_url_policy',self::URL_POLICY);
+        return true;
+    }
+    /** Called ONLY during first controlled B3, after public details were signed. */
+    public static function finalize_publication($id){
+        if(!current_user_can('ba_moderate_events')||!current_user_can('publish_ba_eventi')||!current_user_can('edit_post',$id))return new WP_Error('ba_seo_forbidden','Operazione non autorizzata.');
+        $p=self::project($id);return is_wp_error($p)?$p:self::write_public_slug($id,$p);
+    }
+    public static function register_test_refresh(){
+        register_rest_route('badaround-ops/v1','/event-seo-test-refresh/(?P<id>\\d+)',array(
+            'methods'=>'POST','permission_callback'=>static function($r){
+                return current_user_can('manage_options')&&current_user_can('ba_moderate_events')&&current_user_can('edit_post',(int)$r['id']);
+            },'callback'=>static function($r){
+                $id=(int)$r['id'];
+                if(!function_exists('badaround_child_maintenance_enabled')||!badaround_child_maintenance_enabled()
+                    ||get_post_type($id)!=='ba_evento'||get_post_status($id)!=='publish'||get_post_meta($id,'_ba_moderation_status',true)!=='published')return new WP_Error('ba_seo_test_only','Operazione riservata agli eventi di prova in manutenzione.',array('status'=>409));
+                $p=self::project($id);if(is_wp_error($p))return $p;
+                $old=get_post($id)->post_name;
+                if(($r['apply']??false)!==true)return new WP_REST_Response(array('id'=>$id,'old_slug'=>$old,'proposed'=>$p),200);
+                if(!is_string($r['expected_slug']??null)||!hash_equals($old,$r['expected_slug']))return new WP_Error('ba_seo_drift','La scheda è cambiata.',array('status'=>409));
+                global $wpdb;
+                foreach(array($wpdb->posts,$wpdb->postmeta,$wpdb->prefix.'ba_audit_log') as $table){
+                    if($wpdb->get_var($wpdb->prepare('SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=%s',$table))!=='InnoDB')return new WP_Error('ba_seo_engine','Transazione non disponibile.');
+                }
+                if(false===$wpdb->query('START TRANSACTION'))return new WP_Error('ba_seo_transaction','Transazione non disponibile.');
+                $done=false;
+                try{
+                    $row=$wpdb->get_row($wpdb->prepare("SELECT ID,post_name,post_title,post_status FROM {$wpdb->posts} WHERE ID=%d FOR UPDATE",$id));
+                    clean_post_cache($id);
+                    if(!$row||$row->post_name!==$old||$row->post_status!=='publish')return new WP_Error('ba_seo_drift','La scheda è cambiata.');
+                    if(!get_post_meta($id,'_ba_seo_test_backup_v2',true))update_post_meta($id,'_ba_seo_test_backup_v2',array('slug'=>$old,'title'=>$row->post_title,'contract'=>get_post_meta($id,self::CONTRACT,true),'policy'=>get_post_meta($id,'_ba_seo_url_policy',true)));
+                    if(!get_post_meta($id,self::URL_ID,true))update_post_meta($id,self::URL_ID,str_replace('-','',wp_generate_uuid4()));
+                    update_post_meta($id,self::CONTRACT,self::VERSION);
+                    update_post_meta($id,'_ba_seo_frozen',1);
+                    $p=self::project($id);if(is_wp_error($p))return $p;
+                    $result=self::write_public_slug($id,$p);if(is_wp_error($result))return $result;
+                    if(false===BadAround_Audit_Log::record('event',$id,'test_seo_refreshed','seo','explicit_no_redirect_test_migration'))return new WP_Error('ba_seo_audit','Audit non riuscito.');
+                    if(false===$wpdb->query('COMMIT'))return new WP_Error('ba_seo_commit','Salvataggio non riuscito.');
+                    $done=true;
+                    return new WP_REST_Response(array('id'=>$id,'old_slug'=>$old,'slug'=>get_post($id)->post_name,'url'=>get_permalink($id),'redirect_created'=>false),200);
+                }finally{if(!$done)$wpdb->query('ROLLBACK');clean_post_cache($id);}
+            }
+        ));
     }
 
     public static function section_headings($id){

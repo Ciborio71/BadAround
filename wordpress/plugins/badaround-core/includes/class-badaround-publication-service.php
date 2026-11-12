@@ -902,7 +902,8 @@ class BadAround_Publication_Service {
                     if(is_array($details)){
                         update_post_meta($event_id,BadAround_Event_Public_Details::META,$details);
                         if(BadAround_Event_Public_Details::view($event_id)!==$details['data'])return $this->geo_error('detail_signature');
-                        $result=$this->validate_public_projection($event_id,true);
+                        $result=BadAround_Event_SEO::finalize_publication($event_id);
+                        if(!is_wp_error($result))$result=$this->validate_public_projection($event_id,true);
                         if(!is_wp_error($result) && false===BadAround_Audit_Log::record('event',$event_id,'public_details_approved','publication','public-details-v1'))return $this->geo_error('detail_audit');
                     }
                 }

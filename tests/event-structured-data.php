@@ -10,9 +10,9 @@ function get_queried_object_id(){return 9000;}
 require dirname(__DIR__).'/wordpress/themes/badaround-child/inc/event-structured-data.php';
 $snapshot=serialize([$GLOBALS['meta'],$GLOBALS['posts'],$GLOBALS['private_fixture']]);
 $g=badaround_event_structured_data(9000);$nodes=$g['@graph']??[];
-check(count($nodes)===2&&$nodes[0]['@type']==='WebPage'&&$nodes[1]['@type']==='BreadcrumbList','page and breadcrumb graph generated for approved public contract');
-check($nodes[0]['url']===get_permalink(9000)&&$nodes[1]['itemListElement'][2]['item']===get_permalink(9000),'stable existing canonical matches page and last breadcrumb');
-check(array_column($nodes[1]['itemListElement'],'position')===[1,2,3],'visible breadcrumb hierarchy uses consecutive positions');
+check(count($nodes)===3&&$nodes[0]['@type']==='WebPage'&&$nodes[1]['@type']==='Report'&&$nodes[2]['@type']==='BreadcrumbList','page and breadcrumb graph generated for approved public contract');
+check($nodes[0]['url']===get_permalink(9000)&&$nodes[2]['itemListElement'][2]['item']===get_permalink(9000),'stable existing canonical matches page and last breadcrumb');
+check(array_column($nodes[2]['itemListElement'],'position')===[1,2,3],'visible breadcrumb hierarchy uses consecutive positions');
 check(!str_contains(json_encode($g),'Private Address')&&!isset($nodes[0]['author'])&&!isset($nodes[0]['geo'])&&!isset($nodes[0]['datePublished']),'graph excludes private source, identity, geography and ambiguous dates');
 check($snapshot===serialize([$GLOBALS['meta'],$GLOBALS['posts'],$GLOBALS['private_fixture']]),'structured projection is read-only');
 $old=$GLOBALS['posts'][9000]->post_status;$GLOBALS['posts'][9000]->post_status='draft';check(badaround_event_structured_data(9000)===[],'draft has no graph');$GLOBALS['posts'][9000]->post_status=$old;

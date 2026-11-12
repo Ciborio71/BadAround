@@ -14,12 +14,12 @@ jobs:
   release:
     if: contains(github.event.head_commit.message, '[event-dynamic-seo-release]')
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: 7d594b9b8b87f39b77e164faee54e736368ce2cf
+          ref: 09d8ba740486c05f18c0dcd1e2764db69fb44a73
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
