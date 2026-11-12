@@ -695,7 +695,7 @@ test('search activation and reset keep both address controls in the same slot ab
  const h=await liveWidget(),slot=h.container.querySelector('[data-smart-search-slot]'),holder=h.container.querySelector('[data-smart-widget]');
  assert.equal(h.button.parentElement,slot);assert.equal(holder.parentElement,slot);
  assert.equal(slot.nextElementSibling.id,'ba-smart-privacy');assert(h.button.hidden);assert.equal(holder.hidden,false);
- assert.equal(h.widget.getAttribute('aria-describedby'),'ba-smart-privacy ba-smart-status');
+ assert.equal(h.widget.getAttribute('aria-describedby'),'ba-smart-status');assert.equal(h.widget.placeholder,'Cerca indirizzo, comune o quartiere…');
  h.controller.reset();assert.equal(h.button.hidden,false);assert.equal(holder.hidden,true);assert.equal(holder.children.length,0);
  assert.equal(slot.nextElementSibling.id,'ba-smart-privacy');h.close();
 });
