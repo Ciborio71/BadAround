@@ -52,3 +52,9 @@ Runtime 932c59af729c61dc220cf182327b4eb33fe03b9a; guarded one-file release https
 Wizard-only map marker enlarged from 44×55 to 64×80 CSS pixels, retaining upright SVG, independent gradient IDs and original point/drag semantics. Runtime df5fd34241a2cd0b41004bae1cfc82570948ea35; guarded release https://github.com/Ciborio71/BadAround/actions/runs/43255063736 PASS.
 
 Subsequent requested copy cleanup removes the successful-map status “Il segnaposto indica la posizione riservata…” and the extra date guidance “Indica anche quando è successo…”. Loading/errors and map keyboard help remain functional. Runtime 13e0ad961b624d9b95b80af7d17d80adc06711f9; guarded release https://github.com/Ciborio71/BadAround/actions/runs/43255221735 PASS. 76 targeted address/map/geo tests and five responsive viewport checks PASS; final SHA and production source readback confirmed. No map coordinates, privacy selection, dates or event data changed.
+
+## Final identity presentation: always-visible choices
+
+Latest approved heading: “Come vuoi comparire nella segnalazione?”. Restore the four radio cards before required private names; all options stay visible after selection with no Modify action. Preserve the dynamic text-only public-name/privacy preview, now separated by 18px top margin and 18px top padding. The hidden canonical select and identity enum remain unchanged. This supersedes the native dropdown presentation.
+
+Runtime 6a7249f89b90a1bb27c2238555feb86d695ac9a9; guarded three-file release https://github.com/Ciborio71/BadAround/actions/runs/43256127368 PASS. 31 wizard/identity DOM tests, five responsive browser fixture widths and independent production source readback PASS. Full Identity and MySQL https://github.com/Ciborio71/BadAround/actions/runs/43256127049 PASS.
