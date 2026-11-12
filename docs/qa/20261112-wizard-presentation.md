@@ -58,3 +58,7 @@ Subsequent requested copy cleanup removes the successful-map status “Il segnap
 Latest approved heading: “Come vuoi comparire nella segnalazione?”. Restore the four radio cards before required private names; all options stay visible after selection with no Modify action. Preserve the dynamic text-only public-name/privacy preview, now separated by 18px top margin and 18px top padding. The hidden canonical select and identity enum remain unchanged. This supersedes the native dropdown presentation.
 
 Runtime 6a7249f89b90a1bb27c2238555feb86d695ac9a9; guarded three-file release https://github.com/Ciborio71/BadAround/actions/runs/43256127368 PASS. 31 wizard/identity DOM tests, five responsive browser fixture widths and independent production source readback PASS. Full Identity and MySQL https://github.com/Ciborio71/BadAround/actions/runs/43256127049 PASS.
+
+## Private email helper
+
+Add the requested plain-text helper under Email: “La tua email serve solo per le comunicazioni da BadAround e non viene mai resa pubblica.” Existing field description/error IDs, required email validation, OTP and private storage are unchanged. Runtime 6c02621d42d10cee4e6f265358e028a38dbc34fc. One-file guarded release https://github.com/Ciborio71/BadAround/actions/runs/43263879917 PASS; 31 wizard/identity DOM tests, responsive fixture checks and source SHA/readback PASS.
