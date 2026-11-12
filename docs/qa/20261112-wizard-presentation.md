@@ -62,3 +62,13 @@ Runtime 6a7249f89b90a1bb27c2238555feb86d695ac9a9; guarded three-file release htt
 ## Private email helper
 
 Add the requested plain-text helper under Email: “La tua email serve solo per le comunicazioni da BadAround e non viene mai resa pubblica.” Existing field description/error IDs, required email validation, OTP and private storage are unchanged. Runtime 6c02621d42d10cee4e6f265358e028a38dbc34fc. One-file guarded release https://github.com/Ciborio71/BadAround/actions/runs/43263879917 PASS; 31 wizard/identity DOM tests, responsive fixture checks and source SHA/readback PASS.
+
+## Network box: two notification choices
+
+Latest user-approved presentation: “Facciamo rete sulla tua segnalazione”, “Quali aggiornamenti vuoi ricevere?”, two always-expanded radio choices. Community + BadAround is recommended and preselected for new eligible reports; BadAround-only remains an explicit alternative. Visible native radio controls, recommendation badge and footer “Privacy garantita” explain hidden contact details. Social sharing is still unselected. This explicitly supersedes the earlier no-default contact-preference presentation.
+
+Default is applied only while the active field is unset and form is editable; explicit existing values, snapshots and completed reports are retained. Legacy `none` stays in the hidden canonical select/model/backend for compatibility, but is not a third visible choice. No report data migration, notification activation or actual email sending was performed. Backend enum and storage codes are unchanged.
+
+Notification copy deliberately stays general for BadAround-only: actual automatic notices for each approval, update and closure were not certified in this task. The source includes moderated contribution notifications, but this does not establish a complete event-state notification lifecycle.
+
+Runtime 502f01df1f86dd5a874d9e1764a47cf01967e906 (identical runtime to adf3523c946f4294c1b25b4e1a3dfa555a4d6622; follow-up updates default assertion). Guarded three-file release https://github.com/Ciborio71/BadAround/actions/runs/43265671228 PASS. 32 wizard/identity DOM tests, network and location fixture checks at all five widths, final SHA readback and production source readback PASS. Full Identity/MySQL https://github.com/Ciborio71/BadAround/actions/runs/43265430973 PASS.
