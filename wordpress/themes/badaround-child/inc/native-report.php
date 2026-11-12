@@ -220,7 +220,9 @@ function badaround_native_report_config() {
 		// Contract scaffolding only: no new visible control before GEO-PUBLIC-03.
 		'publicLocationRequest' => array( 'default' => 'exact_point', 'version' => BadAround_Public_Geo_Contract::RADIUS_REQUEST_VERSION, 'radii' => BadAround_Public_Geo_Contract::USER_RADII, 'defaultRadius' => 100 ),
 		'publicDetailsVersion' => 'public-details-v1',
-        'neighborhoodProposal' => true,
+        // Optional district selection is removed from the public wizard.
+        // Existing moderated territorial data remains independent.
+        'neighborhoodProposal' => false,
 		'consentVersion' => 'native-f16-v1', // Version of this QA presentation, not a claim of finalized legal policies.
 		'socialPreferenceVersion' => BadAround_Report_Schema::SOCIAL_PREFERENCE_VERSION,
 		'endpoint' => rest_url( BadAround_Native_Report_REST_Controller::REST_NAMESPACE . BadAround_Native_Report_REST_Controller::REST_ROUTE ),
