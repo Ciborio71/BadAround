@@ -32,6 +32,22 @@
    const radio=Array.from(container.querySelectorAll('.ba-native-category-grid input')).find(el=>el.value===category);
    const icon=radio?.closest('label')?.querySelector('svg');
    if(icon)pin.append(icon.cloneNode(true));else if(config.pinIcons?.[category])pin.innerHTML=config.pinIcons[category];
+   // Cloned gradients need their own IDs: the original category step is hidden.
+   // A shared URL fragment can resolve to its hidden gradient and erase the pin.
+   const svg=pin.querySelector('svg');
+   if(svg){
+    const prefix='ba-location-'+root.crypto.randomUUID()+'-';
+    for(const definition of svg.querySelectorAll('[id]')){
+     const old=definition.id,fresh=prefix+old;definition.id=fresh;
+     for(const element of svg.querySelectorAll('*'))for(const attribute of [...element.attributes]){
+      const value=attribute.value.replaceAll('url(#'+old+')','url(#'+fresh+')');
+      element.setAttribute(attribute.name,value==='#'+old?'#'+fresh:value);
+     }
+    }
+    svg.setAttribute('width','44');svg.setAttribute('height','55');
+    Object.assign(svg.style,{display:'block',width:'44px',height:'55px',transform:'none'});
+   }
+   Object.assign(pin.style,{display:'block',width:'44px',height:'55px',background:'none',transform:'none'});
    pin.setAttribute('aria-hidden','true');return pin;
   }
   function show(position){return mapTask=renderMap(position);}

@@ -85,9 +85,21 @@
     }
 
     const identityWrapper=wrappers.find(w=>w.dataset.nativeField==='reporter.public_identity_mode');
-    const anonymousNote=document.createElement('p');anonymousNote.className='ba-native-anonymous-note';anonymousNote.hidden=true;anonymousNote.dataset.nativeAnonymousNote='';anonymousNote.setAttribute('role','status');
-    anonymousNote.textContent='Nome e cognome sono necessari per gestire e pubblicare la segnalazione. Restano riservati a BadAround: non saranno pubblicati né diffusi pubblicamente. Gli altri utenti vedranno solo la dicitura Anonimo.';
+    const anonymousNote=document.createElement('p');anonymousNote.className='ba-native-anonymous-note';anonymousNote.hidden=true;anonymousNote.dataset.nativeAnonymousNote='';anonymousNote.dataset.nativeSignaturePreview='';anonymousNote.setAttribute('role','status');anonymousNote.setAttribute('aria-live','polite');anonymousNote.id='ba-native-signature-preview';
     identityWrapper?.append(anonymousNote);
+    const signatureSelect=identityWrapper?.querySelector('select[data-native-input]');
+    if(signatureSelect)signatureSelect.setAttribute('aria-describedby',signatureSelect.getAttribute('aria-describedby')+' '+anonymousNote.id);
+    function syncSignature(){
+      const mode=model.effective('reporter.public_identity_mode');anonymousNote.hidden=!mode;
+      if(!mode)return;
+      const first=String(model.effective('reporter.first_name')||'').trim(),last=String(model.effective('reporter.last_name')||'').trim(),nickname=String(model.effective('reporter.pseudonym')||'').trim();
+      const label=mode==='anonymous'?'Anonimo':mode==='pseudonym'?(nickname||'il tuo pseudonimo'):mode==='first_name'?(first||'il tuo nome'):(first||'il tuo nome')+(last?' '+Array.from(last)[0]+'.':' e l’iniziale del cognome');
+      const heading=document.createElement('strong');heading.textContent='🔒 I tuoi dati restano privati: ';
+      const preview=document.createElement('strong');preview.textContent=label;
+      const text=mode==='anonymous'?'chiediamo nome e cognome solo per verifiche interne e gestione della segnalazione. Non saranno pubblicati né diffusi pubblicamente: gli altri utenti leggeranno solo ':mode==='pseudonym'?'nome e cognome completi restano riservati per verifiche interne. Online apparirà solo ':'i dati completi servono per verifiche interne e gestione della segnalazione. Online sarà visibile solo ';
+      anonymousNote.replaceChildren(heading,document.createTextNode(text),preview,document.createTextNode('.'));
+    }
+    const signatureModeration=document.createElement('p');signatureModeration.className='ba-native-help';signatureModeration.textContent='La pubblicazione della segnalazione e della firma scelta resta soggetta alle linee guida e alla moderazione di BadAround.';form.querySelector('[data-native-step="review"]')?.append(signatureModeration);
     const choiceHelp={
       'reporter.contact_preference':{community:'Ricevi avvistamenti, testimonianze e informazioni utili inoltrati da BadAround, senza mostrare i tuoi recapiti.',badaround_only:'Ricevi gli aggiornamenti di BadAround sulla segnalazione, senza gli inoltri facoltativi della community.',none:'Nessun aggiornamento facoltativo. Restano possibili i chiarimenti necessari alla gestione della segnalazione.'},
       'reporter.social_visibility':{requested:'La richiesta sarà valutata dallo staff. Verranno condivisi solo contenuti approvati e pubblicabili.',declined:'La segnalazione rimane sul sito; non richiedi la diffusione sui canali social di BadAround.'}
@@ -386,7 +398,7 @@
     }
     function syncCards(wrapper, field) {
       const select = wrapper.querySelector('select[data-native-input]');
-      if (!select || (field.step === 'location' && wrapper.dataset.nativeField.startsWith('location.')) || wrapper===authorityWrapper || wrapper.dataset.nativeField==='authority.type') return;
+      if (!select || (field.step === 'location' && wrapper.dataset.nativeField.startsWith('location.')) || wrapper===authorityWrapper || wrapper.dataset.nativeField==='authority.type' || wrapper.dataset.nativeField==='reporter.public_identity_mode') return;
       const options = Array.from(select.options).filter(option => option.value);
       const category = wrapper.dataset.nativeField === 'event.category';
       const subtype = wrapper.dataset.nativeField === 'event.subtype';
@@ -526,6 +538,7 @@
             const presentationOrder=['vehicle','property','hazard','public_space','animal','item_document'];
             allowed=[...allowed].sort((a,b)=>presentationOrder.indexOf(a)-presentationOrder.indexOf(b));
           }
+          if(path==='reporter.public_identity_mode'){const order=['name_initial','first_name','pseudonym','anonymous'];allowed=[...allowed].sort((a,b)=>order.indexOf(a)-order.indexOf(b));}
           let optionLabels=field.options;
           if(path==='reporter.relationship'){
             const subtype=model.effective('event.subtype');
@@ -533,7 +546,7 @@
             if(!foundLabel){allowed=allowed.filter(value=>value!=='found_subject');if(model.effective(path)==='found_subject')model.set(path,undefined);}
             else optionLabels={...field.options,found_subject:foundLabel};
           }
-          if(select){const value=model.effective(path)||'';select.replaceChildren(new Option('Seleziona…',''));for(const option of allowed)select.add(new Option(optionLabels[option]||option,option));select.value=value;}
+          if(select){const value=model.effective(path)||'';select.replaceChildren(new Option(path==='reporter.public_identity_mode'?'Seleziona un’opzione…':'Seleziona…',''));for(const option of allowed)select.add(new Option(optionLabels[option]||option,option));select.value=value;}
         }
         const deferred = (path === 'event.subtype' && !model.values['event.category']) || (path === 'reporter.relationship' && !model.effective('event.subtype'));
         wrapper.hidden = !active || deferred;
@@ -554,7 +567,7 @@
         }
         syncCards(wrapper, field);
       });
-      anonymousNote.hidden=model.effective('reporter.public_identity_mode')!=='anonymous';
+      syncSignature();
       form.querySelectorAll('[data-native-step]').forEach(step => { step.hidden = step.dataset.nativeStep !== current; });
       container.querySelectorAll('[data-native-progress]').forEach((li,index) => {
         li.classList.toggle('is-active', index === model.step);

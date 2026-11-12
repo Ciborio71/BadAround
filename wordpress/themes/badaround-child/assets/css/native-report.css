@@ -809,3 +809,20 @@
 .ba-native .ba-native-submit-panel::before{content:'';width:38px;height:38px;border:4px solid #d6e5f7;border-top-color:#1a73e8;border-radius:50%;animation:ba-native-submit-spin .8s linear infinite}
 @media(max-width:600px){.ba-native .ba-native-engagement{padding:18px 14px}.ba-native .ba-native-engagement__intro{gap:12px}}
 @media(prefers-reduced-motion:reduce){.ba-native .ba-native-submit-panel::before{animation:none}}
+
+/* Verified address stays beside its label and wraps naturally on narrow screens. */
+.ba-native .ba-native-location-card [data-smart-confirmation]{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px;row-gap:2px}
+.ba-native .ba-native-location-card [data-smart-confirmation]>strong{display:inline;flex:0 0 auto}
+.ba-native .ba-native-location-card [data-smart-confirmation]>p{display:inline;margin:0;min-width:0;overflow-wrap:anywhere}
+.ba-native .ba-native-location-side .ba-native-neighborhood{padding:14px;border-color:#d8e3ed;border-radius:12px}
+.ba-native .ba-native-neighborhood>legend{float:left;width:100%;padding:0;margin:0 0 12px;color:var(--ba-navy-950);font-size:1.1rem;font-weight:750;line-height:1.35}
+.ba-native .ba-native-neighborhood>legend~*{clear:both}
+.ba-native .ba-native-neighborhood__actions button{border-radius:12px;padding:10px 16px;min-height:44px;border:1px solid #087f8c;background:#087f8c;color:#fff;font:inherit;font-weight:650;cursor:pointer}
+.ba-native .ba-native-neighborhood__actions button+button{background:#fff;color:#087f8c}
+.ba-native .ba-native-neighborhood__actions button:disabled{opacity:.55;cursor:default}
+.ba-native .ba-native-neighborhood__actions button:focus-visible{outline:2px solid #1a73e8;outline-offset:2px}
+.ba-native [data-native-field="reporter.public_identity_mode"] select{display:block;width:100%;padding-right:42px;border-radius:12px;cursor:pointer}
+.ba-native .ba-native-help:empty{display:none}
+.ba-native .ba-native-anonymous-note strong{font-weight:700}
+
+.ba-native .ba-native-location-card [data-smart-confirmation][hidden]{display:none}

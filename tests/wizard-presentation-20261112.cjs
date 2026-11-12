@@ -15,7 +15,11 @@ test('anonymous choice explains private names and engagement is never preselecte
  const h=create();try{
  assert.equal(h.model.effective('reporter.contact_preference'),undefined);assert.equal(h.model.effective('reporter.social_visibility'),undefined);
  h.fill();h.set('reporter.public_identity_mode','anonymous');const note=h.doc.querySelector('[data-native-anonymous-note]');assert.equal(note.hidden,false);assert.match(note.textContent,/non saranno pubblicati/);
- h.set('reporter.public_identity_mode','pseudonym');assert.equal(note.hidden,true);
+ h.set('reporter.public_identity_mode','pseudonym');assert.equal(note.hidden,false);assert.match(note.textContent,/pseudonimo/);
+ h.set('reporter.first_name','Marco');h.set('reporter.last_name','Rossi');h.set('reporter.public_identity_mode','name_initial');assert.match(note.textContent,/Marco R\./);assert(!note.textContent.includes('Rossi'));
+ const select=h.doc.querySelector('[name="reporter.public_identity_mode"]');assert.equal(select.hidden,false);assert.equal(select.parentElement.querySelector('.ba-native-card-grid'),null);
+ assert.deepEqual([...select.options].map(o=>o.value),['','name_initial','first_name','pseudonym','anonymous']);
+ assert(h.doc.querySelector('[data-native-field="reporter.first_name"]').compareDocumentPosition(select)&h.w.Node.DOCUMENT_POSITION_FOLLOWING);
  assert.equal(h.doc.querySelectorAll('.ba-native-engagement__intro').length,2);
  }finally{h.close();}
 });

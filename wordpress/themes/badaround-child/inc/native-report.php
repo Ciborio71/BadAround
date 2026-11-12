@@ -43,7 +43,7 @@ function badaround_native_report_labels() {
 		'reward.status' => 'Vuoi offrire una ricompensa per informazioni utili?', 'reward.amount' => 'Importo in euro', 'reward.conditions' => 'Condizioni della ricompensa', 'reward.expires_on' => 'Scadenza',
 		'reward.confirmed' => 'Confermo l’impegno relativo alla ricompensa indicata',
 		'reporter.first_name' => 'Nome', 'reporter.last_name' => 'Cognome', 'reporter.email' => 'Email', 'reporter.phone' => 'Telefono',
-		'reporter.public_identity_mode' => 'Come vuoi comparire pubblicamente?', 'reporter.pseudonym' => 'Pseudonimo pubblico', 'reporter.contact_preference' => 'Vuoi ricevere aggiornamenti e informazioni su questo evento?',
+		'reporter.public_identity_mode' => 'Come vuoi firmare la segnalazione?', 'reporter.pseudonym' => 'Pseudonimo pubblico', 'reporter.contact_preference' => 'Vuoi ricevere aggiornamenti e informazioni su questo evento?',
 		'reporter.social_visibility' => 'Vuoi dare visibilità a questo evento sui canali social di BadAround?',
 		'consents.truthfulness' => 'Confermo che le informazioni sono veritiere per quanto a mia conoscenza',
 		'consents.media_rights' => 'Confermo di avere i diritti su eventuali contenuti forniti',
@@ -62,7 +62,7 @@ function badaround_native_report_option_label( $path, $value ) {
 		'location.public_precision' => array( 'point' => 'Punto approssimato', 'street' => 'Via, senza civico', 'area' => 'Area o quartiere', 'municipality' => 'Solo il Comune' ),
 		'reward.status' => array( 'none' => 'Nessuna ricompensa', 'fixed' => 'Importo definito', 'negotiable' => 'Da concordare' ),
 		'reporter.contact_preference' => array( 'community' => 'Sì, anche informazioni dalla community', 'badaround_only' => 'Solo aggiornamenti di BadAround', 'none' => 'Nessun aggiornamento facoltativo' ),
-		'reporter.public_identity_mode' => array( 'anonymous' => 'In forma anonima', 'pseudonym' => 'Con uno pseudonimo', 'first_name' => 'Con il mio nome', 'name_initial' => 'Nome e iniziale del cognome' ),
+		'reporter.public_identity_mode' => array( 'name_initial' => 'Nome e iniziale del cognome (es. Marco R.)', 'first_name' => 'Solo il nome (es. Marco)', 'pseudonym' => 'Con uno pseudonimo / nickname', 'anonymous' => 'In forma anonima (apparirà "Anonimo")' ),
 		'media.availability' => array( 'yes' => 'Sì', 'no' => 'No', 'possible' => 'Potrei procurarle', 'surveillance' => 'Possibili riprese di videosorveglianza' ),
 	);
 	if ( isset( $context[ $path ][ $value ] ) ) { return $context[ $path ][ $value ]; }
@@ -135,7 +135,7 @@ function badaround_native_report_config() {
 			foreach ( $categories as $category ) { $options = array_merge( $options, $category['subtypes'] ); }
 		}
 		if ( 'reporter.public_identity_mode' === $path ) {
-			$identity_order = array_flip( array( 'anonymous', 'pseudonym', 'first_name', 'name_initial' ) );
+			$identity_order = array_flip( array( 'name_initial', 'first_name', 'pseudonym', 'anonymous' ) );
 			uksort( $options, function ( $a, $b ) use ( $identity_order ) { return $identity_order[ $a ] <=> $identity_order[ $b ]; } );
 		}
 		$fields[ $path ] = array(
@@ -161,12 +161,13 @@ function badaround_native_report_config() {
 	} );
 	$fields['location.exact_address']['help'] = '';
 	$fields['vehicle.plate_raw']['help'] = 'La targa che inserisci sarà pubblicata in chiaro nella scheda, dopo la moderazione. Se la conosci solo in parte, indica soltanto i caratteri noti.';
-	$fields['reporter.public_identity_mode']['help'] = 'Scegli come preferisci essere indicato. BadAround non pubblica automaticamente i tuoi dati personali. La tua preferenza resta soggetta alla moderazione e alle regole di pubblicazione.';
+	$fields['reporter.public_identity_mode']['help'] = '';
+	$fields['reporter.first_name']['help'] = 'Nome e cognome completi servono per verifiche interne e gestione della segnalazione. Scegli qui sotto come firmarla pubblicamente.';
 	$fields['reporter.contact_preference']['help'] = 'Gli altri utenti non vedono i tuoi recapiti e non possono contattarti direttamente.';
 	$fields['reporter.social_visibility']['help'] = 'La tua scelta sarà valutata dalla moderazione. Potranno essere condivisi solo contenuti approvati e destinati alla pubblicazione; i tuoi recapiti e le informazioni riservate resteranno esclusi. Se non rispondi, non richiedi la diffusione social. La richiesta riguarda Facebook, Instagram, X, Google Business Profile (Google Maps) e TikTok, secondo i canali attivati da BadAround.';
 	$fields['reward.status']['help'] = 'La ricompensa è destinata esclusivamente a chi fornisce informazioni utili al ritrovamento o alla risoluzione della segnalazione.';
 	// Identity preference first; canonical conditions and values are unchanged.
-	$contact_order = array_flip( array( 'reporter.public_identity_mode', 'reporter.pseudonym', 'reporter.first_name', 'reporter.last_name', 'reporter.email', 'reporter.phone', 'reporter.contact_preference' ) );
+	$contact_order = array_flip( array( 'reporter.first_name', 'reporter.last_name', 'reporter.public_identity_mode', 'reporter.pseudonym', 'reporter.email', 'reporter.phone', 'reporter.contact_preference' ) );
 	$order_before_contact = array_flip( array_keys( $fields ) );
 	uksort( $fields, function ( $a, $b ) use ( $contact_order, $order_before_contact ) {
 		if ( isset( $contact_order[ $a ], $contact_order[ $b ] ) ) { return $contact_order[ $a ] <=> $contact_order[ $b ]; }
