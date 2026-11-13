@@ -871,3 +871,7 @@
 
 /* Match the address emphasis to its inline heading. */
 .ba-native .ba-native-location-card [data-smart-address-label]{font-weight:700}
+
+/* Confirmation navigation: adjacent on wide screens, wrapped on mobile. */
+.ba-native .ba-native-success-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.ba-native .ba-native-success-actions .ba-button{max-width:100%;white-space:normal;text-align:center}

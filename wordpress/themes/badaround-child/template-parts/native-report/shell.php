@@ -29,7 +29,10 @@ if ( ! $config ) {
 	<section data-native-success hidden aria-labelledby="ba-native-received">
 		<h2 id="ba-native-received" tabindex="-1"><strong>Segnalazione inviata</strong></h2>
 		<p>La segnalazione sarà sottoposta a moderazione. Non è ancora pubblica: l’invio non equivale ad approvazione.</p>
-		<button type="button" class="ba-button" data-native-new>Inizia una nuova segnalazione</button>
+		<div class="ba-native-success-actions">
+			<button type="button" class="ba-button" data-native-new>Inizia una nuova segnalazione</button>
+			<a class="ba-button ba-button--outline" href="<?php echo esc_url( home_url( '/' ) ); ?>">Torna alla home</a>
+		</div>
 	</section>
 	<script type="application/json" data-native-config><?php echo wp_json_encode( $config, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?></script>
 </div>

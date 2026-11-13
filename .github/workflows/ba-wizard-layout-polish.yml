@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: 6abcc3008b67fd8144abe4d51908d30bea9e7400
+          ref: 102b163acb38bcbbdbda08a091e4281a5c3563c7
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -31,6 +31,7 @@ jobs:
           node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
           php -l wordpress/themes/badaround-child/inc/native-report.php
           php -l wordpress/themes/badaround-child/template-parts/native-report/step.php
+          php -l wordpress/themes/badaround-child/template-parts/native-report/shell.php
           node --check wordpress/themes/badaround-child/assets/js/native-report/smart-address.js
           node --check wordpress/themes/badaround-child/assets/js/native-report/location-map.js
           node --check wordpress/themes/badaround-child/assets/js/native-report/model.js
