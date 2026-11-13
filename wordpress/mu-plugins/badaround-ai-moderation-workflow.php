@@ -76,12 +76,13 @@ final class BadAround_AI_Moderation_Workflow {
         $terms = wp_get_post_terms($id,['ba_tipo_evento','ba_territorio'],['fields'=>'ids']);
         if (is_wp_error($terms)) { return self::error('taxonomy'); }
         $media = $wpdb->get_results($wpdb->prepare("SELECT id,review_status,public_attachment_id,sensitivity FROM {$wpdb->prefix}ba_report_media WHERE event_id=%d AND deleted_at IS NULL ORDER BY id",$id), ARRAY_A);
+        if (!is_array($media)) { return self::error('media_state'); }
         $digest = hash('sha256',wp_json_encode([$primary,$row->content_original,$post->post_status,$post->post_title,$post->post_content,$meta,$terms,$media]));
         return ['digest'=>$digest,'payload'=>self::payload($canonical,$secrets),'secrets'=>$secrets,'post'=>$post,'primary'=>$primary];
     }
     public static function validate_result($result): bool {
         if (!is_array($result) || array_diff(array_keys($result),['recommendation','summary','rationale','proposed_description','flags'])
-            || !isset(self::LABELS[$result['recommendation'] ?? '']) || !is_array($result['flags'] ?? null) || count($result['flags'])>12) { return false; }
+            || !is_string($result['recommendation'] ?? null) || !isset(self::LABELS[$result['recommendation']]) || !is_array($result['flags'] ?? null) || !array_is_list($result['flags']) || count($result['flags'])>12) { return false; }
         foreach (['summary'=>1200,'rationale'=>2500,'proposed_description'=>5000] as $field=>$max) {
             if (!is_string($result[$field] ?? null) || mb_strlen($result[$field])>$max || ($field!=='proposed_description' && trim($result[$field])==='')) { return false; }
         }
@@ -146,7 +147,9 @@ final class BadAround_AI_Moderation_Workflow {
             $job = ['revision'=>bin2hex(random_bytes(16)),'state'=>'queued','updated'=>time(),'policy'=>self::POLICY,'instruction'=>$instruction,'mail_state'=>'not_sent'];
             if (!self::store($id,$job)) { return false; }
             wp_clear_scheduled_hook(self::CRON,[$id]);
-            return wp_schedule_single_event(time()+30,self::CRON,[$id]) !== false;
+            $scheduled=wp_schedule_single_event(time()+30,self::CRON,[$id]);
+            if($scheduled===false||is_wp_error($scheduled)){$job['state']='failed';$job['error']='ba_ai_schedule';self::store($id,$job);return false;}
+            return true;
         } finally { self::unlock('event-'.$id); }
     }
     public static function on_report_meta($meta_id,$id,$key,$value): void {
@@ -163,12 +166,12 @@ final class BadAround_AI_Moderation_Workflow {
             $job = get_post_meta($id,self::META,true);
             if (!is_array($job) || ($job['state'] ?? '')!=='queued') { return; }
             $context = self::context($id);
-            $job['state']='processing';$job['updated']=time();self::store($id,$job);
+            $job['state']='processing';$job['updated']=time();if(!self::store($id,$job)){return;}
             $result = is_wp_error($context) ? $context : self::evaluate($context['payload'],$job['instruction'],(array)get_option('badaround_ai_validated_examples',[]));
             $after = self::context($id);
             if (!is_wp_error($result) && (is_wp_error($after) || !hash_equals($context['digest'],$after['digest']))) { $result = self::error('stale'); }
             $job['updated']=time();$job['model']=self::MODEL;
-            if (is_wp_error($result)) { $job['state']='failed';$job['error']=$result->get_error_code();self::store($id,$job);return; }
+            if (is_wp_error($result)) { $job['state']='failed';$job['error']=$result->get_error_code();if(self::store($id,$job)&&self::enabled()){self::notify($id,$job);}return; }
             $job['state']='ready';$job['digest']=$context['digest'];$job['payload']=$context['payload'];$job['result']=$result;
             if (!self::store($id,$job)) { return; }
             if (self::enabled()) { self::notify($id,$job); }
@@ -179,10 +182,12 @@ final class BadAround_AI_Moderation_Workflow {
         $config = BadAround_AI_Moderation_Config::read();
         if (!$config || !class_exists('BadAround_Transactional_Mailer')) { return; }
         // Reserve before delivery: transport uncertainty never triggers automatic duplicate emails.
-        $job['mail_state']='sending';self::store($id,$job);
+        $job['mail_state']='sending';if(!self::store($id,$job)){return;}
+        $failed=empty($job['result']);
+        $report=$failed?['recommendation'=>'human_review','summary'=>'La valutazione automatica non è stata completata. La segnalazione è rimasta in attesa di moderazione umana.','rationale'=>(string)($job['error']??'ba_ai_unavailable')]:$job['result'];
         $url = admin_url('tools.php?page=badaround-ai-review&event_id='.$id);
-        $text = 'Segnalazione #'.$id."\nProposta AI: ".self::LABELS[$job['result']['recommendation']]."\n".$job['result']['summary']."\nMotivazione: ".$job['result']['rationale']."\n\nApri la pagina riservata per confermare, richiedere modifiche o non confermare. Nessuna azione è eseguita aprendo un link.\n".$url;
-        $html = '<h2>BadAround — proposta di moderazione #'.(int)$id.'</h2><p><strong>'.esc_html(self::LABELS[$job['result']['recommendation']]).'</strong></p><p>'.nl2br(esc_html($job['result']['summary'])).'</p><p>'.nl2br(esc_html($job['result']['rationale'])).'</p>';
+        $text = 'Segnalazione #'.$id."\nProposta AI: ".self::LABELS[$report['recommendation']]."\n".$report['summary']."\nMotivazione: ".$report['rationale']."\n\nApri la pagina riservata per confermare, richiedere modifiche o non confermare. Nessuna azione è eseguita aprendo un link.\n".$url;
+        $html = '<h2>BadAround — proposta di moderazione #'.(int)$id.'</h2><p><strong>'.esc_html(self::LABELS[$report['recommendation']]).'</strong></p><p>'.nl2br(esc_html($report['summary'])).'</p><p>'.nl2br(esc_html($report['rationale'])).'</p>';
         foreach (['confirm'=>'Conferma proposta','modify'=>'Modifica','disagree'=>'Non confermo'] as $anchor=>$label) { $html.='<p><a style="display:inline-block;padding:12px 18px;background:#087f8c;color:#fff;text-decoration:none;border-radius:10px" href="'.esc_url($url.'#'.$anchor).'">'.esc_html($label).'</a></p>'; }
         $html.='<p>Accesso moderatore richiesto. L’AI valuta l’idoneità alla pubblicazione, non la veridicità. I link non pubblicano né rifiutano contenuti.</p>';
         $sent = (new BadAround_Transactional_Mailer())->send($config['moderator_email'],'BadAround — proposta AI per segnalazione #'.$id,$text,$html);

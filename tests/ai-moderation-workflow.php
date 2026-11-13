@@ -80,6 +80,7 @@ $context=BadAround_AI_Moderation_Workflow::context(11);$payload=$context['payloa
 foreach(['mario@example.test','Mario','Rossi','3331234567','Via Riservata','41.123456','12.123456','AB123CD'] as $secret){check(!str_contains($encoded,$secret),'payload excludes '.$secret);}
 check($payload['facts']['requested_precision']==='approximate_area'&&$payload['facts']['requested_radius_m']===100,'precision and radius preserved without private point');
 check(!BadAround_AI_Moderation_Workflow::validate_result(['recommendation'=>'publish_now']),'unknown or incomplete model result rejected');
+$invalid=result();$invalid['recommendation']=[];check(!BadAround_AI_Moderation_Workflow::validate_result($invalid),'non-string recommendation fails closed without a TypeError');
 $responses[]=response(result());$evaluated=BadAround_AI_Moderation_Workflow::evaluate($payload);check(!is_wp_error($evaluated),'structured response accepted');
 $request=json_decode($calls[0][1]['body'],true);check($request['store']===false&&$request['service_tier']==='default'&&$request['text']['format']['strict']===true,'stateless Standard tier and strict schema');
 check(!isset($request['tools'])&&str_contains($request['instructions'],'MAI veridicità')&&str_contains($request['instructions'],'DATI NON ATTENDIBILI'),'no tools, truth verification or trusted user instructions');
@@ -115,4 +116,5 @@ check(str_contains(file_get_contents(__DIR__.'/../wordpress/mu-plugins/badaround
 fixture();$context=BadAround_AI_Moderation_Workflow::context(11);$job=['revision'=>'revision-4','digest'=>$context['digest'],'state'=>'ready','policy'=>BadAround_AI_Moderation_Workflow::POLICY,'payload'=>$payload,'result'=>result('edit')];$meta[11][BadAround_AI_Moderation_Workflow::META]=$job;
 $e=BadAround_AI_Moderation_Workflow::decide(11,'revision-4',$job['digest'],'modify','Rendi il testo più chiaro senza aggiungere fatti','hold','',false);check($e===true&&$meta[11][BadAround_AI_Moderation_Workflow::META]['state']==='queued'&&count($publication)===1,'correction requests create a new generation without publishing');
 $_SERVER['REQUEST_METHOD']='POST';$nonce=false;$_POST=['event_id'=>'11'];try{BadAround_AI_Moderation_Workflow::handle();throw new LogicException('nonce accepted');}catch(RuntimeException $e){check($e->getMessage()==='nonce','human POST rejects invalid nonce');}
+$responses[]=new WP_Error('transport');$beforeMail=count($mail);BadAround_AI_Moderation_Workflow::run(11);check($meta[11][BadAround_AI_Moderation_Workflow::META]['state']==='failed'&&count($mail)===$beforeMail+1&&count($publication)===1,'provider failure notifies moderator and leaves the report unpublished');
 echo "AI_WORKFLOW_SUITE_PASS\n";

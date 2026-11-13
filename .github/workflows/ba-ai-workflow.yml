@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: 24c9f8ccd6f391b03d43e133c947e3022a29ae7e
+          ref: bb1b341502cdceb6a2f4082839663ef49661ae4a
           path: prior-source
           persist-credentials: false
       - name: Verify private configuration and authorization
