@@ -61,8 +61,8 @@ final class BadAround_AI_Moderation_Config {
             'moderator_email_configured' => $data !== null,
             'private_storage_available' => $path !== null && is_writable(dirname($path)),
             'private_file_secure' => $path !== null && self::safe_file($path),
-            'moderation_enabled' => false,
-            'external_calls_enabled' => false,
+            'moderation_enabled' => class_exists('BadAround_AI_Moderation_Workflow', false) && BadAround_AI_Moderation_Workflow::enabled(),
+            'external_calls_enabled' => class_exists('BadAround_AI_Moderation_Workflow', false) && BadAround_AI_Moderation_Workflow::enabled() && $data !== null && $data['expires_on'] >= gmdate('Y-m-d'),
         ];
     }
 
@@ -134,7 +134,8 @@ final class BadAround_AI_Moderation_Config {
         $data = self::read();
         $status = self::status();
         echo '<div class="wrap"><h1>Moderazione AI BadAround</h1>';
-        echo '<p><strong>Moderazione AI non attiva.</strong> Questa pagina configura soltanto la chiave e l’email del moderatore. Il salvataggio non invia dati a OpenAI, non invia email e non pubblica segnalazioni.</p>';
+        echo '<p><strong>' . ($status['moderation_enabled'] ? 'Valutazioni AI attive, con conferma umana obbligatoria.' : 'Moderazione AI non attiva.') . '</strong> Questa pagina configura la chiave e l’email del moderatore. Il salvataggio non avvia chiamate a OpenAI, non invia email e non pubblica segnalazioni.</p>';
+        if (class_exists('BadAround_AI_Moderation_Workflow', false)) { echo '<p><a href="' . esc_url(admin_url('tools.php?page=badaround-ai-review')) . '">Apri le valutazioni AI</a></p>'; }
         if (($_GET['setup'] ?? '') === 'saved') { echo '<div class="notice notice-success"><p>Configurazione salvata. La chiave non viene mostrata nuovamente.</p></div>'; }
         if (($_GET['setup'] ?? '') === 'failed') { echo '<div class="notice notice-error"><p>Salvataggio non completato. Ricarica la pagina e controlla i campi. Se il problema persiste, occorre verificare lo spazio privato sul server.</p></div>'; }
         if (!$status['private_storage_available']) { echo '<div class="notice notice-error"><p>Lo spazio privato sul server non è scrivibile: non inserire la chiave finché la configurazione del server non è stata completata.</p></div>'; }
@@ -148,7 +149,7 @@ final class BadAround_AI_Moderation_Config {
         echo '<tr><th><label for="ba-ai-expiry">Scadenza della chiave</label></th><td><input id="ba-ai-expiry" name="expires_on" type="date" required value="' . esc_attr($data['expires_on'] ?? '') . '"><p class="description">Indica la data impostata su OpenAI. Questo campo non modifica la scadenza della chiave.</p></td></tr>';
         echo '</tbody></table>';
         submit_button('Salva configurazione', 'primary', 'submit', true, $status['private_storage_available'] ? [] : ['disabled' => 'disabled']);
-        echo '</form><p>Le regole di moderazione e la conferma umana saranno configurate nella fase successiva.</p></div>';
+        echo '</form><p>La pubblicazione richiede sempre la conferma di un moderatore.</p></div>';
     }
 }
 
