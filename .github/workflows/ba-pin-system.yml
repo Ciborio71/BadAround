@@ -19,13 +19,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: c33f54f66c484419a23dcd8662238df75847938d
+          ref: 2b544761656abce6a9b435d658ff4ad7a1a9b60e
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify category artwork, precision cards and access regressions
+      - name: Verify photo-only category badges across public event cards
         run: |
           npm ci --prefix tests --ignore-scripts
           find wordpress/themes/badaround-child -name "*.php" -exec php -l {} \; > /dev/null

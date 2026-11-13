@@ -21,6 +21,8 @@ $defaults = array(
 $card = wp_parse_args( $args ?? array(), $defaults );
 $presentation=function_exists('badaround_event_public_presentation')?badaround_event_public_presentation($card['event_id']):array();
 $mode=$presentation['mode']??'';
+// The placeholder already contains its category symbol. Overlay photos only.
+$has_user_image=!empty($card['image'])&&strpos($card['image'],get_stylesheet_directory_uri().'/assets/event-placeholder')!==0;
 if(!$card['category']&&$card['event_id']&&function_exists('badaround_child_event_category_slug'))$card['category']=badaround_child_event_category_slug($card['event_id']);
 if ( ! $card['image'] && function_exists( 'badaround_child_placeholder_url' ) ) {
 	$card['image'] = badaround_child_placeholder_url($card['category'],$mode);
@@ -28,7 +30,7 @@ if ( ! $card['image'] && function_exists( 'badaround_child_placeholder_url' ) ) 
 }
 if(strpos($card['image'],get_stylesheet_directory_uri().'/assets/event-placeholder')===0)$card['image']=badaround_child_placeholder_url($card['category'],$mode);
 $category_class = $card['category'] ? ' ba-event-card--category-' . sanitize_html_class( $card['category'] ) : '';
-$category_icon = function_exists('badaround_pin_svg') ? badaround_pin_svg($card['category'],$mode) : '';
+$category_icon = $has_user_image && function_exists('badaround_pin_svg') ? badaround_pin_svg($card['category'],$mode) : '';
 ?>
 <article class="ba-card ba-event-card<?php echo $card['image'] ? '' : ' ba-event-card--no-media'; ?><?php echo $card['class'] ? ' ' . esc_attr( $card['class'] ) : ''; ?><?php echo esc_attr( $category_class ); ?><?php echo $mode==='approximate_area'?' ba-event-card--approximate':''; ?>">
 	<?php if ( $card['image'] ) : ?>

@@ -161,8 +161,19 @@
 
     const approximateItem = item => publicGeometry(item.public_geo)?.mode === 'approximate_area';
     const precisionLabel = item => approximateItem(item) ? 'Area approssimata · raggio '+publicGeometry(item.public_geo).radius+' m' : '';
+    const hasUserImage = item => {
+        if(!item.thumbnail)return false;
+        // Recognise configured placeholders even when returned as a thumbnail.
+        try{
+            const actual=new URL(item.thumbnail,window.location.href);
+            return ![config.placeholder,...Object.values(config.placeholders||{})].filter(Boolean).some(url=>{
+                const fallback=new URL(url,window.location.href);
+                return actual.origin===fallback.origin&&(actual.pathname===fallback.pathname||actual.pathname===fallback.pathname.replace(/\.svg$/,'-area.svg'));
+            });
+        }catch(_){return false;}
+    };
     const cardImage = (item,category) => {
-        if(item.thumbnail)return item.thumbnail;
+        if(hasUserImage(item))return item.thumbnail;
         const url=config.placeholders?.[category]||config.placeholder;
         return approximateItem(item)&&url?url.replace(/\.svg(?=\?|$)/,'-area.svg'):url;
     };
@@ -238,11 +249,13 @@
 			img.decoding = 'async';
 			media.appendChild(img);
 
+			if(hasUserImage(item)){
 			const medallion = document.createElement('span');
 			medallion.className = 'ba-event-card__media-category';
 			medallion.setAttribute('aria-hidden', 'true');
 			medallion.innerHTML = cardMedallion(item,category);
 			media.appendChild(medallion);
+            }
 			wrap.appendChild(media);
 		} else {
 			wrap.classList.add('ba-event-card--no-media');
@@ -335,7 +348,7 @@
 				img.loading = 'lazy';
 				img.decoding = 'async';
 				media.appendChild(img);
-                const medallion=document.createElement('span');medallion.className='ba-event-card__media-category';medallion.innerHTML=cardMedallion(item,category);media.appendChild(medallion);
+                if(hasUserImage(item)){const medallion=document.createElement('span');medallion.className='ba-event-card__media-category';medallion.innerHTML=cardMedallion(item,category);media.appendChild(medallion);}
 				card.appendChild(media);
 			}
 			const body = document.createElement('div');

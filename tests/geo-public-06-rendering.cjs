@@ -131,16 +131,16 @@ test('all six published category pins use the shared black-on-white artwork with
 });
 
 test('public cards and map previews distinguish approximate areas and retain real photos',async()=>{
- for(const photo of ['', 'https://badaround.it/uploads/dog.jpg']){
+ for(const photo of ['', 'https://badaround.it/uploads/dog.jpg','/assets/event-placeholder-spazi-pubblici.svg?ver=old','/assets/event-placeholder-spazi-pubblici-area.svg?ver=old']){
   const r=await render([{...approximate,thumbnail:photo,permalink:'https://badaround.it/eventi/test/'}]);
   const card=r.dom.window.document.querySelector('.ba-map-event-card');
   assert(card.classList.contains('ba-event-card--approximate'));
   assert.match(card.textContent,/Area approssimata · raggio 1000 m/);
-  assert(card.querySelector('.ba-pin-svg--area'));
-  const img=card.querySelector('img');assert.equal(img.getAttribute('src'),photo||'/assets/event-placeholder-spazi-pubblici-area.svg?ver=4');
+  const realPhoto=photo.includes('/uploads/');assert.equal(!!card.querySelector('.ba-event-card__media-category'),realPhoto);assert.equal(!!card.querySelector('.ba-pin-svg--area'),realPhoto);
+  const img=card.querySelector('img');assert.equal(img.getAttribute('src'),realPhoto?photo:'/assets/event-placeholder-spazi-pubblici-area.svg?ver=4');
   r.markers[0].trigger('click');const preview=r.dom.window.document.querySelector('.ba-map-preview-card');
-  assert(preview.querySelector('.ba-pin-svg--area'));assert.match(preview.textContent,/raggio 1000 m/);
-  assert.equal(preview.querySelector('img').getAttribute('src'),photo||'/assets/event-placeholder-spazi-pubblici-area.svg?ver=4');r.close();
+  assert.equal(!!preview.querySelector('.ba-event-card__media-category'),realPhoto);assert.equal(!!preview.querySelector('.ba-pin-svg--area'),realPhoto);assert.match(preview.textContent,/raggio 1000 m/);
+  assert.equal(preview.querySelector('img').getAttribute('src'),realPhoto?photo:'/assets/event-placeholder-spazi-pubblici-area.svg?ver=4');r.close();
  }
  const r=await render([exact]);const card=r.dom.window.document.querySelector('.ba-map-event-card');
  assert(!card.querySelector('.ba-pin-svg--area'));assert.doesNotMatch(card.textContent,/Area approssimata/);r.close();
