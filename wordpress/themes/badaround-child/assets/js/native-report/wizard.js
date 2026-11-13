@@ -87,6 +87,12 @@
     const identityWrapper=wrappers.find(w=>w.dataset.nativeField==='reporter.public_identity_mode');
     const anonymousNote=document.createElement('p');anonymousNote.className='ba-native-anonymous-note';anonymousNote.hidden=true;anonymousNote.dataset.nativeAnonymousNote='';anonymousNote.dataset.nativeSignaturePreview='';anonymousNote.setAttribute('role','status');anonymousNote.setAttribute('aria-live','polite');anonymousNote.id='ba-native-signature-preview';
     identityWrapper?.append(anonymousNote);
+    const mediaAvailability=wrappers.find(w=>w.dataset.nativeField==='media.availability');
+    const mediaLaterNote=document.createElement('p');mediaLaterNote.className='ba-native-help';mediaLaterNote.hidden=true;mediaLaterNote.dataset.nativeMediaLater='';mediaLaterNote.id='ba-native-media-later';mediaLaterNote.setAttribute('role','status');mediaLaterNote.setAttribute('aria-live','polite');
+    mediaLaterNote.textContent='Potrai aggiungere le immagini in un secondo momento: puoi inviare la segnalazione anche senza foto.';
+    mediaAvailability?.append(mediaLaterNote);
+    const mediaAvailabilitySelect=mediaAvailability?.querySelector('select[data-native-input]');
+    if(mediaAvailabilitySelect)mediaAvailabilitySelect.setAttribute('aria-describedby',[mediaAvailabilitySelect.getAttribute('aria-describedby'),mediaLaterNote.id].filter(Boolean).join(' '));
     const signatureSelect=identityWrapper?.querySelector('select[data-native-input]');
     if(signatureSelect)signatureSelect.setAttribute('aria-describedby',signatureSelect.getAttribute('aria-describedby')+' '+anonymousNote.id);
     function syncSignature(){
@@ -377,6 +383,8 @@
       if (entry) { clearTimeout(entry.commitTimer); entry.collapsedValue = null; syncCards(wrapper,config.fields[wrapper.dataset.nativeField]); }
     }
     function nextQuestion(wrapper) {
+      // Notification preferences are an editable choice, not question progression.
+      if(wrapper.dataset.nativeField==='reporter.contact_preference')return;
       const section = wrapper.closest('[data-native-step]');
       if (!section || section.hidden || model.busy || model.snapshot || model.completed) return;
       const fields = Array.from(section.querySelectorAll('[data-native-field],[data-beta-declarations]'));
@@ -579,6 +587,7 @@
         syncCards(wrapper, field);
       });
       syncSignature();
+      mediaLaterNote.hidden=model.effective('media.availability')!=='possible';
       form.querySelectorAll('[data-native-step]').forEach(step => { step.hidden = step.dataset.nativeStep !== current; });
       container.querySelectorAll('[data-native-progress]').forEach((li,index) => {
         li.classList.toggle('is-active', index === model.step);

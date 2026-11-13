@@ -868,3 +868,6 @@
 .ba-native .ba-native-address-search-icon{position:absolute;left:16px;top:26px;transform:translateY(-50%);width:20px;height:20px;fill:none;stroke:#60656b;stroke-width:2;pointer-events:none}
 .ba-native .ba-native-address-slot>[data-smart-start]{padding-left:50px}
 .ba-native .ba-native-address-slot:has(>[data-smart-widget]:not([hidden]))>.ba-native-address-search-icon{display:none}
+
+/* Match the address emphasis to its inline heading. */
+.ba-native .ba-native-location-card [data-smart-address-label]{font-weight:700}

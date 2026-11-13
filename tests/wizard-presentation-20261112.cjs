@@ -43,3 +43,26 @@ test('network choices default to community for new eligible reports and retain a
  h.model.reset();h.set('event.category','hazard');h.set('event.subtype','hazard_road_obstruction');assert.equal(h.model.effective('reporter.contact_preference'),'community');
  }finally{h.close();}
 });
+
+test('possible images explain later upload and the note clears for other choices',()=>{
+ const h=create();try{
+ h.set('event.category','vehicle');h.set('event.subtype','vehicle_stolen');
+ const note=h.doc.querySelector('[data-native-media-later]');assert(note.hidden);
+ h.set('media.availability','possible');assert.equal(note.hidden,false);assert.match(note.textContent,/aggiungere le immagini in un secondo momento/);
+ const input=h.doc.querySelector('[name="media.availability"]');assert(input.getAttribute('aria-describedby').includes(note.id));
+ h.set('media.availability','yes');assert(note.hidden);h.set('media.availability','no');assert(note.hidden);
+ }finally{h.close();}
+});
+
+test('notification card clicks keep focus and never auto-scroll to Continue',async()=>{
+ const h=create();try{
+ h.fill();h.model.step=4;h.set('reporter.contact_preference','community');
+ let scrolls=0;h.w.scrollTo=()=>{scrolls++;};
+ const wrapper=h.doc.querySelector('[data-native-field="reporter.contact_preference"]');
+ for(const value of ['badaround_only','community']){
+  const radio=wrapper.querySelector('input[type="radio"][value="'+value+'"]');radio.focus();radio.click();
+  await new Promise(resolve=>setTimeout(resolve,10));
+  assert.equal(h.model.effective('reporter.contact_preference'),value);assert.equal(h.doc.activeElement,radio);assert.equal(scrolls,0);
+ }
+ }finally{h.close();}
+});
