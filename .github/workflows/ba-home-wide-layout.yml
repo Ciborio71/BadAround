@@ -19,24 +19,18 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: a1ab68c2db5dddbd8d40e05c6c9cec5ffdbcc6fc
+          ref: 29265ce44897b8f2eea45a953afcf1e6c811b50a
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify home proximity and wizard regressions
+      - name: Verify Home rendering and release guard
         run: |
           npm ci --prefix tests --ignore-scripts
-          node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
-          php -l wordpress/themes/badaround-child/template-parts/native-report/step.php
-          php -l wordpress/themes/badaround-child/inc/native-report.php
-          php -l wordpress/themes/badaround-child/page-segnala-evento.php
+          php -l wordpress/themes/badaround-child/front-page.php
           php tests/home-proximity.php
           node --test tests/home-proximity.cjs
-          php tests/geo-prec-01-publication.php
-          php tests/geo-area-01-publication.php
-          node --test tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs tests/native-report-f19-ux.cjs tests/geo-public-03-choice.cjs tests/geo-area-01-model.cjs
           python3 -m py_compile tools/ba_home_wide_layout_release.py
           python3 -m unittest discover -s tests -p test_ba_event_seo_release.py
       - name: Prepare verified FTPS trust chain

@@ -418,3 +418,7 @@ a.ba-home-category-card:hover,a.ba-home-category-card:focus-visible { transform:
 
 /* Keep the search field inside its existing card without an extra focus frame. */
 .ba-home .ba-home-search [data-ba-home-place-input]:is(:focus,:focus-visible){border:0;outline:none;box-shadow:none;background:transparent}
+
+/* Consistent supporting copy below the category and civic participation headings. */
+.ba-home .ba-home-display-heading--categories,.ba-home .ba-home-display-heading--sentinel{margin-bottom:0}
+.ba-home .ba-home-section-subtitle{margin:12px 0 24px;color:var(--ba-navy-950);line-height:1.6}
