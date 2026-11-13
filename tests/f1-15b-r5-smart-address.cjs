@@ -737,3 +737,59 @@ test('late reverse geocode never overrides manual zone or newer address',async()
  wait.resolve({results:[{address_components:[{types:['country'],long_name:'Italia',short_name:'IT'},{types:['administrative_area_level_1'],long_name:'Lazio'},{types:['administrative_area_level_2'],long_name:'Roma',short_name:'RM'},{types:['locality'],long_name:'Pomezia'},{types:['neighborhood'],long_name:'Zona vecchia'}]}]});await new Promise(r=>setImmediate(r));
  assert.equal(input.value,'Zona mia');assert.equal(h.model.neighborhood,null);assert(!h.container.querySelector('#ba-neighborhood-status').hasAttribute('aria-busy'));h.close();
 });
+
+test('visible address step prepares Places once without focusing or opening a map',async()=>{
+  const h=setup();
+  const step=h.win.document.createElement('section');step.dataset.nativeStep='location';step.hidden=true;
+  const ui=h.container.querySelector('[data-native-smart-address]');ui.before(step);step.append(ui);
+  let focused=0,maps=0;
+  const controller=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:territory}},h.model);
+  assert.equal(h.win.document.querySelectorAll('script[data-ba-smart-address]').length,0);
+  step.hidden=false;controller.syncVisibility();controller.syncVisibility();
+  assert.equal(h.win.document.querySelectorAll('script[data-ba-smart-address]').length,1);
+  assert.equal(h.button.disabled,false,'preparation must leave the input clickable');
+  assert.equal(ui.querySelector('[data-smart-search-slot]').getAttribute('aria-busy'),'true');
+  class Widget extends h.win.HTMLElement{focus(){focused++;}}
+  h.win.customElements.define('ready-place-widget',Widget);
+  h.win.google={maps:{importLibrary:async()=>({PlaceAutocompleteElement:class{constructor(){return h.win.document.createElement('ready-place-widget');}}}),Map:class{constructor(){maps++;}}}};
+  h.win[new URL(h.win.document.querySelector('script[data-ba-smart-address]').src).searchParams.get('callback')]();
+  await new Promise(resolve=>setImmediate(resolve));
+  const widget=ui.querySelector('ready-place-widget');assert(widget);assert.equal(focused,0);assert.equal(maps,0);
+  assert.equal(ui.querySelector('[data-smart-search-slot]').hasAttribute('aria-busy'),false);
+  step.hidden=true;controller.syncVisibility();step.hidden=false;controller.syncVisibility();
+  assert.equal(ui.querySelector('ready-place-widget'),widget);
+  controller.dispose();h.dom.window.close();
+});
+
+test('clicking during preparation focuses the ready widget only while the step remains visible',async()=>{
+  for(const leave of [false,true]){
+    const h=setup(),step=h.win.document.createElement('section');step.dataset.nativeStep='location';
+    const ui=h.container.querySelector('[data-native-smart-address]');ui.before(step);step.append(ui);
+    let focused=0;
+    const controller=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:territory}},h.model);
+    h.button.click();if(leave)step.hidden=true;
+    class Widget extends h.win.HTMLElement{focus(){focused++;}}
+    h.win.customElements.define('pending-place-widget',Widget);
+    h.win.google={maps:{importLibrary:async()=>({PlaceAutocompleteElement:class{constructor(){return h.win.document.createElement('pending-place-widget');}}})}};
+    h.win[new URL(h.win.document.querySelector('script[data-ba-smart-address]').src).searchParams.get('callback')]();
+    await new Promise(resolve=>setImmediate(resolve));
+    assert.equal(focused,leave?0:1);
+    controller.dispose();h.dom.window.close();
+  }
+});
+
+test('reset fences a pending preparation from installing a stale widget',async()=>{
+  const h=setup(),step=h.win.document.createElement('section');step.dataset.nativeStep='location';
+  const ui=h.container.querySelector('[data-native-smart-address]');ui.before(step);step.append(ui);
+  const controller=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:territory}},h.model);
+  step.hidden=true;controller.reset();
+  class Widget extends h.win.HTMLElement{}
+  h.win.customElements.define('reset-place-widget',Widget);
+  h.win.google={maps:{importLibrary:async()=>({PlaceAutocompleteElement:class{constructor(){return h.win.document.createElement('reset-place-widget');}}})}};
+  h.win[new URL(h.win.document.querySelector('script[data-ba-smart-address]').src).searchParams.get('callback')]();
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(ui.querySelector('reset-place-widget'),null);
+  step.hidden=false;controller.syncVisibility();await new Promise(resolve=>setImmediate(resolve));
+  assert(ui.querySelector('reset-place-widget'));
+  controller.dispose();h.dom.window.close();
+});

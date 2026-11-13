@@ -266,11 +266,14 @@
         const radius=choice.querySelector('[name="ba-public-location-radius"]');if(radius)radius.disabled=!ready||model.publicLocationRequest!=='approximate_area'||model.busy||!!model.snapshot||model.completed;}
       if(neighborhoodBox){neighborhoodBox.hidden=!ready;neighborhoodInput.disabled=!ready||locked();neighborhoodClear.disabled=!ready||locked();neighborhoodConfirm.disabled=!ready||locked()||!neighborhoodInput.value.trim()||!!model.neighborhood?.confirmed;neighborhoodConfirm.textContent=model.neighborhood?.confirmed?'Zona confermata':'Conferma zona';}
       mapView?.sync();
+      const step=ui.closest('[data-native-step="location"]');
+      if(step&&!step.hidden&&!locked()&&!manual&&config.smartAddress?.key&&!preparedOnEntry&&!widget){preparedOnEntry=true;void activate(false);}
     }
     function offerManual(message){if(config.locationManualEntry===false){say('La ricerca del luogo non è disponibile per questo indirizzo. Riprova la ricerca o riprova più tardi.');if(confirmation)confirmation.hidden=true;return;}say(message+' Puoi utilizzare i campi manuali.');if(manualButton)manualButton.hidden=false;if(confirmation)confirmation.hidden=true;}
     const paths = LEVELS.map(v => 'location.' + v);
     const privatePaths = ['location.exact_address','location.exact_lat','location.exact_lng'];
     let disposed=false, selected=false, widget, requestId=0, applying=false;
+    let preparedOnEntry=false,activationPending=false,focusAfterActivation=false,activationRevision=0;
     const mapView=ns.LocationMap?.mount(container,config,model,{
       load:()=>loadPlaces(config.smartAddress?.key),ticket:()=>requestId,
       current:id=>!disposed&&id===requestId&&!model.busy&&!model.snapshot&&!model.completed,
@@ -396,13 +399,18 @@
         if (!disposed && id===requestId) offerManual('Google non disponibile. Inserisci la posizione manualmente.');
       }
     }
-    async function activate() {
-      if (disposed || start.disabled || widget) return;
-      start.disabled=true; say('Caricamento della ricerca Google…');
+    async function activate(focus=true) {
+      if (disposed || locked() || widget) return;
+      if(focus!==false)focusAfterActivation=true;
+      if(activationPending||start.disabled)return;
+      activationPending=true;const revision=activationRevision;
+      start.disabled=focus!==false;
+      ui.querySelector('[data-smart-search-slot]')?.setAttribute('aria-busy','true');
+      if(focus!==false)say('Caricamento della ricerca Google…');
       try {
         if (!config.smartAddress?.key) throw new Error('places_unavailable');
         const places=await loadPlaces(config.smartAddress.key);
-        if (disposed) return;
+        if (disposed||revision!==activationRevision||locked()) return;
         const Element=places.PlaceAutocompleteElement || root.google?.maps?.places?.PlaceAutocompleteElement;
         if (!Element) throw new Error('widget_unavailable');
         widget=new Element({includedRegionCodes:['it']});
@@ -415,9 +423,12 @@
         holder.replaceChildren(widget);
         start.hidden=true;holder.hidden=false;
         say('');
-        try{widget.focus()}catch(_){}
+        const step=ui.closest('[data-native-step="location"]');
+        if(focusAfterActivation&&(!step||!step.hidden))try{widget.focus()}catch(_){}
       } catch (_) {
-        if (!disposed) {start.disabled=false;offerManual('Google non è disponibile. Inserisci la posizione manualmente.');}
+        if (!disposed&&revision===activationRevision) {start.disabled=false;offerManual('Google non è disponibile. Inserisci la posizione manualmente.');}
+      } finally {
+        if(revision===activationRevision){activationPending=false;focusAfterActivation=false;ui.querySelector('[data-smart-search-slot]')?.removeAttribute('aria-busy');if(!widget)start.disabled=false;}
       }
     }
     function openManual(){
@@ -436,16 +447,18 @@
         field(missing)?.focus?.();return false;
       }
       say('Seleziona un indirizzo dai suggerimenti Google prima di continuare.');
-      // Navigation alone must not initialize Google: only the search field may do so.
+      // Continuing never accepts free text or starts another provider lookup.
       return false;
     }
     function reset(){
+      activationRevision++;activationPending=false;focusAfterActivation=false;preparedOnEntry=false;
+      ui.querySelector('[data-smart-search-slot]')?.removeAttribute('aria-busy');
       requestId++;clearNeighborhood();selected=false;manual=false;
       if(confirmation)confirmation.hidden=true;
       mapView?.hide();
       if(confirmationLabel)confirmationLabel.textContent='';
       // A new report must not retain free text or prediction state inside the
-      // Google custom element. Recreate it lazily on the next explicit focus.
+      // Google custom element. Recreate it when the address step is reached.
       if(widget){widget.removeEventListener('gmp-select',choose);holder.replaceChildren();widget=null;}
       holder.hidden=true;
       start.value='';start.hidden=false;start.disabled=false;

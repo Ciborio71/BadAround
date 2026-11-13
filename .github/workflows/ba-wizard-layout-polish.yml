@@ -19,13 +19,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: f7e233cbe7c6a0f694ca5b9d5a1dcc3be902460f
+          ref: 639253c4689276f7d2ae041e9cfd2afe13dfa1d0
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify wizard markers and publication regression guards
+      - name: Verify address readiness and publication regression guards
         run: |
           npm ci --prefix tests --ignore-scripts
           node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
@@ -47,7 +47,7 @@ jobs:
           php tests/event-structured-data.php
           php tests/test-ba-event-seo-refresh.php
           php -l wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
-          node --test tests/native-report-f16-dom.cjs tests/native-report-f19-ux.cjs tests/wizard-presentation-20261112.cjs tests/test-ba-access-wizard-dom.cjs tests/native-social-preference.cjs
+          node --test tests/f1-15b-r5-smart-address.cjs tests/native-report-f16-dom.cjs tests/native-report-f19-ux.cjs tests/wizard-presentation-20261112.cjs tests/test-ba-access-wizard-dom.cjs tests/native-social-preference.cjs
           python3 -m py_compile tools/ba_wizard_layout_polish_release.py
           python3 -m unittest discover -s tests -p test_ba_event_seo_release.py
       - name: Verify responsive presentation with the canonical fixture origin

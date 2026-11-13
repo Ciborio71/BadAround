@@ -9,6 +9,7 @@ if ( 'event' === $key ) : ?>
 <div class="ba-native-smart-address" data-native-smart-address>
   <label for="ba-smart-search">Dove è successo?</label>
   <div class="ba-native-address-slot" data-smart-search-slot>
+  <svg class="ba-native-address-search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg>
   <input id="ba-smart-search" data-smart-start type="text" readonly autocomplete="off" placeholder="Cerca indirizzo, comune o quartiere…" aria-describedby="ba-smart-status">
   <div data-smart-widget hidden></div>
   </div>
