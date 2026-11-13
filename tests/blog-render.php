@@ -88,5 +88,5 @@ if($GLOBALS['ctx']==='verify'){
  $GLOBALS['empty']=true;ob_start();badaround_blog_home();$home=ob_get_clean();if($home!=='')throw new RuntimeException('No fake Home cards');
  echo "BLOG_NATIVE_PHP_PASS\n";exit;
 }
-if($GLOBALS['ctx']==='home'){get_header();echo '<main class="ba-container" id="main-content">';badaround_blog_home();echo '</main>';get_footer();}
+if($GLOBALS['ctx']==='home'){get_header();echo '<main class="ba-container ba-home" id="main-content"><form class="ba-home-search"><span class="ba-home-search__icon"></span><input type="search" data-ba-home-place-input placeholder="Cerca indirizzo, comune o quartiere…"><button type="button" class="ba-button">Cerca</button></form><h2 class="ba-home-display-heading ba-home-display-heading--sentinel" data-test-sentinel-heading><span>Diventa una </span><span class="ba-home-display-heading__accent">Sentinella</span></h2>';badaround_blog_home();echo '</main>';get_footer();}
 else include get_stylesheet_directory().'/'.array('index'=>'page-blog.php','category'=>'category.php','single'=>'single-post.php')[$GLOBALS['ctx']];

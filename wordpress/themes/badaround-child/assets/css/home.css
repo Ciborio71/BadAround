@@ -15,7 +15,7 @@
 .ba-home-search { display:grid; grid-template-columns:auto 1fr auto; align-items:center; width:min(100%,590px); padding:5px; background:#fff; border:1px solid #d9e5ee; border-radius:12px; box-shadow:0 12px 30px rgba(7,26,56,.08); }
 .ba-home-search__icon { padding-left:12px; color:#8192a7; font-size:1.2rem; }
 .ba-home-search input { min-width:0; height:46px; border:0; outline:0; padding:0 12px; background:transparent; color:var(--ba-text); }
-.ba-home-search input:focus-visible { box-shadow:inset 0 0 0 2px var(--ba-teal-600); border-radius:8px; }
+.ba-home-search input:focus-visible { box-shadow:none; }
 .ba-home-position {
 	width:fit-content;
 	margin-top:12px;
@@ -415,3 +415,6 @@ a.ba-home-category-card:hover,a.ba-home-category-card:focus-visible { transform:
 .ba-home-category-card .ba-home-category__pin.is-animal .ba-pin-svg{fill:initial;stroke:none}
 .ba-home-events .ba-event-card--home .ba-event-card__media-category{width:36px;height:45px;border:0;border-radius:0;background:none;box-shadow:none}
 .ba-home-events .ba-event-card--home .ba-event-card__media-category .ba-pin-svg{width:36px;height:45px;transform:none;fill:initial;stroke:none}
+
+/* Keep the search field inside its existing card without an extra focus frame. */
+.ba-home .ba-home-search [data-ba-home-place-input]:is(:focus,:focus-visible){border:0;outline:none;box-shadow:none;background:transparent}

@@ -34,3 +34,6 @@
 .ba-blog a:focus-visible{outline:3px solid #056bd2;outline-offset:4px}
 @media(max-width:1024px){.ba-blog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ba-blog-section-head{align-items:flex-start;flex-direction:column}}
 @media(max-width:600px){.ba-blog-grid{grid-template-columns:1fr}.ba-blog-topics{gap:8px}.ba-blog-topics a{font-size:.8rem;padding:8px 12px}.ba-blog-card__body{padding:20px}.ba-blog-home{margin-top:36px;padding-top:28px}.ba-blog-article-header{padding-top:28px}.ba-blog-article-cover img{border-radius:14px}.ba-blog-prose,.ba-blog-article-footer{width:calc(100% - 32px)}.ba-blog-breadcrumbs{font-size:.8rem}}
+
+/* Home uses the shared display heading, like the Sentinella section. */
+.ba-blog-home__intro{margin:14px 0 0;color:var(--ba-muted);font-size:clamp(17px,1.4vw,20px);line-height:1.55}
