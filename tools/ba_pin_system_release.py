@@ -5,7 +5,7 @@ import importlib.util,ftplib,ssl,os,json
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('guard',ROOT/'tools/ba_event_seo_release.py')
 guard=importlib.util.module_from_spec(spec);spec.loader.exec_module(guard)
-FILES=['themes/badaround-child/assets/js/map.js','themes/badaround-child/template-parts/components/event-card.php']
+FILES=['themes/badaround-child/template-parts/components/precision-legend.php','themes/badaround-child/assets/css/components.css','themes/badaround-child/front-page.php','themes/badaround-child/page-mappa.php']
 guard.FILES=FILES
 def main():
     prior={n:(ROOT/'prior-source/wordpress'/n).read_bytes() if (ROOT/'prior-source/wordpress'/n).exists() else None for n in FILES}

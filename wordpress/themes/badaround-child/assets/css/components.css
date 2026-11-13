@@ -60,3 +60,13 @@
 .ba-event-card.ba-event-card--approximate .ba-event-card__media-category,
 .ba-event-card.ba-event-card--approximate .ba-event-card__media-category .ba-pin-svg{width:40px;height:40px}
 .ba-event-card .ba-event-card__precision{margin-top:6px}
+
+/* A passive location key, distinct from category filter buttons. */
+.ba-precision-legend{display:flex;flex-wrap:wrap;align-items:center;gap:10px 20px;min-width:0;color:#40566d;font-size:.82rem;font-weight:600;line-height:1.4}
+.ba-precision-legend__item{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.ba-precision-legend__item svg{display:block;flex:none;stroke:none}
+.ba-home-sectionhead:has(>.ba-precision-legend){flex-wrap:wrap}
+.ba-home-sectionhead>.ba-precision-legend{margin-left:auto}
+.ba-map-commandbar__summary>.ba-precision-legend{margin-top:10px}
+.ba-map-legend__body>.ba-precision-legend{grid-column:1 / -1;margin-bottom:8px}
+@media(max-width:767px){.ba-home-sectionhead>.ba-precision-legend{flex-basis:100%;margin-left:0}}

@@ -61,6 +61,7 @@ $home_categories = array(
 			<details class="ba-map-legend ba-map-legend--home">
 				<summary><span class="ba-map-legend__label">Legenda pinpoint</span></summary>
 				<div class="ba-map-legend__body">
+                    <?php get_template_part('template-parts/components/precision-legend'); ?>
 					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-vehicles" aria-hidden="true"><?php echo badaround_pin_svg('veicoli'); ?></span><span><strong>Veicoli</strong><small>Auto, moto e altri mezzi</small></span></div>
 					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-property" aria-hidden="true"><?php echo badaround_pin_svg('case-e-attivita'); ?></span><span><strong>Case e attività</strong><small>Abitazioni, negozi e uffici</small></span></div>
 					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-hazard" aria-hidden="true"><?php echo badaround_pin_svg('pericoli'); ?></span><span><strong>Pericoli</strong><small>Rischi e situazioni pericolose</small></span></div>
@@ -104,6 +105,7 @@ $home_categories = array(
 
 			<div class="ba-home-sectionhead">
 				<h2 class="ba-home-display-heading"><span>Ultime </span><span class="ba-home-display-heading__accent">Segnalazioni</span></h2>
+                <?php get_template_part('template-parts/components/precision-legend'); ?>
 				<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Vedi tutte le segnalazioni <span aria-hidden="true">→</span></a>
 			</div>
 

@@ -68,6 +68,7 @@ body.page-template-page-mappa .ba-map-category-filter .ba-pin-svg{width:20px;hei
 				<h1>Segnalazioni nella zona</h1>
 				<span class="ba-map-commandbar__count" data-ba-map-count>Caricamento…</span>
 			</div>
+            <?php get_template_part('template-parts/components/precision-legend'); ?>
 		</div>
 			<div class="ba-map-results-panel__mobile-head">
 				<div>
@@ -94,6 +95,7 @@ body.page-template-page-mappa .ba-map-category-filter .ba-pin-svg{width:20px;hei
 			<details class="ba-map-legend">
 				<summary><span class="ba-map-legend__label">Legenda pinpoint</span></summary>
 				<div class="ba-map-legend__body">
+                    <?php get_template_part('template-parts/components/precision-legend'); ?>
 					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-vehicles" aria-hidden="true"><?php echo badaround_pin_svg('veicoli'); ?></span><span><strong>Veicoli</strong><small>Auto, moto e altri mezzi</small></span></div>
 					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-property" aria-hidden="true"><?php echo badaround_pin_svg('case-e-attivita'); ?></span><span><strong>Case e attività</strong><small>Abitazioni, negozi e uffici</small></span></div>
 					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-hazard" aria-hidden="true"><?php echo badaround_pin_svg('pericoli'); ?></span><span><strong>Pericoli</strong><small>Rischi e situazioni pericolose</small></span></div>
