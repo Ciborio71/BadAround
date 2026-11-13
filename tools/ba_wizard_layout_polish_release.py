@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guarded wizard layout polish release."""
+"""Guarded address readiness release with provider regression coverage."""
 from pathlib import Path
 import importlib.util,ftplib,ssl,os,json
 ROOT=Path(__file__).resolve().parents[1]

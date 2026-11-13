@@ -665,7 +665,7 @@ test('verified location decision layout reveals map and choices together and res
 test('precision and radius changes redraw the circle without changing map zoom, viewport or private point',async()=>{
  const h=await mapHarness(),circles=[];let fits=0,zooms=0;
  h.model.publicLocationRequest='exact_point';h.model.publicLocationRadius=500;
- h.win.google.maps.Circle=class{constructor(options){Object.assign(this,options);circles.push(this);}setCenter(p){this.center=p;}setRadius(r){this.radius=r;}setMap(m){this.map=m;}getBounds(){return {};}};
+ h.win.google.maps.Circle=class{constructor(options){Object.assign(this,options);circles.push(this);}setOptions(options){Object.assign(this,options);}setCenter(p){this.center=p;}setRadius(r){this.radius=r;}setMap(m){this.map=m;}getBounds(){return {};}};
  const selected=h.select();selected.resolve();await settleMap();
  const map=h.maps[0],point=JSON.stringify(h.markers[0].position),values=JSON.stringify(h.model.values);
  map.fitBounds=()=>fits++;map.setZoom=()=>zooms++;
