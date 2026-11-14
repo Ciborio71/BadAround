@@ -40,8 +40,8 @@ function populate(h) {
 }
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 
-test('final access cancellation keeps wizard values and media editable; authentication precedes snapshot and submission',async()=>{
- const h=create(completed);populate(h);for(let i=0;i<5;i++)h.click('next');assert.equal(h.model.step,5);
+test('direct final access cancellation keeps wizard values and media editable; authentication precedes snapshot and submission',async()=>{
+ const h=create(completed);populate(h);for(let i=0;i<4;i++)h.click('next');assert.equal(h.model.step,4);
  const original=JSON.stringify(h.model.values),id=h.model.submissionId;let complete,checks=0;
  h.window.BadAroundAccess={ensureIdentity:()=>{checks++;return new Promise(r=>{complete=r;});}};
  h.submit();h.submit();await tick();assert.equal(checks,1);assert.equal(h.requests.length,0);assert.equal(h.freezes(),0);assert.equal(h.model.snapshot,null);

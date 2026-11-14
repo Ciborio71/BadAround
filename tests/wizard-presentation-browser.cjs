@@ -68,5 +68,19 @@ const {chromium}=require('playwright-core'),{execFileSync}=require('node:child_p
  });
  assert(result.visible,'network box visible '+width);assert.equal(result.count,2);assert.equal(result.checked,'community');assert(result.radioVisible);assert(result.expanded);assert(result.footer);assert(result.social,'unchecked compact social box '+width);assert(!result.overflow,'network box overflow '+width);console.log('PASS network choices viewport',width);
  }
+ for(const width of [1440,1024,768,390,320]){
+ await page.setViewportSize({width,height:1100});
+ const final=await page.evaluate(()=>{
+  const root=document.querySelector('[data-native-report]'),wizard=root.nativeReport;wizard.model.step=4;
+  root.querySelector('[name="reporter.email"]').dispatchEvent(new Event('input',{bubbles:true}));
+  const submit=root.querySelector('[data-native-submit]'),preview=root.querySelector('[data-native-review-toggle]');
+  const before=JSON.stringify(wizard.model.payload()),visible=!submit.hidden&&!preview.hidden&&root.querySelector('[data-native-next]').hidden;
+  const rect=preview.getBoundingClientRect();const fits=rect.left>=0&&rect.right<=innerWidth+1;
+  preview.click();const opened=wizard.model.step===5&&!root.querySelector('[data-native-step="review"]').hidden;
+  const stable=before===JSON.stringify(wizard.model.payload());root.querySelector('[data-native-back]').click();
+  return {visible,fits,opened,stable,returned:wizard.model.step===4,overflow:document.documentElement.scrollWidth>innerWidth+1};
+ });
+ assert(final.visible);assert(final.fits);assert(final.opened);assert(final.stable);assert(final.returned);assert(!final.overflow,'optional review overflow '+width);console.log('PASS optional review actions viewport',width);
+ }
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1);});

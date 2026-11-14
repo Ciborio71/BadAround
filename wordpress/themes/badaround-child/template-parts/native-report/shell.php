@@ -10,12 +10,12 @@ if ( ! $config ) {
 	<noscript><p>Per usare il wizard e inviare la segnalazione attiva JavaScript. I campi sono riportati di seguito per consultazione.</p></noscript>
 	<p data-native-boot role="status">Preparazione del modulo…</p>
 	<nav aria-label="Avanzamento della segnalazione"><p class="ba-native-position" data-native-position role="status" aria-live="polite" aria-atomic="true"></p><ol class="ba-native-progress">
-	<?php $timeline = array( 'event' => 'Evento', 'location' => 'Dove e quando', 'details' => 'Dettagli', 'media' => 'Media', 'contact' => 'Contatti', 'review' => 'Riepilogo' ); foreach ( $config['steps'] as $key => $title ) : ?><li data-native-progress="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $timeline[ $key ] ); ?></li><?php endforeach; ?>
+	<?php $timeline = array( 'event' => 'Evento', 'location' => 'Dove e quando', 'details' => 'Dettagli', 'media' => 'Media', 'contact' => 'Contatti', 'review' => 'Riepilogo' ); foreach ( $config['steps'] as $key => $title ) : ?><li data-native-progress="<?php echo esc_attr( $key ); ?>"<?php echo $key === 'review' ? ' hidden' : ''; ?>><?php echo esc_html( $timeline[ $key ] ); ?></li><?php endforeach; ?>
 	</ol></nav>
 	<div class="ba-native-summary" data-native-errors tabindex="-1" role="alert" hidden></div>
 	<form data-native-form novalidate>
 	<?php foreach ( $config['steps'] as $key => $title ) : ?>
-		<section data-native-step="<?php echo esc_attr( $key ); ?>" aria-labelledby="ba-native-heading-<?php echo esc_attr( $key ); ?>">
+		<section id="ba-native-step-<?php echo esc_attr( $key ); ?>" data-native-step="<?php echo esc_attr( $key ); ?>" aria-labelledby="ba-native-heading-<?php echo esc_attr( $key ); ?>">
 			<h2 id="ba-native-heading-<?php echo esc_attr( $key ); ?>" tabindex="-1"><?php echo esc_html( $title ); ?></h2>
 			<?php require __DIR__ . '/step.php'; ?>
 		</section>
@@ -23,6 +23,7 @@ if ( ! $config ) {
 		<div class="ba-native-actions" data-native-navigation hidden>
 			<button class="ba-button ba-button--outline" type="button" data-native-back>Indietro</button>
 			<button class="ba-button" type="button" data-native-next>Continua</button>
+			<button class="ba-button ba-button--outline" type="button" data-native-review-toggle aria-controls="ba-native-step-review" aria-expanded="false" hidden>Vedi riepilogo</button>
 			<button class="ba-button" type="submit" data-native-submit disabled hidden>Invia segnalazione</button>
 		</div>
 	</form>

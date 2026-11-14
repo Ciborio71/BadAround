@@ -15,6 +15,7 @@
     const publicLocationChoice = form.querySelector('[data-native-public-location-choice]');
     const radiusField=form.querySelector('[data-native-radius-field]'),radiusSelect=radiusField?.querySelector('select');
     const steps = Object.keys(config.steps);
+    const finalEntryStep=steps.filter(key=>key!=='review').at(-1);
     const wrappers = Array.from(form.querySelectorAll('[data-native-field]'));
     const workspace=container.closest('.ba-report-workspace');
     const pageTitle=workspace?.querySelector('[data-native-page-title]');
@@ -57,6 +58,7 @@
     conditionalStatus.setAttribute('role','status');conditionalStatus.setAttribute('aria-live','polite');conditionalStatus.setAttribute('aria-atomic','true');form.before(conditionalStatus);
     let activeSpecifications=new Set();
     const next = form.querySelector('[data-native-next]'), back = form.querySelector('[data-native-back]'), submit = form.querySelector('[data-native-submit]');
+    const preview=form.querySelector('[data-native-review-toggle]');
     const success = container.querySelector('[data-native-success]');
     // Outside the busy form so assistive technology can announce progress.
     const submissionFeedback=document.createElement('div');
@@ -112,7 +114,7 @@
       model.set('reporter.social_visibility',socialConsent.checked?'requested':'declined');ns.presentErrors(container,[],config);render();
     }
     if(socialConsent){listen(socialConsent,'input',socialConsentChanged);listen(socialConsent,'change',socialConsentChanged);}
-    const signatureModeration=document.createElement('p');signatureModeration.className='ba-native-help';signatureModeration.textContent='La pubblicazione della segnalazione e della firma scelta resta soggetta alle linee guida e alla moderazione di BadAround.';form.querySelector('[data-native-step="review"]')?.append(signatureModeration);
+    const signatureModeration=document.createElement('p');signatureModeration.className='ba-native-help';signatureModeration.textContent='La pubblicazione della segnalazione e della firma scelta resta soggetta alle linee guida e alla moderazione di BadAround.';form.querySelector('[data-native-step="'+finalEntryStep+'"]')?.append(signatureModeration);
     const choiceHelp={
       'reporter.contact_preference':{community:'Ricevi sia gli aggiornamenti sullo stato della segnalazione, sia eventuali avvistamenti e testimonianze inviati dagli altri utenti tramite BadAround.',badaround_only:'Ricevi solo le comunicazioni di BadAround sulla gestione e sullo stato della segnalazione. Nessun messaggio dalla community.'},
       'reporter.social_visibility':{requested:'La richiesta sarà valutata dallo staff. Verranno condivisi solo contenuti approvati e pubblicabili.',declined:'La segnalazione rimane sul sito; non richiedi la diffusione sui canali social di BadAround.'}
@@ -590,18 +592,22 @@
       mediaLaterNote.hidden=model.effective('media.availability')!=='possible';
       form.querySelectorAll('[data-native-step]').forEach(step => { step.hidden = step.dataset.nativeStep !== current; });
       container.querySelectorAll('[data-native-progress]').forEach((li,index) => {
-        li.classList.toggle('is-active', index === model.step);
-        li.classList.toggle('is-complete', index < model.step);
-        if (index === model.step) li.setAttribute('aria-current','step'); else li.removeAttribute('aria-current');
+        const active=li.dataset.nativeProgress===(current==='review'?finalEntryStep:current);
+        li.hidden=li.dataset.nativeProgress==='review';
+        li.classList.toggle('is-active',active);
+        li.classList.toggle('is-complete',index<model.step&&!active);
+        if(active)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');
       });
       const position = container.querySelector('[data-native-position]');
       if (position) {
-        const text = `Sei in: ${config.steps[current]}.${model.step<steps.length-1?' Dopo: '+config.steps[steps[model.step+1]]+'.':' Controlla e invia la segnalazione.'}`;
+        const text = current==='review'?'Riepilogo facoltativo. Puoi modificare i dati, tornare alla compilazione o inviare la segnalazione.':`Sei in: ${config.steps[current]}.${current===finalEntryStep?' Puoi inviare la segnalazione o consultare il riepilogo.':' Dopo: '+config.steps[steps[model.step+1]]+'.'}`;
         if (position.textContent !== text) position.textContent = text;
       }
       back.disabled = model.step === 0 || model.busy || !!model.snapshot;
-      next.hidden = current === 'review'; next.disabled = model.busy || !!model.snapshot;
-      submit.hidden = current !== 'review'; submit.disabled = model.busy || model.completed || !!model.blocked;
+      next.hidden = current === 'review'||current===finalEntryStep; next.disabled = model.busy || !!model.snapshot;
+      if(preview){preview.hidden=current!==finalEntryStep;preview.disabled=model.busy||!!model.snapshot||model.completed;preview.setAttribute('aria-expanded',String(current==='review'));}
+      back.textContent=current==='review'?'Torna alla compilazione':'Indietro';
+      submit.hidden = current !== 'review'&&current!==finalEntryStep; submit.disabled = model.busy || model.completed || !!model.blocked;
       submit.textContent = model.busy ? (accessPhase?(accessPhase==='checking'?'Controllo accesso…':'Conferma email…'):'Invio in corso…') : model.snapshot ? 'Riprova invio' : config.identityQa===true ? 'Conferma e invia' : 'Invia segnalazione';
       form.setAttribute('aria-busy', String(model.busy));
       syncSubmissionFeedback();
@@ -718,14 +724,18 @@
       if (errors.length) return displayErrors(errors);
       model.step++; ns.presentErrors(container, [], config); render(true);
     });
+    if(preview)listen(preview,'click',()=>{
+      if(model.busy||model.snapshot||model.completed||steps[model.step]!==finalEntryStep)return;
+      model.step=steps.indexOf('review');ns.presentErrors(container,[],config);render(true);
+    });
     listen(back,'click', () => { if (model.step > 0 && !model.snapshot) { model.step--; ns.presentErrors(container, [], config); render(true); } });
     listen(form,'submit', async event => {
       event.preventDefault();
-      if (steps[model.step] !== 'review' || model.busy || model.completed || model.blocked) return;
+      if (!['review',finalEntryStep].includes(steps[model.step]) || model.busy || model.completed || model.blocked) return;
       if (!model.snapshot) {
         const mediaErrors=mediaView?.media.errors() || []; // The media step is intentionally hidden at review; its errors must remain actionable.
         if (mediaErrors.length) return displayErrors(mediaErrors, true);
-        const errors = model.validate(); if (errors.length) return displayErrors(errors);
+        const errors = model.validate(); if (errors.length) return displayErrors(errors,true);
       }
       const pendingPayload=model.snapshot || model.payload();
       if(config.identityQa===true) {
@@ -780,7 +790,7 @@
           else { if(result.error.retryable)mediaView.media.markUncertain();else model.blocked=true; }
         } else if (validationRejection) { model.snapshot = null;mediaView?.media.unlock(); }
         else if (!result.error.retryable) model.blocked = true;
-        // A locked snapshot must stay on review, where an allowed retry is reachable.
+        // Keep the current final view and locked snapshot so retry cannot duplicate intake.
         displayErrors([model.snapshot ? {...result.error, field:null} : editableMedia ? {...result.error,field:config.fields[result.error.field] ? result.error.field : 'media.availability'} : result.error], true);
       }
     });

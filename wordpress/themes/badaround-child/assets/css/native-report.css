@@ -875,3 +875,9 @@
 /* Confirmation navigation: adjacent on wide screens, wrapped on mobile. */
 .ba-native .ba-native-success-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
 .ba-native .ba-native-success-actions .ba-button{max-width:100%;white-space:normal;text-align:center}
+
+/* The five entry steps end with direct submission; review is optional. */
+.ba-native .ba-native-progress{grid-template-columns:repeat(5,minmax(0,1fr))}
+.ba-native .ba-native-actions{flex-wrap:wrap;gap:12px}
+.ba-native [data-native-review-toggle]{margin-left:auto}
+@media(max-width:560px){.ba-native [data-native-review-toggle]{margin-left:0}}
