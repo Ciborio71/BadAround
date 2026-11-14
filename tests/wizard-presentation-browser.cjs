@@ -78,9 +78,10 @@ const {chromium}=require('playwright-core'),{execFileSync}=require('node:child_p
   const rect=preview.getBoundingClientRect();const fits=rect.left>=0&&rect.right<=innerWidth+1;
   preview.click();const opened=wizard.model.step===5&&!root.querySelector('[data-native-step="review"]').hidden;
   const stable=before===JSON.stringify(wizard.model.payload());root.querySelector('[data-native-back]').click();
-  return {visible,fits,opened,stable,returned:wizard.model.step===4,overflow:document.documentElement.scrollWidth>innerWidth+1};
+  const connectorHidden=getComputedStyle(root.querySelector('[data-native-progress="contact"]'),'::after').display==='none';
+  return {visible,fits,opened,stable,connectorHidden,returned:wizard.model.step===4,overflow:document.documentElement.scrollWidth>innerWidth+1};
  });
- assert(final.visible);assert(final.fits);assert(final.opened);assert(final.stable);assert(final.returned);assert(!final.overflow,'optional review overflow '+width);console.log('PASS optional review actions viewport',width);
+ assert(final.connectorHidden);assert(final.visible);assert(final.fits);assert(final.opened);assert(final.stable);assert(final.returned);assert(!final.overflow,'optional review overflow '+width);console.log('PASS optional review actions viewport',width);
  }
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1);});

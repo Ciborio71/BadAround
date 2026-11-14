@@ -881,3 +881,5 @@
 .ba-native .ba-native-actions{flex-wrap:wrap;gap:12px}
 .ba-native [data-native-review-toggle]{margin-left:auto}
 @media(max-width:560px){.ba-native [data-native-review-toggle]{margin-left:0}}
+
+.ba-native .ba-native-progress li[data-native-progress="contact"]::after{display:none}
