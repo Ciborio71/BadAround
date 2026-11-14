@@ -7,6 +7,10 @@ function sanitize_key($v){return strtolower(preg_replace('/[^a-z0-9_\\-]/i','',(
 function sanitize_text_field($v){return trim(strip_tags((string)$v));}
 function wp_strip_all_tags($v){return strip_tags((string)$v);}
 function wp_kses_post($v){return $v;}
+function sanitize_title($v){return trim(strtolower(preg_replace('/[^a-zA-Z0-9]+/','-',iconv('UTF-8','ASCII//TRANSLIT',$v))),'-');}
+function wp_generate_uuid4(){return bin2hex(random_bytes(16));}
+function wp_unique_post_slug($slug,$id,$status,$type,$parent){foreach($GLOBALS['posts'] as $p){if($p->ID!==$id&&($p->post_name??'')===$slug)return $slug.'-2';}return $slug;}
+
 function is_wp_error($v){return $v instanceof WP_Error;}
 class WP_Error {private $c;function __construct($c,$m=''){$this->c=$c;}function get_error_code(){return $this->c;}}
 class WP_Term {public $term_id,$parent,$slug,$name,$taxonomy='ba_territorio';function __construct($id,$parent,$name,$taxonomy='ba_territorio'){$this->term_id=$id;$this->parent=$parent;$this->name=$name;$this->slug=strtolower($name);$this->taxonomy=$taxonomy;}}
@@ -26,12 +30,19 @@ function update_post_meta($id,$key,$val){$gate=apply_filters('update_post_metada
 function delete_post_meta($id,$key){$gate=apply_filters('delete_post_metadata',null,$id,$key,null,null);if($gate!==null)return $gate;unset($GLOBALS['meta'][$id][$key]);return true;}
 function wp_get_post_terms($id,$tax){return array_map(fn($i)=>get_term($i,$tax),$GLOBALS['object_terms'][$id][$tax]??[]);}
 function wp_set_object_terms($id,$ids,$tax,$append=false){$GLOBALS['object_terms'][$id][$tax]=$ids;return $ids;}
-function wp_update_post($x,$error=false){foreach($x as $k=>$v){if($k!=='ID')$GLOBALS['posts'][$x['ID']]->$k=$v;}return $x['ID'];}
+function wp_update_post($x,$error=false){
+ $old=get_post_status($x['ID']);
+ $data=!empty($GLOBALS['wp_core_post_hooks'])?apply_filters('wp_insert_post_data',array_merge((array)get_post($x['ID']),$x),$x):$x;
+ foreach($data as $k=>$v){if($k!=='ID')$GLOBALS['posts'][$x['ID']]->$k=$v;}
+ if(!empty($GLOBALS['wp_core_post_hooks']))$GLOBALS['fixture_moderation']->enforce_b2_pending_status(get_post_status($x['ID']),$old,get_post($x['ID']));
+ return $x['ID'];
+}
 function current_user_can($cap,...$args){return !in_array($cap,$GLOBALS['denied']??[],true);} function get_post_status($id){return get_post($id)->post_status;}
 $GLOBALS['filters']=[];
 function add_filter($name,$fn,$priority=10,$args=1){$GLOBALS['filters'][$name][$priority][]=$fn;}
 function remove_filter($name,$fn,$priority=10){foreach($GLOBALS['filters'][$name][$priority]??[] as $k=>$f)if($fn===$f)unset($GLOBALS['filters'][$name][$priority][$k]);}
 function apply_filters($name,$v,...$args){$groups=$GLOBALS['filters'][$name]??[];ksort($groups);foreach($groups as $fns)foreach($fns as $fn)$v=$fn($v,...$args);return $v;}
+if (!function_exists('add_action')) { function add_action($name,$fn,$priority=10,$args=1){add_filter($name,$fn,$priority,$args);} }
 function do_action($name,...$args){$GLOBALS['actions'][]=$name;}
 function clean_post_cache($id){} function wp_json_encode($x){return json_encode($x);}
 function has_post_thumbnail(){return false;} function set_post_thumbnail(){}
@@ -39,7 +50,7 @@ class BadAround_Media_Repository{function approve_received_images_for_event(){re
 
 function wp_salt($v='auth'){return 'test';}
 function current_time($v,$gmt=false){return '2026-10-09 12:00:00';}
-require_once dirname(__DIR__).'/wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php';
+require_once getenv('BA_PUBLICATION_SERVICE_FILE')?:dirname(__DIR__).'/wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php';
 function check($ok,$msg){if(!$ok){fwrite(STDERR,"FAIL $msg\n");exit(1);}echo "PASS $msg\n";}
 function seed($id,$territory=4,$mode='f16-c8',$date='',$coords=[]){
  $GLOBALS['posts'][$id]=(object)['ID'=>$id,'post_type'=>'ba_evento','post_status'=>'pending','post_title'=>'Segnalazione da moderare #17','post_content'=>''];
@@ -49,7 +60,7 @@ function seed($id,$territory=4,$mode='f16-c8',$date='',$coords=[]){
 class Geo05DB extends DB {
  public $posts='wp_posts',$term_relationships='wp_term_relationships',$last_error='',$snapshot;
  function prepare($sql,...$args){foreach($args as $arg){$v=is_int($arg)?(string)$arg:"'".str_replace("'","''",$arg)."'";$sql=preg_replace('/%[ds]/',$v,$sql,1);}return $sql;}
- function get_var($sql){if(str_contains($sql,'information_schema'))return 'InnoDB';if(str_contains($sql,'JSON_CONTAINS_PATH')){ $l=json_decode($GLOBALS['private_fixture']['content_original']??'',true)['canonical']['location']??[];return (int)(isset($l['public_location_request'])||isset($l['public_location_request_version']));}return 0;}
+ function get_var($sql){if(str_contains($sql,'GET_LOCK')||str_contains($sql,'RELEASE_LOCK'))return 1;if(str_contains($sql,'information_schema'))return 'InnoDB';if(str_contains($sql,'JSON_CONTAINS_PATH')){ $l=json_decode($GLOBALS['private_fixture']['content_original']??'',true)['canonical']['location']??[];return (int)(isset($l['public_location_request'])||isset($l['public_location_request_version']));}return 0;}
  function get_row($sql){if(str_contains($sql,'FROM wp_posts')){preg_match('/ID=(\d+)/',$sql,$m);return get_post((int)$m[1]);}return parent::get_row($sql);}
  function query($sql){if($sql==='START TRANSACTION')$this->snapshot=serialize([$GLOBALS['meta'],$GLOBALS['posts'],$GLOBALS['object_terms'],$GLOBALS['geo_audits']]);if($sql==='ROLLBACK')[$GLOBALS['meta'],$GLOBALS['posts'],$GLOBALS['object_terms'],$GLOBALS['geo_audits']]=unserialize($this->snapshot);if($sql==='COMMIT'&&($GLOBALS['commit_fail']??false))return false;return 1;}
 }
@@ -101,5 +112,13 @@ foreach(['territory_only','municipality'] as $mode){g5seed(520,'exact_point',$mo
 g5seed(521,'approximate_area','approximate_area');check(BadAround_Publication_Service::guard_geo_write(null,521,'_ba_public_lat',41.8991622)===false,'moderation/intake/REST cannot write versioned mirrors');check(BadAround_Publication_Service::guard_geo_write(null,521,'_ba_public_geo',[])===false,'only B3 owns versioned projection writes');check(update_post_meta(521,'_ba_public_lat',41.8991622)===false&&g5none(521),'registered metadata hook blocks actual unauthorized write');
 foreach(['f32-c4'=>150,'f32-c5'=>300,'f32-c6'=>1000,'f32-c7'=>3000,'unknown'=>750] as $precision=>$radius){$l=['exact_lat'=>89.9999,'exact_lng'=>179.9999];$d=['mode'=>'approximate_area'];$p=BadAround_Public_Geo_Projection::build(530,$l,$d,$precision);check($p['radius_meters']===$radius&&BadAround_Public_Geo_Projection::pair($p['lat'],$p['lng']),'versioned radius and valid spherical jitter '.$precision);}
 unset($GLOBALS['private_fixture']);seed(540);check($svc->prepare_public_projection(540)===true&&$svc->validate_public_projection(540)===true,'legacy territory-only unchanged');
+$candidateBefore=get_post(540)->post_content;
+$GLOBALS['private_fixture']=['author_email'=>'private@example.invalid'];
+$candidateResult=$svc->validate_public_projection(540,false,'Contatto riservato private@example.invalid');
+check(is_wp_error($candidateResult)&&$candidateResult->get_error_code()==='ba_publication_private_data_detected'
+ &&get_post(540)->post_content===$candidateBefore,'Identity candidate privacy validation rejects private data without writing the post');
+check($svc->validate_public_projection(540,false,'Descrizione pubblica revisionata sicura')===true
+ &&get_post(540)->post_content===$candidateBefore,'safe Identity candidate uses existing publication validation without mutation');
+unset($GLOBALS['private_fixture']);
 $discovery=file_get_contents(dirname(__DIR__).'/wordpress/plugins/badaround-core/includes/class-badaround-discovery-query.php');$segment=explode('private function public_geo( $event_id ) {',$discovery)[1];$segment=explode('private function deepest_term',$segment)[0];check(!str_contains($segment,'exact_lat')&&!str_contains($segment,'ba_reports'),'Discovery never reads private coordinates');
 echo "GEO_PUBLIC_05_PUBLICATION=PASS\n";

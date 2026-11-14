@@ -112,6 +112,23 @@
       location:{region:region.name,province:province.name,municipality:municipality.name,locality:locality?.name||''},
       termIds:{region:Number(region.id),province:Number(province.id),municipality:Number(municipality.id),...(locality?{locality:Number(locality.id)}:{})}};
   }
+  // A proposal is a label, never an official administrative boundary or a POI.
+  function resolveNeighborhood(components, municipality) {
+    const parts=components||[];
+    for(const type of ['neighborhood','sublocality_level_5','sublocality_level_4','sublocality_level_3','sublocality_level_2','sublocality_level_1','sublocality']){
+      const labels=new Map();
+      parts.filter(p=>(p.types||[]).includes(type)).forEach(p=>{
+        const label=String(p.longText||p.long_name||'').trim();
+        if(label && normalize(label)!==normalize(municipality))labels.set(normalize(label),label);
+      });
+      if(labels.size>1)return null;
+      if(labels.size===1){const label=[...labels.values()][0];
+        if([...label].length>100||!/[\p{L}]/u.test(label)||/[\r\n@<>]|https?:/iu.test(label))return null;
+        return {label,source:type==='neighborhood'?'google_neighborhood':'google_sublocality',confirmed:false};
+      }
+    }
+    return null;
+  }
   let loaderPromise;
   let loaderAttempt = 0;
   function loadPlaces(key, doc = root.document) {
@@ -184,12 +201,79 @@
     const confirmationLabel=ui.querySelector('[data-smart-address-label]');
     const manualButton=ui.querySelector('[data-smart-manual]');
     const manualFields=container.querySelector('[data-native-location-fields]');
+    let neighborhoodBox, neighborhoodInput, neighborhoodStatus, neighborhoodConfirm, neighborhoodClear;
+    let zoneRevision=0, zoneTimer;
+    const locked=()=>model.busy||!!model.snapshot||model.completed;
+    if(config.neighborhoodProposal){
+      neighborhoodBox=root.document.createElement('fieldset');neighborhoodBox.className='ba-native-neighborhood';neighborhoodBox.hidden=true;
+      const legend=root.document.createElement('legend');legend.textContent='Quartiere o zona (facoltativo)';
+      const label=root.document.createElement('label');label.htmlFor='ba-neighborhood-label';label.textContent='Verifica o inserisci il nome della zona';
+      neighborhoodInput=root.document.createElement('input');neighborhoodInput.type='text';neighborhoodInput.id=label.htmlFor;neighborhoodInput.maxLength=100;
+      neighborhoodInput.autocomplete='off';neighborhoodInput.setAttribute('aria-describedby','ba-neighborhood-status');
+      neighborhoodStatus=root.document.createElement('p');neighborhoodStatus.id='ba-neighborhood-status';neighborhoodStatus.setAttribute('role','status');neighborhoodStatus.setAttribute('aria-live','polite');
+      const actions=root.document.createElement('div');actions.className='ba-native-neighborhood__actions';
+      neighborhoodConfirm=root.document.createElement('button');neighborhoodConfirm.type='button';neighborhoodConfirm.textContent='Conferma zona';
+      neighborhoodClear=root.document.createElement('button');neighborhoodClear.type='button';neighborhoodClear.textContent='Non indicare una zona';
+      actions.append(neighborhoodConfirm,neighborhoodClear);neighborhoodBox.append(legend,label,neighborhoodInput,neighborhoodStatus,actions);(ui.querySelector('[data-smart-location-side]')||ui).append(neighborhoodBox);
+      neighborhoodInput.addEventListener('input',()=>{if(locked())return;cancelZoneLookup();model.neighborhood=null;neighborhoodStatus.textContent='Zona proposta da te. Confermala per includerla nel riepilogo; sarà verificata in moderazione.';syncVisibility();});
+      neighborhoodConfirm.addEventListener('click',()=>{
+        if(locked())return;const label=neighborhoodInput.value.trim();
+        if(!label||![...label].length||[...label].length>100||!/[\p{L}]/u.test(label)||/[\r\n@<>]|https?:/iu.test(label)){neighborhoodStatus.textContent='Inserisci solo il nome del quartiere o della zona, senza indirizzi o recapiti.';neighborhoodInput.focus();return;}
+        const source=model.neighborhood?.label===label?model.neighborhood.source:'user_proposed';cancelZoneLookup();
+        model.neighborhood={label,source,confirmed:true};neighborhoodStatus.textContent='Zona confermata: '+label+'. Sarà pubblicata solo dopo la verifica del moderatore.';syncVisibility();
+      });
+      neighborhoodClear.addEventListener('click',()=>{if(locked())return;clearNeighborhood();neighborhoodStatus.textContent='Nessuna zona indicata. Puoi continuare.';syncVisibility();});
+    }
+    function cancelZoneLookup(){zoneRevision++;root.clearTimeout(zoneTimer);if(neighborhoodStatus)neighborhoodStatus.removeAttribute('aria-busy');}
+    function clearNeighborhood(){cancelZoneLookup();model.neighborhood=null;if(neighborhoodInput)neighborhoodInput.value='';if(neighborhoodStatus)neighborhoodStatus.textContent='Puoi indicare una zona oppure continuare senza.';}
+    function setNeighborhood(proposal){
+      if(!neighborhoodInput)return;model.neighborhood=proposal;neighborhoodInput.value=proposal?.label||'';
+      neighborhoodStatus.textContent=proposal?'Google propone «'+proposal.label+'». Verifica il nome e premi Conferma zona. Non identifica confini ufficiali.':'Google non ha identificato una zona univoca. Puoi inserirla tu oppure continuare senza.';
+      syncVisibility();
+    }
+    async function suggestNeighborhood(place,mapped,lat,lng,id){
+      if(!neighborhoodBox)return;
+      const direct=resolveNeighborhood(place.addressComponents,mapped.location.municipality);
+      if(direct){setNeighborhood(direct);return;}
+      setNeighborhood(null);
+      if((place.addressComponents||[]).some(p=>(p.types||[]).some(t=>t==='neighborhood'||t.startsWith('sublocality'))))return;
+      if(!Number.isFinite(lat)||!Number.isFinite(lng)||!root.google?.maps?.importLibrary)return;
+      const revision=++zoneRevision;
+      neighborhoodStatus.textContent='Ricerca del quartiere in corso… Puoi continuare anche senza.';neighborhoodStatus.setAttribute('aria-busy','true');
+      const current=()=>!disposed&&id===requestId&&revision===zoneRevision&&!locked();
+      zoneTimer=root.setTimeout(()=>{if(revision===zoneRevision){if(current())setNeighborhood(null);zoneRevision++;neighborhoodStatus.removeAttribute('aria-busy');}},7000);
+      try{
+        const lib=await root.google.maps.importLibrary('geocoding');if(!current())return;
+        const response=await new lib.Geocoder().geocode({location:{lat,lng},language:'it'});if(!current())return;
+        const components=[];
+        for(const result of response.results||[]){
+          const parts=(result.address_components||result.addressComponents||[]).map(p=>({types:p.types,longText:p.longText||p.long_name,shortText:p.shortText||p.short_name}));
+          const resolved=resolveTerritory(parts,canonicalTerritories);
+          if(resolved.location&&LEVELS.slice(0,3).every(k=>resolved.location[k]===mapped.location[k]))components.push(...parts);
+        }
+        setNeighborhood(resolveNeighborhood(components,mapped.location.municipality));
+      }catch(_){if(current())setNeighborhood(null);}
+      finally{if(revision===zoneRevision){root.clearTimeout(zoneTimer);neighborhoodStatus.removeAttribute('aria-busy');}}
+    }
     let manual=false;
-    function syncVisibility(){if(manualFields)manualFields.hidden=!manual;mapView?.sync();}
+    function syncVisibility(){
+      if(manualFields)manualFields.hidden=!manual;
+      const choice=container.querySelector('[data-native-public-location-choice]');
+      const ready=selected||(manual&&['region','province','municipality','exact_address'].every(key=>String(container.querySelector('[name="location.'+key+'"]')?.value||'').trim()));
+      const layout=ui.querySelector('[data-smart-location-layout]');if(layout)layout.hidden=!ready;
+      const card=ui.querySelector('[data-smart-location-card]');if(card)card.hidden=!selected;
+      if(choice){choice.hidden=!ready;choice.querySelectorAll('input[type=radio]').forEach(input=>{input.disabled=!ready||model.busy||!!model.snapshot||model.completed;});
+        const radius=choice.querySelector('[name="ba-public-location-radius"]');if(radius)radius.disabled=!ready||model.publicLocationRequest!=='approximate_area'||model.busy||!!model.snapshot||model.completed;}
+      if(neighborhoodBox){neighborhoodBox.hidden=!ready;neighborhoodInput.disabled=!ready||locked();neighborhoodClear.disabled=!ready||locked();neighborhoodConfirm.disabled=!ready||locked()||!neighborhoodInput.value.trim()||!!model.neighborhood?.confirmed;neighborhoodConfirm.textContent=model.neighborhood?.confirmed?'Zona confermata':'Conferma zona';}
+      mapView?.sync();
+      const step=ui.closest('[data-native-step="location"]');
+      if(step&&!step.hidden&&!locked()&&!manual&&config.smartAddress?.key&&!preparedOnEntry&&!widget){preparedOnEntry=true;void activate(false);}
+    }
     function offerManual(message){if(config.locationManualEntry===false){say('La ricerca del luogo non è disponibile per questo indirizzo. Riprova la ricerca o riprova più tardi.');if(confirmation)confirmation.hidden=true;return;}say(message+' Puoi utilizzare i campi manuali.');if(manualButton)manualButton.hidden=false;if(confirmation)confirmation.hidden=true;}
     const paths = LEVELS.map(v => 'location.' + v);
     const privatePaths = ['location.exact_address','location.exact_lat','location.exact_lng'];
     let disposed=false, selected=false, widget, requestId=0, applying=false;
+    let preparedOnEntry=false,activationPending=false,focusAfterActivation=false,activationRevision=0;
     const mapView=ns.LocationMap?.mount(container,config,model,{
       load:()=>loadPlaces(config.smartAddress?.key),ticket:()=>requestId,
       current:id=>!disposed&&id===requestId&&!model.busy&&!model.snapshot&&!model.completed,
@@ -227,7 +311,9 @@
     }
     function invalidate(reason,territoryChanged=false) {
       requestId++;
+      clearNeighborhood();
       selected=false;
+      syncVisibility();
       mapView?.hide();
       if(confirmation)confirmation.hidden=true;
       // If a manually edited territory could disagree with the selected
@@ -235,7 +321,7 @@
       if (territoryChanged) assign('location.exact_address','');
       assign('location.exact_lat','');
       assign('location.exact_lng','');
-      say(reason);
+      syncVisibility();say(reason);
     }
     function changed(event) {
       if (disposed || applying || !event.target?.matches?.('[data-native-input]')) return;
@@ -249,11 +335,13 @@
     async function choose(event) {
       if (disposed || model.busy || model.snapshot || model.completed) return;
       const id=++requestId;
+      clearNeighborhood();
       selected=false;
+      syncVisibility();
       mapView?.hide();
       if(confirmation)confirmation.hidden=true;
       // Do not submit an old territory or exact coordinate while resolving a new Place.
-      clearLocation(true);
+      clearLocation(true);syncVisibility();
       try {
         const place=event.placePrediction?.toPlace?.();
         if (!place) throw new Error('place_unavailable');
@@ -306,36 +394,46 @@
         if(selected){manual=false;syncVisibility();if(confirmationLabel)confirmationLabel.textContent=fullAddress;if(confirmation)confirmation.hidden=false;}
         else offerManual('Indirizzo incompleto. Inserisci la posizione manualmente.');
         if(!mapped.location)offerManual('Territorio non riconosciuto. Inserisci manualmente.');
-        else if(selected){say('Posizione riconosciuta.');if(Number.isFinite(lat)&&Number.isFinite(lng))mapView?.show({lat,lng});}
+        else if(selected){say('Posizione riconosciuta.');if(Number.isFinite(lat)&&Number.isFinite(lng))mapView?.show({lat,lng});void suggestNeighborhood(place,mapped,lat,lng,id);}
       } catch (_) {
         if (!disposed && id===requestId) offerManual('Google non disponibile. Inserisci la posizione manualmente.');
       }
     }
-    async function activate() {
-      if (disposed || start.disabled || widget) return;
-      start.disabled=true; say('Caricamento della ricerca Google…');
+    async function activate(focus=true) {
+      if (disposed || locked() || widget) return;
+      if(focus!==false)focusAfterActivation=true;
+      if(activationPending||start.disabled)return;
+      activationPending=true;const revision=activationRevision;
+      start.disabled=focus!==false;
+      ui.querySelector('[data-smart-search-slot]')?.setAttribute('aria-busy','true');
+      if(focus!==false)say('Caricamento della ricerca Google…');
       try {
         if (!config.smartAddress?.key) throw new Error('places_unavailable');
         const places=await loadPlaces(config.smartAddress.key);
-        if (disposed) return;
+        if (disposed||revision!==activationRevision||locked()) return;
         const Element=places.PlaceAutocompleteElement || root.google?.maps?.places?.PlaceAutocompleteElement;
         if (!Element) throw new Error('widget_unavailable');
         widget=new Element({includedRegionCodes:['it']});
         widget.includedRegionCodes=['it'];
         widget.setAttribute('aria-label', 'Posizione dell’evento');
         widget.setAttribute('aria-describedby', 'ba-smart-status');
+        widget.placeholder='Cerca indirizzo, comune o quartiere…';
+        widget.setAttribute('placeholder',widget.placeholder);
         widget.addEventListener('gmp-select',choose);
         holder.replaceChildren(widget);
-        start.hidden=true;
-        say('Cerca un indirizzo italiano e seleziona un suggerimento.');
-        try{widget.focus()}catch(_){}
+        start.hidden=true;holder.hidden=false;
+        say('');
+        const step=ui.closest('[data-native-step="location"]');
+        if(focusAfterActivation&&(!step||!step.hidden))try{widget.focus()}catch(_){}
       } catch (_) {
-        if (!disposed) {start.disabled=false;offerManual('Google non è disponibile. Inserisci la posizione manualmente.');}
+        if (!disposed&&revision===activationRevision) {start.disabled=false;offerManual('Google non è disponibile. Inserisci la posizione manualmente.');}
+      } finally {
+        if(revision===activationRevision){activationPending=false;focusAfterActivation=false;ui.querySelector('[data-smart-search-slot]')?.removeAttribute('aria-busy');if(!widget)start.disabled=false;}
       }
     }
     function openManual(){
       if(config.locationManualEntry===false)return;
-      requestId++;selected=false;manual=true;if(confirmation)confirmation.hidden=true;clearLocation(true);syncVisibility();
+      requestId++;clearNeighborhood();selected=false;manual=true;if(confirmation)confirmation.hidden=true;clearLocation(true);syncVisibility();
       say('Compila Regione, Provincia, Comune e indirizzo preciso. La località è facoltativa.');
       field('location.region')?.focus?.();
     }
@@ -349,21 +447,24 @@
         field(missing)?.focus?.();return false;
       }
       say('Seleziona un indirizzo dai suggerimenti Google prima di continuare.');
-      // Navigation alone must not initialize Google: only the search field may do so.
+      // Continuing never accepts free text or starts another provider lookup.
       return false;
     }
     function reset(){
-      requestId++;selected=false;manual=false;
+      activationRevision++;activationPending=false;focusAfterActivation=false;preparedOnEntry=false;
+      ui.querySelector('[data-smart-search-slot]')?.removeAttribute('aria-busy');
+      requestId++;clearNeighborhood();selected=false;manual=false;
       if(confirmation)confirmation.hidden=true;
       mapView?.hide();
       if(confirmationLabel)confirmationLabel.textContent='';
       // A new report must not retain free text or prediction state inside the
-      // Google custom element. Recreate it lazily on the next explicit focus.
+      // Google custom element. Recreate it when the address step is reached.
       if(widget){widget.removeEventListener('gmp-select',choose);holder.replaceChildren();widget=null;}
+      holder.hidden=true;
       start.value='';start.hidden=false;start.disabled=false;
       if(manualButton)manualButton.hidden=config.locationManualEntry===false || Boolean(config.smartAddress?.key);
       syncVisibility();
-      say('Seleziona il campo per cercare un luogo.');
+      say('');
     }
     function changedGoogle(event){
       if(event.type==='gmp-select')return;
@@ -380,8 +481,8 @@
     manualButton?.addEventListener('click',openManual);
     if(!config.smartAddress?.key)offerManual('Google non configurato. Inserisci la posizione manualmente.');
     syncVisibility();
-    return {canAdvance,syncVisibility,reset,dispose(){disposed=true;requestId++;mapView?.dispose();holder.removeEventListener('keydown',searchKeydown);start.removeEventListener('focus',activate);start.removeEventListener('click',activate);manualButton?.removeEventListener('click',openManual);container.removeEventListener('input',changed);holder.removeEventListener('input',changedGoogle);holder.removeEventListener('change',changedGoogle);widget?.removeEventListener('gmp-select',choose);}};
+    return {canAdvance,syncVisibility,reset,dispose(){disposed=true;requestId++;cancelZoneLookup();neighborhoodBox?.remove();mapView?.dispose();holder.removeEventListener('keydown',searchKeydown);start.removeEventListener('focus',activate);start.removeEventListener('click',activate);manualButton?.removeEventListener('click',openManual);container.removeEventListener('input',changed);holder.removeEventListener('input',changedGoogle);holder.removeEventListener('change',changedGoogle);widget?.removeEventListener('gmp-select',choose);}};
   }
-  ns.SmartAddress = {resolveTerritory,loadPlaces,mount};
-  if (typeof module !== 'undefined' && module.exports) module.exports = {resolveTerritory};
+  ns.SmartAddress = {resolveTerritory,resolveNeighborhood,loadPlaces,mount};
+  if (typeof module !== 'undefined' && module.exports) module.exports = {resolveTerritory,resolveNeighborhood};
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -53,7 +53,7 @@ class BadAround_Report_V2_Validator extends BadAround_Report_Validator {
 		$report = BadAround_Public_Geo_Contract::validation_report( $report );
 		foreach ( $fields as $path => $definition ) {
 			if ( ! BadAround_Report_Conditional_Contract::active( $path, $report, $row ) ) { continue; }
-			$rule = $row['fields'][ $path ]; $present = $this->has_meaningful_value( $report, $path );
+			$rule = in_array($path,array('consents.public_details_version', 'location.neighborhood_label', 'location.neighborhood_source', 'location.neighborhood_confirmed'),true) ? array( 'required_when_active' => false, 'state' => 'OPTIONAL' ) : $row['fields'][ $path ]; $present = $this->has_meaningful_value( $report, $path );
 			if ( $rule['required_when_active'] && ! $present ) { return new WP_Error( 'ba_report_required_field', 'Required active field.', array( 'field' => $path, 'conditional' => 'CONDITIONAL' === $rule['state'] ) ); }
 			if ( ! $present ) { continue; }
 			if ( isset( $rule['constraints_override'] ) ) { $definition['constraints'] = array_merge( $definition['constraints'], $rule['constraints_override'] ); }
@@ -71,6 +71,11 @@ class BadAround_Report_V2_Validator extends BadAround_Report_Validator {
 		if ( $this->has_meaningful_value( $report, 'location.exact_lat' ) xor $this->has_meaningful_value( $report, 'location.exact_lng' ) ) { return $this->field_error( 'ba_report_incomplete_coordinates', 'location.exact_lat', 'Coordinate pair required.' ); }
 		foreach ( array( $this->validate_time_rules( $report, BadAround_Report_Schema::validation_rules() ), $this->validate_reward_rules( $report ) ) as $check ) { if ( is_wp_error( $check ) ) { return $check; } }
 		foreach ( array( 'truthfulness', 'media_rights', 'publication_rules', 'terms', 'privacy' ) as $consent ) { if ( true !== $this->get_path( $report, 'consents.' . $consent ) ) { return $this->field_error( 'ba_report_consent_required', 'consents.' . $consent, 'Consent required.' ); } }
+        $n=$report['location']??array();
+        if(array_key_exists('neighborhood_label',$n)||array_key_exists('neighborhood_source',$n)||array_key_exists('neighborhood_confirmed',$n)){
+            if(!is_string($n['neighborhood_label']??null)||!preg_match('/\p{L}/u',$n['neighborhood_label'])||true!==($n['neighborhood_confirmed']??null)||!in_array($n['neighborhood_source']??null,array('google_neighborhood','google_sublocality','user_proposed'),true))
+                return $this->field_error('ba_report_invalid_location','location.neighborhood_label','Conferma la zona oppure rimuovi la proposta.');
+        }
 		return true;
 	}
 	protected function validate_public_location_request( $report ) {

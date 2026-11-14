@@ -1,0 +1,90 @@
+{
+  "date": "2026-11-06",
+  "code_commit": "d2d451376f495d2e770fc7476f24674f491d15c3",
+  "ci_run": 42143621658,
+  "ci_result": "success",
+  "deploy": {
+    "core_modified": false,
+    "current_modules": 86,
+    "database_modified": false,
+    "flags_modified": false,
+    "modified": [
+      "wordpress-community-review.php",
+      "community-policy.php",
+      "community-gateway.php",
+      "wordpress-community-rest-adapter.php",
+      "wordpress-composition.php",
+      "wordpress-activity-rest.php",
+      "wordpress-identity-portal.php",
+      "wordpress-comment-form.php",
+      "identity-comment-form.js",
+      "identity-portal.js",
+      "wordpress-private-bootstrap.php"
+    ],
+    "new_modules": 1,
+    "preflight": true,
+    "previous_modules": 85,
+    "prior_modules": 85,
+    "private_qa_only": true,
+    "public_identity_enabled": false,
+    "publication_service_after_sha256": "c038cf7f24b0832cdfddd85c5dc43bb808a94933c1caed80a977446b59da3429",
+    "publication_service_before_sha256": "abdeada1736f9a1516bc4c521c3cd9eca72a672b5fb567b0c9ccb81db6381c16"
+  },
+  "local_php": {
+    "scripts": 87,
+    "passed": 87
+  },
+  "javascript": {
+    "baseline_and_transport": 41,
+    "community_dom": 2,
+    "passed": 43
+  },
+  "review_checks": 30,
+  "release_driver_tests": 3,
+  "browser_acceptance": "deferred_to_user",
+  "public_activation": false,
+  "live_report_85": {
+    "event_id": 392,
+    "report_status": "validated",
+    "event_status": "pending",
+    "ownership": "linked",
+    "active_creators": 1
+  },
+  "external_smoke": [
+    {
+      "path": "/",
+      "method": "GET",
+      "http_status": 503,
+      "php_fatal": false,
+      "private_identity_ui_exposed": false
+    },
+    {
+      "path": "/segnala-un-evento/",
+      "method": "GET",
+      "http_status": 503,
+      "php_fatal": false,
+      "private_identity_ui_exposed": false
+    },
+    {
+      "path": "/identity-qa/",
+      "method": "GET",
+      "http_status": 503,
+      "php_fatal": false,
+      "private_identity_ui_exposed": false
+    },
+    {
+      "path": "/wp-json/badaround/v1/discovery",
+      "method": "GET",
+      "http_status": 200,
+      "php_fatal": false,
+      "private_identity_ui_exposed": false
+    },
+    {
+      "path": "/wp-json/badaround/v1/identity/my-reports",
+      "method": "POST",
+      "http_status": 503,
+      "php_fatal": false,
+      "private_identity_ui_exposed": false
+    }
+  ]
+}

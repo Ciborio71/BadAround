@@ -146,7 +146,8 @@ $deepest_term = static function ( $terms, $tax ) {
 							'template-parts/components/event-card',
 							null,
 							array(
-								'title'        => get_the_title(),
+								'event_id'     => $event_id,
+                                'title'        => get_the_title(),
 								'url'          => get_permalink(),
 								'status'       => 'info',
 								'status_label' => $type_label,

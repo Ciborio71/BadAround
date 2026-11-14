@@ -1,1 +1,38 @@
 .ba-contribution-box{margin-top:24px}.ba-contribution-cta{display:flex;gap:16px;justify-content:space-between;align-items:center}.ba-contribution-panel{margin-top:16px}.ba-contribution-form{display:grid;gap:14px}.ba-contribution-form label{display:grid;gap:6px;font-weight:600}.ba-contribution-form input,.ba-contribution-form select,.ba-contribution-form textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px}.ba-contribution-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ba-contribution-help{font-size:.92rem;color:#475569}.ba-contribution-public-list{display:grid;gap:12px;margin-top:16px}.ba-contribution-public-item{padding:14px;border:1px solid #e2e8f0;border-radius:10px}.ba-contribution-status{min-height:1.5em;font-weight:600}@media(max-width:720px){.ba-contribution-cta{align-items:flex-start;flex-direction:column}.ba-contribution-grid{grid-template-columns:1fr}}
+/* Contribution form: compact choices, clear groups and visible feedback. */
+.ba-contribution-box{margin-top:0}
+.ba-contribution-cta{align-items:flex-start}
+.ba-contribution-cta h2{margin:0 0 8px;font-size:1.35rem;line-height:1.25}
+.ba-contribution-cta p{margin:0;max-width:65ch;line-height:1.6}
+.ba-contribution-cta>button{flex-shrink:0;white-space:normal;max-width:100%}
+.ba-contribution-panel{scroll-margin-top:120px;border-top:1px solid #dce5ed;padding-top:22px;margin-top:22px}
+.ba-contribution-panel[hidden],.ba-contribution-form [hidden]{display:none!important}
+.ba-contribution-form{gap:20px;font-size:1rem;line-height:1.5;min-width:0}
+.ba-contribution-form fieldset{min-width:0;margin:0;padding:18px;border:1px solid #dce5ed;border-radius:12px;display:grid;gap:14px}
+.ba-contribution-form legend{padding:0 7px;font-size:1rem;font-weight:750;color:#071a38}
+.ba-contribution-form label{font-size:.96rem;line-height:1.5;min-width:0;color:#243d56}
+.ba-contribution-form label:has(>input[type=radio]),.ba-contribution-form label:has(>input[type=checkbox]){display:flex;align-items:flex-start;gap:10px;font-weight:500;cursor:pointer}
+.ba-contribution-form input[type=radio],.ba-contribution-form input[type=checkbox]{flex:0 0 auto;width:20px!important;height:20px;min-height:0;padding:0;margin:2px 0 0;accent-color:#0798a8}
+.ba-contribution-form input:not([type=radio]):not([type=checkbox]):not([type=hidden]),.ba-contribution-form select,.ba-contribution-form textarea{box-sizing:border-box;width:100%;max-width:100%;min-width:0;padding:12px;font:inherit;color:#071a38;background:#fff;border:1px solid #b9cbd8;border-radius:9px}
+.ba-contribution-form textarea{resize:vertical;min-height:130px}
+.ba-contribution-form :is(input,textarea,select,button,summary):focus-visible{outline:3px solid #0798a8;outline-offset:3px}
+.ba-contribution-preferences{display:grid;grid-template-columns:1fr 1fr;gap:16px;min-width:0}
+.ba-contribution-additional{padding:16px;border:1px solid #dce5ed;border-radius:12px;background:#f7fafc}
+.ba-contribution-additional summary{cursor:pointer;font-weight:700;color:#087887}
+.ba-contribution-additional[open]{display:grid;gap:14px}
+.ba-contribution-additional[open] summary{margin-bottom:16px}
+.ba-contribution-additional>label{margin-top:14px}
+.ba-contribution-form .ba-contribution-help{margin:0;color:#50677d;font-size:.92rem;line-height:1.6}
+.ba-contribution-safety{padding:12px 14px;border-radius:10px;background:#f2f7fa}
+.ba-contribution-form>button[type=submit]{justify-self:start;min-height:48px;padding:12px 24px}
+.ba-contribution-status[data-state]{padding:14px 16px;border:1px solid #b7d7df;border-radius:10px;font-size:1rem;line-height:1.6;color:#153c4b;background:#edf8fb}
+.ba-contribution-status[data-state=error]{border-color:#e7aeb1;background:#fff1f2;color:#9a1e28}
+.ba-contribution-status[data-state=success]{border-color:#9ad4ba;background:#effaf4;color:#11613e}
+.ba-contribution-status:empty{display:none}
+@media(max-width:720px){.ba-contribution-preferences{grid-template-columns:1fr}.ba-contribution-form fieldset{padding:14px}.ba-contribution-form>button[type=submit],.ba-contribution-cta>button{width:100%;max-width:none}}
+
+/* Override inherited fixed field heights that clip native select text. */
+.ba-contribution-form select,.ba-contribution-form input:not([type=radio]):not([type=checkbox]):not([type=hidden]){height:auto;min-height:50px;max-height:none;line-height:1.5;padding-block:10px;font-size:16px}
+.ba-contribution-form select{padding-inline-end:38px}
+.ba-contribution-form textarea{height:auto;max-height:none;line-height:1.5;font-size:16px}
+.ba-contribution-form .ba-moderation-note{margin-top:-8px;font-size:.92rem;color:#50677d}

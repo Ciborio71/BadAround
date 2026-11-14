@@ -1,0 +1,21 @@
+name: BadAround event SEO v2 contract verification
+on:
+  push:
+    branches: [reconcile/identity-production-baseline-20261104]
+    paths:
+      - tests/event-structured-data.php
+      - tests/test-ba-event-seo-refresh.php
+      - .github/workflows/ba-event-seo-contract-check.yml
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify metadata images dates and explicit maintenance migration
+        run: |
+          php tests/event-dynamic-seo.php
+          php tests/event-structured-data.php
+          php tests/test-ba-event-seo-refresh.php
+          php tests/event-gallery.php

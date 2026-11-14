@@ -19,10 +19,11 @@ test('F1.9 typography and Astra isolation stay scoped to native wizard',()=>{
   ]) assert(!forbidden.test(f19),'F1.9 introduces an unscoped global selector');
   // Native location's canonical hidden fields must remain invisible even when
   // Astra / third-party styles attempt to override the HTML hidden attribute.
-  // Allow that single privacy fence, never arbitrary !important declarations.
+  // Allow only the canonical privacy fence and the approved visually-hidden live status.
   const importantRules=f19.split('}').filter(rule=>rule.includes('!important')).map(rule=>rule.trim());
-  assert.equal(importantRules.length,1);
-  assert(importantRules[0].includes('.ba-native [data-native-location-fields][hidden]{display:none!important'));
+  assert.equal(importantRules.length,2);
+  assert(importantRules.some(rule=>rule.includes('.ba-native [data-native-location-fields][hidden]{display:none!important')));
+  assert(importantRules.some(rule=>rule.includes('.ba-native-conditional-status{position:absolute!important')&&rule.includes('clip-path:inset(50%)')&&rule.includes('width:1px')&&rule.includes('height:1px')));
 });
 
 test('F1.9 step transition focuses heading and scrolls only when step is outside safe viewport',()=>{
@@ -167,4 +168,44 @@ test('F1.9 review and media CSS have stable narrow-screen wrapping with no fixed
   assert(f19.includes('@media(max-width:768px)'));
   assert(f19.includes('.ba-native{max-width:none}'));
   assert(f19.includes('.ba-native .ba-native-media-actions button'));
+});
+
+
+test('page heading follows every step and back navigation without duplicating the step introduction',()=>{
+ const h=create({pageHeader:true});try{
+  const title=h.doc.querySelector('[data-native-page-title]'),intro=h.doc.querySelector('[data-native-page-intro]');
+  assert.equal(title.textContent,'Cosa è successo?');assert.match(intro.textContent,/Ti guidiamo/);
+  h.fill();const steps=Object.keys(h.root.nativeReport.config.steps);
+  for(let i=0;i<steps.length;i++){
+   const section=h.doc.querySelector('[data-native-step="'+steps[i]+'"]');
+   assert.equal(title.textContent,h.root.nativeReport.config.steps[steps[i]]+(i===0?'?':''));
+   assert(section.querySelector('h2').hidden);
+   // A contextual emergency notice may legitimately follow the hidden heading.
+   // Check the original introduction by its copied text, not by sibling position.
+   assert([...section.children].some(el=>el.tagName==='P'&&el.hidden&&el.textContent===intro.textContent));
+   assert.equal(section.getAttribute('aria-labelledby'),title.id);
+   if(i<steps.length-1){h.click('next');assert.equal(h.doc.activeElement,title);}
+  }
+  h.click('back');assert.equal(title.textContent,h.root.nativeReport.config.steps.contact);assert.equal(h.doc.activeElement,title);
+ }finally{h.close();}
+});
+test('completion and new report reset the page heading without stale review instructions',async()=>{
+ const h=create({pageHeader:true});try{
+  h.fill();h.goReview();h.submit();await tick();await tick();
+  assert.equal(h.model.completed,true);assert.equal(h.doc.querySelector('[data-native-page-title]').textContent,'Segnalazione inviata');
+  assert.match(h.doc.querySelector('[data-native-page-intro]').textContent,/attesa di moderazione/);
+  h.click('new');assert.equal(h.doc.querySelector('[data-native-page-title]').textContent,'Cosa è successo?');assert.match(h.doc.querySelector('[data-native-page-intro]').textContent,/Ti guidiamo/);
+ }finally{h.close();}
+});
+
+
+test('paired place/danger questions preserve progression without repeated emergency banners',()=>{
+ const h=create();try{
+  h.fill();h.model.step=2;h.set('location.immediate_danger','yes');
+  const row=h.doc.querySelector('.ba-native-place-danger-row');assert(row);
+  assert.deepEqual([...row.querySelectorAll(':scope>[data-native-field]')].map(e=>e.dataset.nativeField),['location.place_type','location.immediate_danger']);
+  assert.equal(h.doc.querySelector('[data-native-emergency-notice]'),null);
+  const danger=row.querySelector('[data-native-field="location.immediate_danger"] .ba-native-card-grid');assert(danger.classList.contains('ba-native-short-options'));
+  h.click('next');assert.equal(h.model.step,3);
+ }finally{h.close();}
 });

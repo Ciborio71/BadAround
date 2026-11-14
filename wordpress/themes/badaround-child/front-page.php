@@ -35,7 +35,7 @@ $home_categories = array(
 
 			<form class="ba-home-search" role="search" action="<?php echo esc_url( home_url( '/mappa/' ) ); ?>" method="get" data-ba-home-place-search>
 				<label class="ba-sr-only" for="ba-home-location">Cerca indirizzo o località</label>
-				<span class="ba-home-search__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" focusable="false"><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="10" r="2.2" fill="currentColor"/></svg></span>
+				<span class="ba-home-search__icon" aria-hidden="true"><?php echo badaround_pin_svg('neutral'); ?></span>
 				<input id="ba-home-location" name="area" type="search" placeholder="Cerca indirizzo, comune o quartiere…" autocomplete="off" data-ba-home-place-input>
 				<input type="hidden" name="place_id" data-ba-home-place-id>
 				<input type="hidden" name="lat" data-ba-home-place-lat>
@@ -47,8 +47,9 @@ $home_categories = array(
 				<button class="ba-button" type="submit">Cerca</button>
 			</form>
 
-			<button class="ba-button ba-button--outline ba-home-position" type="button" data-ba-geolocate aria-describedby="ba-home-geo-status"><svg class="ba-home-position__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg><span>Esplora l’area attorno a te</span></button>
-			<p class="ba-home-privacy">La posizione pubblica degli eventi può essere approssimata in base alla richiesta dell’utente e alla moderazione. La tua posizione non viene salvata.</p>
+			<p class="ba-home-geo-intro"><strong>Scopri cosa succede vicino a te</strong><br>Usa la tua posizione per vedere le segnalazioni nella tua zona.</p>
+			<button class="ba-button ba-button--outline ba-home-position" type="button" data-ba-geolocate aria-describedby="ba-home-geo-status"><svg class="ba-home-position__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg><span>Usa la mia posizione</span></button>
+			<p class="ba-home-privacy">Oppure cerca un comune, un quartiere o un indirizzo. La posizione serve a esplorare la zona; non viene salvata da BadAround né usata per compilare una segnalazione.</p>
 			<p id="ba-home-geo-status" class="ba-home-geo-status" data-ba-geolocation-status role="status" aria-live="polite"></p>
 		</div>
 
@@ -60,13 +61,14 @@ $home_categories = array(
 			<details class="ba-map-legend ba-map-legend--home">
 				<summary><span class="ba-map-legend__label">Legenda pinpoint</span></summary>
 				<div class="ba-map-legend__body">
-					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-vehicles" aria-hidden="true"></span><span><strong>Veicoli</strong><small>Auto, moto e altri mezzi</small></span></div>
-					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-property" aria-hidden="true"></span><span><strong>Case e attività</strong><small>Abitazioni, negozi e uffici</small></span></div>
-					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-hazard" aria-hidden="true"></span><span><strong>Pericoli</strong><small>Rischi e situazioni pericolose</small></span></div>
-					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-public" aria-hidden="true"></span><span><strong>Spazi pubblici</strong><small>Strade, aree pubbliche e decoro</small></span></div>
-					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-animal" aria-hidden="true"></span><span><strong>Animali</strong><small>Smarrimenti e segnalazioni</small></span></div>
-					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-object" aria-hidden="true"></span><span><strong>Oggetti e documenti</strong><small>Oggetti smarriti o ritrovati</small></span></div>
-					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-resolved" aria-hidden="true">✓</span><span><strong>Risolto</strong><small>Evento concluso</small></span></div>
+                    <?php get_template_part('template-parts/components/precision-legend'); ?>
+					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-vehicles" aria-hidden="true"><?php echo badaround_pin_svg('veicoli'); ?></span><span><strong>Veicoli</strong><small>Auto, moto e altri mezzi</small></span></div>
+					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-property" aria-hidden="true"><?php echo badaround_pin_svg('case-e-attivita'); ?></span><span><strong>Case e attività</strong><small>Abitazioni, negozi e uffici</small></span></div>
+					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-hazard" aria-hidden="true"><?php echo badaround_pin_svg('pericoli'); ?></span><span><strong>Pericoli</strong><small>Rischi e situazioni pericolose</small></span></div>
+					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-public" aria-hidden="true"><?php echo badaround_pin_svg('spazi-pubblici'); ?></span><span><strong>Spazi pubblici</strong><small>Strade, aree pubbliche e decoro</small></span></div>
+					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-animal" aria-hidden="true"><?php echo badaround_pin_svg('animali'); ?></span><span><strong>Animali</strong><small>Smarrimenti e segnalazioni</small></span></div>
+					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-object" aria-hidden="true"><?php echo badaround_pin_svg('oggetti-e-documenti'); ?></span><span><strong>Oggetti e documenti</strong><small>Oggetti smarriti o ritrovati</small></span></div>
+					<div class="ba-map-legend__item"><span class="ba-map-legend__pin is-resolved" aria-hidden="true"><?php echo badaround_pin_svg('resolved'); ?></span><span><strong>Risolto</strong><small>Evento concluso</small></span></div>
 					<div class="ba-map-legend__item"><span class="ba-map-legend__cluster" aria-hidden="true">3</span><span><strong>Più eventi</strong><small>Pinpoint raggruppati nella stessa area</small></span></div>
 				</div>
 			</details>
@@ -89,16 +91,13 @@ $home_categories = array(
 
 	<section class="ba-home-main ba-section--tight">
 		<div class="ba-container--wide">
+			<h2 class="ba-home-display-heading ba-home-display-heading--categories"><span>Cosa </span><span class="ba-home-display-heading__accent">Segnalare</span></h2>
+			<p class="ba-home-section-subtitle">Condividi un evento con la community di BadAround: ogni segnalazione può essere utile.</p>
 			<nav class="ba-home-categories" aria-label="Categorie principali">
 				<?php foreach ( $home_categories as $category ) : ?>
 					<a class="ba-home-category-card" href="<?php echo esc_url( add_query_arg( 'categoria', $category['slug'], home_url( '/segnalazioni/' ) ) ); ?>">
 						<span class="ba-home-category__pin <?php echo esc_attr( $category['class'] ); ?>" aria-hidden="true">
-							<?php if ( 'car' === $category['icon'] ) : ?><svg viewBox="0 0 24 24"><path d="M5 14h14l-1.5-5h-11L5 14Zm1 0v3m12-3v3M8 17h8M8 9l1-3h6l1 3"/></svg>
-							<?php elseif ( 'home' === $category['icon'] ) : ?><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v9h-6v-6h-4v6H4v-9Z"/></svg>
-							<?php elseif ( 'warning' === $category['icon'] ) : ?><svg viewBox="0 0 24 24"><path d="M12 4 3.5 20h17L12 4Z"/><path d="M12 9v5m0 3h.01"/></svg>
-							<?php elseif ( 'public' === $category['icon'] ) : ?><svg viewBox="0 0 24 24"><path d="M4 18h16M6 18V9h12v9M8 9V6h8v3M9 13h2m2 0h2"/></svg>
-							<?php elseif ( 'paw' === $category['icon'] ) : ?><svg viewBox="0 0 24 24"><path d="M8 11c-1.3 0-2.3-1.3-2.3-2.8S6.5 5.5 7.8 5.5s2.2 1.2 2.2 2.7S9.3 11 8 11Zm8 0c-1.3 0-2-1.3-2-2.8s.9-2.7 2.2-2.7 2.1 1.2 2.1 2.7S17.3 11 16 11Zm-4 9c-3.2 0-5.4-1.7-5.4-3.8 0-1.8 1.4-3 3-3.9.8-.5 1.2-1.5 2.4-1.5s1.6 1 2.4 1.5c1.6.9 3 2.1 3 3.9 0 2.1-2.2 3.8-5.4 3.8Z"/></svg>
-							<?php else : ?><svg viewBox="0 0 24 24"><path d="M5 7h14v12H5V7Zm3-3h8v3H8V4Zm1 7h6m-6 4h4"/></svg><?php endif; ?>
+							<?php echo badaround_pin_svg($category['slug']); ?>
 						</span>
 						<span class="ba-home-category__copy"><strong><?php echo esc_html( $category['label'] ); ?></strong><small><?php echo esc_html( $category['subtitle'] ); ?></small></span>
 					</a>
@@ -106,11 +105,13 @@ $home_categories = array(
 			</nav>
 
 			<div class="ba-home-sectionhead">
-				<h2>Segnalazioni vicino a te</h2>
+				<h2 class="ba-home-display-heading"><span>Ultime </span><span class="ba-home-display-heading__accent">Segnalazioni</span></h2>
+                <?php get_template_part('template-parts/components/precision-legend'); ?>
 				<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Vedi tutte le segnalazioni <span aria-hidden="true">→</span></a>
 			</div>
 
-			<div class="ba-home-events" id="segnalazioni">
+			<p data-ba-home-feed-status role="status" aria-live="polite">Ultime segnalazioni in Italia. Scegli una zona per vedere quelle pertinenti.</p>
+			<div class="ba-home-events" id="segnalazioni" data-ba-home-feed>
 				<?php if ( ! empty( $recent_events['items'] ) ) : ?>
 					<?php foreach ( $recent_events['items'] as $item ) : ?>
 						<?php
@@ -145,7 +146,8 @@ $home_categories = array(
 							'template-parts/components/event-card',
 							null,
 							array(
-								'title'        => $item['title'],
+								'event_id'     => $item['id'] ?? 0,
+                                'title'        => $item['title'],
 								'url'          => $item['permalink'],
 								'status'       => 'info',
 								'status_label' => $item['event_type']['name'] ?? 'Segnalazione',
@@ -170,6 +172,8 @@ $home_categories = array(
 				<?php endif; ?>
 			</div>
 
+			<h2 class="ba-home-display-heading ba-home-display-heading--sentinel"><span>Diventa una </span><span class="ba-home-display-heading__accent">Sentinella</span></h2>
+			<p class="ba-home-section-subtitle">Contribuisci attivamente alla community di BadAround: il tuo senso civico può fare la differenza.</p>
 			<div class="ba-home-lower">
 				<section class="ba-home-sentinel" id="sentinelle">
 					<div class="ba-home-sentinel__copy">
@@ -183,10 +187,10 @@ $home_categories = array(
 							</span>
 							<span>Sentinella BadAround</span>
 						</div>
-						<h2>Vuoi aiutare a tenere d’occhio una zona?</h2>
+										<p class="ba-home-sentinel__intro">Vuoi aiutare a tenere d’occhio una zona?</p>
 						<p>Diventa una <strong>Sentinella BadAround</strong>: ricevi aggiornamenti sulla zona che ti interessa e contribuisci alla community con segnalazioni e avvistamenti utili!</p>
 						<p class="ba-home-sentinel__privacy">La tua identità non viene resa pubblica.</p>
-						<a class="ba-button" href="<?php echo esc_url( home_url( '/sentinelle/' ) ); ?>">Attiva una Sentinella <span aria-hidden="true">→</span></a>
+						<a class="ba-button" href="<?php echo esc_url( home_url( '/sentinelle/' ) ); ?>">Diventa una Sentinella <span aria-hidden="true">→</span></a>
 					</div>
 					<div class="ba-home-phone" aria-hidden="true">
 						<div class="ba-home-phone__notch"></div>
@@ -206,6 +210,7 @@ $home_categories = array(
 				</section>
 			</div>
 
+			<?php badaround_blog_home(); ?>
 		</div>
 	</section>
 </main>

@@ -20,7 +20,7 @@
     reset() {
       this.submissionId = uuid(this.crypto);
       this.publicLocationRadius = null;
-      this.values = {}; this.publicLocationRequest = this.config.publicLocationRequest?.default === 'approximate_area' ? 'approximate_area' : 'exact_point'; this.step = 0; this.busy = false; this.completed = false; this.snapshot = null;
+      this.neighborhood = null; this.values = {}; this.publicLocationRequest = this.config.publicLocationRequest?.default === 'approximate_area' ? 'approximate_area' : 'exact_point'; this.step = 0; this.busy = false; this.completed = false; this.snapshot = null;
       const defaults = {'location.public_precision':'area', 'reporter.public_identity_mode':'anonymous', 'reward.status':'none'};
       Object.entries(this.config.conditional ? {} : defaults).forEach(([path, value]) => {
         if (this.config.fields[path]?.constraints.enum?.includes(value)) this.values[path] = value;
@@ -59,7 +59,7 @@
       do {
         changed = false;
         for (const path of Object.keys(this.values)) {
-          if (!this.active(path) || (path === 'event.subtype' && this.effective(path) === undefined)) {
+          if (!this.active(path) || (path === 'event.subtype' && this.effective(path) === undefined) || (path === 'location.place_type' && this.constraints(path).enum && !this.constraints(path).enum.includes(this.values[path]))) {
             delete this.values[path]; changed = true;
           }
         }
@@ -102,7 +102,7 @@
     setPublicLocationRequest(value) {
       if (!this.busy && !this.snapshot && !this.completed && this.config.publicLocationRequest && ['exact_point', 'approximate_area'].includes(value)) {
         this.publicLocationRequest = value;
-        this.publicLocationRadius = value === 'approximate_area' ? (this.publicLocationRadius ?? this.config.publicLocationRequest.defaultRadius ?? 500) : null;
+        this.publicLocationRadius = value === 'approximate_area' ? (this.publicLocationRadius ?? this.config.publicLocationRequest.defaultRadius ?? 100) : null;
       }
     }
     setPublicLocationRadius(value) {
@@ -126,12 +126,21 @@
         setPath(out, path, value);
       });
       setPath(out, 'consents.version', this.config.consentVersion);
+      // Recorded only after the explicit final declaration, never inferred for old reports.
+      if (this.config.publicDetailsVersion && ['truthfulness','publication_rules','terms','privacy'].every(key=>out.consents?.[key]===true)) {
+        setPath(out,'consents.public_details_version',this.config.publicDetailsVersion);
+      }
       // Versioned request only. Approval and public coordinates remain server-owned.
       if (this.config.publicLocationRequest) {
         const radiusAware=this.config.publicLocationRequest.version==='public-location-request-v2';
         const request=radiusAware ? {mode:this.publicLocationRequest,...(this.publicLocationRequest==='approximate_area'?{radius_m:this.publicLocationRadius}:{})} : this.publicLocationRequest;
         setPath(out, 'location.public_location_request', request);
         setPath(out, 'location.public_location_request_version', this.config.publicLocationRequest.version);
+      }
+      if(this.config.neighborhoodProposal && this.neighborhood?.confirmed===true && this.neighborhood.label && out.location?.municipality){
+        setPath(out,'location.neighborhood_label',this.neighborhood.label);
+        setPath(out,'location.neighborhood_source',this.neighborhood.source);
+        setPath(out,'location.neighborhood_confirmed',true);
       }
       // Optional request, independent of the mandatory declaration and contact choices.
       if (['requested','declined'].includes(out.reporter?.social_visibility)) {

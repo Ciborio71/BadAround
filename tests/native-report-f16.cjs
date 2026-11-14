@@ -17,7 +17,7 @@ const fixture = () => {
     'location.exact_address':'Via Test 1, Pomezia','location.place_type':'road_sidewalk','location.immediate_danger':'no',
     'time.mode':'exact','time.date':'2026-10-01','time.knowledge':'unknown','content.description':'Segnalazione sintetica F1.6.',
     'damage.status':'no','authority.status':'no','media.availability':'no','reporter.first_name':'QA','reporter.last_name':'Synthetic',
-    'reporter.email':'qa@example.invalid','reporter.contact_preference':'none','consents.truthfulness':true,'consents.media_rights':true,
+    'reporter.email':'qa@example.invalid','reporter.public_identity_mode':'anonymous','reporter.contact_preference':'none','consents.truthfulness':true,'consents.media_rights':true,
     'consents.publication_rules':true,'consents.terms':true,'consents.privacy':true}).forEach(([key,value])=>model.set(key,value));
   return model;
 };
@@ -46,16 +46,16 @@ test('transitive conditional visibility and stale plate/time exclusion',()=>{
   model.set('time.knowledge','exact');model.set('time.exact_time','10:15');model.set('time.mode','unknown');
   assert(!model.active('time.exact_time'));assert.deepEqual(model.payload().time,{mode:'unknown'});
 });
-test('optional state retained while hidden; deterministic effective payload',()=>{
+test('inactive conditional state is pruned from memory and effective payload',()=>{
   const model=fixture();model.set('damage.status','yes');model.set('damage.description','Danno sintetico');
-  model.set('damage.status','no');assert.equal(model.values['damage.description'],'Danno sintetico');assert.equal(model.payload().damage.description,undefined);
-  model.set('damage.status','yes');assert.equal(model.payload().damage.description,'Danno sintetico');
+  model.set('damage.status','no');assert.equal(model.values['damage.description'],undefined);assert.equal(model.payload().damage.description,undefined);
+  model.set('damage.status','yes');assert.equal(model.payload().damage.description,undefined);model.set('damage.description','Nuova descrizione del danno');assert.equal(model.payload().damage.description,'Nuova descrizione del danno');
 });
-test('required bool/array and coordinate pair validation',()=>{
+test('required consent, optional array and coordinate pair validation',()=>{
   const model=fixture();model.set('consents.privacy',false);assert(model.validate().some(e=>e.field==='consents.privacy'));
   model.set('location.exact_lat','41.6');assert(model.validate('location').some(e=>e.code==='invalid_location'));
   model.set('location.exact_lng','12.5');assert.equal(model.payload().location.exact_lat,41.6);
-  model.set('event.category','property');model.set('event.subtype','property_theft');assert(model.validate().some(e=>e.field==='property.stolen_item_categories'));
+  model.set('event.category','property');model.set('event.subtype','property_theft');assert(!model.validate().some(e=>e.field==='property.stolen_item_categories'));
   model.set('property.stolen_item_categories',['cash','documents']);assert.deepEqual(model.payload().property.stolen_item_categories,['cash','documents']);
 });
 test('no WPForms identifiers, local storage or automatic API in model',()=>{
@@ -83,7 +83,7 @@ test('structured rejection and rate limit; wrong success identity is not success
 });
 module.exports={config,fixture};
 
-test('frontend payloads for all six groups accepted by frozen F1.3 validator',()=>{
+test('frontend payloads for all six groups accepted by version-dispatched native validator',()=>{
   const payloads=[];
   for(const [category,group] of Object.entries(config.categories)) {
     const model=fixture();model.set('event.category',category);model.set('event.subtype',Object.keys(group.subtypes)[0]);
@@ -92,6 +92,6 @@ test('frontend payloads for all six groups accepted by frozen F1.3 validator',()
       'object.description':'Oggetto sintetico','object.status':'lost'}).forEach(([key,value])=>model.set(key,value));
     assert.deepEqual(model.validate(),[],category);payloads.push(model.payload());
   }
-  const code = 'require "tests/native-report-f13.php"; $validator = new BadAround_Report_Validator(); foreach (json_decode(file_get_contents("php://stdin"), true) as $payload) { $raw = $validator->validate_raw_contract($payload); if (is_wp_error($raw)) { fwrite(STDERR, $raw->get_error_code()); exit(1); } $valid = $validator->validate($validator->normalize($payload)); if (is_wp_error($valid)) { fwrite(STDERR, $valid->get_error_code()); exit(1); } }';
+  const code = 'require "tests/native-report-f13.php"; require_once "wordpress/plugins/badaround-core/includes/class-badaround-report-version-registry.php"; foreach (json_decode(file_get_contents("php://stdin"), true) as $payload) { $valid = BadAround_Report_Version_Registry::prepare($payload); if (is_wp_error($valid)) { fwrite(STDERR, $valid->get_error_code()); exit(1); } }';
   execFileSync(php,['-r',code],{cwd:path.dirname(__dirname),input:JSON.stringify(payloads),encoding:'utf8'});
 });

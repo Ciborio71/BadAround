@@ -12,6 +12,8 @@ add_filter( 'use_block_editor_for_post_type', '__return_false', 100 );
 add_filter( 'use_block_editor_for_post', '__return_false', 100 );
 
 define( 'BADAROUND_CHILD_VERSION', '0.6.0' );
+require_once __DIR__.'/inc/pins.php';
+require_once __DIR__.'/inc/blog.php';
 
 
 /**
@@ -24,6 +26,13 @@ function badaround_child_maintenance_enabled() {
 	return true;
 }
 
+/** Same fully registered private QA boundary as the Identity REST flow. */
+function badaround_child_is_private_qa_request() {
+    return class_exists('BadAround_Identity_QA_Report_REST', false)
+        && BadAround_Identity_QA_Report_REST::enabled()
+        && false !== has_filter('rest_pre_dispatch', array('BadAround_Identity_WordPress_Private_Bootstrap','private_qa_maintenance_request'));
+}
+
 function badaround_child_is_maintenance_exempt() {
 	if ( ! badaround_child_maintenance_enabled() ) {
 		return true;
@@ -32,6 +41,8 @@ function badaround_child_is_maintenance_exempt() {
 	if ( is_user_logged_in() || is_admin() || wp_doing_ajax() || wp_doing_cron() ) {
 		return true;
 	}
+
+    if ( badaround_child_is_private_qa_request() ) { return true; }
 
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		return true;
@@ -42,6 +53,11 @@ function badaround_child_is_maintenance_exempt() {
 
 function badaround_child_render_maintenance() {
 	if ( badaround_child_is_maintenance_exempt() ) {
+        if ( badaround_child_is_private_qa_request() ) {
+            nocache_headers();
+            header('Cache-Control: private, no-store, max-age=0', true);
+            header('X-Robots-Tag: noindex, nofollow, noarchive', true);
+        }
 		return;
 	}
 
@@ -130,8 +146,20 @@ function badaround_child_public_image_sizes() {
 }
 add_action( 'after_setup_theme', 'badaround_child_public_image_sizes' );
 
-function badaround_child_placeholder_url() {
-	return content_url( '/uploads/2026/10/BadAround-—-placeholder-segnalazione.png' );
+function badaround_child_placeholder_url($category='',$mode='') {
+    $categories=array('veicoli','case-e-attivita','pericoli','spazi-pubblici','animali','oggetti-e-documenti');
+    $suffix=in_array($category,$categories,true)?'-'.$category:'';
+    return get_stylesheet_directory_uri().'/assets/event-placeholder'.$suffix.($mode==='approximate_area'?'-area':'').'.svg?ver=4';
+}
+function badaround_child_event_category_slug($id){
+    $terms=get_the_terms($id,'ba_tipo_evento');
+    if(is_wp_error($terms)||!is_array($terms))return '';
+    foreach($terms as $term){
+        $ancestors=get_ancestors($term->term_id,'ba_tipo_evento','taxonomy');
+        $root=$ancestors?get_term(end($ancestors),'ba_tipo_evento'):$term;
+        if($root&&!is_wp_error($root))return $root->slug;
+    }
+    return '';
 }
 
 function badaround_child_event_image_url( $post_id, $context = 'thumb' ) {
@@ -141,7 +169,8 @@ function badaround_child_event_image_url( $post_id, $context = 'thumb' ) {
 		$url = get_the_post_thumbnail_url( $post_id, $size );
 		if ( $url ) return $url;
 	}
-	return badaround_child_placeholder_url();
+	$presentation=badaround_event_public_presentation($post_id);
+	return badaround_child_placeholder_url(badaround_child_event_category_slug($post_id),$presentation['mode']??'');
 }
 
 /**
@@ -164,8 +193,9 @@ function badaround_child_enqueue_assets() {
 	$is_account   = is_page_template( 'page-area-personale.php' );
 	$is_not_found    = is_404();
 	$is_how_it_works = is_page( 'come-funziona' );
-	$is_legal         = is_page( array( 'termini-e-condizioni', 'privacy-policy', 'cookie-policy', 'regole-di-pubblicazione' ) );
-	$is_badaround     = $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_radar_demo || $is_search || $is_reports || $is_sentinel || $is_states || $is_account || $is_not_found || $is_how_it_works || $is_legal;
+	$is_legal         = is_page( array( 'termini-e-condizioni', 'privacy-policy', 'cookie-policy', 'regole-di-pubblicazione', 'segnalazioni-privacy-e-moderazione' ) );
+	$is_blog = is_page('blog') || is_singular('post') || is_category();
+	$is_badaround     = $is_blog || $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_radar_demo || $is_search || $is_reports || $is_sentinel || $is_states || $is_account || $is_not_found || $is_how_it_works || $is_legal;
 
 	if ( ! $is_badaround ) {
 		return;
@@ -304,6 +334,7 @@ function badaround_child_enqueue_assets() {
 			'window.BadAroundMap=' . wp_json_encode(
 				array(
 					'endpoint'       => esc_url_raw( rest_url( 'badaround/v1/discovery' ) ),
+                    'homeEndpoint'   => esc_url_raw( rest_url( 'badaround/v1/discovery/home' ) ),
 					'limit'          => 100,
 					'hasMaps'        => (bool) $google_maps_key,
 					'mapsUrl'        => $google_maps_key
@@ -317,7 +348,9 @@ function badaround_child_enqueue_assets() {
 						)
 						: '',
 					'categoryByTerm' => $category_by_term,
+                    'pinDesigns' => badaround_pin_map_catalog(),
 					'placeholder'    => badaround_child_placeholder_url(),
+                    'placeholders' => array_combine(array('veicoli','case-e-attivita','pericoli','spazi-pubblici','animali','oggetti-e-documenti'),array_map('badaround_child_placeholder_url',array('veicoli','case-e-attivita','pericoli','spazi-pubblici','animali','oggetti-e-documenti'))),
 				)
 			) . ';',
 			'before'
@@ -432,10 +465,21 @@ add_filter( 'wp_resource_hints', 'badaround_child_map_resource_hints', 10, 2 );
 function badaround_event_document_title( $parts ) {
 	if ( is_singular( 'ba_evento' ) && 'publish' === get_post_status( get_queried_object_id() ) ) {
 		$parts['site'] = 'BadAround';
+		if ( class_exists('BadAround_Event_SEO') && BadAround_Event_SEO::active(get_queried_object_id()) ) {
+			$seo = BadAround_Event_SEO::project(get_queried_object_id());
+			if ( ! is_wp_error($seo) ) { $parts['title']=preg_replace('/ \| BadAround$/D','',$seo['title']); unset($parts['tagline']); }
+		}
 	}
 	return $parts;
 }
 add_filter( 'document_title_parts', 'badaround_event_document_title', 20 );
+add_filter('pre_get_document_title', static function($title) {
+    if (is_singular('ba_evento') && 'publish'===get_post_status(get_queried_object_id()) && class_exists('BadAround_Event_SEO') && BadAround_Event_SEO::active(get_queried_object_id())) {
+        $seo=BadAround_Event_SEO::project(get_queried_object_id());
+        if (!is_wp_error($seo)) { return $seo['title']; }
+    }
+    return $title;
+}, 20);
 
 function badaround_event_robots( $robots ) {
 	if ( is_singular( 'ba_evento' ) && 'publish' !== get_post_status( get_queried_object_id() ) ) {
@@ -454,6 +498,11 @@ function badaround_event_meta_description() {
 		return;
 	}
 	$post_id     = get_queried_object_id();
+    if (class_exists('BadAround_Event_SEO') && BadAround_Event_SEO::active($post_id)) {
+        $seo=BadAround_Event_SEO::project($post_id);
+        if (!is_wp_error($seo)) { echo '<meta name="description" content="'.esc_attr($seo['description']).'">'."\n"; }
+        return;
+    }
 	$description = has_excerpt( $post_id ) ? get_the_excerpt( $post_id ) : wp_strip_all_tags( get_post_field( 'post_content', $post_id ) );
 	$description = trim( preg_replace( '/\s+/', ' ', $description ) );
 	if ( ! $description ) {
@@ -574,3 +623,25 @@ function badaround_search_robots( $robots ) {
 	return $robots;
 }
 add_filter( 'wp_robots', 'badaround_search_robots', 20 );
+
+require_once __DIR__ . '/inc/home-proximity.php';
+
+add_action('wp_enqueue_scripts', static function(){
+    if(!is_front_page())return;
+    wp_enqueue_script('badaround-home-proximity',get_stylesheet_directory_uri().'/assets/js/home-proximity.js',[],(string)filemtime(__DIR__.'/assets/js/home-proximity.js'),true);
+});
+
+require_once __DIR__ . '/inc/event-gallery.php';
+add_action('wp_enqueue_scripts',static function(){
+    if(!is_singular('ba_evento'))return;
+    wp_enqueue_script('badaround-event-gallery',get_stylesheet_directory_uri().'/assets/js/event-gallery.js',[],(string)filemtime(__DIR__.'/assets/js/event-gallery.js'),true);
+    wp_script_add_data('badaround-event-gallery','strategy','defer');
+});
+
+require_once __DIR__ . '/inc/event-heading.php';
+require_once __DIR__ . '/inc/event-structured-data.php';
+
+require_once __DIR__ . '/inc/home-seo.php';
+
+require_once __DIR__.'/inc/event-social.php';
+add_action('wp_head',static function(){echo '<link rel="icon" type="image/png" sizes="32x32" href="'.esc_url(get_stylesheet_directory_uri().'/assets/favicon-32.png?ver=2').'"><link rel="apple-touch-icon" sizes="180x180" href="'.esc_url(get_stylesheet_directory_uri().'/assets/favicon-180.png?ver=2').'"><link rel="icon" type="image/svg+xml" sizes="any" href="'.esc_url(get_stylesheet_directory_uri().'/assets/favicon.svg?ver=2').'">'."\n";},100);

@@ -34,7 +34,102 @@ get_header();
    <h2 id="rad-title">Panoramica territoriale</h2>
    <p id="rad-copy" role="status" aria-live="polite">Caricamento delle segnalazioni pubbliche…</p>
    
-   <div id="rad-reports" class="ba-radar-reports" aria-label="Problematiche segnalate nella zona"></div><p class="ba-radar-note ba-radar-final-note">Statistiche delle segnalazioni pubbliche della community, non dati ufficiali su reati o sicurezza. Le segnalazioni senza data sono escluse dai confronti temporali e le aree approssimate non identificano un punto esatto.</p>
+   <div id="rad-reports" class="ba-radar-reports" aria-label="Problematiche segnalate nella zona"></div>
+
+	  
+<?php
+// RADAR-PUBLIC-06 — Anteprima riservata agli amministratori.
+if (
+    defined('BADAROUND_RADAR_PUBLIC_COUNTS_PREVIEW_ENABLED')
+    && BADAROUND_RADAR_PUBLIC_COUNTS_PREVIEW_ENABLED === true
+    && is_user_logged_in()
+    && current_user_can('manage_options')
+) {
+    $ba_radar_dir = WP_PLUGIN_DIR . '/badaround-core/includes/';
+
+    $ba_radar_files = array(
+        'class-badaround-intelligence-trends.php',
+        'class-badaround-intelligence-peak-candidates.php',
+        'class-badaround-intelligence-data-quality.php',
+        'class-badaround-radar-view-model.php',
+        'class-badaround-radar-canonical-adapter.php',
+        'class-badaround-radar-offline-bridge.php',
+        'class-badaround-radar-public-counts.php',
+        'class-badaround-radar-public-renderer.php',
+        'class-badaround-radar-window-counts.php',
+        'class-badaround-radar-window-renderer.php',
+    );
+
+    $ba_radar_ready = class_exists('BadAround_Discovery_Query');
+
+    foreach ($ba_radar_files as $ba_radar_file) {
+        if (!is_readable($ba_radar_dir . $ba_radar_file)) {
+            $ba_radar_ready = false;
+            break;
+        }
+    }
+
+    if ($ba_radar_ready) {
+        foreach ($ba_radar_files as $ba_radar_file) {
+            require_once $ba_radar_dir . $ba_radar_file;
+        }
+
+        try {
+            $ba_radar_discovery = new BadAround_Discovery_Query();
+            $ba_radar_today = new DateTimeImmutable(
+                'today',
+                wp_timezone()
+            );
+
+            $ba_radar_snapshot =
+                BadAround_Radar_Offline_Bridge::snapshot(
+                    $ba_radar_discovery,
+                    $ba_radar_today,
+                    30
+                );
+
+            $ba_radar_rows =
+                BadAround_Radar_Canonical_Adapter::rows(
+                    $ba_radar_discovery
+                );
+
+            $ba_radar_public =
+                BadAround_Radar_Public_Counts::present(
+                    $ba_radar_rows,
+                    $ba_radar_snapshot['quality']
+                );
+
+            $ba_radar_trends =
+                BadAround_Intelligence_Trends::summarize(
+                    $ba_radar_rows,
+                    $ba_radar_today,
+                    30
+                );
+
+            $ba_radar_window =
+                BadAround_Radar_Window_Counts::present(
+                    $ba_radar_public,
+                    $ba_radar_trends,
+                    $ba_radar_snapshot['quality']
+                );
+
+            echo '<div class="ba-radar-public-preview" aria-label="Anteprima riservata dei conteggi Radar">';
+
+            echo BadAround_Radar_Window_Renderer::render(
+                $ba_radar_window
+            );
+
+            echo '</div>';
+
+        } catch (Throwable $ba_radar_error) {
+            echo '<p role="status">Anteprima Radar non disponibile: verifica dei dati necessaria.</p>';
+        }
+    }
+}
+?>
+
+	  
+	  <p class="ba-radar-note ba-radar-final-note">Statistiche delle segnalazioni pubbliche della community, non dati ufficiali su reati o sicurezza. Le segnalazioni senza data sono escluse dai confronti temporali e le aree approssimate non identificano un punto esatto.</p>
    <a class="ba-radar-back" href="<?php echo esc_url(home_url('/mappa/')); ?>">Apri la mappa delle segnalazioni reali →</a>
   </aside>
  </div>
@@ -750,7 +845,7 @@ function focusLocation(position,address,save=true){
  const pos=position;
  if(!searchCircle)searchCircle=new google.maps.Circle({map,center:pos,radius:radiusMeters(),strokeColor:'#078e99',strokeWeight:2,strokeOpacity:.9,fillColor:'#0798a8',fillOpacity:.05});
  else searchCircle.setCenter(pos);
- if(!centerMarker)centerMarker=new google.maps.Marker({map,position:pos,title:'Centro della ricerca Radar (nessun evento)'});
+ if(!centerMarker)centerMarker=new google.maps.Marker({map,position:pos,title:'Centro della ricerca Radar (nessun evento)',icon:{url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(<?php echo wp_json_encode(badaround_pin_svg('neutral')); ?>),scaledSize:new google.maps.Size(40,50),anchor:new google.maps.Point(20,48.333)}});
  else centerMarker.setPosition(pos);
  searchCircle.setRadius(radiusMeters());searchCircle.setVisible(true);
  chosenCenter={lat:pos.lat instanceof Function?pos.lat():pos.lat,lng:pos.lng instanceof Function?pos.lng():pos.lng};

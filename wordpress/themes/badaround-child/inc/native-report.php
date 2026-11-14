@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/pins.php';
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /** F1.6 diagnostic gate remains staging administrator-only and distinct from default routing. */
@@ -32,7 +33,7 @@ function badaround_native_report_labels() {
 		'time.mode' => 'Quando è successo?', 'time.date' => 'Data dell’evento', 'time.knowledge' => 'Conosci l’orario?', 'time.exact_time' => 'Orario',
 		'time.range_start' => 'Dalle ore', 'time.range_end' => 'Alle ore', 'time.approximate_period' => 'Periodo indicativo', 'time.duration' => 'Da quanto tempo?', 'time.frequency' => 'Con quale frequenza?',
 		'vehicle.role' => 'Eri coinvolto o testimone?', 'vehicle.type' => 'Tipo di veicolo', 'vehicle.make' => 'Marca', 'vehicle.model' => 'Modello', 'vehicle.color' => 'Colore',
-		'vehicle.plate_knowledge' => 'Conosci la targa?', 'vehicle.plate_raw' => 'Targa (riservata)', 'vehicle.distinctive_features' => 'Segni distintivi del veicolo',
+		'vehicle.plate_knowledge' => 'Conosci la targa?', 'vehicle.plate_raw' => 'Targa da pubblicare', 'vehicle.distinctive_features' => 'Segni distintivi del veicolo',
 		'animal.type' => 'Tipo di animale', 'animal.breed' => 'Razza', 'animal.name' => 'Nome dell’animale', 'animal.appearance' => 'Aspetto e segni distintivi',
 		'object.description' => 'Descrizione dell’oggetto', 'object.status' => 'Oggetto smarrito o trovato?', 'object.owner_verification_detail' => 'Dettaglio riservato per verificare il proprietario',
 		'property.tampered_entry_point' => 'Punto di accesso manomesso', 'property.stolen_item_categories' => 'Che cosa è stato rubato?', 'property.access_method' => 'Modalità di accesso', 'property.alarm_status' => 'Stato generale dell’allarme',
@@ -42,7 +43,7 @@ function badaround_native_report_labels() {
 		'reward.status' => 'Vuoi offrire una ricompensa per informazioni utili?', 'reward.amount' => 'Importo in euro', 'reward.conditions' => 'Condizioni della ricompensa', 'reward.expires_on' => 'Scadenza',
 		'reward.confirmed' => 'Confermo l’impegno relativo alla ricompensa indicata',
 		'reporter.first_name' => 'Nome', 'reporter.last_name' => 'Cognome', 'reporter.email' => 'Email', 'reporter.phone' => 'Telefono',
-		'reporter.public_identity_mode' => 'Come vuoi comparire pubblicamente?', 'reporter.pseudonym' => 'Pseudonimo pubblico', 'reporter.contact_preference' => 'Vuoi ricevere aggiornamenti e informazioni su questo evento?',
+		'reporter.public_identity_mode' => 'Come vuoi comparire nella segnalazione?', 'reporter.pseudonym' => 'Pseudonimo pubblico', 'reporter.contact_preference' => 'Quali aggiornamenti vuoi ricevere?',
 		'reporter.social_visibility' => 'Vuoi dare visibilità a questo evento sui canali social di BadAround?',
 		'consents.truthfulness' => 'Confermo che le informazioni sono veritiere per quanto a mia conoscenza',
 		'consents.media_rights' => 'Confermo di avere i diritti su eventuali contenuti forniti',
@@ -60,14 +61,14 @@ function badaround_native_report_option_label( $path, $value ) {
 		'vehicle.plate_knowledge' => array( 'full' => 'Targa completa', 'partial' => 'Solo una parte', 'unknown' => 'Non la conosco', 'none' => 'Il veicolo non ha targa' ),
 		'location.public_precision' => array( 'point' => 'Punto approssimato', 'street' => 'Via, senza civico', 'area' => 'Area o quartiere', 'municipality' => 'Solo il Comune' ),
 		'reward.status' => array( 'none' => 'Nessuna ricompensa', 'fixed' => 'Importo definito', 'negotiable' => 'Da concordare' ),
-		'reporter.contact_preference' => array( 'community' => 'Sì, vorrei ricevere informazioni e aggiornamenti dalla community di BadAround', 'badaround_only' => 'Sì, ma solo aggiornamenti di BadAround', 'none' => 'No, non desidero aggiornamenti facoltativi' ),
-		'reporter.public_identity_mode' => array( 'anonymous' => 'In forma anonima', 'pseudonym' => 'Con uno pseudonimo', 'first_name' => 'Con il mio nome', 'name_initial' => 'Nome e iniziale del cognome' ),
+		'reporter.contact_preference' => array( 'community' => 'Sì, tutto (BadAround + segnalazioni della community)', 'badaround_only' => 'Solo aggiornamenti sullo stato della segnalazione', 'none' => 'Nessun aggiornamento facoltativo' ),
+		'reporter.public_identity_mode' => array( 'name_initial' => 'Nome e iniziale del cognome (es. Marco R.)', 'first_name' => 'Solo il nome (es. Marco)', 'pseudonym' => 'Con uno pseudonimo / nickname', 'anonymous' => 'In forma anonima (apparirà "Anonimo")' ),
 		'media.availability' => array( 'yes' => 'Sì', 'no' => 'No', 'possible' => 'Potrei procurarle', 'surveillance' => 'Possibili riprese di videosorveglianza' ),
 	);
 	if ( isset( $context[ $path ][ $value ] ) ) { return $context[ $path ][ $value ]; }
 	$labels = array(
 		'yes' => 'Sì', 'no' => 'No', 'unsure' => 'Non sono sicuro', 'unknown' => 'Non lo so', 'other' => 'Altro', 'none' => 'Nessuno', 'not_applicable' => 'Non applicabile', 'prefer_not' => 'Preferisco non indicarlo',
-		'directly_involved' => 'Sono coinvolto direttamente', 'witness' => 'Ho assistito come testimone', 'on_behalf' => 'Segnalo per un’altra persona', 'found_subject' => 'Ho trovato il soggetto', 'has_information' => 'Ho informazioni utili', 'territory_observer' => 'Ho osservato la situazione nella zona', 'involved' => 'Coinvolto direttamente',
+		'directly_involved' => 'Sono coinvolto direttamente', 'witness' => 'Ho assistito come testimone', 'on_behalf' => 'Segnalo per un’altra persona', 'found_subject' => 'Ho trovato o avvistato ciò che segnalo', 'has_information' => 'Ho informazioni utili', 'territory_observer' => 'Ho osservato la situazione nella zona', 'involved' => 'Coinvolto direttamente',
 		'road_sidewalk' => 'Strada o marciapiede', 'public_parking' => 'Parcheggio pubblico', 'private_parking' => 'Parcheggio privato', 'private_home' => 'Abitazione privata', 'condominium' => 'Condominio', 'commercial_premises' => 'Negozio o attività commerciale', 'office' => 'Ufficio', 'warehouse' => 'Magazzino', 'garage_outbuilding' => 'Garage o pertinenza', 'park_green' => 'Parco o area verde', 'public_transport' => 'Trasporto pubblico', 'public_building' => 'Edificio pubblico', 'industrial_work_area' => 'Area industriale o di lavoro', 'rural_natural' => 'Area rurale o naturale',
 		'today' => 'Oggi', 'yesterday' => 'Ieri', 'last_7_days' => 'Ultimi 7 giorni', 'last_30_days' => 'Ultimi 30 giorni', 'one_to_three_months' => 'Da uno a tre mesi', 'over_three_months' => 'Oltre tre mesi', 'days' => 'Da alcuni giorni', 'weeks' => 'Da alcune settimane',
 		'daily' => 'Ogni giorno', 'several_times_week' => 'Più volte a settimana', 'weekly' => 'Ogni settimana', 'several_times_month' => 'Più volte al mese', 'occasional' => 'Occasionalmente', 'indeterminate' => 'Frequenza non definita',
@@ -122,7 +123,7 @@ function badaround_native_report_config() {
 	$fields = array();
 	$contract = BadAround_Report_Conditional_Contract::definition();
 	foreach ( BadAround_Report_Conditional_Contract::fields() as $path => $definition ) {
-		if ( in_array( $path, array( 'schema_version', 'submission_id', 'consents.version', 'consents.social_visibility_version', 'media.items', 'location.place_id', 'authority.reference', 'location.public_location_request', 'location.public_location_request_version' ), true ) ) { continue; }
+		if ( in_array( $path, array( 'schema_version', 'submission_id', 'consents.version', 'consents.social_visibility_version', 'consents.public_details_version', 'location.neighborhood_label', 'location.neighborhood_source', 'location.neighborhood_confirmed', 'media.items', 'location.place_id', 'authority.reference', 'location.public_location_request', 'location.public_location_request_version' ), true ) ) { continue; }
 		$options = array();
 		foreach ( $definition['constraints']['enum'] ?? $definition['constraints']['item_enum'] ?? array() as $value ) {
 			$options[ $value ] = badaround_native_report_option_label( $path, $value );
@@ -134,7 +135,7 @@ function badaround_native_report_config() {
 			foreach ( $categories as $category ) { $options = array_merge( $options, $category['subtypes'] ); }
 		}
 		if ( 'reporter.public_identity_mode' === $path ) {
-			$identity_order = array_flip( array( 'anonymous', 'pseudonym', 'first_name', 'name_initial' ) );
+			$identity_order = array_flip( array( 'name_initial', 'first_name', 'pseudonym', 'anonymous' ) );
 			uksort( $options, function ( $a, $b ) use ( $identity_order ) { return $identity_order[ $a ] <=> $identity_order[ $b ]; } );
 		}
 		$fields[ $path ] = array(
@@ -158,11 +159,13 @@ function badaround_native_report_config() {
 		if ( isset( $location_order[ $a ], $location_order[ $b ] ) ) { return $location_order[ $a ] <=> $location_order[ $b ]; }
 		return $original_order[ $a ] <=> $original_order[ $b ];
 	} );
-	$fields['location.exact_address']['help'] = 'Indirizzo e civico restano riservati. La rappresentazione pubblica della posizione sarà valutata dalla moderazione.';
-	$fields['vehicle.plate_raw']['help'] = 'La targa completa resta riservata. L’eventuale versione pubblica sarà mascherata.';
-	$fields['reporter.public_identity_mode']['help'] = 'Scegli come preferisci essere indicato. BadAround non pubblica automaticamente i tuoi dati personali. La tua preferenza resta soggetta alla moderazione e alle regole di pubblicazione.';
+	$fields['location.exact_address']['help'] = '';
+	$fields['vehicle.plate_raw']['help'] = 'La targa che inserisci sarà pubblicata in chiaro nella scheda, dopo la moderazione. Se la conosci solo in parte, indica soltanto i caratteri noti.';
+	$fields['reporter.public_identity_mode']['help'] = '';
+	$fields['reporter.first_name']['help'] = '';
+	$fields['reporter.email']['help'] = 'La tua email serve solo per le comunicazioni da BadAround e non viene mai resa pubblica.';
 	$fields['reporter.contact_preference']['help'] = 'Gli altri utenti non vedono i tuoi recapiti e non possono contattarti direttamente.';
-	$fields['reporter.social_visibility']['help'] = 'La tua scelta sarà valutata dalla moderazione. Potranno essere condivisi solo contenuti approvati e destinati alla pubblicazione; i tuoi recapiti e le informazioni riservate resteranno esclusi. Se non rispondi, non richiedi la diffusione social. La richiesta riguarda Facebook, Instagram, X, Google Business Profile (Google Maps) e TikTok, secondo i canali attivati da BadAround.';
+	$fields['reporter.social_visibility']['help'] = 'I tuoi dati riservati e recapiti non saranno mai condivisi sui social.';
 	$fields['reward.status']['help'] = 'La ricompensa è destinata esclusivamente a chi fornisce informazioni utili al ritrovamento o alla risoluzione della segnalazione.';
 	// Identity preference first; canonical conditions and values are unchanged.
 	$contact_order = array_flip( array( 'reporter.public_identity_mode', 'reporter.pseudonym', 'reporter.first_name', 'reporter.last_name', 'reporter.email', 'reporter.phone', 'reporter.contact_preference' ) );
@@ -196,24 +199,33 @@ function badaround_native_report_config() {
 	// Presentation projection only: no storage destinations, privacy internals or test oracle.
 	$profiles = array();
 	foreach ( $contract['matrix'] as $row ) {
-		$profiles[ $row['subtype'] ] = array( 'category' => $row['category'], 'fields' => $row['fields'] );
+		$profiles[ $row['subtype'] ] = array( 'category' => $row['category'], 'fields' => $row['fields'], 'placeQuestion' => BadAround_Report_Conditional_Contract::place_question($row['category'],$row['subtype']) );
 	}
 	$ordered_fields = array();
 	foreach ( $fields as $path => $field ) {
 		if ( isset( $field['sourceField'] ) ) { continue; }
+		if($path==='location.place_type')$field['options']['other']='Altro luogo';
 		$ordered_fields[ $path ] = $field;
 		foreach ( $fields as $child => $spec ) {
 			if ( ( $spec['sourceField'] ?? null ) === $path ) { $ordered_fields[ $child ] = $spec; }
 		}
 	}
 	$fields = $ordered_fields;
-	return array(
+	$config = array(
+		'pinIcons' => array_combine(array('vehicle','property','hazard','public_space','animal','item_document'),array_map('badaround_pin_svg',array('vehicle','property','hazard','public_space','animal','item_document'))),
+        'placeContextVersion' => '1.0',
 		'conditional' => array( 'sha256' => BadAround_Report_Conditional_Contract::SHA256, 'profiles' => $profiles ),
 		'emergencyNotice' => array( 'subtypes' => $emergency_subtypes, 'dangerValues' => array_values( array_unique( $danger_values ) ) ),
 		'smartAddress' => $smart_key ? array( 'key' => $smart_key, 'territories' => $territories, 'country' => 'IT' ) : null,
 		'schemaVersion' => 'badaround-report/v2',
 		// Contract scaffolding only: no new visible control before GEO-PUBLIC-03.
-		'publicLocationRequest' => array( 'default' => 'exact_point', 'version' => BadAround_Public_Geo_Contract::RADIUS_REQUEST_VERSION, 'radii' => BadAround_Public_Geo_Contract::USER_RADII, 'defaultRadius' => 500 ),
+		'publicLocationRequest' => array( 'default' => 'exact_point', 'version' => BadAround_Public_Geo_Contract::RADIUS_REQUEST_VERSION, 'radii' => BadAround_Public_Geo_Contract::USER_RADII, 'defaultRadius' => 100 ),
+		'publicDetailsVersion' => 'public-details-v1',
+        'contactPreferenceDefault' => 'community',
+        'socialConsentBinary' => true,
+        // Optional district selection is removed from the public wizard.
+        // Existing moderated territorial data remains independent.
+        'neighborhoodProposal' => false,
 		'consentVersion' => 'native-f16-v1', // Version of this QA presentation, not a claim of finalized legal policies.
 		'socialPreferenceVersion' => BadAround_Report_Schema::SOCIAL_PREFERENCE_VERSION,
 		'endpoint' => rest_url( BadAround_Native_Report_REST_Controller::REST_NAMESPACE . BadAround_Native_Report_REST_Controller::REST_ROUTE ),
@@ -224,6 +236,14 @@ function badaround_native_report_config() {
 		'timezone' => wp_timezone_string(), 'fields' => $fields, 'categories' => $categories,
 		'steps' => array( 'event' => 'Cosa è successo', 'location' => 'Dove e quando', 'details' => 'Dettagli', 'media' => 'Immagini', 'contact' => 'Informazioni di contatto', 'review' => 'Riepilogo e invio' ),
 	);
+	// Identity private QA uses the existing wizard and canonical validator.
+	// Outside the server-authorized QA context the baseline stays unchanged.
+	if ( class_exists( 'BadAround_Identity_QA_Report_REST', false )
+		&& BadAround_Identity_QA_Report_REST::enabled() ) {
+		$config['endpoint'] = rest_url( 'badaround-identity-qa/v1/reports' );
+		$config['identityQa'] = true;
+	}
+	return $config;
 }
 
 function badaround_native_report_field( $path, $field ) {
@@ -231,9 +251,27 @@ function badaround_native_report_field( $path, $field ) {
 	$type = $field['type'];
 	$c = $field['constraints'];
 	$description = $id . '-help ' . $id . '-error';
+	if ( 'reporter.social_visibility' === $path ) { $description .= ' ' . $id . '-channels'; }
 	?>
-	<div class="ba-native-field" data-native-field="<?php echo esc_attr( $path ); ?>">
-	<?php if ( 'array' === $type ) : ?>
+	<div class="ba-native-field<?php echo $path==='reporter.contact_preference'?' ba-native-engagement ba-native-engagement--community':($path==='reporter.social_visibility'?' ba-native-engagement ba-native-engagement--social':''); ?>" data-native-field="<?php echo esc_attr( $path ); ?>">
+    <?php if($path==='reporter.contact_preference'||$path==='reporter.social_visibility'): ?>
+    <div class="ba-native-engagement__intro">
+      <?php if($path==='reporter.contact_preference'): ?>
+      <svg class="ba-native-engagement-icon ba-native-engagement-icon--network" viewBox="0 0 64 64" width="52" height="52" aria-hidden="true" focusable="false"><path d="m4 16 17-5 21 7 18-5v39l-18 5-21-7-17 5Z" fill="#d4f1e8"/><path d="M21 11v39m21-32v39M8 37l48-9" fill="none" stroke="#9ad4c4" stroke-width="2"/><path d="m17 40 15-19 15 19H17Z" fill="none" stroke="#087f8c" stroke-width="2.5"/><g fill="#087f8c"><circle cx="32" cy="17" r="5"/><path d="M24 29v-3a8 8 0 0 1 16 0v3Z"/></g><g fill="#1464bf"><circle cx="15" cy="37" r="5"/><path d="M7 49v-3a8 8 0 0 1 16 0v3Z"/></g><g fill="#d48b13"><circle cx="49" cy="37" r="5"/><path d="M41 49v-3a8 8 0 0 1 16 0v3Z"/></g></svg>
+      <?php else: ?>
+      <svg class="ba-native-engagement-icon ba-native-engagement-icon--social" viewBox="0 0 64 64" width="52" height="52" aria-hidden="true" focusable="false"><circle cx="32" cy="32" r="29" fill="#dceaff"/><path d="M11 26h13l26-12v34L24 36H11Z" fill="#1a73e8"/><path d="M24 26v10l26 12V14Z" fill="#79afff"/><path d="M18 36h10l5 17H22Z" fill="#164b8b"/><rect x="8" y="25" width="7" height="12" rx="3" fill="#164b8b"/><path d="m55 20 5-4m-5 15h6m-6 11 5 4" fill="none" stroke="#e6a12a" stroke-width="3" stroke-linecap="round"/></svg>
+      <?php endif; ?>
+      <div><strong><?php echo $path==='reporter.contact_preference'?'Facciamo rete sulla tua segnalazione':'Amplifica la tua segnalazione sui social'; ?></strong><p><?php echo $path==='reporter.contact_preference'?'Un avvistamento o una testimonianza possono fare la differenza. Scegli quali notifiche ricevere: i tuoi recapiti resteranno sempre nascosti.':'Più visibilità significa più possibilità di trovare testimoni o riscontri utili.'; ?></p></div>
+    </div>
+    <?php endif; ?>
+	<?php if('reporter.social_visibility' === $path): ?>
+        <label class="ba-native-choice ba-native-social-consent" for="<?php echo esc_attr($id); ?>-consent">
+          <input type="checkbox" id="<?php echo esc_attr($id); ?>-consent" name="social_share_consent" data-native-social-consent aria-describedby="<?php echo esc_attr($description); ?>">
+          <span><strong>Autorizzo BadAround a condividere la segnalazione sui propri canali social</strong><small>Se approvata dalla moderazione, la segnalazione potrà essere rilanciata sulle pagine ufficiali di BadAround (Facebook, Instagram, TikTok, X e Google Business Profile).</small></span>
+        </label>
+        <label for="<?php echo esc_attr($id); ?>" hidden>Preferenza di condivisione social</label>
+        <select id="<?php echo esc_attr($id); ?>" name="<?php echo esc_attr($path); ?>" data-native-input hidden tabindex="-1" aria-describedby="<?php echo esc_attr($description); ?>"><option value="declined">Non autorizzata</option><option value="requested">Autorizzata</option></select>
+    <?php elseif ( 'array' === $type ) : ?>
 		<fieldset id="<?php echo esc_attr( $id ); ?>" tabindex="-1" aria-describedby="<?php echo esc_attr( $description ); ?>"><legend><?php echo esc_html( $field['label'] ); ?><span data-native-required></span></legend>
 		<?php foreach ( $field['options'] as $value => $label ) : ?>
 		<label class="ba-native-choice"><input type="checkbox" name="<?php echo esc_attr( $path ); ?>" value="<?php echo esc_attr( $value ); ?>" data-native-input><?php echo esc_html( $label ); ?></label>
@@ -241,7 +279,7 @@ function badaround_native_report_field( $path, $field ) {
 	<?php elseif ( 'bool' === $type ) : ?>
 		<label class="ba-native-choice" for="<?php echo esc_attr( $id ); ?>"><input id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $path ); ?>" type="checkbox" data-native-input aria-describedby="<?php echo esc_attr( $description ); ?>"><span><?php echo esc_html( $field['label'] ); ?><span data-native-required></span></span></label>
 	<?php else : ?>
-		<label for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $field['label'] ); ?><span data-native-required><?php echo $field['required'] ? ' (obbligatorio quando applicabile)' : ''; ?></span></label>
+		<label for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $field['label'] ); ?><span data-native-required aria-hidden="true"><?php echo $field['required'] ? ' *' : ''; ?></span></label>
 		<?php if ( 'enum' === $type ) : ?>
 		<select id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $path ); ?>" data-native-input aria-describedby="<?php echo esc_attr( $description ); ?>"><option value="">Seleziona…</option>
 		<?php foreach ( $field['options'] as $value => $label ) : ?><option value="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $label ); ?></option><?php endforeach; ?></select>
@@ -257,12 +295,16 @@ function badaround_native_report_field( $path, $field ) {
 		<?php if ( 'email' === $input_type ) : ?> autocomplete="email"<?php elseif ( 'tel' === $input_type ) : ?> autocomplete="tel"<?php elseif ( 'reporter.first_name' === $path ) : ?> autocomplete="given-name"<?php elseif ( 'reporter.last_name' === $path ) : ?> autocomplete="family-name"<?php endif; ?>>
 		<?php endif; ?>
 	<?php endif; ?>
-		<?php if ( 'reporter.contact_preference' === $path ) : ?>
-		<div class="ba-native-contact-explainer">
-			<p>La community di BadAround può aiutarti con avvistamenti, testimonianze e altre informazioni utili su questo evento. BadAround può inoltrarti questi contributi senza mostrare i tuoi recapiti. Anche scegliendo nessun aggiornamento facoltativo, BadAround potrà scriverti per chiarimenti necessari alla gestione della segnalazione.</p>
-		</div>
-		<?php endif; ?>
-		<p id="<?php echo esc_attr( $id ); ?>-help" class="ba-native-help"><?php echo esc_html( $field['help'] ); ?></p>
+		<?php if ( 'reporter.social_visibility' === $path ) : ?>
+        <ul id="<?php echo esc_attr( $id ); ?>-channels" class="ba-native-social-channels" aria-label="Canali social previsti, secondo quelli attivati da BadAround" role="list">
+            <li><svg class="ba-native-social-icon ba-native-social-icon--facebook" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13.8 21v-8.2h2.8l.4-3.2h-3.2V7.5c0-.9.3-1.5 1.6-1.5h1.7V3.1c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.3H7.6v3.2h2.8V21z"/></svg><span>Facebook</span></li>
+            <li><svg class="ba-native-social-icon ba-native-social-icon--instagram" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.2"/></svg><span>Instagram</span></li>
+            <li><svg class="ba-native-social-icon ba-native-social-icon--tiktok" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 3h3c.3 2.1 1.7 3.5 4 3.8v3a8.4 8.4 0 0 1-4-1.3V16a5.5 5.5 0 1 1-5-5.5v3.1a2.5 2.5 0 1 0 2 2.4V3z"/></svg><span>TikTok</span></li>
+            <li><svg class="ba-native-social-icon ba-native-social-icon--x" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.5 22H2.3l8.2-9.4L2.8 2h6.5l4.5 6.8L18.9 2zm-1.1 18h1.8L8.3 3.9H6.4L17.8 20z"/></svg><span>X</span></li>
+            <li><svg class="ba-native-social-icon ba-native-social-icon--google" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21.6 12.2c0-.7-.1-1.3-.2-2H12v3.9h5.4a4.5 4.5 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.2 3-7.4z" fill="#4285f4"/><path d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22z" fill="#34a853"/><path d="M6.4 14a6 6 0 0 1 0-4V7.4H3.1a10 10 0 0 0 0 9.2L6.4 14z" fill="#fbbc05"/><path d="M12 5.9c1.5 0 2.8.5 3.8 1.5l2.8-2.8A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.9 5.4L6.4 10c.8-2.3 3-4.1 5.6-4.1z" fill="#ea4335"/></svg><span>Google Business Profile</span></li>
+        </ul>
+        <?php endif; ?>
+		<p id="<?php echo esc_attr( $id ); ?>-help" class="ba-native-help"><?php if('reporter.contact_preference' === $path): ?><strong>🔒 Privacy garantita:</strong> <?php elseif('reporter.social_visibility' === $path): ?><strong>🔒 Privacy protetta:</strong> <?php endif; ?><?php echo esc_html( $field['help'] ); ?></p>
 		<p id="<?php echo esc_attr( $id ); ?>-error" class="ba-native-error" hidden></p>
 	</div>
 	<?php

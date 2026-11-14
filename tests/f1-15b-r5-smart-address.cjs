@@ -33,15 +33,21 @@ test('country guard, omissions and homonymous ambiguous terms are fail-closed',(
 });
 function setup(withMap=false){
   const dom=new JSDOM(`<!doctype html><html><head></head><body><section data-native-report>
-  <div data-native-smart-address><input data-smart-start type="text" readonly><div data-smart-widget></div><p data-smart-status></p><div data-smart-confirmation hidden><p data-smart-address-label></p></div><button data-smart-manual hidden type="button">Inserisci manualmente</button></div><div data-native-location-fields hidden>
+  <div data-native-smart-address><div data-smart-search-slot><input data-smart-start type="text" readonly><div data-smart-widget hidden></div></div><p id="ba-smart-privacy">Informazioni privacy</p><p data-smart-status></p><div data-smart-confirmation hidden><p data-smart-address-label></p></div><button data-smart-manual hidden type="button">Inserisci manualmente</button></div><div data-native-location-fields hidden>
   <input data-native-input name="location.region"><input data-native-input name="location.province"><input data-native-input name="location.municipality"><input data-native-input name="location.locality">
   <input data-native-input name="location.exact_address"><input data-native-input name="location.exact_lat"><input data-native-input name="location.exact_lng"></div>
-  </section></body></html>`,{url:'https://staging.badaround.it/segnala-un-evento/',runScripts:'outside-only'});
+  <fieldset data-native-public-location-choice hidden><input type="radio" value="exact_point" checked><input type="radio" value="approximate_area"><select name="ba-public-location-radius" disabled><option value="500">500</option></select></fieldset></section></body></html>`,{url:'https://staging.badaround.it/segnala-un-evento/',runScripts:'outside-only'});
   if(withMap){
     dom.window.eval(fs.readFileSync(path.join(__dirname,'../wordpress/themes/badaround-child/assets/js/map-navigation.js'),'utf8'));
-    dom.window.document.querySelector('[data-native-smart-address]').insertAdjacentHTML('beforeend','<button data-smart-geolocate type="button">Usa la mia posizione</button><div data-smart-map-panel hidden><div data-smart-map></div></div><p data-smart-map-status></p>');
+    dom.window.document.querySelector('[data-native-smart-address]').insertAdjacentHTML('beforeend','<button data-smart-geolocate type="button"><svg data-test-gps-icon viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg><span data-smart-geolocate-label>Usa la mia posizione</span></button><div data-smart-map-panel hidden><div data-smart-map></div></div><p data-smart-map-status></p>');
     dom.window.eval(fs.readFileSync(path.join(__dirname,'../wordpress/themes/badaround-child/assets/js/native-report/location-map.js'),'utf8'));
   }
+  const layout=dom.window.document.createElement('div');layout.dataset.smartLocationLayout='';layout.hidden=true;
+  const ui=dom.window.document.querySelector('[data-native-smart-address]');ui.append(layout);
+  const card=dom.window.document.createElement('div');card.dataset.smartLocationCard='';card.hidden=true;layout.append(card);
+  card.append(ui.querySelector('[data-smart-confirmation]'));
+  const panel=ui.querySelector('[data-smart-map-panel]');if(panel)card.append(panel);
+  layout.append(dom.window.document.querySelector('[data-native-public-location-choice]'));
   dom.window.eval(source);
   const win=dom.window,container=win.document.querySelector('[data-native-report]');
   win.scrollTo=()=>{};
@@ -89,12 +95,12 @@ function deferred(){
   const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});
   return {promise,resolve,reject};
 }
-async function liveWidget(registry=territory,withMap=false){
+async function liveWidget(registry=territory,withMap=false,neighborhoodProposal=false){
   const h=setup(withMap),requests=[];
   class Widget extends h.win.HTMLElement {}
   h.win.customElements.define('fake-r6-place-widget',Widget);
   const adapter=h.win.BadAroundNative.SmartAddress;
-  const controller=adapter.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:registry}},h.model);
+  const controller=adapter.mount(h.container,{neighborhoodProposal,smartAddress:{key:'TEST_BROWSER_KEY',territories:registry},publicLocationRequest:{radii:[50,100,250,500,1000]}},h.model);
   h.button.click();
   h.win.google={maps:{importLibrary:async()=>({PlaceAutocompleteElement:class {constructor(){return h.win.document.createElement('fake-r6-place-widget');}}})}};
   h.win[new URL(h.win.document.querySelector('script[data-ba-smart-address]').src).searchParams.get('callback')]();
@@ -626,4 +632,164 @@ test('GEO-UX-01: device first, moved pin, address, moved pin, then device; lates
  assert.equal(h.model.values['location.public_precision'],'area');
  assert(!Object.keys(h.model.values).some(k=>/public_lat|public_lng|place_id/.test(k)));
  assert(h.container.querySelector('[data-native-location-fields]').hidden);h.close();
+});
+
+
+test('public precision is hidden until Place confirmation and hides again when search changes',async()=>{
+ const h=await liveWidget(),choice=h.container.querySelector('[data-native-public-location-choice]');assert(choice.hidden);
+ const pending=h.select();assert(choice.hidden);pending.resolve();await settleMap();assert.equal(choice.hidden,false);
+ h.widget.dispatchEvent(new h.win.Event('input',{bubbles:true}));assert(choice.hidden);assert([...choice.querySelectorAll('input')].every(x=>x.disabled));h.close();
+});
+test('GPS denial does not reveal precision; successful GPS confirms it and preserves button icon',async()=>{
+ const h=await mapHarness(),choice=h.container.querySelector('[data-native-public-location-choice]');assert(choice.hidden);h.geo.click();assert(choice.hidden);assert(h.geo.querySelector('svg'));
+ h.gps().fail({code:1});assert(choice.hidden);assert(h.geo.querySelector('svg'));h.geo.click();h.gps().ok({coords:{latitude:41.66,longitude:12.43}});await settleMap();assert.equal(choice.hidden,false);assert(h.geo.querySelector('svg'));assert.equal(h.geo.textContent,'Usa la mia posizione');h.close();
+});
+test('manual fallback reveals precision only after complete address and canonical hierarchy',()=>{
+ const h=setup(),adapter=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{territories:territory}},h.model),choice=h.container.querySelector('[data-native-public-location-choice]');
+ h.container.querySelector('[data-smart-manual]').click();assert(choice.hidden);
+ for(const [key,value] of Object.entries({region:'Lazio',province:'Roma',municipality:'Pomezia',exact_address:'Via di prova'})){const field=h.container.querySelector('[name="location.'+key+'"]');field.value=value;field.dispatchEvent(new h.win.Event('input',{bubbles:true}));adapter.syncVisibility();}
+ assert.equal(choice.hidden,false);h.container.querySelector('[name="location.exact_address"]').value='';adapter.syncVisibility();assert(choice.hidden);adapter.dispose();h.dom.window.close();
+});
+
+
+test('verified location decision layout reveals map and choices together and resets on edited address',async()=>{
+ const h=await mapHarness(),layout=h.container.querySelector('[data-smart-location-layout]');
+ assert(layout.hidden);const selected=h.select();assert(layout.hidden);selected.resolve();await settleMap();
+ assert.equal(layout.hidden,false);assert(layout.classList.contains('has-map'));
+ assert.equal(layout.querySelector('[data-native-public-location-choice]').hidden,false);
+ const card=layout.querySelector('[data-smart-location-card]');assert.equal(card.hidden,false);
+ assert.equal(card.firstElementChild,h.container.querySelector('[data-smart-confirmation]'));
+ assert.equal(card.lastElementChild,h.panel);assert.equal(h.container.querySelectorAll('.ba-map-pan').length,0);
+ h.widget.dispatchEvent(new h.win.Event('input',{bubbles:true}));assert(layout.hidden);assert(!layout.classList.contains('has-map'));h.close();
+});
+test('precision and radius changes redraw the circle without changing map zoom, viewport or private point',async()=>{
+ const h=await mapHarness(),circles=[];let fits=0,zooms=0;
+ h.model.publicLocationRequest='exact_point';h.model.publicLocationRadius=500;
+ h.win.google.maps.Circle=class{constructor(options){Object.assign(this,options);circles.push(this);}setOptions(options){Object.assign(this,options);}setCenter(p){this.center=p;}setRadius(r){this.radius=r;}setMap(m){this.map=m;}getBounds(){return {};}};
+ const selected=h.select();selected.resolve();await settleMap();
+ const map=h.maps[0],point=JSON.stringify(h.markers[0].position),values=JSON.stringify(h.model.values);
+ map.fitBounds=()=>fits++;map.setZoom=()=>zooms++;
+ const choice=h.container.querySelector('[data-native-public-location-choice] input');choice.name='ba-public-location-choice';
+ const update=()=>choice.dispatchEvent(new h.win.Event('change',{bubbles:true}));
+ h.model.publicLocationRequest='approximate_area';update();assert.equal(circles.length,1);
+ for(const r of [50,100,250,500,1000]){h.model.publicLocationRadius=r;update();assert.equal(circles[0].radius,r);}
+ h.model.publicLocationRequest='exact_point';update();assert.equal(circles[0].map,null);
+ assert.equal(fits,0);assert.equal(zooms,0);assert.equal(JSON.stringify(h.markers[0].position),point);assert.equal(JSON.stringify(h.model.values),values);h.close();
+});
+
+
+test('wizard preview retains native zoom/fullscreen and keyboard navigation without a directional pad',async()=>{
+ const h=await mapHarness();let options;
+ const load=h.win.google.maps.importLibrary;
+ h.win.google.maps.importLibrary=async name=>{
+  const api=await load(name);if(name!=='maps')return api;
+  return {Map:class extends api.Map{constructor(canvas,input){super(canvas,input);options=input;}}};
+ };
+ const selected=h.select();selected.resolve();await settleMap();
+ assert.equal(options.zoomControl,true);assert.equal(options.fullscreenControl,true);assert.equal(options.keyboardShortcuts,true);
+ assert.equal(h.container.querySelectorAll('.ba-map-pan').length,0);h.close();
+});
+
+
+test('search activation and reset keep both address controls in the same slot above privacy copy',async()=>{
+ const h=await liveWidget(),slot=h.container.querySelector('[data-smart-search-slot]'),holder=h.container.querySelector('[data-smart-widget]');
+ assert.equal(h.button.parentElement,slot);assert.equal(holder.parentElement,slot);
+ assert.equal(slot.nextElementSibling.id,'ba-smart-privacy');assert(h.button.hidden);assert.equal(holder.hidden,false);
+ assert.equal(h.widget.getAttribute('aria-describedby'),'ba-smart-status');assert.equal(h.widget.placeholder,'Cerca indirizzo, comune o quartiere…');
+ h.controller.reset();assert.equal(h.button.hidden,false);assert.equal(holder.hidden,true);assert.equal(holder.children.length,0);
+ assert.equal(slot.nextElementSibling.id,'ba-smart-privacy');h.close();
+});
+test('failed search loading retains the original input slot and the privacy order',async()=>{
+ const h=setup(),controller=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:territory}},h.model);
+ const slot=h.container.querySelector('[data-smart-search-slot]'),holder=h.container.querySelector('[data-smart-widget]');
+ assert(holder.hidden);h.button.click();assert.equal(h.button.hidden,false);
+ h.win.document.querySelector('script[src*="maps.googleapis.com"]').onerror();await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(h.button.hidden,false);assert.equal(h.button.disabled,false);assert(holder.hidden);assert.equal(slot.nextElementSibling.id,'ba-smart-privacy');controller.dispose();h.dom.window.close();
+});
+
+const {resolveNeighborhood}=require('../wordpress/themes/badaround-child/assets/js/native-report/smart-address.js');
+test('neighborhood evidence is optional, unambiguous and excludes POI/town/unsafe labels',()=>{
+ assert.equal(resolveNeighborhood([ac('point_of_interest','Centro EUR')],'Roma'),null);
+ assert.equal(resolveNeighborhood([ac('sublocality','Roma')],'Roma'),null);
+ assert.equal(resolveNeighborhood([ac('neighborhood','Aurelio'),ac('neighborhood','EUR')],'Roma'),null);
+ assert.equal(resolveNeighborhood([ac('neighborhood','<b>Zona</b>')],'Roma'),null);
+ assert.equal(resolveNeighborhood([ac('sublocality_level_1','Municipio IX'),ac('sublocality_level_2','EUR')],'Roma').label,'EUR');
+ assert.equal(resolveNeighborhood([ac('neighborhood','Aurelio'),ac('sublocality','Municipio XIII')],'Roma').source,'google_neighborhood');
+ assert.equal(resolveNeighborhood([ac('neighborhood','Quarto Oggiaro')],'Milano').confirmed,false);
+});
+test('zone requires explicit confirmation; editing and new address clear it; locked form cannot change it',async()=>{
+ const h=await liveWidget(territory,false,true);const chosen=h.select();chosen.resolve();await new Promise(r=>setImmediate(r));
+ const box=h.container.querySelector('.ba-native-neighborhood'),input=box.querySelector('input'),buttons=box.querySelectorAll('button');
+ assert(!box.hidden);assert.equal(input.value,'Torvaianica');assert.equal(h.model.neighborhood.confirmed,false);
+ buttons[0].click();assert.equal(h.model.neighborhood.confirmed,true);
+ input.value='Altra zona';input.dispatchEvent(new h.win.Event('input',{bubbles:true}));assert.equal(h.model.neighborhood,null);
+ buttons[0].click();assert.equal(h.model.neighborhood.source,'user_proposed');
+ h.model.busy=true;h.controller.syncVisibility();assert(input.disabled);assert(buttons[0].disabled);buttons[1].click();assert.equal(h.model.neighborhood.label,'Altra zona');
+ h.model.busy=false;h.widget.dispatchEvent(new h.win.Event('input',{bubbles:true}));assert.equal(h.model.neighborhood,null);assert(box.hidden);
+ h.controller.reset();assert.equal(input.value,'');h.close();
+});
+test('late reverse geocode never overrides manual zone or newer address',async()=>{
+ const h=await liveWidget(territory,false,true),wait=deferred();
+ h.win.google.maps.importLibrary=async()=>({Geocoder:class{geocode(){return wait.promise;}}});
+ const chosen=h.select({components:[ac('country','Italia','IT'),ac('administrative_area_level_1','Lazio'),ac('administrative_area_level_2','Roma','RM'),ac('locality','Pomezia')]});chosen.resolve();await new Promise(r=>setImmediate(r));
+ const input=h.container.querySelector('#ba-neighborhood-label');assert.equal(h.container.querySelector('#ba-neighborhood-status').getAttribute('aria-busy'),'true');
+ input.value='Zona mia';input.dispatchEvent(new h.win.Event('input',{bubbles:true}));
+ wait.resolve({results:[{address_components:[{types:['country'],long_name:'Italia',short_name:'IT'},{types:['administrative_area_level_1'],long_name:'Lazio'},{types:['administrative_area_level_2'],long_name:'Roma',short_name:'RM'},{types:['locality'],long_name:'Pomezia'},{types:['neighborhood'],long_name:'Zona vecchia'}]}]});await new Promise(r=>setImmediate(r));
+ assert.equal(input.value,'Zona mia');assert.equal(h.model.neighborhood,null);assert(!h.container.querySelector('#ba-neighborhood-status').hasAttribute('aria-busy'));h.close();
+});
+
+test('visible address step prepares Places once without focusing or opening a map',async()=>{
+  const h=setup();
+  const step=h.win.document.createElement('section');step.dataset.nativeStep='location';step.hidden=true;
+  const ui=h.container.querySelector('[data-native-smart-address]');ui.before(step);step.append(ui);
+  let focused=0,maps=0;
+  const controller=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:territory}},h.model);
+  assert.equal(h.win.document.querySelectorAll('script[data-ba-smart-address]').length,0);
+  step.hidden=false;controller.syncVisibility();controller.syncVisibility();
+  assert.equal(h.win.document.querySelectorAll('script[data-ba-smart-address]').length,1);
+  assert.equal(h.button.disabled,false,'preparation must leave the input clickable');
+  assert.equal(ui.querySelector('[data-smart-search-slot]').getAttribute('aria-busy'),'true');
+  class Widget extends h.win.HTMLElement{focus(){focused++;}}
+  h.win.customElements.define('ready-place-widget',Widget);
+  h.win.google={maps:{importLibrary:async()=>({PlaceAutocompleteElement:class{constructor(){return h.win.document.createElement('ready-place-widget');}}}),Map:class{constructor(){maps++;}}}};
+  h.win[new URL(h.win.document.querySelector('script[data-ba-smart-address]').src).searchParams.get('callback')]();
+  await new Promise(resolve=>setImmediate(resolve));
+  const widget=ui.querySelector('ready-place-widget');assert(widget);assert.equal(focused,0);assert.equal(maps,0);
+  assert.equal(ui.querySelector('[data-smart-search-slot]').hasAttribute('aria-busy'),false);
+  step.hidden=true;controller.syncVisibility();step.hidden=false;controller.syncVisibility();
+  assert.equal(ui.querySelector('ready-place-widget'),widget);
+  controller.dispose();h.dom.window.close();
+});
+
+test('clicking during preparation focuses the ready widget only while the step remains visible',async()=>{
+  for(const leave of [false,true]){
+    const h=setup(),step=h.win.document.createElement('section');step.dataset.nativeStep='location';
+    const ui=h.container.querySelector('[data-native-smart-address]');ui.before(step);step.append(ui);
+    let focused=0;
+    const controller=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:territory}},h.model);
+    h.button.click();if(leave)step.hidden=true;
+    class Widget extends h.win.HTMLElement{focus(){focused++;}}
+    h.win.customElements.define('pending-place-widget',Widget);
+    h.win.google={maps:{importLibrary:async()=>({PlaceAutocompleteElement:class{constructor(){return h.win.document.createElement('pending-place-widget');}}})}};
+    h.win[new URL(h.win.document.querySelector('script[data-ba-smart-address]').src).searchParams.get('callback')]();
+    await new Promise(resolve=>setImmediate(resolve));
+    assert.equal(focused,leave?0:1);
+    controller.dispose();h.dom.window.close();
+  }
+});
+
+test('reset fences a pending preparation from installing a stale widget',async()=>{
+  const h=setup(),step=h.win.document.createElement('section');step.dataset.nativeStep='location';
+  const ui=h.container.querySelector('[data-native-smart-address]');ui.before(step);step.append(ui);
+  const controller=h.win.BadAroundNative.SmartAddress.mount(h.container,{smartAddress:{key:'TEST_BROWSER_KEY',territories:territory}},h.model);
+  step.hidden=true;controller.reset();
+  class Widget extends h.win.HTMLElement{}
+  h.win.customElements.define('reset-place-widget',Widget);
+  h.win.google={maps:{importLibrary:async()=>({PlaceAutocompleteElement:class{constructor(){return h.win.document.createElement('reset-place-widget');}}})}};
+  h.win[new URL(h.win.document.querySelector('script[data-ba-smart-address]').src).searchParams.get('callback')]();
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(ui.querySelector('reset-place-widget'),null);
+  step.hidden=false;controller.syncVisibility();await new Promise(resolve=>setImmediate(resolve));
+  assert(ui.querySelector('reset-place-widget'));
+  controller.dispose();h.dom.window.close();
 });
