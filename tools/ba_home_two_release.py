@@ -5,7 +5,7 @@ import importlib.util,ftplib,ssl,os,json
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('guard',ROOT/'tools/ba_event_seo_release.py')
 guard=importlib.util.module_from_spec(spec);spec.loader.exec_module(guard)
-FILES=["themes/badaround-child/assets/home-two-network-1200.webp","themes/badaround-child/assets/home-two-network-720.webp","themes/badaround-child/inc/home-two.php","themes/badaround-child/page-home-2.php","themes/badaround-child/assets/css/home-two.css","themes/badaround-child/assets/js/home-two.js","themes/badaround-child/functions.php"]
+FILES=["themes/badaround-child/assets/home-two-network-v2-1200.webp","themes/badaround-child/assets/home-two-network-v2-720.webp","themes/badaround-child/assets/css/home-two.css","themes/badaround-child/page-home-2.php"]
 guard.FILES=FILES
 def main():
     prior={n:(ROOT/'prior-source/wordpress'/n).read_bytes() if (ROOT/'prior-source/wordpress'/n).exists() else None for n in FILES}
