@@ -63,3 +63,5 @@ jobs:
         run: python3 tools/ba_home_two_release.py
 
 # Preview fixture: explicit WordPress query helper.
+
+# Explicit edge-to-edge preview body reset.
