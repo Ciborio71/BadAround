@@ -173,3 +173,6 @@
  .h2-home .h2-callout,.h2-home .h2-witness{padding:8px;max-width:173px}.h2-callout>span:first-child{width:24px}.h2-callout>span:first-child svg{width:24px;height:33px}.h2-callout small,.h2-witness small{font-size:9px}
  .h2-home .h2-witness{top:42%}.h2-callout-house{bottom:23%}.h2-privacy{font-size:13px}
 }
+
+/* Keep the two deliberate headline lines at every desktop breakpoint. */
+@media(min-width:1001px){.h2-hero-grid{align-items:flex-start}.h2-hero-copy{width:36%;max-width:530px}.h2-home h1{font-size:clamp(44px,4.4vw,68px);white-space:nowrap}.h2-lead{max-width:420px}.h2-sentinel .h2-sentinel-art img{left:-75%}}

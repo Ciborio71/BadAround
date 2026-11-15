@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: 5972aa269a769f035ef10fc9a5c650f3343d0343
+          ref: 0f1d8e6d20e10d034775f4aa44da0f132000b17c
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
