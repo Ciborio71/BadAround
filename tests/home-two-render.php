@@ -16,9 +16,9 @@ function wp_body_open(){}function body_class(){echo 'class="ba-home-two-page"';}
 function wp_head(){foreach(['base','components','shell','blog','home-two']as $s)echo '<link rel="stylesheet" href="/wordpress/themes/badaround-child/assets/css/'.$s.'.css">';}
 function get_header(){include $GLOBALS['theme'].'/header.php';}
 function get_footer(){echo '<script src="/wordpress/themes/badaround-child/assets/js/navigation.js"></script><script src="/wordpress/themes/badaround-child/assets/js/home-two.js"></script></body></html>';}
-function badaround_pin_svg($slug){$color=['veicoli'=>'#1677E8','animali'=>'#7040C8','case-e-attivita'=>'#C9153D'][$slug]??'#087f8c';return '<svg viewBox="0 0 48 60"><path fill="'.$color.'" d="M24 59S1 34 1 24a23 23 0 1 1 46 0c0 10-23 35-23 35Z"/><circle cx="24" cy="24" r="16" fill="white"/><circle cx="24" cy="24" r="6"/></svg>';}
+require $theme.'/inc/pins.php';
 function badaround_child_event_category_slug($id){return ['veicoli','animali','case-e-attivita'][($id-1)%3];}
-function badaround_event_public_presentation($id){return $id===2?['mode'=>'approximate_area','radius_meters'=>100]:['mode'=>'exact_point'];}
+class BadAround_Public_Geo_Projection{static function public_view($id){return $id===2?['mode'=>'approximate_area','radius_meters'=>100]:['mode'=>'exact_point'];}}
 function badaround_child_event_image_url($id,$size){return get_stylesheet_directory_uri().'/assets/event-placeholder-'.badaround_child_event_category_slug($id).'.svg';}
 function badaround_child_placeholder_url($cat='',$mode=''){return get_stylesheet_directory_uri().'/assets/event-placeholder-'.($cat?:'veicoli').'.svg';}
 function sanitize_html_class($s){return $s;}
