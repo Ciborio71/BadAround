@@ -30,4 +30,5 @@ if(substr_count($html,'<h1 ')!==1)throw new RuntimeException('H1');
 if(str_contains($html,'data-ba-map '))throw new RuntimeException('Embedded map');
 if(substr_count($html,'ba-event-card__media-category')!==0)throw new RuntimeException('Duplicate placeholder badge');
 if(substr_count($html,'class="h2-category"')!==6)throw new RuntimeException('Categories');
+if(substr_count($html,'class="h2-scene-marker"')!==3)throw new RuntimeException('Scene markers');
 file_put_contents(dirname(__DIR__).'/home-two-fixture.html',$html);echo "HOME_TWO_RENDER_PASS\n";
