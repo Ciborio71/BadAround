@@ -3,6 +3,7 @@
 define('ABSPATH',__DIR__);$theme=dirname(__DIR__).'/wordpress/themes/badaround-child';
 function get_stylesheet_directory_uri(){return '/wordpress/themes/badaround-child';}
 function home_url($path='/'){return $path;}
+function add_query_arg($key,$value,$url){return $url.'?'.rawurlencode($key).'='.rawurlencode($value);}
 function esc_url($s){return htmlspecialchars($s,ENT_QUOTES);}
 function esc_attr($s){return htmlspecialchars($s,ENT_QUOTES);}
 function esc_html($s){return htmlspecialchars($s,ENT_QUOTES);}

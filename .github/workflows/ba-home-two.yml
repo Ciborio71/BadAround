@@ -54,3 +54,5 @@ jobs:
           FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
           FTP_TLS_CA_FILE: tls/chain.pem
         run: python3 tools/ba_home_two_release.py
+
+# Preview fixture: explicit WordPress query helper.
