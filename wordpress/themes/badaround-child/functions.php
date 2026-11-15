@@ -209,7 +209,7 @@ function badaround_child_enqueue_assets() {
 	$is_how_it_works = is_page( 'come-funziona' );
 	$is_legal         = is_page( array( 'termini-e-condizioni', 'privacy-policy', 'cookie-policy', 'regole-di-pubblicazione', 'segnalazioni-privacy-e-moderazione' ) );
 	$is_blog = is_page('blog') || is_singular('post') || is_category();
-	$is_badaround     = $is_blog || $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_radar_demo || $is_search || $is_reports || $is_sentinel || $is_states || $is_account || $is_not_found || $is_how_it_works || $is_legal;
+	$is_badaround     = is_page_template('page-home-2.php') || $is_blog || $is_home || $is_event || $is_location || $is_reporting || $is_map || $is_radar_demo || $is_search || $is_reports || $is_sentinel || $is_states || $is_account || $is_not_found || $is_how_it_works || $is_legal;
 
 	if ( ! $is_badaround ) {
 		return;
@@ -659,3 +659,6 @@ require_once __DIR__ . '/inc/home-seo.php';
 
 require_once __DIR__.'/inc/event-social.php';
 add_action('wp_head',static function(){echo '<link rel="icon" type="image/png" sizes="32x32" href="'.esc_url(get_stylesheet_directory_uri().'/assets/favicon-32.png?ver=2').'"><link rel="apple-touch-icon" sizes="180x180" href="'.esc_url(get_stylesheet_directory_uri().'/assets/favicon-180.png?ver=2').'"><link rel="icon" type="image/svg+xml" sizes="any" href="'.esc_url(get_stylesheet_directory_uri().'/assets/favicon.svg?ver=2').'">'."\n";},100);
+
+// Isolated optional home preview; does not change the current front page.
+require_once __DIR__ . '/inc/home-two.php';

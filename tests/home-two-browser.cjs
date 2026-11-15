@@ -1,0 +1,15 @@
+const {chromium}=require('playwright-core');const assert=require('node:assert/strict');
+(async()=>{const browser=await chromium.launch({executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox']});
+try{const page=await browser.newPage();const requests=[];page.on('request',r=>requests.push(r.url()));
+await page.goto('http://127.0.0.1:8765/home-two-fixture.html');
+for(const width of [1440,1280,1024,768,390,320]){await page.setViewportSize({width,height:1000});await page.waitForTimeout(80);
+const result=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth+1,h1:document.querySelectorAll('h1').length,search:document.querySelector('[data-h2-search]').getBoundingClientRect().right<=innerWidth,loaded:document.querySelector('.h2-network').complete&&document.querySelector('.h2-network').naturalWidth>0,nav:document.querySelector('.ba-menu-toggle').getBoundingClientRect().width>0}));assert(!result.overflow,'overflow '+width);assert.equal(result.h1,1);assert(result.search);assert(result.loaded);console.log('PASS home-two layout',width);
+if(width===390){await page.locator('.ba-menu-toggle').click();assert.equal(await page.locator('.ba-menu-toggle').getAttribute('aria-expanded'),'true');await page.locator('.ba-menu-toggle').click();}}
+assert(!requests.some(u=>u.includes('googleapis.com')),'no initial Google load');
+await page.evaluate(()=>{Object.defineProperty(navigator,'geolocation',{configurable:true,value:{getCurrentPosition:(ok,fail)=>fail({code:1})}});});
+await page.locator('[data-h2-nearby]').click();await page.waitForTimeout(50);assert.match(await page.locator('#h2-search-status').innerText(),/non concesso/);assert(await page.locator('[data-h2-nearby]').isEnabled());
+await page.evaluate(()=>{window.google={maps:{importLibrary:async()=>({AutocompleteSessionToken:class{},AutocompleteSuggestion:{fetchAutocompleteSuggestions:async()=>({suggestions:[{placePrediction:{mainText:{text:'Roma'},secondaryText:{text:'Italia'},placeId:'qa-place',toPlace:()=>({id:'qa-place',formattedAddress:'Roma, Italia',location:{lat:()=>41.9,lng:()=>12.5},fetchFields:async()=>{}})}}]})}})}};});
+await page.locator('[data-h2-input]').fill('Rom');await page.waitForTimeout(450);await page.locator('[data-h2-input]').press('ArrowDown');await page.locator('[data-h2-input]').press('Enter');await page.waitForTimeout(50);assert.equal(await page.locator('input[name=place_id]').inputValue(),'qa-place');assert.equal(await page.locator('input[name=lat]').inputValue(),'41.9');
+await page.locator('[data-h2-input]').fill('Milano');assert.equal(await page.locator('input[name=place_id]').inputValue(),'');
+await page.route('**/mappa/**',r=>r.fulfill({body:'<h1>Map destination</h1>',contentType:'text/html'}));await page.locator('[data-h2-search] button[type=submit]').click();await page.waitForURL('**/mappa/**');assert.equal(new URL(page.url()).searchParams.get('area'),'Milano');assert(!new URL(page.url()).searchParams.has('lat'));console.log('PASS home-two search, stale selection reset and geolocation denial');
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});
