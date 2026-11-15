@@ -65,3 +65,5 @@ jobs:
 # Preview fixture: explicit WordPress query helper.
 
 # Explicit edge-to-edge preview body reset.
+
+# Measure headline text independently of its decorative underline.
