@@ -4,12 +4,12 @@ if(!defined('ABSPATH'))exit;
 get_header();
 $uri=get_stylesheet_directory_uri();
 $categories=[
- ['Veicoli','veicoli','Furti, danni e altri eventi che riguardano auto, moto e mezzi.','#1677E8'],
- ['Case e attività','case-e-attivita','Effrazioni, furti ed eventi in abitazioni, negozi e uffici.','#C9153D'],
- ['Pericoli','pericoli','Ostacoli e situazioni di rischio da segnalare.','#F57C00'],
- ['Spazi pubblici','spazi-pubblici','Degrado, vandalismi e problemi nelle aree comuni.','#0AA184'],
+ ['Veicoli','veicoli','Auto, moto e altri mezzi: furti, danneggiamenti e situazioni da segnalare.','#1677E8'],
+ ['Case e attività','case-e-attivita','Furti, tentati furti e altri eventi che riguardano abitazioni, negozi e uffici.','#C9153D'],
+ ['Pericoli','pericoli','Ostacoli, rischi stradali o ambientali e situazioni che richiedono attenzione.','#F57C00'],
+ ['Spazi pubblici','spazi-pubblici','Vandalismi, degrado e altre situazioni che interessano aree comuni.','#0AA184'],
  ['Animali','animali','Animali smarriti, avvistati o in difficoltà.','#7040C8'],
- ['Oggetti e documenti','oggetti-e-documenti','Oggetti smarriti, sottratti o ritrovati.','#E3A415'],
+ ['Oggetti e documenti','oggetti-e-documenti','Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.','#E3A415'],
 ];
 $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query())->discover(['page'=>1,'per_page'=>3]):['items'=>[]];
 ?>
@@ -28,7 +28,6 @@ $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query
    <a class="h2-callout h2-callout-animal" href="<?php echo esc_url(add_query_arg('categoria','animali',home_url('/segnalazioni/'))); ?>"><span aria-hidden="true"><?php echo badaround_pin_svg('animali'); ?></span><span><strong>Animale smarrito</strong><small>Una segnalazione può aiutare</small></span><b aria-hidden="true">›</b><span class="h2-scene-marker" aria-hidden="true"><?php echo badaround_pin_svg('animali'); ?></span></a>
    <a class="h2-callout h2-callout-house" href="<?php echo esc_url(add_query_arg('categoria','case-e-attivita',home_url('/segnalazioni/'))); ?>"><span aria-hidden="true"><?php echo badaround_pin_svg('case-e-attivita'); ?></span><span><strong>Tentativo di effrazione</strong><small>Condividi ciò che hai osservato</small></span><b aria-hidden="true">›</b><span class="h2-scene-marker" aria-hidden="true"><?php echo badaround_pin_svg('case-e-attivita'); ?></span></a>
    <a class="h2-witness" href="<?php echo esc_url(home_url('/segnalazioni/')); ?>"><svg viewBox="0 0 48 36" aria-hidden="true"><circle cx="24" cy="8" r="6"/><circle cx="9" cy="12" r="5"/><circle cx="39" cy="12" r="5"/><path d="M14 34V24a10 10 0 0 1 20 0v10ZM0 32V24a8 8 0 0 1 12-7v15Zm36 0V17a8 8 0 0 1 12 7v8Z"/></svg><span><strong>Si cercano testimoni</strong><small>Hai visto qualcosa? Può fare la differenza.</small></span><b aria-hidden="true">›</b></a>
-   <span class="h2-art-label">Situazioni illustrate a titolo di esempio</span>
   </div>
  </div>
 </section>

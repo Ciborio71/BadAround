@@ -176,3 +176,50 @@
 
 /* Keep the two deliberate headline lines at every desktop breakpoint. */
 @media(min-width:1001px){.h2-hero-grid{align-items:flex-start}.h2-hero-copy{width:36%;max-width:530px}.h2-home h1{font-size:clamp(44px,4.4vw,68px);white-space:nowrap}.h2-lead{max-width:420px}.h2-sentinel .h2-sentinel-art img{left:-75%}}
+
+/* Category cards: the hero's light callout surfaces, with canonical Home copy. */
+.h2-home .h2-categories{gap:16px;align-items:stretch}
+.h2-home .h2-category{
+ position:relative;display:grid;grid-template-rows:76px minmax(48px,auto) 1fr;
+ align-items:start;align-content:start;justify-content:stretch;justify-items:start;
+ text-align:left;gap:12px;min-width:0;min-height:290px;padding:24px 20px;
+ background:linear-gradient(145deg,#fff 65%,#f3f9fb);
+ border:1px solid #dce7ec;border-radius:18px;
+ box-shadow:0 4px 16px #071b2d07;overflow:hidden;
+ transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease
+}
+.h2-home .h2-category::before{
+ content:"";position:absolute;top:24px;right:20px;width:6px;height:24px;
+ border-radius:4px;background:var(--category);opacity:.65
+}
+.h2-home .h2-category>span{display:block;align-self:start}
+.h2-home .h2-category svg{width:56px;height:72px;filter:none}
+.h2-home .h2-category strong{
+ display:flex;align-items:center;min-height:48px;max-width:none;
+ margin:0;color:#071b2d;font-size:20px;font-weight:800;line-height:1.2;letter-spacing:-.025em
+}
+.h2-home .h2-category small{
+ display:block;max-width:none;margin:0;color:#52697d;font-size:14px;line-height:1.55;
+ overflow-wrap:break-word
+}
+.h2-home .h2-category:hover{
+ transform:translateY(-3px);border-color:var(--category);
+ box-shadow:0 10px 26px #071b2d12;color:#071b2d
+}
+.h2-home .h2-category:focus-visible{outline:3px solid #087f8c;outline-offset:4px}
+@media(min-width:1001px) and (max-width:1199px){
+ .h2-home .h2-categories{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:760px){
+ .h2-home .h2-categories{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+ .h2-home .h2-category{grid-template-rows:64px minmax(44px,auto) 1fr;min-height:270px;padding:20px 16px;gap:10px}
+ .h2-home .h2-category svg{width:48px;height:61px}
+ .h2-home .h2-category strong{font-size:18px;min-height:44px}
+ .h2-home .h2-category small{font-size:13px;line-height:1.5}
+ .h2-home .h2-category::before{top:20px;right:16px;height:20px;width:5px}
+}
+@media(max-width:359px){
+ .h2-home .h2-categories{grid-template-columns:1fr}
+ .h2-home .h2-category{min-height:0}
+}
+@media(prefers-reduced-motion:reduce){.h2-home .h2-category{transition:none}.h2-home .h2-category:hover{transform:none}}
