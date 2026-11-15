@@ -57,3 +57,41 @@
 @media(min-width:761px) and (max-width:1099px){.h2-hero-grid{grid-template-columns:minmax(0,43%) minmax(0,57%)}.h2-hero-copy{padding-right:18px}.h2-visual{min-height:500px;margin:0}.h2-home .h2-callout,.h2-home .h2-witness{max-width:205px}}
 @media(max-width:760px){.h2-hero-grid{grid-template-columns:minmax(0,1fr)}.h2-hero-copy{padding-right:0}.h2-visual{margin:24px 0 0;min-height:390px;border-radius:18px}.h2-network{object-position:center}}
 @media(max-width:480px){.h2-visual{min-height:360px}.h2-home .h2-callout,.h2-home .h2-witness{max-width:180px}}
+
+/* Approved hero composition: full-bleed city at right, readable HTML copy at left. */
+@media(min-width:1001px){
+ .h2-hero{isolation:isolate;overflow:hidden}
+ .h2-hero-grid{position:static;display:flex;min-height:clamp(650px,52vw,840px);padding-block:64px 106px;align-items:center}
+ .h2-hero-copy{width:35%;max-width:510px;flex-shrink:0;padding-right:0;z-index:3}
+ .h2-visual{position:absolute;inset:0;margin:0;width:100%;height:100%;min-height:0;border-radius:0;overflow:hidden;z-index:1}
+ .h2-network{inset:0;width:100%;height:100%;object-fit:cover;object-position:right center;mask-image:none}
+ .h2-home h1{font-size:clamp(48px,4.5vw,76px)}
+ .h2-lead{font-size:clamp(17px,1.38vw,22px)}
+ .h2-callout-car{top:18%;left:40%;right:auto;bottom:auto}
+ .h2-callout-animal{top:16%;right:3%;left:auto;bottom:auto}
+ .h2-callout-house{top:62%;left:37%;right:auto;bottom:auto}
+ .h2-home .h2-witness{top:43%;left:56%;right:auto;max-width:290px}
+ .h2-art-label{bottom:46px;right:20px}
+}
+@media(min-width:1001px) and (max-width:1199px){
+ .h2-hero-grid{min-height:670px}.h2-hero-copy{width:34%}
+ .h2-home .h2-callout,.h2-home .h2-witness{max-width:225px}
+ .h2-callout-car{left:38%}.h2-home .h2-witness{left:53%}.h2-callout-house{left:37%}
+ .h2-hero .h2-actions{gap:10px}.h2-hero .h2-button{padding:13px 17px;font-size:14px}
+}
+@media(min-width:761px) and (max-width:1000px){
+ .h2-hero-grid{display:grid;grid-template-columns:minmax(0,1fr);padding-block:36px 75px}
+ .h2-hero-copy{width:100%;max-width:650px;padding-right:0}
+ .h2-visual{position:relative;inset:auto;margin:20px -24px 0;width:calc(100% + 48px);height:480px;min-height:0;border-radius:0}
+ .h2-network{object-fit:cover;object-position:right center;mask-image:linear-gradient(to bottom,transparent,#000 8%,#000 95%,transparent)}
+ .h2-callout-car{top:17%;left:30%}.h2-callout-animal{top:4%;right:3%}.h2-callout-house{left:15%;bottom:15%;top:auto}
+ .h2-home .h2-witness{top:42%;right:17%;left:auto}
+}
+@media(max-width:760px){
+ .h2-visual{position:relative;inset:auto;margin:24px -20px 0;width:calc(100% + 40px);height:420px;min-height:0;border-radius:0}
+ .h2-network{object-fit:cover;object-position:right center;mask-image:linear-gradient(to bottom,transparent,#000 8%,#000 95%,transparent)}
+ .h2-callout-car{top:18%;left:5%;right:auto;bottom:auto}.h2-callout-animal{top:1%;right:3%;left:auto;bottom:auto}
+ .h2-callout-house{left:5%;bottom:12%;top:auto;right:auto}.h2-home .h2-witness{top:47%;right:3%;left:auto}
+ .h2-art-label{bottom:0;right:10px}
+}
+@media(max-width:480px){.h2-visual{height:380px}.h2-network{object-position:82% center}}
