@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: fa1d1622c448cfc898f9f60eddd5a96775b2b2ef
+          ref: 972f89c4f0e44e13a754306b6c1278dae6956aa3
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -29,6 +29,7 @@ jobs:
         run: |
           npm ci --prefix tests --ignore-scripts
           php -l wordpress/plugins/badaround-core/includes/class-badaround-contribution-service.php
+          php tests/maintenance-contributions.php
           php tests/contributions-e2.php
           php tests/contributions-e5.php
           php tests/test-ba-event-public-details.php

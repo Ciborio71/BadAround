@@ -113,6 +113,20 @@ function badaround_child_maintenance_rest_gate( $result, $server, $request ) {
 
 	$route = $request->get_route();
 
+    // Reserved contributions retain their own validation, email verification and moderation.
+    // During private QA admit only the exact create/verify routes from the existing QA boundary.
+    if ( badaround_child_is_private_qa_request() ) {
+        $method = $request->get_method();
+        $emails = get_option( 'badaround_identity_qa_email_allowlist', array() );
+        if ( 'POST' === $method && '/badaround/v1/contributions' === $route
+            && is_array( $emails ) && in_array( strtolower( trim( (string) $request->get_param( 'email' ) ) ), $emails, true ) ) {
+            return $result;
+        }
+        if ( 'GET' === $method && preg_match( '~^/badaround/v1/contributions/verify/[a-f0-9-]{36}/[a-f0-9]{64}$~D', $route ) ) {
+            return $result;
+        }
+    }
+
 	$allowed_prefixes = array(
 		'/wpvibe/',
 		'/badaround/v1/discovery',
