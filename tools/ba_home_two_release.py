@@ -20,3 +20,5 @@ def main():
         try:ftp.quit()
         except ftplib.all_errors:ftp.close()
 if __name__=='__main__':main()
+
+# Nine-card fixture and browser count verified before upload.
