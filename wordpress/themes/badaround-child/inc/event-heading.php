@@ -12,7 +12,8 @@ function badaround_event_heading($title) {
         if (preg_match('/\p{N}/u', $word) || (mb_strlen($word, 'UTF-8') > 1 && $word === mb_strtoupper($word, 'UTF-8')) || preg_match('/\p{Ll}.*\p{Lu}/u', $word)) { return $word; }
         return mb_strtoupper(mb_substr($lower, 0, 1, 'UTF-8'), 'UTF-8') . mb_substr($lower, 1, null, 'UTF-8');
     }, $title);
-    return is_string($result) ? $result : $title;
+    $result = is_string($result) ? $result : $title;
+    return class_exists('BadAround_Event_SEO') ? BadAround_Event_SEO::after_pipe($result) : $result;
 }
 
 /** Shared decorative witness cue; all meaning remains in the adjacent text. */
