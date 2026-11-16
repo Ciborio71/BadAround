@@ -3,13 +3,14 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 final class BadAround_Event_SEO {
     const VERSION = '1.1'; // URL/activation contract stays compatible with published events.
-    const COPY_VERSION = '2.2';
+    const COPY_VERSION = '2.3';
     const URL_POLICY = 'event-url/2';
     const CONTRACT = '_ba_seo_contract';
     const SLUG = '_ba_seo_slug';
     const URL_ID = '_ba_public_url_id';
 
     public static function register_hooks() {
+        add_filter('the_title', array(__CLASS__, 'public_title_case'), 20, 2);
         add_filter( 'wp_insert_post_data', array( __CLASS__, 'preserve_slug' ), 999, 2 );
         add_action('rest_api_init', array(__CLASS__, 'register_preview'));
         add_action('rest_api_init', array(__CLASS__, 'register_test_refresh'));
@@ -60,6 +61,15 @@ final class BadAround_Event_SEO {
             if ( $frozen && get_post_meta($id,'_ba_seo_frozen',true) ) { $data['post_name'] = $frozen; }
         }
         return $data;
+    }
+    /** A pipe starts a new sentence; preserve every other character and frozen URL. */
+    public static function after_pipe($text) {
+        return preg_replace_callback('/(\\|[\\s\\p{N}«“"\x27(\\[]*)(\\p{L})/u', static function($match) {
+            return $match[1].mb_strtoupper($match[2], 'UTF-8');
+        }, (string)$text);
+    }
+    public static function public_title_case($title, $id = 0) {
+        return get_post_type((int)$id)==='ba_evento' ? self::after_pipe($title) : $title;
     }
     private static function text( $value ) {
         if ( ! is_scalar( $value ) ) { return ''; }
@@ -204,6 +214,10 @@ final class BadAround_Event_SEO {
         $sections['address']='Indirizzo e posizione pubblica';
         $sections['occurrence']='Data e periodo dell’evento';
         $sections['map']='Esplora la mappa di '.($zone!==''?$zone.', ':'').$municipality;
+        $h1=self::after_pipe($h1);
+        $title=self::after_pipe($title);
+        $intro=self::after_pipe($intro);
+        $sections=array_map(array(__CLASS__, 'after_pipe'),$sections);
         if($headings_only)return $sections;
         return array('h1'=>$h1,'title'=>$title,'description'=>self::meta_description($intro),
             'narrative'=>$intro,
