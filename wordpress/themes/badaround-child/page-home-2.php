@@ -11,7 +11,7 @@ $categories=[
  ['Animali','animali','Animali smarriti, avvistati o in difficoltà.','#7040C8'],
  ['Oggetti e documenti','oggetti-e-documenti','Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.','#E3A415'],
 ];
-$recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query())->discover(['page'=>1,'per_page'=>3]):['items'=>[]];
+$recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query())->discover(['page'=>1,'per_page'=>9]):['items'=>[]];
 ?>
 <main class="h2-home" id="main-content">
 <section class="h2-hero" aria-labelledby="h2-title">
@@ -49,7 +49,7 @@ $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query
 <section class="h2-section h2-wrap" aria-labelledby="h2-recent-title">
  <div class="h2-section-head"><h2 id="h2-recent-title">Ultime <em>segnalazioni</em></h2><a href="<?php echo esc_url(home_url('/segnalazioni/')); ?>">Vedi tutte <span aria-hidden="true">→</span></a></div>
  <div class="h2-feed-intro"><p>Ultime segnalazioni pubblicate in Italia. Cerca una zona per esplorare quelle vicine a te.</p><?php get_template_part('template-parts/components/precision-legend'); ?></div>
- <div class="h2-events"><?php foreach(array_slice(($recent['items']??[]),0,3) as $item):
+ <div class="h2-events"><?php foreach(array_slice(($recent['items']??[]),0,9) as $item):
  $category=function_exists('badaround_child_event_category_slug')?badaround_child_event_category_slug((int)$item['id']):'';
  $meta=array_filter([$item['occurred_date']??'',$item['occurred_time']??'',$item['public_place_name']??($item['territory']['name']??'')]);
  get_template_part('template-parts/components/event-card',null,['event_id'=>(int)$item['id'],'title'=>$item['title'],'url'=>$item['permalink'],'status'=>'info','status_label'=>$item['event_type']['name']??'Segnalazione','meta'=>implode(' · ',$meta),'image'=>badaround_child_event_image_url((int)$item['id'],'thumb'),'image_alt'=>$item['title'],'excerpt'=>$item['excerpt']??'','link_label'=>'Vai alla segnalazione','category'=>$category]);
