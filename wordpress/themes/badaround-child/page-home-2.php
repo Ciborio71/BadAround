@@ -9,7 +9,7 @@ $categories=[
  ['Pericoli','pericoli','Ostacoli, rischi stradali o ambientali e situazioni che richiedono attenzione.','#F57C00'],
  ['Spazi pubblici','spazi-pubblici','Vandalismi, degrado e altre situazioni che interessano aree comuni.','#0AA184'],
  ['Animali','animali','Animali smarriti, avvistati o in difficoltà.','#7040C8'],
- ['Oggetti e documenti','oggetti-e-documenti','Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.','#E3A415'],
+ ['Oggetti','oggetti-e-documenti','Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.','#E3A415'],
 ];
 $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query())->discover(['page'=>1,'per_page'=>9]):['items'=>[]];
 ?>
