@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: b06e2938da7db1c800ce0755bf2b4daddeed1f3b
+          ref: ce062822e7713897db25ea032b790e7efd861382
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -36,6 +36,9 @@ jobs:
           php -l wordpress/themes/badaround-child/inc/event-heading.php
           php tests/event-pipe-sentence-case.php
           php -l wordpress/themes/badaround-child/inc/native-report.php
+          php -l wordpress/themes/badaround-child/inc/blog.php
+          php -l wordpress/themes/badaround-child/page-blog.php
+          php tests/blog-pagination.php
           php tests/home-two-render.php
           php tests/maintenance-contributions.php
           php tests/contributions-e2.php
