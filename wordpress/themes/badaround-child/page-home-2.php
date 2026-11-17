@@ -11,7 +11,7 @@ $categories=[
  ['Animali','animali','Animali smarriti, avvistati o in difficoltà.','#7040C8'],
  ['Oggetti','oggetti-e-documenti','Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.','#E3A415'],
 ];
-$recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query())->discover(['page'=>1,'per_page'=>10]):['items'=>[]];
+$recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query())->discover(['page'=>1,'per_page'=>12]):['items'=>[]];
 ?>
 <main class="h2-home" id="main-content">
 <section class="h2-hero" aria-labelledby="h2-title">
@@ -50,7 +50,7 @@ $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query
  <div class="h2-section-head"><h2 id="h2-recent-title">Ultime <em>segnalazioni</em></h2><a href="<?php echo esc_url(home_url('/segnalazioni/')); ?>">Vedi tutte <span aria-hidden="true">→</span></a></div>
  <div class="h2-feed-intro"><p>Ultime segnalazioni pubblicate in Italia. Cerca una zona per esplorare quelle vicine a te.</p><?php get_template_part('template-parts/components/precision-legend'); ?></div>
  <div class="h2-events h2-editorial">
- <?php $feed=array_slice($recent['items']??[],0,10); foreach([array_slice($feed,0,2),array_slice($feed,2,8)] as $group_index=>$group): ?>
+ <?php $feed=array_slice($recent['items']??[],0,12); foreach([array_slice($feed,0,6),array_slice($feed,6,6)] as $group_index=>$group): ?>
  <div class="<?php echo $group_index===0?'h2-featured-list':'h2-stream-list'; ?>">
  <?php foreach($group as $item):
  $id=(int)$item['id'];$category=badaround_child_event_category_slug($id);
@@ -107,6 +107,22 @@ $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query
  @media(max-width:1100px){body.ba-home-two-page .h2-home div.h2-events.h2-editorial{grid-template-columns:minmax(0,1fr)}.h2-editorial .h2-featured-list{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto}}
  @media(max-width:640px){.h2-editorial .h2-featured-list,.h2-editorial .h2-stream-list{grid-template-columns:minmax(0,1fr);grid-template-rows:auto}.h2-editorial .h2-editorial-stream{min-height:170px}.h2-editorial .h2-editorial-feature .h2-editorial-media{height:190px;flex-basis:190px}}
  @media(prefers-reduced-motion:reduce){.h2-editorial .h2-editorial-card{transition:none}}
+
+ /* Reversible six featured plus six compact cards. */
+ body.ba-home-two-page .h2-home div.h2-events.h2-editorial{grid-template-columns:minmax(0,1fr);gap:28px}
+ .h2-editorial .h2-featured-list{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:440px;gap:22px}
+ .h2-editorial .h2-stream-list{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:168px;gap:22px}
+ .h2-editorial .h2-editorial-feature{height:440px}
+ .h2-editorial .h2-editorial-feature h3{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+ .h2-editorial .h2-editorial-stream{height:168px;min-height:0;padding:8px 14px;grid-template-columns:84px minmax(0,1fr);border:1px solid transparent;border-left:6px solid var(--feed-accent);box-shadow:none}
+ .h2-editorial .h2-editorial-stream .h2-editorial-media{width:84px;height:84px;background-color:transparent}
+ .h2-editorial .h2-editorial-stream .h2-editorial-body{gap:4px}
+ .h2-editorial .h2-editorial-stream .h2-editorial-label>span{display:none}
+ .h2-editorial .h2-editorial-stream h3{-webkit-line-clamp:2}
+ .h2-editorial .h2-editorial-stream:hover,.h2-editorial .h2-editorial-stream:focus-within{border-color:var(--feed-accent);box-shadow:0 5px 16px #09223518}
+ @media(max-width:1100px){.h2-editorial .h2-featured-list,.h2-editorial .h2-stream-list{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none}}
+ @media(max-width:640px){.h2-editorial .h2-featured-list,.h2-editorial .h2-stream-list{grid-template-columns:minmax(0,1fr)}.h2-editorial .h2-editorial-stream{min-height:0}.h2-editorial .h2-featured-list{grid-auto-rows:440px}}
+
  </style>
 </section>
 <section class="h2-process"><div class="h2-wrap"><h2>Un’informazione può fare la differenza</h2><ol><li><span><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 22 16-16 5 5-16 16-7 1Z"/><path d="m19 9 5 5"/></svg></span><div><h3>1. Segnala</h3><p>Racconta l’evento che hai osservato, indicando luogo e dettagli utili.</p></div></li><li><span><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="7" cy="16" r="4"/><circle cx="25" cy="6" r="4"/><circle cx="25" cy="26" r="4"/><path d="m11 14 10-6M11 18l10 6"/></svg></span><div><h3>2. Condividi</h3><p>Dopo la moderazione, la segnalazione può essere pubblicata per la community.</p></div></li><li><span><svg viewBox="0 0 48 36" fill="currentColor" aria-hidden="true"><circle cx="24" cy="8" r="6"/><circle cx="9" cy="12" r="5"/><circle cx="39" cy="12" r="5"/><path d="M14 34V24a10 10 0 0 1 20 0v10ZM0 32V24a8 8 0 0 1 12-7v15Zm36 0V17a8 8 0 0 1 12 7v8Z"/></svg></span><div><h3>3. Fai rete</h3><p>Contribuisci con informazioni, avvistamenti e testimonianze pertinenti.</p></div></li></ol><a href="<?php echo esc_url(home_url('/come-funziona/')); ?>">Scopri come funziona BadAround →</a></div></section>
