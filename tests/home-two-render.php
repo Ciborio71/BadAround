@@ -24,11 +24,13 @@ function badaround_child_placeholder_url($cat='',$mode=''){return get_stylesheet
 function sanitize_html_class($s){return $s;}
 function get_template_part($path,$name=null,$args=[]){if(str_contains($path,'precision-legend')){echo '<p>Punto esatto · Area approssimata</p>';return;}include $GLOBALS['theme'].'/'.$path.'.php';}
 function badaround_blog_home(){echo '<section class="ba-blog ba-blog-home"><h2>Il blog di BadAround</h2><p>Informarsi, condividere, fare rete.</p></section>';}
-class BadAround_Discovery_Query{function discover($args){$items=[];for($i=1;$i<=9;$i++)$items[]=['id'=>$i,'title'=>['Veicolo segnalato rubato a Roma, in Via dei Colli Portuensi','Cane smarrito a Firenze','Tentativo di effrazione a Bologna'][($i-1)%3],'permalink'=>'/eventi/esempio-'.$i.'/','event_type'=>['name'=>'Segnalazione'],'public_place_name'=>'Roma','excerpt'=>'Una segnalazione pubblica di esempio per verificare la presentazione.'];return ['items'=>$items];}}
+class BadAround_Discovery_Query{function discover($args){$items=[];for($i=1;$i<=10;$i++)$items[]=['id'=>$i,'title'=>['Veicolo segnalato rubato a Roma, in Via dei Colli Portuensi','Cane smarrito a Firenze','Tentativo di effrazione a Bologna'][($i-1)%3],'permalink'=>'/eventi/esempio-'.$i.'/','event_type'=>['name'=>'Segnalazione'],'public_place_name'=>'Roma','excerpt'=>'Una segnalazione pubblica di esempio per verificare la presentazione.'];return ['items'=>$items];}}
 ob_start();include $theme.'/page-home-2.php';$html=ob_get_clean();
 if(substr_count($html,'<h1 ')!==1)throw new RuntimeException('H1');
 if(str_contains($html,'data-ba-map '))throw new RuntimeException('Embedded map');
 if(substr_count($html,'ba-event-card__media-category')!==0)throw new RuntimeException('Duplicate placeholder badge');
 if(substr_count($html,'class="h2-category"')!==6)throw new RuntimeException('Categories');
 if(substr_count($html,'class="h2-scene-marker"')!==3)throw new RuntimeException('Scene markers');
+if(substr_count($html,'class="h2-editorial-card h2-editorial-feature"')!==2)throw new RuntimeException('Two featured cards');
+if(substr_count($html,'class="h2-editorial-card h2-editorial-stream"')!==8)throw new RuntimeException('Eight stream cards');
 file_put_contents(dirname(__DIR__).'/home-two-fixture.html',$html);echo "HOME_TWO_RENDER_PASS\n";
