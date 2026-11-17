@@ -309,3 +309,29 @@ function badaround_native_report_field( $path, $field ) {
 	</div>
 	<?php
 }
+
+/** Preselect only a known category from a home link; retain all normal wizard steps. */
+function badaround_native_report_category_link() {
+    if ( ! is_page_template( 'page-segnala-evento.php' ) ) { return; }
+    ?>
+    <script>
+    (function(){
+      function applyCategoryLink(){
+        const categories={'veicoli':'vehicle','case-e-attivita':'property','pericoli':'hazard','spazi-pubblici':'public_space','animali':'animal','oggetti-e-documenti':'item_document'};
+        const slug=new URLSearchParams(window.location.search).get('categoria');
+        if(!Object.prototype.hasOwnProperty.call(categories,slug))return;
+        const container=document.querySelector('[data-native-report]');
+        const select=container?.querySelector('select[name="event.category"]');
+        if(!container?.nativeReport||!select||select.value)return;
+        const value=categories[slug];
+        if(!Array.from(select.options).some(option=>option.value===value))return;
+        select.value=value;
+        select.dispatchEvent(new Event('change',{bubbles:true}));
+      }
+      if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',applyCategoryLink,{once:true});
+      else applyCategoryLink();
+    })();
+    </script>
+    <?php
+}
+add_action( 'wp_print_footer_scripts', 'badaround_native_report_category_link', 30 );
