@@ -7,12 +7,13 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 			<div class="ba-footer-brand">
 				<a class="ba-brand ba-brand--footer" href="<?php echo esc_url( home_url( '/' ) ); ?>">
 					<span class="ba-brand__mark" aria-hidden="true">
-						<svg viewBox="0 0 44 44" focusable="false">
-							<circle cx="22" cy="22" r="17" fill="none" stroke="currentColor" stroke-width="2.4"/>
-							<circle cx="22" cy="22" r="8.5" fill="none" stroke="currentColor" stroke-width="2.4" opacity=".72"/>
-							<circle cx="22" cy="22" r="3.3" fill="currentColor"/>
-						</svg>
-					</span>
+				<svg viewBox="0 0 44 44" focusable="false">
+					<circle cx="22" cy="22" r="17" fill="none" stroke="currentColor" stroke-width="2.4"/>
+					<circle cx="22" cy="22" r="8.5" fill="none" stroke="currentColor" stroke-width="2.4" opacity=".72"/>
+					<circle cx="22" cy="22" r="3.3" fill="currentColor"/>
+					<path d="M22 1.8v5.1M22 37.1v5.1M1.8 22h5.1M37.1 22h5.1" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+				</svg>
+			</span>
 					<span class="ba-brand__wordmark">Bad<span>Around</span></span>
 				</a>
 				<p>La rete locale che raccoglie segnalazioni utili, richieste di aiuto e informazioni dal territorio.</p>
