@@ -11,7 +11,7 @@ $categories=[
  ['Animali','animali','Animali smarriti, avvistati o in difficoltà.','#7040C8'],
  ['Oggetti','oggetti-e-documenti','Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.','#E3A415'],
 ];
-$recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query())->discover(['page'=>1,'per_page'=>12]):['items'=>[]];
+$recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query())->discover(['page'=>1,'per_page'=>9]):['items'=>[]];
 ?>
 <main class="h2-home" id="main-content">
 <section class="h2-hero" aria-labelledby="h2-title">
@@ -50,7 +50,7 @@ $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query
  <div class="h2-section-head"><h2 id="h2-recent-title">Ultime <em>segnalazioni</em></h2><a href="<?php echo esc_url(home_url('/segnalazioni/')); ?>">Vedi tutte <span aria-hidden="true">→</span></a></div>
  <div class="h2-feed-intro"><p>Ultime segnalazioni pubblicate in Italia. Cerca una zona per esplorare quelle vicine a te.</p><?php get_template_part('template-parts/components/precision-legend'); ?></div>
  <div class="h2-events h2-editorial">
- <?php $feed=array_slice($recent['items']??[],0,12); foreach([array_slice($feed,0,6),array_slice($feed,6,6)] as $group_index=>$group): ?>
+ <?php $feed=array_slice($recent['items']??[],0,9); foreach([$feed] as $group_index=>$group): ?>
  <div class="<?php echo $group_index===0?'h2-featured-list':'h2-stream-list'; ?>">
  <?php foreach($group as $item):
  $id=(int)$item['id'];$category=badaround_child_event_category_slug($id);
