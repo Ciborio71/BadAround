@@ -319,14 +319,21 @@ function badaround_native_report_category_link() {
       function applyCategoryLink(){
         const categories={'veicoli':'vehicle','case-e-attivita':'property','pericoli':'hazard','spazi-pubblici':'public_space','animali':'animal','oggetti-e-documenti':'item_document'};
         const slug=new URLSearchParams(window.location.search).get('categoria');
-        if(!Object.prototype.hasOwnProperty.call(categories,slug))return;
         const container=document.querySelector('[data-native-report]');
         const select=container?.querySelector('select[name="event.category"]');
-        if(!container?.nativeReport||!select||select.value)return;
-        const value=categories[slug];
-        if(!Array.from(select.options).some(option=>option.value===value))return;
-        select.value=value;
-        select.dispatchEvent(new Event('change',{bubbles:true}));
+        if(!container?.nativeReport||!select)return;
+        const wrapper=select.closest('[data-native-field]');
+        const radios=Array.from(wrapper.querySelectorAll('input[type="radio"]'));
+        for(const radio of radios){
+          const icon=radio.closest('label')?.querySelector('.ba-native-card-icon');
+          const svg=container.nativeReport.config.pinIcons?.[radio.value];
+          if(icon&&svg){icon.innerHTML=svg;icon.classList.add('ba-category-identity-pin');}
+        }
+        const edit=wrapper.querySelector('.ba-native-edit-choice');
+        if(edit){edit.textContent='Cambia categoria';edit.setAttribute('aria-label','Cambia categoria');}
+        if(!Object.prototype.hasOwnProperty.call(categories,slug)||select.value)return;
+        const radio=radios.find(input=>input.value===categories[slug]);
+        if(radio&&!radio.disabled)radio.click();
       }
       if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',applyCategoryLink,{once:true});
       else applyCategoryLink();
