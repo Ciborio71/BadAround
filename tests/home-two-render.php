@@ -31,6 +31,6 @@ if(str_contains($html,'data-ba-map '))throw new RuntimeException('Embedded map')
 if(substr_count($html,'ba-event-card__media-category')!==0)throw new RuntimeException('Duplicate placeholder badge');
 if(substr_count($html,'class="h2-category"')!==6)throw new RuntimeException('Categories');
 if(substr_count($html,'class="h2-scene-marker"')!==3)throw new RuntimeException('Scene markers');
-if(substr_count($html,'class="h2-editorial-card h2-editorial-feature"')!==6)throw new RuntimeException('Two featured cards');
-if(substr_count($html,'class="h2-editorial-card h2-editorial-stream"')!==6)throw new RuntimeException('Eight stream cards');
+if(substr_count($html,'class="h2-editorial-card h2-editorial-feature"')!==9)throw new RuntimeException('Nine featured cards');
+if(substr_count($html,'class="h2-editorial-card h2-editorial-stream"')!==0)throw new RuntimeException('No stream cards');
 file_put_contents(dirname(__DIR__).'/home-two-fixture.html',$html);echo "HOME_TWO_RENDER_PASS\n";
