@@ -333,7 +333,17 @@ function badaround_native_report_category_link() {
         if(edit){edit.textContent='Cambia categoria';edit.setAttribute('aria-label','Cambia categoria');}
         if(!Object.prototype.hasOwnProperty.call(categories,slug)||select.value)return;
         const radio=radios.find(input=>input.value===categories[slug]);
-        if(radio&&!radio.disabled)radio.click();
+        if(radio&&!radio.disabled){
+          // Initial automatic focus is orientation, not an event-type choice.
+          const subtype=container.querySelector('[data-native-field="event.subtype"]');
+          if(subtype){
+            subtype.classList.add('ba-native-initial-focus');
+            const revealFocus=()=>subtype.classList.remove('ba-native-initial-focus');
+            container.addEventListener('keydown',revealFocus,{once:true});
+            subtype.addEventListener('pointerdown',revealFocus,{once:true});
+          }
+          radio.click();
+        }
       }
       if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',applyCategoryLink,{once:true});
       else applyCategoryLink();
