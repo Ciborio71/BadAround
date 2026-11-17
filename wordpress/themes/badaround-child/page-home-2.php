@@ -57,6 +57,8 @@ $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query
  $image=badaround_child_event_image_url($id,'large');
  $photo=$image&&strpos($image,'event-placeholder')===false;
  $meta=array_filter([$item['public_place_name']??($item['territory']['name']??''),$item['occurred_date']??'',$item['occurred_time']??'']);
+ $presentation=function_exists('badaround_event_public_presentation')?badaround_event_public_presentation($id):[];
+ if(($presentation['mode']??'')==='approximate_area'&&!empty($presentation['radius_meters']))$meta[]='Area approssimata · raggio '.(int)$presentation['radius_meters'].' m';
  $colors=array_column($categories,3,1);$accent=$colors[$category]??'#087f8c';
  ?>
  <article class="h2-editorial-card <?php echo $group_index===0?'h2-editorial-feature':'h2-editorial-stream'; ?>" style="--feed-accent:<?php echo esc_attr($accent); ?>">
