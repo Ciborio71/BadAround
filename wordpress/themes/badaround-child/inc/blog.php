@@ -9,8 +9,8 @@ function badaround_blog_profile($id){
  foreach((array)$terms as $term)if(isset($sections[$term->slug]))return array('slug'=>$term->slug,'name'=>$sections[$term->slug][0],'pin'=>$sections[$term->slug][1],'color'=>$sections[$term->slug][2],'term'=>$term);
  return array('slug'=>'il-progetto-badaround','name'=>'Il progetto BadAround','pin'=>'neutral','color'=>'#087f8c','term'=>null);
 }
-function badaround_blog_query($limit=3,$page=1){
- return new WP_Query(array('post_type'=>'post','post_status'=>'publish','posts_per_page'=>$limit,'paged'=>max(1,(int)$page),'ignore_sticky_posts'=>true,'orderby'=>array('date'=>'DESC','ID'=>'DESC'),'tax_query'=>array(array('taxonomy'=>'category','field'=>'slug','terms'=>array_keys(badaround_blog_sections())))));
+function badaround_blog_query($limit=3,$page=1,$exclude=array()) {
+ return new WP_Query(array('post_type'=>'post','post_status'=>'publish','posts_per_page'=>$limit,'paged'=>max(1,(int)$page),'post__not_in'=>array_map('intval',$exclude),'ignore_sticky_posts'=>true,'orderby'=>array('date'=>'DESC','ID'=>'DESC'),'tax_query'=>array(array('taxonomy'=>'category','field'=>'slug','terms'=>array_keys(badaround_blog_sections())))));
 }
 function badaround_blog_excerpt($id){
  $value=get_post_field('post_excerpt',$id);if(!$value)$value=get_post_field('post_content',$id);
@@ -72,3 +72,7 @@ add_action('wp_head',static function(){
 },4);
 
 add_filter('get_canonical_url',static function($url,$post){if(is_page('blog')&&get_query_var('paged')>1)return get_pagenum_link(get_query_var('paged'));return $url;},10,2);
+
+/* Shared shell styling for every editorial view. */
+add_filter('body_class',static function($classes){if(is_page('blog')||is_category()||is_singular('post'))$classes[]='ba-blog-page';return $classes;});
+add_action('pre_get_posts',static function($query){if(!is_admin()&&$query->is_main_query()&&$query->is_category())$query->set('posts_per_page',12);});
