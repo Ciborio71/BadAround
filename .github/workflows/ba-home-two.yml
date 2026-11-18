@@ -91,3 +91,5 @@ jobs:
 # Verify paired columns and content visibility together.
 
 # Compact spacing for short desktop screens.
+
+# Full-width Radar outer box includes its padding.
