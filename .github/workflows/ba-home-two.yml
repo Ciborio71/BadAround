@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: bec67619212234d17d119c88b21c6b331621c494
+          ref: dac81feb66c04d71058042ee176150f49addfea8
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -99,5 +99,3 @@ jobs:
 # Full-width Radar outer box includes its padding.
 
 # Account for authenticated desktop navbar space.
-
-# Radar A authenticated laptop viewport.
