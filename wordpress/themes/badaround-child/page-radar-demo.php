@@ -278,7 +278,7 @@ body.page-template-page-radar-demo .ba-radar-map .ba-map-pan{display:none!import
  .ba-observatory-kpi strong,.ba-observatory-kpi small{grid-column:1}
 }
 @media(max-width:1000px){body.page-template-page-radar-demo .ba-radar-map{height:400px;min-height:0!important}}
-@media(min-width:1001px) and (max-height:720px){
+@media(min-width:1001px) and (max-height:850px){
  body.page-template-page-radar-demo .ba-radar-demo{padding-top:10px}
  .rad-v2-head{margin-bottom:10px}
  .rad-v2-head h1{font-size:34px}
@@ -814,6 +814,7 @@ function sizeRadarShell(){
  const tail=(summary?.getBoundingClientRect().height||50)+(foot?.getBoundingClientRect().height||15)+45;
  const content=reportsHost.getBoundingClientRect().height+(root.querySelector('.ba-radar-back')?.getBoundingClientRect().height||18)+30;
  workspace.style.setProperty('--rad-workspace-height',Math.ceil(Math.max(content,window.innerHeight-top-tail,300))+'px');
+ if(map&&!chosenCenter&&drill.level===0)frameItaly();
 }
 window.addEventListener('resize',sizeRadarShell);
 if(window.ResizeObserver){const shellObserver=new ResizeObserver(()=>requestAnimationFrame(sizeRadarShell));for(const el of [root.querySelector('.rad-v2-head'),root.querySelector('.ba-radar-controls'),$('rad-reports'),$('rad-summary'),document.querySelector('.ba-site-header'),document.querySelector('#wpadminbar')])if(el)shellObserver.observe(el);}
