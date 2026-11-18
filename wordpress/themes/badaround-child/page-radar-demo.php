@@ -1,7 +1,7 @@
 <?php
 /**
  * Template Name: BadAround — Radar Demo
- * RADAR-ONLINE-UX-01: DEMO ONLY — no real event or location data.
+ * Public-feed observatory presentation; no private report data.
  */
 if (!defined('ABSPATH')) exit;
 // This validation-only synthetic experience must not be indexed.
@@ -12,21 +12,22 @@ wp_enqueue_script('badaround-map-navigation',get_stylesheet_directory_uri().'/as
 get_header();
 ?>
 <main class="ba-radar-demo" id="main-content">
+<header class="rad-v2-head"><p>Osservatorio del territorio</p><h1>Radar BadAround</h1><div>Una panoramica delle segnalazioni condivise dalla community.</div><aside>ⓘ Segnalazioni della community, non statistiche ufficiali.</aside></header>
  
- <div class="ba-radar-controls" aria-label="Filtri dimostrativi Radar">
-  <div class="ba-radar-search"><label for="rad-place">Cerca un luogo reale</label><div class="ba-radar-search-row"><input id="rad-place" type="search" value="" placeholder="Cerca evento o luogo" aria-label="Cerca evento o luogo" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="rad-suggestions" /><button id="rad-nearby" type="button" aria-label="Esplora la zona attorno alla mia posizione">⌖ Vicino a me</button></div><div id="rad-suggestions" class="ba-radar-suggestions" role="listbox" aria-label="Suggerimenti indirizzi" hidden></div></div>
+ <div class="ba-radar-controls" aria-label="Filtri Radar">
+  <div class="ba-radar-search"><label for="rad-place">Cerca un luogo reale</label><div class="ba-radar-search-row"><input id="rad-place" type="search" value="" placeholder="Cerca un luogo" aria-label="Cerca un luogo" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="rad-suggestions" /><button id="rad-nearby" type="button" aria-label="Esplora la zona attorno alla mia posizione">⌖ Vicino a me</button></div><div id="rad-suggestions" class="ba-radar-suggestions" role="listbox" aria-label="Suggerimenti indirizzi" hidden></div></div>
   <label>Categoria<select id="rad-cat"><option>Tutte le categorie</option><option>Veicoli</option><option>Pericoli</option><option>Spazi pubblici</option><option>Animali</option><option>Case e attività</option><option>Oggetti e documenti</option></select></label>
-  <label>Periodo<select id="rad-period"><option value="all" selected>Tutti i periodi</option><option value="30">30 giorni</option><option value="7">7 giorni</option><option value="90">90 giorni</option><option value="365">12 mesi</option></select></label>
+  <label>Data episodio<select id="rad-period"><option value="all" selected>Tutti i periodi</option><option value="30">30 giorni</option><option value="7">7 giorni</option><option value="90">90 giorni</option><option value="365">12 mesi</option></select></label>
   <label>Raggio<select id="rad-radius"><option value="1">1 km</option><option value="0.5">500 m</option><option value="2">2 km</option><option value="5">5 km</option></select></label>
   <button id="rad-reset" class="ba-radar-reset-visible" type="button" title="Cancella la zona memorizzata e tutti i filtri">↺ Reimposta</button>
  </div>
- <div class="ba-radar-workspace">
+ <p id="rad-scope" class="rad-v2-scope" aria-live="polite">Area: Italia · Seleziona un luogo per applicare un raggio di ricerca.</p><div class="ba-radar-workspace">
   <section class="ba-radar-map" aria-label="Cartografia Google Maps e segnalazioni pubbliche">
    <div id="rad-google-map" class="ba-radar-google-map" role="application" aria-label="Google Maps — geometrie delle segnalazioni pubblicate"></div>
    
    <div id="rad-map-message" class="ba-radar-map-message" role="status" aria-live="polite">Caricamento cartografia Google Maps…</div>
    
-   <div class="ba-radar-visual-key" aria-label="Legenda informazioni cartografiche"><strong>Radar territoriale</strong><span>Densità visiva delle segnalazioni pubbliche</span><div class="ba-radar-heat-legend" aria-hidden="true"></div><small>Minore densità → maggiore densità</small><small>Aloni tematici illustrativi dalle segnalazioni pubbliche: non rappresentano l’estensione reale degli episodi.</small></div>
+   <div class="ba-radar-visual-key"><strong>Distribuzione delle segnalazioni</strong><span>I conteggi raggruppano le posizioni pubbliche, non indicano il punto di un singolo episodio.</span><small>Punto esatto · Area approssimata</small></div>
 
   </section>
   <aside class="ba-radar-panel" id="rad-panel">
@@ -134,335 +135,66 @@ if (
   </aside>
  </div>
  <button id="rad-drawer" type="button" aria-controls="rad-panel" aria-expanded="false">Mostra analisi zona</button>
- <p class="ba-radar-foot">RADAR-PHENOMENA-01 · Problematiche da dati pubblici · Nessuna heatmap o valutazione di rischio</p>
+ <section id="rad-summary" class="rad-v2-summary" aria-live="polite"></section><p class="ba-radar-foot">La distribuzione dipende dalla partecipazione della community e dalla copertura dei dati.</p>
 </main>
 <style>
-.ba-radar-demo{--navy:#071a38;--teal:#0798a8;--muted:#61778b;color:var(--navy);background:#f3f7fa;min-height:80vh}.ba-radar-demo *{box-sizing:border-box}
-.ba-radar-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px clamp(15px,3vw,44px);background:#fff}.ba-radar-heading h1{font-size:clamp(26px,3vw,38px);margin:0 0 3px}.ba-radar-heading p{margin:0;color:var(--muted)}.ba-radar-kicker{font-weight:850;font-size:11px;letter-spacing:.08em;color:var(--teal)!important}.ba-radar-demo-pill{font-size:10px;color:#865014;background:#fff2d8;border:1px solid #eed8b2;padding:10px 13px;border-radius:20px}
-.ba-radar-controls{display:flex;gap:9px;flex-wrap:wrap;align-items:end;background:#fff;padding:10px clamp(15px,3vw,44px);border-block:1px solid #e0e8ed}.ba-radar-controls label{display:grid;gap:4px;font-size:11px;font-weight:800;color:#50677c}.ba-radar-controls input,.ba-radar-controls select,.ba-radar-controls button{height:40px;min-width:110px;border:1px solid #cfdee5;border-radius:9px;background:#fff;color:var(--navy);padding:0 11px;font:inherit;font-size:13px}.ba-radar-controls .ba-radar-search{flex:1;min-width:210px}.ba-radar-search input{width:100%}.ba-radar-controls button{font-weight:800;cursor:pointer}
-.ba-radar-workspace{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px;max-width:1800px;margin:auto;padding:12px;min-height:590px}.ba-radar-map{position:relative;min-height:575px;border:1px solid #d5e2e9;border-radius:15px;overflow:hidden;background:#e7efe9}.ba-radar-map svg{position:absolute;inset:0;width:100%;height:100%}.ba-radar-map-title,.ba-radar-legend{position:absolute;background:#fff;border-radius:11px;padding:11px 13px;box-shadow:0 6px 18px #071a3820;font-size:12px}.ba-radar-map-title{top:15px;left:15px;font-weight:850}.ba-radar-legend{bottom:14px;right:14px}.ba-radar-gradient{width:170px;height:9px;border-radius:10px;margin:8px 0;background:linear-gradient(90deg,#d3e8dc,#f9d66e,#f48b56,#ca4050)}.ba-radar-legend small{color:var(--muted)}
-.ba-radar-panel{border:1px solid #dfebef;border-radius:15px;padding:21px;background:#fff}.ba-radar-panel h2{font-size:22px;margin:10px 0}.ba-radar-panel>p{color:var(--muted);font-size:13px;line-height:1.6}.ba-radar-tag{font-size:11px;font-weight:850;background:#e6f5f5;color:#077480;border-radius:24px;padding:7px 11px}.ba-radar-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}.ba-radar-metrics>div{padding:15px;background:#f3f8fa;border-radius:10px}.ba-radar-metrics strong{font-size:28px;display:block}.ba-radar-metrics small{font-size:11px;color:var(--muted)}.ba-radar-advice{border-left:4px solid #d4a042;background:#fff8e8;padding:12px;border-radius:8px;font-size:12px}.ba-radar-advice p{margin:7px 0 0;line-height:1.55}.ba-radar-note{background:#f4f8fa;padding:12px;border-radius:10px}.ba-radar-states{display:flex;flex-wrap:wrap;gap:6px}.ba-radar-states button{border:1px solid #d5e0e6;background:#fff;border-radius:8px;padding:8px;font-size:11px;cursor:pointer}.ba-radar-states button.is-active{background:#071a38;color:#fff}.ba-radar-back{display:block;background:#078895;color:#fff;text-decoration:none;text-align:center;padding:12px;margin-top:19px;border-radius:10px;font-size:13px;font-weight:800}.ba-radar-foot{text-align:center;color:#708698;font-size:11px;padding:10px}.ba-radar-demo button:focus-visible,.ba-radar-demo input:focus-visible,.ba-radar-demo select:focus-visible{outline:3px solid #0798a8;outline-offset:2px}#rad-drawer{display:none}
-@media(max-width:850px){.ba-radar-workspace{grid-template-columns:minmax(0,1fr) 300px}.ba-radar-heading{flex-wrap:wrap}}
-@media(max-width:700px){.ba-radar-controls .ba-radar-search{flex-basis:100%}.ba-radar-workspace{display:block;padding:8px}.ba-radar-map{min-height:calc(100dvh - 320px)}.ba-radar-panel{position:fixed;z-index:999;left:0;right:0;bottom:0;max-height:78dvh;overflow:auto;border-radius:20px 20px 0 0;transform:translateY(110%);transition:transform .25s;box-shadow:0 -10px 40px #071a3833}.ba-radar-panel.is-open{transform:translateY(0)}#rad-drawer{display:block;position:fixed;z-index:1000;bottom:15px;left:50%;transform:translateX(-50%);border:0;border-radius:50px;background:#071a38;color:#fff;padding:13px 20px;font-weight:850;white-space:nowrap}.ba-radar-foot{padding-bottom:70px}.ba-radar-demo-pill{font-size:9px}}
-@media(prefers-reduced-motion:reduce){.ba-radar-panel{transition:none}}
-.ba-radar-layer-toggle{position:absolute;left:15px;bottom:15px;border:1px solid #c6dce3;background:#fff;color:#071a38;border-radius:9px;padding:10px 12px;box-shadow:0 4px 12px #071a3820;cursor:pointer;font-size:12px;font-weight:800;z-index:2}.ba-radar-metrics[hidden]{display:none!important}.ba-radar-layer-toggle:focus-visible{outline:3px solid #0798a8;outline-offset:2px}
-@media(max-width:700px){.ba-radar-layer-toggle{bottom:72px}}
-
-/* RADAR-UX-03: align desktop analysis sidebar to Mappe's left-hand rail. */
-@media(min-width:701px){
- .ba-radar-workspace{grid-template-columns:340px minmax(0,1fr)}
- .ba-radar-panel{grid-column:1;grid-row:1;min-width:0}
- .ba-radar-map{grid-column:2;grid-row:1;min-width:0}
-}
-@media(min-width:701px) and (max-width:850px){
- .ba-radar-workspace{grid-template-columns:300px minmax(0,1fr)}
-}
-
-/* RADAR-UX-04 — full-screen dashboard shell parity with Mappe; wp_footer remains active. */
-body.page-template-page-radar-demo .ba-site-footer{display:none}
-
-/* RADAR-UX-05 — dashboard controls, synthetic-only interactive layers. */
-.ba-radar-layers-toggle{position:absolute;right:16px;top:16px;z-index:3;border:0;border-radius:10px;background:#fff;color:#071a38;box-shadow:0 5px 18px #071a3825;padding:11px 15px;font-weight:850;cursor:pointer}
-.ba-radar-layers{position:absolute;right:16px;top:64px;z-index:4;width:min(265px,calc(100% - 32px));padding:16px;border:1px solid #d6e3e9;border-radius:12px;background:#fff;box-shadow:0 10px 35px #071a3830;display:none}
-.ba-radar-layers.is-open{display:grid;gap:12px}
-.ba-radar-layers__head{display:flex;justify-content:space-between;align-items:center}
-.ba-radar-layers__head button{background:transparent;border:0;font-size:23px;cursor:pointer;color:#071a38}
-.ba-radar-layers p,.ba-radar-layers small{margin:0;font-size:11px;color:#60768a}
-.ba-radar-layers label{display:flex;align-items:center;gap:10px;font-weight:700;font-size:12px;color:#071a38}
-.ba-radar-layers input{width:16px;height:16px;accent-color:#0798a8}
-.ba-radar-layers-toggle:focus-visible,.ba-radar-layers button:focus-visible{outline:3px solid #0798a8;outline-offset:2px}
-.ba-radar-demo .ba-radar-panel .ba-radar-brief{margin:12px 0;padding:12px;border:1px solid #cde5e9;border-radius:10px;background:#f0fbfc}
-.ba-radar-brief strong{font-size:12px}.ba-radar-brief p{margin:5px 0 0;font-size:12px;line-height:1.5;color:#486578}
-@media(max-width:700px){.ba-radar-layers-toggle{right:10px;top:10px}.ba-radar-layers{right:10px;top:60px}}
-
-/* RADAR-GMAP-01 — genuine Google basemap; demo analytics never sourced from map content. */
-.ba-radar-google-map{position:absolute;inset:0;width:100%;height:100%;background:#e8f1f4}
-.ba-radar-map-message{position:absolute;top:64px;left:15px;max-width:calc(100% - 30px);z-index:3;background:#fff;color:#4c657b;border-radius:9px;padding:9px 12px;font-size:12px;box-shadow:0 3px 14px #071a3820}
-.ba-radar-map-message[hidden],.ba-radar-demo-heat[hidden]{display:none!important}
-.ba-radar-demo-heat{position:absolute;z-index:1;pointer-events:none;inset:17% 22% 18% 16%;border-radius:50%;background:radial-gradient(ellipse at 48% 45%,rgba(203,56,74,.45) 0%,rgba(245,135,72,.31) 29%,rgba(249,212,101,.19) 57%,transparent 75%);filter:blur(22px)}
-.ba-radar-map-disclaimer{position:absolute;top:60px;right:15px;z-index:2;max-width:210px;padding:8px 10px;background:#fff9e6;border:1px solid #e8d9b3;border-radius:8px;color:#7a561b;font-size:10px;font-weight:900;line-height:1.35}
-.ba-radar-search{display:flex!important;flex-wrap:wrap}
-.ba-radar-search input{flex:1 1 230px;min-width:150px}
-.ba-radar-search button{flex:0 0 auto;min-width:70px;background:#078e99;color:#fff;border:0}
-.ba-radar-search button:hover{background:#067780;color:#fff}
-@media(max-width:700px){.ba-radar-map-disclaimer{top:58px;right:10px;max-width:175px;font-size:9px}.ba-radar-map-message{top:55px}}
-
-/* RADAR-GMAP-02: compact Mappe-like toolbar and accessible Places suggestions. */
-.ba-radar-heading{display:none!important}
-.ba-radar-controls{position:relative;z-index:12}
-.ba-radar-search{position:relative;flex:1 1 280px;min-width:220px;display:grid!important;gap:4px}
-.ba-radar-search-row{display:flex;gap:5px}
-.ba-radar-search-row input{flex:1 1 auto;min-width:0;width:100%}
-.ba-radar-search-row button{min-width:65px;color:#fff;background:#078e99;border-color:#078e99;cursor:pointer}
-.ba-radar-suggestions{position:absolute;left:0;right:0;top:100%;z-index:60;max-height:320px;overflow:auto;background:#fff;border:1px solid #d9e4eb;border-radius:12px;box-shadow:0 15px 30px #071a3830}
-.ba-radar-suggestions[hidden]{display:none!important}
-.ba-radar-suggestions button{display:block;width:100%;height:auto;min-height:42px;padding:11px 13px;border:0;border-bottom:1px solid #edf1f5;border-radius:0;text-align:left;background:#fff;color:#071a38;font-size:12px;cursor:pointer}
-.ba-radar-suggestions button:hover,.ba-radar-suggestions button:focus-visible{background:#eaf7fa;color:#071a38}
-
-/* RADAR-SEARCH-WIDTH-01 — match the compact Mappe search footprint. */
-@media(min-width:701px){.ba-radar-controls .ba-radar-search{flex:0 1 355px;width:355px;max-width:355px;min-width:190px}}
-@media(max-width:700px){.ba-radar-controls .ba-radar-search{flex:1 1 100%;width:100%;max-width:100%;min-width:0}}
-
-/* RADAR-GEO-01 — compact location control, explicitly permission-gated. */
-.ba-radar-search-row #rad-nearby{min-width:111px;white-space:nowrap;background:#eaf7f8!important;border:1px solid #a9d7dc!important;color:#076a76!important;font-size:12px;font-weight:800}
-.ba-radar-search-row #rad-nearby:hover,.ba-radar-search-row #rad-nearby:focus-visible{background:#d4eff1!important;color:#064f59!important}
-.ba-radar-search-row #rad-nearby:disabled{opacity:.6;cursor:wait}
-@media(max-width:930px){.ba-radar-search-row{flex-wrap:wrap}.ba-radar-search-row input{flex-basis:100%}}
-/* RADAR-MAP-PARITY-01: match Mappe edges; keep compact mobile gutters. */
-body.page-template-page-radar-demo .ba-radar-workspace{max-width:none;margin:0;padding:0;gap:0}
-@media(min-width:701px){body.page-template-page-radar-demo .ba-radar-workspace{grid-template-columns:340px minmax(0,1fr)}body.page-template-page-radar-demo .ba-radar-map{border-radius:0;border-left:0;border-right:0}}
-@media(min-width:701px) and (max-width:850px){body.page-template-page-radar-demo .ba-radar-workspace{grid-template-columns:300px minmax(0,1fr)}}
-@media(max-width:700px){body.page-template-page-radar-demo .ba-radar-workspace{padding:0}}
-.ba-radar-layers,.ba-radar-layers-toggle{display:none!important}
-
-/* RADAR-SEARCH-PARITY-02: Mappe-sized text field, Mappe left inset and one-row desktop controls. */
-@media(min-width:931px){
- body.page-template-page-radar-demo .ba-radar-controls{padding:8px 14px;gap:10px}
- body.page-template-page-radar-demo .ba-radar-controls .ba-radar-search{flex:0 0 555px;width:555px;max-width:555px;min-width:0;gap:0}
- body.page-template-page-radar-demo .ba-radar-search-row{flex-wrap:nowrap;align-items:center;gap:7px}
- body.page-template-page-radar-demo .ba-radar-search-row input{flex:0 1 355px;width:355px;min-width:180px;flex-basis:355px;height:40px}
- body.page-template-page-radar-demo .ba-radar-search-row #rad-search{flex:0 0 65px}
- body.page-template-page-radar-demo .ba-radar-search-row #rad-nearby{flex:0 0 120px}
-}
-body.page-template-page-radar-demo .ba-radar-search>label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-@media(max-width:930px){body.page-template-page-radar-demo .ba-radar-controls{padding:8px 9px}}
-
-/* RADAR-DISCOVERY-01: genuine public report browsing (not analytics). */
-.ba-radar-reports{display:grid;gap:9px;max-height:46vh;overflow:auto;margin-top:14px}
-.ba-radar-report{border:1px solid #dce7ed;border-radius:11px;padding:11px 12px;background:#f8fbfd;display:grid;gap:5px}
-.ba-radar-report a{font-weight:800;color:#073d64;text-decoration:none;font-size:13px;line-height:1.35}
-.ba-radar-report a:hover{text-decoration:underline}
-.ba-radar-report small{color:#637a8a;font-size:11px;line-height:1.45}
-.ba-radar-report--selected{outline:2px solid #078e99}
-
-/* RADAR-PHENOMENA-01 — thematic sidebar, not a duplicate of Mappe event list. */
-.ba-radar-phenomenon{border:1px solid #d8e6eb;border-radius:12px;padding:14px;background:#fff}
-.ba-radar-phenomenon h3{font-size:15px;line-height:1.3;margin:0 0 5px;color:#071a38}
-.ba-radar-phenomenon p{font-size:11px;line-height:1.45;color:#657b8d;margin:0 0 8px}
-.ba-radar-phenomenon ul{margin:0;padding-left:18px;color:#28455c;font-size:12px;line-height:1.55}
-.ba-radar-phenomenon li+li{margin-top:4px}
-
-/* RADAR-CONTEXT-01: contextual general guidance, transparently not risk predictions. */
-.ba-radar-guidance,.ba-radar-quality{padding:13px;border-radius:11px;border:1px solid #d5e6ea;background:#f0f9fa}
-.ba-radar-guidance h3,.ba-radar-quality h3{margin:0 0 8px;font-size:13px;color:#08394b}
-.ba-radar-guidance p,.ba-radar-quality p{margin:0;color:#4e6a7a;font-size:12px;line-height:1.5}
-.ba-radar-guidance ul{margin:9px 0 0;padding-left:17px;font-size:12px;color:#24465c;line-height:1.6}
-.ba-radar-guidance li+li{margin-top:8px}
-
-/* RADAR-LAYOUT-PARITY-01 — use the exact Mappe viewport/rail proportions.
-   Header inherited unchanged; Radar interactions remain independent. */
-@media(min-width:861px){
- body.page-template-page-radar-demo{overflow:hidden}
- body.page-template-page-radar-demo .ba-radar-demo{
-  display:grid;grid-template-rows:56px minmax(0,1fr);
-  height:calc(100dvh - 76px - var(--wp-admin--admin-bar--height, 0px));
-  min-height:0;max-height:none;overflow:hidden;
- }
- body.page-template-page-radar-demo .ba-radar-controls{
-  height:56px;min-height:56px;max-height:56px;
-  padding:8px 14px;align-items:center;flex-wrap:nowrap;
-  overflow:visible;gap:10px;
- }
- body.page-template-page-radar-demo .ba-radar-controls>label{gap:0}
- body.page-template-page-radar-demo .ba-radar-controls>label:not(.ba-radar-search)>select{height:40px}
- body.page-template-page-radar-demo .ba-radar-controls>label:not(.ba-radar-search){
-  display:flex;align-items:center;gap:5px;white-space:nowrap;
- }
- body.page-template-page-radar-demo .ba-radar-workspace{
-  display:grid;grid-template-columns:minmax(360px,420px) minmax(0,1fr);
-  grid-template-rows:minmax(0,1fr);height:100%;max-height:100%;
-  min-height:0;overflow:hidden;margin:0;padding:0;gap:0;
- }
- body.page-template-page-radar-demo .ba-radar-panel{
-  grid-column:1;grid-row:1;height:100%;min-height:0;
-  max-height:100%;overflow-y:auto;overflow-x:hidden;
-  border:0;border-right:1px solid #dde7ed;border-radius:0;
-  background:#f7fafc;overscroll-behavior:contain;
- }
- body.page-template-page-radar-demo .ba-radar-map{
-  grid-column:2;grid-row:1;height:100%;min-height:0;
-  max-height:100%;border:0;border-radius:0;
- }
- body.page-template-page-radar-demo .ba-radar-foot{display:none}
-}
-@media(min-width:1280px){
- body.page-template-page-radar-demo .ba-radar-workspace{grid-template-columns:420px minmax(0,1fr)}
-}
-@media(min-width:861px) and (max-width:1040px){
- body.page-template-page-radar-demo .ba-radar-controls{gap:6px;padding:8px 9px}
- body.page-template-page-radar-demo .ba-radar-controls .ba-radar-search{
-  flex:1 1 290px;min-width:180px;max-width:355px;width:auto;
- }
- body.page-template-page-radar-demo .ba-radar-search-row{flex-wrap:nowrap}
- body.page-template-page-radar-demo .ba-radar-search-row input{flex:1 1 auto;min-width:60px}
- body.page-template-page-radar-demo .ba-radar-controls>label:not(.ba-radar-search){font-size:0}
- body.page-template-page-radar-demo .ba-radar-controls>label:not(.ba-radar-search)>select{font-size:12px;min-width:85px}
-}
-@media(min-width:861px) and (max-height:650px){
- body.page-template-page-radar-demo .ba-radar-demo{height:calc(100dvh - 68px - var(--wp-admin--admin-bar--height, 0px))}
-}
-@media(max-width:860px){
- body.page-template-page-radar-demo{overflow:hidden}
- body.page-template-page-radar-demo .ba-radar-demo{
-  display:flex;flex-direction:column;
-  height:calc(100dvh - 68px - var(--wp-admin--admin-bar--height, 0px));
-  min-height:0;overflow:hidden;
- }
- body.page-template-page-radar-demo .ba-radar-controls{
-  flex:0 0 auto;max-height:138px;overflow-y:auto;overflow-x:hidden;
-  padding:7px 9px;gap:6px;
- }
- body.page-template-page-radar-demo .ba-radar-controls .ba-radar-search{
-  flex:1 1 290px;width:auto;max-width:none;min-width:0;
- }
- body.page-template-page-radar-demo .ba-radar-workspace{
-  display:block;flex:1 1 auto;min-height:0;height:auto;overflow:hidden;
-  padding:0;margin:0;
- }
- body.page-template-page-radar-demo .ba-radar-map{
-  width:100%;height:100%;min-height:0;max-height:none;
-  border:0;border-radius:0;
- }
- body.page-template-page-radar-demo .ba-radar-panel{
-  position:fixed;z-index:999;left:0;right:0;bottom:0;
-  height:auto;max-height:78dvh;overflow-y:auto;
-  border-radius:22px 22px 0 0;
-  transform:translateY(110%);
- }
- body.page-template-page-radar-demo .ba-radar-panel.is-open{transform:translateY(0)}
- body.page-template-page-radar-demo #rad-drawer{display:block}
- body.page-template-page-radar-demo .ba-radar-foot{display:none}
-}
-
-/* RADAR-EXPERIENCE-01 — meaningful first-open view without unverified heat or regional ranking. */
-.ba-radar-welcome{padding:16px;border-radius:13px;background:linear-gradient(125deg,#e5f5f7,#f6fafc);border:1px solid #cde5e9}
-.ba-radar-welcome h3{margin:0 0 7px;font-size:16px;color:#082b43}
-.ba-radar-welcome p{margin:0;color:#496a7c;font-size:12px;line-height:1.6}
-.ba-radar-topic{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:13px;border:1px solid #dce7ee;border-radius:11px;background:#fff;cursor:pointer}
-.ba-radar-topic:hover,.ba-radar-topic:focus-visible{border-color:#0798a8;background:#f1fbfc;outline-offset:2px}
-.ba-radar-topic-icon{font-size:23px;line-height:1;flex:none}
-.ba-radar-topic-body{display:grid;gap:3px;min-width:0}.ba-radar-topic-body strong{font-size:13px;color:#071a38}.ba-radar-topic-body small{font-size:11px;color:#627d8d;line-height:1.4}
-
-/* RADAR-INSIGHT-VISUAL-01 — visible reset and clear analytical hierarchy. */
-body.page-template-page-radar-demo .ba-radar-controls #rad-reset{flex:none;display:inline-flex!important;align-items:center;justify-content:center;visibility:visible!important;min-width:104px;height:40px;padding:0 12px;border:1px solid #0b7c8a!important;border-radius:9px;background:#e6f7f8!important;color:#075c6a!important;font-weight:850;font-size:12px;white-space:nowrap;cursor:pointer}
-body.page-template-page-radar-demo .ba-radar-controls #rad-reset:hover{background:#bce8ed!important}
-.ba-radar-visual-key{position:absolute;z-index:2;left:15px;bottom:22px;display:grid;gap:5px;max-width:min(310px,calc(100% - 30px));background:#fff;padding:13px;border-radius:12px;box-shadow:0 8px 26px #071a3825}
-.ba-radar-visual-key strong{color:#072d43;font-size:13px}.ba-radar-visual-key span{color:#33576c;font-size:12px}.ba-radar-visual-key small{color:#a36c23;font-size:10px;line-height:1.5}
-.ba-radar-metrics-preview{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-.ba-radar-metrics-preview>div{padding:12px 10px;border-radius:10px;background:#eaf5f8;border:1px solid #d4e8ed;display:grid;align-content:center;gap:4px;min-height:80px}
-.ba-radar-metrics-preview strong{font-size:24px;line-height:1;color:#075d77}
-.ba-radar-metrics-preview small{font-size:10px;line-height:1.35;color:#486c7b}
-@media(max-width:1040px){body.page-template-page-radar-demo .ba-radar-controls{flex-wrap:wrap;max-height:none;height:auto!important;min-height:56px}body.page-template-page-radar-demo .ba-radar-demo{grid-template-rows:auto minmax(0,1fr)}}
-
-/* RADAR-SEARCH-PARITY-03 — compact Mappe search and two-line Places prediction display. */
-body.page-template-page-radar-demo .ba-radar-search-row{display:flex!important;align-items:center!important;flex-wrap:nowrap!important;gap:7px!important}
-body.page-template-page-radar-demo .ba-radar-search-row #rad-place{height:40px;flex:1 1 auto!important;min-width:90px!important;border:1px solid #d4e3eb;border-radius:10px;background:#f8fbfd;padding:0 14px;font-size:14px}
-body.page-template-page-radar-demo .ba-radar-search-row #rad-nearby{flex:none!important;min-width:0!important;min-height:38px;padding:7px 10px;background:#fff!important;border:1px solid #078e99!important;color:#087c89!important;font-size:12px}
-@media(min-width:931px){body.page-template-page-radar-demo .ba-radar-controls .ba-radar-search{flex:0 0 460px!important;width:460px!important;max-width:460px!important}}
-@media(max-width:930px){body.page-template-page-radar-demo .ba-radar-search-row #rad-place{flex-basis:auto!important}}
-body.page-template-page-radar-demo .ba-radar-suggestions{top:calc(100% + 6px);left:0;right:0;z-index:120;border-radius:14px;border:1px solid #d9e4eb;box-shadow:0 14px 32px rgba(7,26,56,.16)}
-body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestion{display:grid;gap:2px;height:auto;width:100%;padding:10px 13px;border:0;border-bottom:1px solid #edf2f5;border-radius:0;background:#fff;text-align:left}
-body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestion:hover{background:#f2f9fa}
-body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestion strong{font-size:12px;line-height:1.25;color:#071a38}
-body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestion small{font-size:11px;color:#74889a;line-height:1.25}
-.ba-radar-area-shortcuts{padding:13px;border:1px solid #d6e6ed;border-radius:11px;background:#fff}
-.ba-radar-area-shortcuts h3{font-size:14px;margin:0 0 6px}
-.ba-radar-area-shortcuts p{font-size:11px;color:#61778b;line-height:1.4}
-.ba-radar-area-buttons{display:flex;gap:7px;flex-wrap:wrap}
-.ba-radar-area-buttons button{border:1px solid #bcdde3;border-radius:999px;background:#eff9fb;padding:8px 11px;color:#085e6b;font-weight:750;font-size:12px;cursor:pointer}
-
-/* RADAR-TYPO-PARITY-01 — match Mappe controls, avoid inherited over-bold weights. */
-body.page-template-page-radar-demo .ba-radar-controls{font-size:12px;font-weight:400}
-body.page-template-page-radar-demo .ba-radar-controls>label{font-size:11px;font-weight:600;color:#65798c}
-body.page-template-page-radar-demo .ba-radar-controls select{font-family:inherit;font-size:12px!important;font-weight:500!important;color:#071a38}
-body.page-template-page-radar-demo .ba-radar-search-row #rad-place{font-family:inherit;font-weight:400!important}
-body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestion{font-family:inherit;font-weight:400!important;color:#071a38!important}
-body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestion strong{font-size:12px;font-weight:650!important;color:#071a38}
-body.page-template-page-radar-demo .ba-radar-suggestions .ba-map-place-suggestion small{font-size:11px;font-weight:400!important;color:#526d83}
-
-/* RADAR-OSSERVATORIO-01 — actual public feed indicators and accessible rankings. */
-.ba-observatory-head{padding:14px;border-radius:12px;background:#eaf7f8;border:1px solid #cde7ed}
-.ba-observatory-head h3{margin:0 0 6px;font-size:15px;color:#082b43}
-.ba-observatory-head p{margin:0;color:#516f80;font-size:11px;line-height:1.5}
-.ba-observatory-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-.ba-observatory-kpi{display:grid;gap:7px;align-content:space-between;min-height:92px;padding:13px;border-radius:12px;border:1px solid #d3e5eb;background:#fff}
-.ba-observatory-kpi strong{font-size:28px;line-height:1;color:#077787;font-variant-numeric:tabular-nums}
-.ba-observatory-kpi small{font-size:11px;line-height:1.35;color:#577286}
-.ba-observatory-ranking{display:grid;gap:9px;padding:14px 13px;background:#fff;border:1px solid #dce6ec;border-radius:12px}
-.ba-observatory-ranking h3{font-size:14px;margin:0 0 3px;color:#071a38}
-.ba-observatory-rank{display:grid;gap:5px;border:0;border-radius:8px;background:transparent;width:100%;padding:4px;text-align:left;color:#244c62;font-family:inherit}
+body.page-template-page-radar-demo{overflow:auto!important}
+body.page-template-page-radar-demo .ba-site-footer{display:block!important}
+body.page-template-page-radar-demo .ba-radar-demo{display:block!important;height:auto!important;min-height:80vh;overflow:visible!important;background:#f4f9fc;color:#071a38;padding:28px max(20px,3vw) 32px}
+.ba-radar-demo *{box-sizing:border-box}
+.rad-v2-head{max-width:1500px;margin:auto auto 22px}
+.rad-v2-head>p{text-transform:uppercase;letter-spacing:.16em;color:#087f8c;font-weight:800;font-size:14px;margin:0 0 10px}
+.rad-v2-head h1{font-size:clamp(32px,3.6vw,52px);letter-spacing:-.035em;line-height:1.1;margin:0 0 8px;color:#071a38}
+.rad-v2-head>div{font-size:18px;color:#486478}
+.rad-v2-head aside{background:#e6f2f7;padding:9px 14px;border-radius:10px;margin-top:20px;font-size:14px}
+body.page-template-page-radar-demo .ba-radar-controls{max-width:1500px;margin:auto;display:flex!important;flex-wrap:wrap!important;gap:18px!important;align-items:end!important;padding:16px!important;background:#fff;border:1px solid #dce7ed;border-radius:18px;height:auto!important;max-height:none!important;box-shadow:0 5px 16px #0736470a}
+.ba-radar-controls>label{display:grid;gap:5px;font-size:12px;color:#486478;flex:1 1 140px}
+.ba-radar-controls input,.ba-radar-controls select,.ba-radar-controls button{height:42px;border:1px solid #cddfe7;border-radius:12px;background:#fff;color:#071a38;padding:0 12px;font:inherit;font-size:14px;max-width:100%}
+body.page-template-page-radar-demo .ba-radar-controls .ba-radar-search{position:relative;flex:2 1 340px!important;width:auto!important;min-width:0;max-width:none!important}
+.ba-radar-search>label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.ba-radar-search-row{display:flex;gap:12px}
+.ba-radar-search-row input{width:100%;min-width:0;flex:1}
+.ba-radar-search-row button,.ba-radar-reset-visible{color:#087f8c!important;border-color:#087f8c!important;background:white!important;font-weight:750!important;cursor:pointer;white-space:nowrap}
+.ba-radar-controls select:disabled{opacity:.5}
+.ba-radar-suggestions{position:absolute;z-index:100;background:white;border:1px solid #dce7ed;border-radius:12px;box-shadow:0 10px 30px #071a3820;width:100%;max-height:300px;overflow:auto}
+.ba-radar-suggestions button{display:block;height:auto;width:100%;padding:12px;border:0;text-align:left}
+.ba-radar-suggestions strong,.ba-radar-suggestions small{display:block}
+.rad-v2-scope{max-width:1500px;margin:14px auto;font-size:14px;color:#526b80}
+body.page-template-page-radar-demo .ba-radar-workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:20px;max-width:1500px;margin:auto;padding:0}
+body.page-template-page-radar-demo .ba-radar-panel{position:static;transform:none;max-height:none;overflow:visible;grid-column:1;grid-row:1;min-width:0;background:#fff;border:1px solid #dce7ed;border-radius:18px;padding:14px;display:block}
+.ba-radar-panel>.ba-radar-tag,.ba-radar-panel>h2{display:none}
+.ba-radar-panel>p{font-size:13px;color:#526b80;line-height:1.5}
+body.page-template-page-radar-demo #rad-reports{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-height:none;overflow:visible;margin:0}
+.ba-observatory-kpis{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.ba-observatory-kpi{padding:14px 12px;background:#edf7fa;border:1px solid #deedf2;border-radius:14px}
+.ba-observatory-kpi strong{display:block;font-size:30px;line-height:1.1;margin-bottom:8px}
+.ba-observatory-kpi small{font-size:13px;line-height:1.3;display:block}
+.ba-observatory-ranking,.rad-v2-quality{min-width:0;padding:14px;border:1px solid #dce7ed;border-radius:14px;background:#fff}
+.ba-observatory-ranking h3,.rad-v2-quality h3{font-size:17px;line-height:1.2;margin:0 0 12px;letter-spacing:-.02em}
+.ba-observatory-rank{display:grid;gap:5px;padding:5px 0;border:0;background:none;width:100%;text-align:left;color:#294b60;font-family:inherit}
 button.ba-observatory-rank{cursor:pointer}
-button.ba-observatory-rank:hover,button.ba-observatory-rank:focus-visible{background:#eaf7f8;outline-offset:2px}
-.ba-observatory-rank-top{display:flex;justify-content:space-between;gap:10px;font-size:12px;line-height:1.3}
-.ba-observatory-rank-top strong{font-variant-numeric:tabular-nums;color:#075d6d}
-.ba-observatory-track{display:block;width:100%;height:7px;border-radius:999px;background:#e6edf1;overflow:hidden}
-.ba-observatory-track>span{display:block;height:100%;background:#078f9c;border-radius:999px}
-
-/* RADAR-REGION-01: territory drill and readable hover states. */
-body.page-template-page-radar-demo .ba-observatory-rank:hover,
-body.page-template-page-radar-demo .ba-observatory-rank:focus-visible,
-body.page-template-page-radar-demo .ba-observatory-rank:hover *,
-body.page-template-page-radar-demo .ba-observatory-rank:focus-visible *{color:#071a38!important}
-body.page-template-page-radar-demo .ba-observatory-rank:hover{background:#eaf7fa!important}
-.ba-radar-back-drill{display:inline-flex;align-items:center;justify-content:center;width:100%;padding:10px;border:1px solid #a8d8df;border-radius:9px;background:#eaf7f9;color:#075e6d!important;font-weight:700;cursor:pointer}
-.ba-radar-back-drill:hover{background:#d8f0f3!important;color:#075e6d!important}
-
-/* RADAR-MAP-CONTROLS-PARITY-01: Home/Mappe native fullscreen+zoom in right-top rail. */
-body.page-template-page-radar-demo .ba-radar-map .ba-map-pan{display:none!important}
-body.page-template-page-radar-demo .ba-radar-map.ba-map-navigation-shell .ba-map-visual-key{left:15px;right:auto}
-
-/* RADAR-DRILL-ZOOM-01: unmistakable back action. */
-body.page-template-page-radar-demo .ba-radar-back-drill{
- background:#0a7286!important;color:#fff!important;border:2px solid #07596d!important;
- border-radius:10px;min-height:44px;font-size:13px;font-weight:800;
- box-shadow:0 5px 14px rgba(7,26,56,.16)
-}
-body.page-template-page-radar-demo .ba-radar-back-drill:hover,
-body.page-template-page-radar-demo .ba-radar-back-drill:focus-visible{
- background:#06485c!important;color:#fff!important;outline:2px solid #89d9e4;outline-offset:2px
-}
-
-/* RADAR-PRESENTATION-02: compact observatory content and final notes. */
-body.page-template-page-radar-demo .ba-radar-panel{display:flex;flex-direction:column;gap:10px}
-body.page-template-page-radar-demo .ba-radar-panel #rad-reports{order:-1;max-height:none;overflow:visible}
-body.page-template-page-radar-demo .ba-radar-panel .ba-radar-final-note{order:2;margin-top:auto}
-body.page-template-page-radar-demo .ba-radar-panel .ba-radar-back{order:3}
-body.page-template-page-radar-demo .ba-radar-visual-key{max-width:250px}
-
-/* RADAR-HEATMAP-01: custom canvas KDE visual layer, no deprecated Google Heatmap API. */
-.ba-radar-heat-canvas{position:absolute;pointer-events:none;mix-blend-mode:multiply;opacity:.9}
-body.page-template-page-radar-demo .ba-radar-back:hover,
-body.page-template-page-radar-demo .ba-radar-back:focus-visible{background:#05566a!important;color:#fff!important}
-body.page-template-page-radar-demo .ba-radar-back,body.page-template-page-radar-demo .ba-radar-back:visited{color:#fff!important}
-.ba-radar-visual-key{display:grid;gap:7px}
-.ba-radar-heat-legend{height:9px;border-radius:999px;background:linear-gradient(90deg,#19afc5,#25b5ac,#f5bc47,#ef6d30,#cf2732)}
-
-/* UI-TOOLBAR-PARITY-02: match Mappe's horizontal sizing and rhythm. */
-@media(min-width:1041px){
- body.page-template-page-radar-demo .ba-radar-controls{
-  display:flex!important;flex-wrap:nowrap!important;gap:10px!important;
-  padding:10px 12px!important;align-items:center!important;min-height:64px!important;
- }
- body.page-template-page-radar-demo .ba-radar-controls .ba-radar-search{
-  flex:0 0 355px!important;width:355px!important;max-width:355px!important;min-width:0!important;
- }
- body.page-template-page-radar-demo .ba-radar-controls .ba-radar-search-row{
-  display:flex!important;align-items:center!important;gap:7px!important;
- }
- body.page-template-page-radar-demo .ba-radar-controls #rad-place{flex:1 1 auto!important;min-width:0!important;width:0!important;}
- body.page-template-page-radar-demo .ba-radar-controls #rad-nearby{flex:none!important;}
-}
-body.page-template-page-radar-demo .ba-radar-controls input,
-body.page-template-page-radar-demo .ba-radar-controls select,
-body.page-template-page-radar-demo .ba-radar-controls button{height:40px!important;border-radius:12px!important;}
-body.page-template-page-radar-demo .ba-radar-controls #rad-place{
- background:#f8fbfc!important;border:1px solid #d7e3ea!important;
- padding-inline:13px!important;box-shadow:0 2px 5px rgba(7,26,56,.035)!important;
-}
-body.page-template-page-radar-demo .ba-radar-controls #rad-nearby{
- border:1px solid #0b8b99!important;color:#087889!important;background:#fff!important;
-}
-body.page-template-page-radar-demo .ba-radar-controls #rad-nearby:hover{background:#e8f8f9!important;color:#066f79!important}
+.ba-observatory-rank-top{display:flex;justify-content:space-between;gap:10px;font-size:13px;line-height:1.35}
+.ba-observatory-track{height:7px;background:#e3edf1;border-radius:9px;overflow:hidden}
+.ba-observatory-track>span{display:block;height:100%;background:#06939d;border-radius:9px}
+.rad-v2-quality p{font-size:13px;border-bottom:1px solid #e3edf1;padding-bottom:10px;display:flex;justify-content:space-between;gap:12px}
+.ba-radar-note,.ba-observatory-head,.ba-radar-back-drill,.ba-radar-quality,.ba-radar-guidance,.ba-radar-metrics-preview{grid-column:1/-1}
+.ba-radar-note{font-size:12px;background:#eef7fa;padding:12px;border-radius:10px;color:#526b80;line-height:1.5}
+.ba-observatory-head{display:none}
+.ba-radar-back{display:inline-block;color:#087f8c;font-weight:700;font-size:14px;margin-top:8px}
+.ba-radar-back-drill{border:1px solid #087f8c;background:#eff9fb;color:#087184;padding:10px;border-radius:10px;cursor:pointer}
+body.page-template-page-radar-demo .ba-radar-map{grid-column:2;grid-row:1;position:relative;min-height:640px;border:10px solid white;border-radius:18px;overflow:hidden;background:#e7f2f4;box-shadow:0 0 0 1px #dce7ed}
+.ba-radar-google-map{position:absolute;inset:0;width:100%;height:100%}
+.ba-radar-map-message{position:absolute;z-index:3;top:70px;left:12px;background:white;border-radius:10px;padding:12px;font-size:13px;max-width:85%}
+.ba-radar-visual-key{position:absolute;z-index:2;bottom:24px;left:14px;max-width:270px;display:grid;gap:7px;background:#fff;border-radius:14px;padding:14px;font-size:12px;box-shadow:0 5px 15px #071a381a}
+.ba-radar-visual-key strong{font-size:15px}
+.rad-v2-cluster{position:absolute;display:grid;place-items:center;transform:translate(-50%,-50%);width:42px;height:42px;border:3px solid white;border-radius:50%;background:#079798;color:white;font-size:17px;font-weight:800;box-shadow:0 3px 8px #071a3830;pointer-events:none}
+.rad-v2-summary{max-width:1500px;margin:20px auto 0;padding:18px 24px;background:white;border:1px solid #dce7ed;border-radius:18px;display:flex;gap:24px;justify-content:space-between;flex-wrap:wrap;font-size:15px}
+.rad-v2-summary>strong{font-size:22px}
+.ba-radar-foot{max-width:1500px;margin:12px auto 0;font-size:13px;color:#526b80}
+#rad-drawer{display:none!important}
+.ba-radar-demo button:focus-visible,.ba-radar-demo a:focus-visible,.ba-radar-demo input:focus-visible,.ba-radar-demo select:focus-visible{outline:3px solid #0798a8;outline-offset:3px}
+@media(max-width:1000px){body.page-template-page-radar-demo .ba-radar-workspace{grid-template-columns:1fr}body.page-template-page-radar-demo .ba-radar-map{grid-column:1;grid-row:2;min-height:480px}.ba-observatory-kpi strong{font-size:26px}}
+@media(max-width:550px){body.page-template-page-radar-demo .ba-radar-demo{padding:22px 14px}.ba-observatory-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}body.page-template-page-radar-demo #rad-reports{grid-template-columns:1fr}.ba-radar-search-row{flex-wrap:wrap}.ba-radar-search-row input{flex-basis:100%}.ba-radar-visual-key{max-width:220px;font-size:11px}.rad-v2-summary{display:grid;gap:12px}}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -537,9 +269,7 @@ function eligible(e){
  if($('rad-cat').value!=='Tutte le categorie'&&category(e)!==$('rad-cat').value)return false;
  const period=$('rad-period').value;
  if(period!=='all'){
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(e.occurred_date||''))return false;
-  const date=new Date(e.occurred_date+'T12:00:00');
-  if(!Number.isFinite(date.getTime()))return false;
+  const date=episodeDate(e.occurred_date);if(!date)return false;
   const days=(Date.now()-date.getTime())/86400000;
   if(days<0||days>Number(period))return false;
  }
@@ -555,6 +285,12 @@ function eligible(e){
  return true;
 }
 function clearGeometry(){for(const g of geometryLayers)g.setMap(null);geometryLayers=[];}
+function episodeDate(value){
+ const raw=String(value||'').trim();let m=raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+ if(!m){const it=raw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);if(it)m=[raw,it[3],it[2],it[1]];}
+ if(!m)return null;const dt=new Date(Date.UTC(+m[1],+m[2]-1,+m[3]));
+ return dt.getUTCFullYear()===+m[1]&&dt.getUTCMonth()===+m[2]-1&&dt.getUTCDate()===+m[3]?dt:null;
+}
 const numberIT=new Intl.NumberFormat('it-IT');
 const sentenceCase=value=>{const text=String(value||'').trim().toLocaleLowerCase('it-IT');return text?text[0].toLocaleUpperCase('it-IT')+text.slice(1):'';};
 const territoryTree=window.BadAroundRadarTerritories||{};
@@ -570,7 +306,7 @@ function matchesDrill(e){
 }
 function zoomToDrill(){
  if(!map)return;
- if(drill.level===0){map.setCenter({lat:41.9028,lng:12.4964});map.setZoom(7);return;}
+ if(drill.level===0){map.setCenter({lat:41.9028,lng:12.4964});map.setZoom(5);return;}
  const parts=[drill.comune,drill.province,drill.region,'Italia'].filter(Boolean);
  if(!geocoder||!parts.length)return;
  geocoder.geocode({address:parts.join(', '),region:'IT'},(results,status)=>{
@@ -596,16 +332,13 @@ function showObservatory(items,host){
   const chain=territoryPath(e);
   const name=chain[drill.level]||null;
   if(name)places.set(name,(places.get(name)||0)+1);
-  if(/^\\d{4}-\\d{2}-\\d{2}$/.test(e.occurred_date||'')){
-   const dt=new Date(e.occurred_date+'T12:00:00');
-   if(Number.isFinite(dt.getTime())){dated++;const month=e.occurred_date.slice(0,7);months.set(month,(months.get(month)||0)+1);}
-   else undated++;
-  }else undated++;
+  const dt=episodeDate(e.occurred_date);
+  if(dt){dated++;const month=dt.toISOString().slice(0,7);months.set(month,(months.get(month)||0)+1);}else undated++;
  }
  const metrics=document.createElement('div');metrics.className='ba-observatory-kpis';
  for(const [value,label] of [
-  [items.length,'Segnalazioni pubbliche geolocalizzate nel campione'],
-  [types.size,'Tipologie documentate'],
+  [items.length,'Segnalazioni pubbliche geolocalizzate'],
+  [types.size,'Tipologie rappresentate'],
   [places.size,'Territori rappresentati'],
   [dated,'Episodi con data disponibile']
  ]){
@@ -633,7 +366,7 @@ function showObservatory(items,host){
   }
   host.append(section);
  };
- createRanking('Fenomeni più segnalati',types,5,null);
+ createRanking('Tipologie più segnalate',types,5,null);
  createRanking(depthLabels[drill.level]+' per segnalazioni',places,6,label=>{
   if(drill.level===0){drill.region=label;drill.level=1;}
   else if(drill.level===1){drill.province=label;drill.level=2;}
@@ -641,74 +374,49 @@ function showObservatory(items,host){
   else{input.value=label;locate();return;}
   render();zoomToDrill();
  });
- if(dated){
-  createRanking('Mesi con episodi datati',months,5,null);
- }
+ if(dated)createRanking('Mesi degli episodi datati',new Map([...months].sort((a,b)=>b[0].localeCompare(a[0]))),6,null);
+ else{const empty=document.createElement('section');empty.className='rad-v2-quality';empty.textContent='Nessuna data dell’episodio disponibile per il periodo selezionato.';host.append(empty);}
+ const qualityCard=document.createElement('section');qualityCard.className='rad-v2-quality';
+ const qualityTitle=document.createElement('h3');qualityTitle.textContent='Completezza delle date';qualityCard.append(qualityTitle);
+ for(const [label,count]of [['Data episodio disponibile',dated],['Data episodio non disponibile',undated]]){
+ const row=document.createElement('p'),caption=document.createElement('span'),value=document.createElement('strong');caption.textContent=label;value.textContent=String(count);row.append(caption,value);qualityCard.append(row);}
+ host.append(qualityCard);
+ const summary=$('rad-summary');summary.replaceChildren();const heading=document.createElement('strong');heading.textContent='In sintesi';summary.append(heading);
+ const topType=[...types].sort((a,b)=>b[1]-a[1])[0],topPlace=[...places].sort((a,b)=>b[1]-a[1])[0];
+ for(const text of [items.length+' segnalazioni nel campione filtrato',topPlace?topPlace[0]+' · Territorio con più segnalazioni':'Territorio non disponibile',topType?topType[0]+' · Tipologia più segnalata':'Nessuna tipologia']){const span=document.createElement('span');span.textContent=text;summary.append(span);}
  const quality=document.createElement('p');quality.className='ba-radar-note';
  quality.textContent=numberIT.format(undated)+' segnalazioni senza data valida, escluse dal grafico mensile. Le graduatorie riguardano solo il campione pubblico disponibile: non misurano criminalità, rischio o copertura totale del territorio. Eventuali duplicati non certificati possono incidere sui conteggi.';
  host.append(quality);
 }
-let heatOverlay=null,heatItems=[];
-function ensureHeatOverlay(){
- if(!map||heatOverlay)return;
- class RadarHeatOverlay extends google.maps.OverlayView {
-  onAdd(){
-   this.canvas=document.createElement('canvas');this.canvas.className='ba-radar-heat-canvas';
-   this.canvas.setAttribute('aria-hidden','true');
-   this.getPanes().overlayLayer.appendChild(this.canvas);
-   this.listeners=['bounds_changed','zoom_changed','idle'].map(event=>map.addListener(event,()=>this.draw()));
-  }
-  draw(){
-   if(!this.canvas||!this.getProjection())return;
-   const div=this.getProjection(),bounds=map.getBounds();
-   if(!bounds)return;
-   const sw=div.fromLatLngToDivPixel(bounds.getSouthWest()),ne=div.fromLatLngToDivPixel(bounds.getNorthEast());
-   if(!sw||!ne)return;
-   const left=Math.min(sw.x,ne.x),top=Math.min(sw.y,ne.y);
-   const width=Math.abs(sw.x-ne.x),height=Math.abs(sw.y-ne.y);
-   if(width<1||height<1)return;
-   this.canvas.style.left=left+'px';this.canvas.style.top=top+'px';
-   this.canvas.style.width=width+'px';this.canvas.style.height=height+'px';
-   const scale=Math.min(window.devicePixelRatio||1,2);
-   this.canvas.width=Math.ceil(width*scale);this.canvas.height=Math.ceil(height*scale);
-   const context=this.canvas.getContext('2d');if(!context)return;
-   context.setTransform(scale,0,0,scale,0,0);
-   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-   // An organic density field: overlapping radial kernels; no per-episode severity score.
-   for(const item of heatItems){
-    const pixel=div.fromLatLngToDivPixel(new google.maps.LatLng(item.lat,item.lng));
-    if(!pixel)continue;
-    const x=pixel.x-left,y=pixel.y-top;
-    const radius=clamp(item.mode==='approximate_area'?48:38,28,72);
-    if(x+radius<0||y+radius<0||x-radius>width||y-radius>height)continue;
-    const gradient=context.createRadialGradient(x,y,0,x,y,radius);
-    gradient.addColorStop(0,'rgba(207,39,50,.52)');
-    gradient.addColorStop(.28,'rgba(233,92,42,.4)');
-    gradient.addColorStop(.55,'rgba(245,173,58,.3)');
-    gradient.addColorStop(.8,'rgba(32,181,172,.16)');
-    gradient.addColorStop(1,'rgba(20,175,197,0)');
-    context.fillStyle=gradient;context.fillRect(x-radius,y-radius,2*radius,2*radius);
-   }
-  }
-  onRemove(){(this.listeners||[]).forEach(l=>l.remove());this.canvas?.remove();this.canvas=null;}
- }
- heatOverlay=new RadarHeatOverlay();heatOverlay.setMap(map);
-}
+let distributionOverlay=null,distributionItems=[];
 function showPublishedDistribution(items){
- heatItems=items.filter(e=>validGeo(e.public_geo)).slice(0,100).map(e=>({
-  lat:e.public_geo.lat,lng:e.public_geo.lng,mode:e.public_geo.mode
- }));
- ensureHeatOverlay();
- heatOverlay?.draw();
+ distributionItems=items.filter(e=>validGeo(e.public_geo));
+ if(!map)return;
+ if(!distributionOverlay){
+ class Distribution extends google.maps.OverlayView{
+ onAdd(){this.container=document.createElement('div');this.getPanes().overlayLayer.append(this.container);}
+ draw(){if(!this.container||!this.getProjection())return;this.container.replaceChildren();const groups=new Map();
+ for(const event of distributionItems){const path=territoryPath(event);const key=chosenCenter?'area':(path[drill.level]||'territorio');if(!groups.has(key))groups.set(key,[]);groups.get(key).push(event);}
+ for(const [key,events]of groups){const lat=events.reduce((n,e)=>n+e.public_geo.lat,0)/events.length,lng=events.reduce((n,e)=>n+e.public_geo.lng,0)/events.length;
+ const point=this.getProjection().fromLatLngToDivPixel(new google.maps.LatLng(lat,lng));if(!point)continue;
+ const badge=document.createElement('div');badge.className='rad-v2-cluster';badge.style.left=point.x+'px';badge.style.top=point.y+'px';badge.textContent=String(events.length);badge.title=key+' · '+events.length+' segnalazioni aggregate';this.container.append(badge);}}
+ onRemove(){this.container?.remove();}
+ }
+ distributionOverlay=new Distribution();distributionOverlay.setMap(map);
+ }
+ distributionOverlay.draw();
 }
 function render(){
  const filtered=reports.filter(eligible);
+ $('rad-radius').disabled=!chosenCenter;
+ $('rad-scope').textContent=chosenCenter?'Area: '+($('rad-place').value.trim()||'Zona selezionata')+' · Raggio '+$('rad-radius').value+' km':'Area: '+([drill.region,drill.province,drill.comune].filter(Boolean).join(' / ')||'Italia')+' · Seleziona un luogo per applicare un raggio di ricerca.';
+ $('rad-summary').replaceChildren();
  $('rad-title').textContent=chosenCenter?($('rad-place').value.trim()||'Zona selezionata'):'Panoramica territoriale';
  const host=$('rad-reports');host.replaceChildren();
  clearGeometry();
  if(loadError){$('rad-copy').textContent='Impossibile consultare le segnalazioni pubbliche.';return;}
  if(loadingReports){$('rad-copy').textContent='Caricamento dei dati pubblici…';return;}
- showPublishedDistribution(filtered);
+ showPublishedDistribution(filtered.filter(matchesDrill));
  if(!chosenCenter){
   $('rad-title').textContent='Osservatorio BadAround';
   if(drill.level>0){
@@ -732,6 +440,7 @@ function render(){
   chosenCenter=null;searchCircle?.setMap(null);searchCircle=null;centerMarker?.setMap(null);centerMarker=null;
   input.value='';if(map){map.setCenter({lat:42,lng:12.5});map.setZoom(7);}render();
  });host.appendChild(back);
+ showObservatory(filtered,host);
  const groups=new Map();
  for(const e of filtered){
   const key=category(e)||'Altre problematiche';
@@ -776,7 +485,7 @@ function render(){
   }
   section.append(heading,intro,list);host.appendChild(section);
  }
- const undated=filtered.some(event=>!/^\d{4}-\d{2}-\d{2}$/.test(event.occurred_date||''));
+ const undated=filtered.some(event=>!episodeDate(event.occurred_date));
  const quality=document.createElement('section');quality.className='ba-radar-quality';
  const qualityTitle=document.createElement('h3');qualityTitle.textContent='Affidabilità della lettura';
  const qualityBody=document.createElement('p');
@@ -789,11 +498,14 @@ function render(){
 async function fetchReports(){
  loadingReports=true;render();
  try{
-  const response=await fetch(endpoint+'?per_page=100',{credentials:'omit',headers:{Accept:'application/json'}});
+  const response=await fetch(endpoint+'?per_page=100&page=1',{credentials:'omit',headers:{Accept:'application/json'}});
   if(!response.ok)throw Error('Discovery HTTP '+response.status);
   const payload=await response.json();
   if(!Array.isArray(payload?.items))throw Error('Discovery response invalid');
-  reports=payload.items.filter(e=>e&&typeof e.id==='number'&&typeof e.permalink==='string'&&!/^\s*\[?QA\b/i.test(e.title||'')&&!/nessun evento reale|collaudo tecnico sintetico/i.test(e.title||''));
+  let allItems=payload.items;
+  const pages=Math.max(1,Math.min(20,Number(payload.pages)||1));
+  for(let page=2;page<=pages;page++){const next=await fetch(endpoint+'?per_page=100&page='+page,{credentials:'omit',headers:{Accept:'application/json'}});if(!next.ok)throw Error('Discovery pagination');const batch=await next.json();if(!Array.isArray(batch.items))throw Error('Discovery page invalid');allItems=allItems.concat(batch.items);}
+  reports=[...new Map(allItems.map(e=>[e.id,e])).values()].filter(e=>e&&typeof e.id==='number'&&typeof e.permalink==='string'&&!/^\s*\[?QA\b/i.test(e.title||'')&&!/nessun evento reale|collaudo tecnico sintetico/i.test(e.title||''));
   loadError=false;
  }catch(err){loadError=true;reports=[];console.warn('Radar Discovery:',err);}
  loadingReports=false;render();
@@ -823,7 +535,7 @@ async function loadMap(){
  try{
   await readyMaps();
   map=new google.maps.Map($('rad-google-map'),{
-   center:{lat:41.9028,lng:12.4964},zoom:7,mapTypeControl:false,streetViewControl:false,
+   center:{lat:41.9028,lng:12.4964},zoom:5,mapTypeControl:false,streetViewControl:false,
    styles:[{featureType:'poi',elementType:'all',stylers:[{visibility:'off'}]},{featureType:'transit',elementType:'all',stylers:[{visibility:'off'}]},{featureType:'road',elementType:'labels.icon',stylers:[{visibility:'off'}]}],
    ...(window.BadAroundMapNavigation?.options?.()||{
      zoomControl:true,zoomControlOptions:{position:google.maps.ControlPosition.RIGHT_TOP},
@@ -937,12 +649,12 @@ $('rad-nearby').addEventListener('click',()=>{
 });
 
 ['rad-cat','rad-period','rad-radius'].forEach(id=>$(id).addEventListener('change',render));
-$('rad-radius').addEventListener('change',()=>{if(searchCircle&&map)map.fitBounds(searchCircle.getBounds(),60)});
+$('rad-radius').addEventListener('change',()=>{updateCircle();if(searchCircle&&map)map.fitBounds(searchCircle.getBounds(),60)});
 
 
 $('rad-reset').addEventListener('click',()=>{
  for(const [key,value] of Object.entries(initial))$('rad-'+key).value=value;
- chosenCenter=null;
+ chosenCenter=null;drill={level:0,region:null,province:null,comune:null};
  try{window.localStorage.removeItem(LAST_AREA_KEY);}catch(e){}
  searchCircle?.setMap(null);searchCircle=null;centerMarker?.setMap(null);centerMarker=null;
  if(map){map.setCenter({lat:41.9028,lng:12.4964});map.setZoom(7);}
