@@ -227,11 +227,54 @@ body.page-template-page-radar-demo .ba-radar-map .ba-map-pan{display:none!import
 @media(max-width:1100px){.ba-observatory-kpi{grid-template-columns:1fr}.ba-observatory-kpi strong,.ba-observatory-kpi small{grid-column:1}.rad-v2-quality{grid-template-columns:1fr}.rad-v2-quality p{grid-column:1}.rad-v3-donut{grid-row:auto;grid-column:1}}
 @media(max-width:1000px){body.page-template-page-radar-demo .ba-radar-workspace{grid-template-columns:1fr}body.page-template-page-radar-demo .ba-radar-map{min-height:440px}.ba-observatory-kpi{grid-template-columns:25px minmax(0,1fr)}.ba-observatory-kpi strong,.ba-observatory-kpi small{grid-column:2}}
 @media(max-width:550px){.rad-v2-summary>span{border-left:0;padding-left:0}.ba-observatory-kpi{grid-template-columns:1fr}.ba-observatory-kpi strong,.ba-observatory-kpi small{grid-column:1}.rad-v2-quality{grid-template-columns:105px minmax(0,1fr)}.rad-v2-quality p{grid-column:2}.rad-v3-donut{grid-column:1;grid-row:2/4}}
-/* Keep both desktop blocks inside the first viewport; map height never follows content. */
+/* Compact paired observatory: content determines both blocks, never an inner scrollbar. */
 @media(min-width:1001px){
- body.page-template-page-radar-demo .ba-radar-workspace{height:var(--rad-viewport-height,400px);min-height:0}
- body.page-template-page-radar-demo .ba-radar-map{height:100%;min-height:0!important;max-height:100%}
- body.page-template-page-radar-demo .ba-radar-panel{height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+ body.page-template-page-radar-demo .ba-radar-demo{padding-top:16px}
+ .rad-v2-head{position:relative;margin-bottom:14px;padding-right:280px}
+ .rad-v2-head>p{font-size:12px;margin-bottom:6px}
+ .rad-v2-head h1{font-size:40px;margin-bottom:4px}
+ .rad-v2-head>div{font-size:16px;line-height:1.35}
+ .rad-v2-head aside{position:absolute;right:0;top:8px;width:255px;margin:0;padding:12px 16px;border-left:1px solid #b7dbe4;background:transparent;line-height:1.4}
+ body.page-template-page-radar-demo .ba-radar-controls{padding:10px 14px!important;gap:14px!important;flex-wrap:nowrap!important}
+ body.page-template-page-radar-demo .ba-radar-controls .ba-radar-search{flex:2 1 330px!important}
+ .ba-radar-controls>label{flex:1 1 110px;min-width:0}
+ .rad-v2-scope{margin:8px auto;font-size:13px;line-height:1.4}
+ body.page-template-page-radar-demo .ba-radar-workspace{height:auto;min-height:0}
+ body.page-template-page-radar-demo .ba-radar-map{height:auto;min-height:380px!important;max-height:none}
+ body.page-template-page-radar-demo .ba-radar-panel{height:auto;min-height:0;overflow:visible;padding:10px}
+ body.page-template-page-radar-demo #rad-reports{gap:8px}
+ .ba-observatory-kpis{gap:8px}
+ .ba-observatory-kpi{padding:9px 8px;grid-template-columns:23px minmax(0,1fr);gap:3px 5px}
+ .ba-observatory-kpi strong,.ba-observatory-kpi small{grid-column:2}
+ .ba-observatory-kpi strong{font-size:28px;line-height:1}
+ .ba-observatory-kpi small{font-size:11px;line-height:1.2}
+ .ba-observatory-kpi svg{width:22px;height:24px}
+ .ba-observatory-ranking,.rad-v2-quality{padding:9px 10px}
+ .ba-observatory-ranking h3,.rad-v2-quality h3{font-size:15px;margin-bottom:6px;line-height:1.2}
+ .ba-observatory-rank{padding:2px 0;gap:2px}
+ .ba-observatory-rank-top{font-size:12px;line-height:1.2}
+ .ba-observatory-track{height:5px}
+ .rad-v3-timeline>p{font-size:11px;margin-bottom:5px;line-height:1.2}
+ .rad-v3-bars{min-height:105px;gap:6px}
+ .rad-v3-bar{gap:3px}
+ .rad-v3-bar>span{max-height:64px}
+ .rad-v2-quality{grid-template-columns:86px minmax(0,1fr);gap:6px}
+ .rad-v2-quality p{grid-column:2;font-size:11px;padding:5px 0;line-height:1.3}
+ .rad-v3-donut{width:82px;height:82px;grid-column:1;grid-row:2/4}
+ .rad-v3-donut:before{inset:13px}
+ .rad-v3-donut strong{font-size:24px}
+ .rad-v3-context{font-size:11px;padding:7px 10px;line-height:1.3}
+ .ba-radar-back{font-size:12px;margin-top:5px;line-height:1.3}
+ .rad-v2-summary{margin-top:14px;padding:12px 20px;font-size:13px}
+ .rad-v2-summary>strong{font-size:20px}
+ .ba-radar-visual-key{bottom:14px;padding:10px;gap:4px;font-size:11px}
+}
+@media(min-width:1001px) and (max-width:1190px){
+ .ba-radar-search-row{gap:6px}
+ .ba-radar-controls input,.ba-radar-controls select,.ba-radar-controls button{padding:0 8px;font-size:12px}
+ .ba-observatory-kpi{grid-template-columns:1fr}
+ .ba-observatory-kpi svg{display:none}
+ .ba-observatory-kpi strong,.ba-observatory-kpi small{grid-column:1}
 }
 @media(max-width:1000px){body.page-template-page-radar-demo .ba-radar-map{height:400px;min-height:0!important}}
 </style>
@@ -266,16 +309,6 @@ const root=document.querySelector('.ba-radar-demo');if(!root)return;
 const $=id=>root.querySelector('#'+id);
 const ITALY_BOUNDS={north:47.2,south:35.4,west:6.5,east:18.7};
 function frameItaly(){if(map)map.fitBounds(ITALY_BOUNDS,12);}
-function sizeRadar(){
- const workspace=root.querySelector('.ba-radar-workspace');
- if(!workspace||window.innerWidth<=1000)return;
- const top=workspace.getBoundingClientRect().top+window.scrollY;
- const height=Math.max(160,Math.floor(window.innerHeight-top-18));
- workspace.style.setProperty('--rad-viewport-height',height+'px');
-}
-window.addEventListener('resize',sizeRadar);
-if(window.ResizeObserver){const observer=new ResizeObserver(sizeRadar);observer.observe(root.querySelector('.rad-v2-head'));observer.observe(root.querySelector('.ba-radar-controls'));const header=document.querySelector('.ba-site-header');if(header)observer.observe(header);}
-sizeRadar();
 let map=null,geocoder=null,searchCircle=null,centerMarker=null,state='sample',layer=false;
 const initial={place:'',cat:'Tutte le categorie',period:'all',radius:'1'};
 const config=window.BadAroundRadarMaps||{};
