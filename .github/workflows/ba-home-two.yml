@@ -89,3 +89,5 @@ jobs:
 # Compact Radar panel has no internal scroll.
 
 # Verify paired columns and content visibility together.
+
+# Compact spacing for short desktop screens.
