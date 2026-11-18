@@ -2,7 +2,7 @@
 /** Public-only, cached aggregation for the Radar demo. No report repository access. */
 if (!defined('ABSPATH')) exit;
 class BadAround_Radar_Observatory {
-    const VERSION = 'radar-a1';
+    const VERSION = 'radar-heat-v2';
     const MIN_CELL = 3;
     const GEO_SOURCE = 'https://raw.githubusercontent.com/guglielmo/geojson-italy/ba3347df3a53352891109f8198c597a0273684c0/geojson/';
     public static function boot() {
@@ -76,6 +76,7 @@ class BadAround_Radar_Observatory {
         $source=self::rows();if (is_wp_error($source)) return $source;
         $territory=absint($request->get_param('territory'));$category=sanitize_title((string)$request->get_param('category'));
         if(!in_array($category,array('','veicoli','case-e-attivita','pericoli','spazi-pubblici','animali','oggetti-e-documenti'),true))return new WP_Error('radar_category','Categoria non valida.',array('status'=>400));
+        $event_type=sanitize_title((string)$request->get_param('event_type'));
         $period=(string)$request->get_param('period');if (!in_array($period,array('7','30','90','365','all'),true)) $period='all';
         $basis=$request->get_param('basis')==='published'?'published':'date';
         $today=new DateTimeImmutable('today',wp_timezone());$from=$period==='all'?null:$today->modify('-'.((int)$period-1).' days')->format('Y-m-d');
@@ -102,6 +103,7 @@ class BadAround_Radar_Observatory {
             if ($territory&&!in_array($territory,array_column($row['path'],'id'),true)) continue;
             if (!$territory&&$named&&!$center&&!$bounds) { $matches=true;foreach($named as $i=>$place)if(self::norm($row['path'][$i]['name']??'')!==self::norm($place['name']))$matches=false;if(!$matches)continue; }
             if ($category&&$category!==$row['category']) continue;
+            if ($event_type&&$event_type!==sanitize_title($row['type'])) continue;
             if ($center||$bounds) {
                 $g=$row['geo'];if (!$g) continue;
                 if ($center) {$a=sin(deg2rad($g['lat']-$center[0])/2)**2+cos(deg2rad($center[0]))*cos(deg2rad($g['lat']))*sin(deg2rad($g['lng']-$center[1])/2)**2;$distance=6371000*2*asin(min(1,sqrt($a)));if($distance+$g['radius']>$center[2])continue;}
@@ -111,7 +113,8 @@ class BadAround_Radar_Observatory {
             $selected[]=$row;
         }
         $result=self::aggregate($selected,$path,$catalog,$period,$basis,$today,$source);
-        if ($center||$bounds) {$result['scope']=array('path'=>array(),'name'=>$center?'Area attorno a te':'Area selezionata sulla mappa','mode'=>$center?'radius':'viewport');$result['geography']['features']=array();$result['geography']['type']='hexbin';$result['geography']['cells']=self::local_cells($selected);}
+        if ($center||$bounds) {$result['scope']=array('path'=>array(),'name'=>$center?'Area attorno a te':'Area selezionata sulla mappa','mode'=>$center?'radius':'viewport');$result['geography']['features']=array();$result['geography']['type']='heatmap';$result['geography']['cells']=self::local_cells($selected);}
+        $available=array();foreach($source['rows'] as $row){if($category&&$row['category']!==$category)continue;$slug=sanitize_title($row['type']);$available[$slug]=array('slug'=>$slug,'name'=>$row['type'],'category'=>$row['category']);}$result['available_types']=array_values($available);$result['filters']['event_type']=$event_type;
         return rest_ensure_response($result);
     }
     private static function local_cells($rows) {
@@ -164,7 +167,7 @@ class BadAround_Radar_Observatory {
             'metrics'=>array('total'=>count($rows),'types'=>count($types),'territories'=>count($areas),'dated'=>$dated,'without_date'=>count($rows)-$dated,'geographic'=>$plottable),
             'areas'=>array_values($areas),'types'=>array_map(function($name,$count){return array('name'=>$name,'count'=>$count);},array_keys($types),array_values($types)),
             'categories'=>$categories,'territories'=>array_values($catalog),'series'=>array('from'=>$start,'to'=>$today->format('Y-m-d'),'unit'=>$unit,'bins'=>array_map(function($date,$count){return array('date'=>$date,'count'=>$count);},array_keys($bins),array_values($bins))),
-            'geography'=>array('type'=>$depth<3?'administrative':'hexbin','features'=>$features,'cells'=>$depth>=3?$cells:array(),'minimum'=>self::MIN_CELL,'suppressed_cells'=>count($cellGroups)-count($cells)),
+            'geography'=>array('type'=>'heatmap','features'=>$features,'cells'=>$cells,'minimum'=>self::MIN_CELL,'suppressed_cells'=>count($cellGroups)-count($cells)),
             'complete'=>$source['complete']??true,'built_at'=>$source['built_at']??gmdate('c'));
     }
     /** Fixed regular hexagons in Web Mercator; enlarge until public uncertainty fits entirely. */
@@ -195,3 +198,4 @@ class BadAround_Radar_Observatory {
     }
 }
 BadAround_Radar_Observatory::boot();
+
