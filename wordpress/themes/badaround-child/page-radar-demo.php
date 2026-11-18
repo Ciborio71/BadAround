@@ -38,6 +38,16 @@ get_header();
    <div id="rad-reports" class="ba-radar-reports" aria-label="Problematiche segnalate nella zona"></div>
 
 	  
+
+
+	  
+	  <p class="ba-radar-note ba-radar-final-note">Statistiche delle segnalazioni pubbliche della community, non dati ufficiali su reati o sicurezza. Le segnalazioni senza data sono escluse dai confronti temporali e le aree approssimate non identificano un punto esatto.</p>
+   <a class="ba-radar-back" href="<?php echo esc_url(home_url('/mappa/')); ?>">Apri la mappa delle segnalazioni reali →</a>
+  </aside>
+ </div>
+ <button id="rad-drawer" type="button" aria-controls="rad-panel" aria-expanded="false">Mostra analisi zona</button>
+ <section id="rad-summary" class="rad-v2-summary" aria-live="polite"></section><p class="ba-radar-foot">La distribuzione dipende dalla partecipazione della community e dalla copertura dei dati.</p>
+</main>
 <?php
 // RADAR-PUBLIC-06 — Anteprima riservata agli amministratori.
 if (
@@ -114,13 +124,13 @@ if (
                     $ba_radar_snapshot['quality']
                 );
 
-            echo '<div class="ba-radar-public-preview" aria-label="Anteprima riservata dei conteggi Radar">';
+            echo '<details class="ba-radar-admin-diagnostics"><summary>Diagnostica Radar riservata agli amministratori</summary><div class="ba-radar-public-preview" aria-label="Anteprima riservata dei conteggi Radar">';
 
             echo BadAround_Radar_Window_Renderer::render(
                 $ba_radar_window
             );
 
-            echo '</div>';
+            echo '</div></details>';
 
         } catch (Throwable $ba_radar_error) {
             echo '<p role="status">Anteprima Radar non disponibile: verifica dei dati necessaria.</p>';
@@ -128,15 +138,6 @@ if (
     }
 }
 ?>
-
-	  
-	  <p class="ba-radar-note ba-radar-final-note">Statistiche delle segnalazioni pubbliche della community, non dati ufficiali su reati o sicurezza. Le segnalazioni senza data sono escluse dai confronti temporali e le aree approssimate non identificano un punto esatto.</p>
-   <a class="ba-radar-back" href="<?php echo esc_url(home_url('/mappa/')); ?>">Apri la mappa delle segnalazioni reali →</a>
-  </aside>
- </div>
- <button id="rad-drawer" type="button" aria-controls="rad-panel" aria-expanded="false">Mostra analisi zona</button>
- <section id="rad-summary" class="rad-v2-summary" aria-live="polite"></section><p class="ba-radar-foot">La distribuzione dipende dalla partecipazione della community e dalla copertura dei dati.</p>
-</main>
 <style>
 body.page-template-page-radar-demo{overflow:auto!important}
 body.page-template-page-radar-demo .ba-site-footer{display:block!important}
@@ -294,6 +295,31 @@ body.page-template-page-radar-demo .ba-radar-map .ba-map-pan{display:none!import
  .rad-v2-quality{grid-template-columns:70px minmax(0,1fr)}
  body.page-template-page-radar-demo .ba-radar-map{min-height:300px!important}
 }
+
+/* Map application shell spans the available page, including Astra wrappers. */
+body.page-template-page-radar-demo #content,
+body.page-template-page-radar-demo #content>.ast-container,
+body.page-template-page-radar-demo #primary{width:100%!important;max-width:none!important;margin:0!important;padding:0!important;display:block}
+body.page-template-page-radar-demo .ba-radar-demo{width:100%!important;max-width:none!important;min-height:0;padding:16px 24px 18px!important}
+body.page-template-page-radar-demo .rad-v2-head,
+body.page-template-page-radar-demo .ba-radar-controls,
+body.page-template-page-radar-demo .rad-v2-scope,
+body.page-template-page-radar-demo .ba-radar-workspace,
+body.page-template-page-radar-demo .rad-v2-summary,
+body.page-template-page-radar-demo .ba-radar-foot{max-width:none!important;width:100%}
+.ba-radar-admin-diagnostics{margin:16px 24px;padding:14px;border:1px solid #dce7ed;border-radius:12px;background:white}
+.ba-radar-admin-diagnostics>summary{cursor:pointer;font-weight:700}
+@media(min-width:1001px){
+ body.page-template-page-radar-demo .ba-radar-workspace{height:var(--rad-workspace-height,420px);align-items:stretch}
+ body.page-template-page-radar-demo .ba-radar-map{height:100%;min-height:0!important}
+ body.page-template-page-radar-demo .ba-radar-panel{height:100%;min-height:0;overflow:visible;display:flex;flex-direction:column}
+ body.page-template-page-radar-demo #rad-reports{flex:1;align-content:start}
+ .ba-observatory-rank-top>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+ .ba-radar-back{flex-shrink:0}
+ .rad-v2-head{margin-bottom:12px}
+ .ba-radar-foot{font-size:11px;margin-top:7px;line-height:1.3}
+}
+@media(max-width:1000px){body.page-template-page-radar-demo .ba-radar-demo{padding:16px 14px!important}}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -779,6 +805,20 @@ $('rad-reset').addEventListener('click',()=>{
 $('rad-drawer').addEventListener('click',()=>{const open=$('rad-panel').classList.toggle('is-open');$('rad-drawer').textContent=open?'Chiudi analisi':'Mostra analisi zona';$('rad-drawer').setAttribute('aria-expanded',String(open))});
 try{window.localStorage.removeItem(LAST_AREA_KEY);}catch(e){}
 render();loadMap();fetchReports();
+
+function sizeRadarShell(){
+ const workspace=root.querySelector('.ba-radar-workspace'),panel=$('rad-panel'),reportsHost=$('rad-reports');
+ if(!workspace||window.innerWidth<=1000){workspace?.style.removeProperty('--rad-workspace-height');return;}
+ const summary=$('rad-summary'),foot=root.querySelector('.ba-radar-foot');
+ const top=workspace.getBoundingClientRect().top+window.scrollY;
+ const tail=(summary?.getBoundingClientRect().height||50)+(foot?.getBoundingClientRect().height||15)+45;
+ const content=reportsHost.getBoundingClientRect().height+(root.querySelector('.ba-radar-back')?.getBoundingClientRect().height||18)+30;
+ workspace.style.setProperty('--rad-workspace-height',Math.ceil(Math.max(content,window.innerHeight-top-tail,300))+'px');
+}
+window.addEventListener('resize',sizeRadarShell);
+if(window.ResizeObserver){const shellObserver=new ResizeObserver(()=>requestAnimationFrame(sizeRadarShell));for(const el of [root.querySelector('.rad-v2-head'),root.querySelector('.ba-radar-controls'),$('rad-reports'),$('rad-summary'),document.querySelector('.ba-site-header'),document.querySelector('#wpadminbar')])if(el)shellObserver.observe(el);}
+requestAnimationFrame(sizeRadarShell);
+
 })();
 </script>
 <?php get_footer(); ?>
