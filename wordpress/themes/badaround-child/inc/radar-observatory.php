@@ -120,8 +120,11 @@ class BadAround_Radar_Observatory {
     }
     public static function search($request) {
         $q=sanitize_text_field((string)$request->get_param('q'));if(strlen($q)<2)return rest_ensure_response(array());
-        $terms=get_terms(array('taxonomy'=>'ba_territorio','hide_empty'=>false,'name__like'=>$q,'number'=>15));$out=array();
-        if(!is_wp_error($terms))foreach($terms as $term)$out[]=array('id'=>(int)$term->term_id,'name'=>$term->name,'path'=>self::path($term->term_id));return rest_ensure_response($out);
+        $exact=get_terms(array('taxonomy'=>'ba_territorio','hide_empty'=>false,'name'=>$q,'number'=>10));
+        $matches=get_terms(array('taxonomy'=>'ba_territorio','hide_empty'=>false,'name__like'=>$q,'number'=>30));$terms=array();
+        foreach(array(is_wp_error($exact)?array():$exact,is_wp_error($matches)?array():$matches) as $batch)foreach($batch as $term)$terms[$term->term_id]=$term;
+        uasort($terms,function($a,$b)use($q){$needle=self::norm($q);$an=self::norm($a->name);$bn=self::norm($b->name);$as=$an===$needle?0:(strpos($an,$needle)===0?1:2);$bs=$bn===$needle?0:(strpos($bn,$needle)===0?1:2);return $as<=>$bs?:strcmp($an,$bn);});$out=array();
+        foreach(array_slice($terms,0,15) as $term)$out[]=array('id'=>(int)$term->term_id,'name'=>$term->name,'path'=>self::path($term->term_id));return rest_ensure_response($out);
     }
     public static function aggregate($rows,$path,$catalog,$period,$basis,$today,$source=array()) {
         $types=array();$areas=array();$categories=array();$dated=0;$plottable=0;$bins=array();$cellGroups=array();$depth=count($path);
