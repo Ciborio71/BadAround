@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: 93048c4078ff9324da111ee8ec45e8ef71083d3c
+          ref: 23edebd08d1721ac7eb17dac737e401138ff49c3
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -40,6 +40,8 @@ jobs:
           php -l wordpress/themes/badaround-child/page-blog.php
           php -l wordpress/themes/badaround-child/page-come-funziona.php
           php tests/how-render.php
+          php -l wordpress/themes/badaround-child/page-radar-demo.php
+          php tests/radar-observatory-render.php
           php tests/blog-pagination.php
           php tests/home-two-render.php
           php tests/maintenance-contributions.php
@@ -53,6 +55,7 @@ jobs:
           python3 -m http.server 8765 > /tmp/home-two-server.log 2>&1 &
           node tests/home-two-browser.cjs
           node tests/how-browser.cjs
+          node tests/radar-observatory-browser.cjs
       - uses: actions/upload-artifact@v4
         with:
           name: home-two-rendered-preview
@@ -61,6 +64,8 @@ jobs:
             home-two-mobile.png
             how-1440.png
             how-390.png
+            radar-1440.png
+            radar-390.png
           retention-days: 7
       - name: Prepare verified FTPS trust chain
         run: |
