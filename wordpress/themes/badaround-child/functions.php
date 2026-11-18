@@ -662,3 +662,4 @@ add_action('wp_head',static function(){echo '<link rel="icon" type="image/png" s
 
 // Isolated optional home preview; does not change the current front page.
 require_once __DIR__ . '/inc/home-two.php';
+require_once __DIR__ . '/inc/radar-observatory.php';
