@@ -87,3 +87,5 @@ jobs:
 # Measure headline text independently of its decorative underline.
 
 # Compact Radar panel has no internal scroll.
+
+# Verify paired columns and content visibility together.
