@@ -300,7 +300,7 @@ body.page-template-page-radar-demo .ba-radar-map .ba-map-pan{display:none!import
 body.page-template-page-radar-demo #content,
 body.page-template-page-radar-demo #content>.ast-container,
 body.page-template-page-radar-demo #primary{width:100%!important;max-width:none!important;margin:0!important;padding:0!important;display:block}
-body.page-template-page-radar-demo .ba-radar-demo{width:100%!important;max-width:none!important;min-height:0;padding:16px 24px 18px!important}
+body.page-template-page-radar-demo .ba-radar-demo{box-sizing:border-box;width:100%!important;max-width:none!important;min-height:0;padding:16px 24px 18px!important}
 body.page-template-page-radar-demo .rad-v2-head,
 body.page-template-page-radar-demo .ba-radar-controls,
 body.page-template-page-radar-demo .rad-v2-scope,
