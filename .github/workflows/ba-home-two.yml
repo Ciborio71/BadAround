@@ -93,3 +93,5 @@ jobs:
 # Compact spacing for short desktop screens.
 
 # Full-width Radar outer box includes its padding.
+
+# Account for authenticated desktop navbar space.
