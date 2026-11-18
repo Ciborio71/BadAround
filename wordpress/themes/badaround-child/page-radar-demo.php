@@ -277,6 +277,23 @@ body.page-template-page-radar-demo .ba-radar-map .ba-map-pan{display:none!import
  .ba-observatory-kpi strong,.ba-observatory-kpi small{grid-column:1}
 }
 @media(max-width:1000px){body.page-template-page-radar-demo .ba-radar-map{height:400px;min-height:0!important}}
+@media(min-width:1001px) and (max-height:720px){
+ body.page-template-page-radar-demo .ba-radar-demo{padding-top:10px}
+ .rad-v2-head{margin-bottom:10px}
+ .rad-v2-head h1{font-size:34px}
+ .rad-v2-head>p{margin-bottom:3px}
+ .rad-v2-head>div{font-size:14px}
+ .ba-observatory-kpi{padding:6px 8px}
+ .ba-observatory-kpi strong{font-size:24px}
+ .ba-observatory-ranking,.rad-v2-quality{padding:7px 9px}
+ .ba-observatory-ranking h3,.rad-v2-quality h3{font-size:14px;margin-bottom:4px}
+ .rad-v3-bars{min-height:80px}
+ .rad-v3-bar>span{max-height:42px}
+ .rad-v3-donut{width:66px;height:66px}
+ .rad-v3-donut:before{inset:10px}
+ .rad-v2-quality{grid-template-columns:70px minmax(0,1fr)}
+ body.page-template-page-radar-demo .ba-radar-map{min-height:300px!important}
+}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
