@@ -85,3 +85,5 @@ jobs:
 # Explicit edge-to-edge preview body reset.
 
 # Measure headline text independently of its decorative underline.
+
+# Compact Radar panel has no internal scroll.
