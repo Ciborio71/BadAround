@@ -23,8 +23,8 @@ $categories=array('veicoli'=>'Veicoli','case-e-attivita'=>'Case e attività','pe
   <label id="ra-radius-wrap" hidden>Raggio<select id="ra-radius"><option value="1000">1 km</option><option value="500">500 m</option><option value="2000">2 km</option><option value="5000">5 km</option></select></label>
   <button type="button" class="ra-outline" id="ra-reset">↺ Reimposta</button>
  </section>
- <div class="ra-categories" role="group" aria-label="Categoria della segnalazione"><button type="button" data-category="" aria-pressed="true">Tutte</button><?php foreach($categories as $slug=>$label): ?><button type="button" data-category="<?php echo esc_attr($slug); ?>" aria-pressed="false"><?php echo badaround_pin_svg($slug); ?><span><?php echo esc_html($label); ?></span></button><?php endforeach; ?></div>
- <div class="ra-scope"><span id="ra-scope">Area: Italia · Confini amministrativi</span><span id="ra-status" role="status" aria-live="polite">Caricamento dati…</span></div>
+ <div class="ra-category-row"><div class="ra-categories" role="group" aria-label="Categoria della segnalazione"><button type="button" data-category="" aria-pressed="true">Tutte</button><?php foreach($categories as $slug=>$label): ?><button type="button" data-category="<?php echo esc_attr($slug); ?>" aria-pressed="false"><?php echo badaround_pin_svg($slug); ?><span><?php echo esc_html($label); ?></span></button><?php endforeach; ?></div>
+ <div class="ra-scope"><span id="ra-scope">Area: Italia · Confini amministrativi</span><span id="ra-status" role="status" aria-live="polite">Caricamento dati…</span></div></div>
  <div class="ra-workspace">
   <aside class="ra-analysis" aria-label="Analisi delle segnalazioni">
    <div class="ra-kpis" id="ra-kpis"></div>
