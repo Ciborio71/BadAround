@@ -5,7 +5,7 @@ import importlib.util,ftplib,ssl,os,json
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('guard',ROOT/'tools/ba_event_seo_release.py')
 guard=importlib.util.module_from_spec(spec);spec.loader.exec_module(guard)
-FILES=['themes/badaround-child/page-radar-demo.php']
+FILES=['themes/badaround-child/inc/radar-geography.php','themes/badaround-child/inc/radar-observatory.php','themes/badaround-child/assets/css/radar-observatory.css','themes/badaround-child/assets/js/radar-observatory.js','themes/badaround-child/page-radar-demo.php','themes/badaround-child/functions.php']
 guard.FILES=FILES
 def main():
     prior={n:(ROOT/'prior-source/wordpress'/n).read_bytes() if (ROOT/'prior-source/wordpress'/n).exists() else None for n in FILES}
