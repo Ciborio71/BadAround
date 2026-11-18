@@ -60,6 +60,7 @@ jobs:
           node tests/how-browser.cjs
           node tests/radar-observatory-browser.cjs
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: home-two-rendered-preview
           path: |
