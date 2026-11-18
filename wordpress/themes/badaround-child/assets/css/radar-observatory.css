@@ -57,12 +57,12 @@ body.page-template-page-radar-demo .ba-radar-app{width:100%;max-width:none;paddi
  .ra-workspace{grid-template-columns:minmax(0,.8fr) minmax(0,1.05fr)}
  .ra-rankings{grid-template-columns:1fr}
  .ra-rankings>section:first-child .ra-rank:nth-child(n+5),.ra-rankings>section:last-child .ra-rank:nth-child(n+4){display:none}
- .ra-rank-row{font-size:12px;line-height:1.3}
- .ra-rank{padding:3px 0}.ra-rank-track{height:6px;margin-top:3px}
- .ra-card h2{font-size:16px;margin-bottom:6px}
- .ra-timeline{min-height:112px;flex:0 0 auto}
- .ra-analysis{justify-content:space-between}
- .ra-kpi strong{font-size:30px}.ra-kpi span{font-size:12px}
+ .ra-rank-row{font-size:12px;line-height:1.15}
+ .ra-rank{padding:1px 0}.ra-rank-track{height:4px;margin-top:2px}
+ .ra-card{padding:8px 10px}.ra-card h2{font-size:15px;margin-bottom:4px}
+ .ra-timeline{min-height:96px;flex:1}
+ .ra-analysis{justify-content:flex-start}
+ .ra-kpi strong{font-size:28px}.ra-kpi span{font-size:11px}
  .ra-quality{font-size:11px}
 }
 .ra-map-card{background:#f1f8fb}.ra-legend{font-size:11px}.ra-attribution{font-size:10px}
