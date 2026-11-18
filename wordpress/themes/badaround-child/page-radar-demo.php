@@ -195,6 +195,38 @@ body.page-template-page-radar-demo .ba-radar-map{grid-column:2;grid-row:1;positi
 .ba-radar-demo button:focus-visible,.ba-radar-demo a:focus-visible,.ba-radar-demo input:focus-visible,.ba-radar-demo select:focus-visible{outline:3px solid #0798a8;outline-offset:3px}
 @media(max-width:1000px){body.page-template-page-radar-demo .ba-radar-workspace{grid-template-columns:1fr}body.page-template-page-radar-demo .ba-radar-map{grid-column:1;grid-row:2;min-height:480px}.ba-observatory-kpi strong{font-size:26px}}
 @media(max-width:550px){body.page-template-page-radar-demo .ba-radar-demo{padding:22px 14px}.ba-observatory-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}body.page-template-page-radar-demo #rad-reports{grid-template-columns:1fr}.ba-radar-search-row{flex-wrap:wrap}.ba-radar-search-row input{flex-basis:100%}.ba-radar-visual-key{max-width:220px;font-size:11px}.rad-v2-summary{display:grid;gap:12px}}
+
+/* Radar reference layout: balanced information/map blocks and a full-width summary. */
+body.page-template-page-radar-demo .ba-radar-workspace{gap:14px;align-items:stretch;grid-template-columns:minmax(0,1fr) minmax(0,1.03fr)}
+body.page-template-page-radar-demo .ba-radar-panel{padding:14px}
+body.page-template-page-radar-demo .ba-radar-map{min-height:610px}
+.ba-radar-panel:has(.ba-observatory-kpis)>#rad-copy{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.ba-radar-panel .ba-radar-final-note{display:none}
+.ba-observatory-kpi{position:relative;display:grid;grid-template-columns:25px minmax(0,1fr);gap:5px 8px;align-content:start}
+.ba-observatory-kpi svg{width:24px;height:26px;fill:none;stroke:#049893;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ba-observatory-kpi strong{grid-column:2;margin:0;font-size:30px}
+.ba-observatory-kpi small{grid-column:2;font-size:12px}
+.rad-v3-timeline>p{font-size:12px;color:#526b80;margin:0 0 12px}
+.rad-v3-bars{display:flex;gap:10px;align-items:end;min-height:136px;padding:0 3px}
+.rad-v3-bar{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:end;gap:5px}
+.rad-v3-bar>span{display:block;width:min(100%,34px);background:linear-gradient(#36b6b0,#009591);border-radius:4px 4px 0 0}
+.rad-v3-bar strong{font-size:11px;color:#526b80}
+.rad-v3-bar small{font-size:10px;line-height:1.2;text-align:center;white-space:normal;color:#526b80}
+.rad-v2-quality{display:grid;grid-template-columns:105px minmax(0,1fr);gap:10px;align-content:start;align-items:center}
+.rad-v2-quality h3{grid-column:1/-1;margin-bottom:8px}
+.rad-v2-quality p{grid-column:2;margin:0;font-size:12px;padding:8px 0}
+.rad-v3-donut{grid-column:1;grid-row:2/4;width:100px;height:100px;border-radius:50%;background:conic-gradient(#009b9b var(--dated-share),#b4e3e7 0);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;isolation:isolate}
+.rad-v3-donut:before{content:"";position:absolute;inset:16px;background:white;border-radius:50%;z-index:-1}
+.rad-v3-donut strong{font-size:26px;line-height:1.1}
+.rad-v3-donut small{font-size:12px}
+.rad-v3-context{margin:0}
+body.page-template-page-radar-demo .ba-radar-map .ba-map-pan{display:none!important}
+.rad-v2-summary{align-items:center;gap:18px}
+.rad-v2-summary>strong{padding-left:18px;border-left:4px solid #f21f41}
+.rad-v2-summary>span{flex:1;min-width:170px;padding-left:18px;border-left:1px solid #dce7ed;line-height:1.4}
+@media(max-width:1100px){.ba-observatory-kpi{grid-template-columns:1fr}.ba-observatory-kpi strong,.ba-observatory-kpi small{grid-column:1}.rad-v2-quality{grid-template-columns:1fr}.rad-v2-quality p{grid-column:1}.rad-v3-donut{grid-row:auto;grid-column:1}}
+@media(max-width:1000px){body.page-template-page-radar-demo .ba-radar-workspace{grid-template-columns:1fr}body.page-template-page-radar-demo .ba-radar-map{min-height:440px}.ba-observatory-kpi{grid-template-columns:25px minmax(0,1fr)}.ba-observatory-kpi strong,.ba-observatory-kpi small{grid-column:2}}
+@media(max-width:550px){.rad-v2-summary>span{border-left:0;padding-left:0}.ba-observatory-kpi{grid-template-columns:1fr}.ba-observatory-kpi strong,.ba-observatory-kpi small{grid-column:1}.rad-v2-quality{grid-template-columns:105px minmax(0,1fr)}.rad-v2-quality p{grid-column:2}.rad-v3-donut{grid-column:1;grid-row:2/4}}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -336,13 +368,20 @@ function showObservatory(items,host){
   if(dt){dated++;const month=dt.toISOString().slice(0,7);months.set(month,(months.get(month)||0)+1);}else undated++;
  }
  const metrics=document.createElement('div');metrics.className='ba-observatory-kpis';
- for(const [value,label] of [
+ for(const [index,[value,label]] of [
   [items.length,'Segnalazioni pubbliche geolocalizzate'],
   [types.size,'Tipologie rappresentate'],
   [places.size,'Territori rappresentati'],
-  [dated,'Episodi con data disponibile']
- ]){
+  [dated,'Con data dell’episodio']
+ ].entries()){
   const card=document.createElement('div');card.className='ba-observatory-kpi';
+  const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('viewBox','0 0 24 24');icon.setAttribute('aria-hidden','true');const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d',[
+  'M5 5a10 10 0 0 0 0 14 M19 5a10 10 0 0 1 0 14 M8 8a6 6 0 0 0 0 8 M16 8a6 6 0 0 1 0 8 M12 10v4',
+  'M4 3h16v18H4Z M8 7h8 M8 11h8 M8 15h5',
+  'M8 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6 M16 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6 M2 21v-4a6 6 0 0 1 12 0v4 M14 12a6 6 0 0 1 8 5v4',
+  'M4 5h16v16H4Z M4 10h16 M8 2v6 M16 2v6'
+  ][index]);icon.append(path);card.append(icon);
   const large=document.createElement('strong');large.textContent=numberIT.format(value);
   const caption=document.createElement('small');caption.textContent=label;
   card.append(large,caption);metrics.append(card);
@@ -374,18 +413,26 @@ function showObservatory(items,host){
   else{input.value=label;locate();return;}
   render();zoomToDrill();
  });
- if(dated)createRanking('Mesi degli episodi datati',new Map([...months].sort((a,b)=>b[0].localeCompare(a[0]))),6,null);
- else{const empty=document.createElement('section');empty.className='rad-v2-quality';empty.textContent='Nessuna data dell’episodio disponibile per il periodo selezionato.';host.append(empty);}
+ const timeline=document.createElement('section');timeline.className='ba-observatory-ranking rad-v3-timeline';
+ const timelineTitle=document.createElement('h3');timelineTitle.textContent='Mesi degli episodi datati';timeline.append(timelineTitle);
+ const timelineCaption=document.createElement('p');timelineCaption.textContent='Solo episodi con data disponibile.';timeline.append(timelineCaption);
+ if(dated){const chart=document.createElement('div');chart.className='rad-v3-bars';chart.setAttribute('role','list');chart.setAttribute('aria-label','Segnalazioni per mese dell’episodio');
+ const recent=[...months].sort((a,b)=>a[0].localeCompare(b[0])).slice(-6),max=Math.max(...recent.map(row=>row[1]),1);
+ for(const [month,count] of recent){const column=document.createElement('div');column.className='rad-v3-bar';column.setAttribute('role','listitem');column.setAttribute('aria-label',month+': '+count+' segnalazioni');
+ const value=document.createElement('strong');value.textContent=String(count);const bar=document.createElement('span');bar.style.height=Math.max(4,count/max*85)+'px';const label=document.createElement('small');const date=new Date(month+'-01T12:00:00Z');label.textContent=new Intl.DateTimeFormat('it-IT',{month:'short',year:'2-digit'}).format(date);column.append(value,bar,label);chart.append(column);}timeline.append(chart);
+ }else{const empty=document.createElement('p');empty.textContent='Nessuna data disponibile per i filtri selezionati.';timeline.append(empty);}host.append(timeline);
  const qualityCard=document.createElement('section');qualityCard.className='rad-v2-quality';
  const qualityTitle=document.createElement('h3');qualityTitle.textContent='Completezza delle date';qualityCard.append(qualityTitle);
  for(const [label,count]of [['Data episodio disponibile',dated],['Data episodio non disponibile',undated]]){
  const row=document.createElement('p'),caption=document.createElement('span'),value=document.createElement('strong');caption.textContent=label;value.textContent=String(count);row.append(caption,value);qualityCard.append(row);}
+ const donut=document.createElement('div');donut.className='rad-v3-donut';donut.style.setProperty('--dated-share',items.length?String(dated/items.length*100)+'%':'0%');donut.setAttribute('role','img');donut.setAttribute('aria-label',dated+' con data, '+undated+' senza data');
+ const total=document.createElement('strong');total.textContent=String(items.length);const caption=document.createElement('small');caption.textContent='totali';donut.append(total,caption);qualityCard.append(donut);
  host.append(qualityCard);
  const summary=$('rad-summary');summary.replaceChildren();const heading=document.createElement('strong');heading.textContent='In sintesi';summary.append(heading);
  const topType=[...types].sort((a,b)=>b[1]-a[1])[0],topPlace=[...places].sort((a,b)=>b[1]-a[1])[0];
  for(const text of [items.length+' segnalazioni nel campione filtrato',topPlace?topPlace[0]+' · Territorio con più segnalazioni':'Territorio non disponibile',topType?topType[0]+' · Tipologia più segnalata':'Nessuna tipologia']){const span=document.createElement('span');span.textContent=text;summary.append(span);}
- const quality=document.createElement('p');quality.className='ba-radar-note';
- quality.textContent=numberIT.format(undated)+' segnalazioni senza data valida, escluse dal grafico mensile. Le graduatorie riguardano solo il campione pubblico disponibile: non misurano criminalità, rischio o copertura totale del territorio. Eventuali duplicati non certificati possono incidere sui conteggi.';
+ const quality=document.createElement('p');quality.className='ba-radar-note rad-v3-context';
+ quality.textContent='La distribuzione dipende dalla partecipazione della community e dalla copertura dei dati. Le segnalazioni senza data valida sono escluse dal grafico mensile.';
  host.append(quality);
 }
 let distributionOverlay=null,distributionItems=[];
@@ -543,9 +590,8 @@ async function loadMap(){
      gestureHandling:'cooperative'
    })
   });
-  if(window.BadAroundMapNavigation?.mount){
-   window.BadAroundMapNavigation.mount(map,$('rad-google-map'));
-  }
+  // Radar uses native zoom/fullscreen only; dragging and keyboard panning remain available.
+  map.setOptions({cameraControl:false,mapTypeControl:false,streetViewControl:false,rotateControl:false,zoomControl:true,fullscreenControl:true});
   geocoder=new google.maps.Geocoder();
   try{placesApi=await google.maps.importLibrary('places');}
   catch(error){console.warn('Radar autocomplete unavailable; manual address search remains enabled.',error);}
