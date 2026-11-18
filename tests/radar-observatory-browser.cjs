@@ -7,7 +7,7 @@ const {chromium}=require('playwright-core'),assert=require('node:assert/strict')
  await p.route('**/wp-json/badaround/v1/radar-territories?**',r=>r.fulfill({contentType:'application/json',body:JSON.stringify([{...path[2],path}])}));
  await p.route('**/wp-json/badaround/v1/radar-boundaries?**',r=>r.fulfill({contentType:'application/json',body:JSON.stringify({type:'FeatureCollection',features:[feature('Roma',3,18)]})}));
  await p.addInitScript(()=>{
-  const listeners={};window.__radarListeners=listeners;class Bounds{extend(){}toJSON(){return {north:43,south:41,west:11,east:13};}}
+  const listeners={};window.__radarListeners=listeners;class Bounds{extend(){}toJSON(){return window.__viewBounds||{north:43,south:41,west:11,east:13};}}
   class Data{constructor(){this.rows=[];this.handlers={};window.__radarData=this;}forEach(fn){[...this.rows].forEach(fn);}remove(f){this.rows=this.rows.filter(x=>x!==f);}addGeoJson(g){this.rows=g.features.map(x=>({getProperty:k=>x.properties[k],getGeometry:()=>({forEachLatLng:fn=>x.geometry.coordinates.flat(2).filter(v=>Array.isArray(v)).forEach(v=>fn(v))})}));}setStyle(fn){this.style=fn;}addListener(k,fn){this.handlers[k]=fn;}overrideStyle(){}revertStyle(){}}
   class Map{constructor(el,options){this.data=new Data;window.__radarOptions=options;}fitBounds(b){window.__radarBounds=b;}addListener(k,fn){listeners[k]=fn;}getBounds(){return new Bounds;}}
   window.google={maps:{Map,LatLngBounds:Bounds,Geocoder:class{geocode(q,cb){cb([{geometry:{viewport:{north:43,south:41,west:11,east:13}}}],'OK');}},event:{addListenerOnce:(m,k,fn)=>fn()}}};
@@ -20,6 +20,6 @@ const {chromium}=require('playwright-core'),assert=require('node:assert/strict')
  await p.locator('#ra-place').fill('Roma');await p.locator('#ra-suggestions button').first().click();await p.waitForTimeout(100);assert(requests.at(-1).includes('territory=3'));assert((await p.locator('#ra-breadcrumb').innerText()).includes('Roma'));
  await p.locator('[data-category="animali"]').click();await p.getByText('Segnala un evento nella tua zona →').waitFor();assert.equal(await p.locator('.ra-kpi strong').first().innerText(),'0');
  await p.locator('#ra-reset').click();await p.waitForTimeout(50);assert(requests.at(-1).includes('period=all')&&!requests.at(-1).includes('category='));assert.equal(await p.evaluate(()=>window.__radarOptions.cameraControl),false);
- await p.evaluate(()=>window.__radarListeners.dragend());assert(await p.locator('#ra-analyze').isVisible());const before=requests.length;await p.waitForTimeout(30);assert.equal(requests.length,before);await p.locator('#ra-analyze').click();await p.waitForTimeout(50);assert(requests.at(-1).includes('north=43'));
+ await p.evaluate(()=>window.__radarListeners.dragend());assert(await p.locator('#ra-analyze').isVisible());const before=requests.length;await p.waitForTimeout(30);assert.equal(requests.length,before);await p.evaluate(()=>{window.__viewBounds={north:55,south:20,west:-10,east:30};});await p.locator('#ra-analyze').click();await p.waitForTimeout(50);assert(requests.at(-1).includes('north=47.5')&&requests.at(-1).includes('west=6'));
  console.log('RADAR_FILTER_BREADCRUMB_SEARCH_EMPTY_VIEWPORT_PASS');
 }finally{await b.close();}})().catch(e=>{console.error(e);process.exit(1)});
