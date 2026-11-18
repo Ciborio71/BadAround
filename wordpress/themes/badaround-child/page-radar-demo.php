@@ -227,6 +227,13 @@ body.page-template-page-radar-demo .ba-radar-map .ba-map-pan{display:none!import
 @media(max-width:1100px){.ba-observatory-kpi{grid-template-columns:1fr}.ba-observatory-kpi strong,.ba-observatory-kpi small{grid-column:1}.rad-v2-quality{grid-template-columns:1fr}.rad-v2-quality p{grid-column:1}.rad-v3-donut{grid-row:auto;grid-column:1}}
 @media(max-width:1000px){body.page-template-page-radar-demo .ba-radar-workspace{grid-template-columns:1fr}body.page-template-page-radar-demo .ba-radar-map{min-height:440px}.ba-observatory-kpi{grid-template-columns:25px minmax(0,1fr)}.ba-observatory-kpi strong,.ba-observatory-kpi small{grid-column:2}}
 @media(max-width:550px){.rad-v2-summary>span{border-left:0;padding-left:0}.ba-observatory-kpi{grid-template-columns:1fr}.ba-observatory-kpi strong,.ba-observatory-kpi small{grid-column:1}.rad-v2-quality{grid-template-columns:105px minmax(0,1fr)}.rad-v2-quality p{grid-column:2}.rad-v3-donut{grid-column:1;grid-row:2/4}}
+/* Keep both desktop blocks inside the first viewport; map height never follows content. */
+@media(min-width:1001px){
+ body.page-template-page-radar-demo .ba-radar-workspace{height:var(--rad-viewport-height,400px);min-height:0}
+ body.page-template-page-radar-demo .ba-radar-map{height:100%;min-height:0!important;max-height:100%}
+ body.page-template-page-radar-demo .ba-radar-panel{height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+}
+@media(max-width:1000px){body.page-template-page-radar-demo .ba-radar-map{height:400px;min-height:0!important}}
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -257,6 +264,18 @@ if (!is_wp_error($radar_terms)) {
 'use strict';
 const root=document.querySelector('.ba-radar-demo');if(!root)return;
 const $=id=>root.querySelector('#'+id);
+const ITALY_BOUNDS={north:47.2,south:35.4,west:6.5,east:18.7};
+function frameItaly(){if(map)map.fitBounds(ITALY_BOUNDS,12);}
+function sizeRadar(){
+ const workspace=root.querySelector('.ba-radar-workspace');
+ if(!workspace||window.innerWidth<=1000)return;
+ const top=workspace.getBoundingClientRect().top+window.scrollY;
+ const height=Math.max(160,Math.floor(window.innerHeight-top-18));
+ workspace.style.setProperty('--rad-viewport-height',height+'px');
+}
+window.addEventListener('resize',sizeRadar);
+if(window.ResizeObserver){const observer=new ResizeObserver(sizeRadar);observer.observe(root.querySelector('.rad-v2-head'));observer.observe(root.querySelector('.ba-radar-controls'));const header=document.querySelector('.ba-site-header');if(header)observer.observe(header);}
+sizeRadar();
 let map=null,geocoder=null,searchCircle=null,centerMarker=null,state='sample',layer=false;
 const initial={place:'',cat:'Tutte le categorie',period:'all',radius:'1'};
 const config=window.BadAroundRadarMaps||{};
@@ -338,7 +357,7 @@ function matchesDrill(e){
 }
 function zoomToDrill(){
  if(!map)return;
- if(drill.level===0){map.setCenter({lat:41.9028,lng:12.4964});map.setZoom(5);return;}
+ if(drill.level===0){frameItaly();return;}
  const parts=[drill.comune,drill.province,drill.region,'Italia'].filter(Boolean);
  if(!geocoder||!parts.length)return;
  geocoder.geocode({address:parts.join(', '),region:'IT'},(results,status)=>{
@@ -582,7 +601,7 @@ async function loadMap(){
  try{
   await readyMaps();
   map=new google.maps.Map($('rad-google-map'),{
-   center:{lat:41.9028,lng:12.4964},zoom:5,mapTypeControl:false,streetViewControl:false,
+   center:{lat:41.8,lng:12.6},zoom:6,restriction:{latLngBounds:ITALY_BOUNDS,strictBounds:false},minZoom:5,mapTypeControl:false,streetViewControl:false,
    styles:[{featureType:'poi',elementType:'all',stylers:[{visibility:'off'}]},{featureType:'transit',elementType:'all',stylers:[{visibility:'off'}]},{featureType:'road',elementType:'labels.icon',stylers:[{visibility:'off'}]}],
    ...(window.BadAroundMapNavigation?.options?.()||{
      zoomControl:true,zoomControlOptions:{position:google.maps.ControlPosition.RIGHT_TOP},
@@ -592,6 +611,7 @@ async function loadMap(){
   });
   // Radar uses native zoom/fullscreen only; dragging and keyboard panning remain available.
   map.setOptions({cameraControl:false,mapTypeControl:false,streetViewControl:false,rotateControl:false,zoomControl:true,fullscreenControl:true});
+  frameItaly();
   geocoder=new google.maps.Geocoder();
   try{placesApi=await google.maps.importLibrary('places');}
   catch(error){console.warn('Radar autocomplete unavailable; manual address search remains enabled.',error);}
