@@ -313,7 +313,7 @@ body.page-template-page-radar-demo .ba-radar-foot{max-width:none!important;width
  body.page-template-page-radar-demo .ba-radar-workspace{height:var(--rad-workspace-height,420px);align-items:stretch}
  body.page-template-page-radar-demo .ba-radar-map{height:100%;min-height:0!important}
  body.page-template-page-radar-demo .ba-radar-panel{height:100%;min-height:0;overflow:visible;display:flex;flex-direction:column}
- body.page-template-page-radar-demo #rad-reports{flex:1;align-content:start}
+ body.page-template-page-radar-demo #rad-reports{flex:0 0 auto;align-content:start}
  .ba-observatory-rank-top>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
  .ba-radar-back{flex-shrink:0}
  .rad-v2-head{margin-bottom:12px}
