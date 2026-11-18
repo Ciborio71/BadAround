@@ -12,6 +12,7 @@ $today=new DateTimeImmutable('2026-11-18',wp_timezone());
 $result=BadAround_Radar_Observatory::aggregate($rows,array(),array(),'30','date',$today);
 check($result['metrics']['total']===4&&$result['metrics']['dated']===2,'totals distinguish invalid missing and future episode dates');
 check(count($result['series']['bins'])===30&&array_sum(array_column($result['series']['bins'],'count'))===2,'zero filling and future exclusion');
+check(count($result['geography']['cells'])===1&&$result['geography']['type']==='heatmap','national heatmap uses suppressed aggregated cells');
 check(!str_contains(json_encode($result),'public_geo')&&!str_contains(json_encode($result),'permalink'),'response contains no event projections');
 $local=BadAround_Radar_Observatory::aggregate(array_slice($rows,0,2),$path,array(),'all','date',$today);
 check(count($local['geography']['cells'])===0,'sparse cells suppressed');
@@ -24,3 +25,4 @@ foreach(array(0,100,500,2000) as $radius){
 }
 check(count((require get_stylesheet_directory().'/inc/radar-geography.php')['regions']['features'])===20,'20 sourced regions');
 echo "RADAR_AGGREGATE_PASS\n";
+
