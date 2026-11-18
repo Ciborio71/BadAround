@@ -7,7 +7,7 @@ wp_enqueue_style('ba-radar-observatory',$base.'/assets/css/radar-observatory.css
 wp_enqueue_script('ba-radar-observatory',$base.'/assets/js/radar-observatory.js',array(),(string)filemtime(__DIR__.'/assets/js/radar-observatory.js'),true);
 $settings=get_option('wpforms_settings',array());$key=is_array($settings)?trim((string)($settings['geolocation-google-places-api-key']??'')):'';
 $maps=$key?add_query_arg(array('key'=>$key,'v'=>'weekly','loading'=>'async'),'https://maps.googleapis.com/maps/api/js'):'';
-wp_localize_script('ba-radar-observatory','BadAroundRadar',array('endpoint'=>rest_url('badaround/v1/radar'),'search'=>rest_url('badaround/v1/radar-territories'),'boundaries'=>rest_url('badaround/v1/radar-boundaries'),'provinces'=>rest_url('badaround/v1/radar-boundaries?level=provinces'),'mapsUrl'=>$maps,'mapUrl'=>home_url('/mappa/'),'reportUrl'=>home_url('/segnala-un-evento/')));
+wp_localize_script('ba-radar-observatory','BadAroundRadar',array('nonce'=>is_user_logged_in()?wp_create_nonce('wp_rest'):'','endpoint'=>rest_url('badaround/v1/radar'),'search'=>rest_url('badaround/v1/radar-territories'),'boundaries'=>rest_url('badaround/v1/radar-boundaries'),'provinces'=>rest_url('badaround/v1/radar-boundaries?level=provinces'),'mapsUrl'=>$maps,'mapUrl'=>home_url('/mappa/'),'reportUrl'=>home_url('/segnala-un-evento/')));
 get_header();
 $categories=array('veicoli'=>'Veicoli','case-e-attivita'=>'Case e attività','pericoli'=>'Pericoli','spazi-pubblici'=>'Spazi pubblici','animali'=>'Animali','oggetti-e-documenti'=>'Oggetti');
 ?>
