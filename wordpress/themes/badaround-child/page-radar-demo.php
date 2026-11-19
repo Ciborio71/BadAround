@@ -463,6 +463,30 @@ body.page-template-page-radar-demo .ba-radar-controls #rad-nearby{
  border:1px solid #0b8b99!important;color:#087889!important;background:#fff!important;
 }
 body.page-template-page-radar-demo .ba-radar-controls #rad-nearby:hover{background:#e8f8f9!important;color:#066f79!important}
+
+/* RADAR-TWO-COLUMN-TRIAL-01 — analytics layout only; original baseline saved in ops/baselines. */
+@media(min-width:1280px){
+ body.page-template-page-radar-demo .ba-radar-workspace{grid-template-columns:minmax(580px,44%) minmax(0,1fr)}
+ body.page-template-page-radar-demo #rad-reports{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;max-height:none;overflow:visible}
+ #rad-reports>.ba-observatory-head,#rad-reports>.ba-observatory-kpis,#rad-reports>.ba-radar-note,#rad-reports>.ba-radar-back-drill{grid-column:1/-1}
+ #rad-reports>.ba-observatory-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .ba-observatory-kpi{min-height:90px;padding:10px;background:#edf8fa}
+ .ba-observatory-kpi small{font-size:11px}
+ .ba-observatory-ranking{padding:12px 10px;gap:6px;align-content:start}
+ .ba-observatory-rank-top{font-size:12px}
+}
+.ba-observatory-months>p{font-size:11px;color:#58748a;margin:0}
+.ba-observatory-bars{display:flex;gap:12px;align-items:end;justify-content:space-around;min-height:135px;overflow-x:auto;padding:8px 0}
+.ba-observatory-month{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;min-width:40px;color:#547486;font-size:12px}
+.ba-observatory-month i{display:block;max-width:42px;width:75%;background:linear-gradient(#35b8b3,#00959b);border-radius:6px 6px 0 0}
+.ba-observatory-month small{font-size:11px;white-space:nowrap}
+.ba-observatory-date-body{display:flex;align-items:center;gap:12px;min-height:135px}
+.ba-observatory-ring{width:96px;height:96px;flex-shrink:0;border-radius:50%;background:conic-gradient(#009b9e 0 var(--dated-share),#b5e4e9 var(--dated-share) 100%);display:grid;place-items:center}
+.ba-observatory-ring>div{width:68px;height:68px;background:white;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ba-observatory-ring strong{font-size:25px;color:#071a38;line-height:1.1}.ba-observatory-ring small{font-size:11px}
+.ba-observatory-date-body dl{flex:1;margin:0;min-width:0}.ba-observatory-date-body dl>div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #d7e7ed;padding:10px 0;font-size:11px;line-height:1.4}.ba-observatory-date-body dd{margin:0;font-weight:750}
+@media(max-width:1279px){#rad-reports{grid-template-columns:1fr}.ba-observatory-date-body{gap:16px}}
+
 </style>
 <?php
 $radar_maps_settings = get_option('wpforms_settings',array());
@@ -596,9 +620,9 @@ function showObservatory(items,host){
   const chain=territoryPath(e);
   const name=chain[drill.level]||null;
   if(name)places.set(name,(places.get(name)||0)+1);
-  if(/^\\d{4}-\\d{2}-\\d{2}$/.test(e.occurred_date||'')){
+  if(/^\d{4}-\d{2}-\d{2}$/.test(e.occurred_date||'')){
    const dt=new Date(e.occurred_date+'T12:00:00');
-   if(Number.isFinite(dt.getTime())){dated++;const month=e.occurred_date.slice(0,7);months.set(month,(months.get(month)||0)+1);}
+   if(Number.isFinite(dt.getTime())&&dt.toISOString().slice(0,10)===e.occurred_date){dated++;const month=e.occurred_date.slice(0,7);months.set(month,(months.get(month)||0)+1);}
    else undated++;
   }else undated++;
  }
@@ -641,9 +665,12 @@ function showObservatory(items,host){
   else{input.value=label;locate();return;}
   render();zoomToDrill();
  });
- if(dated){
-  createRanking('Mesi con episodi datati',months,5,null);
- }
+ const chart=document.createElement('section');chart.className='ba-observatory-ranking ba-observatory-months';
+ const chartTitle=document.createElement('h3');chartTitle.textContent='Mesi degli episodi datati';const chartIntro=document.createElement('p');chartIntro.textContent='Solo segnalazioni con data disponibile.';chart.append(chartTitle,chartIntro);
+ const bars=document.createElement('div');bars.className='ba-observatory-bars';const maximum=Math.max(1,...months.values());
+ for(const [month,count]of [...months].sort((a,b)=>a[0].localeCompare(b[0]))){const column=document.createElement('div');column.className='ba-observatory-month';const n=document.createElement('strong');n.textContent=numberIT.format(count);const bar=document.createElement('i');bar.style.height=(count/maximum*85)+'px';const label=document.createElement('small');label.textContent=new Intl.DateTimeFormat('it-IT',{month:'short',year:'2-digit',timeZone:'UTC'}).format(new Date(month+'-01T12:00:00Z'));column.append(n,bar,label);bars.append(column);}
+ if(!months.size){const empty=document.createElement('p');empty.textContent='Nessuna data disponibile nel campione.';bars.append(empty);}chart.append(bars);host.append(chart);
+ const completeness=document.createElement('section');completeness.className='ba-observatory-ranking ba-observatory-completeness';const title=document.createElement('h3');title.textContent='Completezza delle date';const body=document.createElement('div');body.className='ba-observatory-date-body';const ring=document.createElement('div');ring.className='ba-observatory-ring';ring.style.setProperty('--dated-share',(items.length?dated/items.length*100:0)+'%');const total=document.createElement('strong');total.textContent=numberIT.format(items.length);const caption=document.createElement('small');caption.textContent='totali';const center=document.createElement('div');center.append(total,caption);ring.append(center);const details=document.createElement('dl');for(const [label,count]of [['Data disponibile',dated],['Data non disponibile',undated]]){const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=numberIT.format(count);row.append(dt,dd);details.append(row);}body.append(ring,details);completeness.append(title,body);host.append(completeness);
  const quality=document.createElement('p');quality.className='ba-radar-note';
  quality.textContent=numberIT.format(undated)+' segnalazioni senza data valida, escluse dal grafico mensile. Le graduatorie riguardano solo il campione pubblico disponibile: non misurano criminalità, rischio o copertura totale del territorio. Eventuali duplicati non certificati possono incidere sui conteggi.';
  host.append(quality);
