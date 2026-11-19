@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: 22fd1b7dc79ba7318dff61cef910887c453067ee
+          ref: 6c6353cbb631d0a1a2c1c024d82c300db7126342
           path: prior-source
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -58,7 +58,7 @@ jobs:
           python3 -m http.server 8765 > /tmp/home-two-server.log 2>&1 &
           node tests/home-two-browser.cjs
           node tests/how-browser.cjs
-          node tests/radar-observatory-browser.cjs
+          node tests/radar-original-browser.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
