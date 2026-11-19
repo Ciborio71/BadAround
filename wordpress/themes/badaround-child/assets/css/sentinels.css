@@ -254,3 +254,6 @@
 .ba-sentinel-territory-search{margin-bottom:6px}
 .ba-sentinel-search-status{min-height:1.25em;margin:0 0 10px;color:#667b8e;font-size:.72rem}
 .ba-sentinel-field>span strong{color:#8f2833}
+
+.ba-sentinel-art-pin{width:38px;height:48px;border:0;border-radius:0;transform:none;background:none;box-shadow:none}
+.ba-sentinel-art-pin>.ba-pin-svg{width:38px;height:48px;transform:none}

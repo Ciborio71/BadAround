@@ -1,0 +1,85 @@
+name: BadAround Identity administrative diagnostics
+on:
+  push:
+    branches: [reconcile/identity-production-baseline-20261104]
+    paths:
+      - wordpress/mu-plugins/badaround-identity-ops.php
+      - .github/workflows/ba-identity-ops.yml
+permissions:
+  contents: read
+jobs:
+  read-only-diagnostics:
+    if: contains(github.event.head_commit.message, '[identity-ops-original-release]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: f65ecfb091dd1ab309190dd4a724bb5018250f85
+          path: prior-source
+          persist-credentials: false
+      - run: php -l wordpress/mu-plugins/badaround-identity-ops.php
+      - name: Prepare verified FTPS trust chain
+        run: |
+          mkdir -p tls
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/chain.pem
+      - name: Add administrative read-only diagnostics
+        env:
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import ftplib,ssl,os,io
+          ftp=ftplib.FTP_TLS(context=ssl.create_default_context(cafile='tls/chain.pem'),timeout=40)
+          ftp.connect('46.231.24.137',21);ftp.host='hostmld17.aziendeitalia.com'
+          ftp.login(os.environ['FTP_USER'],os.environ['FTP_PASSWORD']);ftp.prot_p()
+          def read(path):
+              b=io.BytesIO()
+              try:ftp.retrbinary('RETR '+path,b.write)
+              except ftplib.error_perm as e:
+                  if str(e).startswith('550'):return None
+                  raise
+              return b.getvalue()
+          try:
+              target='/httpdocs/wp-content/mu-plugins/badaround-identity-ops.php'
+              data=Path('wordpress/mu-plugins/badaround-identity-ops.php').read_bytes()
+              old=read(target)
+              expected=Path('prior-source/wordpress/mu-plugins/badaround-identity-ops.php').read_bytes()
+              if old is not None and old not in (data,expected):raise RuntimeError('Existing diagnostic source differs')
+              if old==expected:
+                  backup='/wordpress-backups/ba-identity-ops-'+os.environ['GITHUB_RUN_ID']+'.prior'
+                  if read(backup) is not None:raise RuntimeError('Backup destination occupied')
+                  ftp.storbinary('STOR '+backup,io.BytesIO(old))
+                  if read(backup)!=old:raise RuntimeError('Backup verification failed')
+                  temp='/wordpress-backups/ba-identity-ops-'+os.environ['GITHUB_RUN_ID']+'.part'
+                  if read(temp) is not None:raise RuntimeError('Temporary destination occupied')
+                  ftp.storbinary('STOR '+temp,io.BytesIO(data))
+                  if read(temp)!=data or read(target)!=old:raise RuntimeError('Source changed before swap')
+                  ftp.rename(temp,target)
+                  if read(target)!=data:
+                      if read(backup)==old:ftp.rename(backup,target)
+                      raise RuntimeError('Diagnostic swap verification failed')
+              if old is None:
+                  try:ftp.cwd('/httpdocs/wp-content/mu-plugins')
+                  except ftplib.error_perm:ftp.mkd('/httpdocs/wp-content/mu-plugins')
+                  temp='/wordpress-backups/ba-identity-ops-'+os.environ['GITHUB_RUN_ID']+'.part'
+                  if read(temp) is not None:raise RuntimeError('Temporary destination occupied')
+                  ftp.storbinary('STOR '+temp,io.BytesIO(data))
+                  if read(temp)!=data or read(target) is not None:raise RuntimeError('Source integrity check failed')
+                  ftp.rename(temp,target)
+              if read(target)!=data:raise RuntimeError('Installed diagnostic differs')
+              print('ADMINISTRATIVE_READ_ONLY_DIAGNOSTICS_DEPLOY_PASS')
+              import re
+              config=read('/httpdocs/wp-config.php')
+              if config is None:raise RuntimeError('Configuration unavailable')
+              for number,line in enumerate(config.decode('utf-8').splitlines(),1):
+                  for name in ['BADAROUND_TURBOSMTP_CONSUMER_KEY','BADAROUND_TURBOSMTP_CONSUMER_SECRET','BADAROUND_TURBOSMTP_FROM_EMAIL']:
+                      if name in line:print('CONFIG_DEFINE_ORDER',number,name)
+                  if 'wp-settings.php' in line:print('CONFIG_SETTINGS_INCLUDE_ORDER',number)
+                  if 'ba-identity-private-qa.php' in line:print('CONFIG_IDENTITY_INCLUDE_ORDER',number)
+          finally:ftp.quit()
+          PY

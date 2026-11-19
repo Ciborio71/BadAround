@@ -9,7 +9,7 @@ test('all 33 DOM profiles: active controls, required markers and summary/payload
  const h=create();try{for(const oracle of contract.regression_oracle){seed(h,oracle);assert.equal(h.root.nativeReport.config.schemaVersion,'badaround-report/v2');
   for(let step=0;step<5;step++){h.model.step=step;h.set('content.description',h.model.values['content.description']);
    for(const [p,f] of Object.entries(config.fields)){const w=wrapper(h,p);assert(w,p);if(!h.model.active(p)){assert(w.hidden,p);assert([...w.querySelectorAll('input,select,textarea')].every(e=>e.disabled),p+' not tabbable');}
-    if(f.step===Object.keys(config.steps)[step]&&h.model.active(p)&&!w.hidden&&!w.hasAttribute('data-beta-bundled')){const flags=w.querySelector('[data-native-required]');if(flags)assert.equal(flags.textContent.includes('obbligatorio'),h.model.required(p),p);}
+    if(f.step===Object.keys(config.steps)[step]&&h.model.active(p)&&!w.hidden&&!w.hasAttribute('data-beta-bundled')){const flags=w.querySelector('[data-native-required]');if(flags)assert.equal(flags.dataset.nativeRequiredState==='required',h.model.required(p),p);}
    }
   }
   const keys=review(h);for(const p of keys){assert(h.model.active(p),p+' summary active');assert(h.model.effective(p)!==undefined,p);}

@@ -102,6 +102,10 @@ class BadAround_Discovery_Query {
 			'order'               => 'DESC',
 			'meta_query'          => BadAround_Discovery_Contract::public_gate_meta_query(),
 		);
+		// Home pagination needs deterministic ties; other consumers keep their existing ordering.
+		if ( ! empty( $filters['home_stable_order'] ) ) {
+			$args['orderby'] = array( 'date' => 'DESC', 'ID' => 'DESC' );
+		}
 
 		if ( '' !== $search ) {
 			$resolved = $this->resolve_search( $search );
@@ -367,6 +371,11 @@ class BadAround_Discovery_Query {
 		}
 
 		$image = get_the_post_thumbnail_url( $event_id, 'medium' );
+        $public_place_name=sanitize_text_field((string)get_post_meta($event_id,'_ba_public_place_name',true));
+        $public_details=class_exists('BadAround_Event_Public_Details')?BadAround_Event_Public_Details::view($event_id):array();
+        $zone=$public_details['neighborhood']??'';
+        if($zone!==''&&stripos($public_place_name,$zone)===false)$public_place_name.=($public_place_name!==''?', zona ':'').$zone;
+
 
 		return array(
 			'id'                => $event_id,
@@ -387,7 +396,7 @@ class BadAround_Discovery_Query {
 			'occurred_date'     => sanitize_text_field( (string) get_post_meta( $event_id, '_ba_occurred_date', true ) ),
 			'occurred_time'     => sanitize_text_field( (string) get_post_meta( $event_id, '_ba_occurred_time', true ) ),
 			'event_status'      => sanitize_key( (string) get_post_meta( $event_id, '_ba_event_status', true ) ),
-			'public_place_name' => sanitize_text_field( (string) get_post_meta( $event_id, '_ba_public_place_name', true ) ),
+			'public_place_name' => $public_place_name,
 			'public_geo'        => $geo,
 		);
 	}

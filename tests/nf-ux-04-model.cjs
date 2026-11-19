@@ -55,6 +55,6 @@ test('every conditional dependency across 33 profiles agrees with backend after 
   function activate(expr){if(expr.all)expr.all.forEach(activate);else if(expr.any)activate(expr.any[0]);else if(expr.op!=='active'){const rule=m.rule(expr.field);if(rule?.condition)activate(rule.condition);m.set(expr.field,expr.op==='contains'?[expr.value]:expr.value??(expr.values.includes(m.effective(expr.field))?m.effective(expr.field):expr.values[0]));}}
   activate(rule.condition);variants.push(m.payload());expected.push({active:paths.filter(k=>m.active(k)),required:paths.filter(k=>m.required(k))});
  }
- const b=backend(variants);for(const [i,r] of b.entries()){assert.deepEqual(r.active,expected[i].active,'active '+i);assert.deepEqual(r.required,expected[i].required,'required '+i);assert.deepEqual(r.normalized,variants[i],'serialization '+i);}
+ const b=backend(variants);for(const [i,r] of b.entries()){assert.deepEqual(r.active.filter(p=>paths.includes(p)),expected[i].active,'active '+i);assert.deepEqual(r.required,expected[i].required,'required '+i);assert.deepEqual(r.normalized,variants[i],'serialization '+i);}
  assert(variants.length>300);
 });

@@ -7,12 +7,13 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 			<div class="ba-footer-brand">
 				<a class="ba-brand ba-brand--footer" href="<?php echo esc_url( home_url( '/' ) ); ?>">
 					<span class="ba-brand__mark" aria-hidden="true">
-						<svg viewBox="0 0 44 44" focusable="false">
-							<circle cx="22" cy="22" r="17" fill="none" stroke="currentColor" stroke-width="2.4"/>
-							<circle cx="22" cy="22" r="8.5" fill="none" stroke="currentColor" stroke-width="2.4" opacity=".72"/>
-							<circle cx="22" cy="22" r="3.3" fill="currentColor"/>
-						</svg>
-					</span>
+				<svg viewBox="0 0 44 44" focusable="false">
+					<circle cx="22" cy="22" r="17" fill="none" stroke="currentColor" stroke-width="2.4"/>
+					<circle cx="22" cy="22" r="8.5" fill="none" stroke="currentColor" stroke-width="2.4" opacity=".72"/>
+					<circle cx="22" cy="22" r="3.3" fill="currentColor"/>
+					<path d="M22 1.8v5.1M22 37.1v5.1M1.8 22h5.1M37.1 22h5.1" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+				</svg>
+			</span>
 					<span class="ba-brand__wordmark">Bad<span>Around</span></span>
 				</a>
 				<p>La rete locale che raccoglie segnalazioni utili, richieste di aiuto e informazioni dal territorio.</p>
@@ -22,9 +23,13 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 			<div class="ba-footer-nav">
 				<div>
 					<h2>Esplora</h2>
+                    <a href="<?php echo esc_url(home_url('/blog/')); ?>">Blog</a>
 					<a href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Mappa</a>
 					<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Segnalazioni</a>
 					<a href="<?php echo esc_url( home_url( '/come-funziona/' ) ); ?>">Come funziona</a>
+                    <?php $information_page = get_page_by_path( 'segnalazioni-privacy-e-moderazione' ); if ( $information_page && 'publish' === $information_page->post_status ) : ?>
+                    <a href="<?php echo esc_url( get_permalink( $information_page ) ); ?>">Segnalazioni, privacy e moderazione</a>
+                    <?php endif; ?>
 				</div>
 				<div>
 					<h2>Community</h2>

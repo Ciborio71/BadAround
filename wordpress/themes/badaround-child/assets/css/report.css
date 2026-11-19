@@ -297,3 +297,31 @@ body.page-template-page-segnala-evento .ba-site-header{position:sticky}
 @media(prefers-reduced-motion:reduce){
 	.ba-report-workspace *{scroll-behavior:auto!important;transition:none!important}
 }
+
+/* Keep the page title on the same content column as the native wizard. */
+.ba-report-workspace__head{padding-inline:clamp(22px,4.2vw,58px)}
+.ba-report-workspace__identity{width:100%;max-width:none;margin-inline:auto;justify-content:space-between}
+.ba-report-workspace__identity>div{min-width:0}
+.ba-report-workspace__icon{order:2}
+.ba-report-required-legend{display:block;margin-top:6px}
+.ba-report-trust .ba-required-marker{color:#8f2833;font-weight:400}
+@media(max-width:1024px){.ba-report-workspace__identity{max-width:none}}
+@media(max-width:768px){.ba-report-workspace__identity{max-width:none}}
+@media(max-width:640px){.ba-report-workspace__head{padding-inline:16px}}
+
+/* Trust copy shares the same horizontal inset as the heading and wizard. */
+.ba-report-trust{padding-inline:clamp(22px,4.2vw,58px)}
+@media(max-width:640px){.ba-report-trust{padding-inline:16px}}
+
+
+/* The active step owns the page heading; the timeline follows immediately. */
+.ba-report-workspace__identity [data-native-page-title]{font-size:clamp(1.45rem,2.4vw,2rem);line-height:1.18}
+.ba-report-workspace__identity [data-native-page-title]:focus-visible{outline:3px solid var(--ba-report-teal-dark);outline-offset:4px}
+.ba-report-workspace__identity [data-native-page-intro]{max-width:none;font-size:1rem;line-height:1.55;margin-top:10px}
+.ba-report-workspace:has([data-native-page-title]) .ba-report-stage{padding-top:20px}
+
+/* Contextual step icon beside the heading, retaining the existing typography. */
+.ba-report-workspace__identity{justify-content:flex-start;align-items:flex-start}
+.ba-report-workspace__identity>div{flex:1}
+.ba-report-workspace__icon{order:0;flex-shrink:0}
+.ba-report-workspace__icon [data-native-step-icon][hidden]{display:none}

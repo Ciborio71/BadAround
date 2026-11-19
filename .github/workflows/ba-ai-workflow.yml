@@ -1,0 +1,51 @@
+name: BadAround human-confirmed AI moderation guarded release
+on:
+  push:
+    branches: [reconcile/identity-production-baseline-20261104]
+    paths:
+      - wordpress/mu-plugins/badaround-ai-moderation-config.php
+      - wordpress/mu-plugins/badaround-ai-moderation-workflow.php
+      - tests/ai-moderation-config.php
+      - tests/ai-moderation-workflow.php
+      - tools/ba_ai_workflow_release.py
+      - .github/workflows/ba-ai-workflow.yml
+permissions:
+  contents: read
+concurrency:
+  group: ba-ai-workflow-release
+  cancel-in-progress: false
+jobs:
+  release:
+    if: contains(github.event.head_commit.message, '[ai-workflow-release]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: bb1b341502cdceb6a2f4082839663ef49661ae4a
+          path: prior-source
+          persist-credentials: false
+      - name: Verify private configuration and authorization
+        run: |
+          php -l wordpress/mu-plugins/badaround-ai-moderation-config.php
+          php tests/ai-moderation-config.php
+          php -l wordpress/mu-plugins/badaround-ai-moderation-workflow.php
+          php tests/ai-moderation-workflow.php
+          php tests/publication-seo-classic.php
+          php tests/geo-prec-01-publication.php
+          php tests/geo-area-01-publication.php
+          python3 -m py_compile tools/ba_ai_workflow_release.py
+          python3 -m unittest discover -s tests -p test_ba_event_seo_release.py
+      - name: Prepare verified FTPS trust chain
+        run: |
+          mkdir -p tls
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/chain.pem
+      - name: Install recommendation and explicit human review modules
+        env:
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          FTP_TLS_CA_FILE: tls/chain.pem
+        run: python3 tools/ba_ai_workflow_release.py

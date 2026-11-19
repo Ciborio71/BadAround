@@ -6,29 +6,63 @@
   const ui=container.querySelector('[data-native-smart-address]');
   const panel=ui?.querySelector('[data-smart-map-panel]'),canvas=ui?.querySelector('[data-smart-map]');
   const geo=ui?.querySelector('[data-smart-geolocate]'),status=ui?.querySelector('[data-smart-map-status]');
+  const geoLabel=geo?.querySelector('[data-smart-geolocate-label]')||geo;
   if(!panel||!canvas||!geo)return {hide(){},show(){},sync(){},dispose(){}};
   const confirmation=ui.querySelector('[data-smart-confirmation]');
   // Keep the verified address next to the result, without changing its data source.
-  if(confirmation){panel.after(confirmation);confirmation.tabIndex=-1;}
+  const layout=ui.querySelector('[data-smart-location-layout]');
+  const card=ui.querySelector('[data-smart-location-card]');
+  if(confirmation){if(card)card.prepend(confirmation);else (layout||panel).after(confirmation);confirmation.tabIndex=-1;}
   let disposed=false,map,marker,circle,dragListener,dragMoveListener,busy=false;
-  let mapTask=Promise.resolve(),lastCircleRadius=null;
+  let mapTask=Promise.resolve(),markerAppearance='';
+  const colors={vehicle:'#1677E8',property:'#C9153D',hazard:'#F57C00',public_space:'#0AA184',animal:'#7040C8',item_document:'#E3A415'};
+  const categoryColor=()=>colors[model.values['event.category']]||'#087f8c';
+  function syncMarker(){
+   if(!marker)return;
+   const approximate=model.publicLocationRequest==='approximate_area';
+   const appearance=model.values['event.category']+':'+approximate;
+   if(appearance!==markerAppearance){marker.anchorLeft='-50%';marker.anchorTop=approximate?'-50%':'-100%';marker.replaceChildren(glyph());markerAppearance=appearance;}
+  }
   const locked=()=>Boolean(disposed||model.busy||model.snapshot||model.completed);
   const say=text=>{if(!disposed&&status)status.textContent=text;};
   function syncCircle(){
    const radius=model.publicLocationRadius;
-   if(!map||!marker||panel.hidden||model.publicLocationRequest!=='approximate_area'||!Number.isInteger(radius)||!config.publicLocationRequest?.radii?.includes(radius)){circle?.setMap(null);if(model.publicLocationRequest==='exact_point'&&lastCircleRadius!==null){map?.setZoom?.(17);lastCircleRadius=null;}return;}
+   if(!map||!marker||panel.hidden||model.publicLocationRequest!=='approximate_area'||!Number.isInteger(radius)||!config.publicLocationRequest?.radii?.includes(radius)){circle?.setMap(null);return;}
    const p=marker.position,center={lat:typeof p.lat==='function'?p.lat():p.lat,lng:typeof p.lng==='function'?p.lng():p.lng};
-   if(!circle&&root.google?.maps?.Circle)circle=new root.google.maps.Circle({map,center,radius,strokeColor:'#087f8c',strokeOpacity:.8,strokeWeight:2,fillColor:'#087f8c',fillOpacity:.12,clickable:false});
-   if(circle){circle.setCenter(center);circle.setRadius(radius);circle.setMap(map);if(lastCircleRadius!==radius&&map.fitBounds&&circle.getBounds)map.fitBounds(circle.getBounds(),24);lastCircleRadius=radius;}
+   if(!circle&&root.google?.maps?.Circle)circle=new root.google.maps.Circle({map,center,radius,strokeColor:categoryColor(),strokeOpacity:.8,strokeWeight:2,fillColor:categoryColor(),fillOpacity:.12,clickable:false});
+   if(circle){circle.setOptions({strokeColor:categoryColor(),fillColor:categoryColor()});circle.setCenter(center);circle.setRadius(radius);circle.setMap(map);}
   }
-  function sync(){geo.disabled=locked()||busy||!config.smartAddress?.key;if(marker)marker.gmpDraggable=!locked()&&!busy;syncCircle();}
+  function sync(){layout?.classList.toggle('has-map',!panel.hidden);geo.disabled=locked()||busy||!config.smartAddress?.key;if(marker)marker.gmpDraggable=!locked()&&!busy;syncMarker();syncCircle();}
   function glyph(){
    const category=model.values['event.category'];
-   const colors={vehicle:'#1677E8',property:'#C9153D',hazard:'#F57C00',public_space:'#0AA184',animal:'#7040C8',item_document:'#E3A415'};
-   const pin=container.ownerDocument.createElement('span');pin.className='ba-native-location-pin';pin.style.backgroundColor=colors[category]||'#087f8c';
+   const approximate=model.publicLocationRequest==='approximate_area',width=80,height=approximate?80:100;
+   const pin=container.ownerDocument.createElement('span');pin.className='ba-native-location-pin';
    const radio=Array.from(container.querySelectorAll('.ba-native-category-grid input')).find(el=>el.value===category);
    const icon=radio?.closest('label')?.querySelector('svg');
-   if(icon)pin.append(icon.cloneNode(true));
+   if(icon)pin.append(icon.cloneNode(true));else if(config.pinIcons?.[category])pin.innerHTML=config.pinIcons[category];
+   // Cloned gradients need their own IDs: the original category step is hidden.
+   // A shared URL fragment can resolve to its hidden gradient and erase the pin.
+   const svg=pin.querySelector('svg');
+   if(svg){
+    const prefix='ba-location-'+root.crypto.randomUUID()+'-';
+    for(const definition of svg.querySelectorAll('[id]')){
+     const old=definition.id,fresh=prefix+old;definition.id=fresh;
+     for(const element of svg.querySelectorAll('*'))for(const attribute of [...element.attributes]){
+      const value=attribute.value.replaceAll('url(#'+old+')','url(#'+fresh+')');
+      element.setAttribute(attribute.name,value==='#'+old?'#'+fresh:value);
+     }
+    }
+    if(approximate){
+     const outline=svg.querySelector(':scope > path');
+     const ring=container.ownerDocument.createElementNS('http://www.w3.org/2000/svg','circle');
+     for(const [key,value] of Object.entries({cx:24,cy:23,r:21,fill:outline?.getAttribute('fill')||categoryColor(),stroke:'#fff','stroke-width':1.6}))ring.setAttribute(key,String(value));
+     if(outline)outline.replaceWith(ring);else svg.prepend(ring);
+     svg.setAttribute('viewBox','0 -1 48 48');
+    }
+    svg.setAttribute('width',String(width));svg.setAttribute('height',String(height));
+    Object.assign(svg.style,{display:'block',width:width+'px',height:height+'px',transform:'none'});
+   }
+   Object.assign(pin.style,{display:'block',width:width+'px',height:height+'px',background:'none',transform:'none'});
    pin.setAttribute('aria-hidden','true');return pin;
   }
   function show(position){return mapTask=renderMap(position);}
@@ -42,14 +76,15 @@
     panel.hidden=false;
     if(!map){
      map=new GoogleMap(canvas,{center:position,zoom:17,mapId:config.smartAddress?.mapId||'DEMO_MAP_ID',mapTypeControl:false,streetViewControl:false,clickableIcons:false,...root.BadAroundMapNavigation.options()});
-     root.BadAroundMapNavigation.mount(map,canvas);
+     // Native zoom/fullscreen and keyboard gestures suffice for this small preview.
+     // Keep the directional pad on the other application maps only.
      marker=new AdvancedMarkerElement({map,position,title:'Posizione riservata dell’evento. Sposta per correggere.',gmpDraggable:true});
-     marker.replaceChildren(glyph());
+     syncMarker();
      dragListener=()=>{const p=marker.position;reverse({lat:typeof p.lat==='function'?p.lat():p.lat,lng:typeof p.lng==='function'?p.lng():p.lng});};
      marker.addEventListener('gmp-dragend',dragListener);
      dragMoveListener=()=>syncCircle();marker.addEventListener('gmp-drag',dragMoveListener);
-    }else{marker.map=map;marker.position=position;marker.replaceChildren(glyph());map.setCenter(position);}
-    sync();say('Il segnaposto indica la posizione riservata dell’evento. Puoi correggerla spostandolo.');
+    }else{marker.map=map;marker.position=position;syncMarker();map.setCenter(position);}
+    sync();say('');
    }catch(_){if(!disposed&&bridge.current(ticket))say('Mappa non disponibile. Puoi continuare con l’indirizzo Google confermato.');}
   }
   function revealAddress(ticket){
@@ -88,7 +123,7 @@
     }
     else if(bridge.current(ticket))say('Punto non riconosciuto. Cerca e seleziona un indirizzo Google.');
    }catch(_){if(!disposed&&bridge.current(ticket))say('Non è stato possibile verificare il punto. Cerca e seleziona un indirizzo Google.');}
-   finally{if(!disposed){busy=false;geo.textContent='Usa la mia posizione';sync();}}
+   finally{if(!disposed){busy=false;geoLabel.textContent='Usa la mia posizione';sync();}}
   }
   function reverse(position){
    if(locked()||busy)return;
@@ -98,22 +133,22 @@
   function geolocate(){
    if(locked()||busy)return;
    if(root.isSecureContext===false||!root.navigator?.geolocation){say('La posizione del dispositivo non è disponibile in questo browser. Puoi cercare un indirizzo.');return;}
-   const ticket=bridge.reserve();busy=true;sync();geo.textContent='Ricerca della posizione…';say('Attendi la posizione del dispositivo e controlla che sia il luogo dell’evento.');
+   const ticket=bridge.reserve();busy=true;sync();geoLabel.textContent='Ricerca della posizione…';say('Attendi la posizione del dispositivo e controlla che sia il luogo dell’evento.');
    const failed=error=>{
-    if(disposed)return;busy=false;geo.textContent='Usa la mia posizione';sync();
+    if(disposed)return;busy=false;geoLabel.textContent='Usa la mia posizione';sync();
     if(!bridge.current(ticket))return;
     const messages={1:'Permesso alla posizione negato. Consenti l’accesso alla posizione nelle impostazioni del browser oppure cerca un indirizzo.',2:'Non è stato possibile rilevare la posizione del dispositivo. Riprova oppure cerca un indirizzo.',3:'La ricerca della posizione ha richiesto troppo tempo. Riprova oppure cerca un indirizzo.'};
     say(messages[error?.code]||'La posizione del dispositivo non è disponibile. Puoi cercare un indirizzo.');
    };
    try{root.navigator.geolocation.getCurrentPosition(p=>{
-    if(disposed||!bridge.current(ticket)){busy=false;geo.textContent='Usa la mia posizione';sync();return;}
+    if(disposed||!bridge.current(ticket)){busy=false;geoLabel.textContent='Usa la mia posizione';sync();return;}
     resolve({lat:p.coords.latitude,lng:p.coords.longitude},ticket,true);
    },failed,{enableHighAccuracy:true,timeout:12000,maximumAge:0});}catch(_){failed();}
   }
-  function categoryChanged(event){if(event.target?.name==='event.category'&&marker)marker.replaceChildren(glyph());}
-  function geoChoiceChanged(event){if(['ba-public-location-choice','ba-public-location-radius'].includes(event.target?.name))syncCircle();}
+  function categoryChanged(event){if(event.target?.name==='event.category'){syncMarker();syncCircle();}}
+  function geoChoiceChanged(event){if(['ba-public-location-choice','ba-public-location-radius'].includes(event.target?.name)){syncMarker();syncCircle();}}
   geo.addEventListener('click',geolocate);container.addEventListener('input',categoryChanged);container.addEventListener('change',geoChoiceChanged);sync();
-  return {show,sync,hide(){panel.hidden=true;if(marker)marker.map=null;circle?.setMap(null);},dispose(){disposed=true;if(marker&&dragListener)marker.removeEventListener('gmp-dragend',dragListener);if(marker&&dragMoveListener)marker.removeEventListener('gmp-drag',dragMoveListener);circle?.setMap(null);if(marker)marker.map=null;container.removeEventListener('change',geoChoiceChanged);geo.removeEventListener('click',geolocate);container.removeEventListener('input',categoryChanged);}};
+  return {show,sync,hide(){panel.hidden=true;layout?.classList.remove('has-map');if(marker)marker.map=null;circle?.setMap(null);},dispose(){disposed=true;if(marker&&dragListener)marker.removeEventListener('gmp-dragend',dragListener);if(marker&&dragMoveListener)marker.removeEventListener('gmp-drag',dragMoveListener);circle?.setMap(null);if(marker)marker.map=null;container.removeEventListener('change',geoChoiceChanged);geo.removeEventListener('click',geolocate);container.removeEventListener('input',categoryChanged);}};
  }
  ns.LocationMap={mount};
 })(typeof window!=='undefined'?window:globalThis);

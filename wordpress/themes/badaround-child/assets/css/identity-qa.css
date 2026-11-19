@@ -1,0 +1,23 @@
+/* Collaudo Identity: presentation only, scoped to this page. */
+.ba-identity-qa{padding:48px 0 72px;min-height:60vh}
+.ba-identity-qa__content{max-width:960px;margin:0 auto;padding:clamp(22px,4vw,44px)}
+.ba-identity-qa h1{color:var(--ba-navy-950);font-size:clamp(2rem,4vw,3rem);line-height:1.12;letter-spacing:-.035em;margin:0 0 18px}
+.ba-identity-qa h2{color:var(--ba-navy-950);font-size:1.5rem;line-height:1.25;margin:28px 0 12px}
+.ba-identity-qa h3{color:var(--ba-navy-950);font-size:1.15rem;margin:0 0 8px}
+.ba-identity-qa p{color:var(--ba-muted);line-height:1.7}
+.ba-identity-qa form{display:grid;gap:16px;max-width:640px;margin:28px 0;padding-top:24px;border-top:1px solid var(--ba-border)}
+.ba-identity-qa label{display:grid;gap:7px;font-weight:650;color:var(--ba-text)}
+.ba-identity-qa input:not([type="checkbox"]){width:100%;min-height:46px;padding:11px 13px;border:1px solid var(--ba-border);border-radius:10px;background:#fff;color:var(--ba-text);font:inherit}
+.ba-identity-qa label:has(input[type="checkbox"]){display:block;font-weight:400;line-height:1.65}
+.ba-identity-qa input[type="checkbox"]{width:18px;height:18px;margin:0 8px 0 0;vertical-align:middle;accent-color:var(--ba-teal-700)}
+.ba-identity-qa button{justify-self:start;min-height:46px;padding:11px 20px;border:1px solid transparent;border-radius:12px;background:var(--ba-teal-600);color:#fff;font:inherit;font-weight:750;cursor:pointer}
+.ba-identity-qa button:hover{background:var(--ba-teal-700);color:#fff}
+.ba-identity-qa button:disabled{opacity:.6;cursor:wait}
+.ba-identity-qa input:focus-visible,.ba-identity-qa button:focus-visible,.ba-identity-qa summary:focus-visible{outline:3px solid var(--ba-teal-100);outline-offset:3px}
+.ba-identity-qa details{margin:20px 0;padding:16px 18px;border:1px solid var(--ba-border);border-radius:12px;background:var(--ba-surface-alt)}
+.ba-identity-qa summary{color:var(--ba-teal-700);font-weight:700;cursor:pointer}
+.ba-identity-qa details h1{font-size:1.6rem;margin-top:18px}
+.ba-identity-qa details h2{font-size:1.2rem}
+.ba-identity-qa [data-ba-result]:not(:empty){margin:16px 0;color:var(--ba-navy-800);font-weight:650}
+.ba-identity-qa [hidden]{display:none!important}
+@media(max-width:640px){.ba-identity-qa{padding:24px 0 44px}.ba-identity-qa__content{padding:22px 18px}.ba-identity-qa button{width:100%;justify-self:stretch}.ba-identity-qa details{padding:14px}}

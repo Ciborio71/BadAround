@@ -249,7 +249,8 @@ $period_label = $period ? sprintf( 'Ultimi %d giorni', $period ) : '';
 								'template-parts/components/event-card',
 								null,
 								array(
-									'title'        => $item['title'],
+									'event_id'     => $item['id'] ?? 0,
+                                'title'        => $item['title'],
 									'url'          => $item['permalink'],
 									'status'       => 'info',
 									'status_label' => $item['event_type']['name'] ?? 'Segnalazione',

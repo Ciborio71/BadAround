@@ -83,10 +83,10 @@ function badaround_sentinel_territory_label( WP_Term $term ) {
 						<span class="ba-sentinel-art-road ba-sentinel-art-road--b"></span>
 						<span class="ba-sentinel-art-road ba-sentinel-art-road--c"></span>
 						<span class="ba-sentinel-art-zone"><i></i><strong>La tua zona</strong></span>
-						<span class="ba-sentinel-art-pin ba-sentinel-art-pin--vehicles">●</span>
-						<span class="ba-sentinel-art-pin ba-sentinel-art-pin--hazards">!</span>
-						<span class="ba-sentinel-art-pin ba-sentinel-art-pin--animals">●</span>
-						<span class="ba-sentinel-art-pin ba-sentinel-art-pin--places">⌂</span>
+						<span class="ba-sentinel-art-pin ba-sentinel-art-pin--vehicles"><?php echo badaround_pin_svg('veicoli'); ?></span>
+						<span class="ba-sentinel-art-pin ba-sentinel-art-pin--hazards"><?php echo badaround_pin_svg('pericoli'); ?></span>
+						<span class="ba-sentinel-art-pin ba-sentinel-art-pin--animals"><?php echo badaround_pin_svg('animali'); ?></span>
+						<span class="ba-sentinel-art-pin ba-sentinel-art-pin--places"><?php echo badaround_pin_svg('case-e-attivita'); ?></span>
 					</div>
 					<div class="ba-sentinel-art-status"><span></span> Sentinella attiva</div>
 					<div class="ba-sentinel-art-notification">

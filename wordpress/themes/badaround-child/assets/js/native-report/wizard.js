@@ -3,9 +3,9 @@
   const ns = window.BadAroundNative;
   function boot(container) {
     if (container.nativeReport) return; // Reinitialization must retain the current logical wizard.
-    let disposed=false; const listeners=[]; let submitWaitTimer=null;
+    let disposed=false; const listeners=[]; let submitWaitTimer=null;let accessPhase=null;let pairedLabelObserver=null;
     function listen(target,type,handler) { target.addEventListener(type,handler);listeners.push(()=>target.removeEventListener(type,handler)); }
-    function teardown() { if(disposed)return; disposed=true;clearTimeout(submitWaitTimer);submissionFeedback.hidden=true;listeners.forEach(remove=>remove());mediaView?.dispose();smartAddress?.dispose(); }
+    function teardown() { if(disposed)return; disposed=true;pairedLabelObserver?.disconnect();clearTimeout(submitWaitTimer);submissionFeedback.hidden=true;listeners.forEach(remove=>remove());mediaView?.dispose();smartAddress?.dispose(); }
     const config = JSON.parse(container.querySelector('[data-native-config]').textContent);
     const model = new ns.Model(config);
     // These are explicit reporter choices in the UI; canonical fallback defaults stay frozen.
@@ -15,7 +15,36 @@
     const publicLocationChoice = form.querySelector('[data-native-public-location-choice]');
     const radiusField=form.querySelector('[data-native-radius-field]'),radiusSelect=radiusField?.querySelector('select');
     const steps = Object.keys(config.steps);
+    const finalEntryStep=steps.filter(key=>key!=='review').at(-1);
     const wrappers = Array.from(form.querySelectorAll('[data-native-field]'));
+    const workspace=container.closest('.ba-report-workspace');
+    const pageTitle=workspace?.querySelector('[data-native-page-title]');
+    const pageIntro=workspace?.querySelector('[data-native-page-intro]');
+    const pageIcon=workspace?.querySelector('[data-native-page-icon]');
+    const stepCopy=new Map(Array.from(form.querySelectorAll('[data-native-step]')).map(section=>{
+      const heading=section.querySelector('h2');
+      const intro=heading?.nextElementSibling?.tagName==='P'?heading.nextElementSibling:null;
+      return [section.dataset.nativeStep,{section,heading,intro,text:intro?.textContent||''}];
+    }));
+    function syncPageHeading(current){
+      if(!pageTitle||!pageIntro)return;
+      for(const entry of stepCopy.values()){
+        if(entry.heading)entry.heading.hidden=true;
+        if(entry.intro)entry.intro.hidden=true;
+        entry.section.setAttribute('aria-labelledby',pageTitle.id);
+      }
+      pageTitle.textContent=model.completed?'Segnalazione inviata':config.steps[current]+(current==='event'?'?':'');
+      if(pageIcon){
+        const iconKey=model.completed?'complete':current;
+        pageIcon.dataset.nativePageIconState=iconKey;
+        pageIcon.querySelectorAll('[data-native-step-icon]').forEach(icon=>icon.toggleAttribute('hidden',icon.dataset.nativeStepIcon!==iconKey));
+      }
+      pageIntro.textContent=model.completed?'La segnalazione è stata inviata ed è in attesa di moderazione.':stepCopy.get(current)?.text||'';
+      pageIntro.hidden=!pageIntro.textContent;
+      const successHeading=success.querySelector('h2');if(successHeading)successHeading.hidden=model.completed;
+      if(model.completed)success.setAttribute('aria-labelledby',pageTitle.id);
+    }
+
     // One contextual, non-blocking notice. No model value or payload field is added.
     const emergencyNotice=document.createElement('div');
     emergencyNotice.className='ba-native-emergency-notice';
@@ -24,41 +53,32 @@
     emergencyNotice.setAttribute('role','status');
     emergencyNotice.setAttribute('aria-live','polite');
     emergencyNotice.setAttribute('aria-atomic','true');
-    const emergencyCopy='Se c’è un pericolo immediato o un’emergenza, contatta subito il 112. BadAround non sostituisce i servizi di emergenza.';
-    function syncEmergencyNotice(current){
-      const rules=config.emergencyNotice;
-      const triggered=!!rules && (rules.subtypes.includes(model.effective('event.subtype')) ||
-        (model.active('location.immediate_danger') && rules.dangerValues.includes(model.effective('location.immediate_danger'))));
-      const anchor=current===config.fields['event.subtype'].step
-        ? wrappers.find(w=>w.dataset.nativeField==='event.subtype')
-        : current===config.fields['location.immediate_danger'].step
-          ? wrappers.find(w=>w.dataset.nativeField==='location.immediate_danger')
-          : form.querySelector(`[data-native-step="${current}"] h2`);
-      if(anchor && anchor.nextElementSibling!==emergencyNotice)anchor.after(emergencyNotice);
-      emergencyNotice.hidden=!triggered;
-      const text=triggered?emergencyCopy:'';
-      if(emergencyNotice.textContent!==text)emergencyNotice.textContent=text;
-    }
+    function syncEmergencyNotice(){emergencyNotice.hidden=true;emergencyNotice.textContent='';}
     const conditionalStatus=document.createElement('p');conditionalStatus.className='ba-native-conditional-status';
     conditionalStatus.setAttribute('role','status');conditionalStatus.setAttribute('aria-live','polite');conditionalStatus.setAttribute('aria-atomic','true');form.before(conditionalStatus);
     let activeSpecifications=new Set();
     const next = form.querySelector('[data-native-next]'), back = form.querySelector('[data-native-back]'), submit = form.querySelector('[data-native-submit]');
+    const preview=form.querySelector('[data-native-review-toggle]');
     const success = container.querySelector('[data-native-success]');
     // Outside the busy form so assistive technology can announce progress.
     const submissionFeedback=document.createElement('div');
     submissionFeedback.className='ba-native-submit-feedback';submissionFeedback.hidden=true;
     submissionFeedback.dataset.nativeSubmitFeedback='';
     submissionFeedback.setAttribute('role','status');submissionFeedback.setAttribute('aria-live','polite');submissionFeedback.setAttribute('aria-atomic','true');
+    const submissionPanel=document.createElement('div');submissionPanel.className='ba-native-submit-panel';submissionPanel.tabIndex=-1;
+    const submissionText=document.createElement('p');submissionPanel.append(submissionText);submissionFeedback.append(submissionPanel);
     form.after(submissionFeedback);
+    listen(document,'keydown',event=>{if(!submissionFeedback.hidden&&event.key==='Tab'){event.preventDefault();submissionPanel.focus({preventScroll:true});}});
     function syncSubmissionFeedback(){
+      if(accessPhase&&accessPhase!=='checking'){submit.classList.remove('is-loading');clearTimeout(submitWaitTimer);submitWaitTimer=null;submissionFeedback.hidden=true;return;}
       submit.classList.toggle('is-loading',model.busy);
       if(model.busy){
         if(submissionFeedback.hidden){
-          submissionFeedback.textContent='Invio in corso… Attendi la conferma prima di chiudere la pagina.';
+          submissionText.textContent=accessPhase==='checking'?'Controllo dell’accesso in corso…':'Invio in corso… Attendi la conferma prima di chiudere la pagina.';
           submissionFeedback.hidden=false;
-          submissionFeedback.scrollIntoView?.({block:'nearest',behavior:'instant'});
+          submissionPanel.focus({preventScroll:true});
           submitWaitTimer=setTimeout(()=>{
-            if(!disposed&&model.busy)submissionFeedback.textContent='Stiamo elaborando la segnalazione. Attendi la conferma: non occorre premere di nuovo Invia.';
+            if(!disposed&&model.busy)submissionText.textContent=accessPhase==='checking'?'Stiamo verificando l’accesso. Attendi: la segnalazione non è ancora stata inviata.':'Stiamo elaborando la segnalazione. Attendi la conferma: non occorre premere di nuovo Invia.';
           },6000);
         }
       }else{
@@ -66,6 +86,39 @@
       }
     }
 
+    const identityWrapper=wrappers.find(w=>w.dataset.nativeField==='reporter.public_identity_mode');
+    const anonymousNote=document.createElement('p');anonymousNote.className='ba-native-anonymous-note';anonymousNote.hidden=true;anonymousNote.dataset.nativeAnonymousNote='';anonymousNote.dataset.nativeSignaturePreview='';anonymousNote.setAttribute('role','status');anonymousNote.setAttribute('aria-live','polite');anonymousNote.id='ba-native-signature-preview';
+    identityWrapper?.append(anonymousNote);
+    const mediaAvailability=wrappers.find(w=>w.dataset.nativeField==='media.availability');
+    const mediaLaterNote=document.createElement('p');mediaLaterNote.className='ba-native-help';mediaLaterNote.hidden=true;mediaLaterNote.dataset.nativeMediaLater='';mediaLaterNote.id='ba-native-media-later';mediaLaterNote.setAttribute('role','status');mediaLaterNote.setAttribute('aria-live','polite');
+    mediaLaterNote.textContent='Potrai aggiungere le immagini in un secondo momento: puoi inviare la segnalazione anche senza foto.';
+    mediaAvailability?.append(mediaLaterNote);
+    const mediaAvailabilitySelect=mediaAvailability?.querySelector('select[data-native-input]');
+    if(mediaAvailabilitySelect)mediaAvailabilitySelect.setAttribute('aria-describedby',[mediaAvailabilitySelect.getAttribute('aria-describedby'),mediaLaterNote.id].filter(Boolean).join(' '));
+    const signatureSelect=identityWrapper?.querySelector('select[data-native-input]');
+    if(signatureSelect)signatureSelect.setAttribute('aria-describedby',signatureSelect.getAttribute('aria-describedby')+' '+anonymousNote.id);
+    function syncSignature(){
+      const mode=model.effective('reporter.public_identity_mode');anonymousNote.hidden=!mode;
+      if(!mode)return;
+      const first=String(model.effective('reporter.first_name')||'').trim(),last=String(model.effective('reporter.last_name')||'').trim(),nickname=String(model.effective('reporter.pseudonym')||'').trim();
+      const label=mode==='anonymous'?'Anonimo':mode==='pseudonym'?(nickname||'il tuo pseudonimo'):mode==='first_name'?(first||'il tuo nome'):(first||'il tuo nome')+(last?' '+Array.from(last)[0]+'.':' e l’iniziale del cognome');
+      const heading=document.createElement('strong');heading.textContent='🔒 I tuoi dati restano privati: ';
+      const preview=document.createElement('strong');preview.textContent=label;
+      const text=mode==='anonymous'?'chiediamo nome e cognome solo per verifiche interne e gestione della segnalazione. Non saranno pubblicati né diffusi pubblicamente: gli altri utenti leggeranno solo ':mode==='pseudonym'?'nome e cognome completi restano riservati per verifiche interne. Online apparirà solo ':'i dati completi servono per verifiche interne e gestione della segnalazione. Online sarà visibile solo ';
+      anonymousNote.replaceChildren(heading,document.createTextNode(text),preview,document.createTextNode('.'));
+    }
+    const socialWrapper=wrappers.find(w=>w.dataset.nativeField==='reporter.social_visibility');
+    const socialConsent=socialWrapper?.querySelector('[data-native-social-consent]');
+    function socialConsentChanged(event){
+      event.stopPropagation();if(model.busy||model.snapshot||model.completed)return;
+      model.set('reporter.social_visibility',socialConsent.checked?'requested':'declined');ns.presentErrors(container,[],config);render();
+    }
+    if(socialConsent){listen(socialConsent,'input',socialConsentChanged);listen(socialConsent,'change',socialConsentChanged);}
+    const signatureModeration=document.createElement('p');signatureModeration.className='ba-native-help';signatureModeration.textContent='La pubblicazione della segnalazione e della firma scelta resta soggetta alle linee guida e alla moderazione di BadAround.';form.querySelector('[data-native-step="'+finalEntryStep+'"]')?.append(signatureModeration);
+    const choiceHelp={
+      'reporter.contact_preference':{community:'Ricevi sia gli aggiornamenti sullo stato della segnalazione, sia eventuali avvistamenti e testimonianze inviati dagli altri utenti tramite BadAround.',badaround_only:'Ricevi solo le comunicazioni di BadAround sulla gestione e sullo stato della segnalazione. Nessun messaggio dalla community.'},
+      'reporter.social_visibility':{requested:'La richiesta sarà valutata dallo staff. Verranno condivisi solo contenuti approvati e pubblicabili.',declined:'La segnalazione rimane sul sito; non richiedi la diffusione sui canali social di BadAround.'}
+    };
     let mediaView = null;
     const smartAddress = ns.SmartAddress?.mount(container, config, model);
     function mountMedia() {
@@ -124,7 +177,7 @@
         if (field.help && !['Dato riservato: non viene pubblicato integralmente.','La pubblicazione avviene solo dopo moderazione.'].includes(field.help)) {
           const help = document.createElement('small');
           help.className = 'ba-native-review-help';
-          help.textContent = field.help;
+          help.textContent = path==='location.exact_address' ? (model.publicLocationRequest==='exact_point'?'Indirizzo completo destinato alla pubblicazione, dopo la moderazione.':'Indirizzo riservato: al pubblico sarà mostrata solo la zona approssimata.') : field.help;
           detail.append(help);
         }
         list.append(term, detail);
@@ -141,7 +194,14 @@
         }
         const term=document.createElement('dt');term.textContent='Posizione pubblica richiesta';
         const detail=document.createElement('dd');detail.textContent=model.publicLocationLabel();
+        const exposure=document.createElement('small');exposure.className='ba-native-review-help';
+        exposure.textContent=model.publicLocationRequest==='exact_point'?'Saranno pubblicati l’indirizzo completo e il civico indicati, dopo la moderazione.':'L’indirizzo completo e il civico restano riservati: sarà pubblicata solo la zona approssimata.';detail.append(exposure);
         locationSection.querySelector('dl').append(term,detail);
+        if(config.neighborhoodProposal&&model.neighborhood?.confirmed){
+          const zoneTerm=document.createElement('dt');zoneTerm.textContent='Quartiere / zona proposta';
+          const zoneDetail=document.createElement('dd');zoneDetail.textContent=model.neighborhood.label+' — da verificare in moderazione';
+          locationSection.querySelector('dl').append(zoneTerm,zoneDetail);
+        }
       }
       // Follow the seven-step sequence even when schema fields are ordered differently.
       steps.forEach(key => { if (sections.has(key)) region.append(sections.get(key)); });
@@ -171,14 +231,6 @@
       item_document: {title:'Oggetti e documenti', desc:'Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.', icon:'object', color:'#E3A415'}
     };
     // Same SVG geometry and stroke/fill treatment as the home category pins.
-    const cardIcons = {
-      vehicle:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 14h14l-1.5-5h-11L5 14Zm1 0v3m12-3v3M8 17h8M8 9l1-3h6l1 3"/></svg>',
-      property:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7v9h-6v-6h-4v6H4v-9Z"/></svg>',
-      hazard:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 3.5 20h17L12 4Z"/><path d="M12 9v5m0 3h.01"/></svg>',
-      public:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h16M6 18V9h12v9M8 9V6h8v3M9 13h2m2 0h2"/></svg>',
-      animal:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor" stroke="none"><path d="M8 11c-1.3 0-2.3-1.3-2.3-2.8S6.5 5.5 7.8 5.5s2.2 1.2 2.2 2.7S9.3 11 8 11Zm8 0c-1.3 0-2-1.3-2-2.8s.9-2.7 2.2-2.7 2.1 1.2 2.1 2.7S17.3 11 16 11Zm-4 9c-3.2 0-5.4-1.7-5.4-3.8 0-1.8 1.4-3 3-3.9.8-.5 1.2-1.5 2.4-1.5s1.6 1 2.4 1.5c1.6.9 3 2.1 3 3.9 0 2.1-2.2 3.8-5.4 3.8Z"/></svg>',
-      object:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14v12H5V7Zm3-3h8v3H8V4Zm1 7h6m-6 4h4"/></svg>'
-    };
     const cardGroups = new Map();
     // Presentation adapters preserve every canonical value and validation rule.
     // One explicit action for required declarations only; optional contact preferences stay independent.
@@ -198,8 +250,8 @@
       link.setAttribute('aria-label',label+' (si apre in una nuova scheda)');return link;
     }
     const declarationDetail=document.createElement('p');declarationDetail.id='ba-native-declarations-detail';declarationDetail.className='ba-native-declaration-detail';
-    declarationDetail.append('Dichiaro di avere il diritto di condividere eventuali contenuti allegati, di aver letto e accettato le ',policyLink('regole di pubblicazione','/regole-di-pubblicazione/'),' e i ',policyLink('termini e le condizioni','/termini-e-condizioni/'),' di BadAround e di aver preso visione dell’',policyLink('informativa privacy','/privacy-policy/'),'.');
-    const declarationRequired=document.createElement('span');declarationRequired.dataset.nativeRequired='';declarationRequired.textContent=' (obbligatorio)';declarationCopy.append(declarationRequired);
+    declarationDetail.append('Mi assumo la responsabilità dei contenuti inviati. Ho compreso che, dopo la moderazione, la targa inserita sarà pubblicata in chiaro e, scegliendo Punto esatto, saranno pubblicati anche l’indirizzo completo e il numero civico. Con Area approssimata sarà mostrata solo la zona. Dichiaro di avere il diritto di condividere eventuali contenuti allegati, di aver letto e accettato le ',policyLink('regole di pubblicazione','/regole-di-pubblicazione/'),' e i ',policyLink('termini e le condizioni','/termini-e-condizioni/'),' di BadAround e di aver preso visione dell’',policyLink('informativa privacy','/privacy-policy/'),'.');
+    const declarationRequired=document.createElement('span');declarationRequired.dataset.nativeRequired='';declarationRequired.textContent=' *';declarationRequired.dataset.nativeRequiredState='required';declarationRequired.setAttribute('aria-hidden','true');declarationInput.setAttribute('aria-required','true');declarationCopy.append(declarationRequired);
     declarationLabel.append(declarationInput,declarationCopy);declaration.append(declarationLabel,declarationDetail);
     const declarationError=document.createElement('p');declarationError.id='ba-native-declarations-error';declarationError.className='ba-native-error';declarationError.hidden=true;
     declarationInput.setAttribute('aria-describedby','ba-native-declarations-detail ba-native-declarations-help '+declarationError.id);declaration.append(declarationError);finalBox.append(declaration);
@@ -267,6 +319,7 @@
           }else unit.querySelectorAll('[data-native-question-number]').forEach(el=>el.remove());
           if(!visible)unit.querySelectorAll('input,select,textarea').forEach(el=>{el.disabled=true;el.required=false;el.setAttribute('aria-required','false');});
           if(unit===authorityWrapper){authorityCanonical.disabled=true;authorityCanonical.required=false;authorityCanonical.setAttribute('aria-required','false');authorityChoice.disabled=!visible||locked;authorityChoice.required=visible&&model.required(path);authorityChoice.setAttribute('aria-required',String(visible&&model.required(path)));}
+          if(unit===socialWrapper&&socialConsent){socialConsent.checked=model.effective(path)==='requested';socialConsent.disabled=!visible||locked||section.dataset.nativeStep!==steps[model.step];socialConsent.required=false;}
           if(unit===declaration){declarationInput.disabled=!visible||locked;declarationInput.required=visible;declarationInput.setAttribute('aria-required',String(visible));}
         }
         if(section.dataset.nativeStep==='media'){
@@ -294,19 +347,46 @@
       badge.textContent=number+'. ';
     }
     // Pair only closely related fields; DOM and keyboard order remain left-to-right.
-    for (const pair of [['reporter.email','reporter.phone'],['reporter.first_name','reporter.last_name'],['vehicle.make','vehicle.model','vehicle.color'],['animal.breed','animal.name'],['time.date','time.knowledge'],['time.range_start','time.range_end'],['property.access_method','property.alarm_status']]) {
+    for (const pair of [['location.place_type','location.immediate_danger'],['reporter.email','reporter.phone'],['reporter.first_name','reporter.last_name'],['vehicle.make','vehicle.model','vehicle.color'],['animal.breed','animal.name'],['time.date','time.knowledge'],['time.range_start','time.range_end'],['property.access_method','property.alarm_status']]) {
       const fields = pair.map(path => wrappers.find(wrapper => wrapper.dataset.nativeField === path));
       if (fields.some(field => !field) || fields.some(field=>field.parentElement!==fields[0].parentElement)) continue;
       const row = document.createElement('div'); row.className = 'ba-native-field-pair';
+      if(pair[0]==='location.place_type')row.classList.add('ba-native-place-danger-row');
       row.style.setProperty('--ba-field-columns',String(fields.length));
       fields[0].before(row); fields.forEach(field => row.append(field));
     }
+    // Match actual label height, including wrapping, font loading and zoom.
+    // Only presentation changes: controls, canonical values and keyboard order stay intact.
+    function alignPlaceLabels(){
+      if(disposed)return;
+      const row=form.querySelector('.ba-native-place-danger-row');
+      if(!row)return;
+      row.style.removeProperty('--ba-paired-label-height');
+      if(!window.matchMedia?.('(min-width:1025px)').matches)return;
+      const labels=[...row.querySelectorAll(':scope > .ba-native-field:not([hidden]) > label')];
+      if(labels.length!==2)return;
+      const height=Math.max(...labels.map(label=>label.getBoundingClientRect().height));
+      if(height>0)row.style.setProperty('--ba-paired-label-height',Math.ceil(height)+'px');
+    }
+    const pairedRow=form.querySelector('.ba-native-place-danger-row');
+    if(pairedRow&&window.ResizeObserver){
+      let width=-1;
+      pairedLabelObserver=new ResizeObserver(entries=>{
+        const nextWidth=entries[0]?.contentRect.width;
+        if(nextWidth!==width){width=nextWidth;alignPlaceLabels();}
+      });
+      pairedLabelObserver.observe(pairedRow);
+    }
+    listen(window,'resize',alignPlaceLabels);
+    if(document.fonts?.addEventListener)listen(document.fonts,'loadingdone',alignPlaceLabels);
     function expandCards(wrapper) {
       const select = wrapper.querySelector('select[data-native-input]');
       const entry = cardGroups.get(select);
       if (entry) { clearTimeout(entry.commitTimer); entry.collapsedValue = null; syncCards(wrapper,config.fields[wrapper.dataset.nativeField]); }
     }
     function nextQuestion(wrapper) {
+      // Notification preferences are an editable choice, not question progression.
+      if(wrapper.dataset.nativeField==='reporter.contact_preference')return;
       const section = wrapper.closest('[data-native-step]');
       if (!section || section.hidden || model.busy || model.snapshot || model.completed) return;
       const fields = Array.from(section.querySelectorAll('[data-native-field],[data-beta-declarations]'));
@@ -324,7 +404,8 @@
       if (!target || target.disabled) return;
       target.focus({preventScroll:true});
       // Keep the contextual notice in view when the existing auto-focus advances.
-      const anchor = !emergencyNotice.hidden && wrapper.nextElementSibling===emergencyNotice
+      const questionRow=wrapper.closest('.ba-native-field-pair')||wrapper;
+      const anchor = !emergencyNotice.hidden && questionRow.nextElementSibling===emergencyNotice
         ? emergencyNotice : nextField || target;
       const rect = anchor.getBoundingClientRect();
       const headerBottom = document.querySelector('.ba-site-header')?.getBoundingClientRect().bottom || 0;
@@ -335,8 +416,8 @@
     }
     function syncCards(wrapper, field) {
       const select = wrapper.querySelector('select[data-native-input]');
-      if (!select || (field.step === 'location' && wrapper.dataset.nativeField.startsWith('location.')) || wrapper===authorityWrapper || wrapper.dataset.nativeField==='authority.type') return;
-      const options = Array.from(select.options).filter(option => option.value);
+      if (!select || (field.step === 'location' && wrapper.dataset.nativeField.startsWith('location.')) || wrapper===authorityWrapper || wrapper.dataset.nativeField==='authority.type' || wrapper.dataset.nativeField==='reporter.social_visibility') return;
+      const options = Array.from(select.options).filter(option => option.value && !option.hidden);
       const category = wrapper.dataset.nativeField === 'event.category';
       const subtype = wrapper.dataset.nativeField === 'event.subtype';
       if (!category && !subtype && options.length > 6) return;
@@ -368,6 +449,7 @@
         group.addEventListener('keyup', () => { entry.arrowNavigation = false; });
 
       }
+      entry.group.classList.toggle('ba-native-short-options',!category&&!subtype&&options.length===3&&options.every(option=>option.textContent.trim().length<=32));
       const signature = JSON.stringify(options.map(option => [option.value,option.textContent]));
       if (entry.signature !== signature) {
         entry.group.replaceChildren(); entry.signature = signature;
@@ -378,14 +460,16 @@
           radio.setAttribute('aria-describedby', select.getAttribute('aria-describedby'));
           const copy = document.createElement('span'); copy.className = 'ba-native-card-copy';
           const meta = category ? categoryCards[option.value] : null;
-          const title = document.createElement('strong'); title.textContent = meta?.title || option.textContent; copy.append(title);
+          const title = document.createElement('span'); title.className='ba-native-card-title'; title.textContent = meta?.title || option.textContent; copy.append(title);
           if (meta) {
             card.style.setProperty('--ba-card-accent',meta.color);
             const icon = document.createElement('span'); icon.className = 'ba-native-card-icon';
-            icon.setAttribute('aria-hidden','true'); icon.innerHTML = cardIcons[meta.icon];
+            icon.setAttribute('aria-hidden','true'); icon.innerHTML = config.pinIcons?.[option.value] || '';
             const description = document.createElement('small'); description.textContent = meta.desc; copy.append(description);
             card.append(icon);
           }
+          if(wrapper.dataset.nativeField==='reporter.contact_preference'&&option.value==='community'){const badge=document.createElement('span');badge.className='ba-native-recommended';badge.textContent='Consigliato';copy.append(badge);}
+          const optionHelp=choiceHelp[wrapper.dataset.nativeField]?.[option.value];if(optionHelp){const description=document.createElement('small');description.textContent=optionHelp;copy.append(description);}
           card.append(radio,copy); entry.group.append(card);
           const commitChoice = () => {
             if (entry.arrowNavigation) return;
@@ -412,7 +496,7 @@
         });
       }
       if (!select.value || entry.collapsedValue !== select.value) entry.collapsedValue = null;
-      const collapsed = Boolean(entry.collapsedValue);
+      const collapsed = !['reporter.public_identity_mode','reporter.contact_preference'].includes(wrapper.dataset.nativeField) && Boolean(entry.collapsedValue);
       entry.group.classList.toggle('is-collapsed',collapsed);
       entry.edit.hidden = !collapsed; entry.edit.disabled = select.disabled;
       entry.edit.setAttribute('aria-expanded',String(!collapsed));
@@ -429,6 +513,10 @@
       model.pruneInactive();
       const current = steps[model.step];
       if (publicLocationChoice) {
+        if(!smartAddress){
+          publicLocationChoice.hidden=!['region','province','municipality','exact_address'].every(key=>String(model.effective('location.'+key)||'').trim());
+          const layout=form.querySelector('[data-smart-location-layout]');if(layout)layout.hidden=publicLocationChoice.hidden;
+        }
         publicLocationChoice.querySelectorAll('input[type="radio"]').forEach(input=>{
           input.checked=input.value===model.publicLocationRequest;
           input.disabled=model.busy || !!model.snapshot || model.completed;
@@ -442,6 +530,11 @@
       subtype.value = previous;
       wrappers.forEach(wrapper => {
         const path = wrapper.dataset.nativeField, field = config.fields[path], active = model.active(path);
+        if(path==='location.place_type'){
+          const label=wrapper.querySelector('label');
+          const copyNode=label&&[...label.childNodes].find(node=>node.nodeType===3);
+          if(copyNode)copyNode.textContent=config.conditional?.profiles[model.effective('event.subtype')]?.placeQuestion||field.label;
+        }
         if (path === 'damage.status') {
           const theft = model.effective('event.subtype') === 'vehicle_stolen';
           const label = wrapper.querySelector('label');
@@ -457,6 +550,8 @@
           if(input.type==='checkbox')input.checked=field.type==='array'?Array.isArray(value)&&value.includes(input.value):value===true;
           else input.value=value===undefined?'':String(value);
         });
+        if(path==='reporter.social_visibility'&&active&&model.effective(path)===undefined&&!model.busy&&!model.snapshot&&!model.completed&&config.socialConsentBinary===true)model.set(path,'declined');
+        if(path==='reporter.contact_preference'&&active&&model.effective(path)===undefined&&!model.busy&&!model.snapshot&&!model.completed&&config.contactPreferenceDefault==='community')model.set(path,'community');
         if(config.conditional && field.constraints.enum && path!=='event.subtype'){
           const select=wrapper.querySelector('select[data-native-input]');
           let allowed=model.constraints(path).enum;
@@ -464,7 +559,15 @@
             const presentationOrder=['vehicle','property','hazard','public_space','animal','item_document'];
             allowed=[...allowed].sort((a,b)=>presentationOrder.indexOf(a)-presentationOrder.indexOf(b));
           }
-          if(select){const value=model.effective(path)||'';select.replaceChildren(new Option('Seleziona…',''));for(const option of allowed)select.add(new Option(field.options[option]||option,option));select.value=value;}
+          if(path==='reporter.public_identity_mode'){const order=['name_initial','first_name','pseudonym','anonymous'];allowed=[...allowed].sort((a,b)=>order.indexOf(a)-order.indexOf(b));}
+          let optionLabels=field.options;
+          if(path==='reporter.relationship'){
+            const subtype=model.effective('event.subtype');
+            const foundLabel=subtype==='vehicle_observed'?'Ho individuato il veicolo':subtype==='animal_sighted_or_found'?'Ho trovato o avvistato l’animale':model.effective('event.category')==='item_document'?'Ho trovato l’oggetto':null;
+            if(!foundLabel){allowed=allowed.filter(value=>value!=='found_subject');if(model.effective(path)==='found_subject')model.set(path,undefined);}
+            else optionLabels={...field.options,found_subject:foundLabel};
+          }
+          if(select){const value=model.effective(path)||'';select.replaceChildren(new Option(path==='reporter.public_identity_mode'?'Seleziona un’opzione…':'Seleziona…',''));for(const option of allowed){const item=new Option(optionLabels[option]||option,option);if(path==='reporter.contact_preference'&&option==='none')item.hidden=true;select.add(item);}select.value=value;}
         }
         const deferred = (path === 'event.subtype' && !model.values['event.category']) || (path === 'reporter.relationship' && !model.effective('event.subtype'));
         wrapper.hidden = !active || deferred;
@@ -476,24 +579,36 @@
           const group = wrapper.querySelector('fieldset');
           if (group) group.setAttribute('aria-required', String(active && model.required(path)));
         });
-        const flag = wrapper.querySelector('[data-native-required]'); if (flag) flag.textContent = active && model.required(path) ? ' (obbligatorio)' : ' (facoltativo)';
+        const flag = wrapper.querySelector('[data-native-required]');
+        if (flag) {
+          const required = active && model.required(path);
+          flag.textContent = required ? ' *' : ' (facoltativo)';
+          flag.dataset.nativeRequiredState = required ? 'required' : 'optional';
+          if (required) flag.setAttribute('aria-hidden','true'); else flag.removeAttribute('aria-hidden');
+        }
         syncCards(wrapper, field);
       });
+      syncSignature();
+      mediaLaterNote.hidden=model.effective('media.availability')!=='possible';
       form.querySelectorAll('[data-native-step]').forEach(step => { step.hidden = step.dataset.nativeStep !== current; });
       container.querySelectorAll('[data-native-progress]').forEach((li,index) => {
-        li.classList.toggle('is-active', index === model.step);
-        li.classList.toggle('is-complete', index < model.step);
-        if (index === model.step) li.setAttribute('aria-current','step'); else li.removeAttribute('aria-current');
+        const active=li.dataset.nativeProgress===(current==='review'?finalEntryStep:current);
+        li.hidden=li.dataset.nativeProgress==='review';
+        li.classList.toggle('is-active',active);
+        li.classList.toggle('is-complete',index<model.step&&!active);
+        if(active)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');
       });
       const position = container.querySelector('[data-native-position]');
       if (position) {
-        const text = `Sei in: ${config.steps[current]}.${model.step<steps.length-1?' Dopo: '+config.steps[steps[model.step+1]]+'.':' Controlla e invia la segnalazione.'}`;
+        const text = current==='review'?'Riepilogo facoltativo. Puoi modificare i dati, tornare alla compilazione o inviare la segnalazione.':`Sei in: ${config.steps[current]}.${current===finalEntryStep?' Puoi inviare la segnalazione o consultare il riepilogo.':' Dopo: '+config.steps[steps[model.step+1]]+'.'}`;
         if (position.textContent !== text) position.textContent = text;
       }
       back.disabled = model.step === 0 || model.busy || !!model.snapshot;
-      next.hidden = current === 'review'; next.disabled = model.busy || !!model.snapshot;
-      submit.hidden = current !== 'review'; submit.disabled = model.busy || model.completed || !!model.blocked;
-      submit.textContent = model.busy ? 'Invio in corso…' : model.snapshot ? 'Riprova invio' : 'Invia segnalazione';
+      next.hidden = current === 'review'||current===finalEntryStep; next.disabled = model.busy || !!model.snapshot;
+      if(preview){preview.hidden=current!==finalEntryStep;preview.disabled=model.busy||!!model.snapshot||model.completed;preview.setAttribute('aria-expanded',String(current==='review'));}
+      back.textContent=current==='review'?'Torna alla compilazione':'Indietro';
+      submit.hidden = current !== 'review'&&current!==finalEntryStep; submit.disabled = model.busy || model.completed || !!model.blocked;
+      submit.textContent = model.busy ? (accessPhase?(accessPhase==='checking'?'Controllo accesso…':'Conferma email…'):'Invio in corso…') : model.snapshot ? 'Riprova invio' : config.identityQa===true ? 'Conferma e invia' : 'Invia segnalazione';
       form.setAttribute('aria-busy', String(model.busy));
       syncSubmissionFeedback();
       smartAddress?.syncVisibility?.();
@@ -504,16 +619,18 @@
       if(added.length)conditionalStatus.textContent=added.map(path=>config.fields[path].label+' — campo obbligatorio.').join(' ');
       else if(specifications.size<activeSpecifications.size)conditionalStatus.textContent='Domande aggiornate in base alle risposte.';
       activeSpecifications=specifications;
+      syncPageHeading(current);
       syncEmergencyNotice(current);
+      alignPlaceLabels();
       if (current === 'review') review();
       if (focus) focusStep(current);
     }
     function focusStep(current) {
       const section = form.querySelector(`[data-native-step="${current}"]`);
-      const heading = section?.querySelector('h2');
+      const heading = pageTitle || section?.querySelector('h2');
       if (!section || !heading) return;
       try { heading.focus({preventScroll:true}); } catch (_) { heading.focus(); }
-      const rect = section.getBoundingClientRect();
+      const rect = (pageTitle?.closest('header')||section).getBoundingClientRect();
       const header = document.querySelector('.ba-site-header');
       const headerBottom = header ? header.getBoundingClientRect().bottom : 0;
       const safeTop = Math.max(16, headerBottom + 16);
@@ -526,7 +643,7 @@
         catch (_) { window.scrollTo(0,top); }
       }
     }
-    function displayErrors(errors) {
+    function displayErrors(errors, trustedServer = false) {
       // Keep the canonical validator untouched, but do not surface errors for
       // questions that progressive disclosure has not shown to the user yet.
       errors=errors.filter(error=>{
@@ -534,6 +651,7 @@
         if(!model.active(error.field))return false;
         if(declarationPaths.includes(error.field))return true;
         if(error.field==='location.public_location_request.radius_m')return model.publicLocationRequest==='approximate_area';
+        if(trustedServer)return true; // Final server validation may target an earlier, currently hidden step.
         const wrapper=wrappers.find(w=>w.dataset.nativeField===error.field);
         return !wrapper || (!wrapper.hidden && !wrapper.closest('[hidden]'));
       });
@@ -606,14 +724,34 @@
       if (errors.length) return displayErrors(errors);
       model.step++; ns.presentErrors(container, [], config); render(true);
     });
+    if(preview)listen(preview,'click',()=>{
+      if(model.busy||model.snapshot||model.completed||steps[model.step]!==finalEntryStep)return;
+      model.step=steps.indexOf('review');ns.presentErrors(container,[],config);render(true);
+    });
     listen(back,'click', () => { if (model.step > 0 && !model.snapshot) { model.step--; ns.presentErrors(container, [], config); render(true); } });
     listen(form,'submit', async event => {
       event.preventDefault();
-      if (steps[model.step] !== 'review' || model.busy || model.completed || model.blocked) return;
+      if (!['review',finalEntryStep].includes(steps[model.step]) || model.busy || model.completed || model.blocked) return;
       if (!model.snapshot) {
-        const mediaErrors=mediaView?.media.errors() || []; if (mediaErrors.length) return displayErrors(mediaErrors);
-        const errors = model.validate(); if (errors.length) return displayErrors(errors);
-        const payload=model.payload();
+        const mediaErrors=mediaView?.media.errors() || []; // The media step is intentionally hidden at review; its errors must remain actionable.
+        if (mediaErrors.length) return displayErrors(mediaErrors, true);
+        const errors = model.validate(); if (errors.length) return displayErrors(errors,true);
+      }
+      const pendingPayload=model.snapshot || model.payload();
+      if(config.identityQa===true) {
+        accessPhase='checking';model.busy=true;render();let authorized=false;
+        try {authorized=await window.BadAroundAccess?.ensureIdentity({...pendingPayload.reporter,
+          privacy_acknowledged:pendingPayload.consents?.privacy===true,can_edit_email:!model.snapshot},{onPhase:phase=>{if(!disposed){accessPhase=phase;render();}}});} catch {authorized=false;}
+        if(disposed)return;const accessCancelled=accessPhase==='cancelled';accessPhase=null;model.busy=false;
+        if(authorized!==true) {
+          if(authorized?.editEmail===true&&!model.snapshot){model.step=steps.indexOf('contact');render(true);wrappers.find(w=>w.dataset.nativeField==='reporter.email')?.querySelector('[data-native-input]')?.focus();}
+          else if(accessCancelled){render();ns.presentErrors(container,[],config);conditionalStatus.textContent=model.snapshot?'La segnalazione è conservata. Puoi riprovare la conferma quando vuoi.':'La compilazione è conservata. Puoi continuare a modificarla.';submit.focus({preventScroll:true});}
+          else {render();displayErrors([{code:'identity_required',retryable:true,field:null}]);}
+          return;
+        }
+      }
+      if (!model.snapshot) {
+        const payload=pendingPayload;
         const descriptors=mediaView ? mediaView.media.freeze() : [];
         if (descriptors.length) { payload.media.items=descriptors;model.snapshot=ns.freezeMediaPayload(payload); }
         else model.snapshot=payload;
@@ -627,13 +765,14 @@
         form.setAttribute('aria-busy','false');syncSubmissionFeedback();
         mediaView?.dispose();
         form.hidden = true; container.querySelector('nav').hidden = true; success.hidden = false;
-        const heading=success.querySelector('h2');
+        syncPageHeading(steps[model.step]);
+        const heading=pageTitle||success.querySelector('h2');
         try{heading.focus({preventScroll:true});}catch(_){heading.focus();}
         const revealConfirmation=()=>{
           if(disposed||!model.completed)return;
           const header=document.querySelector('.ba-site-header');
           const safeTop=Math.max(24,(header?.getBoundingClientRect().bottom||0)+24);
-          const top=Math.max(0,(window.scrollY||0)+success.getBoundingClientRect().top-safeTop);
+          const top=Math.max(0,(window.scrollY||0)+(pageTitle?.closest('header')||success).getBoundingClientRect().top-safeTop);
           window.scrollTo({top,behavior:'instant'});
         };
         revealConfirmation();
@@ -651,8 +790,8 @@
           else { if(result.error.retryable)mediaView.media.markUncertain();else model.blocked=true; }
         } else if (validationRejection) { model.snapshot = null;mediaView?.media.unlock(); }
         else if (!result.error.retryable) model.blocked = true;
-        // A locked snapshot must stay on review, where an allowed retry is reachable.
-        displayErrors([model.snapshot ? {...result.error, field:null} : editableMedia ? {...result.error,field:config.fields[result.error.field] ? result.error.field : 'media.availability'} : result.error]);
+        // Keep the current final view and locked snapshot so retry cannot duplicate intake.
+        displayErrors([model.snapshot ? {...result.error, field:null} : editableMedia ? {...result.error,field:config.fields[result.error.field] ? result.error.field : 'media.availability'} : result.error], true);
       }
     });
     listen(container.querySelector('[data-native-new]'),'click', () => {
