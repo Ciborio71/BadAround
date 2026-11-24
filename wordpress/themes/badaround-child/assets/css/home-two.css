@@ -223,3 +223,14 @@
  .h2-home .h2-category{min-height:0}
 }
 @media(prefers-reduced-motion:reduce){.h2-home .h2-category{transition:none}.h2-home .h2-category:hover{transform:none}}
+
+/* Ultra-wide CSS viewports (including browser zoom-out): keep labels clear of copy. */
+@media(min-width:1800px){
+ .ba-home-two-page .ba-site-header .ba-site-header__inner.ba-container--wide{width:calc(100% - 80px);max-width:1440px;margin-inline:auto}
+ .ba-home-two-page .h2-hero-copy{width:530px;max-width:530px}
+ .ba-home-two-page .h2-callout-car{left:calc(50% - 80px);right:auto}
+ .ba-home-two-page .h2-callout-house{left:calc(50% - 60px);right:auto}
+ .ba-home-two-page .h2-home .h2-witness{left:calc(50% + 250px);right:auto}
+ .ba-home-two-page .h2-callout-animal{right:max(3%,calc((100% - 1440px)/2));left:auto}
+ .ba-home-two-page .h2-network{mask-image:linear-gradient(to right,transparent 0%,transparent calc(50% - 190px),#000 calc(50% + 100px))}
+}
