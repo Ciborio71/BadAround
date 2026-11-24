@@ -153,6 +153,19 @@ $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query
 .h2-report-banner a:focus-visible{outline:3px solid #08d4c1;outline-offset:5px}
 @media(max-width:1000px){.h2-report-banner .h2-report-inner{grid-template-columns:1.15fr 1fr}.h2-report-banner .h2-report-copy{padding:28px 0 28px 24px}.h2-report-banner h2{font-size:30px}.h2-report-banner .h2-report-art{object-fit:contain}}
 @media(max-width:700px){.h2-report-banner .h2-report-inner{grid-template-columns:minmax(0,1fr)}.h2-report-banner .h2-report-copy{padding:28px 22px 12px}.h2-report-banner h2{font-size:clamp(27px,6.5vw,36px)}.h2-report-banner .h2-report-art{height:auto;max-height:360px;object-fit:contain;mask-image:linear-gradient(to bottom,transparent,#000 10%)}.h2-report-banner .h2-report-actions{gap:18px}.h2-report-banner .h2-report-more{font-size:15px}}
+
+/* Compact report banner: artwork does not determine section height. */
+.h2-home .h2-report-banner .h2-report-inner{min-height:0}
+.h2-home .h2-report-banner .h2-report-copy{padding-top:26px;padding-bottom:26px}
+.h2-home .h2-report-banner h2{font-size:clamp(27px,2.3vw,40px);line-height:1.12;margin-bottom:14px}
+.h2-home .h2-report-banner .h2-report-eyebrow{margin-bottom:12px}
+.h2-home .h2-report-banner .h2-report-lead{font-size:clamp(16px,1.12vw,19px);line-height:1.45;margin-bottom:14px}
+.h2-home .h2-report-banner .h2-report-free{padding:9px 12px;margin-bottom:10px}
+.h2-home .h2-report-banner .h2-report-community{font-size:16px;margin-bottom:16px}
+.h2-home .h2-report-banner .h2-report-actions .h2-button{min-height:46px;padding:12px 18px;font-size:16px}
+.h2-home .h2-report-banner .h2-report-art{position:absolute;right:0;top:0;width:48.8%;height:100%;max-height:none;object-fit:contain;object-position:right center}
+@media(max-width:1000px){.h2-home .h2-report-banner h2{font-size:28px}.h2-home .h2-report-banner .h2-report-art{width:46.5%}}
+@media(max-width:700px){.h2-home .h2-report-banner .h2-report-copy{padding:24px 22px 12px}.h2-home .h2-report-banner .h2-report-art{position:static;width:100%;height:240px;object-position:center}.h2-home .h2-report-banner h2{font-size:27px}}
 </style>
 <section class="h2-section h2-wrap" aria-labelledby="h2-categories-title">
  <h2 id="h2-categories-title">Cosa puoi <em>segnalare?</em></h2><p class="h2-subtitle">Condividi un evento con la community di BadAround.</p>
