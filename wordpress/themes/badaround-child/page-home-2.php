@@ -161,5 +161,53 @@ $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query
 <section class="h2-process"><div class="h2-wrap"><div class="h2-process-copy"><h2>Un’informazione può fare la differenza</h2><ol><li><span><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 22 16-16 5 5-16 16-7 1Z"/><path d="m19 9 5 5"/></svg></span><div><h3>01. Segnala</h3><p>Racconta ciò che hai osservato.</p></div></li><li><span><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="7" cy="16" r="4"/><circle cx="25" cy="6" r="4"/><circle cx="25" cy="26" r="4"/><path d="m11 14 10-6M11 18l10 6"/></svg></span><div><h3>02. Condividi</h3><p>Fai circolare informazioni utili.</p></div></li><li><span><svg viewBox="0 0 48 36" fill="currentColor" aria-hidden="true"><circle cx="24" cy="8" r="6"/><circle cx="9" cy="12" r="5"/><circle cx="39" cy="12" r="5"/><path d="M14 34V24a10 10 0 0 1 20 0v10ZM0 32V24a8 8 0 0 1 12-7v15Zm36 0V17a8 8 0 0 1 12 7v8Z"/></svg></span><div><h3>03. Fai rete</h3><p>Aiuta la community della tua zona.</p></div></li></ol><a href="<?php echo esc_url(home_url('/come-funziona/')); ?>">Scopri come funziona →</a></div><figure class="h2-process-art" aria-hidden="true"></figure></div></section>
 <div class="h2-section h2-wrap h2-blog"><?php badaround_blog_home(); ?></div>
 <section class="h2-section h2-wrap"><div class="h2-sentinel"><div><p class="h2-eyebrow">Il tuo senso civico può fare la differenza</p><h2>Diventa una <em>Sentinella</em></h2><p>Segui la tua zona e contribuisci attivamente alla community di BadAround.</p><a class="h2-button h2-button-red" href="<?php echo esc_url(home_url('/sentinelle/')); ?>">Diventa una Sentinella <span aria-hidden="true">→</span></a></div><figure class="h2-sentinel-art" aria-hidden="true"><img src="<?php echo esc_url($uri.'/assets/home-two-network-v3-900.webp'); ?>" width="900" height="506" loading="lazy" decoding="async" alt=""><svg class="h2-sentinel-bell" viewBox="0 0 80 100" fill="none"><path d="M40 96S4 59 4 39a36 36 0 1 1 72 0c0 20-36 57-36 57Z" fill="#16bcc4" stroke="white" stroke-width="4"/><circle cx="40" cy="39" r="27" fill="#129ba5" stroke="white" stroke-width="3"/><path d="M27 49h26l-4-6V32a9 9 0 0 0-18 0v11Z" fill="white"/><path d="M35 53a5 5 0 0 0 10 0M40 20v4" stroke="white" stroke-width="3" stroke-linecap="round"/></svg></figure></div></section>
+
+<section class="h2-community-faq" aria-labelledby="h2-community-title">
+ <div class="h2-wrap h2-community-grid">
+  <div class="h2-community-copy">
+   <p class="h2-community-eyebrow">Il valore della community</p>
+   <h2 id="h2-community-title">Il territorio si conosce meglio, insieme.</h2>
+   <p>BadAround è una piattaforma gratuita per condividere segnalazioni locali: furti, smarrimenti, pericoli e informazioni utili per chi vive nella tua zona. Esplora la <a href="<?php echo esc_url(home_url('/mappa/')); ?>">mappa delle segnalazioni</a> per scoprire gli eventi pubblicati intorno a te.</p>
+   <p>Un avvistamento o una testimonianza possono aiutare altre persone. Collaboriamo e prendiamoci cura del territorio: <a href="<?php echo esc_url(home_url('/segnala-un-evento/')); ?>">invia una segnalazione</a> e contribuisci anche tu.</p>
+   <a class="h2-community-more" href="<?php echo esc_url(home_url('/come-funziona/')); ?>">Scopri come funziona <span aria-hidden="true">→</span></a>
+   <ul class="h2-community-values" aria-label="I valori di BadAround"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m3 12 9-9h7l2 2v7l-9 9Z"/><circle cx="16" cy="8" r="1"/></svg><span>Gratuito</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="9" cy="7" r="3"/><circle cx="18" cy="9" r="2"/><path d="M2 21v-3a7 7 0 0 1 14 0v3m2-7a5 5 0 0 1 5 5v2"/></svg><span>Collaborativo</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m12 2 9 4v6c0 6-9 10-9 10S3 18 3 12V6Z"/><path d="m8 12 3 3 5-6"/></svg><span>Di valore civico</span></li></ul>
+  </div>
+  <div class="h2-faq-list" aria-labelledby="h2-faq-title">
+   <h2 id="h2-faq-title">Hai qualche domanda?</h2>
+   <details class="h2-faq-item"><summary>Che cos’è BadAround?<span class="h2-faq-toggle" aria-hidden="true"></span></summary><div class="h2-faq-answer"><p>BadAround è una piattaforma gratuita per condividere segnalazioni locali e favorire la collaborazione tra cittadini. Un avvistamento, una testimonianza o un’informazione possono aiutare le persone della tua zona.</p></div></details>
+   <details class="h2-faq-item"><summary>Quali eventi posso segnalare?<span class="h2-faq-toggle" aria-hidden="true"></span></summary><div class="h2-faq-answer"><p>Puoi segnalare eventi che riguardano veicoli, case e attività, pericoli, spazi pubblici, animali e oggetti smarriti o ritrovati. Descrivi ciò che è successo o che hai osservato, distinguendo i fatti dalle supposizioni.</p></div></details>
+   <details class="h2-faq-item"><summary>Segnalare su BadAround è gratuito?<span class="h2-faq-toggle" aria-hidden="true"></span></summary><div class="h2-faq-answer"><p>Sì, il servizio è totalmente gratuito e nasce con uno scopo sociale e civico: condividere informazioni utili e favorire l’aiuto reciproco nella community.</p></div></details>
+   <details class="h2-faq-item"><summary>Come trovo le segnalazioni della mia zona?<span class="h2-faq-toggle" aria-hidden="true"></span></summary><div class="h2-faq-answer"><p>Cerca un indirizzo, un comune o un quartiere nella barra di ricerca della home, oppure usa “Vicino a me”, consentendo l’accesso alla posizione, per esplorare le segnalazioni sulla mappa.</p></div></details>
+   <details class="h2-faq-item"><summary>Le segnalazioni vengono pubblicate subito?<span class="h2-faq-toggle" aria-hidden="true"></span></summary><div class="h2-faq-answer"><p>Le segnalazioni vengono verificate prima della pubblicazione. I recapiti personali e le coordinate riservate non vengono esposti automaticamente; la posizione pubblica può essere un punto esatto o un’area approssimata, secondo il tipo di evento e la valutazione in moderazione.</p></div></details>
+   <details class="h2-faq-item"><summary>BadAround sostituisce una denuncia?<span class="h2-faq-toggle" aria-hidden="true"></span></summary><div class="h2-faq-answer"><p>No. Una segnalazione su BadAround non sostituisce una denuncia né una richiesta di intervento. Per denunciare un reato rivolgiti alle autorità competenti. In caso di emergenza o pericolo immediato chiama il 112.</p></div></details>
+  </div>
+ </div>
+</section>
+<style>
+.h2-home .h2-community-faq{background:#f0f8fa;padding:48px 0 52px;margin-top:12px;color:#10243f}
+.h2-community-faq .h2-community-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:clamp(28px,4vw,72px);align-items:start}
+.h2-community-faq .h2-community-eyebrow{color:#087f8c;font-size:13px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;margin:0 0 20px}
+.h2-home .h2-community-faq h2{font-size:clamp(28px,2.7vw,42px);line-height:1.18;margin:0 0 24px;letter-spacing:-.03em}
+.h2-community-faq .h2-community-copy>p:not(.h2-community-eyebrow){font-size:17px;line-height:1.65;margin:0 0 20px;color:#3f566a}
+.h2-community-faq a{color:#087f8c;text-decoration:underline;text-underline-offset:3px}
+.h2-community-faq .h2-community-more{display:inline-block;font-size:18px;font-weight:750;margin:3px 0 24px}
+.h2-community-faq .h2-community-values{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.h2-community-faq .h2-community-values li{display:flex;align-items:center;justify-content:center;gap:9px;padding:14px 10px;min-width:0;border:1px solid #d9e6ec;border-radius:13px;background:#fff;color:#10243f;font-weight:700;font-size:13px;line-height:1.35}
+.h2-community-faq .h2-community-values svg{width:27px;height:27px;flex-shrink:0;color:#087f8c}
+.h2-community-faq .h2-faq-item{border:1px solid #d4e1e8;background:#fff;border-radius:13px;margin:0 0 10px;overflow:hidden}
+.h2-community-faq .h2-faq-item summary{display:flex;align-items:center;justify-content:space-between;gap:16px;list-style:none;cursor:pointer;padding:18px 20px;color:#10243f;font-size:17px;line-height:1.4;font-weight:750}
+.h2-community-faq .h2-faq-item summary::-webkit-details-marker{display:none}
+.h2-community-faq .h2-faq-toggle{position:relative;flex:0 0 20px;width:20px;height:20px;color:#087f8c}
+.h2-community-faq .h2-faq-toggle:before,.h2-community-faq .h2-faq-toggle:after{content:"";position:absolute;inset:9px 1px auto;height:2px;background:currentColor;border-radius:2px}
+.h2-community-faq .h2-faq-toggle:after{transform:rotate(90deg)}
+.h2-community-faq .h2-faq-item[open]{background:#e0f1f4;border-color:#c5e3e8}
+.h2-community-faq .h2-faq-item[open] .h2-faq-toggle:after{display:none}
+.h2-community-faq .h2-faq-answer{padding:0 20px 20px}
+.h2-community-faq .h2-faq-answer p{margin:0;font-size:16px;line-height:1.6;color:#3b5367}
+.h2-community-faq summary:hover{background:#eff8fa}
+.h2-community-faq summary:focus-visible,.h2-community-faq a:focus-visible{outline:3px solid #087f8c;outline-offset:-3px;border-radius:5px}
+@media(max-width:1000px){.h2-community-faq .h2-community-grid{grid-template-columns:minmax(0,1fr)}.h2-community-faq .h2-community-copy{max-width:760px}.h2-community-faq .h2-community-values{max-width:600px}}
+@media(max-width:600px){.h2-home .h2-community-faq{padding:32px 0}.h2-community-faq .h2-faq-item summary{padding:16px;font-size:16px}.h2-community-faq .h2-community-values{gap:7px}.h2-community-faq .h2-community-values li{flex-direction:column;text-align:center;font-size:12px;padding:12px 6px}.h2-community-faq .h2-faq-answer{padding:0 16px 16px}}
+</style>
 </main>
 <?php get_footer(); ?>
