@@ -106,9 +106,12 @@ $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query
 
  /* Reversible six featured plus six compact cards. */
  body.ba-home-two-page .h2-home div.h2-events.h2-editorial{grid-template-columns:minmax(0,1fr);gap:28px}
- .h2-editorial .h2-featured-list{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:440px;gap:22px}
+ .h2-editorial .h2-featured-list{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:minmax(440px,1fr);gap:22px}
  .h2-editorial .h2-stream-list{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:168px;gap:22px}
- .h2-editorial .h2-editorial-feature{height:440px}
+ .h2-editorial .h2-editorial-feature{height:100%;min-height:440px}
+ .h2-editorial .h2-editorial-feature .h2-editorial-body{flex:1 0 auto}
+ .h2-editorial .h2-editorial-feature .h2-editorial-cta{flex-shrink:0}
+
  .h2-editorial .h2-editorial-feature h3{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
  .h2-editorial .h2-editorial-stream{height:168px;min-height:0;padding:8px 14px;grid-template-columns:84px minmax(0,1fr);border:1px solid transparent;border-left:6px solid var(--feed-accent);box-shadow:none}
  .h2-editorial .h2-editorial-stream .h2-editorial-media{width:84px;height:84px;background-color:transparent}
@@ -117,7 +120,7 @@ $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query
  .h2-editorial .h2-editorial-stream h3{-webkit-line-clamp:2}
  .h2-editorial .h2-editorial-stream:hover,.h2-editorial .h2-editorial-stream:focus-within{border-color:var(--feed-accent);box-shadow:0 5px 16px #09223518}
  @media(max-width:1100px){.h2-editorial .h2-featured-list,.h2-editorial .h2-stream-list{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none}}
- @media(max-width:640px){.h2-editorial .h2-featured-list,.h2-editorial .h2-stream-list{grid-template-columns:minmax(0,1fr)}.h2-editorial .h2-editorial-stream{min-height:0}.h2-editorial .h2-featured-list{grid-auto-rows:440px}}
+ @media(max-width:640px){.h2-editorial .h2-featured-list,.h2-editorial .h2-stream-list{grid-template-columns:minmax(0,1fr)}.h2-editorial .h2-editorial-stream{min-height:0}.h2-editorial .h2-featured-list{grid-auto-rows:minmax(440px,1fr)}}
 
  </style>
 </section>
