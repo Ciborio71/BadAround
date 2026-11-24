@@ -121,7 +121,36 @@ $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query
 
  </style>
 </section>
-<section class="h2-process"><div class="h2-wrap"><div class="h2-process-copy"><h2>Un’informazione può fare la differenza</h2><ol><li><span><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 22 16-16 5 5-16 16-7 1Z"/><path d="m19 9 5 5"/></svg></span><div><h3>01. Segnala</h3><p>Racconta ciò che hai osservato.</p></div></li><li><span><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="7" cy="16" r="4"/><circle cx="25" cy="6" r="4"/><circle cx="25" cy="26" r="4"/><path d="m11 14 10-6M11 18l10 6"/></svg></span><div><h3>02. Condividi</h3><p>Fai circolare informazioni utili.</p></div></li><li><span><svg viewBox="0 0 48 36" fill="currentColor" aria-hidden="true"><circle cx="24" cy="8" r="6"/><circle cx="9" cy="12" r="5"/><circle cx="39" cy="12" r="5"/><path d="M14 34V24a10 10 0 0 1 20 0v10ZM0 32V24a8 8 0 0 1 12-7v15Zm36 0V17a8 8 0 0 1 12 7v8Z"/></svg></span><div><h3>03. Fai rete</h3><p>Aiuta la community della tua zona.</p></div></li></ol><a href="<?php echo esc_url(home_url('/come-funziona/')); ?>">Scopri come funziona →</a></div><figure class="h2-process-art" aria-hidden="true"></figure></div></section>
+<section class="h2-report-banner" aria-labelledby="h2-report-title">
+ <div class="h2-report-inner">
+  <div class="h2-report-copy">
+   <p class="h2-report-eyebrow">Informazioni utili, persone vicine</p>
+   <h2 id="h2-report-title"><span>Ti hanno rubato l’auto?</span><span>Hai subito un furto?</span><span>Hai notato una situazione sospetta?</span></h2>
+   <p class="h2-report-lead">Segnalalo su BadAround. Condividi ciò che hai osservato e aiuta la community della tua zona.</p>
+   <p class="h2-report-free"><span aria-hidden="true">✓</span> Totalmente gratuito. Un progetto di valore sociale e civico.</p>
+   <p class="h2-report-community">Collaboriamo e diamoci una mano.</p>
+   <div class="h2-report-actions"><a class="h2-button h2-button-red" href="<?php echo esc_url(home_url('/segnala-un-evento/')); ?>">Segnala un evento <span aria-hidden="true">→</span></a><a class="h2-report-more" href="<?php echo esc_url(home_url('/come-funziona/')); ?>">Scopri come funziona <span aria-hidden="true">→</span></a></div>
+  </div>
+  <img class="h2-report-art" src="<?php echo esc_url($uri.'/assets/home-community-report.svg'); ?>" width="1000" height="864" loading="lazy" decoding="async" alt="Illustrazione di auto rubata, tentativo di furto e situazione sospetta collegati a una segnalazione sulla mappa">
+ </div>
+</section>
+<style>
+.ba-home-two-page .h2-home .h2-report-banner{width:100%;max-width:none;margin:30px 0;background:#043340;color:#fff;overflow:hidden}
+.h2-report-banner .h2-report-inner{position:relative;display:grid;grid-template-columns:1.05fr 1fr;align-items:center;width:100%;max-width:2000px;margin:auto;min-height:490px}
+.h2-report-banner .h2-report-copy{position:relative;z-index:1;padding:38px 0 38px clamp(24px,4.5vw,90px)}
+.h2-report-banner .h2-report-eyebrow{margin:0 0 16px;color:#05d1bd;text-transform:uppercase;letter-spacing:.07em;font-size:clamp(11px,1vw,16px);font-weight:800}
+.h2-report-banner h2{font-size:clamp(27px,2.65vw,47px);line-height:1.14;letter-spacing:-.035em;color:#fff;margin:0 0 20px;font-weight:800}
+.h2-report-banner h2 span{display:block}
+.h2-report-banner .h2-report-lead{max-width:650px;font-size:clamp(16px,1.25vw,21px);line-height:1.5;margin:0 0 20px;color:#e9f6f8}
+.h2-report-banner .h2-report-free{display:flex;align-items:center;gap:10px;width:fit-content;padding:12px 16px;border-radius:14px;background:#0bd1bc;color:#042d38;font-size:clamp(13px,1.02vw,17px);font-weight:750;line-height:1.4;margin:0 0 13px}
+.h2-report-banner .h2-report-community{margin:0 0 24px;font-size:clamp(15px,1.15vw,19px);color:#fff}
+.h2-report-banner .h2-report-actions{display:flex;align-items:center;flex-wrap:wrap;gap:18px 26px}
+.h2-report-banner .h2-report-more{color:#fff;font-size:16px;font-weight:750;text-decoration:underline;text-underline-offset:5px}
+.h2-report-banner .h2-report-art{display:block;width:100%;height:100%;max-height:610px;object-fit:cover;object-position:center;mask-image:linear-gradient(to right,transparent,#000 10%)}
+.h2-report-banner a:focus-visible{outline:3px solid #08d4c1;outline-offset:5px}
+@media(max-width:1000px){.h2-report-banner .h2-report-inner{grid-template-columns:1.15fr 1fr}.h2-report-banner .h2-report-copy{padding:28px 0 28px 24px}.h2-report-banner h2{font-size:30px}.h2-report-banner .h2-report-art{object-fit:contain}}
+@media(max-width:700px){.h2-report-banner .h2-report-inner{grid-template-columns:minmax(0,1fr)}.h2-report-banner .h2-report-copy{padding:28px 22px 12px}.h2-report-banner h2{font-size:clamp(27px,6.5vw,36px)}.h2-report-banner .h2-report-art{height:auto;max-height:360px;object-fit:contain;mask-image:linear-gradient(to bottom,transparent,#000 10%)}.h2-report-banner .h2-report-actions{gap:18px}.h2-report-banner .h2-report-more{font-size:15px}}
+</style>
 <section class="h2-section h2-wrap" aria-labelledby="h2-categories-title">
  <h2 id="h2-categories-title">Cosa puoi <em>segnalare?</em></h2><p class="h2-subtitle">Condividi un evento con la community di BadAround.</p>
  <nav class="h2-categories" aria-label="Categorie delle segnalazioni"><?php foreach($categories as [$label,$slug,$description,$color]): ?><a class="h2-category" style="--category:<?php echo esc_attr($color); ?>" href="<?php echo esc_url(add_query_arg('categoria',$slug,home_url('/segnala-un-evento/'))); ?>"><span aria-hidden="true"><?php echo badaround_pin_svg($slug); ?></span><strong><?php echo esc_html($label); ?></strong><small><?php echo esc_html($description); ?></small></a><?php endforeach; ?></nav>
