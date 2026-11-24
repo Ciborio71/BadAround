@@ -102,3 +102,5 @@ jobs:
 
 
 
+
+# Verify ultra-wide hero label separation up to 4096 CSS pixels.
