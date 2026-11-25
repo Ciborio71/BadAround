@@ -255,3 +255,7 @@ body.ba-home-two-page .h2-home .h2-blog .ba-blog-home__intro{font-size:18px;line
 body.ba-home-two-page .h2-home .h2-blog .ba-blog-section-head>.ba-button{position:absolute;right:0;bottom:0}
 @media(max-width:1000px){body.ba-home-two-page .h2-home .h2-feed-tools{grid-template-columns:minmax(0,1fr);gap:16px}body.ba-home-two-page .h2-home .h2-feed-legend,body.ba-home-two-page .h2-home .h2-all-reports{grid-column:1;justify-self:center}}
 @media(max-width:700px){body.ba-home-two-page .h2-home #h2-categories-title,body.ba-home-two-page .h2-home #h2-recent-title{font-size:clamp(34px,7vw,44px)}body.ba-home-two-page .h2-home #h2-categories-title+.h2-subtitle,body.ba-home-two-page .h2-home .h2-feed-intro>p,body.ba-home-two-page .h2-home .h2-blog .ba-blog-home__intro{font-size:16px}body.ba-home-two-page .h2-home .h2-blog .ba-blog-section-head{padding-bottom:0}body.ba-home-two-page .h2-home .h2-blog .ba-blog-section-head>.ba-button{position:static;margin-top:0}body.ba-home-two-page .h2-home .h2-feed-legend .ba-precision-legend{flex-wrap:wrap}}
+
+/* Match the blog section heading to categories and latest reports. */
+body.ba-home-two-page .h2-home .h2-blog #ba-blog-home-title{font-size:clamp(36px,4vw,56px);line-height:1.15;text-align:center}
+@media(max-width:700px){body.ba-home-two-page .h2-home .h2-blog #ba-blog-home-title{font-size:clamp(34px,7vw,44px)}}
