@@ -49,8 +49,7 @@ $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query
 <section class="h2-report-banner" aria-labelledby="h2-report-title">
  <div class="h2-report-inner">
   <div class="h2-report-copy">
-   <p class="h2-report-eyebrow">Informazioni utili, persone vicine</p>
-   <h2 id="h2-report-title"><span>Ti hanno rubato l’auto?</span><span>Hai subito un furto?</span><span>Hai notato una situazione sospetta?</span></h2>
+   <h2 id="h2-report-title"><span>Hai subito un furto?</span><span>Hai notato una situazione sospetta?</span></h2>
    <p class="h2-report-lead">Segnalalo su BadAround. Condividi ciò che hai osservato e aiuta la community della tua zona.</p>
    <p class="h2-report-free"><span aria-hidden="true">✓</span> Totalmente gratuito. Un progetto di valore sociale e civico.</p>
    <p class="h2-report-community">Collaboriamo e diamoci una mano.</p>
