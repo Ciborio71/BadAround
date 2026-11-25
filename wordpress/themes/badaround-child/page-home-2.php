@@ -93,8 +93,9 @@ $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query
 @media(max-width:700px){.h2-home .h2-report-banner .h2-report-inner{grid-template-columns:minmax(0,1fr)}.h2-home .h2-report-banner .h2-report-copy{padding:24px 0 12px}.h2-home .h2-report-banner .h2-report-art{position:static;width:100%;height:230px;object-position:center}.h2-home .h2-report-banner h2{font-size:27px}}
 </style>
 <section class="h2-section h2-wrap" aria-labelledby="h2-recent-title">
- <div class="h2-section-head"><h2 id="h2-recent-title">Ultime <em>segnalazioni</em></h2><a href="<?php echo esc_url(home_url('/segnalazioni/')); ?>">Vedi tutte <span aria-hidden="true">→</span></a></div>
- <div class="h2-feed-intro"><p>Ultime segnalazioni pubblicate in Italia. Cerca una zona per esplorare quelle vicine a te.</p><?php get_template_part('template-parts/components/precision-legend'); ?></div>
+ <div class="h2-section-head"><h2 id="h2-recent-title">Ultime <em>segnalazioni</em></h2></div>
+ <div class="h2-feed-intro"><p>Ultime segnalazioni pubblicate in Italia. Cerca una zona per esplorare quelle vicine a te.</p></div>
+ <div class="h2-feed-tools"><div class="h2-feed-legend"><?php get_template_part('template-parts/components/precision-legend'); ?></div><a class="ba-button ba-button--outline h2-all-reports" href="<?php echo esc_url(home_url('/segnalazioni/')); ?>">Tutte le segnalazioni <span aria-hidden="true">→</span></a></div>
  <div class="h2-events h2-editorial">
  <?php $feed=array_slice($recent['items']??[],0,9); foreach([$feed] as $group_index=>$group): ?>
  <div class="<?php echo $group_index===0?'h2-featured-list':'h2-stream-list'; ?>">
@@ -232,6 +233,26 @@ $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query
 .h2-home .h2-section-head,.h2-home .h2-blog .ba-blog-section-head{position:relative;justify-content:center;padding-inline:130px}
 .h2-home .h2-section-head>a,.h2-home .h2-blog .ba-blog-section-head>a{position:absolute;right:0}
 @media(max-width:700px){.h2-home .h2-section-head,.h2-home .h2-blog .ba-blog-section-head{padding-inline:0;flex-direction:column;align-items:center;gap:8px}.h2-home .h2-section-head>a,.h2-home .h2-blog .ba-blog-section-head>a{position:static;padding-top:0}}
+</style>
+<style>
+/* Centered homepage section hierarchy and aligned report navigation. */
+.h2-home #h2-categories-title,.h2-home #h2-recent-title{display:block;width:100%;text-align:center;font-size:clamp(36px,4vw,56px);line-height:1.15;margin:0 0 14px}
+.h2-home #h2-categories-title+.h2-subtitle,.h2-home .h2-feed-intro>p{font-size:18px;line-height:1.5;text-align:center;max-width:none;margin:0 0 24px}
+.h2-home .h2-section-head{display:block;padding:0}
+.h2-home .h2-feed-intro{display:block;margin-bottom:0}
+.h2-home .h2-feed-tools{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:20px;margin:0 0 26px}
+.h2-home .h2-feed-legend{grid-column:2;justify-self:center}
+.h2-home .h2-feed-legend .ba-precision-legend{justify-content:center;margin:0}
+.h2-home .h2-all-reports{grid-column:3;justify-self:end;white-space:nowrap}
+.h2-home .h2-all-reports,.h2-home .h2-blog .ba-blog-section-head>.ba-button{border:1px solid #0094a5;border-radius:14px;color:#087f8c;background:#fff;box-shadow:none;padding:14px 22px;font-size:17px;line-height:1.4;font-weight:750;display:inline-flex;gap:12px;align-items:center;justify-content:center}
+.h2-home .h2-all-reports:hover,.h2-home .h2-blog .ba-blog-section-head>.ba-button:hover{background:#edf8fa}
+.h2-home .h2-blog .ba-blog-section-head{display:block;position:relative;padding:0 0 64px;text-align:center}
+.h2-home .h2-blog .ba-blog-section-head>div{width:100%}
+.h2-home .h2-blog #ba-blog-home-title{width:100%;text-align:center;margin:0 0 14px}
+.h2-home .h2-blog .ba-blog-home__intro{font-size:18px;line-height:1.5;text-align:center;max-width:none;margin:0 0 20px}
+.h2-home .h2-blog .ba-blog-section-head>.ba-button{position:absolute;right:0;bottom:0}
+@media(max-width:1000px){.h2-home .h2-feed-tools{grid-template-columns:minmax(0,1fr);gap:16px}.h2-home .h2-feed-legend,.h2-home .h2-all-reports{grid-column:1;justify-self:center}}
+@media(max-width:700px){.h2-home #h2-categories-title,.h2-home #h2-recent-title{font-size:clamp(34px,7vw,44px)}.h2-home #h2-categories-title+.h2-subtitle,.h2-home .h2-feed-intro>p,.h2-home .h2-blog .ba-blog-home__intro{font-size:16px}.h2-home .h2-blog .ba-blog-section-head{padding-bottom:0}.h2-home .h2-blog .ba-blog-section-head>.ba-button{position:static;margin-top:0}.h2-home .h2-feed-legend .ba-precision-legend{flex-wrap:wrap}}
 </style>
 </main>
 <?php get_footer(); ?>
