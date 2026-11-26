@@ -280,3 +280,10 @@ html body.ba-home-two-page .h2-home .h2-report-banner .h2-report-art{width:45.5%
 /* Restore the illustrated map beneath category pins when no photo exists. */
 body.ba-home-two-page .h2-home .h2-editorial .h2-editorial-fallback{background:#f5f8fa url("../event-placeholder-map.svg") center/cover no-repeat}
 html body.ba-home-two-page .h2-home .h2-report-banner .h2-report-art{transform:none}
+
+/* Align the desktop blog action with its centered heading. */
+@media(min-width:1200px){
+ body.ba-home-two-page .h2-home .h2-blog .ba-blog-section-head{padding-bottom:0}
+ body.ba-home-two-page .h2-home .h2-blog #ba-blog-home-title{box-sizing:border-box;padding-inline:250px}
+ body.ba-home-two-page .h2-home .h2-blog .ba-blog-section-head>.ba-button{top:5px;bottom:auto}
+}
