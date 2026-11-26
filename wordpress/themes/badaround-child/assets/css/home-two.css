@@ -281,9 +281,11 @@ html body.ba-home-two-page .h2-home .h2-report-banner .h2-report-art{width:45.5%
 body.ba-home-two-page .h2-home .h2-editorial .h2-editorial-fallback{background:#f5f8fa url("../event-placeholder-map.svg") center/cover no-repeat}
 html body.ba-home-two-page .h2-home .h2-report-banner .h2-report-art{transform:none}
 
-/* Align the desktop blog action with its centered heading. */
+/* Keep the desktop blog action level with the centered subtitle. */
 @media(min-width:1200px){
- body.ba-home-two-page .h2-home .h2-blog .ba-blog-section-head{padding-bottom:0}
- body.ba-home-two-page .h2-home .h2-blog #ba-blog-home-title{box-sizing:border-box;padding-inline:250px}
- body.ba-home-two-page .h2-home .h2-blog .ba-blog-section-head>.ba-button{top:5px;bottom:auto}
+ body.ba-home-two-page .h2-home .h2-blog .ba-blog-section-head{display:grid;grid-template-columns:250px minmax(0,1fr) 250px;gap:14px 0;align-items:center;padding-bottom:0}
+ body.ba-home-two-page .h2-home .h2-blog .ba-blog-section-head>div{display:contents}
+ body.ba-home-two-page .h2-home .h2-blog #ba-blog-home-title{grid-column:1/-1;margin:0;padding:0}
+ body.ba-home-two-page .h2-home .h2-blog .ba-blog-home__intro{grid-column:2;grid-row:2;margin:0}
+ body.ba-home-two-page .h2-home .h2-blog .ba-blog-section-head>.ba-button{position:static;grid-column:3;grid-row:2;justify-self:end}
 }
