@@ -49,11 +49,10 @@ $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query
 <section class="h2-report-banner" aria-labelledby="h2-report-title">
  <div class="h2-report-inner">
   <div class="h2-report-copy">
-   <h2 id="h2-report-title"><span>Hai subito un furto?</span><span>Hai notato una situazione sospetta?</span></h2>
-   <p class="h2-report-lead">Segnalalo su BadAround. Condividi ciò che hai osservato e aiuta la community della tua zona.</p>
-   <p class="h2-report-free"><span aria-hidden="true">✓</span> Totalmente gratuito. Un progetto di valore sociale e civico.</p>
-   <p class="h2-report-community">Collaboriamo e diamoci una mano.</p>
-   <div class="h2-report-actions"><a class="h2-button h2-button-red" href="<?php echo esc_url(home_url('/segnala-un-evento/')); ?>">Segnala un evento <span aria-hidden="true">→</span></a><a class="h2-report-more" href="<?php echo esc_url(home_url('/come-funziona/')); ?>">Scopri come funziona <span aria-hidden="true">→</span></a></div>
+   <h2 id="h2-report-title"><span>Hai subito un furto?</span><span>Hai notato qualcosa di sospetto?</span></h2>
+   <p class="h2-report-lead">Segnalalo su <strong>BadAround</strong> in pochi secondi: aiuta i tuoi vicini a tenere alta l’attenzione e previeni nuovi episodi nella tua zona.</p>
+   <p class="h2-report-free"><span aria-hidden="true">✓</span> 100% gratuito • Sicurezza partecipata di quartiere</p>
+   <div class="h2-report-actions"><a class="h2-button h2-button-red" href="<?php echo esc_url(home_url('/segnala-un-evento/')); ?>">Segnala ora <span aria-hidden="true">→</span></a><a class="h2-report-more" href="<?php echo esc_url(home_url('/come-funziona/')); ?>">Scopri come funziona <span aria-hidden="true">→</span></a></div>
   </div>
   <img class="h2-report-art" src="<?php echo esc_url($uri.'/assets/home-community-report.svg'); ?>" width="1500" height="750" loading="lazy" decoding="async" alt="Cinque situazioni collegate alla mappa: auto rubata, furti in casa, su bici e auto, e ricerca di un cane smarrito">
  </div>
