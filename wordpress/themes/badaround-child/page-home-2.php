@@ -55,7 +55,7 @@ $recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query
    <p class="h2-report-community">Collaboriamo e diamoci una mano.</p>
    <div class="h2-report-actions"><a class="h2-button h2-button-red" href="<?php echo esc_url(home_url('/segnala-un-evento/')); ?>">Segnala un evento <span aria-hidden="true">→</span></a><a class="h2-report-more" href="<?php echo esc_url(home_url('/come-funziona/')); ?>">Scopri come funziona <span aria-hidden="true">→</span></a></div>
   </div>
-  <img class="h2-report-art" src="<?php echo esc_url($uri.'/assets/home-community-report.svg'); ?>" width="1000" height="864" loading="lazy" decoding="async" alt="Illustrazione di auto rubata, tentativo di furto e situazione sospetta collegati a una segnalazione sulla mappa">
+  <img class="h2-report-art" src="<?php echo esc_url($uri.'/assets/home-community-report.svg'); ?>" width="1500" height="750" loading="lazy" decoding="async" alt="Cinque situazioni collegate alla mappa: auto rubata, furti in casa, su bici e auto, e ricerca di un cane smarrito">
  </div>
 </section>
 <style>

@@ -276,3 +276,7 @@ html body.ba-home-two-page .h2-home .h2-report-banner .h2-report-art{width:45.5%
  html body.ba-home-two-page .h2-home .h2-report-banner .h2-report-inner{grid-template-columns:minmax(0,1fr)}
  html body.ba-home-two-page .h2-home .h2-report-banner .h2-report-art{width:100%;transform:none}
 }
+
+/* Restore the illustrated map beneath category pins when no photo exists. */
+body.ba-home-two-page .h2-home .h2-editorial .h2-editorial-fallback{background:#f5f8fa url("../event-placeholder-map.svg") center/cover no-repeat}
+html body.ba-home-two-page .h2-home .h2-report-banner .h2-report-art{transform:none}
