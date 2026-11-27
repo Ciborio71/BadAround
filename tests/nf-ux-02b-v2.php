@@ -13,7 +13,7 @@ function v2fixture( $subtype = 'animal_missing' ) {
 	$c = BadAround_Report_Conditional_Contract::definition();
 	foreach ( $c['regression_oracle'] as $test ) {
 		if ( $test['subtype'] === $subtype ) {
-			$p = f13_fixture();
+			$p = f13_fixture(); unset($p['location']['place_type']);
 			foreach ( $test['minimal_user_values'] as $path => $value ) { v2put( $p, $path, $value ); }
 			$p['schema_version'] = 'badaround-report/v2'; $p['submission_id'] = BadAround_Native_Media_Config::new_uuid();
 			return $p;
@@ -141,5 +141,27 @@ $conflict = $controller->rest_create( new WP_REST_Request( json_encode( $p ), ar
 v2check( $conflict->status === 409 && $conflict->data['error']['code'] === 'duplicate_submission' && ! $conflict->data['error']['retryable'], 'cross-version HTTP409 nonretryable' );
 foreach ( array( null, '', 'badaround-report/v3' ) as $version ) { $p = v2fixture(); if ( null === $version ) { unset( $p['schema_version'] ); } else { $p['schema_version'] = $version; } v2check( is_wp_error( BadAround_Report_Version_Registry::prepare( $p ) ), 'missing/unsupported version never accepted' ); }
 $v1 = f13_fixture(); $v1['animal']['type_other_detail'] = 'must not upgrade'; v2check( v2code( BadAround_Report_Version_Registry::prepare( $v1 ) ) === 'ba_report_unknown_field', 'v1 remains closed to v2-only fields' );
+// Additive publication declaration survives canonical normalization and persistence.
+$p=v2fixture();$p['consents']['public_details_version']='public-details-v1';
+$n=BadAround_Report_Version_Registry::prepare($p);
+v2check(!is_wp_error($n)&&($n['consents']['public_details_version']??'')==='public-details-v1','publication declaration survives v2 normalization');
+foreach(['unknown-policy',true,[],42] as $invalid){$p['consents']['public_details_version']=$invalid;v2check(is_wp_error(BadAround_Report_Version_Registry::prepare($p)),'invalid publication policy rejected');}
+$p=v2fixture();$p['consents']['public_details_version']='public-details-v1';$saved=v2gold()->submit($p);
+v2check(v2code($saved)==='success','declared policy report persists');
+$stored=$wpdb->get_results('SELECT content_original FROM test_ba_reports',ARRAY_A);$found=false;
+foreach($stored as $item){$c=json_decode($item['content_original'],true);if(($c['canonical']['consents']['public_details_version']??'')==='public-details-v1')$found=true;}
+v2check($found,'stored canonical envelope retains publication declaration');
 echo "NF_UX_02B_V2=PASS assertions={$checks} matrix_assignments={$assignments} oracle_cases=33 specs=8\n";
 rmdir( $root ); rmdir( $public );
+
+foreach(BadAround_Report_Conditional_Contract::definition()['matrix'] as $row){
+ $p=v2fixture($row['subtype']);$allowed=$row['fields']['location.place_type']['constraints_override']['enum'];
+ v2check(count($allowed)<=8 && in_array('other',$allowed,true),'bounded contextual choices '.$row['subtype']);
+ foreach($allowed as $place){if($place==='other')continue;$p['location']['place_type']=$place;
+  v2check(!is_wp_error(BadAround_Report_Version_Registry::prepare($p)),'contextual place accepted '.$row['subtype'].' '.$place);}
+}
+$p=v2fixture('property_attempted_breakin');$p['location']['place_type']='park_green';
+v2check(is_wp_error(BadAround_Report_Version_Registry::prepare($p)),'incompatible property place rejected by server');
+$p=v2fixture('hazard_road_obstruction');$p['location']['place_type']='private_home';
+v2check(is_wp_error(BadAround_Report_Version_Registry::prepare($p)),'incompatible road obstruction place rejected by server');
+echo "CONTEXTUAL_PLACE_VALIDATION_PASS\n";

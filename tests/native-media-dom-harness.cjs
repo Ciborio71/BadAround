@@ -8,6 +8,10 @@ const data={'event.category':'hazard','event.subtype':'hazard_road_obstruction',
 const tick=()=>new Promise(r=>setImmediate(r));
 function create(options={}) {
  const dom=new JSDOM(html,{url:'https://staging.badaround.it/segnala-un-evento/?native_report=1',runScripts:'outside-only'}),w=dom.window,requests=[],uploads=[],revoked=[];
+ if(options.pageHeader){
+  const root=w.document.querySelector('[data-native-report]'),workspace=w.document.createElement('section');workspace.className='ba-report-workspace';root.before(workspace);
+  workspace.innerHTML='<header><h1 id="ba-report-page-title" data-native-page-title tabindex="-1"></h1><p data-native-page-intro></p></header>';workspace.append(root);
+ }
  w.AbortController=AbortController;w.URL.createObjectURL=()=>`blob:https://staging.badaround.it/${globalThis.crypto.randomUUID()}`;w.URL.revokeObjectURL=u=>revoked.push(u);
  let uploadNumber=0;
  class XHR {
@@ -27,7 +31,7 @@ function create(options={}) {
   return {ok:true,status:200,json:async()=>response};
  };
  for(const p of options.frozen?['model','api','errors','wizard']:['model','api','errors','media','media-view','wizard']){
-  const source=options.runtimeRef?execFileSync('git',['show',`${options.runtimeRef}:wordpress/themes/badaround-child/assets/js/native-report/${p}.js`],{encoding:'utf8'}):options.frozen?execFileSync('git',['show',`bcc2c74ca3391f1d16f9b1eb9719650ea4d27952:wordpress/themes/badaround-child/assets/js/native-report/${p}.js`],{encoding:'utf8'}):fs.readFileSync(path.join(base,p+'.js'),'utf8');w.eval(source);
+  const source=options.runtimeRef&&process.env.BA_MEDIA_BASELINE_DIR?fs.readFileSync(path.join(process.env.BA_MEDIA_BASELINE_DIR,p+'.js'),'utf8'):options.runtimeRef?execFileSync('git',['show',`${options.runtimeRef}:wordpress/themes/badaround-child/assets/js/native-report/${p}.js`],{encoding:'utf8'}):options.frozen?execFileSync('git',['show',`bcc2c74ca3391f1d16f9b1eb9719650ea4d27952:wordpress/themes/badaround-child/assets/js/native-report/${p}.js`],{encoding:'utf8'}):fs.readFileSync(path.join(base,p+'.js'),'utf8');w.eval(source);
  }
  const doc=w.document,root=doc.querySelector('[data-native-report]'),model=root.nativeReport.model;
  const set=(key,value,event='input')=>{const input=doc.querySelector(`[name="${key}"]`);if(input.type==='checkbox')input.checked=value;else input.value=value;input.dispatchEvent(new w.Event(event,{bubbles:true}));};

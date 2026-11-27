@@ -20,7 +20,7 @@ test('GEO-PUBLIC-03: default request is exact_point and version is immutable',()
 });
 test('selection is actual serialized request, not config default',()=>{
  const v=m();v.setPublicLocationRequest('approximate_area');
- assert.deepEqual(v.payload().location.public_location_request,{mode:'approximate_area',radius_m:500});
+ assert.deepEqual(v.payload().location.public_location_request,{mode:'approximate_area',radius_m:100});
  assert.equal(v.payload().location.public_location_request_version,'public-location-request-v2');
  v.setPublicLocationRequest('exact_point');assert.deepEqual(v.payload().location.public_location_request,{mode:'exact_point'});
 });
@@ -39,7 +39,7 @@ test('snapshot/retry locks choice and reset restores default',()=>{
  const p=v.payload();v.snapshot=p;
  v.setPublicLocationRequest('exact_point');
  assert.equal(v.publicLocationRequest,'approximate_area');
- assert.deepEqual(v.snapshot.location.public_location_request,{mode:'approximate_area',radius_m:500});
+ assert.deepEqual(v.snapshot.location.public_location_request,{mode:'approximate_area',radius_m:100});
  assert.equal(v.snapshot.location.public_location_request_version,'public-location-request-v2');
  v.snapshot=null;v.reset();
  assert.equal(v.publicLocationRequest,'exact_point');
@@ -59,8 +59,15 @@ test('HTML displays exactly two descriptive radio choices, no technical fields',
  assert(html.includes('data-native-public-location-choice'));
  assert(html.includes('value="exact_point" checked'));
  assert(html.includes('value="approximate_area"'));
- assert(html.includes('Come vuoi che venga mostrata pubblicamente la posizione?'));
+ assert(html.includes('Come vuoi mostrare la posizione al pubblico?'));
  assert(html.includes('Se la segnalazione è approvata'));
+ const doc=new (require('jsdom').JSDOM)(html).window.document;
+ const layout=doc.querySelector('[data-smart-location-layout]');
+ assert(layout.hidden);assert(layout.querySelector('[data-smart-map-panel]'));
+ assert(layout.querySelector('[data-native-public-location-choice]'));
+ const card=layout.querySelector('[data-smart-location-card]');
+ assert(card);assert(card.querySelector('[data-smart-confirmation]'));assert(card.querySelector('[data-smart-map-panel]'));
+ assert.equal(card.firstElementChild.hasAttribute('data-smart-confirmation'),true);
  assert(!html.includes('name="location.public_location_request_version"'));
  assert(!html.includes('name="location.public_location_request"'));
 });

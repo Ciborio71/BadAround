@@ -1,6 +1,9 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 $report_url = home_url( '/segnala-un-evento/' );
+$identity_ui = class_exists('BadAround_Identity_WordPress_Portal',false) && BadAround_Identity_WordPress_Portal::enabled();
+$account_authenticated = $identity_ui && BadAround_Identity_WordPress_Portal::account_authenticated();
+$account_label = $account_authenticated ? 'Il mio profilo' : 'Accedi';
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?>>
@@ -13,7 +16,7 @@ $report_url = home_url( '/segnala-un-evento/' );
 <?php wp_body_open(); ?>
 <a class="ba-skip-link" href="#main-content"><?php esc_html_e( 'Vai al contenuto', 'badaround-child' ); ?></a>
 
-<header class="ba-site-header" data-ba-header>
+<header class="ba-site-header<?php echo $identity_ui ? ' ba-site-header--identity' : ''; ?>" data-ba-header>
 	<div class="ba-site-header__inner ba-container--wide">
 		<a class="ba-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php esc_attr_e( 'BadAround — Home', 'badaround-child' ); ?>">
 			<span class="ba-brand__mark" aria-hidden="true">
@@ -33,10 +36,12 @@ $report_url = home_url( '/segnala-un-evento/' );
 			<a href="<?php echo esc_url( home_url( '/cerca/' ) ); ?>">Cerca</a>
 			<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Segnalazioni</a>
 			<a href="<?php echo esc_url( home_url( '/come-funziona/' ) ); ?>">Come funziona</a>
+            <a href="<?php echo esc_url(home_url('/blog/')); ?>"<?php echo (is_page('blog')||is_singular('post')||is_category())?' aria-current="page"':''; ?>>Blog</a>
 			<a href="<?php echo esc_url( home_url( '/sentinelle/' ) ); ?>">Sentinelle</a>
 		</nav>
 
 		<div class="ba-header-actions">
+            <?php if ($identity_ui) : ?><a class="ba-header-login" data-ba-account-link data-ba-account-state="<?php echo $account_authenticated ? 'authenticated' : 'anonymous'; ?>" href="<?php echo esc_url(home_url('/identity-qa/')); ?>"><?php echo esc_html($account_label); ?></a><?php endif; ?>
 			<a class="ba-button ba-button--urgent ba-header-report" href="<?php echo esc_url( $report_url ); ?>">
 				<span class="ba-header-report__plus" aria-hidden="true">+</span>
 				Segnala un evento
@@ -49,16 +54,18 @@ $report_url = home_url( '/segnala-un-evento/' );
 
 	<div class="ba-mobile-menu" id="ba-mobile-menu" hidden>
 		<nav aria-label="<?php esc_attr_e( 'Navigazione mobile', 'badaround-child' ); ?>">
+            <?php if ($identity_ui) : ?><a data-ba-account-link data-ba-account-state="<?php echo $account_authenticated ? 'authenticated' : 'anonymous'; ?>" href="<?php echo esc_url(home_url('/identity-qa/')); ?>"><?php echo esc_html($account_label); ?></a><?php endif; ?>
 			<a href="<?php echo esc_url( home_url( '/mappa/' ) ); ?>">Mappa</a>
 			<a href="<?php echo esc_url( home_url( '/radar-demo/' ) ); ?>"<?php echo is_page( 'radar-demo' ) ? ' aria-current="page"' : ''; ?>>Radar</a>
 			<a href="<?php echo esc_url( home_url( '/cerca/' ) ); ?>">Cerca</a>
 			<a href="<?php echo esc_url( home_url( '/segnalazioni/' ) ); ?>">Segnalazioni</a>
 			<a href="<?php echo esc_url( home_url( '/come-funziona/' ) ); ?>">Come funziona</a>
+            <a href="<?php echo esc_url(home_url('/blog/')); ?>"<?php echo (is_page('blog')||is_singular('post')||is_category())?' aria-current="page"':''; ?>>Blog</a>
 			<a href="<?php echo esc_url( home_url( '/sentinelle/' ) ); ?>">Sentinelle</a>
 			<a class="ba-button ba-button--urgent" href="<?php echo esc_url( $report_url ); ?>">Segnala un evento</a>
 		</nav>
 	</div>
 </header>
-<?php if ( is_page( array( 'termini-e-condizioni', 'privacy-policy', 'cookie-policy', 'regole-di-pubblicazione' ) ) ) : ?>
+<?php if ( is_page( array( 'termini-e-condizioni', 'privacy-policy', 'cookie-policy', 'regole-di-pubblicazione', 'segnalazioni-privacy-e-moderazione' ) ) ) : ?>
 	<span id="main-content" class="ba-main-anchor" tabindex="-1"></span>
 <?php endif; ?>

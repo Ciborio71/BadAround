@@ -4,6 +4,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/class-badaround-event-seo.php';
+require_once __DIR__ . '/class-badaround-event-public-details.php';
 require_once __DIR__ . '/class-badaround-public-geo-contract.php';
 require_once __DIR__ . '/class-badaround-public-geo-projection.php';
 
@@ -15,11 +17,67 @@ class BadAround_Publication_Service {
 	private $b3_event = 0;
 	private static $geo_writer = 0;
 
+	/** Withdraw an external event for explicit enrichment and fresh B2/B3 review.
+	 * Caller owns the surrounding InnoDB transaction; this method never publishes.
+	 */
+	public function reopen_external_for_enrichment( $id, $revision ) {
+		if ( ! BadAround_External_Report_Intake::permitted() || ! current_user_can('edit_post',$id)
+			|| ! hash_equals(BadAround_External_Report_Contract::event_hash($id),$revision)
+			|| ! BadAround_External_Report_Admin::report($id)
+			|| ! in_array(get_post_status($id),array('draft','pending','publish'),true) ) {
+			return new WP_Error('ba_external_enrichment_conflict','Evento modificato o non aggiornabile.');
+		}
+		$before=get_post_meta($id,'_ba_moderation_status',true);
+		$result=wp_update_post(array('ID'=>$id,'post_status'=>'pending'),true);
+		if(is_wp_error($result) || get_post_status($id)!=='pending'){return new WP_Error('ba_external_enrichment_storage','Aggiornamento non riuscito.');}
+		self::$geo_writer=(int)$id;
+		try {
+			foreach(array('_ba_public_geo','_ba_public_geo_proof','_ba_public_lat','_ba_public_lng','_ba_public_radius_m') as $key){delete_post_meta($id,$key);if(''!==get_post_meta($id,$key,true)){return new WP_Error('ba_external_enrichment_storage','Proiezione non rimossa.');}}
+		} finally {self::$geo_writer=0;}
+		update_post_meta($id,'_ba_moderation_status','new');
+		delete_post_meta($id,BadAround_External_Report_Admin::REVIEW_META);
+		if(get_post_meta($id,'_ba_moderation_status',true)!=='new' || !BadAround_Audit_Log::transition('event',$id,'external_enrichment_reopened',$before,'new','external_intake','Integrazione manuale GEO e foto: nuova moderazione obbligatoria.')){
+			return new WP_Error('ba_external_enrichment_storage','Audit non registrato.');
+		}
+		return true;
+	}
+
 	public static function register_geo_guards() {
+		BadAround_Event_SEO::register_hooks();
+        add_action('rest_api_init',array(__CLASS__,'register_publication_retry'));
+        BadAround_Event_Public_Details::register_hooks();
 		foreach ( array( 'add_post_metadata', 'update_post_metadata', 'delete_post_metadata' ) as $hook ) {
 			add_filter( $hook, array( __CLASS__, 'guard_geo_write' ), 999, 5 );
 		}
 	}
+
+    /** Maintenance-only admin retry through the owning publication service. */
+    public static function register_publication_retry(){
+        register_rest_route('badaround-ops/v1','/publication-retry/(?P<id>\\d+)',array(
+            'methods'=>'POST',
+            'permission_callback'=>static function($r){
+                $id=absint($r['id']);
+                return current_user_can('manage_options')&&current_user_can('ba_moderate_events')
+                    &&current_user_can('publish_ba_eventi')&&current_user_can('ba_view_private_reports')&&current_user_can('edit_post',$id);
+            },
+            'callback'=>static function($r){
+                $id=absint($r['id']);clean_post_cache($id);
+                if(!function_exists('badaround_child_maintenance_enabled')||!badaround_child_maintenance_enabled()
+                    ||get_post_type($id)!=='ba_evento')return new WP_Error('ba_publication_retry_unavailable','Ripristino riservato alla manutenzione.',array('status'=>409));
+                $primary=absint(get_post_meta($id,'_ba_primary_report_id',true));
+                if(!$primary||$primary!==absint($r['expected_report_id']??0))return new WP_Error('ba_publication_retry_stale','Segnalazione modificata.',array('status'=>409));
+                global $wpdb;
+                $digest=$wpdb->get_var($wpdb->prepare("SELECT SHA2(content_original,256) FROM {$wpdb->prefix}ba_reports WHERE id=%d AND event_id=%d AND deleted_at IS NULL",$primary,$id));
+                if(!is_string($digest)||!is_string($r['expected_source_hash']??null)||!hash_equals($digest,$r['expected_source_hash']))return new WP_Error('ba_publication_retry_stale','Dati modificati.',array('status'=>409));
+                $status=get_post_status($id);$moderation=get_post_meta($id,'_ba_moderation_status',true);
+                if(!((in_array($status,array('draft','pending'),true)&&$moderation==='approved')||($status==='publish'&&$moderation==='published')))return new WP_Error('ba_publication_retry_state','Serve una segnalazione già approvata.',array('status'=>409));
+                if(($r['apply']??false)!==true)return new WP_REST_Response(array('id'=>$id,'status'=>$status,'moderation'=>$moderation,'ready'=>true),200);
+                $result=(new self())->publish($id);
+                if(is_wp_error($result))return $result;
+                return new WP_REST_Response(array('id'=>$id,'status'=>get_post_status($id),'moderation'=>get_post_meta($id,'_ba_moderation_status',true),'url'=>get_permalink($id)),200);
+            }
+        ));
+    }
 
 	public static function guard_geo_write( $check, $event_id, $key, $value = null, $extra = null ) {
 		if ( ! in_array( $key, array( '_ba_public_geo', '_ba_public_geo_proof', '_ba_public_lat', '_ba_public_lng', '_ba_public_radius_m' ), true ) ) { return $check; }
@@ -192,10 +250,12 @@ class BadAround_Publication_Service {
 		return true;
 	}
 
-	public function validate_public_projection( $event_id, $allow_published_recovery = false ) {
+	public function validate_public_projection( $event_id, $allow_published_recovery = false, $candidate_content = null ) {
 		global $wpdb;
 
 		$event_id = absint( $event_id );
+		$external_gate = class_exists( 'BadAround_External_Report_Admin' ) ? ( new BadAround_External_Report_Admin() )->publication_gate( true, $event_id ) : true;
+		if ( is_wp_error( $external_gate ) ) { return $external_gate; }
 		$post     = get_post( $event_id );
 		if ( ! $post || BadAround_Event_Post_Type::POST_TYPE !== $post->post_type ) {
 			return new WP_Error( 'ba_publication_invalid_event', __( 'Evento non valido.', 'badaround-core' ) );
@@ -209,7 +269,7 @@ class BadAround_Publication_Service {
 		}
 
 		$title   = trim( wp_strip_all_tags( (string) $post->post_title ) );
-		$content = trim( wp_strip_all_tags( (string) $post->post_content ) );
+		$content = trim( wp_strip_all_tags( null === $candidate_content ? (string) $post->post_content : (string) $candidate_content ) );
 		if ( '' === $title || preg_match( '/^Segnalazione da moderare\s*#/i', $title ) ) {
 			return new WP_Error( 'ba_publication_title_missing', __( 'Il titolo pubblico deve essere completato prima della pubblicazione.', 'badaround-core' ) );
 		}
@@ -322,21 +382,36 @@ class BadAround_Publication_Service {
 			return new WP_Error( 'ba_publication_private_report_missing', __( 'Il report riservato collegato non è disponibile.', 'badaround-core' ) );
 		}
 
+		$seo_projection = BadAround_Event_SEO::active( $event_id ) ? BadAround_Event_SEO::project( $event_id ) : array();
+        if ( is_wp_error( $seo_projection ) ) { return $seo_projection; }
+        $public_details=BadAround_Event_Public_Details::view($event_id);
+        $approved_address=$public_details['address']??'';
+        $detail_text=implode(' ',array_column($public_details['facts']??[],'value')).' '.($public_details['neighborhood']??'');
 		$public_text = strtolower( implode( "\n", array_filter( array(
 			$title,
+            $detail_text,
+			implode( ' ', $seo_projection ),
 			$content,
 			$place_name,
 			(string) get_post_meta( $event_id, '_ba_public_address', true ),
 			(string) get_post_meta( $event_id, '_ba_vehicle_plate_masked', true ),
 		) ) ) );
 
+        $public_text_without_address=$public_text;
+        $public_text .= '\n'.strtolower($approved_address).'\n'.strtolower($public_details['plate']??'');
 		$private_identity = trim( strtolower( trim( (string) $report->author_name . ' ' . (string) $report->author_surname ) ) );
-		foreach ( array( $private_identity, $report->author_email, $report->author_phone, $report->exact_address ) as $private_value ) {
+		foreach ( array( $private_identity, $report->author_email, $report->author_phone ) as $private_value ) {
 			$private_value = trim( strtolower( (string) $private_value ) );
 			if ( strlen( $private_value ) >= 5 && false !== strpos( $public_text, $private_value ) ) {
 				return new WP_Error( 'ba_publication_private_data_detected', __( 'La proiezione pubblica contiene dati del report riservato.', 'badaround-core' ) );
 			}
 		}
+
+        // Explicit authorization applies only to the sealed address field, never to prose, SEO or other data.
+        $private_address=trim(strtolower((string)$report->exact_address));
+        if(strlen($private_address)>=5 && strpos($public_text_without_address,$private_address)!==false){
+            return new WP_Error('ba_publication_private_data_detected',__('La proiezione pubblica contiene dati del report riservato.','badaround-core'));
+        }
 
 		if ( $explicit_exact ) {
 			$verified = BadAround_Public_Geo_Projection::verified( $event_id );
@@ -351,7 +426,14 @@ class BadAround_Publication_Service {
 		$full_plate = strtoupper( preg_replace( '/[^A-Z0-9]/', '', (string) $report->full_plate ) );
 		if ( $full_plate ) {
 			$masked_plate = strtoupper( preg_replace( '/[^A-Z0-9*]/', '', (string) get_post_meta( $event_id, '_ba_vehicle_plate_masked', true ) ) );
-			if ( '' === $masked_plate || $masked_plate === $full_plate || false !== strpos( strtoupper( $public_text ), $full_plate ) ) {
+			// A full plate is allowed only in the sealed field issued from the versioned
+            // reporter declaration. It never authorizes a copy in prose/SEO/legacy meta.
+            $approved_plate=strtoupper(preg_replace('/[^A-Z0-9]/','',(string)($public_details['plate']??'')));
+            $plate_authorized=$approved_plate!=='' && hash_equals($full_plate,$approved_plate);
+            if($plate_authorized && false !== strpos(strtoupper($public_text_without_address),$full_plate)){
+                return new WP_Error('ba_publication_plate_outside_approved_field','La targa va mostrata nel campo pubblico dedicato, senza copie nei testi o nei metadati SEO.');
+            }
+            if ( !$plate_authorized && ( '' === $masked_plate || $masked_plate === $full_plate || false !== strpos(strtoupper($public_text_without_address),$full_plate) ) ) {
 				return new WP_Error( 'ba_publication_plate_not_masked', __( 'La targa completa non può essere pubblicata.', 'badaround-core' ) );
 			}
 		}
@@ -590,6 +672,8 @@ class BadAround_Publication_Service {
 		if ( ! $event_id || ! current_user_can( 'ba_moderate_events' ) || ! current_user_can( 'publish_ba_eventi' ) || ! current_user_can( 'edit_post', $event_id ) ) {
 			return new WP_Error( 'ba_publication_forbidden', __( 'Non sei autorizzato a pubblicare questo evento.', 'badaround-core' ) );
 		}
+		$external_gate = class_exists( 'BadAround_External_Report_Admin' ) ? ( new BadAround_External_Report_Admin() )->publication_gate( true, $event_id ) : true;
+		if ( is_wp_error( $external_gate ) ) { return $external_gate; }
 		if (class_exists('BadAround_Native_Media_Fence')) {
 			$fence=BadAround_Native_Media_Fence::check($event_id);
 			if (is_wp_error($fence)) return $fence;
@@ -668,6 +752,8 @@ class BadAround_Publication_Service {
 			return new WP_Error( 'ba_publication_transition_not_allowed', __( 'La pubblicazione è consentita solo dallo stato Approvato.', 'badaround-core' ) );
 		}
 
+		$seo = BadAround_Event_SEO::prepare( $event_id );
+		if ( is_wp_error( $seo ) ) { return $seo; }
 		$valid = $this->validate_public_projection( $event_id );
 		if ( is_wp_error( $valid ) ) {
 			return $valid;
@@ -715,6 +801,9 @@ class BadAround_Publication_Service {
 		if ( ! get_post_meta( $event_id, '_ba_event_status', true ) ) {
 			update_post_meta( $event_id, '_ba_event_status', 'open' );
 		}
+
+		$seo_frozen = BadAround_Event_SEO::freeze( $event_id );
+		if ( is_wp_error($seo_frozen) ) { wp_update_post(array('ID'=>$event_id,'post_status'=>'pending')); return $seo_frozen; }
 
 		$publication_audit = BadAround_Audit_Log::transition(
 			'event',
@@ -836,6 +925,22 @@ class BadAround_Publication_Service {
 			} else {
 				$result = $this->prepare_public_projection( $event_id );
 				if ( ! is_wp_error( $result ) ) { $result = $this->publish( $event_id ); }
+                if ( ! is_wp_error( $result ) ) {
+                    $details=BadAround_Event_Public_Details::publication_snapshot($event_id);
+                    if(is_wp_error($details))return $details;
+                    if(is_array($details)){
+                        update_post_meta($event_id,BadAround_Event_Public_Details::META,$details);
+                        if(BadAround_Event_Public_Details::view($event_id)!==$details['data'])return $this->geo_error('detail_signature');
+                        // SEO updates post_title/post_name through wp_update_post. Keep the
+                        // event-bound B3 authorization for that write as well, then remove it.
+                        $seo_allow=static function($allowed,$candidate_id)use($event_id){return absint($candidate_id)===$event_id?true:$allowed;};
+                        add_filter('badaround_allow_event_publish',$seo_allow,999,2);
+                        try{$result=BadAround_Event_SEO::finalize_publication($event_id);}
+                        finally{remove_filter('badaround_allow_event_publish',$seo_allow,999);}
+                        if(!is_wp_error($result))$result=$this->validate_public_projection($event_id,true);
+                        if(!is_wp_error($result) && false===BadAround_Audit_Log::record('event',$event_id,'public_details_approved','publication','public-details-v1'))return $this->geo_error('detail_audit');
+                    }
+                }
 				if ( ! is_wp_error( $result ) ) {
 					$c = $this->versioned_context( $event_id );
 					$p = BadAround_Public_Geo_Projection::verified( $event_id );
@@ -854,6 +959,88 @@ class BadAround_Publication_Service {
 		}
 		if ( ! $was_published ) { do_action( 'badaround_event_published', $event_id ); }
 		return true;
+	}
+
+    /** Atomic, capability-checked public detail review. No intake, GEO, slug or status writes. */
+    public function apply_public_details($id,$stored,$expected_source) {
+        global $wpdb;$id=absint($id);
+        if(!current_user_can('ba_moderate_events')||!current_user_can('publish_ba_eventi')||!current_user_can('ba_view_private_reports')||!current_user_can('edit_post',$id))return $this->geo_error('detail_forbidden');
+        foreach([$wpdb->posts,$wpdb->postmeta,$wpdb->prefix.'ba_reports',$wpdb->prefix.'ba_audit_log'] as $table){
+            if($wpdb->get_var($wpdb->prepare('SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=%s',$table))!=='InnoDB')return $this->geo_error('detail_transaction_unavailable');
+        }
+        if(false===$wpdb->query('START TRANSACTION'))return $this->geo_error('detail_storage');
+        $committed=false;$previous=$this->b3_event;
+        try {
+            $post=$wpdb->get_row($wpdb->prepare("SELECT ID,post_type,post_status FROM {$wpdb->posts} WHERE ID=%d FOR UPDATE",$id));
+            clean_post_cache($id);
+            if(!$post||$post->post_type!=='ba_evento'||$post->post_status!=='publish'||get_post_meta($id,'_ba_moderation_status',true)!=='published')return $this->geo_error('detail_state');
+            $primary=absint(get_post_meta($id,'_ba_primary_report_id',true));
+            $report=$wpdb->get_row($wpdb->prepare("SELECT content_original FROM {$wpdb->prefix}ba_reports WHERE id=%d AND event_id=%d AND deleted_at IS NULL FOR UPDATE",$primary,$id));
+            if(!$report||!is_string($expected_source)||!hash_equals(hash('sha256',$report->content_original),$expected_source))return $this->geo_error('detail_stale');
+            $this->b3_event=self::uses_versioned_geo($id)?$id:0;
+            update_post_meta($id,BadAround_Event_Public_Details::META,$stored);
+            if(get_post_meta($id,BadAround_Event_Public_Details::META,true)!==$stored||BadAround_Event_Public_Details::view($id)!==($stored['data']??null))return $this->geo_error('detail_signature');
+            $valid=$this->validate_public_projection($id,true);if(is_wp_error($valid))return $valid;
+            if(false===BadAround_Audit_Log::record('event',$id,'public_details_approved','moderation',empty($stored['data']['address'])?'public_facts_only':'explicit_address_authorization'))return $this->geo_error('detail_audit');
+            if(false===$wpdb->query('COMMIT'))return $this->geo_error('detail_storage');
+            $committed=true;return true;
+        } catch(Throwable $e){return $this->geo_error('detail_storage');}
+        finally{$this->b3_event=$previous;if(!$committed)$wpdb->query('ROLLBACK');clean_post_cache($id);}
+    }
+
+	/** Identity review owns the surrounding transaction and the intent CAS.
+	 * Validate a candidate before any public write; never change canonical intake or GEO.
+	 */
+	public function apply_identity_revision( $event_id, $description, $expected_snapshot ) {
+		global $wpdb;
+		$event_id = absint( $event_id );
+		if ( ! class_exists( 'BadAround_Identity_Community_Review', false )
+			|| ! BadAround_Identity_Community_Review::enabled()
+			|| ! BadAround_Identity_Community_Review::is_moderator()
+			|| ! current_user_can( 'ba_moderate_events' ) || ! current_user_can( 'publish_ba_eventi' )
+			|| ! current_user_can( 'edit_post', $event_id ) || ! current_user_can( 'ba_view_private_reports' )
+			|| ! BadAround_Identity_Community_Review::owns_transaction()
+			|| ! is_string( $description ) || mb_strlen( $description, 'UTF-8' ) < 10
+			|| mb_strlen( $description, 'UTF-8' ) > 5000 || ! is_string( $expected_snapshot ) ) {
+			return $this->geo_error( 'identity_revision_forbidden' );
+		}
+		$snapshot = BadAround_Identity_Community_Review::snapshot( $event_id, true );
+		if ( ! $snapshot || ! hash_equals( $snapshot['digest'], $expected_snapshot ) ) {
+			return $this->geo_error( 'identity_revision_stale' );
+		}
+		$previous = $this->b3_event;
+		$this->b3_event = self::uses_versioned_geo( $event_id ) ? $event_id : 0;
+		$allow = static function( $allowed, $candidate_id ) use ( $event_id ) {
+			return absint( $candidate_id ) === $event_id ? true : $allowed;
+		};
+		try {
+			$was_pending = in_array( get_post_status( $event_id ), array( 'pending', 'draft' ), true );
+			$pending_moderation = get_post_meta( $event_id, '_ba_moderation_status', true );
+			if ( $was_pending ) {
+				if ( ! in_array( $pending_moderation, array( 'new', 'in_review', 'needs_information' ), true ) ) {
+					return $this->geo_error( 'identity_revision_state' );
+				}
+				$result = wp_update_post( array( 'ID' => $event_id, 'post_content' => wp_kses_post( $description ) ), true );
+				if ( is_wp_error( $result ) ) { return $result; }
+				return in_array( get_post_status( $event_id ), array( 'pending', 'draft' ), true )
+					&& get_post_meta( $event_id, '_ba_moderation_status', true ) === $pending_moderation
+					? true : $this->geo_error( 'identity_revision_state' );
+			}
+			if ( class_exists( 'BadAround_Native_Media_Fence' ) ) {
+				$fence = BadAround_Native_Media_Fence::check( $event_id );
+				if ( is_wp_error( $fence ) ) { return $fence; }
+			}
+			$valid = $this->validate_public_projection( $event_id, true, $description );
+			if ( is_wp_error( $valid ) ) { return $valid; }
+			add_filter( 'badaround_allow_event_publish', $allow, 999, 2 );
+			try {
+				$result = wp_update_post( array( 'ID' => $event_id, 'post_content' => wp_kses_post( $description ) ), true );
+			} finally { remove_filter( 'badaround_allow_event_publish', $allow, 999 ); }
+			if ( is_wp_error( $result ) ) { return $result; }
+			return 'publish' === get_post_status( $event_id )
+				&& self::STATUS_PUBLISHED === get_post_meta( $event_id, '_ba_moderation_status', true )
+				? true : $this->geo_error( 'identity_revision_state' );
+		} finally { $this->b3_event = $previous; }
 	}
 
 	private function geo_error( $code ) { return new WP_Error( 'ba_publication_geo_' . $code, __( 'Pubblicazione geografica non autorizzata o non verificabile.', 'badaround-core' ) ); }

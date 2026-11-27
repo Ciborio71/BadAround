@@ -28,3 +28,9 @@ Prima dell'invio la scelta può essere modificata; una nuova segnalazione ripart
 ## QA
 
 Test dedicati: sì/no/omesso, indipendenza dalla conferma e dal contatto, versione riconosciuta, tipi/enum errati, rilettura tramite repository reale su DB simulato, timestamp server, retry identico e conflitto su modifica, riepilogo e reset. Browser Chromium/WebKit: veicoli con 112 e richiesta, pseudonimo con rifiuto, altre categorie con omissione; mobile e desktop, tastiera, numerazione e submission 201 simulate. Nessuna segnalazione di prova nel database staging.
+
+## Aggiornamento UI — produzione, 11 novembre 2026
+
+La domanda del wizard mostra le cinque piattaforme dell’ambito v1 con icone SVG locali e nomi visibili: Facebook, Instagram, TikTok, X e Google Business Profile. L’elenco è informativo, accessibile e collegato alla descrizione del controllo; non contiene link esterni, tracking o nuovi campi. La richiesta non è preselezionata e non esegue una pubblicazione.
+
+Il testo, la versione social-preference-v1, le scelte sì/no/omessa, la persistenza e la moderazione restano invariati. Non sono aggiunti altri canali. Il flusso PostPickr non è attivato: la connessione consultata non espone un progetto BadAround. Nessun post o bozza creato in altri progetti.

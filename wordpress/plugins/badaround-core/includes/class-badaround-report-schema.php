@@ -509,6 +509,8 @@ class BadAround_Report_Schema {
 			'consents.publication_rules' => self::field( 'bool', true, self::PRIVACY_PRIVATE, 'ba_reports.consent_publication', 'never' ),
 			'consents.terms' => self::field( 'bool', true, self::PRIVACY_PRIVATE, 'ba_reports.content_original', 'never' ),
 			'consents.privacy' => self::field( 'bool', true, self::PRIVACY_PRIVATE, 'ba_reports.consent_privacy', 'never' ),
+			// Additive declaration: older reports retain their original privacy policy.
+			'consents.public_details_version' => self::field( 'string', false, self::PRIVACY_PRIVATE, 'ba_reports.content_original', 'never', array( 'enum' => array( 'public-details-v1' ), 'max_length' => 64 ) ),
 			'consents.version' => self::field( 'string', true, self::PRIVACY_PRIVATE, 'ba_reports.consent_version', 'never', array( 'max_length' => 64 ) ),
 		);
 	}

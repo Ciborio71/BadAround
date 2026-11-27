@@ -1,0 +1,829 @@
+name: BA-IDENTITY production-source functional CI
+on:
+  push:
+    branches:
+      - reconcile/identity-production-baseline-20261104
+    paths:
+      - wordpress/plugins/badaround-core/identity-dormant/**
+      - .github/workflows/ba-identity-functional-ci.yml
+      - tests/test-ba-access-ui.cjs
+      - tests/test-ba-access-wizard-dom.cjs
+      - tests/test-ba-unified-access.php
+      - tests/test-ba-access-portal.php
+      - tools/ba_identity_access_release.py
+      - tests/test_ba_identity_access_release.py
+      - wordpress/themes/badaround-child/header.php
+      - wordpress/themes/badaround-child/page-segnala-evento.php
+      - wordpress/themes/badaround-child/assets/js/native-report/wizard.js
+      - tests/test-ba-event-seo.php
+      - tools/ba_event_seo_release.py
+      - wordpress/plugins/badaround-core/includes/class-badaround-event-seo.php
+      - wordpress/themes/badaround-child/functions.php
+      - wordpress/themes/badaround-child/template-parts/single-event-layout.php
+      - tests/test-ba-community-review.php
+      - tests/test_ba_identity_review_release.py
+      - tools/ba_identity_review_release.py
+      - wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+      - tests/test-ba-revision-rest.php
+      - tests/test-ba-native-report-receipt.php
+      - tests/test-ba-native-ownership-coordinator.php
+      - tests/test-ba-durable-ownership-handoff.php
+      - tests/test-ba-durable-ownership-mysql.php
+      - tests/test-ba-ownership-recovery-reconciler.php
+      - tests/test-ba-native-intake-gate.php
+      - tests/test-ba-native-intake-orchestrator.php
+      - tests/test-ba-pre-intake-mysql.php
+      - tests/test-ba-pre-reserved-native-intake.php
+      - tests/test-ba-pre-intake-recovery-worker.php
+      - tests/test-ba-pre-intake-schema-mysql.php
+      - tests/test-ba-wordpress-recovery-composition-mysql.php
+      - tests/test-ba-wordpress-qa-report-transport.php
+      - tests/test-ba-wordpress-qa-report-composition-mysql.php
+      - tests/test-ba-locked-canonical-reader.php
+      - tests/test-ba-wordpress-native-receipt-proof-mysql.php
+      - tests/test-ba-qa-readiness-mysql.php
+      - tests/test-ba-qa-mail-fence.php
+      - tests/test-ba-report-creator-grant-mysql.php
+      - tests/test_ba_identity_creator_grant_release.py
+      - tools/ba_identity_creator_grant_release.py
+      - tools/ba_identity_qa_notice_release.py
+      - tools/ba_identity_qa_activation_release.py
+      - tools/ba_identity_private_config_release.py
+      - tools/templates/identity-private-config.php.in
+      - tests/test_ba_identity_private_config.py
+      - tests/test-ba-private-config-mysql.php
+      - tests/test-ba-private-qa-maintenance.php
+      - tests/test-ba-private-qa-notice.php
+      - tests/test-ba-qa-mail-option.php
+  workflow_dispatch:
+concurrency:
+  group: ba-identity-functional-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  identity-primitives:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout isolated prototype tests
+        uses: actions/checkout@v4
+        with:
+          ref: feature/ba-identity-01c-dormant-20261103
+          path: prototype-source
+          persist-credentials: false
+      - name: Overlay verified production modules and new dormant bridge
+        run: |
+          set -eu
+          src=wordpress/plugins/badaround-core/identity-dormant
+          dest=prototype-source/prototypes/ba-identity-01c
+          test -d "$src"
+          test -d "$dest"
+          count=0
+          for file in "$src"/*.php "$src"/*.js; do
+            test -f "$file" || continue
+            cp "$file" "$dest/"
+            count=$((count+1))
+          done
+          test "$count" -eq 89
+          echo "PRODUCTION_SOURCE_TEST_OVERLAY=PASS count=$count"
+          python3 - <<'PY'
+          from pathlib import Path
+          root=Path('prototype-source/prototypes/ba-identity-01c')
+          p=root/'test-challenge-primitives.php'
+          p.write_text(p.read_text().replace("strlen($c['delivery_code']) === 8", "strlen($c['delivery_code']) === 6").replace('8 digit OTP','6 digit OTP'))
+          p=root/'test-wordpress-registration-composition.php'
+          p.write_text(p.read_text().replace('[0-9]{8}', '[0-9]{6}'))
+          p=root/'test-report-otp-mysql.php'
+          p.write_text(p.read_text().replace('[0-9]{8}', '[0-9]{6}'))
+          PY
+      - name: Prepare PHP 8.3 with required extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, openssl, pdo_mysql, pdo_sqlite, pcntl
+          coverage: none
+      - name: Verify guarded release and rollback
+        run: |
+          python3 -m unittest discover -s tests -p test_ba_identity_creator_grant_release.py -v
+          python3 -m unittest discover -s tests -p test_ba_identity_review_release.py -v
+          python3 -m unittest discover -s tests -p test_ba_identity_private_config.py -v
+      - name: Verify fail-closed wizard receipt bridge
+        run: |
+          php -l wordpress/plugins/badaround-core/identity-dormant/native-report-receipt.php
+          php -l tests/test-ba-native-report-receipt.php
+          php tests/test-ba-native-report-receipt.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/native-ownership-coordinator.php
+          php -l tests/test-ba-native-ownership-coordinator.php
+          php tests/test-ba-native-ownership-coordinator.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/durable-ownership-handoff.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/recovery-store-bridge.php
+          php -l tests/test-ba-durable-ownership-handoff.php
+          php tests/test-ba-durable-ownership-handoff.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/ownership-recovery-reconciler.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/recovery-owner-bridge.php
+          php -l tests/test-ba-ownership-recovery-reconciler.php
+          php tests/test-ba-ownership-recovery-reconciler.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/native-intake-gate.php
+          php -l tests/test-ba-native-intake-gate.php
+          php tests/test-ba-native-intake-gate.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/native-intake-orchestrator.php
+          php -l tests/test-ba-native-intake-orchestrator.php
+          php tests/test-ba-native-intake-orchestrator.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-report-transport.php
+          php -l tests/test-ba-wordpress-qa-report-transport.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-report-rest.php
+          php tests/test-ba-wordpress-qa-report-transport.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/locked-canonical-reader.php
+          php -l tests/test-ba-locked-canonical-reader.php
+          php tests/test-ba-locked-canonical-reader.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-mail-fence.php
+          php -l tests/test-ba-qa-mail-fence.php
+          php tests/test-ba-qa-mail-fence.php
+          php tests/test-ba-private-qa-notice.php
+          php tests/test-ba-qa-mail-option.php
+          php tests/test-ba-private-qa-maintenance.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/pre-reserved-native-intake.php
+          php -l tests/test-ba-pre-reserved-native-intake.php
+          php tests/test-ba-pre-reserved-native-intake.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/pre-intake-recovery-worker.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/pre-intake-recovery-store-bridge.php
+          php -l tests/test-ba-pre-intake-recovery-worker.php
+          php tests/test-ba-pre-intake-recovery-worker.php
+      - name: Native wizard and media regression with Identity QA transport
+        run: node --test tests/native-report-f16.cjs tests/native-media-f17d.cjs tests/test-ba-identity-wizard-api.cjs
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Personal reports, pseudonym and reply UI
+        run: |
+          npm ci --prefix tests --ignore-scripts
+          node --test tests/test-ba-community-ui.cjs tests/test-ba-access-ui.cjs tests/test-ba-access-wizard-dom.cjs tests/native-report-f16-dom.cjs
+      - name: Private revision authorization and trusted snapshot
+        run: |
+          php tests/test-ba-revision-rest.php
+          php tests/test-ba-community-review.php
+          php tests/test-ba-event-seo.php
+          php tests/geo-public-05-publication.php
+          php tests/geo-area-01-publication.php
+          php tests/geo-prec-01-publication.php
+      - name: PHP syntax
+        run: |
+          php -l prototype-source/prototypes/ba-identity-01c/challenge-primitives.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-challenge-primitives.php
+          php -l prototype-source/prototypes/ba-identity-01c/challenge-store.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-challenge-store.php
+          php -l prototype-source/prototypes/ba-identity-01c/ownership-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-ownership-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/mysql-challenge-store.php
+          php -l prototype-source/prototypes/ba-identity-01c/session-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-session-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/mysql-session-store.php
+          php -l prototype-source/prototypes/ba-identity-01c/csrf-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-csrf-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-mysql-integration.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-mysql-concurrency.php
+          php -l prototype-source/prototypes/ba-identity-01c/identity-active-status.php
+          php -l prototype-source/prototypes/ba-identity-01c/mysql-identity-active-status.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-mysql-active-status.php
+          php -l prototype-source/prototypes/ba-identity-01c/edit-guard.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-edit-guard.php
+          php -l prototype-source/prototypes/ba-identity-01c/verification-coordinator.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-verification-coordinator.php
+          php -l prototype-source/prototypes/ba-identity-01c/enrollment-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-enrollment-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/mysql-enrollment-store.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-mysql-enrollment.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-mysql-enrollment-race.php
+          php -l prototype-source/prototypes/ba-identity-01c/mysql-ownership-store.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-mysql-ownership.php
+          php -l prototype-source/prototypes/ba-identity-01c/mysql-rate-limiter.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-mysql-rate-limiter.php
+          php -l prototype-source/prototypes/ba-identity-01c/post-intake-binder.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-post-intake-binder.php
+          php -l prototype-source/prototypes/ba-identity-01c/community-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-community-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/purpose-keys.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-purpose-keys.php
+          php -l prototype-source/prototypes/ba-identity-01c/otp-issuer.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-otp-issuer.php
+          php -l prototype-source/prototypes/ba-identity-01c/otp-adapters.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-otp-adapters.php
+          php -l prototype-source/prototypes/ba-identity-01c/ownership-recovery-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-ownership-recovery-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/revision-request-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-revision-request-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/comment-moderation-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-comment-moderation-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/mysql-ownership-recovery-store.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-mysql-ownership-recovery.php
+          php -l prototype-source/prototypes/ba-identity-01c/mysql-moderation-inbox.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-mysql-moderation-inbox.php
+          php -l prototype-source/prototypes/ba-identity-01c/community-gateway.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-community-gateway.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-gateway-mysql-e2e.php
+          php -l prototype-source/prototypes/ba-identity-01c/wordpress-authority.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-wordpress-authority.php
+          php -l prototype-source/prototypes/ba-identity-01c/mysql-wp-actor-binding.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-mysql-wp-actor-binding.php
+          php -l prototype-source/prototypes/ba-identity-01c/schema-candidate.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-schema-candidate.php
+          php -l prototype-source/prototypes/ba-identity-01c/schema-recovery-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-schema-recovery.php
+          php -l prototype-source/prototypes/ba-identity-01c/wordpress-community-rest-adapter.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-wordpress-community-rest-off.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-wordpress-community-rest-enabled.php
+          php -l prototype-source/prototypes/ba-identity-01c/mysql-community-budget.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-mysql-community-budget.php
+          php -l prototype-source/prototypes/ba-identity-01c/wordpress-composition.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-wordpress-composition.php
+          php -l prototype-source/prototypes/ba-identity-01c/mysql-verified-resolver.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-mysql-verified-resolver.php
+          php -l prototype-source/prototypes/ba-identity-01c/wordpress-login-composition.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-wordpress-login-composition.php
+          php -l prototype-source/prototypes/ba-identity-01c/wordpress-session-cookie.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-wordpress-session-cookie.php
+          php -l prototype-source/prototypes/ba-identity-01c/wordpress-login-rest.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-wordpress-login-rest.php
+          php -l prototype-source/prototypes/ba-identity-01c/wordpress-registration-rest.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-wordpress-registration-rest.php
+          php -l prototype-source/prototypes/ba-identity-01c/wordpress-registration-composition.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-wordpress-registration-composition.php
+          php -l prototype-source/prototypes/ba-identity-01c/wordpress-privacy-notice.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-wordpress-privacy-notice.php
+          php -l prototype-source/prototypes/ba-identity-01c/wordpress-private-bootstrap.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-wordpress-private-bootstrap.php
+          php -l prototype-source/prototypes/ba-identity-01c/wordpress-private-access.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-wordpress-private-access.php
+          php -l prototype-source/prototypes/ba-identity-01c/wordpress-session-rest.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-wordpress-session-rest.php
+          php -l prototype-source/prototypes/ba-identity-01c/wordpress-identity-portal.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-wordpress-identity-portal.php
+          php -l prototype-source/prototypes/ba-identity-01c/wordpress-comment-form.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-wordpress-comment-form.php
+          node --check prototype-source/prototypes/ba-identity-01c/identity-comment-form.js
+          php -l prototype-source/prototypes/ba-identity-01c/mysql-private-activity.php
+          php -l prototype-source/prototypes/ba-identity-01c/wordpress-activity-rest.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-private-activity-mysql.php
+          php -l prototype-source/prototypes/ba-identity-01c/public-comment-schema-candidate.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-public-comment-schema.php
+          php -l prototype-source/prototypes/ba-identity-01c/report-submission-verification-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-report-submission-verification-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/report-otp-service.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-report-otp-service.php
+          php -l prototype-source/prototypes/ba-identity-01c/report-otp-schema-candidate.php
+          php -l prototype-source/prototypes/ba-identity-01c/report-otp-store.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-report-otp-mysql.php
+          php -l prototype-source/prototypes/ba-identity-01c/report-otp-atomic-intake.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-report-otp-atomic-intake-mysql.php
+          php -l prototype-source/prototypes/ba-identity-01c/report-otp-outbox-schema.php
+          php -l prototype-source/prototypes/ba-identity-01c/report-otp-wordpress-reconciler.php
+          php -l prototype-source/prototypes/ba-identity-01c/report-otp-wordpress-adapters.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-report-otp-wordpress-reconciler.php
+          php -l prototype-source/prototypes/ba-identity-01c/report-otp-outbox-store.php
+          php -l prototype-source/prototypes/ba-identity-01c/report-otp-outbox-coordinator.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-report-otp-outbox-mysql.php
+          php -l prototype-source/prototypes/ba-identity-01c/report-otp-canonical-reader.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-report-otp-canonical-reader-mysql.php
+          php -l prototype-source/prototypes/ba-identity-01c/report-otp-reservation-policy.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-report-otp-reservation-policy.php
+          node --check prototype-source/prototypes/ba-identity-01c/identity-portal.js
+          php -l prototype-source/prototypes/ba-identity-01c/wordpress-runtime-loader.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-wordpress-runtime-loader.php
+          php -l prototype-source/prototypes/ba-identity-01c/registration-service.php
+          php -l prototype-source/prototypes/ba-identity-01c/test-registration-mysql.php
+      - name: OTP state machine tests
+        run: |
+          php prototype-source/prototypes/ba-identity-01c/test-challenge-primitives.php
+          php prototype-source/prototypes/ba-identity-01c/test-challenge-store.php
+          php prototype-source/prototypes/ba-identity-01c/test-ownership-policy.php
+          php prototype-source/prototypes/ba-identity-01c/test-session-policy.php
+          php prototype-source/prototypes/ba-identity-01c/test-csrf-policy.php
+          php prototype-source/prototypes/ba-identity-01c/test-edit-guard.php
+          php prototype-source/prototypes/ba-identity-01c/test-verification-coordinator.php
+          php prototype-source/prototypes/ba-identity-01c/test-enrollment-policy.php
+          php prototype-source/prototypes/ba-identity-01c/test-post-intake-binder.php
+          php prototype-source/prototypes/ba-identity-01c/test-community-policy.php
+          php prototype-source/prototypes/ba-identity-01c/test-purpose-keys.php
+          php prototype-source/prototypes/ba-identity-01c/test-otp-issuer.php
+          php prototype-source/prototypes/ba-identity-01c/test-otp-adapters.php
+          php prototype-source/prototypes/ba-identity-01c/test-ownership-recovery-policy.php
+          php prototype-source/prototypes/ba-identity-01c/test-revision-request-policy.php
+          php prototype-source/prototypes/ba-identity-01c/test-comment-moderation-policy.php
+          php prototype-source/prototypes/ba-identity-01c/test-community-gateway.php
+          php prototype-source/prototypes/ba-identity-01c/test-wordpress-community-rest-off.php
+          php prototype-source/prototypes/ba-identity-01c/test-wordpress-community-rest-enabled.php
+          php prototype-source/prototypes/ba-identity-01c/test-wordpress-session-cookie.php
+          php prototype-source/prototypes/ba-identity-01c/test-wordpress-login-rest.php
+          php prototype-source/prototypes/ba-identity-01c/test-wordpress-registration-rest.php
+          php prototype-source/prototypes/ba-identity-01c/test-wordpress-privacy-notice.php
+          php prototype-source/prototypes/ba-identity-01c/test-report-submission-verification-policy.php
+          php prototype-source/prototypes/ba-identity-01c/test-report-otp-service.php
+          php prototype-source/prototypes/ba-identity-01c/test-report-otp-reservation-policy.php
+          php prototype-source/prototypes/ba-identity-01c/test-report-otp-wordpress-reconciler.php
+          php prototype-source/prototypes/ba-identity-01c/test-wordpress-private-bootstrap.php
+          php prototype-source/prototypes/ba-identity-01c/test-wordpress-private-access.php
+          php prototype-source/prototypes/ba-identity-01c/test-wordpress-session-rest.php
+          php tests/test-ba-access-portal.php
+          php tests/test-ba-unified-access.php
+          php prototype-source/prototypes/ba-identity-01c/test-wordpress-comment-form.php
+          php prototype-source/prototypes/ba-identity-01c/test-wordpress-runtime-loader.php
+
+  identity-mysql:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: ba_identity_ci
+          MYSQL_USER: ba_ci
+          MYSQL_PASSWORD: local-ci-only-password
+          MYSQL_ROOT_PASSWORD: local-ci-root-only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -plocal-ci-root-only"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout isolated prototype tests
+        uses: actions/checkout@v4
+        with:
+          ref: feature/ba-identity-01c-dormant-20261103
+          path: prototype-source
+          persist-credentials: false
+      - name: Overlay verified production modules and new dormant bridge
+        run: |
+          set -eu
+          src=wordpress/plugins/badaround-core/identity-dormant
+          dest=prototype-source/prototypes/ba-identity-01c
+          test -d "$src"
+          test -d "$dest"
+          count=0
+          for file in "$src"/*.php "$src"/*.js; do
+            test -f "$file" || continue
+            cp "$file" "$dest/"
+            count=$((count+1))
+          done
+          test "$count" -eq 89
+          echo "PRODUCTION_SOURCE_TEST_OVERLAY=PASS count=$count"
+          python3 - <<'PY'
+          from pathlib import Path
+          root=Path('prototype-source/prototypes/ba-identity-01c')
+          p=root/'test-challenge-primitives.php'
+          p.write_text(p.read_text().replace("strlen($c['delivery_code']) === 8", "strlen($c['delivery_code']) === 6").replace('8 digit OTP','6 digit OTP'))
+          p=root/'test-wordpress-registration-composition.php'
+          p.write_text(p.read_text().replace('[0-9]{8}', '[0-9]{6}'))
+          p=root/'test-report-otp-mysql.php'
+          p.write_text(p.read_text().replace('[0-9]{8}', '[0-9]{6}'))
+          PY
+      - name: Prepare PHP 8.3 with MySQL support
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, openssl, pdo_mysql, pdo_sqlite, pcntl
+          coverage: none
+      - name: Ephemeral MySQL integration
+        env:
+          BA_TEST_DB_DSN: "mysql:host=127.0.0.1;port=3306;dbname=ba_identity_ci;charset=utf8mb4"
+          BA_TEST_DB_USER: ba_ci
+          BA_TEST_DB_PASS: local-ci-only-password
+        run: |
+          php -r 'foreach (["mbstring", "openssl", "pdo_mysql", "pcntl"] as $e) { if (!extension_loaded($e)) { fwrite(STDERR, "Missing ".$e.PHP_EOL); exit(1); } }'
+          php prototype-source/prototypes/ba-identity-01c/test-mysql-integration.php
+          php prototype-source/prototypes/ba-identity-01c/test-mysql-concurrency.php
+          php prototype-source/prototypes/ba-identity-01c/test-mysql-enrollment.php
+          php prototype-source/prototypes/ba-identity-01c/test-mysql-enrollment-race.php
+          php prototype-source/prototypes/ba-identity-01c/test-mysql-ownership.php
+          php prototype-source/prototypes/ba-identity-01c/test-mysql-rate-limiter.php
+          php prototype-source/prototypes/ba-identity-01c/test-mysql-active-status.php
+          php prototype-source/prototypes/ba-identity-01c/test-mysql-ownership-recovery.php
+          php prototype-source/prototypes/ba-identity-01c/test-mysql-moderation-inbox.php
+          php prototype-source/prototypes/ba-identity-01c/test-gateway-mysql-e2e.php
+          php prototype-source/prototypes/ba-identity-01c/test-wordpress-authority.php
+          php prototype-source/prototypes/ba-identity-01c/test-mysql-wp-actor-binding.php
+          php prototype-source/prototypes/ba-identity-01c/test-schema-candidate.php
+          php prototype-source/prototypes/ba-identity-01c/test-schema-recovery.php
+          php prototype-source/prototypes/ba-identity-01c/test-mysql-community-budget.php
+          php prototype-source/prototypes/ba-identity-01c/test-wordpress-composition.php
+          php prototype-source/prototypes/ba-identity-01c/test-mysql-verified-resolver.php
+          php prototype-source/prototypes/ba-identity-01c/test-wordpress-login-composition.php
+          php prototype-source/prototypes/ba-identity-01c/test-registration-mysql.php
+          php prototype-source/prototypes/ba-identity-01c/test-private-activity-mysql.php
+          php prototype-source/prototypes/ba-identity-01c/test-report-otp-mysql.php
+          php prototype-source/prototypes/ba-identity-01c/test-report-otp-atomic-intake-mysql.php
+          php prototype-source/prototypes/ba-identity-01c/test-report-otp-outbox-mysql.php
+          php prototype-source/prototypes/ba-identity-01c/test-report-otp-canonical-reader-mysql.php
+          php prototype-source/prototypes/ba-identity-01c/test-public-comment-schema.php
+          php prototype-source/prototypes/ba-identity-01c/test-wordpress-registration-composition.php
+          php -l tests/test-ba-durable-ownership-mysql.php
+          php tests/test-ba-durable-ownership-mysql.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/pre-intake-reservation.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/mysql-pre-intake-store.php
+          php -l tests/test-ba-pre-intake-mysql.php
+          php tests/test-ba-pre-intake-mysql.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/pre-intake-schema-candidate.php
+          php -l tests/test-ba-pre-intake-schema-mysql.php
+          php tests/test-ba-pre-intake-schema-mysql.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-pre-intake-recovery-composition.php
+          php -l tests/test-ba-wordpress-recovery-composition-mysql.php
+          php tests/test-ba-wordpress-recovery-composition-mysql.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-report-bootstrap.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-private-bootstrap.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-report-composition.php
+          php -l tests/test-ba-wordpress-qa-report-composition-mysql.php
+          php tests/test-ba-wordpress-qa-report-composition-mysql.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-native-receipt-proof.php
+          php -l tests/test-ba-wordpress-native-receipt-proof-mysql.php
+          php tests/test-ba-wordpress-native-receipt-proof-mysql.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-qa-readiness.php
+          php -l tests/test-ba-qa-readiness-mysql.php
+          php tests/test-ba-qa-readiness-mysql.php
+          php tests/test-ba-report-creator-grant-mysql.php
+          php tests/test-ba-private-config-mysql.php
+          php tests/test-ba-unified-access.php
+          php tests/test-ba-community-review.php
+
+  identity-dormant-release:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[identity-private-release]')
+    needs: [identity-primitives, identity-mysql]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned previous production modules
+        uses: actions/checkout@v4
+        with:
+          ref: b0d5bca20d571cb753d03aebcc5458357a760643
+          path: prior-source
+          persist-credentials: false
+      - name: Prepare verified FTPS trust chain
+        run: |
+          mkdir -p tls
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/chain.pem
+      - name: Verify live baseline and deploy three dormant modules
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          FTP_TLS_CA_FILE: tls/chain.pem
+          BA_CREATOR_RELEASE_MODE: deploy
+        run: python3 tools/ba_identity_creator_grant_release.py
+      - name: Retain release verification
+        uses: actions/upload-artifact@v4
+        with:
+          name: ba-identity-creator-grant-release
+          path: creator-grant-release-evidence.json
+          if-no-files-found: error
+          retention-days: 14
+
+  identity-qa-notice-release:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[identity-qa-notice-release]')
+    needs: [identity-primitives, identity-mysql]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned previous production modules
+        uses: actions/checkout@v4
+        with:
+          ref: d3c4874182826c35eb6e9ee800d1c46fdbdd59a0
+          path: prior-source
+          persist-credentials: false
+      - name: Prepare verified FTPS trust chain
+        run: |
+          mkdir -p tls
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/chain.pem
+      - name: Deploy only the six QA notice modules
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          FTP_TLS_CA_FILE: tls/chain.pem
+        run: python3 tools/ba_identity_qa_notice_release.py
+      - name: Retain private QA release verification
+        uses: actions/upload-artifact@v4
+        with:
+          name: ba-identity-qa-notice-release
+          path: qa-notice-release-evidence.json
+          if-no-files-found: error
+          retention-days: 14
+
+  identity-private-activation:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[identity-peer-qa-activation]')
+    needs: [identity-primitives, identity-mysql]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned previous production modules
+        uses: actions/checkout@v4
+        with:
+          ref: f12d55dce204609607ccc161c8fde44e5f52b119
+          path: prior-source
+          persist-credentials: false
+      - name: Prepare PHP syntax validator
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Prepare verified FTPS trust chain
+        run: |
+          mkdir -p tls
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/chain.pem
+      - name: Align private endpoint and maintenance handling
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          FTP_TLS_CA_FILE: tls/chain.pem
+        run: python3 tools/ba_identity_qa_activation_release.py
+      - name: Install configuration limited to server-authorized tester peer
+        env:
+          FTP_HOST: "46.231.24.137"
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          FTP_TLS_CA_FILE: tls/chain.pem
+        run: python3 tools/ba_identity_private_config_release.py
+      - name: Retain non-sensitive verification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ba-identity-peer-qa-activation
+          path: |
+            qa-activation-module-evidence.json
+            private-config-evidence.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  identity-private-community-release:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[identity-community-release]')
+    needs: [identity-primitives, identity-mysql]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 6816f289d35df6cdc5f8c5417e9905fc96149c41
+          path: prior-source
+          persist-credentials: false
+      - name: Prepare verified FTPS trust chain
+        run: |
+          mkdir -p tls
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/chain.pem
+      - name: Deploy tested private community adapters
+        env:
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          FTP_TLS_CA_FILE: tls/chain.pem
+        run: python3 tools/ba_identity_community_release.py
+
+  identity-private-media-release:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[identity-media-release]')
+    needs: [identity-primitives, identity-mysql]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 99e2b1a0aed176c964521591a35a31d56d0ed5c3
+          path: prior-source
+          persist-credentials: false
+      - name: Prepare verified FTPS trust chain
+        run: |
+          mkdir -p tls
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/chain.pem
+      - name: Align private media QA with existing capability checks
+        env:
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          FTP_TLS_CA_FILE: tls/chain.pem
+        run: python3 tools/ba_identity_media_qa_release.py
+
+  identity-review-development-release:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[identity-review-release]')
+    needs: [identity-primitives, identity-mysql]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 92d50c133f3ef126dc4aafd8188512caee9bee9b
+          path: prior-source
+          persist-credentials: false
+      - name: Syntax and release driver validation
+        run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-community-review.php
+          python3 -m py_compile tools/ba_identity_review_release.py
+      - name: Prepare verified FTPS trust chain
+        run: |
+          mkdir -p tls
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/chain.pem
+      - name: Deploy tested review development within private QA
+        env:
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          FTP_TLS_CA_FILE: tls/chain.pem
+        run: python3 tools/ba_identity_review_release.py
+
+  identity-feedback-release:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[identity-feedback-release]')
+    needs: [identity-primitives, identity-mysql]
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 8d97fe55192c2638d4354ff14ff81eb29101a87b
+          path: prior-source
+          persist-credentials: false
+      - run: |
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-identity-portal.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-community-review.php
+      - name: Prepare verified FTPS trust chain
+        run: |
+          mkdir -p tls
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/chain.pem
+      - name: Install scoped feedback styling with verified backups
+        env:
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import ftplib,ssl,os,io,re,hashlib
+          base='/httpdocs/wp-content/plugins/badaround-core/identity-dormant/'
+          source=Path('wordpress/plugins/badaround-core/identity-dormant')
+          names=['identity-feedback.css','wordpress-identity-portal.php','wordpress-community-review.php']
+          ftp=ftplib.FTP_TLS(context=ssl.create_default_context(cafile='tls/chain.pem'),timeout=40)
+          ftp.connect('46.231.24.137',21);ftp.host='hostmld17.aziendeitalia.com'
+          ftp.login(os.environ['FTP_USER'],os.environ['FTP_PASSWORD']);ftp.prot_p()
+          def read(path):
+              b=io.BytesIO()
+              try:ftp.retrbinary('RETR '+path,b.write)
+              except ftplib.error_perm as e:
+                  if str(e).startswith('550'):return None
+                  raise
+              return b.getvalue()
+          run=os.environ['GITHUB_RUN_ID']
+          old={};new={};mode={};installed=[]
+          def paths(name):
+              stem='/wordpress-backups/ba-identity-feedback-'+run+'-'+name
+              return stem+'.prior',stem+'.part'
+          try:
+              core='/httpdocs/wp-content/plugins/badaround-core/badaround-core.php'
+              if hashlib.sha256(read(core) or b'').hexdigest()!='18cb9ad21a63e08449eb85b7cb9233846bb02e2c472d05f118cd7d5764b7d175':raise RuntimeError('Core baseline differs')
+              for name in names:
+                  prior=Path('prior-source')/source/name
+                  old[name]=prior.read_bytes() if prior.exists() else None
+                  new[name]=(source/name).read_bytes()
+                  if read(base+name)!=old[name]:raise RuntimeError('Live source differs: '+name)
+                  if old[name] is not None:
+                      match=re.search(r'(?i)unix\.mode=([0-7]{3,4});',ftp.sendcmd('MLST '+base+name))
+                      if match is None:raise RuntimeError('Cannot verify file mode')
+                      mode[name]=match.group(1)
+                  else:mode[name]='644'
+                  backup,temp=paths(name)
+                  if read(backup) is not None or read(temp) is not None:raise RuntimeError('Protected destination occupied')
+              for name in names:
+                  backup,temp=paths(name)
+                  if old[name] is not None:
+                      ftp.storbinary('STOR '+backup,io.BytesIO(old[name]))
+                      ftp.sendcmd('SITE CHMOD 600 '+backup)
+                      if read(backup)!=old[name]:raise RuntimeError('Backup mismatch')
+                  ftp.storbinary('STOR '+temp,io.BytesIO(new[name]))
+                  ftp.sendcmd('SITE CHMOD '+mode[name]+' '+temp)
+                  if read(temp)!=new[name]:raise RuntimeError('Temporary source mismatch')
+              for name in names:
+                  backup,temp=paths(name)
+                  if read(base+name)!=old[name]:raise RuntimeError('Concurrent source change')
+                  ftp.rename(temp,base+name);installed.append(name)
+                  if read(base+name)!=new[name]:raise RuntimeError('Installed source mismatch')
+              if any(read(base+name)!=new[name] for name in names):raise RuntimeError('Post-release source mismatch')
+              print('IDENTITY_FEEDBACK_STYLE_RELEASE_PASS: scoped CSS and two presenters; backups verified; no data or flags changed')
+          except Exception:
+              for name in reversed(installed):
+                  backup,temp=paths(name)
+                  if read(base+name)!=new[name]:raise RuntimeError('Concurrent drift prevents rollback') from None
+                  if old[name] is None:ftp.delete(base+name)
+                  else:
+                      if read(backup)!=old[name]:raise RuntimeError('Rollback backup mismatch') from None
+                      ftp.sendcmd('SITE CHMOD '+mode[name]+' '+backup)
+                      ftp.rename(backup,base+name)
+                  if read(base+name)!=old[name]:raise RuntimeError('Rollback verification failed') from None
+              raise
+          finally:ftp.quit()
+          PY
+
+  event-seo-release:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[event-seo-release]')
+    needs: [identity-primitives, identity-mysql]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 45bd99735420b4a70f85f90c573dab52562c2a39
+          path: prior-source
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Validate release sources
+        run: |
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-event-seo.php
+          php -l wordpress/plugins/badaround-core/includes/class-badaround-publication-service.php
+          php -l wordpress/themes/badaround-child/functions.php
+          php -l wordpress/themes/badaround-child/template-parts/single-event-layout.php
+          python3 -m unittest discover -s tests -p test_ba_event_seo_release.py -v
+      - name: Prepare verified FTPS trust chain
+        run: |
+          mkdir -p tls
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/chain.pem
+      - name: Deploy SEO preserving the Identity baseline
+        env:
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          FTP_TLS_CA_FILE: tls/chain.pem
+        run: python3 tools/ba_event_seo_release.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: event-seo-release-evidence
+          path: event-seo-release-evidence.json
+          if-no-files-found: error
+
+  identity-access-release:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[identity-access-release]')
+    needs: [identity-primitives, identity-mysql]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 14ee508472d73314b22f34a91c83997da22f269d
+          path: prior-source
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Check guarded access release and rollback
+        run: |
+          python3 -m unittest discover -s tests -p test_ba_identity_access_release.py -v
+          php -l wordpress/plugins/badaround-core/identity-dormant/unified-access.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-access-rest.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-private-bootstrap.php
+          php -l wordpress/plugins/badaround-core/identity-dormant/wordpress-identity-portal.php
+          php -l wordpress/themes/badaround-child/header.php
+          php -l wordpress/themes/badaround-child/page-segnala-evento.php
+          node --check wordpress/plugins/badaround-core/identity-dormant/identity-access.js
+          node --check wordpress/themes/badaround-child/assets/js/native-report/wizard.js
+      - name: Prepare verified FTPS trust chain
+        run: |
+          mkdir -p tls
+          curl -fsSL https://letsencrypt.org/certs/gen-y/int-yr2.pem -o tls/yr2.pem
+          curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr-by-x1.pem -o tls/yr-by-x1.pem
+          cat /etc/ssl/certs/ca-certificates.crt tls/yr2.pem tls/yr-by-x1.pem > tls/chain.pem
+      - name: Deploy unified access within the authorized QA perimeter
+        env:
+          FTP_USER: ${{ secrets.STAGING_SFTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.STAGING_SFTP_PASSWORD }}
+          FTP_TLS_CA_FILE: tls/chain.pem
+        run: python3 tools/ba_identity_access_release.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: identity-access-release-evidence
+          path: identity-access-release-evidence.json
+          if-no-files-found: error

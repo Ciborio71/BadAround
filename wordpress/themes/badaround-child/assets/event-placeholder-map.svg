@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="360" viewBox="0 0 720 360">
+<rect width="720" height="360" fill="#e5edea"/>
+<!-- An illustrative city plan, never an event's actual location. -->
+<g fill="#b9d8b6" stroke="#9ec79c" stroke-width="2"><path d="M20 14h129l-18 75H20Z"/><path d="m439 247 83-11 22 100H437Z"/><path d="M12 265h119v81H12Z"/></g>
+<path d="M606-35C507 34 657 91 583 166S548 271 612 395" fill="none" stroke="#91c5d8" stroke-width="47"/>
+<path d="M606-35C507 34 657 91 583 166S548 271 612 395" fill="none" stroke="#b3dce9" stroke-width="34"/>
+<g fill="#cbd5d5" stroke="#b6c5c7" stroke-width="1.5">
+<path d="M178 15h67v58h-77Z M272 15h85v58h-85Z M383 15h87v58h-87Z M486 15h42l15 58h-57Z"/>
+<path d="M25 124h91v73H25Z M149 124h80v73h-80Z M264 124h74v73h-74Z M372 124h75v73h-75Z M483 124h53v73h-53Z"/>
+<path d="M154 246h73v85h-73Z M265 246h72v85h-72Z M369 246h43v85h-43Z M640 18h66v65h-66Z M639 126h67v74h-67Z M641 246h65v86h-65Z"/>
+</g>
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+<path d="M-20 104h760M-20 222h760M141-20v400M248-20v400M357-20v400M463-20v400M623-20v400" stroke="#bdcacc" stroke-width="19"/>
+<path d="M-20 104h760M-20 222h760M141-20v400M248-20v400M357-20v400M463-20v400M623-20v400" stroke="#fff" stroke-width="14"/>
+<path d="M-25 353 744-13" stroke="#c7c7af" stroke-width="27"/>
+<path d="M-25 353 744-13" stroke="#fff5ce" stroke-width="20"/>
+<path d="M-25 353 744-13" stroke="#e7dba5" stroke-width="1.5" stroke-dasharray="10 10"/>
+</g>
+<g fill="#87b583"><circle cx="43" cy="37" r="9"/><circle cx="76" cy="58" r="11"/><circle cx="109" cy="34" r="9"/><circle cx="465" cy="275" r="9"/><circle cx="497" cy="300" r="11"/><circle cx="37" cy="292" r="10"/><circle cx="88" cy="319" r="11"/></g>
+</svg>

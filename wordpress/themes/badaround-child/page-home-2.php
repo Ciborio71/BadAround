@@ -1,0 +1,256 @@
+<?php
+/** Template Name: BadAround — Home 2 (anteprima) */
+if(!defined('ABSPATH'))exit;
+get_header();
+$uri=get_stylesheet_directory_uri();
+$categories=[
+ ['Veicoli','veicoli','Auto, moto e altri mezzi: furti, danneggiamenti e situazioni da segnalare.','#1677E8'],
+ ['Case e attività','case-e-attivita','Furti, tentati furti e altri eventi che riguardano abitazioni, negozi e uffici.','#C9153D'],
+ ['Pericoli','pericoli','Ostacoli, rischi stradali o ambientali e situazioni che richiedono attenzione.','#F57C00'],
+ ['Spazi pubblici','spazi-pubblici','Vandalismi, degrado e altre situazioni che interessano aree comuni.','#0AA184'],
+ ['Animali','animali','Animali smarriti, avvistati o in difficoltà.','#7040C8'],
+ ['Oggetti','oggetti-e-documenti','Chiavi, documenti, dispositivi e altri oggetti smarriti o ritrovati.','#E3A415'],
+];
+$recent=class_exists('BadAround_Discovery_Query')?(new BadAround_Discovery_Query())->discover(['page'=>1,'per_page'=>9]):['items'=>[]];
+?>
+<main class="h2-home" id="main-content">
+<section class="h2-hero" aria-labelledby="h2-title">
+ <div class="h2-wrap h2-hero-grid">
+  <div class="h2-hero-copy"><p class="h2-eyebrow">Osserva. Segnala. Condividi. Fai rete.</p>
+   <h1 id="h2-title">Cosa succede<br>intorno a te?</h1>
+   <p class="h2-lead">Furti, smarrimenti, pericoli e richieste di testimoni. Segui le segnalazioni della tua zona e contribuisci a far circolare informazioni utili nella community.</p>
+   <div class="h2-actions"><a class="h2-button h2-button-red" href="<?php echo esc_url(home_url('/segnala-un-evento/')); ?>"><span aria-hidden="true">+</span> Segnala un evento</a><a class="h2-button h2-button-ghost" href="<?php echo esc_url(home_url('/mappa/')); ?>"><svg class="h2-ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg> Esplora la mappa</a></div>
+   <p class="h2-privacy"><svg class="h2-ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m12 2 9 4v6c0 5-9 10-9 10S3 17 3 12V6Z"/><path d="m7 12 3 3 7-7"/></svg><span>Scegli come comparire e come mostrare la posizione. I tuoi recapiti restano riservati.</span></p>
+  </div>
+  <div class="h2-visual" aria-label="Esempi illustrativi di segnalazioni collegate alla community">
+   <img class="h2-network" src="<?php echo esc_url($uri.'/assets/home-two-network-v3-1600.webp'); ?>" srcset="<?php echo esc_url($uri.'/assets/home-two-network-v3-900.webp'); ?> 900w, <?php echo esc_url($uri.'/assets/home-two-network-v3-1600.webp'); ?> 1600w" sizes="100vw" width="1600" height="900" alt="Quartiere illustrato: un veicolo, un'abitazione e un animale collegati alle segnalazioni sul telefono" fetchpriority="high" decoding="async">
+   <a class="h2-callout h2-callout-car" href="<?php echo esc_url(add_query_arg('categoria','veicoli',home_url('/segnalazioni/'))); ?>"><span aria-hidden="true"><?php echo badaround_pin_svg('veicoli'); ?></span><span><strong>Furto di veicolo</strong><small>Informazioni e avvistamenti utili</small></span><b aria-hidden="true">›</b><span class="h2-scene-marker" aria-hidden="true"><?php echo badaround_pin_svg('veicoli'); ?></span></a>
+   <a class="h2-callout h2-callout-animal" href="<?php echo esc_url(add_query_arg('categoria','animali',home_url('/segnalazioni/'))); ?>"><span aria-hidden="true"><?php echo badaround_pin_svg('animali'); ?></span><span><strong>Animale smarrito</strong><small>Una segnalazione può aiutare</small></span><b aria-hidden="true">›</b><span class="h2-scene-marker" aria-hidden="true"><?php echo badaround_pin_svg('animali'); ?></span></a>
+   <a class="h2-callout h2-callout-house" href="<?php echo esc_url(add_query_arg('categoria','case-e-attivita',home_url('/segnalazioni/'))); ?>"><span aria-hidden="true"><?php echo badaround_pin_svg('case-e-attivita'); ?></span><span><strong>Tentativo di effrazione</strong><small>Condividi ciò che hai osservato</small></span><b aria-hidden="true">›</b><span class="h2-scene-marker" aria-hidden="true"><?php echo badaround_pin_svg('case-e-attivita'); ?></span></a>
+   <a class="h2-witness" href="<?php echo esc_url(home_url('/segnalazioni/')); ?>"><svg viewBox="0 0 48 36" aria-hidden="true"><circle cx="24" cy="8" r="6"/><circle cx="9" cy="12" r="5"/><circle cx="39" cy="12" r="5"/><path d="M14 34V24a10 10 0 0 1 20 0v10ZM0 32V24a8 8 0 0 1 12-7v15Zm36 0V17a8 8 0 0 1 12 7v8Z"/></svg><span><strong>Si cercano testimoni</strong><small>Hai visto qualcosa? Può fare la differenza.</small></span><b aria-hidden="true">›</b></a>
+  </div>
+ </div>
+</section>
+<div class="h2-wrap h2-search-wrap">
+ <form class="h2-search" action="<?php echo esc_url(home_url('/mappa/')); ?>" role="search" method="get" data-h2-search>
+  <label class="ba-sr-only" for="h2-area">Cerca indirizzo, comune o quartiere</label>
+  <span class="h2-search-pin" aria-hidden="true"><?php echo badaround_pin_svg('neutral'); ?></span>
+  <div class="h2-search-field"><input id="h2-area" type="search" name="area" placeholder="Cerca indirizzo, comune o quartiere…" autocomplete="off" required aria-describedby="h2-search-status" data-h2-input><div class="h2-suggestions" data-h2-suggestions hidden></div></div>
+  <?php foreach(['place_id','lat','lng','north','south','east','west'] as $field): ?><input type="hidden" name="<?php echo esc_attr($field); ?>" value=""><?php endforeach; ?>
+  <button class="h2-button h2-button-teal" type="submit">Cerca <span aria-hidden="true">→</span></button>
+  <button class="h2-nearby" type="button" data-h2-nearby><span aria-hidden="true">◎</span> Vicino a me</button>
+ </form>
+ <p id="h2-search-status" class="h2-search-status" role="status" aria-live="polite"></p>
+</div>
+<section class="h2-section h2-wrap" aria-labelledby="h2-categories-title">
+ <h2 id="h2-categories-title">Cosa puoi <em>segnalare?</em></h2><p class="h2-subtitle">Condividi un evento con la community di BadAround.</p>
+ <nav class="h2-categories" aria-label="Categorie delle segnalazioni"><?php foreach($categories as [$label,$slug,$description,$color]): ?><a class="h2-category" style="--category:<?php echo esc_attr($color); ?>" href="<?php echo esc_url(add_query_arg('categoria',$slug,home_url('/segnala-un-evento/'))); ?>"><span aria-hidden="true"><?php echo badaround_pin_svg($slug); ?></span><strong><?php echo esc_html($label); ?></strong><small><?php echo esc_html($description); ?></small></a><?php endforeach; ?></nav>
+</section>
+<section class="h2-report-banner" aria-labelledby="h2-report-title">
+ <div class="h2-report-inner">
+  <div class="h2-report-copy">
+   <h2 id="h2-report-title"><span>Hai subito un furto?</span><span>Hai notato qualcosa di sospetto?</span></h2>
+   <p class="h2-report-lead">Segnalalo su <strong>BadAround</strong> in pochi secondi: aiuta i tuoi vicini a tenere alta l’attenzione e previeni nuovi episodi nella tua zona.</p>
+   <p class="h2-report-free"><span aria-hidden="true">✓</span> 100% gratuito • Sicurezza partecipata di quartiere</p>
+   <div class="h2-report-actions"><a class="h2-button h2-button-red" href="<?php echo esc_url(home_url('/segnala-un-evento/')); ?>">Segnala ora <span aria-hidden="true">→</span></a><a class="h2-report-more" href="<?php echo esc_url(home_url('/come-funziona/')); ?>">Scopri come funziona <span aria-hidden="true">→</span></a></div>
+  </div>
+  <img class="h2-report-art" src="<?php echo esc_url($uri.'/assets/home-community-report.svg'); ?>" width="1500" height="750" loading="lazy" decoding="async" alt="Cinque situazioni collegate alla mappa: auto rubata, furti in casa, su bici e auto, e ricerca di un cane smarrito">
+ </div>
+</section>
+<style>
+.ba-home-two-page .h2-home .h2-report-banner{width:100%;max-width:none;margin:30px 0;background:#043340;color:#fff;overflow:hidden}
+.h2-report-banner .h2-report-inner{position:relative;display:grid;grid-template-columns:1.05fr 1fr;align-items:center;width:100%;max-width:2000px;margin:auto;min-height:490px}
+.h2-report-banner .h2-report-copy{position:relative;z-index:1;padding:38px 0 38px clamp(24px,4.5vw,90px)}
+.h2-report-banner .h2-report-eyebrow{margin:0 0 16px;color:#05d1bd;text-transform:uppercase;letter-spacing:.07em;font-size:clamp(11px,1vw,16px);font-weight:800}
+.h2-report-banner h2{font-size:clamp(27px,2.65vw,47px);line-height:1.14;letter-spacing:-.035em;color:#fff;margin:0 0 20px;font-weight:800}
+.h2-report-banner h2 span{display:block}
+.h2-report-banner .h2-report-lead{max-width:650px;font-size:clamp(16px,1.25vw,21px);line-height:1.5;margin:0 0 20px;color:#e9f6f8}
+.h2-report-banner .h2-report-free{display:flex;align-items:center;gap:10px;width:fit-content;padding:12px 16px;border-radius:14px;background:#0bd1bc;color:#042d38;font-size:clamp(13px,1.02vw,17px);font-weight:750;line-height:1.4;margin:0 0 13px}
+.h2-report-banner .h2-report-community{margin:0 0 24px;font-size:clamp(15px,1.15vw,19px);color:#fff}
+.h2-report-banner .h2-report-actions{display:flex;align-items:center;flex-wrap:wrap;gap:18px 26px}
+.h2-report-banner .h2-report-more{color:#fff;font-size:16px;font-weight:750;text-decoration:underline;text-underline-offset:5px}
+.h2-report-banner .h2-report-art{display:block;width:100%;height:100%;max-height:610px;object-fit:cover;object-position:center;mask-image:linear-gradient(to right,transparent,#000 10%)}
+.h2-report-banner a:focus-visible{outline:3px solid #08d4c1;outline-offset:5px}
+@media(max-width:1000px){.h2-report-banner .h2-report-inner{grid-template-columns:1.15fr 1fr}.h2-report-banner .h2-report-copy{padding:28px 0 28px 24px}.h2-report-banner h2{font-size:30px}.h2-report-banner .h2-report-art{object-fit:contain}}
+@media(max-width:700px){.h2-report-banner .h2-report-inner{grid-template-columns:minmax(0,1fr)}.h2-report-banner .h2-report-copy{padding:28px 22px 12px}.h2-report-banner h2{font-size:clamp(27px,6.5vw,36px)}.h2-report-banner .h2-report-art{height:auto;max-height:360px;object-fit:contain;mask-image:linear-gradient(to bottom,transparent,#000 10%)}.h2-report-banner .h2-report-actions{gap:18px}.h2-report-banner .h2-report-more{font-size:15px}}
+
+/* Shared content alignment and compact proportions with the process banner. */
+.h2-home .h2-report-banner .h2-report-inner{width:calc(100% - 80px);max-width:1440px;min-height:0;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+.h2-home .h2-report-banner .h2-report-copy{padding:24px 24px 24px 0}
+.h2-home .h2-report-banner h2{font-size:clamp(27px,2.1vw,34px);line-height:1.12;margin-bottom:12px}
+.h2-home .h2-report-banner .h2-report-eyebrow{font-size:12px;margin-bottom:12px}
+.h2-home .h2-report-banner .h2-report-lead{font-size:16px;line-height:1.45;max-width:650px;margin-bottom:12px}
+.h2-home .h2-report-banner .h2-report-free{padding:8px 12px;font-size:14px;margin-bottom:8px}
+.h2-home .h2-report-banner .h2-report-community{font-size:15px;margin-bottom:14px}
+.h2-home .h2-report-banner .h2-report-actions{gap:14px 24px}
+.h2-home .h2-report-banner .h2-report-actions .h2-button{min-height:44px;padding:11px 16px;font-size:15px}
+.h2-home .h2-report-banner .h2-report-more{font-size:15px}
+.h2-home .h2-report-banner .h2-report-art{position:absolute;right:0;top:0;width:41.7%;height:100%;max-height:none;object-fit:contain;object-position:right center}
+@media(max-width:1000px){.h2-home .h2-report-banner .h2-report-inner{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}.h2-home .h2-report-banner h2{font-size:27px}}
+@media(max-width:760px){.h2-home .h2-report-banner .h2-report-inner{width:calc(100% - 40px)}}
+@media(max-width:700px){.h2-home .h2-report-banner .h2-report-inner{grid-template-columns:minmax(0,1fr)}.h2-home .h2-report-banner .h2-report-copy{padding:24px 0 12px}.h2-home .h2-report-banner .h2-report-art{position:static;width:100%;height:230px;object-position:center}.h2-home .h2-report-banner h2{font-size:27px}}
+</style>
+<section class="h2-section h2-wrap" aria-labelledby="h2-recent-title">
+ <div class="h2-section-head"><h2 id="h2-recent-title">Ultime <em>segnalazioni</em></h2></div>
+ <div class="h2-feed-intro"><p>Ultime segnalazioni pubblicate in Italia. Cerca una zona per esplorare quelle vicine a te.</p></div>
+ <div class="h2-feed-tools"><div class="h2-feed-legend"><?php get_template_part('template-parts/components/precision-legend'); ?></div><a class="ba-button ba-button--outline h2-all-reports" href="<?php echo esc_url(home_url('/segnalazioni/')); ?>">Tutte le segnalazioni <span aria-hidden="true">→</span></a></div>
+ <div class="h2-events h2-editorial">
+ <?php $feed=array_slice($recent['items']??[],0,9); foreach([$feed] as $group_index=>$group): ?>
+ <div class="<?php echo $group_index===0?'h2-featured-list':'h2-stream-list'; ?>">
+ <?php foreach($group as $item):
+ $id=(int)$item['id'];$category=badaround_child_event_category_slug($id);
+ $image=badaround_child_event_image_url($id,'large');
+ $photo=$image&&strpos($image,'event-placeholder')===false;
+ $meta=array_filter([$item['public_place_name']??($item['territory']['name']??''),$item['occurred_date']??'',$item['occurred_time']??'']);
+ $presentation=function_exists('badaround_event_public_presentation')?badaround_event_public_presentation($id):[];
+ if(($presentation['mode']??'')==='approximate_area'&&!empty($presentation['radius_meters']))$meta[]='Area approssimata · raggio '.(int)$presentation['radius_meters'].' m';
+ $colors=array_column($categories,3,1);$accent=$colors[$category]??'#087f8c';
+ ?>
+ <article class="h2-editorial-card <?php echo $group_index===0?'h2-editorial-feature':'h2-editorial-stream'; ?>" style="--feed-accent:<?php echo esc_attr($accent); ?>">
+ <a class="h2-editorial-media<?php echo $photo?'':' h2-editorial-fallback'; ?>" href="<?php echo esc_url($item['permalink']); ?>" tabindex="-1" aria-hidden="true">
+ <?php if($photo): ?><img src="<?php echo esc_url($image); ?>" alt="" loading="lazy" decoding="async"><?php else: echo badaround_pin_svg($category); endif; ?>
+ </a>
+ <?php if($group_index===0): ?><span class="h2-featured-tag">★ In evidenza</span><?php endif; ?>
+ <div class="h2-editorial-body">
+ <div class="h2-editorial-label"><span aria-hidden="true"><?php echo badaround_pin_svg($category); ?></span><?php echo esc_html($item['event_type']['name']??'Segnalazione'); ?></div>
+ <h3><a href="<?php echo esc_url($item['permalink']); ?>"><?php echo esc_html($item['title']); ?></a></h3>
+ <p class="h2-editorial-meta"><?php echo esc_html(implode(' · ',$meta)); ?></p>
+ <?php if($group_index===0&&!empty($item['excerpt'])): ?><p class="h2-editorial-excerpt"><?php echo esc_html(strip_tags($item['excerpt'])); ?></p><?php endif; ?>
+ <a class="h2-editorial-cta" href="<?php echo esc_url($item['permalink']); ?>"><?php echo $group_index===0?'Vai alla segnalazione':'Vedi segnalazione'; ?> <span aria-hidden="true">→</span></a>
+ </div></article>
+ <?php endforeach; ?></div><?php endforeach; ?>
+ <?php if(!$feed): ?><p>Le prossime segnalazioni compariranno qui dopo la pubblicazione.</p><?php endif; ?>
+ </div>
+ <style>
+ body.ba-home-two-page .h2-home div.h2-events.h2-editorial{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,2fr);grid-auto-rows:auto;gap:22px;align-items:stretch}
+ .h2-editorial .h2-featured-list{display:grid;grid-template-rows:repeat(2,minmax(0,1fr));gap:22px;min-width:0}
+ .h2-editorial .h2-stream-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:18px;min-width:0}
+ .h2-editorial .h2-editorial-card{position:relative;box-sizing:border-box;min-width:0;background:#fff;border:1px solid #e4ebf0;border-radius:18px;box-shadow:0 4px 14px #0922350b;overflow:hidden;transition:box-shadow .18s,border-color .18s}
+ .h2-editorial .h2-editorial-card:hover,.h2-editorial .h2-editorial-card:focus-within{border-color:var(--feed-accent);box-shadow:0 7px 22px #09223518}
+ .h2-editorial .h2-editorial-feature{display:flex;flex-direction:column;padding:14px}
+ .h2-editorial .h2-editorial-media{display:flex;align-items:center;justify-content:center;overflow:hidden;background:#f0f6f8;border-radius:12px;min-width:0}
+ .h2-editorial .h2-editorial-feature .h2-editorial-media{height:174px;flex:0 0 174px}
+ .h2-editorial .h2-editorial-media img{display:block;width:100%;height:100%;object-fit:cover}
+ .h2-editorial .h2-editorial-fallback>svg{width:76px;height:96px}
+ .h2-editorial .h2-featured-tag{position:absolute;top:24px;right:24px;background:#075566;color:white;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:750}
+ .h2-editorial .h2-editorial-body{display:flex;flex-direction:column;gap:9px;min-width:0;flex:1;padding:12px 2px 0}
+ .h2-editorial .h2-editorial-label{display:flex;align-items:center;gap:7px;color:var(--feed-accent);font-size:11px;font-weight:800;line-height:1.3;text-transform:uppercase}
+ .h2-editorial .h2-editorial-label span{display:flex;flex:0 0 20px}
+ .h2-editorial .h2-editorial-label svg{width:20px;height:25px}
+ .h2-editorial h3{margin:0;font-size:21px;line-height:1.3;font-weight:750}
+ .h2-editorial h3 a{color:#071e30}
+ .h2-editorial .h2-editorial-meta{margin:0;color:#536579;font-size:12px;line-height:1.45}
+ .h2-editorial .h2-editorial-excerpt{margin:0;color:#465b70;font-size:14px;line-height:1.45;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+ .h2-editorial .h2-editorial-cta{align-self:flex-start;margin-top:auto;color:var(--feed-accent);font-size:13px;font-weight:750}
+ .h2-editorial .h2-editorial-feature .h2-editorial-cta{background:#087f8c;color:white;padding:9px 15px;border-radius:10px}
+ .h2-editorial .h2-editorial-stream{display:grid;grid-template-columns:80px minmax(0,1fr);gap:12px;padding:14px 12px;border-left:4px solid var(--feed-accent);min-height:190px}
+ .h2-editorial .h2-editorial-stream .h2-editorial-media{width:80px;height:96px;align-self:center}
+ .h2-editorial .h2-editorial-stream .h2-editorial-fallback>svg{width:54px;height:68px}
+ .h2-editorial .h2-editorial-stream .h2-editorial-body{padding:0;gap:7px}
+ .h2-editorial .h2-editorial-stream h3{font-size:16px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+ .h2-editorial a:focus-visible{outline:2px solid #087f8c;outline-offset:3px}
+ @media(max-width:1100px){body.ba-home-two-page .h2-home div.h2-events.h2-editorial{grid-template-columns:minmax(0,1fr)}.h2-editorial .h2-featured-list{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto}}
+ @media(max-width:640px){.h2-editorial .h2-featured-list,.h2-editorial .h2-stream-list{grid-template-columns:minmax(0,1fr);grid-template-rows:auto}.h2-editorial .h2-editorial-stream{min-height:170px}.h2-editorial .h2-editorial-feature .h2-editorial-media{height:190px;flex-basis:190px}}
+ @media(prefers-reduced-motion:reduce){.h2-editorial .h2-editorial-card{transition:none}}
+
+ /* Reversible six featured plus six compact cards. */
+ body.ba-home-two-page .h2-home div.h2-events.h2-editorial{grid-template-columns:minmax(0,1fr);gap:28px}
+ .h2-editorial .h2-featured-list{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:minmax(440px,1fr);gap:22px}
+ .h2-editorial .h2-stream-list{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:168px;gap:22px}
+ .h2-editorial .h2-editorial-feature{height:100%;min-height:440px}
+ .h2-editorial .h2-editorial-feature .h2-editorial-body{flex:1 0 auto}
+ .h2-editorial .h2-editorial-feature .h2-editorial-cta{flex-shrink:0}
+
+ .h2-editorial .h2-editorial-feature h3{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+ .h2-editorial .h2-editorial-stream{height:168px;min-height:0;padding:8px 14px;grid-template-columns:84px minmax(0,1fr);border:1px solid transparent;border-left:6px solid var(--feed-accent);box-shadow:none}
+ .h2-editorial .h2-editorial-stream .h2-editorial-media{width:84px;height:84px;background-color:transparent}
+ .h2-editorial .h2-editorial-stream .h2-editorial-body{gap:4px}
+ .h2-editorial .h2-editorial-stream .h2-editorial-label>span{display:none}
+ .h2-editorial .h2-editorial-stream h3{-webkit-line-clamp:2}
+ .h2-editorial .h2-editorial-stream:hover,.h2-editorial .h2-editorial-stream:focus-within{border-color:var(--feed-accent);box-shadow:0 5px 16px #09223518}
+ @media(max-width:1100px){.h2-editorial .h2-featured-list,.h2-editorial .h2-stream-list{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none}}
+ @media(max-width:640px){.h2-editorial .h2-featured-list,.h2-editorial .h2-stream-list{grid-template-columns:minmax(0,1fr)}.h2-editorial .h2-editorial-stream{min-height:0}.h2-editorial .h2-featured-list{grid-auto-rows:minmax(440px,1fr)}}
+
+ </style>
+</section>
+<section class="h2-process"><div class="h2-wrap"><div class="h2-process-copy"><h2>Un’informazione può fare la differenza</h2><ol><li><span><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 22 16-16 5 5-16 16-7 1Z"/><path d="m19 9 5 5"/></svg></span><div><h3>01. Segnala</h3><p>Racconta ciò che hai osservato.</p></div></li><li><span><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="7" cy="16" r="4"/><circle cx="25" cy="6" r="4"/><circle cx="25" cy="26" r="4"/><path d="m11 14 10-6M11 18l10 6"/></svg></span><div><h3>02. Condividi</h3><p>Fai circolare informazioni utili.</p></div></li><li><span><svg viewBox="0 0 48 36" fill="currentColor" aria-hidden="true"><circle cx="24" cy="8" r="6"/><circle cx="9" cy="12" r="5"/><circle cx="39" cy="12" r="5"/><path d="M14 34V24a10 10 0 0 1 20 0v10ZM0 32V24a8 8 0 0 1 12-7v15Zm36 0V17a8 8 0 0 1 12 7v8Z"/></svg></span><div><h3>03. Fai rete</h3><p>Aiuta la community della tua zona.</p></div></li></ol><a href="<?php echo esc_url(home_url('/come-funziona/')); ?>">Scopri come funziona →</a></div><figure class="h2-process-art" aria-hidden="true"></figure></div></section>
+<div class="h2-section h2-wrap h2-blog"><?php badaround_blog_home(); ?></div>
+<section class="h2-section h2-wrap"><div class="h2-sentinel"><div><p class="h2-eyebrow">Il tuo senso civico può fare la differenza</p><h2>Diventa una <em>Sentinella</em></h2><p>Segui la tua zona e contribuisci attivamente alla community di BadAround.</p><a class="h2-button h2-button-red" href="<?php echo esc_url(home_url('/sentinelle/')); ?>">Diventa una Sentinella <span aria-hidden="true">→</span></a></div><figure class="h2-sentinel-art" aria-hidden="true"><img src="<?php echo esc_url($uri.'/assets/home-two-network-v3-900.webp'); ?>" width="900" height="506" loading="lazy" decoding="async" alt=""><svg class="h2-sentinel-bell" viewBox="0 0 80 100" fill="none"><path d="M40 96S4 59 4 39a36 36 0 1 1 72 0c0 20-36 57-36 57Z" fill="#16bcc4" stroke="white" stroke-width="4"/><circle cx="40" cy="39" r="27" fill="#129ba5" stroke="white" stroke-width="3"/><path d="M27 49h26l-4-6V32a9 9 0 0 0-18 0v11Z" fill="white"/><path d="M35 53a5 5 0 0 0 10 0M40 20v4" stroke="white" stroke-width="3" stroke-linecap="round"/></svg></figure></div></section>
+
+<section class="h2-community-faq" aria-labelledby="h2-community-title">
+ <div class="h2-wrap h2-community-grid">
+  <div class="h2-community-copy">
+   <p class="h2-community-eyebrow">Il valore della community</p>
+   <h2 id="h2-community-title">Il territorio si conosce meglio, insieme.</h2>
+   <p>BadAround è una piattaforma gratuita per condividere segnalazioni locali: furti, smarrimenti, pericoli e informazioni utili per chi vive nella tua zona. Esplora la <a href="<?php echo esc_url(home_url('/mappa/')); ?>">mappa delle segnalazioni</a> per scoprire gli eventi pubblicati intorno a te.</p>
+   <p>Un avvistamento o una testimonianza possono aiutare altre persone. Collaboriamo e prendiamoci cura del territorio: <a href="<?php echo esc_url(home_url('/segnala-un-evento/')); ?>">invia una segnalazione</a> e contribuisci anche tu.</p>
+   <a class="h2-community-more" href="<?php echo esc_url(home_url('/come-funziona/')); ?>">Scopri come funziona <span aria-hidden="true">→</span></a>
+   <ul class="h2-community-values" aria-label="I valori di BadAround"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m3 12 9-9h7l2 2v7l-9 9Z"/><circle cx="16" cy="8" r="1"/></svg><span>Gratuito</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="9" cy="7" r="3"/><circle cx="18" cy="9" r="2"/><path d="M2 21v-3a7 7 0 0 1 14 0v3m2-7a5 5 0 0 1 5 5v2"/></svg><span>Collaborativo</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m12 2 9 4v6c0 6-9 10-9 10S3 18 3 12V6Z"/><path d="m8 12 3 3 5-6"/></svg><span>Di valore civico</span></li></ul>
+  </div>
+  <div class="h2-faq-list" aria-labelledby="h2-faq-title">
+   <h2 id="h2-faq-title">Hai qualche domanda?</h2>
+   <details class="h2-faq-item"><summary>Che cos’è BadAround?<span class="h2-faq-toggle" aria-hidden="true"></span></summary><div class="h2-faq-answer"><p>BadAround è una piattaforma gratuita per condividere segnalazioni locali e favorire la collaborazione tra cittadini. Un avvistamento, una testimonianza o un’informazione possono aiutare le persone della tua zona.</p></div></details>
+   <details class="h2-faq-item"><summary>Quali eventi posso segnalare?<span class="h2-faq-toggle" aria-hidden="true"></span></summary><div class="h2-faq-answer"><p>Puoi segnalare eventi che riguardano veicoli, case e attività, pericoli, spazi pubblici, animali e oggetti smarriti o ritrovati. Descrivi ciò che è successo o che hai osservato, distinguendo i fatti dalle supposizioni.</p></div></details>
+   <details class="h2-faq-item"><summary>Segnalare su BadAround è gratuito?<span class="h2-faq-toggle" aria-hidden="true"></span></summary><div class="h2-faq-answer"><p>Sì, il servizio è totalmente gratuito e nasce con uno scopo sociale e civico: condividere informazioni utili e favorire l’aiuto reciproco nella community.</p></div></details>
+   <details class="h2-faq-item"><summary>Come trovo le segnalazioni della mia zona?<span class="h2-faq-toggle" aria-hidden="true"></span></summary><div class="h2-faq-answer"><p>Cerca un indirizzo, un comune o un quartiere nella barra di ricerca della home, oppure usa “Vicino a me”, consentendo l’accesso alla posizione, per esplorare le segnalazioni sulla mappa.</p></div></details>
+   <details class="h2-faq-item"><summary>Le segnalazioni vengono pubblicate subito?<span class="h2-faq-toggle" aria-hidden="true"></span></summary><div class="h2-faq-answer"><p>Le segnalazioni vengono verificate prima della pubblicazione. I recapiti personali e le coordinate riservate non vengono esposti automaticamente; la posizione pubblica può essere un punto esatto o un’area approssimata, secondo il tipo di evento e la valutazione in moderazione.</p></div></details>
+   <details class="h2-faq-item"><summary>BadAround sostituisce una denuncia?<span class="h2-faq-toggle" aria-hidden="true"></span></summary><div class="h2-faq-answer"><p>No. Una segnalazione su BadAround non sostituisce una denuncia né una richiesta di intervento. Per denunciare un reato rivolgiti alle autorità competenti. In caso di emergenza o pericolo immediato chiama il 112.</p></div></details>
+  </div>
+ </div>
+</section>
+<style>
+.h2-home .h2-community-faq{background:#f0f8fa;padding:48px 0 52px;margin-top:12px;color:#10243f}
+.h2-community-faq .h2-community-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:clamp(28px,4vw,72px);align-items:start}
+.h2-community-faq .h2-community-eyebrow{color:#087f8c;font-size:13px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;margin:0 0 20px}
+.h2-home .h2-community-faq h2{font-size:clamp(28px,2.7vw,42px);line-height:1.18;margin:0 0 24px;letter-spacing:-.03em}
+.h2-community-faq .h2-community-copy>p:not(.h2-community-eyebrow){font-size:17px;line-height:1.65;margin:0 0 20px;color:#3f566a}
+.h2-community-faq a{color:#087f8c;text-decoration:underline;text-underline-offset:3px}
+.h2-community-faq .h2-community-more{display:inline-block;font-size:18px;font-weight:750;margin:3px 0 24px}
+.h2-community-faq .h2-community-values{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.h2-community-faq .h2-community-values li{display:flex;align-items:center;justify-content:center;gap:9px;padding:14px 10px;min-width:0;border:1px solid #d9e6ec;border-radius:13px;background:#fff;color:#10243f;font-weight:700;font-size:13px;line-height:1.35}
+.h2-community-faq .h2-community-values svg{width:27px;height:27px;flex-shrink:0;color:#087f8c}
+.h2-community-faq .h2-faq-item{border:1px solid #d4e1e8;background:#fff;border-radius:13px;margin:0 0 10px;overflow:hidden}
+.h2-community-faq .h2-faq-item summary{display:flex;align-items:center;justify-content:space-between;gap:16px;list-style:none;cursor:pointer;padding:18px 20px;color:#10243f;font-size:17px;line-height:1.4;font-weight:750}
+.h2-community-faq .h2-faq-item summary::-webkit-details-marker{display:none}
+.h2-community-faq .h2-faq-toggle{position:relative;flex:0 0 20px;width:20px;height:20px;color:#087f8c}
+.h2-community-faq .h2-faq-toggle:before,.h2-community-faq .h2-faq-toggle:after{content:"";position:absolute;inset:9px 1px auto;height:2px;background:currentColor;border-radius:2px}
+.h2-community-faq .h2-faq-toggle:after{transform:rotate(90deg)}
+.h2-community-faq .h2-faq-item[open]{background:#e0f1f4;border-color:#c5e3e8}
+.h2-community-faq .h2-faq-item[open] .h2-faq-toggle:after{display:none}
+.h2-community-faq .h2-faq-answer{padding:0 20px 20px}
+.h2-community-faq .h2-faq-answer p{margin:0;font-size:16px;line-height:1.6;color:#3b5367}
+.h2-community-faq summary:hover{background:#eff8fa}
+.h2-community-faq summary:focus-visible,.h2-community-faq a:focus-visible{outline:3px solid #087f8c;outline-offset:-3px;border-radius:5px}
+@media(max-width:1000px){.h2-community-faq .h2-community-grid{grid-template-columns:minmax(0,1fr)}.h2-community-faq .h2-community-copy{max-width:760px}.h2-community-faq .h2-community-values{max-width:600px}}
+@media(max-width:600px){.h2-home .h2-community-faq{padding:32px 0}.h2-community-faq .h2-faq-item summary{padding:16px;font-size:16px}.h2-community-faq .h2-community-values{gap:7px}.h2-community-faq .h2-community-values li{flex-direction:column;text-align:center;font-size:12px;padding:12px 6px}.h2-community-faq .h2-faq-answer{padding:0 16px 16px}}
+</style>
+<style>
+/* Trial: center section headings while preserving banner questions and card titles. */
+.h2-home #h2-categories-title,.h2-home #h2-recent-title,.h2-home .h2-process h2,.h2-home .h2-sentinel h2,.h2-home .h2-blog h2,.h2-home .h2-community-faq h2{text-align:center}
+.h2-home #h2-categories-title+.h2-subtitle{text-align:center}
+.h2-home .h2-section-head,.h2-home .h2-blog .ba-blog-section-head{position:relative;justify-content:center;padding-inline:130px}
+.h2-home .h2-section-head>a,.h2-home .h2-blog .ba-blog-section-head>a{position:absolute;right:0}
+@media(max-width:700px){.h2-home .h2-section-head,.h2-home .h2-blog .ba-blog-section-head{padding-inline:0;flex-direction:column;align-items:center;gap:8px}.h2-home .h2-section-head>a,.h2-home .h2-blog .ba-blog-section-head>a{position:static;padding-top:0}}
+</style>
+<style>
+/* Centered homepage section hierarchy and aligned report navigation. */
+.h2-home #h2-categories-title,.h2-home #h2-recent-title{display:block;width:100%;text-align:center;font-size:clamp(36px,4vw,56px);line-height:1.15;margin:0 0 14px}
+.h2-home #h2-categories-title+.h2-subtitle,.h2-home .h2-feed-intro>p{font-size:18px;line-height:1.5;text-align:center;max-width:none;margin:0 0 24px}
+.h2-home .h2-section-head{display:block;padding:0}
+.h2-home .h2-feed-intro{display:block;margin-bottom:0}
+.h2-home .h2-feed-tools{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:20px;margin:0 0 26px}
+.h2-home .h2-feed-legend{grid-column:2;justify-self:center}
+.h2-home .h2-feed-legend .ba-precision-legend{justify-content:center;margin:0}
+.h2-home .h2-all-reports{grid-column:3;justify-self:end;white-space:nowrap}
+.h2-home .h2-all-reports,.h2-home .h2-blog .ba-blog-section-head>.ba-button{border:1px solid #0094a5;border-radius:14px;color:#087f8c;background:#fff;box-shadow:none;padding:14px 22px;font-size:17px;line-height:1.4;font-weight:750;display:inline-flex;gap:12px;align-items:center;justify-content:center}
+.h2-home .h2-all-reports:hover,.h2-home .h2-blog .ba-blog-section-head>.ba-button:hover{background:#edf8fa}
+.h2-home .h2-blog .ba-blog-section-head{display:block;position:relative;padding:0 0 64px;text-align:center}
+.h2-home .h2-blog .ba-blog-section-head>div{width:100%}
+.h2-home .h2-blog #ba-blog-home-title{width:100%;text-align:center;margin:0 0 14px}
+.h2-home .h2-blog .ba-blog-home__intro{font-size:18px;line-height:1.5;text-align:center;max-width:none;margin:0 0 20px}
+.h2-home .h2-blog .ba-blog-section-head>.ba-button{position:absolute;right:0;bottom:0}
+@media(max-width:1000px){.h2-home .h2-feed-tools{grid-template-columns:minmax(0,1fr);gap:16px}.h2-home .h2-feed-legend,.h2-home .h2-all-reports{grid-column:1;justify-self:center}}
+@media(max-width:700px){.h2-home #h2-categories-title,.h2-home #h2-recent-title{font-size:clamp(34px,7vw,44px)}.h2-home #h2-categories-title+.h2-subtitle,.h2-home .h2-feed-intro>p,.h2-home .h2-blog .ba-blog-home__intro{font-size:16px}.h2-home .h2-blog .ba-blog-section-head{padding-bottom:0}.h2-home .h2-blog .ba-blog-section-head>.ba-button{position:static;margin-top:0}.h2-home .h2-feed-legend .ba-precision-legend{flex-wrap:wrap}}
+</style>
+</main>
+<?php get_footer(); ?>

@@ -1,5 +1,5 @@
 /* Native reporting design system. Scoped to the native wizard; independent of WPForms markup. */
-.ba-native{max-width:880px;margin-inline:auto;color:var(--ba-text);overflow-wrap:anywhere}
+.ba-native{max-width:none;margin-inline:auto;color:var(--ba-text);overflow-wrap:anywhere}
 .ba-native [hidden]{display:none!important}
 .ba-native .ba-native-emergency-notice{box-sizing:border-box;max-width:100%;min-width:0;margin:12px 0 24px;padding:16px;border:1px solid #946000;border-inline-start-width:4px;border-radius:10px;background:#fff6df;color:#493400;font-size:1rem;line-height:1.5;overflow-wrap:anywhere}
 .ba-native h2{margin:24px 0 20px;font-size:clamp(1.3rem,4vw,1.9rem)}
@@ -18,7 +18,7 @@
 .ba-native .ba-native-field .ba-native-choice{display:flex;gap:12px;align-items:center;min-height:48px;padding:8px 0;cursor:pointer}
 .ba-native .ba-native-choice input{flex-shrink:0;width:22px;height:22px;accent-color:var(--ba-teal-700)}
 .ba-native .ba-native-help{color:var(--ba-muted);font-size:.86rem;margin:6px 0}
-.ba-native [data-native-required]{font-size:.8rem;font-weight:500}
+.ba-native [data-native-required]{font-size:.8rem;font-weight:400}
 .ba-native .ba-native-error{color:#a42020;font-weight:700;margin:8px 0}
 .ba-native [aria-invalid=true]{border-color:#a42020!important}
 .ba-native .ba-native-summary{border:2px solid #a42020;background:#fff5f5;padding:16px;border-radius:12px;margin:20px 0}
@@ -78,7 +78,7 @@
 	letter-spacing:-.02em;
 }
 .ba-native [data-native-step]>h2+p{
-	max-width:72ch;
+	max-width:none;
 	margin:0 0 24px;
 	color:var(--ba-muted);
 }
@@ -206,7 +206,7 @@
 	margin-top:1px;
 }
 .ba-native .ba-native-help{
-	max-width:72ch;
+	max-width:none;
 	margin:7px 0 0;
 	color:var(--ba-muted);
 	font-size:.875rem;
@@ -360,7 +360,7 @@
 	background:var(--ba-surface-alt);
 }
 @media(max-width:1024px){
-	.ba-native{max-width:820px}
+	.ba-native{max-width:none}
 	.ba-native .ba-native-progress{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 @media(max-width:768px){
@@ -484,7 +484,7 @@
 .ba-native .ba-native-option-card:hover{border-color:var(--ba-card-accent);box-shadow:0 12px 26px rgba(7,26,56,.075)}
 .ba-native .ba-native-option-card:has(input:disabled){opacity:.6;cursor:not-allowed}
 .ba-native .ba-native-card-copy{display:block;min-width:0}
-.ba-native .ba-native-card-copy strong{display:block;font-size:1rem;line-height:1.3;color:var(--ba-navy-950);font-weight:800}
+.ba-native .ba-native-card-copy .ba-native-card-title{display:block;font-size:1rem;line-height:1.3;color:var(--ba-navy-950);font-weight:400}
 .ba-native .ba-native-card-copy small{display:block;margin-top:6px;font-size:.8rem;font-weight:500;line-height:1.4;color:#53677c}
 .ba-native .ba-native-card-icon{position:relative;display:grid;place-items:center;width:32px;height:32px;margin-left:0;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 4px 10px rgba(7,26,56,.20);background:var(--ba-card-accent);color:#fff}
 .ba-native .ba-native-card-icon svg{display:block;width:17px;height:17px;transform:rotate(45deg);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -492,7 +492,7 @@
 @media(max-width:480px){
  .ba-native .ba-native-field .ba-native-card-grid{grid-template-columns:1fr;gap:10px}
  .ba-native .ba-native-category-grid .ba-native-option-card{grid-template-columns:32px minmax(0,1fr);min-height:104px;padding:16px}
- .ba-native .ba-native-card-copy strong{font-size:1rem}
+ .ba-native .ba-native-card-copy .ba-native-card-title{font-size:1rem}
 }
 @media(prefers-reduced-motion:reduce){.ba-native .ba-native-option-card{transition:none}}
 
@@ -632,10 +632,254 @@
 
 
 /* UX-RESPONSIVE-01B.2 — review editing and clearer required-field affordance. */
-.ba-native [data-native-required]{font-weight:800;color:#8f2833}
+.ba-native [data-native-required],.ba-native .ba-required-marker{font-weight:400;color:#8f2833}
+.ba-native [data-native-required-state="optional"]{color:inherit}
 .ba-native .ba-native-review-section__head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
 .ba-native .ba-native-review-section__head h3{margin:0}
 .ba-native .ba-native-review-edit{flex:0 0 auto;min-height:44px;padding:8px 12px;border:1px solid var(--ba-teal-700);border-radius:10px;background:#fff;color:var(--ba-teal-700);font-weight:800;cursor:pointer}
 .ba-native .ba-native-review-edit:hover,.ba-native .ba-native-review-edit:focus-visible{background:#eefafa;color:var(--ba-navy-950)}
 .ba-native .ba-native-review-edit:focus-visible{outline:3px solid #111827;outline-offset:2px}
 @media(max-width:480px){.ba-native .ba-native-review-section__head{align-items:flex-start}.ba-native .ba-native-review-edit{padding-inline:10px}}
+
+/* Choice emphasis follows the native radio state, including collapsed selections. */
+.ba-native .ba-native-option-card:has(input:checked) .ba-native-card-title{font-weight:800}
+
+/* Category names remain strong; subtype labels follow the checked state. */
+.ba-native .ba-native-category-grid .ba-native-card-title{font-weight:800}
+.ba-native [data-smart-geolocate].ba-native-gps-button{display:inline-flex;align-items:center;gap:9px}
+.ba-native .ba-native-gps-icon{width:22px;height:22px;flex:0 0 22px;fill:none;stroke:currentColor;stroke-width:1.8}
+.ba-native .ba-native-public-location-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}
+.ba-native .ba-native-public-location-options .ba-native-public-location-option{margin:0;display:grid;grid-template-columns:22px minmax(0,1fr);align-content:start;align-items:start;gap:10px}
+.ba-native .ba-native-public-location-options .ba-native-public-location-visual{grid-column:2;width:min(112px,100%);min-width:0}
+.ba-native .ba-native-public-location-options .ba-native-public-location-copy{grid-column:1/-1}
+.ba-native .ba-native-public-location-copy strong{font-weight:400}
+.ba-native .ba-native-public-location-option:has(input:checked) .ba-native-public-location-copy strong{font-weight:800}
+@media(max-width:359px){.ba-native .ba-native-public-location-options{grid-template-columns:1fr}}
+
+/* Desktop: compact event date leaves room for the three time-knowledge choices. */
+@media(min-width:1025px){
+ .ba-native .ba-native-field-pair:has(>[data-native-field="time.date"]):has(>[data-native-field="time.knowledge"]){grid-template-columns:minmax(170px,190px) minmax(0,1fr)}
+ .ba-native [data-native-field="time.knowledge"] .ba-native-card-grid:not(.is-collapsed){grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+ .ba-native [data-native-field="time.knowledge"] .ba-native-card-grid:not(.is-collapsed) .ba-native-option-card{min-height:56px;padding:12px;gap:8px}
+}
+
+
+/* Verified position: map and public precision form one responsive decision block. */
+.ba-native .ba-native-location-layout{min-width:0;margin:20px 0;display:grid;gap:20px;align-items:start}
+.ba-native .ba-native-location-layout .ba-native-public-location-choice{margin:0}
+.ba-native .ba-native-location-layout .ba-native-public-location-options{grid-template-columns:1fr}
+.ba-native .ba-native-location-layout .ba-native-public-location-visual{width:76px}
+.ba-native .ba-native-location-layout .ba-native-public-location-option{padding:12px}
+.ba-native .ba-native-location-layout [data-smart-map-panel]{min-width:0}
+.ba-native .ba-native-location-layout .ba-native-location-map{height:380px}
+.ba-native .ba-native-location-layout [data-smart-map-status]{margin-top:8px}
+@media(min-width:1025px){
+ .ba-native .ba-native-location-layout.has-map{grid-template-columns:minmax(0,1.85fr) minmax(260px,1fr)}
+ .ba-native .ba-native-location-layout .ba-native-public-location-choice{padding:14px}
+}
+@media(max-width:600px){.ba-native .ba-native-location-layout .ba-native-location-map{height:280px}}
+
+
+/* A single recognized-position card contains the address and its editable map. */
+.ba-native .ba-native-location-card{min-width:0;padding:14px;border:1px solid #b9dde0;border-radius:12px;background:#f2fbf9}
+.ba-native .ba-native-location-card [data-smart-confirmation]{padding:0;border:0;border-radius:0;background:transparent}
+.ba-native .ba-native-location-card [data-smart-confirmation]>strong{display:block;margin:0;color:var(--ba-navy-950);font-size:1.04rem;font-weight:750;line-height:1.35}
+.ba-native .ba-native-location-card [data-smart-map-panel]{margin-top:12px}
+.ba-native .ba-native-location-layout .ba-native-public-location-choice{padding:14px}
+.ba-native .ba-native-location-layout .ba-native-public-location-choice>legend{float:left;width:100%;padding:0;margin:0 0 12px;line-height:1.35}
+.ba-native .ba-native-location-layout .ba-native-public-location-choice>legend~*{clear:both}
+.ba-native .ba-native-location-layout .ba-native-public-location-options{margin-top:0}
+
+
+/* Wide wizard canvas; short controls and long copy keep a readable measure. */
+.ba-native{width:100%}
+.ba-native .ba-native-field input:is([type=text],[type=email]){max-width:42rem}
+.ba-native .ba-native-field textarea{max-width:100%}
+.ba-native .ba-native-field select{max-width:32rem}
+.ba-native [data-native-field="reporter.first_name"] input,
+.ba-native [data-native-field="reporter.last_name"] input,
+.ba-native [data-native-field="reporter.email"] input{max-width:32rem}
+
+
+/* Questions lead the step; option labels and help copy retain their scale. */
+.ba-native .ba-native-field>label,
+.ba-native .ba-native-field>fieldset>legend,
+.ba-native .ba-native-smart-address>label,
+.ba-native .ba-native-public-location-choice>legend,
+.ba-native .ba-native-location-card [data-smart-confirmation]>strong{font-size:1.1rem}
+/* Keep the textual step status for assistive technology without repeating the heading. */
+.ba-native .ba-native-position{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+
+
+/* One fixed search slot: swapping in Google must not reorder the privacy copy. */
+.ba-native .ba-native-address-slot{min-width:0;min-height:52px;width:100%}
+.ba-native .ba-native-address-slot>[data-smart-widget]{min-width:0;width:100%}
+.ba-native .ba-native-address-slot [data-smart-start],
+.ba-native .ba-native-address-slot gmp-place-autocomplete{display:block;box-sizing:border-box;width:100%;max-width:100%;height:52px;min-height:52px;margin:0;border:1px solid #c9d7e2;border-radius:12px;background-color:#fff;color:var(--ba-text);font:inherit;line-height:1.4;color-scheme:light}
+.ba-native .ba-native-address-slot:focus-within{border-radius:12px;outline:3px solid var(--ba-teal-700);outline-offset:3px}
+
+
+/* Public precision cards: large visual on the left, selection and copy on the right. */
+.ba-native .ba-native-location-layout .ba-native-public-location-options .ba-native-public-location-option{grid-template-columns:clamp(80px,28%,144px) minmax(0,1fr);align-items:center;align-content:normal;gap:16px;padding:16px}
+.ba-native .ba-native-location-layout .ba-native-public-location-options .ba-native-public-location-visual{grid-column:1;grid-row:1;display:block;width:100%;min-width:0;margin:0;align-self:center}
+.ba-native .ba-native-location-layout .ba-native-public-location-options .ba-native-public-location-copy{grid-column:2;grid-row:1;display:grid;grid-template-columns:22px minmax(0,1fr);align-items:center;gap:8px}
+.ba-native .ba-native-public-location-copy>input{grid-column:1;grid-row:1;margin:0;align-self:center}
+.ba-native .ba-native-public-location-copy>strong{grid-column:2;grid-row:1;line-height:1.35}
+.ba-native .ba-native-public-location-copy>small{grid-column:1/-1;grid-row:2}
+@media(max-width:359px){.ba-native .ba-native-location-layout .ba-native-public-location-options .ba-native-public-location-option{grid-template-columns:64px minmax(0,1fr);gap:10px;padding:12px}}
+
+
+/* Short answers share a desktop row; longer options keep their existing layout. */
+.ba-native .ba-native-place-danger-row{display:block}
+@media(min-width:1025px){
+ .ba-native .ba-native-field .ba-native-short-options:not(.is-collapsed){grid-template-columns:repeat(3,minmax(0,1fr))}
+ .ba-native .ba-native-place-danger-row{display:grid;grid-template-columns:minmax(0,.3fr) minmax(0,.7fr);gap:20px;align-items:start}
+ .ba-native .ba-native-place-danger-row>.ba-native-field>label{margin-bottom:10px;min-block-size:var(--ba-paired-label-height,auto);box-sizing:border-box}
+ .ba-native .ba-native-place-danger-row .ba-native-choice-row{margin-top:0}
+ .ba-native .ba-native-place-danger-row select[data-native-input]{width:100%;max-width:100%;min-height:64px}
+ .ba-native .ba-native-place-danger-row .ba-native-card-grid .ba-native-option-card{min-height:64px}
+}
+
+/* Optional neighborhood proposal: scoped to the wizard, no global width/font override. */
+.ba-native-neighborhood{margin:20px 0;padding:20px;border:1px solid #b8dfe3;border-radius:16px;background:#f2fbfb;min-width:0}
+.ba-native-neighborhood[hidden]{display:none}
+.ba-native-neighborhood input{width:100%;max-width:100%;box-sizing:border-box}
+.ba-native-neighborhood__actions{display:flex;flex-wrap:wrap;gap:12px}
+.ba-native-neighborhood__actions button{width:auto;flex:0 1 auto}
+.ba-native-neighborhood [aria-busy="true"]::before{content:"";display:inline-block;width:1em;height:1em;margin-right:.5em;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:ba-zone-spin .8s linear infinite;vertical-align:middle}
+@keyframes ba-zone-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.ba-native-neighborhood [aria-busy="true"]::before{animation:none}}
+
+/* Informative channel list: local SVGs, visible names, no outbound navigation. */
+.ba-native .ba-native-social-channels{display:flex;flex-wrap:wrap;gap:10px 16px;list-style:none;margin:16px 0;padding:0}
+.ba-native .ba-native-social-channels li{display:inline-flex;align-items:center;gap:8px;min-width:0;max-width:100%;margin:0;padding:8px 12px;background:#fff;border:1px solid #dce5ed;border-radius:12px;color:var(--ba-text,#102a43);font-weight:400}
+.ba-native .ba-native-social-channels span{overflow-wrap:anywhere}
+.ba-native .ba-native-social-icon{display:block;flex:0 0 24px;width:24px;height:24px;fill:currentColor}
+.ba-native .ba-native-social-icon--facebook{color:#1877f2}
+.ba-native .ba-native-social-icon--instagram{color:#c13584}
+.ba-native .ba-native-social-icon--tiktok,.ba-native .ba-native-social-icon--x{color:#111}
+
+/* Paired questions may wrap naturally without pushing controls out of alignment. */
+.ba-native .ba-native-place-danger-row>.ba-native-field{min-width:0}
+.ba-native .ba-native-place-danger-row .ba-native-card-copy{overflow-wrap:anywhere}
+
+/* Shared pin SVG replaces CSS-rotated category shapes. */
+.ba-native .ba-native-category-grid .ba-native-card-icon{width:32px;height:40px;border:0;border-radius:0;transform:none;background:none;box-shadow:none}
+.ba-native .ba-native-category-grid .ba-native-card-icon .ba-pin-svg{width:32px;height:40px;transform:none;stroke:none;fill:initial}
+.ba-native .ba-native-location-pin{width:80px;height:100px;border:0;border-radius:0;transform:none;background:none;box-shadow:none}
+.ba-native .ba-native-location-pin .ba-pin-svg{width:80px;height:100px;transform:none;stroke:none;fill:initial}
+
+/* Category selection: large upright pins, with a small clear margin inside the card. */
+.ba-native .ba-native-category-grid:not(.is-collapsed) .ba-native-option-card{grid-template-columns:88px minmax(0,1fr);padding-block:14px}
+.ba-native .ba-native-category-grid:not(.is-collapsed) .ba-native-card-icon,
+.ba-native .ba-native-category-grid:not(.is-collapsed) .ba-native-card-icon .ba-pin-svg{width:88px;height:110px}
+@media(max-width:600px){
+ .ba-native .ba-native-category-grid:not(.is-collapsed) .ba-native-option-card{grid-template-columns:64px minmax(0,1fr);padding:12px}
+ .ba-native .ba-native-category-grid:not(.is-collapsed) .ba-native-card-icon,
+ .ba-native .ba-native-category-grid:not(.is-collapsed) .ba-native-card-icon .ba-pin-svg{width:64px;height:80px}
+}
+
+/* Clear address focus: Google's own inner focus remains, no second outer frame. */
+.ba-native .ba-native-address-slot:focus-within{outline:none;box-shadow:none}
+.ba-native .ba-native-address-slot [data-smart-start]:focus-visible{outline:2px solid #1a73e8;outline-offset:-2px}
+.ba-native [data-smart-status]:empty,.ba-native [data-smart-map-status]:empty{display:none}
+.ba-native .ba-native-location-card{background:transparent}
+.ba-native .ba-native-location-side{display:grid;gap:16px;min-width:0;align-content:start}
+.ba-native .ba-native-location-side .ba-native-neighborhood{margin:0;background:#fff}
+.ba-native [data-native-next]:not(:disabled),.ba-native [data-native-submit]:not(:disabled){background:#1a73e8;border-color:#1a73e8;color:#fff}
+.ba-native [data-native-next]:not(:disabled):is(:hover,:active),.ba-native [data-native-submit]:not(:disabled):is(:hover,:active){background:#1558b0;border-color:#1558b0;color:#fff}
+.ba-native .ba-native-anonymous-note{padding:14px 16px;border:1px solid #b9dde0;border-radius:12px;background:#f3fbfc;color:#29435c;line-height:1.5}
+.ba-native .ba-native-anonymous-note[hidden]{display:none}
+.ba-native .ba-native-engagement{padding:24px;border:1px solid #b9dde0;border-radius:18px;background:#f5fbfc}
+.ba-native .ba-native-engagement--social{background:#f6f8fd;border-color:#c9d7ed}
+.ba-native .ba-native-engagement__intro{display:flex;gap:16px;align-items:flex-start;margin:0 0 20px;color:#087f8c}
+.ba-native .ba-native-engagement__intro>svg{flex:0 0 40px}
+.ba-native .ba-native-engagement__intro strong{display:block;font-size:1.18rem;line-height:1.35;color:var(--ba-navy-950)}
+.ba-native .ba-native-engagement__intro p{margin:6px 0 0;color:#53677c;line-height:1.5}
+.ba-native .ba-native-engagement .ba-native-option-card{background:#fff;align-items:center}
+.ba-native .ba-native-engagement .ba-native-card-grid:not(.is-collapsed){grid-template-columns:1fr}
+.ba-native .ba-native-engagement .ba-native-card-copy small{font-size:.88rem;line-height:1.5}
+.ba-native .ba-native-engagement .ba-native-card-grid.is-collapsed .ba-native-card-copy small{display:none}
+.ba-native .ba-native-submit-feedback{position:fixed;inset:0;z-index:10050;display:grid;place-items:center;box-sizing:border-box;max-width:none;margin:0;padding:24px;border:0;border-radius:0;background:rgba(7,26,56,.52);color:var(--ba-navy-950);text-align:center}
+.ba-native .ba-native-submit-feedback[hidden]{display:none}
+.ba-native .ba-native-submit-feedback::before{display:none}
+.ba-native .ba-native-submit-panel{display:grid;justify-items:center;gap:18px;width:min(100%,480px);padding:32px 24px;border:1px solid #c9d7ed;border-radius:20px;background:#fff;box-shadow:0 18px 60px rgba(7,26,56,.2)}
+.ba-native .ba-native-submit-panel:focus{outline:none}
+.ba-native .ba-native-submit-panel p{margin:0;color:var(--ba-navy-950);font-weight:650;font-size:1.08rem;line-height:1.5}
+.ba-native .ba-native-submit-panel::before{content:'';width:38px;height:38px;border:4px solid #d6e5f7;border-top-color:#1a73e8;border-radius:50%;animation:ba-native-submit-spin .8s linear infinite}
+@media(max-width:600px){.ba-native .ba-native-engagement{padding:18px 14px}.ba-native .ba-native-engagement__intro{gap:12px}}
+@media(prefers-reduced-motion:reduce){.ba-native .ba-native-submit-panel::before{animation:none}}
+
+/* Verified address stays beside its label and wraps naturally on narrow screens. */
+.ba-native .ba-native-location-card [data-smart-confirmation]{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px;row-gap:2px}
+.ba-native .ba-native-location-card [data-smart-confirmation]>strong{display:inline;flex:0 0 auto}
+.ba-native .ba-native-location-card [data-smart-confirmation]>p{display:inline;margin:0;min-width:0;overflow-wrap:anywhere}
+.ba-native .ba-native-location-side .ba-native-neighborhood{padding:14px;border-color:#d8e3ed;border-radius:12px}
+.ba-native .ba-native-neighborhood>legend{float:left;width:100%;padding:0;margin:0 0 12px;color:var(--ba-navy-950);font-size:1.1rem;font-weight:750;line-height:1.35}
+.ba-native .ba-native-neighborhood>legend~*{clear:both}
+.ba-native .ba-native-neighborhood__actions button{border-radius:12px;padding:10px 16px;min-height:44px;border:1px solid #087f8c;background:#087f8c;color:#fff;font:inherit;font-weight:650;cursor:pointer}
+.ba-native .ba-native-neighborhood__actions button+button{background:#fff;color:#087f8c}
+.ba-native .ba-native-neighborhood__actions button:disabled{opacity:.55;cursor:default}
+.ba-native .ba-native-neighborhood__actions button:focus-visible{outline:2px solid #1a73e8;outline-offset:2px}
+.ba-native .ba-native-help:empty{display:none}
+.ba-native .ba-native-anonymous-note strong{font-weight:700}
+
+.ba-native .ba-native-location-card [data-smart-confirmation][hidden]{display:none}
+
+/* Separate the privacy explanation from the visible signature choices. */
+.ba-native [data-native-field="reporter.public_identity_mode"] .ba-native-anonymous-note{margin-top:18px;padding-top:18px}
+
+/* Clear notification choices use visible native radios and stay expanded. */
+.ba-native .ba-native-engagement--community .ba-native-card-grid input[type=radio]{position:static;opacity:1;flex:0 0 22px;width:22px;height:22px;min-height:22px;margin:0;padding:0;accent-color:#087f8c}
+.ba-native .ba-native-engagement--community .ba-native-card-grid .ba-native-option-card::after{display:none}
+.ba-native .ba-native-engagement--community .ba-native-option-card{align-items:flex-start;padding:18px;gap:14px}
+.ba-native .ba-native-engagement--community .ba-native-card-copy{min-width:0;flex:1}
+.ba-native .ba-native-recommended{display:inline-block;width:fit-content;max-width:100%;margin:6px 0 2px;padding:3px 9px;border-radius:999px;background:#dcf4e8;color:#075d3f;font-size:.78rem;font-weight:700}
+.ba-native .ba-native-engagement--community>.ba-native-help{margin-top:16px}
+
+/* Distinct illustrations separate network updates from social publication. */
+.ba-native .ba-native-engagement--community{background:#effaf7;border-color:#b8dfcf}
+.ba-native .ba-native-engagement--social{background:#eff5ff;border-color:#c5d8fa;padding:20px}
+.ba-native .ba-native-engagement__intro>.ba-native-engagement-icon{flex:0 0 52px;width:52px;height:52px}
+.ba-native .ba-native-engagement--social .ba-native-engagement__intro{margin-bottom:14px}
+.ba-native .ba-native-social-consent{display:flex;align-items:flex-start;gap:14px;padding:16px;margin:0;border:1px solid #c5d8fa;border-radius:14px;background:#fff;cursor:pointer}
+.ba-native .ba-native-social-consent input[type=checkbox]{flex:0 0 22px;width:22px;height:22px;min-height:22px;margin:2px 0 0;padding:0;accent-color:#1a73e8}
+.ba-native .ba-native-social-consent>span{min-width:0;display:block}
+.ba-native .ba-native-social-consent strong{display:inline;line-height:1.4}
+.ba-native .ba-native-social-consent small{display:block;margin-top:6px;color:#53677c;line-height:1.5}
+.ba-native .ba-native-social-consent:has(input:checked){border-color:#1a73e8;background:#f9fbff}
+.ba-native .ba-native-social-consent:has(input:focus-visible){outline:2px solid #1a73e8;outline-offset:3px}
+.ba-native .ba-native-social-consent:has(input:disabled){cursor:default}
+.ba-native .ba-native-engagement--social .ba-native-social-channels{gap:12px;margin:12px 0}
+.ba-native .ba-native-engagement--social .ba-native-social-channels li{padding:0;border:0;border-radius:0;background:transparent;gap:0}
+.ba-native .ba-native-engagement--social .ba-native-social-icon{width:16px;height:16px;flex-basis:16px;color:#64748b}
+.ba-native .ba-native-engagement--social .ba-native-social-icon [fill]:not([fill="none"]){fill:currentColor}
+.ba-native .ba-native-engagement--social .ba-native-social-channels span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.ba-native .ba-native-engagement--social>.ba-native-help{margin-top:12px}
+@media(max-width:600px){.ba-native .ba-native-engagement--social{padding:18px 14px}.ba-native .ba-native-social-consent{padding:14px 12px;gap:10px}}
+
+/* Equal address/title sizing; safe wrapping on narrow screens. */
+.ba-native .ba-native-location-card [data-smart-confirmation]>strong,
+.ba-native .ba-native-location-card [data-smart-address-label]{font-size:17.6px;line-height:1.35}
+.ba-native .ba-native-location-card [data-smart-address-label]{color:#056bd2}
+
+/* Keep the address field stable while Places is prepared on step entry. */
+.ba-native .ba-native-address-slot{position:relative}
+.ba-native .ba-native-address-search-icon{position:absolute;left:16px;top:26px;transform:translateY(-50%);width:20px;height:20px;fill:none;stroke:#60656b;stroke-width:2;pointer-events:none}
+.ba-native .ba-native-address-slot>[data-smart-start]{padding-left:50px}
+.ba-native .ba-native-address-slot:has(>[data-smart-widget]:not([hidden]))>.ba-native-address-search-icon{display:none}
+
+/* Match the address emphasis to its inline heading. */
+.ba-native .ba-native-location-card [data-smart-address-label]{font-weight:700}
+
+/* Confirmation navigation: adjacent on wide screens, wrapped on mobile. */
+.ba-native .ba-native-success-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.ba-native .ba-native-success-actions .ba-button{max-width:100%;white-space:normal;text-align:center}
+
+/* The five entry steps end with direct submission; review is optional. */
+.ba-native .ba-native-progress{grid-template-columns:repeat(5,minmax(0,1fr))}
+.ba-native .ba-native-actions{flex-wrap:wrap;gap:12px}
+.ba-native [data-native-review-toggle]{margin-left:auto}
+@media(max-width:560px){.ba-native [data-native-review-toggle]{margin-left:0}}
+
+.ba-native .ba-native-progress li[data-native-progress="contact"]::after{display:none}

@@ -1,0 +1,41 @@
+<?php
+require __DIR__.'/test-ba-event-public-details.php';
+function policy_seed($id,$mode='exact_point',$version='public-details-v1'){
+    g5seed($id,$mode,$mode);
+    $raw=json_decode($GLOBALS['private_fixture']['content_original'],true);
+    $raw['canonical']['event']=['category'=>'vehicle','subtype'=>'vehicle_stolen'];
+    $raw['canonical']['vehicle']=['plate_knowledge'=>'full','plate_raw'=>'AB123CD'];
+    $raw['canonical']['consents']=['truthfulness'=>true,'publication_rules'=>true,'terms'=>true,'privacy'=>true];
+    if($version!==null)$raw['canonical']['consents']['public_details_version']=$version;
+    $GLOBALS['private_fixture']['content_original']=json_encode($raw);
+    $GLOBALS['private_fixture']['full_plate']='AB123CD';
+    $GLOBALS['meta'][$id]['_ba_vehicle_plate_masked']='AB***CD';
+}
+policy_seed(9400);
+check($svc->publish(9400)===true,'new declared exact publication succeeds atomically');
+$p=BadAround_Event_Public_Details::view(9400);
+check(($p['plate']??'')==='AB123CD'&&$p['address']==='Private Address 99','declared exact address and full plate available immediately after B3');
+check($p['publication_policy']==='public-details-v1','sealed snapshot retains policy provenance');
+check($svc->publish(9400)===true,'repeat publication keeps sealed public fields');
+$before=$p;BadAround_Event_Public_Details::published(9400);
+check(BadAround_Event_Public_Details::view(9400)===$before,'shutdown cannot overwrite atomic declaration projection');
+$GLOBALS['posts'][9400]->post_content.=' AB123CD';
+check(is_wp_error($svc->publish(9400)),'plate authorization does not permit uncontrolled prose copies');
+$GLOBALS['posts'][9400]->post_content=str_replace(' AB123CD','',$GLOBALS['posts'][9400]->post_content);
+$GLOBALS['meta'][9400][BadAround_Event_Public_Details::META]['data']['plate']='INJECTED';
+check(BadAround_Event_Public_Details::view(9400)===[],'tampered plate fails closed');
+policy_seed(9401,'approximate_area');
+check($svc->publish(9401)===true,'declared approximate publication succeeds');
+$p=BadAround_Event_Public_Details::view(9401);
+check($p['address']===''&&$p['plate']==='AB123CD','approximate mode hides exact address but still publishes declared plate');
+policy_seed(9402,'exact_point',null);
+check($svc->publish(9402)===true,'legacy report remains publishable');
+check(BadAround_Event_Public_Details::view(9402)===[],'no retroactive consent or full plate projection for previous reports');
+policy_seed(9403);$before=get_post_meta(9403);
+$GLOBALS['commit_fail']=true;$r=$svc->publish(9403);$GLOBALS['commit_fail']=false;
+check(is_wp_error($r)&&get_post_meta(9403)===$before&&get_post_status(9403)==='pending','commit failure rolls back public address plate GEO and publication');
+policy_seed(9404);$raw=json_decode($GLOBALS['private_fixture']['content_original'],true);$raw['canonical']['consents']['truthfulness']=false;$GLOBALS['private_fixture']['content_original']=json_encode($raw);
+check($svc->publish(9404)===true&&BadAround_Event_Public_Details::view(9404)===[],'policy marker alone cannot authorize disclosure');
+$template=file_get_contents(dirname(__DIR__).'/wordpress/themes/badaround-child/template-parts/single-event-layout.php');
+check(str_contains($template,'Responsabilità della segnalazione')&&str_contains($template,'mailto:info@badaround.it?subject=')&&str_contains($template,'get_permalink( $post_id )'),'always-present disclaimer and actionable event-specific rectification email');
+echo "EVENT_PUBLICATION_POLICY_SUITE_PASS\n";

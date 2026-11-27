@@ -2,6 +2,9 @@
   'use strict';
   const ns = root.BadAroundNative = root.BadAroundNative || {};
   const messages = {
+    identity_required:'Riprova l’invio per confermare la tua email. I dati inseriti sono conservati.',
+    identity_pending:'La verifica dell’invio è ancora in corso. Attendi e riprova lo stesso invio, senza crearne uno nuovo.',
+    identity_submission_failed:'Non è possibile confermare l’invio. Se il problema persiste, contatta BadAround prima di crearne un altro.',
     invalid_public_radius:'Scegli un raggio tra 50 m, 100 m, 250 m, 500 m e 1 km.',
     media_count_limit:'Puoi selezionare al massimo 5 immagini.', media_file_too_large:'Ogni immagine può pesare al massimo 5 MiB (5.242.880 byte).',
     media_type_unsupported:'Formato non supportato. Usa uno dei formati disponibili indicati nel modulo.', media_image_invalid:'L’immagine è vuota, danneggiata, animata o supera i limiti consentiti. Scegli un’altra immagine.',
